@@ -4,9 +4,9 @@ import {MainStyles as styles} from '../styles/MainStyles.jsx'
 
 export default function Admin() {
   return (
-    <styles.ContentWrapper>
+    <styles.BodyWrapper>
       <h2>/admin</h2>
       <p>Admin page placeholder</p>
-    </styles.ContentWrapper>
+    </styles.BodyWrapper>
   )
 }
