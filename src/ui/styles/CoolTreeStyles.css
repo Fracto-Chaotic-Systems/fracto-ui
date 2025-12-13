@@ -1,0 +1,23 @@
+/* styles.css */
+
+.TreeNode {
+    color: #444444;
+    font-family: monospace;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.displayName {
+    background-color: #f0f0f0;
+    color: cornflowerblue;
+    font-weight: bold;
+    margin-left: 0.25rem;
+}
+
+.selectedName {
+    background-color: #f0f0f0;
+    color: orangered;
+    font-weight: bold;
+    font-style: italic;
+    margin-left: 0.25rem;
+}
