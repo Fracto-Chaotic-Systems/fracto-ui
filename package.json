@@ -4,11 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "start": "../fracto-ui-not/node_modules/.bin/vite",
-    "dev": "../fracto-ui-not/node_modules/.bin/vite",
-    "build": "../fracto-ui-not/node_modules/.bin/vite build",
-    "lint": "../fracto-ui-not/node_modules/.bin/eslint .",
-    "preview": "../fracto-ui-not/node_modules/.bin/vite preview"
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
   },
   "dependencies": {
     "react": "^19.2.0",
