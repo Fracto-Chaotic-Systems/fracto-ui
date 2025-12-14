@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 
-import {MainStyles as styles} from '../styles/MainStyles.jsx'
+import { MainStyles as styles } from '../styles/MainStyles.jsx'
 
 export class Tiles extends Component {
    render() {

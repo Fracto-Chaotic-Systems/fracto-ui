@@ -8,6 +8,8 @@ import Data from './pages/Data.jsx'
 import Assets from './pages/Assets.jsx'
 import Tiles from './pages/Tiles.jsx'
 import Study from './pages/Study.jsx'
+import AppSettings from "./settings/AppSettings.jsx";
+import {APP_ROOT_SETTINGS, KEY_SELECTED_PAGE} from "./settings/RootSettings.jsx";
 
 const ROUTES = [
    {path: "/admin", element: <Admin/>, title: 'admin'},
@@ -20,8 +22,20 @@ const ROUTES = [
 
 export class App extends Component {
    state = {
-      selected_page: 'admin',
-      app_settings: {}
+      selected_page: 0
+   }
+
+   componentDidMount() {
+      const all_settings = Object.assign({}, APP_ROOT_SETTINGS)
+      AppSettings.initialize(all_settings)
+      this.setState({selected_page: AppSettings.get(KEY_SELECTED_PAGE)})
+   }
+
+   set_selected_page = (selected_page) => {
+      AppSettings.on_settings_changed({
+         [KEY_SELECTED_PAGE]: selected_page
+      })
+      this.setState({selected_page})
    }
 
    render() {
@@ -33,6 +47,7 @@ export class App extends Component {
             element={route.element}
          />
       })
+      console.log('selected_page',selected_page)
       const menu = ROUTES
          .filter(route => route.path !== '/')
          .map((route, i) => {
@@ -42,7 +57,7 @@ export class App extends Component {
             }
             return <Link
                to={route.path}
-               onClick={() => this.setState({selected_page: route.title})}
+               onClick={() => this.set_selected_page(route.title)}
                key={`route-${i}`}>
                <styles.MenuItem
                   key={`menu-item-${i}`}
@@ -52,11 +67,11 @@ export class App extends Component {
             </Link>
          })
       return [
-         <styles.HeaderWrapper>
+         <styles.HeaderWrapper key={'header-wrapper'}>
             {menu}
             <styles.AppTitle>fracto</styles.AppTitle>
          </styles.HeaderWrapper>,
-         <Routes>{all_routes}</Routes>
+         <Routes key={'routes'}>{all_routes}</Routes>
       ]
    }
 }
