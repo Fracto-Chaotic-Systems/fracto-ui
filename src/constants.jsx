@@ -1,0 +1,1 @@
+export const HEADER_BAR_HEIGHT_PX = 25

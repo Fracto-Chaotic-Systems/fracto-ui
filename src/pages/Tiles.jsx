@@ -1,10 +1,14 @@
-import React from 'react'
+import React, {Component} from 'react'
 
-export default function Tiles() {
-  return (
-    <div>
-      <h2>/tiles</h2>
-      <p>Tiles page placeholder</p>
-    </div>
-  )
+import {MainStyles as styles} from '../styles/MainStyles.jsx'
+
+export class Tiles extends Component {
+   render() {
+      return <styles.BodyWrapper>
+         <h2>/tiles</h2>
+         <p>Tiles page placeholder</p>
+      </styles.BodyWrapper>
+   }
 }
+
+export default Tiles

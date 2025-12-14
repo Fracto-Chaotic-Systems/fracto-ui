@@ -2,13 +2,13 @@ import React, {Component} from 'react'
 
 import {MainStyles as styles} from '../styles/MainStyles.jsx'
 
-export class Data extends Component {
+export class Study extends Component {
    render() {
       return <styles.BodyWrapper>
-         <h2>/data</h2>
-         <p>Data page placeholder</p>
+         <h2>/study</h2>
+         <p>Study page placeholder</p>
       </styles.BodyWrapper>
    }
 }
 
-export default Data
+export default Study
