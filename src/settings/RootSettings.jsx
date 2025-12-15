@@ -1,5 +1,5 @@
 import AppSettings, {TYPE_OBJECT, TYPE_STRING} from "./AppSettings.jsx";
-import {getViewportDimensions} from "../utils/Dom.js";
+import {copy_json, getViewportDimensions} from "../utils/Dom.js";
 
 const ROOT_FOLDER = 'root'
 export const KEY_SELECTED_PAGE = `${ROOT_FOLDER}/selected_page`
@@ -35,7 +35,7 @@ export const poll_viewport_dimensions = (cb = null) => {
             [KEY_VIEWPORT_DIMENSIONS]: new_viewport
          })
          if (cb) {
-            cb(new_viewport)
+            cb(copy_json(new_viewport))
          }
       }
    }, 1000)

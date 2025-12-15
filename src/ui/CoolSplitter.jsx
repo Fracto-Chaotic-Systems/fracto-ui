@@ -34,8 +34,8 @@ export class CoolSplitter extends Component {
    };
 
    start_drag = (e) => {
-      const {type} = this.props;
-      console.log("start_drag")
+      const {type, position} = this.props;
+      console.log("start_drag", position)
       const drag_start_pos = type === SPLITTER_TYPE_HORIZONTAL ? e.clientY : e.clientX;
       this.setState({
          in_drag: true,
@@ -55,6 +55,9 @@ export class CoolSplitter extends Component {
       const {in_drag, drag_start_pos, splitter_ref} = this.state;
       const {type, position, on_change} = this.props;
       if (!in_drag) {
+         return;
+      }
+      if (isNaN(position)) {
          return;
       }
       const splitter = splitter_ref.current;

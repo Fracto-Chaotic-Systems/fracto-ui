@@ -4,9 +4,11 @@ import {HEADER_BAR_HEIGHT_PX} from "../constants.jsx";
 
 export class MainStyles {
    static BodyWrapper = styled(CoolStyles.Block)`
-       padding: 1rem 0.5rem;
        background-color: #fcfcfc;
        height: 100vh;
+   `
+   static ContentWrapper = styled(CoolStyles.InlineBlock)`
+       background-color: #fcfcfc;
    `
    static AppTitle = styled(CoolStyles.Block)`
        ${CoolStyles.uppercase}

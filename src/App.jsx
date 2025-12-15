@@ -15,6 +15,10 @@ import {
    poll_viewport_dimensions,
 } from "./settings/RootSettings.jsx";
 import {APP_ADMIN_SETTINGS} from "./settings/AdminSettings.jsx";
+import {APP_ASSETS_SETTINGS} from "./settings/AssetsSettings.jsx";
+import {APP_DATA_SETTINGS} from "./settings/DataSettings.jsx";
+import {APP_TILES_SETTINGS} from "./settings/TilesSettings.jsx";
+import {APP_STUDY_SETTINGS} from "./settings/StudySettings.jsx";
 
 const ROUTES = [
    {path: "/admin", element: <Admin/>, title: 'admin'},
@@ -33,7 +37,11 @@ export class App extends Component {
    componentDidMount() {
       const all_settings = Object.assign({},
          APP_ROOT_SETTINGS,
-         APP_ADMIN_SETTINGS
+         APP_ADMIN_SETTINGS,
+         APP_ASSETS_SETTINGS,
+         APP_DATA_SETTINGS,
+         APP_TILES_SETTINGS,
+         APP_STUDY_SETTINGS,
       )
       AppSettings.initialize(all_settings)
       const viewport_interval = poll_viewport_dimensions()

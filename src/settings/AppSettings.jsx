@@ -13,11 +13,14 @@ export class AppSettings {
 
    static get = (key) => {
       if (key in AppSettings.setting_definitions) {
-         if (typeof AppSettings.settings_data[key] === 'object') {
-            return copy_json(AppSettings.settings_data[key])
+         if (key in AppSettings.settings_data) {
+            if (typeof AppSettings.settings_data[key] === 'object') {
+               return copy_json(AppSettings.settings_data[key])
+            }
+            return AppSettings.settings_data[key]
          }
-         return AppSettings.settings_data[key]
-      } else  {
+         return AppSettings.setting_definitions[key].default_value
+      } else {
          console.log('key not found', key, AppSettings.setting_definitions, AppSettings.settings_data)
       }
       return undefined
