@@ -3,6 +3,8 @@ import React, {Component} from 'react'
 import {KEY_DATA_SPLITTER_POS_PX} from "../settings/DataSettings.jsx";
 import SplitterLayout from "./SplitterLayout.jsx";
 
+import {MainStyles as styles} from '../styles/MainStyles.jsx'
+
 export class Data extends Component {
    state = {
       container_ref: React.createRef(),
@@ -13,12 +15,17 @@ export class Data extends Component {
    }
 
    render_left_pane = () => {
-      return 'data left'
+      return <styles.PaneWrapper>
+         data left
+      </styles.PaneWrapper>
    }
 
    render_right_pane = () => {
-      return 'data right'
+      return <styles.PaneWrapper>
+         data right
+      </styles.PaneWrapper>
    }
+
 
    render() {
       const left_pane = this.render_left_pane();

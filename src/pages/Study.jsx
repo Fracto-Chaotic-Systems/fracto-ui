@@ -3,6 +3,8 @@ import React, {Component} from 'react'
 import {KEY_STUDY_SPLITTER_POS_PX} from "../settings/StudySettings.jsx";
 import SplitterLayout from "./SplitterLayout.jsx";
 
+import {MainStyles as styles} from '../styles/MainStyles.jsx'
+
 export class Study extends Component {
    state = {
       container_ref: React.createRef(),
@@ -13,12 +15,17 @@ export class Study extends Component {
    }
 
    render_left_pane = () => {
-      return 'study left'
+      return <styles.PaneWrapper>
+         study left
+      </styles.PaneWrapper>
    }
 
    render_right_pane = () => {
-      return 'study right'
+      return <styles.PaneWrapper>
+         study right
+      </styles.PaneWrapper>
    }
+
 
    render() {
       const left_pane = this.render_left_pane();

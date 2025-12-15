@@ -39,6 +39,26 @@ export class MainStyles {
        font-size: 1rem;
        color: black;
    `
+   static PaneWrapper = styled(CoolStyles.Block)`
+       padding: 0 0.25rem;
+       font-size: 1rem;
+       color: #444444;
+   `
+   static SidebarItem = styled(CoolStyles.Block)`
+       ${CoolStyles.align_center}
+       ${CoolStyles.pointer}
+       border-radius: 0.25rem;
+   `
+   static SidebarLink = styled(CoolStyles.InlineBlock)`
+       ${CoolStyles.uppercase}
+       font-size: 0.75rem;
+       color: #444444;
+       letter-spacing: 4px;
+       margin-top: 2px;
+       &:hover {
+           font-weight: bold;
+       }
+   `
 }
 
 export default MainStyles

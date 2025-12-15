@@ -3,6 +3,8 @@ import React, {Component} from 'react'
 import {KEY_TILES_SPLITTER_POS_PX} from "../settings/TilesSettings.jsx";
 import SplitterLayout from "./SplitterLayout.jsx";
 
+import {MainStyles as styles} from '../styles/MainStyles.jsx'
+
 export class Tiles extends Component {
    state = {
       container_ref: React.createRef(),
@@ -13,12 +15,17 @@ export class Tiles extends Component {
    }
 
    render_left_pane = () => {
-      return 'tiles left'
+      return <styles.PaneWrapper>
+         tiles left
+      </styles.PaneWrapper>
    }
 
    render_right_pane = () => {
-      return 'tiles right'
+      return <styles.PaneWrapper>
+         tiles right
+      </styles.PaneWrapper>
    }
+
 
    render() {
       const left_pane = this.render_left_pane();
