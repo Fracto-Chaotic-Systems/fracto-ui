@@ -12,11 +12,14 @@ import SplitterLayout from "./SplitterLayout.jsx";
 import {MainStyles as styles} from '../styles/MainStyles.jsx'
 import AppSettings from "../settings/AppSettings.jsx";
 import Sidebar from "./utils/Sidebar.jsx";
+import DataOverview from "./data/DataOverview.jsx";
+import DataSettings from "./data/DataSettings.jsx";
+import DataStatus from "./data/DataStatus.jsx";
 
 const SIDEBAR_LIST = [
-   {title: 'overview', section_code: DATA_OVERVIEW},
-   {title: 'settings', section_code: DATA_SETTINGS},
-   {title: 'status', section_code: DATA_STATUS}
+   {title: 'overview', section_code: DATA_OVERVIEW, right_pane: <DataOverview />},
+   {title: 'settings', section_code: DATA_SETTINGS, right_pane: <DataSettings />},
+   {title: 'status', section_code: DATA_STATUS, right_pane: <DataStatus />}
 ]
 
 export class Data extends Component {
@@ -47,8 +50,10 @@ export class Data extends Component {
    }
 
    render_right_pane = () => {
+      const {section_code} = this.state
+      const section = SIDEBAR_LIST.find((item) => item.section_code === section_code)
       return <styles.PaneWrapper>
-         data right
+         {section ? section.right_pane : ''}
       </styles.PaneWrapper>
    }
 

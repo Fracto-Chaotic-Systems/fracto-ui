@@ -12,11 +12,14 @@ import SplitterLayout from "./SplitterLayout.jsx";
 import {MainStyles as styles} from '../styles/MainStyles.jsx'
 import AppSettings from "../settings/AppSettings.jsx";
 import Sidebar from "./utils/Sidebar.jsx";
+import AssetsOverview from "./assets/AssetsOverview.jsx";
+import AssetsSettings from "./assets/AssetsSettings.jsx";
+import AssetsStatus from "./assets/AssetsStatus.jsx";
 
 const SIDEBAR_LIST = [
-   {title: 'overview', section_code: ASSETS_OVERVIEW},
-   {title: 'settings', section_code: ASSETS_SETTINGS},
-   {title: 'status', section_code: ASSETS_STATUS}
+   {title: 'overview', section_code: ASSETS_OVERVIEW, right_pane: <AssetsOverview />},
+   {title: 'settings', section_code: ASSETS_SETTINGS, right_pane: <AssetsSettings />},
+   {title: 'status', section_code: ASSETS_STATUS, right_pane: <AssetsStatus />}
 ]
 
 export class Assets extends Component {
@@ -47,8 +50,10 @@ export class Assets extends Component {
    }
 
    render_right_pane = () => {
+      const {section_code} = this.state
+      const section = SIDEBAR_LIST.find((item) => item.section_code === section_code)
       return <styles.PaneWrapper>
-         assets right
+         {section ? section.right_pane : ''}
       </styles.PaneWrapper>
    }
 

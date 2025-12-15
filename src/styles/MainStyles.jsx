@@ -51,6 +51,7 @@ export class MainStyles {
    `
    static SidebarLink = styled(CoolStyles.InlineBlock)`
        ${CoolStyles.uppercase}
+       ${CoolStyles.noselect}
        font-size: 0.75rem;
        color: #444444;
        letter-spacing: 4px;

@@ -12,11 +12,14 @@ import SplitterLayout from "./SplitterLayout.jsx";
 import {MainStyles as styles} from '../styles/MainStyles.jsx'
 import AppSettings from "../settings/AppSettings.jsx";
 import Sidebar from "./utils/Sidebar.jsx";
+import StudyOverview from "./study/StudyOverview.jsx";
+import StudySettings from "./study/StudySettings.jsx";
+import StudyStatus from "./study/StudyStatus.jsx";
 
 const SIDEBAR_LIST = [
-   {title: 'overview', section_code: STUDY_OVERVIEW},
-   {title: 'settings', section_code: STUDY_SETTINGS},
-   {title: 'status', section_code: STUDY_STATUS}
+   {title: 'overview', section_code: STUDY_OVERVIEW, right_pane: <StudyOverview />},
+   {title: 'settings', section_code: STUDY_SETTINGS, right_pane: <StudySettings />},
+   {title: 'status', section_code: STUDY_STATUS, right_pane: <StudyStatus />}
 ]
 
 export class Study extends Component {
@@ -47,11 +50,12 @@ export class Study extends Component {
    }
 
    render_right_pane = () => {
+      const {section_code} = this.state
+      const section = SIDEBAR_LIST.find((item) => item.section_code === section_code)
       return <styles.PaneWrapper>
-         study right
+         {section ? section.right_pane : ''}
       </styles.PaneWrapper>
    }
-
 
    render() {
       const left_pane = this.render_left_pane();

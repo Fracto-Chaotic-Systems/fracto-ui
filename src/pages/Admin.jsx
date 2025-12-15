@@ -11,11 +11,14 @@ import SplitterLayout from "./SplitterLayout.jsx";
 import {MainStyles as styles} from '../styles/MainStyles.jsx'
 import AppSettings from "../settings/AppSettings.jsx";
 import Sidebar from "./utils/Sidebar.jsx";
+import AdminOverview from "./admin/AdminOverview.jsx";
+import AdminSettings from "./admin/AdminSettings.jsx";
+import AdminStatus from "./admin/AdminStatus.jsx";
 
 const SIDEBAR_LIST = [
-   {title: 'overview', section_code: ADMIN_OVERVIEW},
-   {title: 'settings', section_code: ADMIN_SETTINGS},
-   {title: 'status', section_code: ADMIN_STATUS}
+   {title: 'overview', section_code: ADMIN_OVERVIEW, right_pane: <AdminOverview />},
+   {title: 'settings', section_code: ADMIN_SETTINGS, right_pane: <AdminSettings />},
+   {title: 'status', section_code: ADMIN_STATUS, right_pane: <AdminStatus />}
 ]
 
 export class Admin extends Component {
@@ -46,8 +49,10 @@ export class Admin extends Component {
    }
 
    render_right_pane = () => {
+      const {section_code} = this.state
+      const section = SIDEBAR_LIST.find((item) => item.section_code === section_code)
       return <styles.PaneWrapper>
-         admin right
+         {section ? section.right_pane : ''}
       </styles.PaneWrapper>
    }
 

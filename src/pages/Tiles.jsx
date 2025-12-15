@@ -12,11 +12,14 @@ import SplitterLayout from "./SplitterLayout.jsx";
 import {MainStyles as styles} from '../styles/MainStyles.jsx'
 import AppSettings from "../settings/AppSettings.jsx";
 import Sidebar from "./utils/Sidebar.jsx";
+import TilesOverview from "./tiles/TilesOverview.jsx";
+import TilesSettings from "./tiles/TilesSettings.jsx";
+import TilesStatus from "./tiles/TilesStatus.jsx";
 
 const SIDEBAR_LIST = [
-   {title: 'overview', section_code: TILES_OVERVIEW},
-   {title: 'settings', section_code: TILES_SETTINGS},
-   {title: 'status', section_code: TILES_STATUS}
+   {title: 'overview', section_code: TILES_OVERVIEW, right_pane: <TilesOverview />},
+   {title: 'settings', section_code: TILES_SETTINGS, right_pane: <TilesSettings />},
+   {title: 'status', section_code: TILES_STATUS, right_pane: <TilesStatus />}
 ]
 
 export class Tiles extends Component {
@@ -47,11 +50,12 @@ export class Tiles extends Component {
    }
 
    render_right_pane = () => {
+      const {section_code} = this.state
+      const section = SIDEBAR_LIST.find((item) => item.section_code === section_code)
       return <styles.PaneWrapper>
-         tiles right
+         {section ? section.right_pane : ''}
       </styles.PaneWrapper>
    }
-
 
    render() {
       const left_pane = this.render_left_pane();
