@@ -17,6 +17,8 @@ export class AppSettings {
             return copy_json(AppSettings.settings_data[key])
          }
          return AppSettings.settings_data[key]
+      } else  {
+         console.log('key not found', key, AppSettings.setting_definitions, AppSettings.settings_data)
       }
       return undefined
    }

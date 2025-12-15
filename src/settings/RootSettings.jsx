@@ -20,7 +20,10 @@ export const APP_ROOT_SETTINGS = {
    },
 }
 
-export const poll_viewport_dimensions = () => {
+export const poll_viewport_dimensions = (cb = null) => {
+   if (cb) {
+      cb(getViewportDimensions())
+   }
    return setInterval(() => {
       const current_viewport = AppSettings.get(KEY_VIEWPORT_DIMENSIONS)
       const new_viewport = getViewportDimensions()
@@ -31,6 +34,9 @@ export const poll_viewport_dimensions = () => {
          AppSettings.on_settings_changed({
             [KEY_VIEWPORT_DIMENSIONS]: new_viewport
          })
+         if (cb) {
+            cb(new_viewport)
+         }
       }
    }, 1000)
 }
