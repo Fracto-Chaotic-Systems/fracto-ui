@@ -28,6 +28,11 @@ export class Admin extends Component {
       this.setState({section_code})
    }
 
+   componentDidMount() {
+      const section_code = AppSettings.get(KEY_ADMIN_SECTION)
+      this.setState({section_code})
+   }
+
    render_left_pane = () => {
       const {section_code} = this.state
       const sidebar = <Sidebar

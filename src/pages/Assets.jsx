@@ -1,16 +1,48 @@
 import React, {Component} from 'react'
 
-import {KEY_ASSETS_SPLITTER_POS_PX} from "../settings/AssetsSettings.jsx";
+import {
+   ASSETS_OVERVIEW,
+   ASSETS_SETTINGS,
+   ASSETS_STATUS,
+   KEY_ASSETS_SECTION,
+   KEY_ASSETS_SPLITTER_POS_PX
+} from "../settings/AssetsSettings.jsx";
 import SplitterLayout from "./SplitterLayout.jsx";
 
 import {MainStyles as styles} from '../styles/MainStyles.jsx'
+import AppSettings from "../settings/AppSettings.jsx";
+import Sidebar from "./utils/Sidebar.jsx";
+
+const SIDEBAR_LIST = [
+   {title: 'overview', section_code: ASSETS_OVERVIEW},
+   {title: 'settings', section_code: ASSETS_SETTINGS},
+   {title: 'status', section_code: ASSETS_STATUS}
+]
 
 export class Assets extends Component {
-   state = {}
+   state = {section_code: ASSETS_OVERVIEW}
+
+   sidebar_select = (section_code) => {
+      AppSettings.on_settings_changed({
+         [KEY_ASSETS_SECTION]: section_code
+      })
+      this.setState({section_code})
+   }
+
+   componentDidMount() {
+      const section_code = AppSettings.get(KEY_ASSETS_SECTION)
+      this.setState({section_code})
+   }
 
    render_left_pane = () => {
+      const {section_code} = this.state
+      const sidebar = <Sidebar
+         sidebar_list={SIDEBAR_LIST}
+         section_code={section_code}
+         on_change={this.sidebar_select}
+      />
       return <styles.PaneWrapper>
-         assets left
+         {sidebar}
       </styles.PaneWrapper>
    }
 
