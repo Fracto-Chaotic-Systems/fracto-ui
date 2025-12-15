@@ -9,14 +9,19 @@ import Assets from './pages/Assets.jsx'
 import Tiles from './pages/Tiles.jsx'
 import Study from './pages/Study.jsx'
 import AppSettings from "./settings/AppSettings.jsx";
-import {APP_ROOT_SETTINGS, KEY_SELECTED_PAGE} from "./settings/RootSettings.jsx";
+import {
+   APP_ROOT_SETTINGS,
+   KEY_SELECTED_PAGE,
+   poll_viewport_dimensions,
+} from "./settings/RootSettings.jsx";
+import {APP_ADMIN_SETTINGS} from "./settings/AdminSettings.jsx";
 
 const ROUTES = [
    {path: "/admin", element: <Admin/>, title: 'admin'},
    {path: "/data", element: <Data/>, title: 'data'},
    {path: "/assets", element: <Assets/>, title: 'assets'},
-   {path: "/study", element: <Study/>, title: 'study'},
    {path: "/tiles", element: <Tiles/>, title: 'tiles'},
+   {path: "/study", element: <Study/>, title: 'study'},
    {path: "/", element: <h1>Fracto</h1>, title: 'home'}
 ]
 
@@ -26,9 +31,23 @@ export class App extends Component {
    }
 
    componentDidMount() {
-      const all_settings = Object.assign({}, APP_ROOT_SETTINGS)
+      const all_settings = Object.assign({},
+         APP_ROOT_SETTINGS,
+         APP_ADMIN_SETTINGS
+      )
       AppSettings.initialize(all_settings)
-      this.setState({selected_page: AppSettings.get(KEY_SELECTED_PAGE)})
+      const viewport_interval = poll_viewport_dimensions()
+      this.setState({
+         viewport_interval,
+         selected_page: AppSettings.get(KEY_SELECTED_PAGE)
+      })
+   }
+
+   componentWillUnmount() {
+      const {viewport_interval} = this.state
+      if (viewport_interval) {
+         clearInterval(viewport_interval)
+      }
    }
 
    set_selected_page = (selected_page) => {
@@ -47,7 +66,6 @@ export class App extends Component {
             element={route.element}
          />
       })
-      console.log('selected_page',selected_page)
       const menu = ROUTES
          .filter(route => route.path !== '/')
          .map((route, i) => {

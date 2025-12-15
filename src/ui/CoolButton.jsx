@@ -29,7 +29,7 @@ export class CoolButton extends Component {
 
    render() {
       const {content, on_click, style, primary, disabled} = this.props;
-      let new_style =JSON.parse(JSON.stringify(style)) || {}
+      let new_style = JSON.parse(JSON.stringify(style)) || {}
       if (primary) {
          new_style.color = "white";
          new_style.backgroundColor = CoolColors.deep_blue

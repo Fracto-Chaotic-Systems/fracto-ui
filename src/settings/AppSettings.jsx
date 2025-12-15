@@ -1,3 +1,5 @@
+import {copy_json} from "../utils/Dom.js";
+
 export const TYPE_STRING = typeof 'abc'
 export const TYPE_NUMBER = typeof 123
 export const TYPE_OBJECT = typeof {abc: 123}
@@ -9,12 +11,18 @@ export class AppSettings {
    static setting_definitions = {}
    static settings_data = {}
 
-   static get = (key)=>{
-      return AppSettings.settings_data[key]
+   static get = (key) => {
+      if (key in AppSettings.setting_definitions) {
+         if (typeof AppSettings.settings_data[key] === 'object') {
+            return copy_json(AppSettings.settings_data[key])
+         }
+         return AppSettings.settings_data[key]
+      }
+      return undefined
    }
 
    static initialize = (setting_definitions) => {
-      AppSettings.setting_definitions = JSON.parse(JSON.stringify(setting_definitions));
+      AppSettings.setting_definitions = copy_json(setting_definitions);
       const page_settings_keys = Object.keys(AppSettings.setting_definitions)
       const page_settings = {}
       page_settings_keys.forEach(key => {
@@ -129,7 +137,7 @@ export class AppSettings {
                   break;
                }
                AppSettings.settings_data[key] =
-                  JSON.parse(JSON.stringify(new_settings[key]))
+                  copy_json(new_settings[key])
                break
             default:
                AppSettings.settings_data[key] = new_settings[key]
