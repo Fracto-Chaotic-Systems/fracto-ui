@@ -6,6 +6,7 @@ export class MainStyles {
    static BodyWrapper = styled(CoolStyles.Block)`
        background-color: #fcfcfc;
        height: 100vh;
+       overflow: hidden;
    `
    static ContentWrapper = styled(CoolStyles.InlineBlock)`
        background-color: #fcfcfc;

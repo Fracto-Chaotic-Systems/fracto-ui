@@ -5,10 +5,12 @@ import {HEADER_BAR_HEIGHT_PX} from "../constants.jsx";
 import {MainStyles as styles} from '../styles/MainStyles.jsx'
 import AppSettings from "../settings/AppSettings.jsx";
 import {copy_json} from "../utils/Dom.js";
-import {poll_viewport_dimensions} from "../settings/RootSettings.jsx";
+import {KEY_VIEWPORT_DIMENSIONS, poll_viewport_dimensions} from "../settings/RootSettings.jsx";
 import PropTypes from "prop-types";
 
 export const SPLITTER_WIDTH_PX = 4;
+const SPLITTER_MIN_FACTOR = 0.075;
+const SPLITTER_MAX_FACTOR = 0.20;
 
 export class SplitterLayout extends Component {
    static propTypes = {
@@ -71,6 +73,13 @@ export class SplitterLayout extends Component {
 
    resize_panes = (splitter_position) => {
       console.log('splitter_position', splitter_position)
+      const viewport_dimensions = AppSettings.get(KEY_VIEWPORT_DIMENSIONS)
+      if (splitter_position < viewport_dimensions.width * SPLITTER_MIN_FACTOR) {
+         splitter_position = viewport_dimensions.width * SPLITTER_MIN_FACTOR
+      }
+      if (splitter_position > viewport_dimensions.width * SPLITTER_MAX_FACTOR) {
+         splitter_position = viewport_dimensions.width * SPLITTER_MAX_FACTOR
+      }
       const {splitter_pos_key} = this.props
       AppSettings.on_settings_changed({
          [splitter_pos_key]: parseInt(splitter_position)
@@ -126,7 +135,7 @@ export class SplitterLayout extends Component {
          on_change={this.resize_panes}
       />
       const copied_dimensions = copy_json(viewport_dimensions)
-      copied_dimensions.height -= HEADER_BAR_HEIGHT_PX
+      copied_dimensions.height -= 1
       const left_pane = this.render_left_pane()
       const right_pane = this.render_right_pane()
       return <styles.BodyWrapper
