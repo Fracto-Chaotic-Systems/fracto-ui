@@ -20,12 +20,12 @@ import AdminStatus from "./admin/AdminStatus.jsx";
 import AdminIdentify from "./admin/AdminIdentify.jsx";
 
 const SIDEBAR_LIST = [
-   {title: 'overview', section_code: ADMIN_OVERVIEW, right_pane: <AdminOverview />},
+   {title: 'overview', section_code: ADMIN_OVERVIEW, right_pane: <AdminOverview/>},
    {title: 'break', section_code: SIDEBAR_BREAKER},
-   {title: 'identify', section_code: ADMIN_IDENTIFY, right_pane: <AdminIdentify />},
+   {title: 'identify', section_code: ADMIN_IDENTIFY, right_pane: <AdminIdentify/>},
    {title: 'break', section_code: SIDEBAR_BREAKER},
-   {title: 'settings', section_code: ADMIN_SETTINGS, right_pane: <AdminSettings />},
-   {title: 'status', section_code: ADMIN_STATUS, right_pane: <AdminStatus />}
+   {title: 'settings', section_code: ADMIN_SETTINGS, right_pane: <AdminSettings/>},
+   {title: 'status', section_code: ADMIN_STATUS, right_pane: <AdminStatus/>}
 ]
 
 export class Admin extends Component {
@@ -39,8 +39,11 @@ export class Admin extends Component {
    }
 
    componentDidMount() {
-      const section_code = AppSettings.get(KEY_ADMIN_SECTION)
-      this.setState({section_code})
+      setTimeout(() => {
+         const section_code = AppSettings.get(KEY_ADMIN_SECTION)
+         console.log('section_code', section_code)
+         this.setState({section_code})
+      }, 100)
    }
 
    render_left_pane = () => {

@@ -10,6 +10,7 @@ export class AppSettings {
 
    static setting_definitions = {}
    static settings_data = {}
+   static settings_initialized = false
 
    static get = (key) => {
       if (key in AppSettings.setting_definitions) {
@@ -56,6 +57,7 @@ export class AppSettings {
          }
       })
       AppSettings.load_settings()
+      AppSettings.settings_initialized = true
    }
 
    static persist_settings = (new_settings) => {
