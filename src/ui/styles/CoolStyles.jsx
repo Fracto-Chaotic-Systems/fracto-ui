@@ -191,9 +191,6 @@ export class CoolStyles {
         min-width: 5rem;
         outline: none;
         padding: 0.125rem 0.25rem;
-        :: placeholder {
-            color: #bbbbbb;
-        }
     `;
 
    static InputTextArea = styled.textarea`

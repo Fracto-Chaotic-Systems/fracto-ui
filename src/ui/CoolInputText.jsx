@@ -6,20 +6,21 @@ import {CoolStyles} from "./CoolImports";
 export class CoolInputText extends Component {
 
    static propTypes = {
-      value: PropTypes.string,
+      value: PropTypes.string.isRequired,
       style_extra: PropTypes.object,
       placeholder: PropTypes.string,
       callback: PropTypes.func,
       is_text_area: PropTypes.bool,
-      on_change: PropTypes.func
+      on_change: PropTypes.func,
+      name: PropTypes.string,
    }
 
    static defaultProps = {
-      value: '',
       style_extra: {},
       callback: null,
       placeholder: '',
-      is_text_area: false
+      is_text_area: false,
+      name: Math.random().toString(36),
    }
 
    state = {
@@ -30,6 +31,7 @@ export class CoolInputText extends Component {
    componentDidMount() {
       const {input_ref} = this.state;
       const {value, callback} = this.props;
+      console.log('value', value)
       const key_handler = (key) => {
          if (key.code === "Escape") {
             document.removeEventListener("keydown", key_handler);
@@ -47,6 +49,7 @@ export class CoolInputText extends Component {
          }
       }
       document.addEventListener("keydown", key_handler);
+      this.setState({current_value: value})
    }
 
    on_change = (value) => {
@@ -59,24 +62,27 @@ export class CoolInputText extends Component {
 
    render() {
       const {input_ref, current_value} = this.state;
-      const {placeholder, style_extra, is_text_area, callback} = this.props;
+      const {placeholder, style_extra, is_text_area, callback, name, value} = this.props;
       return is_text_area ?
          <CoolStyles.InputTextArea
             ref={input_ref}
             autoFocus
             size={current_value.length}
             style={style_extra}
-            value={current_value}
+            value={current_value || value}
+            name={name}
             rows={5}
             cols={40}
             onChange={e => this.on_change(e.target.value)}
             placeholder={placeholder}/> :
-         <CoolStyles.InputText
+         <input
+            value={current_value || value}
+            name={name}
+            id={name}
             ref={input_ref}
-            autoFocus
-            size={current_value.length}
+            autoFocus={true}
+            size={current_value?.length || 20}
             style={style_extra}
-            value={current_value}
             onChange={e => this.on_change(e.target.value)}
             onBlur={e => {
                if (callback) {

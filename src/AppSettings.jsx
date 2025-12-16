@@ -58,6 +58,7 @@ export class AppSettings {
       })
       AppSettings.load_settings()
       AppSettings.settings_initialized = true
+      console.log('settings_initialized', AppSettings.settings_data)
    }
 
    static persist_settings = (new_settings) => {
@@ -94,6 +95,9 @@ export class AppSettings {
          const setting_str = localStorage.getItem(key)
          if (setting_str) {
             switch (AppSettings.setting_definitions[key].data_type) {
+               case TYPE_BOOLEAN:
+                  AppSettings.settings_data[key] = !!setting_str;
+                  break;
                case TYPE_STRING:
                   AppSettings.settings_data[key] = setting_str;
                   break;
@@ -105,7 +109,8 @@ export class AppSettings {
                   AppSettings.settings_data[key] = JSON.parse(setting_str);
                   break;
                default:
-                  console.log('load_settings bad data_type', AppSettings.settings_data[key])
+                  console.log('load_settings bad data_type',
+                     AppSettings.setting_definitions[key].data_type)
                   break;
             }
          }

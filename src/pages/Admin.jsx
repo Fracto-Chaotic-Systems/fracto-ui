@@ -39,11 +39,14 @@ export class Admin extends Component {
    }
 
    componentDidMount() {
-      setTimeout(() => {
+      const interval = setInterval(() => {
+         if (!AppSettings.settings_initialized) {
+            return
+         }
+         clearInterval(interval)
          const section_code = AppSettings.get(KEY_ADMIN_SECTION)
-         console.log('section_code', section_code)
          this.setState({section_code})
-      }, 100)
+      }, 500)
    }
 
    render_left_pane = () => {

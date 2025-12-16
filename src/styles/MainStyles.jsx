@@ -71,8 +71,10 @@ export class MainStyles {
        ${CoolStyles.align_center}
        ${CoolStyles.uppercase}
        ${CoolStyles.noselect}
-       margin: 1rem auto;
+       margin: 1rem;
        font-size: 2rem;
+       line-height: 2.25rem;
+       border-bottom: 1px solid #cccccc;
    `
    static CenteredBlock = styled(CoolStyles.Block)`
        ${CoolStyles.align_center}

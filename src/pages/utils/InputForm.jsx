@@ -18,6 +18,21 @@ export class InputForm extends Component {
       values: {}
    }
 
+   componentDidMount() {
+      const {values} = this.state
+      const {form_entries} = this.props
+      form_entries.forEach(entry => {
+         const setting_definition = AppSettings.setting_definitions[entry.settings_key];
+         const setting_value = AppSettings.get(entry.settings_key);
+         if (!setting_value) {
+            values[entry.settings_key] = setting_definition.default_value
+         } else {
+            values[entry.settings_key] = setting_value
+         }
+      })
+      this.setState({values})
+   }
+
    text_changed = (value, entry) => {
       const {values} = this.state
       if (!value.length) {
@@ -50,9 +65,14 @@ export class InputForm extends Component {
       const all_entries = form_entries.map((entry, i) => {
          const setting_definition = AppSettings.setting_definitions[entry.settings_key];
          let edit_value = false
+         console.log('values[entry.settings_key]',values[entry.settings_key])
          switch (setting_definition.data_type) {
             case TYPE_BOOLEAN:
-               edit_value = <input type={"checkbox"} onClick={(e) => this.checkbox_changed(e, entry)}/>
+               edit_value = <input
+                  type={"checkbox"}
+                  value={values[entry.settings_key]}
+                  onClick={(e) => this.checkbox_changed(e, entry)}
+               />
                break;
             case TYPE_STRING:
                edit_value = <CoolInputText
@@ -83,6 +103,7 @@ export class InputForm extends Component {
       return [
          all_entries,
          <CoolButton
+            key={'response-button'}
             disabled={disabled}
             content={'ok'}
             on_click={this.set_values}
