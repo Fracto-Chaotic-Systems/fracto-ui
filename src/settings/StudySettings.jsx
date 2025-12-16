@@ -1,7 +1,8 @@
 import {
    TYPE_NUMBER,
    TYPE_STRING
-} from "./AppSettings.jsx";
+} from "../AppSettings.jsx";
+import {DEFAULT_SIDEBAR_WIDTH} from "../constants.jsx";
 
 const STUDY_FOLDER = 'study'
 export const KEY_STUDY_SPLITTER_POS_PX = `${STUDY_FOLDER}/splitter_pos_px`
@@ -14,7 +15,7 @@ export const STUDY_STATUS = 'study_status'
 export const APP_STUDY_SETTINGS = {
    [KEY_STUDY_SPLITTER_POS_PX]: {
       data_type: TYPE_NUMBER,
-      default_value: 250,
+      default_value: DEFAULT_SIDEBAR_WIDTH,
       description: 'pixel width of the study page leftmost splitter',
       persist: true,
    },

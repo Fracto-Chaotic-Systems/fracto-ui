@@ -1,4 +1,4 @@
-import {copy_json} from "../utils/Dom.js";
+import {copy_json} from "./utils/Dom.js";
 
 export const TYPE_STRING = typeof 'abc'
 export const TYPE_NUMBER = typeof 123
@@ -65,6 +65,9 @@ export class AppSettings {
          .forEach(key => {
             const key_settings = AppSettings.setting_definitions[key]
             switch (key_settings.data_type) {
+               case TYPE_BOOLEAN:
+                  localStorage.setItem(key, !!new_settings[key])
+                  break
                case TYPE_STRING:
                   localStorage.setItem(key, new_settings[key])
                   break
@@ -76,7 +79,7 @@ export class AppSettings {
                   localStorage.setItem(key, JSON.stringify(new_settings[key]))
                   break
                default:
-                  console.log('persist_settings bad data_type', key_settings)
+                  console.log('persist_settings bad data_type', key_settings.data_type)
                   break;
             }
          })

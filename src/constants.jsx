@@ -1,1 +1,2 @@
 export const HEADER_BAR_HEIGHT_PX = 25
+export const DEFAULT_SIDEBAR_WIDTH = 150

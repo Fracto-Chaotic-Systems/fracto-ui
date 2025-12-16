@@ -10,14 +10,15 @@ import {
 import SplitterLayout from "./SplitterLayout.jsx";
 
 import {MainStyles as styles} from '../styles/MainStyles.jsx'
-import AppSettings from "../settings/AppSettings.jsx";
-import Sidebar from "./utils/Sidebar.jsx";
+import AppSettings from "../AppSettings.jsx";
+import Sidebar, {SIDEBAR_BREAKER} from "./utils/Sidebar.jsx";
 import AssetsOverview from "./assets/AssetsOverview.jsx";
 import AssetsSettings from "./assets/AssetsSettings.jsx";
 import AssetsStatus from "./assets/AssetsStatus.jsx";
 
 const SIDEBAR_LIST = [
    {title: 'overview', section_code: ASSETS_OVERVIEW, right_pane: <AssetsOverview />},
+   {title: 'break', section_code: SIDEBAR_BREAKER},
    {title: 'settings', section_code: ASSETS_SETTINGS, right_pane: <AssetsSettings />},
    {title: 'status', section_code: ASSETS_STATUS, right_pane: <AssetsStatus />}
 ]

@@ -1,9 +1,9 @@
 import React, {Component} from 'react'
 
 import {CoolSplitter, SPLITTER_TYPE_VERTICAL} from "../ui/CoolSplitter.jsx";
-import {HEADER_BAR_HEIGHT_PX} from "../constants.jsx";
+import {DEFAULT_SIDEBAR_WIDTH, HEADER_BAR_HEIGHT_PX} from "../constants.jsx";
 import {MainStyles as styles} from '../styles/MainStyles.jsx'
-import AppSettings from "../settings/AppSettings.jsx";
+import AppSettings from "../AppSettings.jsx";
 import {copy_json} from "../utils/Dom.js";
 import {KEY_VIEWPORT_DIMENSIONS, poll_viewport_dimensions} from "../settings/RootSettings.jsx";
 import PropTypes from "prop-types";
@@ -22,7 +22,7 @@ export class SplitterLayout extends Component {
    state = {
       container_ref: React.createRef(),
       container_bounds: {},
-      splitter_position: 250,
+      splitter_position: DEFAULT_SIDEBAR_WIDTH,
       viewport_interval: null,
       viewport_dimensions: {width: 0, height: 0},
    }
@@ -72,7 +72,7 @@ export class SplitterLayout extends Component {
    }
 
    resize_panes = (splitter_position) => {
-      console.log('splitter_position', splitter_position)
+      // console.log('splitter_position', splitter_position)
       const viewport_dimensions = AppSettings.get(KEY_VIEWPORT_DIMENSIONS)
       if (splitter_position < viewport_dimensions.width * SPLITTER_MIN_FACTOR) {
          splitter_position = viewport_dimensions.width * SPLITTER_MIN_FACTOR

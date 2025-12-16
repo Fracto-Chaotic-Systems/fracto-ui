@@ -60,6 +60,29 @@ export class MainStyles {
            font-weight: bold;
        }
    `
+   static SidebarBreaker = styled(CoolStyles.Block)`
+       ${CoolStyles.align_center}
+       ${CoolStyles.noselect}
+       border-bottom: 0.15rem solid #cccccc;
+       margin: 0.25rem 1rem;
+       line-height: 0.25rem;
+   `
+   static SectionTitle = styled(CoolStyles.Block)`
+       ${CoolStyles.align_center}
+       ${CoolStyles.uppercase}
+       ${CoolStyles.noselect}
+       margin: 1rem auto;
+       font-size: 2rem;
+   `
+   static CenteredBlock = styled(CoolStyles.Block)`
+       ${CoolStyles.align_center}
+       margin: 1rem auto;
+   `
+   static InputPrompt = styled(CoolStyles.InlineBlock)`
+       ${CoolStyles.italic}
+       ${CoolStyles.noselect}
+       margin-right: 0.5rem;
+   `
 }
 
 export default MainStyles

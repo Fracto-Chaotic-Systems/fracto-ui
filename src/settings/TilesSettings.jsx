@@ -1,7 +1,8 @@
 import {
    TYPE_NUMBER,
    TYPE_STRING
-} from "./AppSettings.jsx";
+} from "../AppSettings.jsx";
+import {DEFAULT_SIDEBAR_WIDTH} from "../constants.jsx";
 
 const TILES_FOLDER = 'tiles'
 export const KEY_TILES_SPLITTER_POS_PX = `${TILES_FOLDER}/splitter_pos_px`
@@ -14,7 +15,7 @@ export const TILES_STATUS = 'tiles_status'
 export const APP_TILES_SETTINGS = {
    [KEY_TILES_SPLITTER_POS_PX]: {
       data_type: TYPE_NUMBER,
-      default_value: 250,
+      default_value: DEFAULT_SIDEBAR_WIDTH,
       description: 'pixel width of the tiles page leftmost splitter',
       persist: true,
    },

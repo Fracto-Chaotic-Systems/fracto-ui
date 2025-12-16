@@ -10,14 +10,15 @@ import {
 import SplitterLayout from "./SplitterLayout.jsx";
 
 import {MainStyles as styles} from '../styles/MainStyles.jsx'
-import AppSettings from "../settings/AppSettings.jsx";
-import Sidebar from "./utils/Sidebar.jsx";
+import AppSettings from "../AppSettings.jsx";
+import Sidebar, {SIDEBAR_BREAKER} from "./utils/Sidebar.jsx";
 import StudyOverview from "./study/StudyOverview.jsx";
 import StudySettings from "./study/StudySettings.jsx";
 import StudyStatus from "./study/StudyStatus.jsx";
 
 const SIDEBAR_LIST = [
    {title: 'overview', section_code: STUDY_OVERVIEW, right_pane: <StudyOverview />},
+   {title: 'break', section_code: SIDEBAR_BREAKER},
    {title: 'settings', section_code: STUDY_SETTINGS, right_pane: <StudySettings />},
    {title: 'status', section_code: STUDY_STATUS, right_pane: <StudyStatus />}
 ]

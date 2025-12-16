@@ -1,22 +1,29 @@
 import React, {Component} from 'react'
 
 import {
+   ADMIN_IDENTIFY,
    ADMIN_OVERVIEW,
    ADMIN_SETTINGS,
-   ADMIN_STATUS, KEY_ADMIN_SECTION,
+   ADMIN_STATUS,
+   KEY_ADMIN_SECTION,
    KEY_ADMIN_SPLITTER_POS_PX
 } from "../settings/AdminSettings.jsx";
 import SplitterLayout from "./SplitterLayout.jsx";
 
 import {MainStyles as styles} from '../styles/MainStyles.jsx'
-import AppSettings from "../settings/AppSettings.jsx";
-import Sidebar from "./utils/Sidebar.jsx";
+import AppSettings from "../AppSettings.jsx";
+import Sidebar, {SIDEBAR_BREAKER} from "./utils/Sidebar.jsx";
+
 import AdminOverview from "./admin/AdminOverview.jsx";
 import AdminSettings from "./admin/AdminSettings.jsx";
 import AdminStatus from "./admin/AdminStatus.jsx";
+import AdminIdentify from "./admin/AdminIdentify.jsx";
 
 const SIDEBAR_LIST = [
    {title: 'overview', section_code: ADMIN_OVERVIEW, right_pane: <AdminOverview />},
+   {title: 'break', section_code: SIDEBAR_BREAKER},
+   {title: 'identify', section_code: ADMIN_IDENTIFY, right_pane: <AdminIdentify />},
+   {title: 'break', section_code: SIDEBAR_BREAKER},
    {title: 'settings', section_code: ADMIN_SETTINGS, right_pane: <AdminSettings />},
    {title: 'status', section_code: ADMIN_STATUS, right_pane: <AdminStatus />}
 ]

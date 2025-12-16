@@ -8,7 +8,7 @@ import Data from './pages/Data.jsx'
 import Assets from './pages/Assets.jsx'
 import Tiles from './pages/Tiles.jsx'
 import Study from './pages/Study.jsx'
-import AppSettings from "./settings/AppSettings.jsx";
+import AppSettings from "./AppSettings.jsx";
 import {
    APP_ROOT_SETTINGS,
    KEY_SELECTED_PAGE,
