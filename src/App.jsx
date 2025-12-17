@@ -22,6 +22,10 @@ import {APP_STUDY_SETTINGS} from "./settings/StudySettings.jsx";
 import {APP_ADMIN_TEXT} from "./text/AdminText.jsx";
 import {AppText} from "./AppText.jsx";
 import {APP_ROOT_TEXT} from "./text/RootText.jsx";
+import {APP_ASSETS_TEXT} from "./text/AssetsText.jsx";
+import {APP_DATA_TEXT} from "./text/DataText.jsx";
+import {APP_STUDY_TEXT} from "./text/StudyText.jsx";
+import {APP_TILES_TEXT} from "./text/TilesText.jsx";
 
 const ROUTES = [
    {path: "/admin", element: <Admin/>, title: 'admin'},
@@ -41,6 +45,10 @@ export class App extends Component {
       // initialize text
       const all_text = Object.assign({},
          APP_ADMIN_TEXT,
+         APP_ASSETS_TEXT,
+         APP_DATA_TEXT,
+         APP_STUDY_TEXT,
+         APP_TILES_TEXT,
          APP_ROOT_TEXT,
       )
       AppText.initialize(all_text)
