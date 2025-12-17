@@ -10,14 +10,14 @@ export class AppText {
       AppText.text_data = copy_json(all_text)
       AppText.text_keys = Object.keys(AppText.text_data)
       AppText.text_initialized = true
-      console.log('AppText initialized', all_text)
+      console.log('AppText initialized')
    }
 
    static get = (key) => {
       if (AppText.text_keys.includes(key)) {
          return AppText.text_data[key]
       } else {
-         console.log('text key not found', key, AppText.text_keys)
+         console.log('text key not found', key)
       }
       return undefined
    }

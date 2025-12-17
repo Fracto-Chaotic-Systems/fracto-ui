@@ -33,9 +33,8 @@ export class MainStyles {
        border-bottom: 0.1rem solid #555555;
    `;
    static MenuItem = styled(CoolStyles.InlineBlock)`
-       ${CoolStyles.fixed}
        ${CoolStyles.bold}
-       top: 0;
+       margin: 0 0.5rem 0 1rem;
        font-size: 1rem;
        color: black;
    `
@@ -56,6 +55,7 @@ export class MainStyles {
        color: #444444;
        letter-spacing: 4px;
        margin-top: 2px;
+
        &:hover {
            font-weight: bold;
        }
@@ -84,6 +84,10 @@ export class MainStyles {
        ${CoolStyles.italic}
        ${CoolStyles.noselect}
        margin-right: 0.5rem;
+   `
+   static MenuWrapper = styled(CoolStyles.InlineBlock)`
+       ${CoolStyles.fixed}
+       left: 60px,
    `
 }
 

@@ -21,18 +21,25 @@ import {APP_TILES_SETTINGS} from "./settings/TilesSettings.jsx";
 import {APP_STUDY_SETTINGS} from "./settings/StudySettings.jsx";
 import {APP_ADMIN_TEXT} from "./text/AdminText.jsx";
 import {AppText} from "./AppText.jsx";
-import {APP_ROOT_TEXT} from "./text/RootText.jsx";
+import {
+   APP_ROOT_TEXT,
+   KEY_MENU_ADMIN,
+   KEY_MENU_ASSETS,
+   KEY_MENU_DATA,
+   KEY_MENU_STUDY,
+   KEY_MENU_TILES
+} from "./text/RootText.jsx";
 import {APP_ASSETS_TEXT} from "./text/AssetsText.jsx";
 import {APP_DATA_TEXT} from "./text/DataText.jsx";
 import {APP_STUDY_TEXT} from "./text/StudyText.jsx";
 import {APP_TILES_TEXT} from "./text/TilesText.jsx";
 
 const ROUTES = [
-   {path: "/admin", element: <Admin/>, title: 'admin'},
-   {path: "/data", element: <Data/>, title: 'data'},
-   {path: "/assets", element: <Assets/>, title: 'assets'},
-   {path: "/tiles", element: <Tiles/>, title: 'tiles'},
-   {path: "/study", element: <Study/>, title: 'study'},
+   {path: "/admin", element: <Admin/>, title_key: KEY_MENU_ADMIN},
+   {path: "/data", element: <Data/>, title_key: KEY_MENU_DATA},
+   {path: "/assets", element: <Assets/>, title_key: KEY_MENU_ASSETS},
+   {path: "/tiles", element: <Tiles/>, title_key: KEY_MENU_TILES},
+   {path: "/study", element: <Study/>, title_key: KEY_MENU_STUDY},
    {path: "/", element: <h1>Fracto</h1>, title: 'home'}
 ]
 
@@ -92,29 +99,32 @@ export class App extends Component {
       }
       const all_routes = ROUTES.map(route => {
          return <Route
-            key={`route-${route.title}`}
+            key={`route-${AppText.get(route.title_key)}`}
             path={route.path}
             element={route.element}
          />
       })
-      const menu = ROUTES
+      const menu_items = ROUTES
          .filter(route => route.path !== '/')
          .map((route, i) => {
+            const route_title = AppText.get(route.title_key)
             const item_style = {
-               left: `${20 + i * 60}px`,
-               color: selected_page === route.title ? 'black' : 'grey'
+               color: selected_page === route_title ? 'black' : 'grey'
             }
             return <Link
                to={route.path}
-               onClick={() => this.set_selected_page(route.title)}
+               onClick={() => this.set_selected_page(route_title)}
                key={`route-${i}`}>
                <styles.MenuItem
                   key={`menu-item-${i}`}
                   style={item_style}>
-                  {route.title}
+                  {route_title}
                </styles.MenuItem>
             </Link>
          })
+      const menu = <styles.MenuWrapper>
+         {menu_items}
+      </styles.MenuWrapper>
       return [
          <styles.HeaderWrapper key={'header-wrapper'}>
             {menu}

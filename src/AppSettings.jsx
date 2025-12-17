@@ -57,7 +57,7 @@ export class AppSettings {
       })
       AppSettings.load_settings()
       AppSettings.settings_initialized = true
-      console.log('settings_initialized', AppSettings.settings_data)
+      console.log('settings_initialized')
    }
 
    static persist_settings = (new_settings) => {

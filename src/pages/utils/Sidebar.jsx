@@ -16,7 +16,7 @@ export class Sidebar extends Component {
       const {sidebar_list, section_code, on_change} = this.props
       const sidebar = sidebar_list.map((item, i) => {
          if (item.section_code === SIDEBAR_BREAKER) {
-            return <styles.SidebarBreaker />
+            return <styles.SidebarBreaker key={`breaker-${i}`} />
          }
          const item_style = item.section_code === section_code
             ? {background: 'linear-gradient(15deg, #557799 0%, #7799bb 50%, #bbddff 90%)'} : {}
