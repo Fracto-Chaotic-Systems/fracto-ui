@@ -1,26 +1,33 @@
 import React, {Component} from 'react'
 
+import {MainStyles as styles} from '../styles/MainStyles.jsx'
 import {
-   KEY_STUDY_SECTION,
-   KEY_STUDY_SPLITTER_POS_PX,
    STUDY_OVERVIEW,
    STUDY_SETTINGS,
-   STUDY_STATUS
+   STUDY_STATUS,
+   KEY_STUDY_SECTION,
+   KEY_STUDY_SPLITTER_POS_PX
 } from "../settings/StudySettings.jsx";
+import {
+   KEY_SIDEBAR_OVERVIEW,
+   KEY_SIDEBAR_SETTINGS,
+   KEY_SIDEBAR_STATUS
+} from "../text/RootText.jsx";
 import SplitterLayout from "./utils/SplitterLayout.jsx";
-
-import {MainStyles as styles} from '../styles/MainStyles.jsx'
-import AppSettings from "../AppSettings.jsx";
 import Sidebar, {SIDEBAR_BREAKER} from "./utils/Sidebar.jsx";
+import AppSettings from "../AppSettings.jsx";
+
 import StudyOverview from "./study/StudyOverview.jsx";
 import StudySettings from "./study/StudySettings.jsx";
 import StudyStatus from "./study/StudyStatus.jsx";
+import AppText from "../AppText.jsx";
 
 const SIDEBAR_LIST = [
-   {title: 'overview', section_code: STUDY_OVERVIEW, right_pane: <StudyOverview />},
-   {title: 'break', section_code: SIDEBAR_BREAKER},
-   {title: 'settings', section_code: STUDY_SETTINGS, right_pane: <StudySettings />},
-   {title: 'status', section_code: STUDY_STATUS, right_pane: <StudyStatus />}
+   {title_key: KEY_SIDEBAR_OVERVIEW, section_code: STUDY_OVERVIEW, right_pane: <StudyOverview/>},
+   {section_code: SIDEBAR_BREAKER},
+   {section_code: SIDEBAR_BREAKER},
+   {title_key: KEY_SIDEBAR_SETTINGS, section_code: STUDY_SETTINGS, right_pane: <StudySettings/>},
+   {title_key: KEY_SIDEBAR_STATUS, section_code: STUDY_STATUS, right_pane: <StudyStatus/>}
 ]
 
 export class Study extends Component {
@@ -40,8 +47,14 @@ export class Study extends Component {
 
    render_left_pane = () => {
       const {section_code} = this.state
+      const sidebar_list = SIDEBAR_LIST.map(entry => {
+         if (entry.title_key) {
+            entry.title = AppText.get(entry.title_key)
+         }
+         return entry
+      })
       const sidebar = <Sidebar
-         sidebar_list={SIDEBAR_LIST}
+         sidebar_list={sidebar_list}
          section_code={section_code}
          on_change={this.sidebar_select}
       />
@@ -62,6 +75,7 @@ export class Study extends Component {
       const left_pane = this.render_left_pane();
       const right_pane = this.render_right_pane();
       return <SplitterLayout
+         key={'study-splitter'}
          left_content={left_pane}
          right_content={right_pane}
          splitter_pos_key={KEY_STUDY_SPLITTER_POS_PX}

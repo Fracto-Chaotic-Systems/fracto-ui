@@ -1,5 +1,6 @@
 import React, {Component} from 'react'
 
+import {MainStyles as styles} from '../styles/MainStyles.jsx'
 import {
    ASSETS_OVERVIEW,
    ASSETS_SETTINGS,
@@ -7,20 +8,26 @@ import {
    KEY_ASSETS_SECTION,
    KEY_ASSETS_SPLITTER_POS_PX
 } from "../settings/AssetsSettings.jsx";
+import {
+   KEY_SIDEBAR_OVERVIEW,
+   KEY_SIDEBAR_SETTINGS,
+   KEY_SIDEBAR_STATUS
+} from "../text/RootText.jsx";
 import SplitterLayout from "./utils/SplitterLayout.jsx";
-
-import {MainStyles as styles} from '../styles/MainStyles.jsx'
-import AppSettings from "../AppSettings.jsx";
 import Sidebar, {SIDEBAR_BREAKER} from "./utils/Sidebar.jsx";
+import AppSettings from "../AppSettings.jsx";
+
 import AssetsOverview from "./assets/AssetsOverview.jsx";
 import AssetsSettings from "./assets/AssetsSettings.jsx";
 import AssetsStatus from "./assets/AssetsStatus.jsx";
+import AppText from "../AppText.jsx";
 
 const SIDEBAR_LIST = [
-   {title: 'overview', section_code: ASSETS_OVERVIEW, right_pane: <AssetsOverview />},
-   {title: 'break', section_code: SIDEBAR_BREAKER},
-   {title: 'settings', section_code: ASSETS_SETTINGS, right_pane: <AssetsSettings />},
-   {title: 'status', section_code: ASSETS_STATUS, right_pane: <AssetsStatus />}
+   {title_key: KEY_SIDEBAR_OVERVIEW, section_code: ASSETS_OVERVIEW, right_pane: <AssetsOverview/>},
+   {section_code: SIDEBAR_BREAKER},
+   {section_code: SIDEBAR_BREAKER},
+   {title_key: KEY_SIDEBAR_SETTINGS, section_code: ASSETS_SETTINGS, right_pane: <AssetsSettings/>},
+   {title_key: KEY_SIDEBAR_STATUS, section_code: ASSETS_STATUS, right_pane: <AssetsStatus/>}
 ]
 
 export class Assets extends Component {
@@ -40,8 +47,14 @@ export class Assets extends Component {
 
    render_left_pane = () => {
       const {section_code} = this.state
+      const sidebar_list = SIDEBAR_LIST.map(entry => {
+         if (entry.title_key) {
+            entry.title = AppText.get(entry.title_key)
+         }
+         return entry
+      })
       const sidebar = <Sidebar
-         sidebar_list={SIDEBAR_LIST}
+         sidebar_list={sidebar_list}
          section_code={section_code}
          on_change={this.sidebar_select}
       />

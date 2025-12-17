@@ -62,7 +62,6 @@ export class SplitterLayout extends Component {
          this.setState({container_bounds})
       }
       const viewport_interval = poll_viewport_dimensions(viewport_dimensions => {
-         console.log ('this.props.splitter_pos_key', this.props.splitter_pos_key)
          this.setState({
             viewport_dimensions,
             splitter_position: AppSettings.get(this.props.splitter_pos_key)
