@@ -74,9 +74,62 @@ export class InputForm extends Component {
       this.init_values()
    }
 
-   render() {
+   render_title_block = () => {
+      const {form_meta} = this.props
+      const title = form_meta.form_title_key
+         ? <styles.TightCenteredBlock>
+            <styles.FormTitle>
+               {AppText.get(form_meta.form_title_key)}
+            </styles.FormTitle>
+         </styles.TightCenteredBlock>
+         : undefined
+      const subtitle = form_meta.form_subtitle_key
+         ? <styles.TightCenteredBlock>
+            <styles.FormSubtitle>
+               {AppText.get(form_meta.form_subtitle_key)}
+            </styles.FormSubtitle>
+         </styles.TightCenteredBlock>
+         : undefined
+      return title || subtitle
+         ? <styles.CenteredBlock>
+            {title || ''}
+            {subtitle || ''}
+         </styles.CenteredBlock>
+         : ''
+   }
+
+   render_button_block = () => {
       const {values} = this.state
       const {form_entries, form_meta} = this.props
+      let disabled = false
+      const value_keys = Object.keys(values)
+      form_entries.forEach(entry => {
+         if (entry.required && value_keys.includes(entry.settings_key)) {
+            return
+         }
+         disabled = true
+      })
+      return <styles.ButtonBlock>
+         <CoolButton
+            key={'response-cancel'}
+            disabled={false}
+            content={AppText.get(KEY_FORM_CANCEL)}
+            on_click={this.cancel_entries}
+            primary={false}
+         />
+         <CoolButton
+            key={'response-button'}
+            disabled={disabled}
+            content={form_meta.default_button_key ? AppText.get(form_meta.default_button_key) : 'ok'}
+            on_click={this.set_values}
+            primary={true}
+         />
+      </styles.ButtonBlock>
+   }
+
+   render() {
+      const {values} = this.state
+      const {form_entries} = this.props
       const all_entries = form_entries.map((entry, i) => {
          const setting_definition = AppSettings.setting_definitions[entry.settings_key];
          let edit_value = false
@@ -108,39 +161,16 @@ export class InputForm extends Component {
             {edit_value}
          </styles.CenteredBlock>
       })
-      let disabled = false
-      const value_keys = Object.keys(values)
-      form_entries.forEach(entry => {
-         if (entry.required && value_keys.includes(entry.settings_key)) {
-            return
-         }
-         disabled = true
-      })
-      const title = form_meta.form_title_key ? <styles.FormTitle>
-         {AppText.get(form_meta.form_title_key)}
-      </styles.FormTitle> : ''
+      const title_block = this.render_title_block()
+      const button_block = this.render_button_block()
       const elements = [
-         title,
+         title_block,
          all_entries,
-         <CoolButton
-            key={'response-cancel'}
-            disabled={false}
-            content={AppText.get(KEY_FORM_CANCEL)}
-            on_click={this.cancel_entries}
-            primary={false}
-         />,
-         <CoolButton
-            key={'response-button'}
-            disabled={disabled}
-            content={form_meta.default_button_key ? AppText.get(form_meta.default_button_key) : 'ok'}
-            on_click={this.set_values}
-            primary={true}
-         />
+         button_block,
       ]
       return <styles.FormWrapper>
          {elements}
       </styles.FormWrapper>
-
    }
 }
 

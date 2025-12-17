@@ -80,10 +80,19 @@ export class MainStyles {
        ${CoolStyles.align_center}
        margin: 0.5rem auto;
    `
+   static ButtonBlock = styled(CoolStyles.Block)`
+       ${CoolStyles.align_center}
+       margin: 1rem auto;
+   `
+   static TightCenteredBlock = styled(CoolStyles.Block)`
+       ${CoolStyles.align_center}
+       margin: auto;
+   `
    static InputPrompt = styled(CoolStyles.InlineBlock)`
        ${CoolStyles.italic}
        ${CoolStyles.noselect}
        margin-right: 0.5rem;
+       font-size: 0.85rem;
    `
    static MenuWrapper = styled(CoolStyles.InlineBlock)`
        ${CoolStyles.fixed}
@@ -93,8 +102,13 @@ export class MainStyles {
        ${CoolStyles.bold}
        font-size: 1.5rem;
    `
+   static FormSubtitle = styled(CoolStyles.InlineBlock)`
+       ${CoolStyles.italic}
+       font-size: 0.85rem;
+       color: grey;
+   `
    static FormWrapper = styled(CoolStyles.InlineBlock)`
-       padding: 1rem 1.5rem;
+       padding: 0 1.5rem;
        background-color: #f8f8f8;
        border: 1px solid #cccccc;
        box-shadow: 0.25rem 0.25rem 1.5rem rgba(0, 0, 0, 0.25);

@@ -11,6 +11,7 @@ export const KEY_DATA_MYSQL_USER_LABEL = `${DATA_FOLDER}/data_mysql_user_label`
 export const KEY_DATA_MYSQL_USER_PROMPT = `${DATA_FOLDER}/data_mysql_user_prompt`
 export const KEY_DATA_MYSQL_SAVE = `${DATA_FOLDER}/data_mysql_save`
 export const KEY_DATA_MYSQL_FORM_TITLE = `${DATA_FOLDER}/data_mysql_form_title`
+export const KEY_DATA_MYSQL_FORM_SUBTITLE = `${DATA_FOLDER}/data_mysql_form_subtitle`
 
 export const APP_DATA_TEXT = {
    [KEY_DATA_OVERVIEW]: 'data overview',
@@ -24,4 +25,5 @@ export const APP_DATA_TEXT = {
    [KEY_DATA_MYSQL_USER_PROMPT]: "root?",
    [KEY_DATA_MYSQL_SAVE]: "save mysql settings",
    [KEY_DATA_MYSQL_FORM_TITLE]: "MySQL Connection Settings",
+   [KEY_DATA_MYSQL_FORM_SUBTITLE]: "Enter the connection details to the Fracto MySQL database",
 }

@@ -1,53 +1,10 @@
 import {Component} from "react";
 
 import {MainStyles as styles} from '../../styles/MainStyles.jsx'
-import {
-   KEY_DATA_MYSQL_FORM_TITLE,
-   KEY_DATA_MYSQL_HOST_LABEL,
-   KEY_DATA_MYSQL_HOST_PROMPT,
-   KEY_DATA_MYSQL_PORT_LABEL,
-   KEY_DATA_MYSQL_PORT_PROMPT,
-   KEY_DATA_MYSQL_SAVE,
-   KEY_DATA_MYSQL_USER_LABEL,
-   KEY_DATA_MYSQL_USER_PROMPT,
-   KEY_DATA_SETTINGS
-} from "../../text/DataText.jsx";
+import {KEY_DATA_SETTINGS} from "../../text/DataText.jsx";
 import AppText from "../../AppText.jsx";
-import {
-   KEY_DATA_MYSQL_HOST,
-   KEY_DATA_MYSQL_PORT,
-   KEY_DATA_MYSQL_USER
-} from "../../settings/DataSettings.jsx";
 import InputForm from "../utils/InputForm.jsx";
-
-const FORM_ENTRIES = [
-   {
-      label_key: KEY_DATA_MYSQL_HOST_LABEL,
-      prompt_key: KEY_DATA_MYSQL_HOST_PROMPT,
-      width_px: 200,
-      required: true,
-      settings_key: KEY_DATA_MYSQL_HOST,
-   },
-   {
-      label_key: KEY_DATA_MYSQL_PORT_LABEL,
-      prompt_key: KEY_DATA_MYSQL_PORT_PROMPT,
-      width_px: 200,
-      required: true,
-      settings_key: KEY_DATA_MYSQL_PORT,
-   },
-   {
-      label_key: KEY_DATA_MYSQL_USER_LABEL,
-      prompt_key: KEY_DATA_MYSQL_USER_PROMPT,
-      width_px: 200,
-      required: true,
-      settings_key: KEY_DATA_MYSQL_USER,
-   },
-]
-
-const FORM_META = {
-   form_title_key: KEY_DATA_MYSQL_FORM_TITLE,
-   default_button_key: KEY_DATA_MYSQL_SAVE,
-}
+import {MYSQL_CONNECTION_FORM} from "../../forms/mysql_connection.jsx";
 
 export class DataSettings extends Component {
    render() {
@@ -59,8 +16,8 @@ export class DataSettings extends Component {
          <styles.CenteredBlock
             key={'input-form'}>
             <InputForm
-               form_entries={FORM_ENTRIES}
-               form_meta={FORM_META}
+               form_entries={MYSQL_CONNECTION_FORM.form_entries}
+               form_meta={MYSQL_CONNECTION_FORM.form_meta}
             />
          </styles.CenteredBlock>,
       ];
