@@ -30,26 +30,25 @@ export class AppSettings {
    static initialize = (setting_definitions) => {
       AppSettings.setting_definitions = copy_json(setting_definitions);
       const page_settings_keys = Object.keys(AppSettings.setting_definitions)
-      const page_settings = {}
       page_settings_keys.forEach(key => {
          if ("default_value" in AppSettings.setting_definitions[key]) {
-            page_settings[key] = AppSettings.setting_definitions[key].default_value
+            AppSettings.settings_data[key] = AppSettings.setting_definitions[key].default_value
          } else {
             switch (AppSettings.setting_definitions[key].data_type) {
                case TYPE_STRING:
-                  page_settings[key] = '~';
+                  AppSettings.settings_data[key] = '~';
                   break
                case TYPE_NUMBER:
-                  page_settings[key] = -1;
+                  AppSettings.settings_data[key] = -1;
                   break
                case TYPE_OBJECT:
-                  page_settings[key] = {};
+                  AppSettings.settings_data[key] = {};
                   break
                case TYPE_ARRAY:
-                  page_settings[key] = [];
+                  AppSettings.settings_data[key] = [];
                   break
                case TYPE_BOOLEAN:
-                  page_settings[key] = false;
+                  AppSettings.settings_data[key] = false;
                   break
                default:
                   break;

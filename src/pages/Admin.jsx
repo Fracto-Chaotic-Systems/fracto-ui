@@ -8,7 +8,7 @@ import {
    KEY_ADMIN_SECTION,
    KEY_ADMIN_SPLITTER_POS_PX
 } from "../settings/AdminSettings.jsx";
-import SplitterLayout from "./SplitterLayout.jsx";
+import SplitterLayout from "./utils/SplitterLayout.jsx";
 
 import {MainStyles as styles} from '../styles/MainStyles.jsx'
 import AppSettings from "../AppSettings.jsx";
@@ -18,14 +18,21 @@ import AdminOverview from "./admin/AdminOverview.jsx";
 import AdminSettings from "./admin/AdminSettings.jsx";
 import AdminStatus from "./admin/AdminStatus.jsx";
 import AdminIdentify from "./admin/AdminIdentify.jsx";
+import AppText from "../AppText.jsx";
+import {KEY_IDENTIFY_TITLE} from "../text/AdminText.jsx";
+import {
+   KEY_SIDEBAR_OVERVIEW,
+   KEY_SIDEBAR_SETTINGS,
+   KEY_SIDEBAR_STATUS
+} from "../text/RootText.jsx";
 
 const SIDEBAR_LIST = [
-   {title: 'overview', section_code: ADMIN_OVERVIEW, right_pane: <AdminOverview/>},
-   {title: 'break', section_code: SIDEBAR_BREAKER},
-   {title: 'identify', section_code: ADMIN_IDENTIFY, right_pane: <AdminIdentify/>},
-   {title: 'break', section_code: SIDEBAR_BREAKER},
-   {title: 'settings', section_code: ADMIN_SETTINGS, right_pane: <AdminSettings/>},
-   {title: 'status', section_code: ADMIN_STATUS, right_pane: <AdminStatus/>}
+   {title_key: KEY_SIDEBAR_OVERVIEW, section_code: ADMIN_OVERVIEW, right_pane: <AdminOverview/>},
+   {section_code: SIDEBAR_BREAKER},
+   {title_key: KEY_IDENTIFY_TITLE, section_code: ADMIN_IDENTIFY, right_pane: <AdminIdentify/>},
+   {section_code: SIDEBAR_BREAKER},
+   {title_key: KEY_SIDEBAR_SETTINGS, section_code: ADMIN_SETTINGS, right_pane: <AdminSettings/>},
+   {title_key: KEY_SIDEBAR_STATUS, section_code: ADMIN_STATUS, right_pane: <AdminStatus/>}
 ]
 
 export class Admin extends Component {
@@ -39,20 +46,20 @@ export class Admin extends Component {
    }
 
    componentDidMount() {
-      const interval = setInterval(() => {
-         if (!AppSettings.settings_initialized) {
-            return
-         }
-         clearInterval(interval)
-         const section_code = AppSettings.get(KEY_ADMIN_SECTION)
-         this.setState({section_code})
-      }, 500)
+      const section_code = AppSettings.get(KEY_ADMIN_SECTION)
+      this.setState({section_code})
    }
 
    render_left_pane = () => {
       const {section_code} = this.state
+      const sidebar_list = SIDEBAR_LIST.map(entry => {
+         if (entry.title_key) {
+            entry.title = AppText.get(entry.title_key)
+         }
+         return entry
+      })
       const sidebar = <Sidebar
-         sidebar_list={SIDEBAR_LIST}
+         sidebar_list={sidebar_list}
          section_code={section_code}
          on_change={this.sidebar_select}
       />

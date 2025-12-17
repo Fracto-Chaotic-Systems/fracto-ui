@@ -7,7 +7,7 @@ import {
    TILES_SETTINGS,
    TILES_STATUS
 } from "../settings/TilesSettings.jsx";
-import SplitterLayout from "./SplitterLayout.jsx";
+import SplitterLayout from "./utils/SplitterLayout.jsx";
 
 import {MainStyles as styles} from '../styles/MainStyles.jsx'
 import AppSettings from "../AppSettings.jsx";

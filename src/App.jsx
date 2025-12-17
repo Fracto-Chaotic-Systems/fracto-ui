@@ -19,6 +19,9 @@ import {APP_ASSETS_SETTINGS} from "./settings/AssetsSettings.jsx";
 import {APP_DATA_SETTINGS} from "./settings/DataSettings.jsx";
 import {APP_TILES_SETTINGS} from "./settings/TilesSettings.jsx";
 import {APP_STUDY_SETTINGS} from "./settings/StudySettings.jsx";
+import {APP_ADMIN_TEXT} from "./text/AdminText.jsx";
+import {AppText} from "./AppText.jsx";
+import {APP_ROOT_TEXT} from "./text/RootText.jsx";
 
 const ROUTES = [
    {path: "/admin", element: <Admin/>, title: 'admin'},
@@ -35,6 +38,14 @@ export class App extends Component {
    }
 
    componentDidMount() {
+      // initialize text
+      const all_text = Object.assign({},
+         APP_ADMIN_TEXT,
+         APP_ROOT_TEXT,
+      )
+      AppText.initialize(all_text)
+
+      // initialize settings
       const all_settings = Object.assign({},
          APP_ROOT_SETTINGS,
          APP_ADMIN_SETTINGS,
@@ -44,6 +55,7 @@ export class App extends Component {
          APP_STUDY_SETTINGS,
       )
       AppSettings.initialize(all_settings)
+
       const viewport_interval = poll_viewport_dimensions()
       this.setState({
          viewport_interval,
@@ -67,6 +79,9 @@ export class App extends Component {
 
    render() {
       const {selected_page} = this.state
+      if (!selected_page) {
+         return ('...')
+      }
       const all_routes = ROUTES.map(route => {
          return <Route
             key={`route-${route.title}`}

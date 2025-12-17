@@ -7,7 +7,7 @@ import {
    STUDY_SETTINGS,
    STUDY_STATUS
 } from "../settings/StudySettings.jsx";
-import SplitterLayout from "./SplitterLayout.jsx";
+import SplitterLayout from "./utils/SplitterLayout.jsx";
 
 import {MainStyles as styles} from '../styles/MainStyles.jsx'
 import AppSettings from "../AppSettings.jsx";

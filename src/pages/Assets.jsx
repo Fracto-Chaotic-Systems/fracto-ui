@@ -7,7 +7,7 @@ import {
    KEY_ASSETS_SECTION,
    KEY_ASSETS_SPLITTER_POS_PX
 } from "../settings/AssetsSettings.jsx";
-import SplitterLayout from "./SplitterLayout.jsx";
+import SplitterLayout from "./utils/SplitterLayout.jsx";
 
 import {MainStyles as styles} from '../styles/MainStyles.jsx'
 import AppSettings from "../AppSettings.jsx";
