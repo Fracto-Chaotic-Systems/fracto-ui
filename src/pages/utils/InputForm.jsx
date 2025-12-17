@@ -4,14 +4,21 @@ import PropTypes from "prop-types";
 import {MainStyles as styles} from '../../styles/MainStyles.jsx'
 import {CoolInputText} from "../../ui/CoolImports.jsx";
 import AppSettings, {
-   TYPE_BOOLEAN,
+   TYPE_BOOLEAN, TYPE_NUMBER,
    TYPE_STRING
 } from "../../AppSettings.jsx";
 import CoolButton from "../../ui/CoolButton.jsx";
+import AppText from "../../AppText.jsx";
+import {KEY_FORM_CANCEL} from "../../text/RootText.jsx";
 
 export class InputForm extends Component {
    static propTypes = {
       form_entries: PropTypes.array.isRequired,
+      form_meta: PropTypes.object,
+   }
+
+   static defaultProps = {
+      form_meta: {},
    }
 
    state = {
@@ -19,7 +26,11 @@ export class InputForm extends Component {
    }
 
    componentDidMount() {
-      const {values} = this.state
+      this.init_values()
+   }
+
+   init_values = () => {
+      const values = {}
       const {form_entries} = this.props
       form_entries.forEach(entry => {
          const setting_definition = AppSettings.setting_definitions[entry.settings_key];
@@ -59,13 +70,17 @@ export class InputForm extends Component {
       })
    }
 
+   cancel_entries = () => {
+      this.init_values()
+   }
+
    render() {
       const {values} = this.state
-      const {form_entries} = this.props
+      const {form_entries, form_meta} = this.props
       const all_entries = form_entries.map((entry, i) => {
          const setting_definition = AppSettings.setting_definitions[entry.settings_key];
          let edit_value = false
-         console.log('values[entry.settings_key]',values[entry.settings_key])
+         console.log('values[entry.settings_key]', values[entry.settings_key])
          switch (setting_definition.data_type) {
             case TYPE_BOOLEAN:
                edit_value = <input
@@ -74,11 +89,12 @@ export class InputForm extends Component {
                   onClick={(e) => this.checkbox_changed(e, entry)}
                />
                break;
+            case TYPE_NUMBER:
             case TYPE_STRING:
                edit_value = <CoolInputText
                   value={values[entry.settings_key]}
                   on_change={(e) => this.text_changed(e, entry)}
-                  placeholder={entry.prompt}
+                  placeholder={AppText.get(entry.prompt_key)}
                   style_extra={{width: `${entry.width_px}px`}}
                />;
                break;
@@ -87,7 +103,7 @@ export class InputForm extends Component {
          return <styles.CenteredBlock
             key={`input-form_entries_${i}`}>
             <styles.InputPrompt style={label_style}>
-               {`${entry.label}:`}
+               {`${AppText.get(entry.label_key)}:`}
             </styles.InputPrompt>
             {edit_value}
          </styles.CenteredBlock>
@@ -100,16 +116,31 @@ export class InputForm extends Component {
          }
          disabled = true
       })
-      return [
+      const title = form_meta.form_title_key ? <styles.FormTitle>
+         {AppText.get(form_meta.form_title_key)}
+      </styles.FormTitle> : ''
+      const elements = [
+         title,
          all_entries,
+         <CoolButton
+            key={'response-cancel'}
+            disabled={false}
+            content={AppText.get(KEY_FORM_CANCEL)}
+            on_click={this.cancel_entries}
+            primary={false}
+         />,
          <CoolButton
             key={'response-button'}
             disabled={disabled}
-            content={'ok'}
+            content={form_meta.default_button_key ? AppText.get(form_meta.default_button_key) : 'ok'}
             on_click={this.set_values}
             primary={true}
          />
       ]
+      return <styles.FormWrapper>
+         {elements}
+      </styles.FormWrapper>
+
    }
 }
 

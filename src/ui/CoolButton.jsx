@@ -5,10 +5,16 @@ import styled from "styled-components";
 import {CoolStyles, CoolColors} from "./CoolImports";
 
 const BasicButton = styled(CoolStyles.InlineBlock)`
-   ${CoolStyles.pointer}
-   ${CoolStyles.noselect}
-   border-radius: 0.25rem;
-   padding: 0.325rem 0.75rem;
+    ${CoolStyles.pointer}
+    ${CoolStyles.noselect}
+    ${CoolStyles.uppercase}
+    ${CoolStyles.italic}
+    ${CoolStyles.align_middle}
+    border-radius: 0.25rem;
+    line-height: 1.25rem;
+    font-size: 0.75rem;
+    padding: 0.125rem 1rem;
+    margin-right: 0.5rem;
 `;
 
 export class CoolButton extends Component {

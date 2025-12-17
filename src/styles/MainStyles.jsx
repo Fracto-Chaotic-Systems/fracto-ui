@@ -78,7 +78,7 @@ export class MainStyles {
    `
    static CenteredBlock = styled(CoolStyles.Block)`
        ${CoolStyles.align_center}
-       margin: 1rem auto;
+       margin: 0.5rem auto;
    `
    static InputPrompt = styled(CoolStyles.InlineBlock)`
        ${CoolStyles.italic}
@@ -88,6 +88,18 @@ export class MainStyles {
    static MenuWrapper = styled(CoolStyles.InlineBlock)`
        ${CoolStyles.fixed}
        left: 60px,
+   `
+   static FormTitle = styled(CoolStyles.InlineBlock)`
+       ${CoolStyles.bold}
+       font-size: 1.5rem;
+   `
+   static FormWrapper = styled(CoolStyles.InlineBlock)`
+       padding: 1rem 1.5rem;
+       background-color: #f8f8f8;
+       border: 1px solid #cccccc;
+       box-shadow: 0.25rem 0.25rem 1.5rem rgba(0, 0, 0, 0.25);
+       border-radius: 0.125rem;
+       margin-top: 0.5rem;
    `
 }
 
