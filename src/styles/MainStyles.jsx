@@ -82,7 +82,7 @@ export class MainStyles {
    `
    static ButtonBlock = styled(CoolStyles.Block)`
        ${CoolStyles.align_center}
-       margin: 1rem auto;
+       margin: 1.25rem auto;
    `
    static TightCenteredBlock = styled(CoolStyles.Block)`
        ${CoolStyles.align_center}
@@ -106,6 +106,7 @@ export class MainStyles {
        ${CoolStyles.italic}
        font-size: 0.85rem;
        color: grey;
+       line-height: 0.75rem;
    `
    static FormWrapper = styled(CoolStyles.InlineBlock)`
        padding: 0 1.5rem;
@@ -113,7 +114,7 @@ export class MainStyles {
        border: 1px solid #cccccc;
        box-shadow: 0.25rem 0.25rem 1.5rem rgba(0, 0, 0, 0.25);
        border-radius: 0.125rem;
-       margin-top: 0.5rem;
+       margin: 0.5rem auto;
    `
 }
 

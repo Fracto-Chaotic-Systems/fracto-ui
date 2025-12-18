@@ -1,7 +1,7 @@
 import {Component} from "react";
 
 import {MainStyles as styles} from '../../styles/MainStyles.jsx'
-import {KEY_DATA_OVERVIEW} from "../../text/DataText.jsx";
+import {KEY_DATA_CONTENT_OVERVIEW} from "../../text/DataText.jsx";
 import AppText from "../../AppText.jsx";
 
 export class DataOverview extends Component {
@@ -9,7 +9,7 @@ export class DataOverview extends Component {
       return [
          <styles.SectionTitle
             key={'data-overview-title'}>
-            {AppText.get(KEY_DATA_OVERVIEW)}
+            {AppText.get(KEY_DATA_CONTENT_OVERVIEW)}
          </styles.SectionTitle>,
          <styles.CenteredBlock
             key={'input-form'}>
