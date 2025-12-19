@@ -14,7 +14,7 @@ export const MAIN_SERVER_FORM = {
       {
          label_key: KEY_DATA_MAIN_SERVER_LABEL,
          prompt_key: KEY_DATA_MAIN_SERVER_PROMPT,
-         width_px: 200,
+         width_px: 250,
          required: true,
          settings_key: KEY_DATA_MAIN_SERVER_URL,
       },
