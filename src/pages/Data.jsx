@@ -1,33 +1,39 @@
 import React, {Component} from 'react'
 
+import SplitterLayout from "./utils/SplitterLayout.jsx";
+import Sidebar, {SIDEBAR_BREAKER} from "./utils/Sidebar.jsx";
+
 import {MainStyles as styles} from '../styles/MainStyles.jsx'
+import AppSettings from "../AppSettings.jsx";
 import {
+   DATA_LOGS,
    DATA_OVERVIEW,
    DATA_SETTINGS,
    DATA_STATUS,
    KEY_DATA_SECTION,
    KEY_DATA_SPLITTER_POS_PX
 } from "../settings/DataSettings.jsx";
+
+import AppText from "../AppText.jsx";
 import {
+   KEY_SIDEBAR_LOGS,
    KEY_SIDEBAR_OVERVIEW,
    KEY_SIDEBAR_SETTINGS,
    KEY_SIDEBAR_STATUS
 } from "../text/RootText.jsx";
-import SplitterLayout from "./utils/SplitterLayout.jsx";
-import Sidebar, {SIDEBAR_BREAKER} from "./utils/Sidebar.jsx";
-import AppSettings from "../AppSettings.jsx";
 
 import DataOverview from "./Data/DataOverview.jsx";
 import DataSettings from "./Data/DataSettings.jsx";
 import DataStatus from "./Data/DataStatus.jsx";
-import AppText from "../AppText.jsx";
+import DataLogs from "./data/DataLogs.jsx";
 
 const SIDEBAR_LIST = [
    {title_key: KEY_SIDEBAR_OVERVIEW, section_code: DATA_OVERVIEW, right_pane: <DataOverview/>},
    {section_code: SIDEBAR_BREAKER},
    {section_code: SIDEBAR_BREAKER},
    {title_key: KEY_SIDEBAR_SETTINGS, section_code: DATA_SETTINGS, right_pane: <DataSettings/>},
-   {title_key: KEY_SIDEBAR_STATUS, section_code: DATA_STATUS, right_pane: <DataStatus/>}
+   {title_key: KEY_SIDEBAR_STATUS, section_code: DATA_STATUS, right_pane: <DataStatus/>},
+   {title_key: KEY_SIDEBAR_LOGS, section_code: DATA_LOGS, right_pane: <DataLogs/>},
 ]
 
 export class Data extends Component {

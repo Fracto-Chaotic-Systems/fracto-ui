@@ -1,33 +1,39 @@
 import React, {Component} from 'react'
 
+import Sidebar, {SIDEBAR_BREAKER} from "./utils/Sidebar.jsx";
+import SplitterLayout from "./utils/SplitterLayout.jsx";
+
 import {MainStyles as styles} from '../styles/MainStyles.jsx'
+import AppSettings from "../AppSettings.jsx";
 import {
+   ASSETS_LOGS,
    ASSETS_OVERVIEW,
    ASSETS_SETTINGS,
    ASSETS_STATUS,
    KEY_ASSETS_SECTION,
    KEY_ASSETS_SPLITTER_POS_PX
 } from "../settings/AssetsSettings.jsx";
+
+import AppText from "../AppText.jsx";
 import {
+   KEY_SIDEBAR_LOGS,
    KEY_SIDEBAR_OVERVIEW,
    KEY_SIDEBAR_SETTINGS,
    KEY_SIDEBAR_STATUS
 } from "../text/RootText.jsx";
-import SplitterLayout from "./utils/SplitterLayout.jsx";
-import Sidebar, {SIDEBAR_BREAKER} from "./utils/Sidebar.jsx";
-import AppSettings from "../AppSettings.jsx";
 
 import AssetsOverview from "./assets/AssetsOverview.jsx";
 import AssetsSettings from "./assets/AssetsSettings.jsx";
 import AssetsStatus from "./assets/AssetsStatus.jsx";
-import AppText from "../AppText.jsx";
+import AssetsLogs from "./assets/AssetsLogs.jsx";
 
 const SIDEBAR_LIST = [
    {title_key: KEY_SIDEBAR_OVERVIEW, section_code: ASSETS_OVERVIEW, right_pane: <AssetsOverview/>},
    {section_code: SIDEBAR_BREAKER},
    {section_code: SIDEBAR_BREAKER},
    {title_key: KEY_SIDEBAR_SETTINGS, section_code: ASSETS_SETTINGS, right_pane: <AssetsSettings/>},
-   {title_key: KEY_SIDEBAR_STATUS, section_code: ASSETS_STATUS, right_pane: <AssetsStatus/>}
+   {title_key: KEY_SIDEBAR_STATUS, section_code: ASSETS_STATUS, right_pane: <AssetsStatus/>},
+   {title_key: KEY_SIDEBAR_LOGS, section_code: ASSETS_LOGS, right_pane: <AssetsLogs/>},
 ]
 
 export class Assets extends Component {

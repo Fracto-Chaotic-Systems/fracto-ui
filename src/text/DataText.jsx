@@ -5,6 +5,7 @@ const AWS_FOLDER = `${DATA_FOLDER}/aws`
 export const KEY_DATA_CONTENT_OVERVIEW = `${DATA_FOLDER}/overview`
 export const KEY_DATA_CONTENT_SETTINGS = `${DATA_FOLDER}/settings`
 export const KEY_DATA_CONTENT_STATUS = `${DATA_FOLDER}/status`
+export const KEY_DATA_CONTENT_LOGS = `${DATA_FOLDER}/logs`
 
 export const KEY_DATA_MYSQL_HOST_LABEL = `${MYSQL_FOLDER}/host_label`
 export const KEY_DATA_MYSQL_HOST_PROMPT = `${MYSQL_FOLDER}/host_prompt`
@@ -34,6 +35,7 @@ export const APP_DATA_TEXT = {
    [KEY_DATA_CONTENT_OVERVIEW]: 'data overview',
    [KEY_DATA_CONTENT_SETTINGS]: 'data settings',
    [KEY_DATA_CONTENT_STATUS]: 'data status',
+   [KEY_DATA_CONTENT_LOGS]: 'data logs',
    [KEY_DATA_MYSQL_HOST_LABEL]: "host",
    [KEY_DATA_MYSQL_HOST_PROMPT]: "localhost?",
    [KEY_DATA_MYSQL_PORT_LABEL]: "port",

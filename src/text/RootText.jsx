@@ -7,6 +7,7 @@ const FORM_FOLDER = `${ROOT_FOLDER}/form`
 export const KEY_SIDEBAR_OVERVIEW = `${SIDEBAR_FOLDER}/overview`
 export const KEY_SIDEBAR_SETTINGS = `${SIDEBAR_FOLDER}/settings`
 export const KEY_SIDEBAR_STATUS = `${SIDEBAR_FOLDER}/status`
+export const KEY_SIDEBAR_LOGS = `${SIDEBAR_FOLDER}/logs`
 export const KEY_MENU_ADMIN = `${MENU_FOLDER}/admin`
 export const KEY_MENU_DATA = `${MENU_FOLDER}/data`
 export const KEY_MENU_ASSETS = `${MENU_FOLDER}/assets`
@@ -18,6 +19,7 @@ export const APP_ROOT_TEXT = {
    [KEY_SIDEBAR_OVERVIEW]: 'Overview',
    [KEY_SIDEBAR_SETTINGS]: 'Settings',
    [KEY_SIDEBAR_STATUS]: 'Status',
+   [KEY_SIDEBAR_LOGS]: 'Logs',
    [KEY_MENU_ADMIN]: 'admin',
    [KEY_MENU_DATA]: 'data',
    [KEY_MENU_ASSETS]: 'assets',

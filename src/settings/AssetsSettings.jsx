@@ -8,6 +8,7 @@ export const KEY_ASSETS_SECTION = `${ASSETS_FOLDER}/assets_section`
 export const ASSETS_OVERVIEW = 'assets_overview'
 export const ASSETS_SETTINGS = 'assets_settings'
 export const ASSETS_STATUS = 'assets_status'
+export const ASSETS_LOGS = 'assets_logs'
 
 export const APP_ASSETS_SETTINGS = {
    [KEY_ASSETS_SPLITTER_POS_PX]: {

@@ -11,6 +11,7 @@ export const KEY_TILES_SECTION = `${TILES_FOLDER}/tiles_section`
 export const TILES_OVERVIEW = 'tiles_overview'
 export const TILES_SETTINGS = 'tiles_settings'
 export const TILES_STATUS = 'tiles_status'
+export const TILES_LOGS = 'tiles_logs'
 
 export const APP_TILES_SETTINGS = {
    [KEY_TILES_SPLITTER_POS_PX]: {

@@ -116,6 +116,15 @@ export class MainStyles {
        border-radius: 0.125rem;
        margin: 0.5rem auto;
    `
+   static ConsoleWrapper = styled(CoolStyles.Block)`
+       padding: 0.5rem;
+       background-color: #222222;
+   `
+   static ConsoleLine = styled(CoolStyles.Block)`
+       ${CoolStyles.monospace}
+       font-size: 0.85rem;
+       color: white;
+   `
 }
 
 export default MainStyles

@@ -1,30 +1,34 @@
 import React, {Component} from 'react'
 
+import Sidebar, {SIDEBAR_BREAKER} from "./utils/Sidebar.jsx";
+import SplitterLayout from "./utils/SplitterLayout.jsx";
+
+import {MainStyles as styles} from '../styles/MainStyles.jsx'
+import AppSettings from "../AppSettings.jsx";
 import {
    ADMIN_IDENTIFY,
+   ADMIN_LOGS,
    ADMIN_OVERVIEW,
    ADMIN_SETTINGS,
    ADMIN_STATUS,
    KEY_ADMIN_SECTION,
    KEY_ADMIN_SPLITTER_POS_PX
 } from "../settings/AdminSettings.jsx";
-import SplitterLayout from "./utils/SplitterLayout.jsx";
 
-import {MainStyles as styles} from '../styles/MainStyles.jsx'
-import AppSettings from "../AppSettings.jsx";
-import Sidebar, {SIDEBAR_BREAKER} from "./utils/Sidebar.jsx";
+import AppText from "../AppText.jsx";
+import {KEY_IDENTIFY_TITLE} from "../text/AdminText.jsx";
+import {
+   KEY_SIDEBAR_LOGS,
+   KEY_SIDEBAR_OVERVIEW,
+   KEY_SIDEBAR_SETTINGS,
+   KEY_SIDEBAR_STATUS
+} from "../text/RootText.jsx";
 
 import AdminOverview from "./admin/AdminOverview.jsx";
 import AdminSettings from "./admin/AdminSettings.jsx";
 import AdminStatus from "./admin/AdminStatus.jsx";
 import AdminIdentify from "./admin/AdminIdentify.jsx";
-import AppText from "../AppText.jsx";
-import {KEY_IDENTIFY_TITLE} from "../text/AdminText.jsx";
-import {
-   KEY_SIDEBAR_OVERVIEW,
-   KEY_SIDEBAR_SETTINGS,
-   KEY_SIDEBAR_STATUS
-} from "../text/RootText.jsx";
+import AdminLogs from "./admin/AdminLogs.jsx";
 
 const SIDEBAR_LIST = [
    {title_key: KEY_SIDEBAR_OVERVIEW, section_code: ADMIN_OVERVIEW, right_pane: <AdminOverview/>},
@@ -32,7 +36,8 @@ const SIDEBAR_LIST = [
    {title_key: KEY_IDENTIFY_TITLE, section_code: ADMIN_IDENTIFY, right_pane: <AdminIdentify/>},
    {section_code: SIDEBAR_BREAKER},
    {title_key: KEY_SIDEBAR_SETTINGS, section_code: ADMIN_SETTINGS, right_pane: <AdminSettings/>},
-   {title_key: KEY_SIDEBAR_STATUS, section_code: ADMIN_STATUS, right_pane: <AdminStatus/>}
+   {title_key: KEY_SIDEBAR_STATUS, section_code: ADMIN_STATUS, right_pane: <AdminStatus/>},
+   {title_key: KEY_SIDEBAR_LOGS, section_code: ADMIN_LOGS, right_pane: <AdminLogs/>}
 ]
 
 export class Admin extends Component {

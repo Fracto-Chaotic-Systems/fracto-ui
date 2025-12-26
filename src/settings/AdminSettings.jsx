@@ -19,6 +19,7 @@ export const ADMIN_OVERVIEW = 'admin_overview'
 export const ADMIN_IDENTIFY = 'admin_identify'
 export const ADMIN_SETTINGS = 'admin_settings'
 export const ADMIN_STATUS = 'admin_status'
+export const ADMIN_LOGS = 'admin_logs'
 
 export const APP_ADMIN_SETTINGS = {
    [KEY_ADMIN_SPLITTER_POS_PX]: {

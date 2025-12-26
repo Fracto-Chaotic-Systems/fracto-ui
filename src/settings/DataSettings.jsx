@@ -19,6 +19,7 @@ export const KEY_DATA_MAIN_SERVER_URL = `${AUTH_FOLDER}/main_server_url`
 export const DATA_OVERVIEW = 'data_overview'
 export const DATA_SETTINGS = 'data_settings'
 export const DATA_STATUS = 'data_status'
+export const DATA_LOGS = 'data_logs'
 
 export const APP_DATA_SETTINGS = {
    [KEY_DATA_SPLITTER_POS_PX]: {

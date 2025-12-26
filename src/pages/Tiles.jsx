@@ -1,33 +1,39 @@
 import React, {Component} from 'react'
 
+import Sidebar, {SIDEBAR_BREAKER} from "./utils/Sidebar.jsx";
+import SplitterLayout from "./utils/SplitterLayout.jsx";
+
 import {MainStyles as styles} from '../styles/MainStyles.jsx'
+import AppSettings from "../AppSettings.jsx";
 import {
    TILES_OVERVIEW,
    TILES_SETTINGS,
    TILES_STATUS,
    KEY_TILES_SECTION,
-   KEY_TILES_SPLITTER_POS_PX
+   KEY_TILES_SPLITTER_POS_PX,
+   TILES_LOGS
 } from "../settings/TilesSettings.jsx";
+
+import AppText from "../AppText.jsx";
 import {
+   KEY_SIDEBAR_LOGS,
    KEY_SIDEBAR_OVERVIEW,
    KEY_SIDEBAR_SETTINGS,
    KEY_SIDEBAR_STATUS
 } from "../text/RootText.jsx";
-import SplitterLayout from "./utils/SplitterLayout.jsx";
-import Sidebar, {SIDEBAR_BREAKER} from "./utils/Sidebar.jsx";
-import AppSettings from "../AppSettings.jsx";
 
 import TilesOverview from "./tiles/TilesOverview.jsx";
 import TilesSettings from "./tiles/TilesSettings.jsx";
 import TilesStatus from "./tiles/TilesStatus.jsx";
-import AppText from "../AppText.jsx";
+import TilesLogs from "./tiles/TilesLogs.jsx";
 
 const SIDEBAR_LIST = [
    {title_key: KEY_SIDEBAR_OVERVIEW, section_code: TILES_OVERVIEW, right_pane: <TilesOverview/>},
    {section_code: SIDEBAR_BREAKER},
    {section_code: SIDEBAR_BREAKER},
    {title_key: KEY_SIDEBAR_SETTINGS, section_code: TILES_SETTINGS, right_pane: <TilesSettings/>},
-   {title_key: KEY_SIDEBAR_STATUS, section_code: TILES_STATUS, right_pane: <TilesStatus/>}
+   {title_key: KEY_SIDEBAR_STATUS, section_code: TILES_STATUS, right_pane: <TilesStatus/>},
+   {title_key: KEY_SIDEBAR_LOGS, section_code: TILES_LOGS, right_pane: <TilesLogs/>}
 ]
 
 export class Tiles extends Component {
