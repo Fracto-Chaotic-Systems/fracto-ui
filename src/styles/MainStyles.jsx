@@ -125,6 +125,20 @@ export class MainStyles {
        font-size: 0.85rem;
        color: white;
    `
+   static FilenameWrapper = styled(CoolStyles.Block)`
+       ${CoolStyles.monospace}
+       ${CoolStyles.align_middle}
+       font-size: 0.85rem;
+       line-height: 1rem;
+       color: darkorchid;
+       background-color: white;
+   `
+   static HighlightSpan = styled.span`
+       color: lightskyblue;
+   `
+   static FractoLine = styled(MainStyles.ConsoleLine)`
+       color: lightgreen;
+   `
 }
 
 export default MainStyles
