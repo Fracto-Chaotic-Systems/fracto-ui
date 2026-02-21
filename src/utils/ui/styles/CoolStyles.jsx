@@ -1,6 +1,6 @@
 import styled, {css} from "styled-components";
 
-import {CoolColors} from "../CoolImports";
+import {CoolColors} from "../CoolImports.jsx";
 
 export class CoolStyles {
 
@@ -170,6 +170,10 @@ export class CoolStyles {
    static TableBody = styled.div`
         display: table-row-group;
     `;
+
+   static MediumIcon = styled.div`
+       display: inline-block;
+   `;
 
    static blue_border = css`
         border: 0.125rem solid ${CoolColors.cool_blue};

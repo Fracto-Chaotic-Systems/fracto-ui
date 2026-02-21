@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 
-import {CoolModalStyles as styles} from './styles/CoolModalStyles';
+import {CoolModalStyles as styles} from './styles/CoolModalStyles.jsx';
 
 export class CoolModal extends Component {
 

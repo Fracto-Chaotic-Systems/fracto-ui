@@ -10,13 +10,16 @@ import {
    ADMIN_LOGS,
    ADMIN_OVERVIEW,
    ADMIN_SETTINGS,
-   ADMIN_STATUS,
+   ADMIN_STATUS, ADMIN_VERSIONS,
    KEY_ADMIN_SECTION,
    KEY_ADMIN_SPLITTER_POS_PX
 } from "../settings/AdminSettings.jsx";
 
 import AppText from "../AppText.jsx";
-import {KEY_IDENTIFY_TITLE} from "../text/AdminText.jsx";
+import {
+   KEY_IDENTIFY_TITLE,
+   KEY_VERSIONS_TITLE
+} from "../text/AdminText.jsx";
 import {
    KEY_SIDEBAR_LOGS,
    KEY_SIDEBAR_OVERVIEW,
@@ -29,11 +32,13 @@ import AdminSettings from "./admin/AdminSettings.jsx";
 import AdminStatus from "./admin/AdminStatus.jsx";
 import AdminIdentify from "./admin/AdminIdentify.jsx";
 import AdminLogs from "./admin/AdminLogs.jsx";
+import AdminVersions from "./admin/AdminVersions.jsx";
 
 const SIDEBAR_LIST = [
    {title_key: KEY_SIDEBAR_OVERVIEW, section_code: ADMIN_OVERVIEW, right_pane: <AdminOverview/>},
    {section_code: SIDEBAR_BREAKER},
    {title_key: KEY_IDENTIFY_TITLE, section_code: ADMIN_IDENTIFY, right_pane: <AdminIdentify/>},
+   {title_key: KEY_VERSIONS_TITLE, section_code: ADMIN_VERSIONS, right_pane: <AdminVersions/>},
    {section_code: SIDEBAR_BREAKER},
    {title_key: KEY_SIDEBAR_SETTINGS, section_code: ADMIN_SETTINGS, right_pane: <AdminSettings/>},
    {title_key: KEY_SIDEBAR_STATUS, section_code: ADMIN_STATUS, right_pane: <AdminStatus/>},

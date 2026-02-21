@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faCaretRight} from '@fortawesome/free-solid-svg-icons';
 
-import {CoolStyles} from "./CoolImports";
+import {CoolStyles} from "./CoolImports.jsx";
 
 const ITEM_COLOR = "#888888";
 const ITEM_HILIGHT_COLOR = "#333333";

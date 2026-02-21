@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 
-import {CoolTransportStyles as styles} from './styles/CoolTransportStyles'
+import {CoolTransportStyles as styles} from './styles/CoolTransportStyles.jsx'
 
 const TRANSIT_CODE_PLAY = 'transit_code_play'
 const TRANSIT_CODE_PAUSE = 'transit_code_pause'

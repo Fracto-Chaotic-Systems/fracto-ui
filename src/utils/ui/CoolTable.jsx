@@ -2,16 +2,18 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import styled from "styled-components";
 
-import {CoolStyles} from "./CoolImports";
+import {CoolStyles} from "./CoolImports.jsx";
 import ReactTimeAgo from 'react-time-ago';
 import TimeAgo from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
+import AppText from "../../AppText.jsx";
 
 TimeAgo.locale(en)
 
 export const CELL_TYPE_OBJECT = "cell_type_oject"
 export const CELL_TYPE_NUMBER = "cell_type_number"
 export const CELL_TYPE_TEXT = "cell_type_text"
+export const CELL_TYPE_TEXT_KEY = "cell_type_text_key"
 export const CELL_TYPE_SELECT = "cell_type_select"
 export const CELL_TYPE_LINK = "cell_type_link"
 export const CELL_TYPE_TIME_AGO = "cell_type_time_ago"
@@ -22,6 +24,8 @@ export const CELL_ALIGN_RIGHT = "cell_align_right"
 export const CELL_ALIGN_CENTER = "cell_align_center"
 
 export const TABLE_CAN_SELECT = "table_can_select"
+export const TABLE_NO_HEADER = "table_no_header"
+export const TABLE_NO_BORDER = "table_no_border"
 const COLUMN_ID_SELECT = "column_id_select"
 
 const HEADER_COLUMN_SELECT = {
@@ -33,7 +37,7 @@ const HEADER_COLUMN_SELECT = {
 }
 
 const MainTable = styled(CoolStyles.Table)`
-    border: 0.1rem solid #aaaaaa;
+    margin: 0;
 `
 
 const TableRow = styled(CoolStyles.TableRow)`
@@ -47,7 +51,7 @@ const TableRow = styled(CoolStyles.TableRow)`
 
 const TableCell = styled(CoolStyles.TableCell)`
     ${CoolStyles.ellipsis}
-    padding: 0.25rem 0.5rem 0 0.75rem;
+    padding: 0 0.5rem;
 `
 
 const SelectorCell = styled(CoolStyles.TableCell)`
@@ -163,6 +167,9 @@ export class CoolTable extends Component {
                object_data = data[0](data[1])
             }
             break;
+         case CELL_TYPE_TEXT_KEY:
+            object_data = AppText.get(data)
+            break;
          case CELL_TYPE_OBJECT:
          case CELL_TYPE_TEXT:
          default:
@@ -220,9 +227,6 @@ export class CoolTable extends Component {
       if (options.includes(TABLE_CAN_SELECT)) {
          columns_clone.unshift(HEADER_COLUMN_SELECT)
       }
-      const header_cells = columns_clone.map((column, i) => {
-         return this.render_header_cell(column)
-      })
       const table_rows = data.map((obj, row) => {
          const row_cells = columns_clone.map((column, col) => {
             if (column.id === COLUMN_ID_SELECT) {
@@ -239,12 +243,24 @@ export class CoolTable extends Component {
             {row_cells}
          </TableRow>
       })
-      return <MainTable>
+      let table_header = ''
+      if (!options.includes(TABLE_NO_HEADER)) {
+         const header_cells = columns_clone.map((column, i) => {
+            return this.render_header_cell(column)
+         })
+         table_header = <TableHeader>{header_cells}</TableHeader>
+      }
+      // console.log('options',options)
+      const no_border = options.includes(TABLE_NO_BORDER)
+      const table_style = {
+         border: !no_border ? '0.1rem solid #aaaaaa' : 0
+      }
+      return <CoolStyles.Table style={table_style}>
          <TableScrollable>
-            <TableHeader>{header_cells}</TableHeader>
+            {table_header}
             <TableBody>{table_rows}</TableBody>
          </TableScrollable>
-      </MainTable>
+      </CoolStyles.Table>
    }
 }
 

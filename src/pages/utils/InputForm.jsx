@@ -2,12 +2,12 @@ import React, {Component} from 'react'
 import PropTypes from "prop-types";
 
 import {MainStyles as styles} from '../../styles/MainStyles.jsx'
-import {CoolInputText} from "../../ui/CoolImports.jsx";
+import {CoolInputText} from "../../utils/ui/CoolImports.jsx";
 import AppSettings, {
    TYPE_BOOLEAN, TYPE_NUMBER,
    TYPE_STRING
 } from "../../AppSettings.jsx";
-import CoolButton from "../../ui/CoolButton.jsx";
+import CoolButton from "../../utils/ui/CoolButton.jsx";
 import AppText from "../../AppText.jsx";
 import {KEY_FORM_CANCEL} from "../../text/RootText.jsx";
 

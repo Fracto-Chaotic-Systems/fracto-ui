@@ -1,6 +1,9 @@
 import styled from "styled-components";
-import {CoolStyles} from "../ui/CoolImports.jsx";
+import {CoolStyles} from "../utils/ui/CoolImports.jsx";
 import {HEADER_BAR_HEIGHT_PX} from "../constants.jsx";
+
+export const MARGIN_PX = 12
+export const CONTENT_BACKGROUND_COLOR = "#fcfcfc"
 
 export class MainStyles {
    static BodyWrapper = styled(CoolStyles.Block)`
@@ -123,6 +126,7 @@ export class MainStyles {
    static ConsoleLine = styled(CoolStyles.Block)`
        ${CoolStyles.monospace}
        font-size: 0.85rem;
+       line-height: 1rem;
        color: white;
    `
    static FilenameWrapper = styled(CoolStyles.Block)`
@@ -138,6 +142,35 @@ export class MainStyles {
    `
    static FractoLine = styled(MainStyles.ConsoleLine)`
        color: lightgreen;
+   `
+   static TableWrapper = styled(CoolStyles.InlineBlock)`
+       box-shadow: 0.25rem 0.25rem 1.5rem rgba(0, 0, 0, 0.25);
+       margin: 0.5rem auto;
+   `
+   static InlineContentWrapper = styled(CoolStyles.InlineBlock)`
+       ${CoolStyles.align_center}
+       ${CoolStyles.narrow_box_shadow}
+       border: 1px solid #aaaaaa;
+       border-radius: 0.25rem;
+       padding: 0.5rem;
+       margin-bottom: ${MARGIN_PX}px;
+       background-color: ${CONTENT_BACKGROUND_COLOR};
+   `
+   static FloatRight = styled(CoolStyles.InlineBlock)`
+       float: right;
+       margin-right: 1rem;
+   `
+   static BlueButton = styled(CoolStyles.InlineBlock)`
+       ${CoolStyles.pointer}
+       ${CoolStyles.noselect}
+       ${CoolStyles.italic}
+       font-weight: 400;
+       color: white;
+       background: linear-gradient(15deg, #557799 0%, #7799bb 50%, #bbddff 90%);
+       border: 0.1rem solid #444444;
+       border-radius: 0.25rem;
+       line-height: 1.25rem;
+       padding: 0 0.5rem 0.125rem;
    `
 }
 

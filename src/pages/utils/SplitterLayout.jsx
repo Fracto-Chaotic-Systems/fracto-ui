@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 
-import {CoolSplitter, SPLITTER_TYPE_VERTICAL} from "../../ui/CoolSplitter.jsx";
+import {CoolSplitter, SPLITTER_TYPE_VERTICAL} from "../../utils/ui/CoolSplitter.jsx";
 import {DEFAULT_SIDEBAR_WIDTH, HEADER_BAR_HEIGHT_PX} from "../../constants.jsx";
 import {MainStyles as styles} from '../../styles/MainStyles.jsx'
 import AppSettings from "../../AppSettings.jsx";
@@ -95,7 +95,7 @@ export class SplitterLayout extends Component {
       const wrapper_style = {
          width: `${splitter_position + SPLITTER_WIDTH_PX}px`,
          height: `${viewport_dimensions.height - HEADER_BAR_HEIGHT_PX}px`,
-         backgroundColor: 'lightyellow',
+         backgroundColor: '#eeeeee',
          marginTop: `${HEADER_BAR_HEIGHT_PX}px`
       }
       return <styles.ContentWrapper
@@ -113,7 +113,7 @@ export class SplitterLayout extends Component {
       const wrapper_style = {
          width: `${viewport_dimensions.width - splitter_position - SPLITTER_WIDTH_PX}px`,
          height: `${viewport_dimensions.height - HEADER_BAR_HEIGHT_PX}px`,
-         backgroundColor: 'lightcyan',
+         backgroundColor: '#f4f4f4',
          marginTop: `${HEADER_BAR_HEIGHT_PX}px`
       }
       return <styles.ContentWrapper

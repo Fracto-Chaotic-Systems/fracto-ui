@@ -5,13 +5,14 @@ import {
    KEY_OPERATOR_EMAIL_LABEL,
    KEY_OPERATOR_EMAIL_PROMPT,
    KEY_OPERATOR_NAME_LABEL,
-   KEY_OPERATOR_NAME_PROMPT
+   KEY_OPERATOR_NAME_PROMPT, KEY_SERVER_ROOT_LABEL, KEY_SERVER_ROOT_PROMPT
 } from "../text/AdminText.jsx";
 import {
    KEY_ID_OPERATOR_CONSENT,
    KEY_ID_OPERATOR_EMAIL,
    KEY_ID_OPERATOR_NAME
 } from "../settings/AdminSettings.jsx";
+import {KEY_SERVER_ROOT} from "../settings/RootSettings.jsx";
 
 export const OPERATOR_ID_FORM = {
    form_entries: [
@@ -28,6 +29,13 @@ export const OPERATOR_ID_FORM = {
          width_px: 250,
          required: true,
          settings_key: KEY_ID_OPERATOR_EMAIL,
+      },
+      {
+         label_key: KEY_SERVER_ROOT_LABEL,
+         prompt_key: KEY_SERVER_ROOT_PROMPT,
+         width_px: 250,
+         required: true,
+         settings_key: KEY_SERVER_ROOT,
       },
       {
          label_key: KEY_OPERATOR_CONSENT_LABEL,

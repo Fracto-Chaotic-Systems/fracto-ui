@@ -4,6 +4,7 @@ import {copy_json, getViewportDimensions} from "../utils/Dom.js";
 const ROOT_FOLDER = 'root'
 export const KEY_SELECTED_PAGE = `${ROOT_FOLDER}/selected_page`
 export const KEY_VIEWPORT_DIMENSIONS = `${ROOT_FOLDER}/viewport_dimensions`
+export const KEY_SERVER_ROOT = `${ROOT_FOLDER}/server_root`
 
 export const APP_ROOT_SETTINGS = {
    [KEY_SELECTED_PAGE]: {
@@ -17,6 +18,12 @@ export const APP_ROOT_SETTINGS = {
       default_value: {width: 0, height: 0},
       description: 'width and height of the browser client area',
       persist: false,
+   },
+   [KEY_SERVER_ROOT]: {
+      data_type: TYPE_STRING,
+      default_value: "",
+      description: 'root filepath of the main server',
+      persist: true,
    },
 }
 

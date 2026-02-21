@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import styled from "styled-components";
 
-import {CoolStyles, CoolColors} from './CoolImports';
+import {CoolStyles, CoolColors} from './CoolImports.jsx';
 
 export const SPLITTER_TYPE_HORIZONTAL = "horizontal";
 export const SPLITTER_TYPE_VERTICAL = "vertical";

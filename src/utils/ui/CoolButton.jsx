@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import styled from "styled-components";
 
-import {CoolStyles, CoolColors} from "./CoolImports";
+import {CoolStyles, CoolColors} from "./CoolImports.jsx";
 
 const BasicButton = styled(CoolStyles.InlineBlock)`
     ${CoolStyles.pointer}

@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import styled from "styled-components";
 
-import {CoolStyles} from "./CoolImports";
+import {CoolStyles} from "./CoolImports.jsx";
 
 const TabsWrapper = styled(CoolStyles.Block)`
     ${CoolStyles.noselect}

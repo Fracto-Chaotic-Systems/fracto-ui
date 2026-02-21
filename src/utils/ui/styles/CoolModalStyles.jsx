@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import {CoolColors, CoolStyles} from "../CoolImports";
+import {CoolColors, CoolStyles} from "../CoolImports.jsx";
 import {Button} from "@mui/material";
 
 export class CoolModalStyles {

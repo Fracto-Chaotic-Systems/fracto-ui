@@ -8,11 +8,17 @@ import {
    KEY_STUDY_SECTION,
    KEY_STUDY_SPLITTER_POS_PX
 } from "../settings/StudySettings.jsx";
+import AppText from "../AppText.jsx";
 import {
    KEY_SIDEBAR_OVERVIEW,
    KEY_SIDEBAR_SETTINGS,
    KEY_SIDEBAR_STATUS
 } from "../text/RootText.jsx";
+import {
+   KEY_MAGNITUDES_TITLE,
+   KEY_STUDY_MAGNITUDES
+} from "../text/StudyText.jsx";
+
 import SplitterLayout from "./utils/SplitterLayout.jsx";
 import Sidebar, {SIDEBAR_BREAKER} from "./utils/Sidebar.jsx";
 import AppSettings from "../AppSettings.jsx";
@@ -20,11 +26,12 @@ import AppSettings from "../AppSettings.jsx";
 import StudyOverview from "./study/StudyOverview.jsx";
 import StudySettings from "./study/StudySettings.jsx";
 import StudyStatus from "./study/StudyStatus.jsx";
-import AppText from "../AppText.jsx";
+import StudyMagnitudes from "./study/StudyMagnitudes.jsx";
 
 const SIDEBAR_LIST = [
    {title_key: KEY_SIDEBAR_OVERVIEW, section_code: STUDY_OVERVIEW, right_pane: <StudyOverview/>},
    {section_code: SIDEBAR_BREAKER},
+   {title_key: KEY_MAGNITUDES_TITLE, section_code: KEY_STUDY_MAGNITUDES, right_pane: <StudyMagnitudes/>},
    {section_code: SIDEBAR_BREAKER},
    {title_key: KEY_SIDEBAR_SETTINGS, section_code: STUDY_SETTINGS, right_pane: <StudySettings/>},
    {title_key: KEY_SIDEBAR_STATUS, section_code: STUDY_STATUS, right_pane: <StudyStatus/>}

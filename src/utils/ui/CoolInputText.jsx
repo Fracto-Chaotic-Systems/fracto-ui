@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 
-import {CoolStyles} from "./CoolImports";
+import {CoolStyles} from "./CoolImports.jsx";
 
 export class CoolInputText extends Component {
 
@@ -31,7 +31,7 @@ export class CoolInputText extends Component {
    componentDidMount() {
       const {input_ref} = this.state;
       const {value, callback} = this.props;
-      console.log('value', value)
+      // console.log('value', value)
       const key_handler = (key) => {
          if (key.code === "Escape") {
             document.removeEventListener("keydown", key_handler);

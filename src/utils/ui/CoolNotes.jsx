@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import styled from "styled-components";
 
 import {AppStyles} from "../../app/AppImports";
-import CoolEditor from './CoolEditor';
+import CoolEditor from './CoolEditor.jsx';
 import './cool.css';
 
 const COOLNOTES_CODE_FANCY_EDIT = 10001;

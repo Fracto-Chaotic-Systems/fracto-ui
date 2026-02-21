@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import CoolStyles from "./CoolStyles";
+import CoolStyles from "./CoolStyles.jsx";
 
 export class CoolTransportStyles {
    static GenericButton = styled(CoolStyles.InlineBlock)`
