@@ -7,7 +7,7 @@ import CoolTable, {
    CELL_ALIGN_LEFT,
    CELL_ALIGN_RIGHT,
    CELL_TYPE_TEXT,
-} from "../../utils/ui/CoolTable.jsx";
+} from "../../utils/ui/styles/CoolTableStyles.jsx";
 import {ALL_SERVICES, FRACTO_ADMIN_PORT} from "../../../../../constants.js";
 
 const TABLE_COLUMNS = [

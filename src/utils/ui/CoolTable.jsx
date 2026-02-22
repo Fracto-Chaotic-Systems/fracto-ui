@@ -1,8 +1,23 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import styled from "styled-components";
 
 import {CoolStyles} from "./CoolImports.jsx";
+import {
+   CoolTableStyles as styles,
+   CELL_ALIGN_CENTER,
+   CELL_ALIGN_LEFT,
+   CELL_ALIGN_RIGHT,
+   CELL_TYPE_CALLBACK,
+   CELL_TYPE_LINK,
+   CELL_TYPE_NUMBER,
+   CELL_TYPE_OBJECT,
+   CELL_TYPE_TEXT,
+   CELL_TYPE_TEXT_KEY,
+   CELL_TYPE_TIME_AGO,
+   TABLE_CAN_SELECT,
+   TABLE_NO_BORDER,
+   TABLE_NO_HEADER
+} from "./styles/CoolTableStyles.jsx";
 import ReactTimeAgo from 'react-time-ago';
 import TimeAgo from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'
@@ -10,91 +25,15 @@ import AppText from "../../AppText.jsx";
 
 TimeAgo.locale(en)
 
-export const CELL_TYPE_OBJECT = "cell_type_oject"
-export const CELL_TYPE_NUMBER = "cell_type_number"
-export const CELL_TYPE_TEXT = "cell_type_text"
-export const CELL_TYPE_TEXT_KEY = "cell_type_text_key"
-export const CELL_TYPE_SELECT = "cell_type_select"
-export const CELL_TYPE_LINK = "cell_type_link"
-export const CELL_TYPE_TIME_AGO = "cell_type_time_ago"
-export const CELL_TYPE_CALLBACK = "cell_type_callback"
-
-export const CELL_ALIGN_LEFT = "cell_align_left"
-export const CELL_ALIGN_RIGHT = "cell_align_right"
-export const CELL_ALIGN_CENTER = "cell_align_center"
-
-export const TABLE_CAN_SELECT = "table_can_select"
-export const TABLE_NO_HEADER = "table_no_header"
-export const TABLE_NO_BORDER = "table_no_border"
 const COLUMN_ID_SELECT = "column_id_select"
 
 const HEADER_COLUMN_SELECT = {
    id: COLUMN_ID_SELECT,
    label: '-',
    type: CELL_TYPE_OBJECT,
-   width_px: 10,
+   width_px: 25,
    align: CELL_ALIGN_CENTER
 }
-
-const MainTable = styled(CoolStyles.Table)`
-    margin: 0;
-`
-
-const TableRow = styled(CoolStyles.TableRow)`
-    padding: 0 0.125rem;
-
-    &: hover {
-        ${CoolStyles.pointer}
-        background-color: #eeeeee;
-    }
-`
-
-const TableCell = styled(CoolStyles.TableCell)`
-    ${CoolStyles.ellipsis}
-    padding: 0 0.5rem;
-`
-
-const SelectorCell = styled(CoolStyles.TableCell)`
-    padding: 0 0.375rem;
-`
-
-const HeaderSpan = styled(CoolStyles.InlineBlock)`
-    ${CoolStyles.uppercase}
-    ${CoolStyles.narrow_text_shadow}
-    color: white;
-    font-size: 0.70rem;
-    letter-spacing: 1px;
-    padding: 0.125rem 0.5rem;
-    background-color: #888888;
-    margin: 0.125rem 0;
-`
-
-const TableHeader = styled(CoolStyles.TableHeader)`
-    background-color: #dddddd;
-    padding: 0;
-`
-const HeaderCell = styled(CoolStyles.TableCell)`
-    ${CoolStyles.noselect}
-    padding: 0.125rem 0 0.125rem 0.25rem;
-`
-
-const TableBody = styled(CoolStyles.TableBody)`
-    padding: 0.125rem;
-`
-
-const TableScrollable = styled(CoolStyles.Block)`
-    overflow-x: hidden;
-    overflow-y: auto;
-`
-
-export const NumericSpan = styled.span`
-    ${CoolStyles.monospace}
-    ${CoolStyles.ellipsis}
-`
-
-const LinkSpan = styled.span`
-    ${CoolStyles.link}
-`
 
 export class CoolTable extends Component {
 
@@ -105,11 +44,13 @@ export class CoolTable extends Component {
       on_click_column: PropTypes.func,
       options: PropTypes.array,
       selected_row: PropTypes.number,
+      table_style: PropTypes.object,
    }
 
    static defaultProps = {
       options: [],
-      selected_row: -1
+      selected_row: -1,
+      table_style: {}
    }
 
    state = {}
@@ -136,15 +77,15 @@ export class CoolTable extends Component {
                break;
          }
       }
-      return <HeaderCell
+      return <styles.HeaderCell
          key={`header_cell-${column.id}`}
          onClick={e => on_click_column ? on_click_column(column.id) : null}
          style={cell_style}>
-         <HeaderSpan
+         <styles.HeaderSpan
             style={cell_style}>
             {column.label}
-         </HeaderSpan>
-      </HeaderCell>
+         </styles.HeaderSpan>
+      </styles.HeaderCell>
    }
 
    render_cell = (row, col, column, data, id) => {
@@ -152,12 +93,14 @@ export class CoolTable extends Component {
       let object_data = data
       switch (column.type) {
          case CELL_TYPE_NUMBER:
-            object_data = <NumericSpan>{data}</NumericSpan>
+            object_data = <styles.NumericSpan>{data}</styles.NumericSpan>
             break;
          case CELL_TYPE_LINK:
-            object_data = <LinkSpan onClick={e => {
-               column.on_click(id, data)
-            }}>{column.alias || data}</LinkSpan>
+            object_data = <CoolStyles.LinkSpan
+               onClick={e => {
+                  column.on_click(id, data)
+               }}>{column.alias || data}
+            </CoolStyles.LinkSpan>
             break;
          case CELL_TYPE_TIME_AGO:
             object_data = <ReactTimeAgo date={data}/>
@@ -175,7 +118,7 @@ export class CoolTable extends Component {
          default:
             break;
       }
-      let cell_style = {maxWidth: `${column.width_px}px`}
+      let cell_style = {minWidth: `${column.width_px}px`}
       if (column.align) {
          switch (column.align) {
             case CELL_ALIGN_LEFT:
@@ -194,35 +137,35 @@ export class CoolTable extends Component {
       }
       if (column["style"]) {
          cell_style = {
+            ...column["style"],
             ...cell_style,
-            ...column["style"]
          };
       }
-      return <TableCell
+      return <styles.TableCell
          style={cell_style}
          key={`cell-${row}-${col}`}>
          {object_data}
-      </TableCell>
+      </styles.TableCell>
    }
 
    render_empty_cell = (row, col) => {
-      return <TableCell
+      return <styles.TableCell
          key={`cell-${row}-${col}`}
       />
    }
 
    render_selector = (row, column) => {
       const {selected_row} = this.props
-      const cell_style = column.width_px ? {maxWidth: `${column.width_px}px`} : {}
-      return <SelectorCell
+      const cell_style = column.width_px ? {minWidth: `${column.width_px}px`} : {}
+      return <styles.SelectorCell
          style={cell_style}
          key={`selector-${row}`}>
          <input type={"radio"} checked={selected_row === row}/>
-      </SelectorCell>
+      </styles.SelectorCell>
    }
 
    render() {
-      const {columns, data, options, on_select_row} = this.props
+      const {columns, data, options, on_select_row, table_style} = this.props
       let columns_clone = columns.slice()
       if (options.includes(TABLE_CAN_SELECT)) {
          columns_clone.unshift(HEADER_COLUMN_SELECT)
@@ -237,29 +180,27 @@ export class CoolTable extends Component {
                return this.render_empty_cell(row, col)
             }
          })
-         return <TableRow
+         return <styles.TableRow
             onClick={e => on_select_row ? on_select_row(row) : console.log("no select callback")}
             key={`row-${row}`}>
             {row_cells}
-         </TableRow>
+         </styles.TableRow>
       })
       let table_header = ''
       if (!options.includes(TABLE_NO_HEADER)) {
          const header_cells = columns_clone.map((column, i) => {
             return this.render_header_cell(column)
          })
-         table_header = <TableHeader>{header_cells}</TableHeader>
+         table_header = <styles.TableHeader>{header_cells}</styles.TableHeader>
       }
-      // console.log('options',options)
+      // console.log('table_style', table_style)
       const no_border = options.includes(TABLE_NO_BORDER)
-      const table_style = {
-         border: !no_border ? '0.1rem solid #aaaaaa' : 0
-      }
-      return <CoolStyles.Table style={table_style}>
-         <TableScrollable>
+      const extra_style = {border: !no_border ? '0.1rem solid #aaaaaa' : 0}
+      return <CoolStyles.Table>
+         <styles.TableScrollable style={extra_style}>
             {table_header}
-            <TableBody>{table_rows}</TableBody>
-         </TableScrollable>
+            <styles.TableBody>{table_rows}</styles.TableBody>
+         </styles.TableScrollable>
       </CoolStyles.Table>
    }
 }

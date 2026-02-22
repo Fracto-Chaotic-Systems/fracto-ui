@@ -3,7 +3,7 @@ import {Component} from "react";
 import {
    MainStyles as styles,
    MARGIN_PX,
-} from "../../../styles/MainStyles.jsx";
+} from "../src/styles/MainStyles.jsx";
 import {
    CoolTable,
    CELL_ALIGN_RIGHT,
@@ -11,14 +11,14 @@ import {
    CELL_TYPE_TEXT_KEY,
    TABLE_NO_BORDER,
    TABLE_NO_HEADER,
-} from "../../../utils/ui/CoolTable.jsx";
+} from "../src/utils/ui/CoolTable.jsx";
 import {
    KEY_STUDY_ASPECT,
    KEY_STUDY_CARDINALITY,
    KEY_STUDY_PRECISION,
    KEY_STUDY_RANGE_MAX,
    KEY_STUDY_RANGE_MIN,
-} from "../../../text/StudyText.jsx";
+} from "../src/text/StudyText.jsx";
 import PropTypes from "prop-types";
 import {
    KEY_STUDY_MAGNITUDES_ASPECT,
@@ -26,9 +26,9 @@ import {
    KEY_STUDY_MAGNITUDES_PRECISION,
    KEY_STUDY_MAGNITUDES_RANGE_MAX,
    KEY_STUDY_MAGNITUDES_RANGE_MIN,
-} from "../../../settings/StudySettings.jsx";
-import AppSettings from "../../../AppSettings.jsx";
-import {CoolInputText} from "../../../utils/ui/CoolImports.jsx";
+} from "../src/settings/StudySettings.jsx";
+import AppSettings from "../src/AppSettings.jsx";
+import {CoolInputText} from "../src/utils/ui/CoolImports.jsx";
 
 const DATA_ENTRY_COLUMNS = [
    {

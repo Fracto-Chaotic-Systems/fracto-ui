@@ -168,7 +168,7 @@ export class CoolStyles {
     `;
 
    static TableBody = styled.div`
-        display: table-row-group;
+        display: inline-block;
     `;
 
    static MediumIcon = styled.div`

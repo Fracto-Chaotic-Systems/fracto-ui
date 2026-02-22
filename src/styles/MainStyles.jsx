@@ -152,9 +152,9 @@ export class MainStyles {
        ${CoolStyles.narrow_box_shadow}
        border: 1px solid #aaaaaa;
        border-radius: 0.25rem;
-       padding: 0.5rem;
        margin-bottom: ${MARGIN_PX}px;
        background-color: ${CONTENT_BACKGROUND_COLOR};
+       overflow: auto;
    `
    static FloatRight = styled(CoolStyles.InlineBlock)`
        float: right;
@@ -171,6 +171,9 @@ export class MainStyles {
        border-radius: 0.25rem;
        line-height: 1.25rem;
        padding: 0 0.5rem 0.125rem;
+   `
+      static OneRemSpacer = styled(CoolStyles.InlineBlock)`
+       width: 1rem;
    `
 }
 

@@ -110,20 +110,20 @@ export class InputForm extends Component {
          disabled = true
       })
       return <styles.ButtonBlock>
-         <CoolButton
-            key={'response-cancel'}
-            disabled={false}
-            content={AppText.get(KEY_FORM_CANCEL)}
-            on_click={this.cancel_entries}
-            primary={false}
-         />
-         <CoolButton
-            key={'response-button'}
-            disabled={disabled}
-            content={form_meta.default_button_key ? AppText.get(form_meta.default_button_key) : 'ok'}
-            on_click={this.set_values}
-            primary={true}
-         />
+         {/*<CoolButton*/}
+         {/*   key={'response-cancel'}*/}
+         {/*   disabled={false}*/}
+         {/*   content={AppText.get(KEY_FORM_CANCEL)}*/}
+         {/*   on_click={this.cancel_entries}*/}
+         {/*   primary={false}*/}
+         {/*/>*/}
+         {/*<CoolButton*/}
+         {/*   key={'response-button'}*/}
+         {/*   disabled={disabled}*/}
+         {/*   content={form_meta.default_button_key ? AppText.get(form_meta.default_button_key) : 'ok'}*/}
+         {/*   on_click={this.set_values}*/}
+         {/*   primary={true}*/}
+         {/*/>*/}
       </styles.ButtonBlock>
    }
 

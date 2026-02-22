@@ -12,17 +12,14 @@ import {KEY_STUDY_SPLITTER_POS_PX} from "../../settings/StudySettings.jsx";
 import AppText from "../../AppText.jsx";
 import {KEY_STUDY_MAGNITUDES} from "../../text/StudyText.jsx";
 
-import {
-   FRACTO_DATA_PORT,
-   FRACTO_UI_PORT
-} from "../../../../../constants.js";
 import MeridianChart from "../utils/MeridianChart.jsx";
-import {click_point_chart} from "../utils/PatternsUtils.jsx";
 
 import OrbitalMagnitudes from "./magnitudes/OrbitalMagnitudes.jsx";
-import FilterDataEntry from "./magnitudes/FilterDataEntry.jsx";
+import FareySequenceList from "./magnitudes/FareySequenceList.jsx";
 
 const HEIGHT_FACTOR = 0.43
+const RADIAN_SIZE_FACTOR = 3.5
+const UPDATE_INTERVAL_MS = 5000
 
 export class StudyMagnitudes extends Component {
 
@@ -31,13 +28,13 @@ export class StudyMagnitudes extends Component {
       rendered_height: 0,
       vector_data: {file_contents: []},
       interval: null,
-      farey_sequence: []
    }
 
    componentDidMount() {
       this.update_dimensions()
-      this.get_vector_data()
-      this.get_farey_sequence()
+      setTimeout(() => {
+         this.get_vector_data()
+      }, 100)
    }
 
    componentWillUnmount() {
@@ -50,16 +47,8 @@ export class StudyMagnitudes extends Component {
    get_vector_data = async () => {
       const vector_data = await OrbitalMagnitudes
          .read_vector_data(1, 3, 24)
-      console.log('vector_data', vector_data)
+      // console.log('vector_data', vector_data)
       this.setState({vector_data})
-   }
-
-   get_farey_sequence = async () => {
-      const origin = window.origin.replace(`${FRACTO_UI_PORT}`, `${FRACTO_DATA_PORT}`)
-      const url = `${origin}/utils/farey_sequence`
-      const farey_sequence = await fetch(url, {}).then(res => res.json())
-      this.setState({farey_sequence})
-      console.log('farey_sequence', farey_sequence)
    }
 
    update_dimensions() {
@@ -69,7 +58,7 @@ export class StudyMagnitudes extends Component {
             rendered_width: viewport_dimensions.width,
             rendered_height: viewport_dimensions.height,
          })
-      }, 15000)
+      }, UPDATE_INTERVAL_MS)
       this.setState({interval})
    }
 
@@ -118,14 +107,6 @@ export class StudyMagnitudes extends Component {
    render() {
       const {rendered_width, rendered_height} = this.state
       const splitter_width = AppSettings.get(KEY_STUDY_SPLITTER_POS_PX)
-      const form_data_entry = <FilterDataEntry
-         height_px={rendered_height / 4}
-         width_px={(rendered_width - splitter_width) / 4}
-      />
-      const radians_map = <MeridianChart
-         height_px={rendered_height / 4}
-         width_px={(rendered_width - splitter_width) / 4}
-      />
       const magnitudes_chart = this.render_magnitudes_chart(rendered_width, rendered_height)
       const contents_style = {
          width: '100%',
@@ -152,15 +133,22 @@ export class StudyMagnitudes extends Component {
             style={contents_style}
             key={'input-form'}>
             <CoolStyles.InlineBlock>
-               <CoolStyles.Block>{form_data_entry}</CoolStyles.Block>
-               <CoolStyles.Block>{radians_map}</CoolStyles.Block>
+               <MeridianChart
+                  height_px={rendered_height / RADIAN_SIZE_FACTOR}
+                  width_px={(rendered_width - splitter_width) / RADIAN_SIZE_FACTOR}
+               />
             </CoolStyles.InlineBlock>
+            <styles.OneRemSpacer/>
+            <styles.InlineContentWrapper
+               style={{height: `${rendered_height * 0.4}px`}}>
+               <FareySequenceList
+                  height_px={charts_style.height}
+               />
+            </styles.InlineContentWrapper>
+            <styles.OneRemSpacer/>
             <styles.InlineContentWrapper
                style={charts_style}>
-               {click_point_chart([], [], true)}
             </styles.InlineContentWrapper>
-            <styles.InlineContentWrapper
-               style={charts_style}/>
             {magnitudes_chart}
          </styles.CenteredBlock>,
       ];

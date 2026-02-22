@@ -32,7 +32,7 @@ export class OrbitalMagnitudes {
    }
 
    static magnitudes_chart = (vector_data, on_hover) => {
-      console.log('vector_data', vector_data)
+      // console.log('vector_data', vector_data)
       const chart_data = vector_data.map(data => {
          return {
             x: parseInt(data.r_num) / parseInt(data.r_den),
@@ -41,7 +41,7 @@ export class OrbitalMagnitudes {
          }
       })
          .sort((a, b) => a.x - b.x)
-      console.log('chart_data', chart_data)
+      // console.log('chart_data', chart_data)
       const data = {
          labels: chart_data.map(data => data.x),
          datasets: [
