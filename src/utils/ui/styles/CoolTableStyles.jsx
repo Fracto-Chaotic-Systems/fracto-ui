@@ -32,12 +32,15 @@ export class CoolTableStyles {
    static TableCell = styled(CoolStyles.TableCell)`
        ${CoolStyles.ellipsis}
        ${CoolStyles.noselect}
-       padding: 03px;
-       line-height: 12px;
+       padding: 0 3px;
+       line-height: 16px;
+       max-height: 16px;
    `
 
    static SelectorCell = styled(CoolStyles.TableCell)`
        padding-left: 0.25rem;
+       line-height: 16px;
+       max-height: 16px;
    `
 
    static HeaderSpan = styled(CoolStyles.InlineBlock)`
@@ -46,7 +49,7 @@ export class CoolTableStyles {
        color: white;
        font-size: 0.70rem;
        letter-spacing: 1px;
-       padding: 3px;
+       padding: 1px 3px;
        background-color: #888888;
        margin: 0.125rem 0;
    `
@@ -70,9 +73,10 @@ export class CoolTableStyles {
        overflow-y: auto;
    `
 
-   static NumericSpan = styled.span`
+   static NumericSpan = styled(CoolStyles.InlineBlock)`
        ${CoolStyles.monospace}
        ${CoolStyles.ellipsis}
+       font-size: 16px;
    `
 }
 

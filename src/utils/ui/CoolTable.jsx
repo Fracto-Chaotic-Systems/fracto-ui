@@ -44,13 +44,15 @@ export class CoolTable extends Component {
       on_click_column: PropTypes.func,
       options: PropTypes.array,
       selected_row: PropTypes.number,
+      selected_rows: PropTypes.array,
       table_style: PropTypes.object,
    }
 
    static defaultProps = {
       options: [],
       selected_row: -1,
-      table_style: {}
+      selected_rows: [],
+      table_style: {},
    }
 
    state = {}
@@ -154,18 +156,41 @@ export class CoolTable extends Component {
       />
    }
 
+   on_selector_changed = (e, row) => {
+      const {on_select_row} = this.props
+      console.log(`on_selector_changed event on row #${row}, checked is ${e.target.checked}`)
+      // if (on_select_row) {
+      //    on_select_row(row, e.target.checked)
+      // }
+   }
+
    render_selector = (row, column) => {
-      const {selected_row} = this.props
-      const cell_style = column.width_px ? {minWidth: `${column.width_px}px`} : {}
+      const {selected_row, selected_rows} = this.props
+      const cell_style = column.width_px
+         ? {minWidth: `${column.width_px}px`}
+         : {}
+      let is_checked = false
+      let row_in_array = false
+      if (selected_rows.indexOf(row) >= 0) {
+         is_checked = true
+         row_in_array = true
+      }
+      if (!row_in_array && selected_row === row) {
+         is_checked = true
+      }
       return <styles.SelectorCell
          style={cell_style}
          key={`selector-${row}`}>
-         <input type={"radio"} checked={selected_row === row}/>
+         <input
+            type={"radio"}
+            checked={is_checked}
+            onChange={e => this.on_selector_changed(e, row)}
+         />
       </styles.SelectorCell>
    }
 
    render() {
-      const {columns, data, options, on_select_row, table_style} = this.props
+      const {columns, data, options, on_select_row, table_style, selected_rows} = this.props
       let columns_clone = columns.slice()
       if (options.includes(TABLE_CAN_SELECT)) {
          columns_clone.unshift(HEADER_COLUMN_SELECT)
@@ -180,8 +205,11 @@ export class CoolTable extends Component {
                return this.render_empty_cell(row, col)
             }
          })
+         const row_is_selected = (selected_rows.indexOf(row) >= 0)
          return <styles.TableRow
-            onClick={e => on_select_row ? on_select_row(row) : console.log("no select callback")}
+            onClick={e => on_select_row
+               ? on_select_row(row, row_is_selected)
+               : console.log("no select callback")}
             key={`row-${row}`}>
             {row_cells}
          </styles.TableRow>
@@ -193,9 +221,14 @@ export class CoolTable extends Component {
          })
          table_header = <styles.TableHeader>{header_cells}</styles.TableHeader>
       }
-      // console.log('table_style', table_style)
       const no_border = options.includes(TABLE_NO_BORDER)
-      const extra_style = {border: !no_border ? '0.1rem solid #aaaaaa' : 0}
+      const extra_style = {
+         ...table_style,
+         border: !no_border ? '0.1rem solid #aaaaaa' : 0
+      }
+      // if (selected_rows.length) {
+      //    console.log('selected_rows', selected_rows)
+      // }
       return <CoolStyles.Table>
          <styles.TableScrollable style={extra_style}>
             {table_header}

@@ -3,12 +3,16 @@ import {Component} from "react";
 import {MainStyles as styles} from '../../styles/MainStyles.jsx'
 import AppText from "../../AppText.jsx";
 import {KEY_ADMIN_VERSIONS_TITLE} from "../../text/AdminText.jsx";
-import CoolTable, {
+import CoolTable from "../../utils/ui/CoolTable.jsx";
+import {
    CELL_ALIGN_LEFT,
    CELL_ALIGN_RIGHT,
    CELL_TYPE_TEXT,
-} from "../../utils/ui/styles/CoolTableStyles.jsx";
-import {ALL_SERVICES, FRACTO_ADMIN_PORT} from "../../../../../constants.js";
+} from "../../utils/ui/styles/CoolTableStyles.jsx"
+import {
+   ALL_SERVICES,
+   FRACTO_ADMIN_PORT
+} from "../../../../../constants.js";
 
 const TABLE_COLUMNS = [
    {

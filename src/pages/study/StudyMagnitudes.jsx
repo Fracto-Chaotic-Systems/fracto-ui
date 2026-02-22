@@ -142,7 +142,7 @@ export class StudyMagnitudes extends Component {
             <styles.InlineContentWrapper
                style={{height: `${rendered_height * 0.4}px`}}>
                <FareySequenceList
-                  height_px={charts_style.height}
+                  height_px={rendered_height * 0.4}
                />
             </styles.InlineContentWrapper>
             <styles.OneRemSpacer/>
