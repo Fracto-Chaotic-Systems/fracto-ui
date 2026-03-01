@@ -108,8 +108,10 @@ export class CoolTable extends Component {
             object_data = <ReactTimeAgo date={data}/>
             break;
          case CELL_TYPE_CALLBACK:
-            if (data[0]) {
+            if (data[0] && typeof data[0] === 'function') {
                object_data = data[0](data[1])
+            } else {
+               console.log('unxpected data', data)
             }
             break;
          case CELL_TYPE_TEXT_KEY:
@@ -156,12 +158,10 @@ export class CoolTable extends Component {
       />
    }
 
+   // required by the input control but unused
    on_selector_changed = (e, row) => {
       const {on_select_row} = this.props
       console.log(`on_selector_changed event on row #${row}, checked is ${e.target.checked}`)
-      // if (on_select_row) {
-      //    on_select_row(row, e.target.checked)
-      // }
    }
 
    render_selector = (row, column) => {

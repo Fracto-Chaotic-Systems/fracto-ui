@@ -82,7 +82,7 @@ export class CoolSplitter extends Component {
       } : {
          top: container_bounds.top,
          left: position - bar_width_px / 2,
-         width: bar_width_px - 1,
+         width: bar_width_px,
          height: container_bounds.height,
          cursor: "ew-resize"
       }

@@ -1,23 +1,24 @@
 import {Component} from "react";
 
-import {MainStyles as styles} from '../../styles/MainStyles.jsx'
-import AppText from "../../AppText.jsx";
-import {KEY_ADMIN_VERSIONS_TITLE} from "../../text/AdminText.jsx";
+import {
+   ALL_SERVICES,
+   FRACTO_ADMIN_PORT
+} from "../../../../../constants.js";
 import CoolTable from "../../utils/ui/CoolTable.jsx";
+
+import {MainStyles as styles} from '../../styles/MainStyles.jsx'
 import {
    CELL_ALIGN_LEFT,
    CELL_ALIGN_RIGHT,
    CELL_TYPE_TEXT,
 } from "../../utils/ui/styles/CoolTableStyles.jsx"
-import {
-   ALL_SERVICES,
-   FRACTO_ADMIN_PORT
-} from "../../../../../constants.js";
+import AppText from "../../AppText.jsx";
+import {KEY_ADMIN_VERSIONS_TITLE} from "../../text/AdminText.jsx";
 
 const TABLE_COLUMNS = [
    {
       id: "service",
-      label: "service",
+      label: "service:",
       type: CELL_TYPE_TEXT,
       width_px: 150,
       align: CELL_ALIGN_RIGHT,

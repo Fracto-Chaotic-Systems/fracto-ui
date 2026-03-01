@@ -42,7 +42,6 @@ export class MainStyles {
        color: black;
    `
    static PaneWrapper = styled(CoolStyles.Block)`
-       padding: 0 0.25rem;
        font-size: 1rem;
        color: #444444;
    `
@@ -74,7 +73,7 @@ export class MainStyles {
        ${CoolStyles.align_center}
        ${CoolStyles.uppercase}
        ${CoolStyles.noselect}
-       margin: 1rem;
+       margin: 1rem 0 0;
        font-size: 2rem;
        line-height: 2.25rem;
        border-bottom: 1px solid #cccccc;

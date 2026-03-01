@@ -1,14 +1,21 @@
 import React, {Component} from 'react'
+import PropTypes from "prop-types";
 
-import {CoolSplitter, SPLITTER_TYPE_VERTICAL} from "../../utils/ui/CoolSplitter.jsx";
-import {DEFAULT_SIDEBAR_WIDTH, HEADER_BAR_HEIGHT_PX} from "../../constants.jsx";
+import CoolSplitter, {SPLITTER_TYPE_VERTICAL} from "../../utils/ui/CoolSplitter.jsx";
+import {
+   DEFAULT_SIDEBAR_WIDTH,
+   HEADER_BAR_HEIGHT_PX,
+   SPLITTER_WIDTH_PX
+} from "../../constants.jsx";
+
 import {MainStyles as styles} from '../../styles/MainStyles.jsx'
 import AppSettings from "../../AppSettings.jsx";
 import {copy_json} from "../../utils/Dom.js";
-import {KEY_VIEWPORT_DIMENSIONS, poll_viewport_dimensions} from "../../settings/RootSettings.jsx";
-import PropTypes from "prop-types";
+import {
+   KEY_VIEWPORT_DIMENSIONS,
+   poll_viewport_dimensions
+} from "../../settings/RootSettings.jsx";
 
-export const SPLITTER_WIDTH_PX = 4;
 const SPLITTER_MIN_FACTOR = 0.075;
 const SPLITTER_MAX_FACTOR = 0.20;
 

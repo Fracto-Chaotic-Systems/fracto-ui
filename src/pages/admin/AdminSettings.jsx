@@ -21,7 +21,7 @@ export class AdminSettings extends Component {
             .map((key, i) => {
                const setting_definition = AppSettings.setting_definitions[key]
                let data_value = AppSettings.settings_data[key]
-               if (setting_definition.data_type === TYPE_OBJECT) {
+               if (setting_definition?.data_type === TYPE_OBJECT) {
                   data_value = JSON.stringify(data_value)
                }
                return {key, data_value}
