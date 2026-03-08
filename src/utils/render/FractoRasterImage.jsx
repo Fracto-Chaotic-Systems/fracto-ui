@@ -5,9 +5,11 @@ import styled from "styled-components";
 import FractoColors from "./FractoColors";
 import {FRACTO_TILES_PORT} from "../../../../../constants.js";
 import {copy_json} from "../Dom.js";
+import {CoolStyles} from "../ui/CoolImports.jsx";
 
 const FractoCanvas = styled.canvas`
-    margin: 0;
+    ${CoolStyles.medium_box_shadow};
+    margin: 0 auto;
 `;
 
 export class FractoRasterImage extends Component {
@@ -58,6 +60,7 @@ export class FractoRasterImage extends Component {
          height_px: height_px,
          ctx: ctx,
          stored_values: {
+            width_px,
             scope,
             focal_point: copy_json(focal_point)
          },
@@ -81,11 +84,11 @@ export class FractoRasterImage extends Component {
       const focal_x_changed = prevState.stored_values.focal_point.x !== this.props.focal_point.x
       const focal_y_changed = prevState.stored_values.focal_point.y !== this.props.focal_point.y
       const scope_changed = prevState.stored_values.scope !== this.props.scope
-      if (focal_x_changed || focal_y_changed || scope_changed) {
-         console.log(`componentDidUpdate: ${focal_x_changed},${focal_y_changed},${scope_changed}`,
-            prevState.stored_values, this.props)
+      const width_px_changed = prevState.stored_values.width_px !== this.props.width_px
+      if (focal_x_changed || focal_y_changed || scope_changed || width_px_changed) {
          this.setState({
             stored_values: {
+               width_px: this.props.width_px,
                scope: this.props.scope,
                focal_point: copy_json(this.props.focal_point)
             },
@@ -103,7 +106,7 @@ export class FractoRasterImage extends Component {
          on_plan_complete,
          resolution_factor
       } = this.props
-
+      this.setState({loading_tiles: true})
       const all_params = [
          `width_px=${width_px}`,
          `focal_point_x=${focal_point.x}`,

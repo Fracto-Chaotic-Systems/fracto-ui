@@ -155,7 +155,8 @@ export class NavigatorSplitterLayout extends Component {
          left: bounding_rect.left + steps_splitter_pos - page_splitter_pos,
          width: main_splitter_pos - steps_splitter_pos,
          height: steps_bounding_rect.height,
-         backgroundColor: 'lightgreen',
+         backgroundColor: '#888888',
+         textAlign: 'center',
       }
       const legend_pane_style = {
          top: steps_bounding_rect.height + bounding_rect.top + SPLITTER_WIDTH_PX,

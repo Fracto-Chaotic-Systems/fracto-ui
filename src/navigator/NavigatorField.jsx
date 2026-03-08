@@ -1,8 +1,13 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import FractoRasterImage from "../utils/render/FractoRasterImage.jsx";
-import AppSettings from "../AppSettings.jsx";
+
 import {NavigatorStyles as styles} from '../styles/NavigatorStyles.jsx';
+import AppSettings from "../AppSettings.jsx";
+
+import FractoRasterImage from "../utils/render/FractoRasterImage.jsx";
+import {copy_json} from "../utils/Dom.js";
+
+const IMAGE_SIZE_DELTA = 50
 
 export class NavigatorField extends Component {
    static propTypes = {
@@ -13,9 +18,34 @@ export class NavigatorField extends Component {
 
    state = {
       image_ref: React.createRef(),
+      width_px: 0,
+      saved_bounding_rect: {},
    }
 
    componentDidMount() {
+      this.adjust_canvas_size()
+   }
+
+   componentDidUpdate(prevProps, prevState, snapshot) {
+      const width_changed =
+         prevState.saved_bounding_rect.width !== this.props.bounding_rect.width
+      const height_changed =
+         prevState.saved_bounding_rect.height !== this.props.bounding_rect.height
+      if (width_changed || height_changed) {
+         this.adjust_canvas_size()
+      }
+   }
+
+   adjust_canvas_size = () => {
+      const {bounding_rect} = this.props
+      const largest_width_px = Math
+         .min(bounding_rect.width, bounding_rect.height)
+      const width_px = Math
+         .floor(largest_width_px / IMAGE_SIZE_DELTA) * IMAGE_SIZE_DELTA
+      this.setState({
+         width_px,
+         saved_bounding_rect: copy_json(bounding_rect)
+      })
    }
 
    client_click = (e) => {
@@ -34,7 +64,7 @@ export class NavigatorField extends Component {
       const topmost = focal_point.y + scope / 2
       const increment = scope / client_click.container_bounds.width
       AppSettings.on_settings_changed({
-         [frame_settings_key]:{
+         [frame_settings_key]: {
             focal_point: {
                x: leftmost + increment * client_click.x,
                y: topmost - increment * client_click.y,
@@ -45,16 +75,20 @@ export class NavigatorField extends Component {
    }
 
    render() {
-      const {image_ref} = this.state
+      const {image_ref, width_px} = this.state
       const {bounding_rect, frame_settings} = this.props
       if (!frame_settings.focal_point || !frame_settings.scope) {
          return []
       }
+      const wrapper_style = {
+         marginTop: `${(bounding_rect.height - width_px) / 2}px`
+      };
       return <styles.ImageWrapper
          onClick={this.on_click}
+         style={wrapper_style}
          ref={image_ref}>
          <FractoRasterImage
-            width_px={500}
+            width_px={width_px}
             focal_point={frame_settings.focal_point}
             scope={frame_settings.scope}
          />
