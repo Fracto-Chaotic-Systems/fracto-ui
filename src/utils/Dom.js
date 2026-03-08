@@ -17,3 +17,7 @@ export const getViewportDimensions = () => {
 export const copy_json = (json) => {
    return JSON.parse(JSON.stringify(json));
 }
+
+export const random_id = (preface = 'id') => {
+   return `${preface}_${Math.floor(Math.random() * 100000000)}`
+}

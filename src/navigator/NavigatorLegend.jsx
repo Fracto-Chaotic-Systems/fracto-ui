@@ -1,6 +1,8 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 
+import {NavigatorStyles as styles} from "../styles/NavigatorStyles.jsx";
+
 export class NavigatorLegend extends Component {
    static propTypes = {
       bounding_rect: PropTypes.object.isRequired,

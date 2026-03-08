@@ -119,22 +119,23 @@ export class CoolStyles {
         border-radius: 1rem
     `;
 
-   static link = css`
-        ${CoolStyles.italic};
-        ${CoolStyles.pointer};
-        color: ${CoolColors.cool_blue};
-        font-weight: normal;
-        &: hover{
-            ${CoolStyles.underline};
-        }
-    `;
+   // static link = css`
+   //      ${CoolStyles.italic};
+   //      ${CoolStyles.pointer};
+   //      color: ${CoolColors.cool_blue};
+   //      font-weight: normal;
+   //      &: hover{
+   //          ${CoolStyles.underline};
+   //      }
+   //  `;
 
-   static LinkSpan = styled.span`
-        ${CoolStyles.pointer}
-        ${CoolStyles.noselect}
-        ${CoolStyles.italic}
-        color: ${CoolColors.cool_blue}
-    `;
+   static LinkSpan = styled.div`
+       display: inline-block;
+       ${CoolStyles.pointer}
+       ${CoolStyles.noselect}
+       ${CoolStyles.italic}
+       color: ${CoolColors.cool_blue}
+   `;
 
    static Clickable = styled.div`
         ${CoolStyles.pointer}

@@ -25,21 +25,33 @@ export class TilesGenerator extends Component {
       container_ref: React.createRef(),
       bounding_rect: {},
       frame_settings: {},
+      subscription: null,
    }
 
    componentDidMount() {
       this.update_dimensions()
       this.setState({
          interval: setInterval(this.update_dimensions, UPDATE_INTERVAL_MS),
-         frame_settings: AppSettings.get(KEY_TILES_GENERATOR_FRAME_SETTINGS),
+         frame_settings: AppSettings
+            .get(KEY_TILES_GENERATOR_FRAME_SETTINGS),
+         subscription: AppSettings
+            .subscribe(KEY_TILES_GENERATOR_FRAME_SETTINGS, this.on_frame_settings_changed)
       })
    }
 
    componentWillUnmount() {
-      const {interval} = this.state
+      const {interval, subscription} = this.state
       if (interval) {
          clearInterval(interval)
       }
+      if (subscription) {
+         AppSettings.unsubscribe(subscription)
+      }
+   }
+
+   on_frame_settings_changed = (key, value) => {
+      console.log('on_frame_settings_changed', value)
+      this.setState({frame_settings: value})
    }
 
    update_dimensions = () => {
@@ -53,9 +65,7 @@ export class TilesGenerator extends Component {
    }
 
    render() {
-      const {
-         container_ref, rendered_height, rendered_width, frame_settings
-      } = this.state
+      const {container_ref, rendered_height, rendered_width, frame_settings} = this.state
       let top = 0;
       let left = 0;
       if (container_ref.current) {
@@ -86,6 +96,7 @@ export class TilesGenerator extends Component {
             <NavigatorSplitterLayout
                bounding_rect={bounding_rect}
                frame_settings={frame_settings}
+               frame_settings_key={KEY_TILES_GENERATOR_FRAME_SETTINGS}
                splitter_keys={splitter_keys}
             />
          </styles.TightCenteredBlock>,

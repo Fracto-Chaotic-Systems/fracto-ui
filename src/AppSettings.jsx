@@ -1,4 +1,7 @@
-import {copy_json} from "./utils/Dom.js";
+import {
+   copy_json,
+   random_id
+} from "./utils/Dom.js";
 
 export const TYPE_STRING = typeof 'abc'
 export const TYPE_NUMBER = typeof 123
@@ -10,6 +13,7 @@ export class AppSettings {
 
    static setting_definitions = {}
    static settings_data = {}
+   static subscriptions = {}
    static settings_initialized = false
 
    static get = (key) => {
@@ -135,6 +139,7 @@ export class AppSettings {
 
    static on_settings_changed = (new_settings) => {
       const new_settings_keys = Object.keys(new_settings)
+      const subscription_keys = Object.keys(AppSettings.subscriptions)
       new_settings_keys.forEach((key) => {
          const key_definition = AppSettings.setting_definitions[key]
          if (!key_definition) {
@@ -157,8 +162,24 @@ export class AppSettings {
                AppSettings.settings_data[key] = new_settings[key]
                break;
          }
+         subscription_keys
+            .filter(k => AppSettings.subscriptions [k].key === key)
+            .forEach(s_key => setTimeout(() => {
+               const handler_fn = AppSettings.subscriptions[s_key].handler_fn
+               handler_fn(key, AppSettings.settings_data[key])
+            }, 100))
       })
       AppSettings.persist_settings(new_settings)
+   }
+
+   static subscribe = (key, handler_fn) => {
+      const subscription_key = random_id('sub')
+      AppSettings.subscriptions[subscription_key] = {key, handler_fn}
+      return subscription_key
+   }
+
+   static unsubscribe = (subscription_key) => {
+      delete AppSettings.subscriptions[subscription_key]
    }
 }
 

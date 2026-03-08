@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 
-import {CoolStyles} from "../utils/ui/CoolImports.jsx";
+import {CoolStyles} from "../utils/ui/styles/CoolStyles.jsx";
 import CoolSplitter, {
    SPLITTER_TYPE_HORIZONTAL,
    SPLITTER_TYPE_VERTICAL
@@ -27,6 +27,7 @@ export class NavigatorSplitterLayout extends Component {
       bounding_rect: PropTypes.object.isRequired,
       frame_settings: PropTypes.object.isRequired,
       splitter_keys: PropTypes.object.isRequired,
+      frame_settings_key: PropTypes.number.isRequired,
    }
 
    state = {
@@ -105,7 +106,7 @@ export class NavigatorSplitterLayout extends Component {
 
    render() {
       const {main_splitter_pos, legend_splitter_pos, steps_splitter_pos} = this.state
-      const {bounding_rect, splitter_keys} = this.props
+      const {bounding_rect, splitter_keys, frame_settings, frame_settings_key} = this.props
       const legend_bounding_rect = {
          left: bounding_rect.left - 1,
          width: main_splitter_pos - bounding_rect.left - 2,
@@ -169,7 +170,7 @@ export class NavigatorSplitterLayout extends Component {
             key={'steps-pane'}>
             <NavigatorSteps
                bounding_rect={step_pane_style}
-               frame_settings={{}}
+               frame_settings={frame_settings}
             />
          </styles.FixedWrapper>,
          <styles.FixedWrapper
@@ -177,7 +178,8 @@ export class NavigatorSplitterLayout extends Component {
             key={'field-pane'}>
             <NavigatorField
                bounding_rect={field_pane_style}
-               frame_settings={{}}
+               frame_settings={frame_settings}
+               frame_settings_key={frame_settings_key}
             />
          </styles.FixedWrapper>,
          <styles.FixedWrapper
@@ -185,7 +187,7 @@ export class NavigatorSplitterLayout extends Component {
             key={'legend-pane'}>
             <NavigatorLegend
                bounding_rect={legend_pane_style}
-               frame_settings={{}}
+               frame_settings={frame_settings}
             />
          </styles.FixedWrapper>,
       ]

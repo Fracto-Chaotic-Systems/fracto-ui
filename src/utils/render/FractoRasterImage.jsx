@@ -2,20 +2,13 @@ import React, {Component} from 'react';
 import PropTypes from "prop-types";
 import styled from "styled-components";
 
-import {CoolStyles} from "../ui/CoolImports";
-
-import FractoColors from "../../../../../sdk/FractoColors";
-import {
-   init_canvas_buffer,
-   fill_canvas_buffer,
-} from "../../../../../sdk/FractoTileData.js";
+import FractoColors from "./FractoColors";
+import {FRACTO_TILES_PORT} from "../../../../../constants.js";
+import {copy_json} from "../Dom.js";
 
 const FractoCanvas = styled.canvas`
-    ${CoolStyles.narrow_box_shadow}
     margin: 0;
 `;
-
-export var BAD_TILES = {};
 
 export class FractoRasterImage extends Component {
 
@@ -45,12 +38,12 @@ export class FractoRasterImage extends Component {
       canvas_buffer: null,
       canvas_ref: React.createRef(),
       loading_tiles: true,
-      stored_values: {}
+      stored_values: {},
    }
 
    componentDidMount() {
       const {canvas_ref} = this.state;
-      const {width_px, aspect_ratio} = this.props;
+      const {width_px, aspect_ratio, scope, focal_point} = this.props;
       const canvas = canvas_ref.current;
       if (!canvas) {
          console.log('no canvas');
@@ -63,69 +56,45 @@ export class FractoRasterImage extends Component {
       }
       this.setState({
          height_px: height_px,
-         ctx: ctx
+         ctx: ctx,
+         stored_values: {
+            scope,
+            focal_point: copy_json(focal_point)
+         },
       })
 
       setTimeout(() => {
-         const canvas_buffer = this.init_canvas_buffer()
-         this.fill_canvas_buffer(canvas_buffer, ctx)
+         this.fill_canvas(ctx)
       }, 100)
    }
 
    componentDidUpdate(prevProps, prevState, snapshot) {
-      const width_px_changed = prevProps.width_px !== this.props.width_px;
-      const aspect_ratio_changed = prevProps.aspect_ratio !== this.props.aspect_ratio;
-      let canvas_buffer = this.state.canvas_buffer
       if (this.state.loading_tiles) {
          return;
       }
-      if (
-         width_px_changed
-         || aspect_ratio_changed
-         || !canvas_buffer) {
-         canvas_buffer = this.init_canvas_buffer()
-         this.fill_canvas_buffer(canvas_buffer, this.state.ctx);
-      } else {
-         const {stored_values} = this.state
-         let focal_point_x_changed = false
-         if (stored_values.focal_point) {
-            const diff_focal_point_x = this.props.focal_point.x - stored_values.focal_point.x
-            const diff_focal_point_y = this.props.focal_point.y - stored_values.focal_point.y
-            const magnitude_diff = Math.sqrt(
-               diff_focal_point_x * diff_focal_point_x + diff_focal_point_y * diff_focal_point_y)
-            focal_point_x_changed = (magnitude_diff / this.props.scope > 0.001)
-         }
-         const settings_changed = PageSettings.test_update_settings(
-            [
-               // KEY_FOCAL_POINT,
-               KEY_SCOPE,
-               KEY_UPDATE_INDEX,
-            ], this.props, stored_values)
-         if (settings_changed || focal_point_x_changed) {
-            stored_values.filter_level = this.props.filter_level
-            stored_values.focal_point = this.props.focal_point
-            this.setState({stored_values, loading_tiles: true})
-            this.fill_canvas_buffer(canvas_buffer, this.state.ctx);
-            // console.log('stored values changed', stored_values);
-         }
+      if (!prevState.stored_values.focal_point) {
+         return;
+      }
+      if (!prevState.stored_values.scope) {
+         return;
+      }
+      const focal_x_changed = prevState.stored_values.focal_point.x !== this.props.focal_point.x
+      const focal_y_changed = prevState.stored_values.focal_point.y !== this.props.focal_point.y
+      const scope_changed = prevState.stored_values.scope !== this.props.scope
+      if (focal_x_changed || focal_y_changed || scope_changed) {
+         console.log(`componentDidUpdate: ${focal_x_changed},${focal_y_changed},${scope_changed}`,
+            prevState.stored_values, this.props)
+         this.setState({
+            stored_values: {
+               scope: this.props.scope,
+               focal_point: copy_json(this.props.focal_point)
+            },
+         })
+         this.fill_canvas(this.state.ctx)
       }
    }
 
-   init_canvas_buffer = () => {
-      const {width_px, aspect_ratio} = this.props
-      let height_px = Math.round(width_px * aspect_ratio);
-      if (height_px & 1) {
-         height_px -= 1
-      }
-      const new_canvas_buffer = init_canvas_buffer(width_px, aspect_ratio);
-      this.setState({
-         canvas_buffer: new_canvas_buffer,
-         height_px: height_px
-      })
-      return new_canvas_buffer
-   }
-
-   fill_canvas_buffer = async (canvas_buffer, ctx) => {
+   fill_canvas = async (ctx) => {
       const {
          width_px,
          focal_point,
@@ -134,12 +103,28 @@ export class FractoRasterImage extends Component {
          on_plan_complete,
          resolution_factor
       } = this.props
-      // console.log('fill_canvas_buffer')
-      await fill_canvas_buffer(canvas_buffer, width_px, focal_point, scope, aspect_ratio, resolution_factor)
-      FractoColors.buffer_to_canvas(canvas_buffer, ctx)
+
+      const all_params = [
+         `width_px=${width_px}`,
+         `focal_point_x=${focal_point.x}`,
+         `focal_point_y=${focal_point.y}`,
+         `scope=${scope}`,
+         `aspect_ratio=${aspect_ratio}`,
+         `resolution_factor=${resolution_factor}`,
+      ].join('&')
+      const url = `http://localhost:${FRACTO_TILES_PORT}/canvas_buffer?${all_params}`
+      console.log('url', url)
+      const start = performance.now()
+      const response = await fetch(url)
+      const result = await response.json()
+      const mid = performance.now()
+
+      FractoColors.buffer_to_canvas(result.canvas_buffer, ctx)
       if (on_plan_complete) {
-         on_plan_complete(canvas_buffer, ctx)
+         on_plan_complete(result.canvas_buffer, ctx)
       }
+      const end = performance.now()
+      console.log(`get canvas buffer: ${mid - start} buffer_to_canvas: ${end - mid}`)
       this.setState({loading_tiles: false})
    }
 
