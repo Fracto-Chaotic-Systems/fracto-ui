@@ -6,10 +6,11 @@ export const OPACITY_LINE_PCT = 45
 
 export class NavigatorStyles {
    static FixedWrapper = styled(CoolStyles.Block)`
-      position: fixed;
+       position: fixed;
    `
    static ImageWrapper = styled(CoolStyles.InlineBlock)`
        padding: 0;
+       line-height: 0;
    `
    static VerticalCrossHair = styled(CoolStyles.InlineBlock)`
        position: fixed;
@@ -31,7 +32,7 @@ export class NavigatorStyles {
    `
    static CenterBox = styled(CoolStyles.InlineBlock)`
        position: fixed;
-       border: ${WIDTH_CROSSHAIR_LINE_PX}px solid rgba(255,255,255,${2 * OPACITY_LINE_PCT}%);
+       border: ${WIDTH_CROSSHAIR_LINE_PX}px solid rgba(255, 255, 255, ${2 * OPACITY_LINE_PCT}%);
        cursor: crosshair;
        background-color: transparent;
        border-radius: 3px;
@@ -49,6 +50,12 @@ export class NavigatorStyles {
        background-color: white;
        opacity: 0.${OPACITY_LINE_PCT};
        cursor: crosshair;
+   `
+   static StepImageWrapper = styled(CoolStyles.InlineBlock)`
+       padding: 0;
+       line-height: 0;
+       border-bottom: 2px solid #888888;
+       background-color: #eeeeee;
    `
 }
 

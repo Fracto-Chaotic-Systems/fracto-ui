@@ -148,7 +148,7 @@ export class NavigatorSplitterLayout extends Component {
          left: bounding_rect.left,
          width: steps_splitter_pos - bounding_rect.left,
          height: steps_bounding_rect.height,
-         backgroundColor: 'skyblue',
+         backgroundColor: '#888888',
       }
       const field_pane_style = {
          top: bounding_rect.top,

@@ -1,16 +1,9 @@
 import React, {Component} from 'react';
 import PropTypes from "prop-types";
-import styled from "styled-components";
 
 import FractoColors from "./FractoColors";
 import {FRACTO_TILES_PORT} from "../../../../../constants.js";
 import {copy_json} from "../Dom.js";
-import {CoolStyles} from "../ui/CoolImports.jsx";
-
-const FractoCanvas = styled.canvas`
-    canvas ${CoolStyles.medium_box_shadow};
-    margin: 0 auto;
-`;
 
 export class FractoRasterImage extends Component {
 
@@ -137,7 +130,7 @@ export class FractoRasterImage extends Component {
       const canvas_style = {
          cursor: loading_tiles || disabled ? "wait" : "crosshair"
       }
-      return <FractoCanvas
+      return <canvas
          key={'fracto-canvas'}
          ref={canvas_ref}
          style={canvas_style}
