@@ -33,6 +33,7 @@ import {APP_ASSETS_TEXT} from "./text/AssetsText.jsx";
 import {APP_DATA_TEXT} from "./text/DataText.jsx";
 import {APP_STUDY_TEXT} from "./text/StudyText.jsx";
 import {APP_TILES_TEXT} from "./text/TilesText.jsx";
+import {APP_NAVIGATOR_SETTINGS} from "./settings/NavigatorSettings.jsx";
 
 const ROUTES = [
    {path: "/admin", element: <Admin/>, title_key: KEY_MENU_ADMIN},
@@ -68,6 +69,7 @@ export class App extends Component {
          APP_DATA_SETTINGS,
          APP_TILES_SETTINGS,
          APP_STUDY_SETTINGS,
+         APP_NAVIGATOR_SETTINGS,
       )
       AppSettings.initialize(all_settings)
 

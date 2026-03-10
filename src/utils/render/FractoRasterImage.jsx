@@ -8,7 +8,7 @@ import {copy_json} from "../Dom.js";
 import {CoolStyles} from "../ui/CoolImports.jsx";
 
 const FractoCanvas = styled.canvas`
-    ${CoolStyles.medium_box_shadow};
+    canvas ${CoolStyles.medium_box_shadow};
     margin: 0 auto;
 `;
 
@@ -33,7 +33,7 @@ export class FractoRasterImage extends Component {
       update_counter: 0,
       filter_level: 0,
       color_handler: FractoColors.pattern_color_hsl,
-      resolution_factor: 1,
+      resolution_factor: 1.5,
    }
 
    state = {
@@ -116,7 +116,7 @@ export class FractoRasterImage extends Component {
          `resolution_factor=${resolution_factor}`,
       ].join('&')
       const url = `http://localhost:${FRACTO_TILES_PORT}/canvas_buffer?${all_params}`
-      console.log('url', url)
+      // console.log('url', url)
       const start = performance.now()
       const response = await fetch(url)
       const result = await response.json()

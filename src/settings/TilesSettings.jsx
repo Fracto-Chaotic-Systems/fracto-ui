@@ -1,5 +1,6 @@
 import {
-   TYPE_NUMBER, TYPE_OBJECT,
+   TYPE_NUMBER,
+   TYPE_OBJECT,
    TYPE_STRING
 } from "../AppSettings.jsx";
 import {DEFAULT_SIDEBAR_WIDTH} from "../constants.jsx";

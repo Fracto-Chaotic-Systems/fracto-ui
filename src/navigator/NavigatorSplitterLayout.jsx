@@ -172,6 +172,7 @@ export class NavigatorSplitterLayout extends Component {
             <NavigatorSteps
                bounding_rect={step_pane_style}
                frame_settings={frame_settings}
+               frame_settings_key={frame_settings_key}
             />
          </styles.FixedWrapper>,
          <styles.FixedWrapper

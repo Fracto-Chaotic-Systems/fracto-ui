@@ -2,12 +2,21 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 
 import {NavigatorStyles as styles} from '../styles/NavigatorStyles.jsx';
+import {copy_json} from "../utils/Dom.js";
 import AppSettings from "../AppSettings.jsx";
+import {
+   KEY_NAVIGATOR_CLIENT_POINT,
+   KEY_NAVIGATOR_HOVER_POINT,
+   KEY_NAVIGATOR_SHOW_CROSSHAIRS
+} from "../settings/NavigatorSettings.jsx";
 
 import FractoRasterImage from "../utils/render/FractoRasterImage.jsx";
-import {copy_json} from "../utils/Dom.js";
+import NavigatorUtils from "./NavigatorUtils.jsx";
 
 const IMAGE_SIZE_DELTA = 50
+const ZOOM_FACTOR = 1.5
+const ZOOM_FACTOR_MINOR = 1.5
+const ZOOM_FACTOR_MAJOR = 3.0
 
 export class NavigatorField extends Component {
    static propTypes = {
@@ -18,8 +27,9 @@ export class NavigatorField extends Component {
 
    state = {
       image_ref: React.createRef(),
-      width_px: 0,
+      width_px: 1,
       saved_bounding_rect: {},
+      show_crosshairs: false,
    }
 
    componentDidMount() {
@@ -45,6 +55,69 @@ export class NavigatorField extends Component {
       this.setState({
          width_px,
          saved_bounding_rect: copy_json(bounding_rect)
+      })
+   }
+
+   get_mouse_pos = (e) => {
+      const {image_ref, width_px} = this.state
+      const {frame_settings} = this.props
+      const {focal_point, scope} = frame_settings
+      const inspector_bounds = {
+         left: focal_point.x - scope / 2, top: focal_point.y + scope / 2,
+      }
+      const image_wrapper = image_ref.current
+      if (!image_wrapper) {
+         return {}
+      }
+      const bounds = image_wrapper.getBoundingClientRect()
+      const increment = scope / width_px
+      const x = inspector_bounds.left + increment * (e.clientX - bounds.x)
+      const y = inspector_bounds.top - increment * (e.clientY - bounds.y)
+      return {
+         x, y,
+         clientX: e.clientX,
+         clientY: e.clientY,
+         image_bounds: bounds
+      }
+   }
+
+   on_mousemove = (e) => {
+      const location = this.get_mouse_pos(e)
+      AppSettings.on_settings_changed({
+         [KEY_NAVIGATOR_HOVER_POINT]: {
+            x: location.x,
+            y: location.y
+         },
+         [KEY_NAVIGATOR_CLIENT_POINT]: {
+            x: location.clientX,
+            y: location.clientY
+         },
+         [KEY_NAVIGATOR_SHOW_CROSSHAIRS]: true
+      })
+      this.setState({show_crosshairs: true})
+   }
+
+   on_mouseleave = (e) => {
+      AppSettings.on_settings_changed({
+         [KEY_NAVIGATOR_HOVER_POINT]: {x: 0, y: 0},
+         [KEY_NAVIGATOR_CLIENT_POINT]: {x: 0, y: 0},
+         [KEY_NAVIGATOR_SHOW_CROSSHAIRS]: false
+      })
+      this.setState({show_crosshairs: false})
+   }
+
+   on_wheel = (e) => {
+      const {frame_settings, frame_settings_key} = this.props
+      const {scope} = frame_settings
+      let zoom_factor = e.shiftKey ? ZOOM_FACTOR_MAJOR : ZOOM_FACTOR
+      if (e.altKey) {
+         zoom_factor = ZOOM_FACTOR_MINOR
+      }
+      frame_settings.scope = e.deltaY > 0
+         ? scope * zoom_factor
+         : scope / zoom_factor
+      AppSettings.on_settings_changed({
+         [frame_settings_key]: frame_settings
       })
    }
 
@@ -75,7 +148,7 @@ export class NavigatorField extends Component {
    }
 
    render() {
-      const {image_ref, width_px} = this.state
+      const {image_ref, width_px, show_crosshairs} = this.state
       const {bounding_rect, frame_settings} = this.props
       if (!frame_settings.focal_point || !frame_settings.scope) {
          return []
@@ -83,16 +156,28 @@ export class NavigatorField extends Component {
       const wrapper_style = {
          marginTop: `${(bounding_rect.height - width_px) / 2}px`
       };
-      return <styles.ImageWrapper
-         onClick={this.on_click}
-         style={wrapper_style}
-         ref={image_ref}>
-         <FractoRasterImage
-            width_px={width_px}
-            focal_point={frame_settings.focal_point}
-            scope={frame_settings.scope}
-         />
-      </styles.ImageWrapper>
+      const client_point = AppSettings.get(KEY_NAVIGATOR_CLIENT_POINT)
+      const crosshairs = show_crosshairs
+         ? NavigatorUtils.render_cross_hairs(
+            bounding_rect, client_point, this.on_click)
+         : []
+      return [
+         <styles.ImageWrapper
+            onClick={this.on_click}
+            onMouseMove={this.on_mousemove}
+            onMouseLeave={this.on_mouseleave}
+            onWheel={this.on_wheel}
+            style={wrapper_style}
+            key={'image-wrapper'}
+            ref={image_ref}>
+            <FractoRasterImage
+               width_px={width_px}
+               focal_point={frame_settings.focal_point}
+               scope={frame_settings.scope}
+            />
+         </styles.ImageWrapper>,
+         crosshairs,
+      ]
    }
 }
 
