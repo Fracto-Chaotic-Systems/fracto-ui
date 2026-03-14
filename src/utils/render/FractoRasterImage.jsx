@@ -1,9 +1,13 @@
 import React, {Component} from 'react';
 import PropTypes from "prop-types";
+import ip from "ip";
 
 import FractoColors from "./FractoColors";
 import {FRACTO_TILES_PORT} from "../../../../../constants.js";
 import {copy_json} from "../Dom.js";
+
+const IP_ADDRESS = ip.address();
+console.log(`Server IP Address: ${IP_ADDRESS}`);
 
 export class FractoRasterImage extends Component {
 
@@ -108,8 +112,8 @@ export class FractoRasterImage extends Component {
          `aspect_ratio=${aspect_ratio}`,
          `resolution_factor=${resolution_factor}`,
       ].join('&')
-      const url = `http://localhost:${FRACTO_TILES_PORT}/canvas_buffer?${all_params}`
-      // console.log('url', url)
+      const url = `${IP_ADDRESS}:${FRACTO_TILES_PORT}/canvas_buffer?${all_params}`
+      console.log('url', url)
       const start = performance.now()
       const response = await fetch(url)
       const result = await response.json()
