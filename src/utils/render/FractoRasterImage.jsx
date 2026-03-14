@@ -3,10 +3,11 @@ import PropTypes from "prop-types";
 import ip from "ip";
 
 import FractoColors from "./FractoColors";
-import {FRACTO_TILES_PORT} from "../../../../../constants.js";
+import {FRACTO_TILES_PORT, FRACTO_UI_PORT} from "../../../../../constants.js";
 import {copy_json} from "../Dom.js";
 
 const IP_ADDRESS = window.location.host;
+IP_ADDRESS.replace(`:${FRACTO_UI_PORT}`, '')
 console.log(`Server IP Address: ${IP_ADDRESS}`);
 
 export class FractoRasterImage extends Component {
