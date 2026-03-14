@@ -112,7 +112,7 @@ export class FractoRasterImage extends Component {
          `aspect_ratio=${aspect_ratio}`,
          `resolution_factor=${resolution_factor}`,
       ].join('&')
-      const url = `${IP_ADDRESS}:${FRACTO_TILES_PORT}/canvas_buffer?${all_params}`
+      const url = `http://${IP_ADDRESS}:${FRACTO_TILES_PORT}/canvas_buffer?${all_params}`
       console.log('url', url)
       const start = performance.now()
       const response = await fetch(url)
