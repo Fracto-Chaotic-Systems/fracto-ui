@@ -6,7 +6,7 @@ import FractoColors from "./FractoColors";
 import {FRACTO_TILES_PORT} from "../../../../../constants.js";
 import {copy_json} from "../Dom.js";
 
-const IP_ADDRESS = ip.address();
+const IP_ADDRESS = window.location.host;
 console.log(`Server IP Address: ${IP_ADDRESS}`);
 
 export class FractoRasterImage extends Component {
