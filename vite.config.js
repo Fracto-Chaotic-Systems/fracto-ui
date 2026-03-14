@@ -7,6 +7,7 @@ export default defineConfig({
    plugins: [plugin()],
    server: {
       port: FRACTO_UI_PORT,
+      host: true,
    },
    define: {
       'process.env': {}, // this provides an empty object for process.env references

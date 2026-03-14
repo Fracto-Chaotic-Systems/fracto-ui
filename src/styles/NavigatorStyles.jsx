@@ -52,6 +52,7 @@ export class NavigatorStyles {
        cursor: crosshair;
    `
    static StepImageWrapper = styled(CoolStyles.InlineBlock)`
+       ${CoolStyles.pointer}
        padding: 0;
        line-height: 0;
        border-bottom: 2px solid #888888;
