@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import PropTypes from "prop-types";
-import ip from "ip";
 
 import FractoColors from "./FractoColors";
 import {FRACTO_TILES_PORT, FRACTO_UI_PORT} from "../../../../../constants.js";
@@ -113,18 +112,12 @@ export class FractoRasterImage extends Component {
          `resolution_factor=${resolution_factor}`,
       ].join('&')
       const url = `http://${IP_ADDRESS}:${FRACTO_TILES_PORT}/canvas_buffer?${all_params}`
-      console.log('url', url)
-      const start = performance.now()
       const response = await fetch(url)
       const result = await response.json()
-      const mid = performance.now()
-
       FractoColors.buffer_to_canvas(result.canvas_buffer, ctx)
       if (on_plan_complete) {
          on_plan_complete(result.canvas_buffer, ctx)
       }
-      const end = performance.now()
-      console.log(`get canvas buffer: ${mid - start} buffer_to_canvas: ${end - mid}`)
       this.setState({loading_tiles: false})
    }
 
