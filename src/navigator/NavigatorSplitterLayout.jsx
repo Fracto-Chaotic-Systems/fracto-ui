@@ -21,7 +21,9 @@ import NavigatorLegend from "./NavigatorLegend.jsx";
 import NavigatorField from "./NavigatorField.jsx";
 
 const MAX_MAIN_SPLITTER_POS = 800;
-const FIELD_BACKGROUND_COLOR = "#bbbbbb";
+const FIELD_BACKGROUND_COLOR = "#666666";
+const STEPS_BACKGROUND_COLOR = "#aaaaaa";
+const LEGEND_BACKGROUND_COLOR = "#eeeeee";
 
 export class NavigatorSplitterLayout extends Component {
    static propTypes = {
@@ -149,7 +151,7 @@ export class NavigatorSplitterLayout extends Component {
          left: bounding_rect.left,
          width: steps_splitter_pos - bounding_rect.left,
          height: steps_bounding_rect.height,
-         backgroundColor: FIELD_BACKGROUND_COLOR,
+         backgroundColor: STEPS_BACKGROUND_COLOR,
       }
       const field_pane_style = {
          top: bounding_rect.top,
@@ -164,7 +166,7 @@ export class NavigatorSplitterLayout extends Component {
          left: bounding_rect.left,
          width: main_splitter_pos - page_splitter_pos,
          height: bounding_rect.height - bounding_rect.top - steps_bounding_rect.height,
-         backgroundColor: FIELD_BACKGROUND_COLOR,
+         backgroundColor: LEGEND_BACKGROUND_COLOR,
       }
       const all_panes = [
          <styles.FixedWrapper

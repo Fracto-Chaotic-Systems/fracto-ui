@@ -13,5 +13,5 @@ export const APP_TILES_TEXT = {
    [KEY_TILES_STATUS]: 'tiles status',
    [KEY_TILES_LOGS]: 'tiles logs',
    [KEY_TILES_GENERATOR]: 'generate',
-   [KEY_TILES_GENERATE]: 'tile generator',
+   [KEY_TILES_GENERATE]: 'generate tiles',
 }

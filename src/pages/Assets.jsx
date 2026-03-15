@@ -6,6 +6,7 @@ import SplitterLayout from "./utils/SplitterLayout.jsx";
 import {MainStyles as styles} from '../styles/MainStyles.jsx'
 import AppSettings from "../AppSettings.jsx";
 import {
+   ASSETS_GENERATOR,
    ASSETS_LOGS,
    ASSETS_OVERVIEW,
    ASSETS_SETTINGS,
@@ -21,15 +22,18 @@ import {
    KEY_SIDEBAR_SETTINGS,
    KEY_SIDEBAR_STATUS
 } from "../text/RootText.jsx";
+import {KEY_IMAGE_ASSETS_GENERATOR} from "../text/AssetsText.jsx";
 
 import AssetsOverview from "./assets/AssetsOverview.jsx";
 import AssetsSettings from "./assets/AssetsSettings.jsx";
 import AssetsStatus from "./assets/AssetsStatus.jsx";
 import AssetsLogs from "./assets/AssetsLogs.jsx";
+import AssetsGenerator from "./assets/AssetsGenerator.jsx";
 
 const SIDEBAR_LIST = [
    {title_key: KEY_SIDEBAR_OVERVIEW, section_code: ASSETS_OVERVIEW, right_pane: <AssetsOverview/>},
    {section_code: SIDEBAR_BREAKER},
+   {title_key: KEY_IMAGE_ASSETS_GENERATOR, section_code: ASSETS_GENERATOR, right_pane: <AssetsGenerator/>},
    {section_code: SIDEBAR_BREAKER},
    {title_key: KEY_SIDEBAR_SETTINGS, section_code: ASSETS_SETTINGS, right_pane: <AssetsSettings/>},
    {title_key: KEY_SIDEBAR_STATUS, section_code: ASSETS_STATUS, right_pane: <AssetsStatus/>},
