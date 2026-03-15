@@ -1,4 +1,4 @@
-import {copy_json} from "./utils/Dom.js";
+import {copy_json} from "./utils/Dom.jsx";
 
 export class AppText {
 

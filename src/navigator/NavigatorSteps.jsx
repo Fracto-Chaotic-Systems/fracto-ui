@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 
-import {copy_json} from "../utils/Dom.js";
+import {copy_json} from "../utils/Dom.jsx";
 
 import {NavigatorStyles as styles} from '../styles/NavigatorStyles.jsx';
 import AppSettings from "../AppSettings.jsx";

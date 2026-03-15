@@ -12,6 +12,9 @@ export class NavigatorStyles {
        padding: 0;
        line-height: 0;
    `
+   static StatsWrapper = styled(CoolStyles.InlineBlock)`
+       padding: 0.5rem;
+   `
    static VerticalCrossHair = styled(CoolStyles.InlineBlock)`
        position: fixed;
        width: ${WIDTH_CROSSHAIR_LINE_PX}px;

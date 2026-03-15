@@ -68,6 +68,10 @@ export class CoolTableStyles {
        padding-top: 27px;
    `
 
+   static TableBodyNoHeader = styled(CoolStyles.TableBody)`
+       overflow: auto;
+   `
+
    static TableScrollable = styled(CoolStyles.Block)`
        overflow-x: hidden;
        overflow-y: auto;

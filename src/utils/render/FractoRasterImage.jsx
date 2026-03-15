@@ -1,9 +1,14 @@
 import React, {Component} from 'react';
 import PropTypes from "prop-types";
 
+import {copy_json} from "../Dom.jsx";
+import AppSettings from "../../AppSettings.jsx";
+import {KEY_NAVIGATOR_DISABLED} from "../../settings/NavigatorSettings.jsx";
 import FractoColors from "./FractoColors";
-import {FRACTO_TILES_PORT, FRACTO_UI_PORT} from "../../../../../constants.js";
-import {copy_json} from "../Dom.js";
+import {
+   FRACTO_TILES_PORT,
+   FRACTO_UI_PORT
+} from "../../../../../constants.js";
 
 const IP_ADDRESS = window.location.host.replace(`:${FRACTO_UI_PORT}`, '')
 console.log(`Server IP Address: ${IP_ADDRESS}`);
@@ -102,6 +107,9 @@ export class FractoRasterImage extends Component {
          on_plan_complete,
          resolution_factor
       } = this.props
+      AppSettings.on_settings_changed({
+         [KEY_NAVIGATOR_DISABLED]: true
+      })
       this.setState({loading_tiles: true})
       const all_params = [
          `width_px=${width_px}`,
@@ -119,6 +127,9 @@ export class FractoRasterImage extends Component {
          on_plan_complete(result.canvas_buffer, ctx)
       }
       this.setState({loading_tiles: false})
+      AppSettings.on_settings_changed({
+         [KEY_NAVIGATOR_DISABLED]: false
+      })
    }
 
    render() {

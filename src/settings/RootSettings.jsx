@@ -1,5 +1,5 @@
 import AppSettings, {TYPE_OBJECT, TYPE_STRING} from "../AppSettings.jsx";
-import {copy_json, getViewportDimensions} from "../utils/Dom.js";
+import {copy_json, getViewportDimensions} from "../utils/Dom.jsx";
 
 const ROOT_FOLDER = 'root'
 export const KEY_SELECTED_PAGE = `${ROOT_FOLDER}/selected_page`

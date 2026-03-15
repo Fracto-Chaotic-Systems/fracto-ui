@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 
 import {NavigatorStyles as styles} from '../styles/NavigatorStyles.jsx';
-import {copy_json} from "../utils/Dom.js";
+import {copy_json} from "../utils/Dom.jsx";
 import AppSettings from "../AppSettings.jsx";
 import {
    KEY_NAVIGATOR_CLIENT_POINT,
@@ -47,11 +47,18 @@ export class NavigatorField extends Component {
    }
 
    adjust_canvas_size = () => {
-      const {bounding_rect} = this.props
+      const {bounding_rect, frame_settings, frame_settings_key} = this.props
       const largest_width_px = Math
          .min(bounding_rect.width, bounding_rect.height)
       const width_px = Math
          .floor(largest_width_px / IMAGE_SIZE_DELTA) * IMAGE_SIZE_DELTA
+      if (frame_settings.focal_point) {
+         let copy_frame_settings = copy_json(frame_settings)
+         copy_frame_settings.width_px = width_px
+         AppSettings.on_settings_changed({
+            [frame_settings_key]: copy_frame_settings
+         })
+      }
       this.setState({
          width_px,
          saved_bounding_rect: copy_json(bounding_rect)

@@ -1,19 +1,30 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import styled from "styled-components";
+import {wait_icon, wait_icon_2} from "../utils/ui/CoolIcons.jsx"
 
 import {CoolStyles} from '../utils/ui/styles/CoolStyles.jsx';
 
 const TRANSIT_PADDING_PX = 5
 const CURVED_CORNERS_FACTOR = 25
+const WAIT_ICON_SIZE_PX = 35
 
 const CanvasSubstrate = styled.canvas`
-   ${CoolStyles.narrow_box_shadow}
-   margin: ${TRANSIT_PADDING_PX}px;
+    ${CoolStyles.narrow_box_shadow}
+    margin: ${TRANSIT_PADDING_PX}px;
 `;
 
 const CanvasWrapper = styled(CoolStyles.InlineBlock)`
-   margin: 0;
+    margin: 0;
+`
+
+const WaitIconWrapper = styled(CoolStyles.InlineBlock)`
+    position: absolute;
+    left: 0;
+    fill: white;
+    height: ${WAIT_ICON_SIZE_PX}px;
+    width: ${WAIT_ICON_SIZE_PX}px;
+    opacity: 0.75;
 `
 
 const ARROW_UP_ONE = 'arrow_up_one';
@@ -68,7 +79,8 @@ export class NavigatorTransit extends Component {
       canvas_ref: React.createRef(),
       canvas_measure_px: 0,
       in_hover: null,
-      in_click: null
+      in_click: null,
+      wait_icon: wait_icon,
    }
 
    componentDidMount() {
@@ -107,6 +119,7 @@ export class NavigatorTransit extends Component {
    }
 
    static all_regions = []
+   static is_wait_icon_2 = false
 
    make_regions = () => {
       const {canvas_measure_px} = this.state
@@ -703,6 +716,17 @@ export class NavigatorTransit extends Component {
          cursor: in_wait ? "wait" : "pointer",
          borderRadius: `${width_px / CURVED_CORNERS_FACTOR}px`
       }
+      let icon = []
+      if (in_wait) {
+         const icon_style = {
+            left: width_px / 2 - WAIT_ICON_SIZE_PX / 2,
+            top: width_px / 2 - WAIT_ICON_SIZE_PX / 2,
+         }
+         icon = <WaitIconWrapper style={icon_style}>
+            {NavigatorTransit.is_wait_icon_2 ? wait_icon : wait_icon_2}
+         </WaitIconWrapper>
+         NavigatorTransit.is_wait_icon_2 = !NavigatorTransit.is_wait_icon_2
+      }
       return <CanvasWrapper
          onClick={this.on_click}
          onMouseMove={this.on_mousemove}
@@ -714,6 +738,7 @@ export class NavigatorTransit extends Component {
             width={width_px - 2 * TRANSIT_PADDING_PX}
             height={width_px * 1.0 - 2 * TRANSIT_PADDING_PX}
          />
+         {icon}
       </CanvasWrapper>
    }
 }

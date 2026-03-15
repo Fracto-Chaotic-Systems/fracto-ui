@@ -10,7 +10,7 @@ import {
 
 import {MainStyles as styles} from '../../styles/MainStyles.jsx'
 import AppSettings from "../../AppSettings.jsx";
-import {copy_json} from "../../utils/Dom.js";
+import {copy_json} from "../../utils/Dom.jsx";
 import {
    KEY_VIEWPORT_DIMENSIONS,
    poll_viewport_dimensions

@@ -229,10 +229,13 @@ export class CoolTable extends Component {
       // if (selected_rows.length) {
       //    console.log('selected_rows', selected_rows)
       // }
+      const rows = options.includes(TABLE_NO_HEADER)
+         ? <styles.TableBodyNoHeader>{table_rows}</styles.TableBodyNoHeader>
+         : <styles.TableBody>{table_rows}</styles.TableBody>
       return <CoolStyles.Table>
          <styles.TableScrollable style={extra_style}>
             {table_header}
-            <styles.TableBody>{table_rows}</styles.TableBody>
+            {rows}
          </styles.TableScrollable>
       </CoolStyles.Table>
    }

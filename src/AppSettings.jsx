@@ -1,7 +1,7 @@
 import {
    copy_json,
    random_id
-} from "./utils/Dom.js";
+} from "./utils/Dom.jsx";
 
 export const TYPE_STRING = typeof 'abc'
 export const TYPE_NUMBER = typeof 123

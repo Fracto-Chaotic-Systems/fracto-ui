@@ -3,7 +3,7 @@ import {refresh_icon} from "./CoolIcons.jsx"
 
 import {CoolStyles as styles} from "./CoolImports.jsx";
 import PropTypes from "prop-types";
-import {getViewportDimensions} from "../Dom.js";
+import {getViewportDimensions} from "../Dom.jsx";
 
 export class CoolWindowListener extends Component {
 
