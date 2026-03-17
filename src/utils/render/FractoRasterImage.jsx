@@ -120,16 +120,23 @@ export class FractoRasterImage extends Component {
          `resolution_factor=${resolution_factor}`,
       ].join('&')
       const url = `http://${IP_ADDRESS}:${FRACTO_TILES_PORT}/canvas_buffer?${all_params}`
-      const response = await fetch(url)
-      const result = await response.json()
-      FractoColors.buffer_to_canvas(result.canvas_buffer, ctx)
-      if (on_plan_complete) {
-         on_plan_complete(result.canvas_buffer, ctx)
+      try {
+         const response = await fetch(url)
+         const result = await response.json()
+         FractoColors.buffer_to_canvas(result.canvas_buffer, ctx)
+         if (on_plan_complete) {
+            on_plan_complete(result.canvas_buffer, ctx)
+         }
+         this.setState({loading_tiles: false})
+         AppSettings.on_settings_changed({
+            [KEY_NAVIGATOR_DISABLED]: false
+         })
+      } catch (e) {
+         console.error('exception thrown in fill_canvas', e)
+         AppSettings.on_settings_changed({
+            [KEY_NAVIGATOR_DISABLED]: false
+         })
       }
-      this.setState({loading_tiles: false})
-      AppSettings.on_settings_changed({
-         [KEY_NAVIGATOR_DISABLED]: false
-      })
    }
 
    render() {

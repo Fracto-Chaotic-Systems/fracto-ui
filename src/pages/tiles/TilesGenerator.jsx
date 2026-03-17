@@ -1,6 +1,9 @@
 import React, {Component} from "react";
 
-import {MainStyles as styles} from '../../styles/MainStyles.jsx'
+import {
+   MainStyles as styles,
+   MARGIN_PX
+} from '../../styles/MainStyles.jsx'
 import AppSettings from "../../AppSettings.jsx";
 import {KEY_VIEWPORT_DIMENSIONS} from "../../settings/RootSettings.jsx";
 import {
@@ -14,6 +17,7 @@ import AppText from "../../AppText.jsx";
 import {KEY_TILES_GENERATE} from "../../text/TilesText.jsx";
 
 import NavigatorSplitterLayout from "../../navigator/NavigatorSplitterLayout.jsx";
+import FractoHeatMap from "../../utils/render/FractoHeatMap.jsx";
 
 const UPDATE_INTERVAL_MS = 1000
 
@@ -29,11 +33,12 @@ export class TilesGenerator extends Component {
    }
 
    componentDidMount() {
+      const frame_settings = AppSettings
+         .get(KEY_TILES_GENERATOR_FRAME_SETTINGS)
       this.update_dimensions()
       this.setState({
          interval: setInterval(this.update_dimensions, UPDATE_INTERVAL_MS),
-         frame_settings: AppSettings
-            .get(KEY_TILES_GENERATOR_FRAME_SETTINGS),
+         frame_settings,
          subscription: AppSettings
             .subscribe(KEY_TILES_GENERATOR_FRAME_SETTINGS, this.on_frame_settings_changed)
       })
@@ -50,8 +55,9 @@ export class TilesGenerator extends Component {
    }
 
    on_frame_settings_changed = (key, value) => {
-      // console.log('on_frame_settings_changed', value)
-      this.setState({frame_settings: value})
+      const frame_settings = AppSettings
+         .get(KEY_TILES_GENERATOR_FRAME_SETTINGS)
+      this.setState({frame_settings})
    }
 
    update_dimensions = () => {
@@ -85,6 +91,11 @@ export class TilesGenerator extends Component {
          steps_key: KEY_TILES_GENERATOR_STEPS_SPLITTER_POS,
          section_key: KEY_TILES_SPLITTER_POS_PX,
       }
+      const splitter_pos = AppSettings.get(KEY_TILES_GENERATOR_SPLITTER_POS)
+      const right_block_style = {
+         left: `${splitter_pos + MARGIN_PX}px`,
+         top: `${top + MARGIN_PX}px`,
+      }
       return [
          <styles.SectionTitle
             key={'tiles-overview-title'}>
@@ -99,6 +110,13 @@ export class TilesGenerator extends Component {
                frame_settings_key={KEY_TILES_GENERATOR_FRAME_SETTINGS}
                splitter_keys={splitter_keys}
             />
+            <styles.FixedInlineBlock
+               style={right_block_style}>
+               <FractoHeatMap
+                  frame_settings={frame_settings}
+                  frame_settings_key={KEY_TILES_GENERATOR_FRAME_SETTINGS}
+               />
+            </styles.FixedInlineBlock>
          </styles.TightCenteredBlock>,
       ];
    }

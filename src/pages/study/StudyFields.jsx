@@ -14,6 +14,7 @@ import AppText from "../../AppText.jsx";
 import {KEY_STUDY_FIELDS} from "../../text/StudyText.jsx";
 
 import NavigatorSplitterLayout from "../../navigator/NavigatorSplitterLayout.jsx";
+import FieldsColorChart from "./fields/FieldsColorChart.jsx";
 
 const UPDATE_INTERVAL_MS = 1000
 
@@ -99,6 +100,7 @@ export class StudyFields extends Component {
                frame_settings_key={KEY_STUDY_FIELDS_FRAME_SETTINGS}
                splitter_keys={splitter_keys}
             />
+            {/*<FieldsColorChart />*/}
          </styles.TightCenteredBlock>,
       ];
    }

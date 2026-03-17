@@ -2,7 +2,7 @@ import styled from "styled-components";
 import {CoolStyles} from "../utils/ui/CoolImports.jsx";
 import {HEADER_BAR_HEIGHT_PX} from "../constants.jsx";
 
-export const MARGIN_PX = 12
+export const MARGIN_PX = 10
 export const CONTENT_BACKGROUND_COLOR = "#fcfcfc"
 
 export class MainStyles {
@@ -90,6 +90,11 @@ export class MainStyles {
        ${CoolStyles.align_center}
        margin: auto;
    `
+   static FixedInlineBlock = styled(CoolStyles.InlineBlock)`
+       ${CoolStyles.fixed}
+       ${CoolStyles.align_center}
+       margin: auto;
+   `
    static InputPrompt = styled(CoolStyles.InlineBlock)`
        ${CoolStyles.italic}
        ${CoolStyles.noselect}
@@ -171,7 +176,7 @@ export class MainStyles {
        line-height: 1.25rem;
        padding: 0 0.5rem 0.125rem;
    `
-      static OneRemSpacer = styled(CoolStyles.InlineBlock)`
+   static OneRemSpacer = styled(CoolStyles.InlineBlock)`
        width: 1rem;
    `
 }

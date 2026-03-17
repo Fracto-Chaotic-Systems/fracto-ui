@@ -11,6 +11,7 @@ const POINTS_FOLDER = 'study/points'
 const FIELDS_FOLDER = 'study/fields'
 export const KEY_STUDY_SPLITTER_POS_PX = `${STUDY_FOLDER}/splitter_pos_px`
 export const KEY_STUDY_SECTION = `${STUDY_FOLDER}/study_section`
+
 export const KEY_STUDY_MAGNITUDES_ASPECT = `${MAGNITUDES_FOLDER}/magnitudes_aspect`
 export const KEY_STUDY_MAGNITUDES_CARDINALITY = `${MAGNITUDES_FOLDER}/magnitudes_cardinality`
 export const KEY_STUDY_MAGNITUDES_RANGE_MIN = `${MAGNITUDES_FOLDER}/magnitudes_range_min`
@@ -18,10 +19,12 @@ export const KEY_STUDY_MAGNITUDES_RANGE_MAX = `${MAGNITUDES_FOLDER}/magnitudes_r
 export const KEY_STUDY_MAGNITUDES_INCREMENT = `${MAGNITUDES_FOLDER}/magnitudes_increment`
 export const KEY_STUDY_MAGNITUDES_PRECISION = `${MAGNITUDES_FOLDER}/magnitudes_precision`
 export const KEY_STUDY_MAGNITUDES_RATIO_ARRAY = `${MAGNITUDES_FOLDER}/ratio_array`
+
 export const KEY_STUDY_POINTS_FRAME_SETTINGS = `${POINTS_FOLDER}/frame_settings`
 export const KEY_STUDY_POINTS_SPLITTER_POS = `${POINTS_FOLDER}/splitter_pos`
 export const KEY_STUDY_POINTS_LEGEND_SPLITTER_POS = `${POINTS_FOLDER}/legend_splitter_pos`
 export const KEY_STUDY_POINTS_STEPS_SPLITTER_POS = `${POINTS_FOLDER}/steps_splitter_pos`
+
 export const KEY_STUDY_FIELDS_FRAME_SETTINGS = `${FIELDS_FOLDER}/frame_settings`
 export const KEY_STUDY_FIELDS_SPLITTER_POS = `${FIELDS_FOLDER}/splitter_pos`
 export const KEY_STUDY_FIELDS_LEGEND_SPLITTER_POS = `${FIELDS_FOLDER}/legend_splitter_pos`

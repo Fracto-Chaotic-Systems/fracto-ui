@@ -19,6 +19,7 @@
     "@fortawesome/react-fontawesome": "^3.1.1",
     "@mui/material": "^7.3.6",
     "axios": "^1.13.6",
+    "chart.js": "^4.5.1",
     "ip": "^2.0.1",
     "javascript-time-ago": "^2.5.12",
     "prop-types": "^15.8.1",

@@ -90,7 +90,7 @@ export class NavigatorLegend extends Component {
    }
 
    render_stats = () => {
-      const {frame_settings} = this.props
+      const {frame_settings, bounding_rect} = this.props
       const hover_point = AppSettings.get(KEY_NAVIGATOR_HOVER_POINT)
       const table_data = [
          {
@@ -106,7 +106,8 @@ export class NavigatorLegend extends Component {
             value: [render_coordinates, hover_point],
          }
       ]
-      return <styles.StatsWrapper>
+      const stats_style = {width: `${bounding_rect.width - TRANSITOR_HEIGHT_PX - 20}px`}
+      return <styles.StatsWrapper style={stats_style}>
          <CoolTable
             columns={TABLE_COLUMNS}
             data={table_data}

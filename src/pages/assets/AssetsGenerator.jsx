@@ -1,6 +1,8 @@
 import React, {Component} from "react";
 
-import {MainStyles as styles} from '../../styles/MainStyles.jsx'
+import {FRACTO_TILES_PORT, FRACTO_UI_PORT} from "../../../../../constants.js";
+
+import {MainStyles as styles, MARGIN_PX} from '../../styles/MainStyles.jsx'
 import AppSettings from "../../AppSettings.jsx";
 import {KEY_VIEWPORT_DIMENSIONS} from "../../settings/RootSettings.jsx";
 import {
@@ -11,11 +13,16 @@ import {
    KEY_ASSETS_SPLITTER_POS_PX
 } from "../../settings/AssetsSettings.jsx";
 import AppText from "../../AppText.jsx";
-
-import NavigatorSplitterLayout from "../../navigator/NavigatorSplitterLayout.jsx";
 import {KEY_IMAGE_ASSETS_GENERATE} from "../../text/AssetsText.jsx";
 
+import NavigatorSplitterLayout from "../../navigator/NavigatorSplitterLayout.jsx";
+import {KEY_NAVIGATOR_DISABLED} from "../../settings/NavigatorSettings.jsx";
+import FractoColors from "../../utils/render/FractoColors.jsx";
+import FractoHeatMap from "../../utils/render/FractoHeatMap.jsx";
+import {KEY_TILES_GENERATOR_FRAME_SETTINGS} from "../../settings/TilesSettings.jsx";
+
 const UPDATE_INTERVAL_MS = 1000
+const HEAT_MAP_WIDTH_PX = 400
 
 export class AssetsGenerator extends Component {
    state = {
@@ -26,14 +33,16 @@ export class AssetsGenerator extends Component {
       bounding_rect: {},
       frame_settings: {},
       subscription: null,
+      heat_map_buffer: [],
+      ctx: null,
    }
 
    componentDidMount() {
-      this.update_dimensions()
+      const frame_settings = AppSettings
+         .get(KEY_ASSETS_GENERATOR_FRAME_SETTINGS)
       this.setState({
+         frame_settings,
          interval: setInterval(this.update_dimensions, UPDATE_INTERVAL_MS),
-         frame_settings: AppSettings
-            .get(KEY_ASSETS_GENERATOR_FRAME_SETTINGS),
          subscription: AppSettings
             .subscribe(KEY_ASSETS_GENERATOR_FRAME_SETTINGS, this.on_frame_settings_changed)
       })
@@ -49,8 +58,7 @@ export class AssetsGenerator extends Component {
       }
    }
 
-   on_frame_settings_changed = (key, value) => {
-      // console.log('on_frame_settings_changed', value)
+   on_frame_settings_changed = async (key, value) => {
       this.setState({frame_settings: value})
    }
 
@@ -65,7 +73,9 @@ export class AssetsGenerator extends Component {
    }
 
    render() {
-      const {container_ref, rendered_height, rendered_width, frame_settings} = this.state
+      const {
+         container_ref, rendered_height, rendered_width, frame_settings
+      } = this.state
       let top = 0;
       let left = 0;
       if (container_ref.current) {
@@ -85,6 +95,11 @@ export class AssetsGenerator extends Component {
          steps_key: KEY_ASSETS_GENERATOR_STEPS_SPLITTER_POS,
          section_key: KEY_ASSETS_SPLITTER_POS_PX,
       }
+      const splitter_pos = AppSettings.get(KEY_ASSETS_GENERATOR_SPLITTER_POS)
+      const right_block_style = {
+         left: `${splitter_pos + MARGIN_PX}px`,
+         top: `${top + MARGIN_PX}px`,
+      }
       return [
          <styles.SectionTitle
             key={'assets-overview-title'}>
@@ -99,6 +114,13 @@ export class AssetsGenerator extends Component {
                frame_settings_key={KEY_ASSETS_GENERATOR_FRAME_SETTINGS}
                splitter_keys={splitter_keys}
             />
+            <styles.FixedInlineBlock
+               style={right_block_style}>
+               <FractoHeatMap
+                  frame_settings={frame_settings}
+                  frame_settings_key={KEY_ASSETS_GENERATOR_FRAME_SETTINGS}
+               />
+            </styles.FixedInlineBlock>
          </styles.TightCenteredBlock>,
       ];
    }

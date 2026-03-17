@@ -154,6 +154,18 @@ export class NavigatorField extends Component {
       })
    }
 
+   on_plan_complete = (canvas_buffer) => {
+      const {frame_settings, frame_settings_key} = this.props
+      const {width_px} = this.state
+      AppSettings.on_settings_changed({
+         [frame_settings_key]: {
+            focal_point: frame_settings.focal_point,
+            scope: frame_settings.scope,
+            width_px,
+         }
+      })
+   }
+
    render() {
       const {image_ref, width_px, show_crosshairs} = this.state
       const {bounding_rect, frame_settings} = this.props
@@ -181,6 +193,7 @@ export class NavigatorField extends Component {
                width_px={width_px}
                focal_point={frame_settings.focal_point}
                scope={frame_settings.scope}
+               on_plan_complete={this.on_plan_complete}
             />
          </styles.ImageWrapper>,
          crosshairs,

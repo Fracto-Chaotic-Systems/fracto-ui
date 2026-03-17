@@ -14,6 +14,7 @@ export class NavigatorStyles {
    `
    static StatsWrapper = styled(CoolStyles.InlineBlock)`
        padding: 0.5rem;
+       overflow: hidden;
    `
    static VerticalCrossHair = styled(CoolStyles.InlineBlock)`
        position: fixed;

@@ -44,6 +44,9 @@ export const round_places = (x, digits) => {
 }
 
 export const render_coordinates = (point, digits = 12) => {
+   if (!point || (!point.x && !point.y)) {
+      return <NumberSpan>---</NumberSpan>
+   }
    const x_rounded = round_places(point?.x, digits);
    const y_rounded = round_places(point?.y, digits);
    return [
