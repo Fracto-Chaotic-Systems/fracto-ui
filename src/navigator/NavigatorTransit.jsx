@@ -490,6 +490,9 @@ export class NavigatorTransit extends Component {
 
    draw_paths = () => {
       const {ctx, in_hover, in_click} = this.state
+      if (!ctx) {
+         return;
+      }
       const regions = this.make_regions()
       regions.forEach(region => {
          ctx.beginPath();
