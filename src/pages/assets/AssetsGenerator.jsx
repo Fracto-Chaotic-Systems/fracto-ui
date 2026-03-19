@@ -1,8 +1,9 @@
 import React, {Component} from "react";
 
-import {FRACTO_TILES_PORT, FRACTO_UI_PORT} from "../../../../../constants.js";
-
-import {MainStyles as styles, MARGIN_PX} from '../../styles/MainStyles.jsx'
+import {
+   MainStyles as styles,
+   MARGIN_PX
+} from '../../styles/MainStyles.jsx'
 import AppSettings from "../../AppSettings.jsx";
 import {KEY_VIEWPORT_DIMENSIONS} from "../../settings/RootSettings.jsx";
 import {
@@ -16,13 +17,9 @@ import AppText from "../../AppText.jsx";
 import {KEY_IMAGE_ASSETS_GENERATE} from "../../text/AssetsText.jsx";
 
 import NavigatorSplitterLayout from "../../navigator/NavigatorSplitterLayout.jsx";
-import {KEY_NAVIGATOR_DISABLED} from "../../settings/NavigatorSettings.jsx";
-import FractoColors from "../../utils/render/FractoColors.jsx";
-import FractoHeatMap from "../../utils/render/FractoHeatMap.jsx";
-import {KEY_TILES_GENERATOR_FRAME_SETTINGS} from "../../settings/TilesSettings.jsx";
+import FractoTileCoverage from "../../utils/render/FractoTileCoverage.jsx";
 
 const UPDATE_INTERVAL_MS = 1000
-const HEAT_MAP_WIDTH_PX = 400
 
 export class AssetsGenerator extends Component {
    state = {
@@ -30,11 +27,8 @@ export class AssetsGenerator extends Component {
       rendered_height: 0,
       interval: null,
       container_ref: React.createRef(),
-      bounding_rect: {},
       frame_settings: {},
       subscription: null,
-      heat_map_buffer: [],
-      ctx: null,
    }
 
    componentDidMount() {
@@ -116,7 +110,8 @@ export class AssetsGenerator extends Component {
             />
             <styles.FixedInlineBlock
                style={right_block_style}>
-               <FractoHeatMap
+               <FractoTileCoverage
+                  bounding_rect={bounding_rect}
                   frame_settings={frame_settings}
                   frame_settings_key={KEY_ASSETS_GENERATOR_FRAME_SETTINGS}
                />

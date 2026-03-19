@@ -17,7 +17,7 @@ import AppText from "../../AppText.jsx";
 import {KEY_TILES_GENERATE} from "../../text/TilesText.jsx";
 
 import NavigatorSplitterLayout from "../../navigator/NavigatorSplitterLayout.jsx";
-import FractoHeatMap from "../../utils/render/FractoHeatMap.jsx";
+import FractoTileCoverage from "../../utils/render/FractoTileCoverage.jsx";
 
 const UPDATE_INTERVAL_MS = 1000
 
@@ -61,13 +61,17 @@ export class TilesGenerator extends Component {
    }
 
    update_dimensions = () => {
+      const {rendered_width, rendered_height} = this.state;
       const viewport_dimensions = AppSettings.get(KEY_VIEWPORT_DIMENSIONS)
-      // console.log('viewport_dimensions', viewport_dimensions)
       const splitter_width = AppSettings.get(KEY_TILES_SPLITTER_POS_PX)
-      this.setState({
-         rendered_width: viewport_dimensions.width - splitter_width,
-         rendered_height: viewport_dimensions.height,
-      })
+      const rendered_width_changed = rendered_width !== viewport_dimensions.width - splitter_width
+      const rendered_height_changed = rendered_height !== viewport_dimensions.height
+      if (rendered_height_changed || rendered_width_changed) {
+         this.setState({
+            rendered_width: viewport_dimensions.width - splitter_width,
+            rendered_height: viewport_dimensions.height,
+         })
+      }
    }
 
    render() {
@@ -91,10 +95,17 @@ export class TilesGenerator extends Component {
          steps_key: KEY_TILES_GENERATOR_STEPS_SPLITTER_POS,
          section_key: KEY_TILES_SPLITTER_POS_PX,
       }
+      const tiles_splitter_pos = AppSettings.get(KEY_TILES_SPLITTER_POS_PX)
       const splitter_pos = AppSettings.get(KEY_TILES_GENERATOR_SPLITTER_POS)
       const right_block_style = {
          left: `${splitter_pos + MARGIN_PX}px`,
          top: `${top + MARGIN_PX}px`,
+      }
+      const tile_coverage_bounds = {
+         top,
+         left: tiles_splitter_pos + splitter_pos - frame_settings.width_px + MARGIN_PX,
+         width: rendered_width - splitter_pos - MARGIN_PX,
+         height: rendered_height,
       }
       return [
          <styles.SectionTitle
@@ -112,7 +123,8 @@ export class TilesGenerator extends Component {
             />
             <styles.FixedInlineBlock
                style={right_block_style}>
-               <FractoHeatMap
+               <FractoTileCoverage
+                  bounding_rect={tile_coverage_bounds}
                   frame_settings={frame_settings}
                   frame_settings_key={KEY_TILES_GENERATOR_FRAME_SETTINGS}
                />

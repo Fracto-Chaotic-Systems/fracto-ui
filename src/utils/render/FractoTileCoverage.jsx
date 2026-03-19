@@ -6,7 +6,12 @@ import {
    FRACTO_UI_PORT
 } from "../../../../../constants.js";
 
-import {MainStyles as styles} from '../../styles/MainStyles.jsx'
+import CoolStyles from "../ui/styles/CoolStyles.jsx";
+import {MainStyles as styles} from "../../styles/MainStyles.jsx";
+import {
+   CELL_ALIGN_CENTER,
+   CELL_TYPE_NUMBER, TABLE_NO_BORDER,
+} from "../ui/styles/CoolTableStyles.jsx";
 import AppSettings from "../../AppSettings.jsx";
 import {KEY_NAVIGATOR_DISABLED} from "../../settings/NavigatorSettings.jsx";
 import AppText from "../../AppText.jsx";
@@ -16,9 +21,28 @@ import {
 } from "../../text/NavigatorText.jsx";
 
 import FractoColors from "./FractoColors.jsx";
+import CoolTable from "../ui/CoolTable.jsx";
 
-export class FractoHeatMap extends Component {
+const TABLE_COLUMNS = [
+   {
+      id: "level",
+      label: "level",
+      type: CELL_TYPE_NUMBER,
+      width_px: 35,
+      align: CELL_ALIGN_CENTER,
+   },
+   {
+      id: "count",
+      label: "count",
+      type: CELL_TYPE_NUMBER,
+      width_px: 80,
+      align: CELL_ALIGN_CENTER,
+   },
+]
+
+export class FractoTileCoverage extends Component {
    static propTypes = {
+      bounding_rect: PropTypes.object.isRequired,
       frame_settings: PropTypes.object.isRequired,
       frame_settings_key: PropTypes.string.isRequired,
    }
@@ -31,6 +55,8 @@ export class FractoHeatMap extends Component {
       stored_focal_point_x: 1,
       stored_focal_point_y: 1,
       in_fetch: false,
+      heat_map_buffer: [],
+      tiles_coverage: [],
    }
 
    componentDidMount() {
@@ -89,6 +115,7 @@ export class FractoHeatMap extends Component {
          console.log('clear_canvas no ctx');
          return;
       }
+      this.setState({tiles_coverage: []})
       ctx.fillStyle = 'white';
       ctx.fillRect(0, 0, frame_settings.width_px, frame_settings.width_px);
       ctx.fillStyle = 'black';
@@ -125,33 +152,65 @@ export class FractoHeatMap extends Component {
          const result = await fetch(url, {}).then(res => res.json())
          FractoColors.buffer_to_canvas(result.heat_map_buffer, ctx)
          console.log('new heat map', result)
-         this.setState({heat_map_buffer: result.heat_map_buffer, in_fetch: false})
+         this.setState({
+            heat_map_buffer: result.heat_map_buffer,
+            tiles_coverage: result.coverage,
+            in_fetch: false
+         })
       } catch (e) {
          console.error(`error fetching ${url}`)
       }
    }
 
    render() {
-      const {canvas_ref, in_fetch} = this.state
+      const {canvas_ref, in_fetch, tiles_coverage} = this.state
       const {frame_settings} = this.props
-      const right_block_style = {
+      const canvas_block_style = {
          height: `${frame_settings.width_px}px`,
          width: `${frame_settings.width_px}px`,
          cursor: in_fetch ? 'wait' : 'pointer',
          border: '1px solid #666666',
          borderRadius: '0.25rem',
       }
-      return <styles.FixedInlineBlock
-         title={in_fetch ? 'please be patient' : 'click for heat map'}
-         style={right_block_style}
-         onClick={this.generate_heat_map}>
-         <canvas
-            ref={canvas_ref}
-            width={frame_settings.width_px}
-            height={frame_settings.width_px}
+      let coverage_data = []
+      if (tiles_coverage.length > 0) {
+         coverage_data = tiles_coverage
+            .filter(coverage => coverage.length > 0)
+            .map((coverage) => {
+               return {
+                  level: coverage[0].length,
+                  count: coverage.length,
+               }
+            })
+      }
+      console.log('coverage_data', coverage_data)
+      const coverage_table = coverage_data.length
+         ? <CoolTable
+            columns={TABLE_COLUMNS}
+            data={coverage_data}
+            options={[TABLE_NO_BORDER]}
+            table_style={{backgroundColor: 'white'}}
          />
-      </styles.FixedInlineBlock>
+         : []
+      return <CoolStyles.InlineBlock
+         key={'heat-map'}
+         title={in_fetch ? 'please be patient' : 'click for heat map'}
+         onClick={this.generate_heat_map}>
+         <CoolStyles.InlineBlock
+            style={canvas_block_style}>
+            <canvas
+               ref={canvas_ref}
+               width={frame_settings.width_px}
+               height={frame_settings.width_px}
+            />
+         </CoolStyles.InlineBlock>
+         <styles.OneRemSpacer/>
+         <CoolStyles.InlineBlock
+            key={'coverage-table'}>
+            {coverage_table}
+         </CoolStyles.InlineBlock>
+      </CoolStyles.InlineBlock>
    }
 }
 
-export default FractoHeatMap
+export default FractoTileCoverage
