@@ -154,7 +154,7 @@ export class FractoTileCoverage extends Component {
          console.log('new heat map', result)
          this.setState({
             heat_map_buffer: result.heat_map_buffer,
-            tiles_coverage: result.coverage,
+            tiles_coverage: result.coverage || [],
             in_fetch: false
          })
       } catch (e) {
