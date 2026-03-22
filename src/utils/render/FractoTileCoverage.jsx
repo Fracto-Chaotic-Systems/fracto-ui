@@ -46,7 +46,7 @@ export class FractoTileCoverage extends Component {
       bounding_rect: PropTypes.object.isRequired,
       frame_settings: PropTypes.object.isRequired,
       frame_settings_key: PropTypes.string.isRequired,
-      on_level_select: PropTypes.func.isRequired,
+      on_level_select: PropTypes.func,
    }
 
    state = {
@@ -123,7 +123,9 @@ export class FractoTileCoverage extends Component {
          coverage_data: [],
          selected_level: LEVEL_NOT_SELECTED,
       })
-      on_level_select(0)
+      if (on_level_select) {
+         on_level_select(0)
+      }
       ctx.fillStyle = 'white';
       ctx.fillRect(0, 0, frame_settings.width_px, frame_settings.width_px);
       ctx.fillStyle = 'black';
