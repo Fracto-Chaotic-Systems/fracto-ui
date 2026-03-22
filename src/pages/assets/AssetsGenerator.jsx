@@ -94,6 +94,7 @@ export class AssetsGenerator extends Component {
    }
 
    on_level_select = (selected_level) => {
+      console.log(`on_level_select = ${selected_level}`)
       const resolution = AppSettings.get(KEY_ASSETS_GENERATOR_RESOLUTION)
       this.setState({selected_level, resolution})
    }
@@ -132,7 +133,7 @@ export class AssetsGenerator extends Component {
 
    render_button_block = (resolution) => {
       const {selected_level} = this.state
-      if (!selected_level) {
+      if (!resolution) {
          return []
       }
       const resolution_select =
