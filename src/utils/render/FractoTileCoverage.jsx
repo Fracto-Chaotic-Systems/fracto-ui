@@ -46,7 +46,7 @@ export class FractoTileCoverage extends Component {
       bounding_rect: PropTypes.object.isRequired,
       frame_settings: PropTypes.object.isRequired,
       frame_settings_key: PropTypes.string.isRequired,
-      on_level_select: PropTypes.func,
+      on_level_select: PropTypes.func.isRequired,
    }
 
    state = {
