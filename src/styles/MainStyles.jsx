@@ -179,6 +179,9 @@ export class MainStyles {
    static OneRemSpacer = styled(CoolStyles.InlineBlock)`
        width: 1rem;
    `
+   static HalfRemDown = styled(CoolStyles.Block)`
+       height: 0.5rem;
+   `
 }
 
 export default MainStyles

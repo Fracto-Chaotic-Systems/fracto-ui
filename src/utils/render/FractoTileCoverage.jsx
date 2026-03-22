@@ -10,7 +10,7 @@ import CoolStyles from "../ui/styles/CoolStyles.jsx";
 import {MainStyles as styles} from "../../styles/MainStyles.jsx";
 import {
    CELL_ALIGN_CENTER,
-   CELL_TYPE_NUMBER, TABLE_NO_BORDER,
+   CELL_TYPE_NUMBER, TABLE_CAN_SELECT, TABLE_NO_BORDER,
 } from "../ui/styles/CoolTableStyles.jsx";
 import AppSettings from "../../AppSettings.jsx";
 import {KEY_NAVIGATOR_DISABLED} from "../../settings/NavigatorSettings.jsx";
@@ -28,23 +28,25 @@ const TABLE_COLUMNS = [
       id: "level",
       label: "level",
       type: CELL_TYPE_NUMBER,
-      width_px: 35,
+      width_px: 65,
       align: CELL_ALIGN_CENTER,
    },
    {
       id: "count",
       label: "count",
       type: CELL_TYPE_NUMBER,
-      width_px: 80,
+      width_px: 65,
       align: CELL_ALIGN_CENTER,
    },
 ]
+const LEVEL_NOT_SELECTED = -1
 
 export class FractoTileCoverage extends Component {
    static propTypes = {
       bounding_rect: PropTypes.object.isRequired,
       frame_settings: PropTypes.object.isRequired,
       frame_settings_key: PropTypes.string.isRequired,
+      on_level_select: PropTypes.func.isRequired,
    }
 
    state = {
@@ -56,7 +58,8 @@ export class FractoTileCoverage extends Component {
       stored_focal_point_y: 1,
       in_fetch: false,
       heat_map_buffer: [],
-      tiles_coverage: [],
+      coverage_data: [],
+      selected_level: LEVEL_NOT_SELECTED,
    }
 
    componentDidMount() {
@@ -111,11 +114,16 @@ export class FractoTileCoverage extends Component {
    }
 
    clear_canvas = (ctx, frame_settings, text) => {
+      const {on_level_select} = this.props
       if (!ctx) {
          console.log('clear_canvas no ctx');
          return;
       }
-      this.setState({tiles_coverage: []})
+      this.setState({
+         coverage_data: [],
+         selected_level: LEVEL_NOT_SELECTED,
+      })
+      on_level_select(0)
       ctx.fillStyle = 'white';
       ctx.fillRect(0, 0, frame_settings.width_px, frame_settings.width_px);
       ctx.fillStyle = 'black';
@@ -148,22 +156,37 @@ export class FractoTileCoverage extends Component {
       this.clear_canvas(ctx, frame_settings, AppText.get(KEY_HEAT_MAP_FETCHING))
       this.setState({in_fetch: true})
       try {
-         console.log('fetching heat map', url)
          const result = await fetch(url, {}).then(res => res.json())
-         FractoColors.buffer_to_canvas(result.heat_map_buffer, ctx)
-         console.log('new heat map', result)
-         this.setState({
-            heat_map_buffer: result.heat_map_buffer,
-            tiles_coverage: result.coverage || [],
-            in_fetch: false
-         })
+         if (result.heat_map_buffer) {
+            FractoColors.buffer_to_canvas(result.heat_map_buffer, ctx)
+            const coverage_data = result.coverage
+               .filter(coverage => coverage.length > 0)
+               .map((coverage) => {
+                  return {
+                     level: coverage[0].length,
+                     count: coverage.length,
+                  }
+               })
+            this.setState({
+               heat_map_buffer: result.heat_map_buffer,
+               coverage_data,
+            })
+         }
+         this.setState({in_fetch: false})
       } catch (e) {
          console.error(`error fetching ${url}`)
       }
    }
 
+   on_select_row = (selected_level) => {
+      const {coverage_data} = this.state
+      const {on_level_select} = this.props
+      this.setState({selected_level})
+      on_level_select(selected_level + coverage_data[0].level)
+   }
+
    render() {
-      const {canvas_ref, in_fetch, tiles_coverage} = this.state
+      const {canvas_ref, in_fetch, coverage_data, selected_level} = this.state
       const {frame_settings} = this.props
       const canvas_block_style = {
          height: `${frame_settings.width_px}px`,
@@ -172,31 +195,21 @@ export class FractoTileCoverage extends Component {
          border: '1px solid #666666',
          borderRadius: '0.25rem',
       }
-      let coverage_data = []
-      if (tiles_coverage.length > 0) {
-         coverage_data = tiles_coverage
-            .filter(coverage => coverage.length > 0)
-            .map((coverage) => {
-               return {
-                  level: coverage[0].length,
-                  count: coverage.length,
-               }
-            })
-      }
-      console.log('coverage_data', coverage_data)
       const coverage_table = coverage_data.length
          ? <CoolTable
             columns={TABLE_COLUMNS}
             data={coverage_data}
-            options={[TABLE_NO_BORDER]}
+            options={[TABLE_CAN_SELECT]}
             table_style={{backgroundColor: 'white'}}
+            selected_row={selected_level}
+            on_select_row={this.on_select_row}
          />
          : []
       return <CoolStyles.InlineBlock
          key={'heat-map'}
-         title={in_fetch ? 'please be patient' : 'click for heat map'}
-         onClick={this.generate_heat_map}>
+         title={in_fetch ? 'please be patient' : 'click for heat map'}>
          <CoolStyles.InlineBlock
+            onClick={this.generate_heat_map}
             style={canvas_block_style}>
             <canvas
                ref={canvas_ref}

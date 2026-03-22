@@ -15,6 +15,7 @@ export const KEY_ASSETS_GENERATOR_FRAME_SETTINGS = `${ASSETS_GENERATOR_FOLDER}/f
 export const KEY_ASSETS_GENERATOR_SPLITTER_POS = `${ASSETS_GENERATOR_FOLDER}/splitter_pos`
 export const KEY_ASSETS_GENERATOR_LEGEND_SPLITTER_POS = `${ASSETS_GENERATOR_FOLDER}/legend_splitter_pos`
 export const KEY_ASSETS_GENERATOR_STEPS_SPLITTER_POS = `${ASSETS_GENERATOR_FOLDER}/steps_splitter_pos`
+export const KEY_ASSETS_GENERATOR_RESOLUTION = `${ASSETS_GENERATOR_FOLDER}/generator_resolution`
 
 const DEFAULT_FRAME_SETTINGS = {
    focal_point: {x: -0.75, y: 0.0001},
@@ -57,6 +58,12 @@ export const APP_ASSETS_SETTINGS = {
       data_type: TYPE_NUMBER,
       default_value: 200,
       description: 'Current position for the vertical steps splitter',
+      persist: true,
+   },
+   [KEY_ASSETS_GENERATOR_RESOLUTION]: {
+      data_type: TYPE_NUMBER,
+      default_value: 2400,
+      description: 'Current resolution of the assets generator',
       persist: true,
    },
 }
