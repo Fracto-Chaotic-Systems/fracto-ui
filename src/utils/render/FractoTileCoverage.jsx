@@ -184,7 +184,9 @@ export class FractoTileCoverage extends Component {
       const {coverage_data} = this.state
       const {on_level_select} = this.props
       this.setState({selected_level})
-      on_level_select(selected_level + coverage_data[0].level)
+      if (on_level_select) {
+         on_level_select(selected_level + coverage_data[0].level)
+      }
    }
 
    render() {

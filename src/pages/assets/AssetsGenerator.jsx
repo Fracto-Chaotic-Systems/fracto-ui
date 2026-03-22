@@ -25,7 +25,6 @@ import NavigatorSplitterLayout from "../../navigator/NavigatorSplitterLayout.jsx
 import FractoTileCoverage from "../../utils/render/FractoTileCoverage.jsx";
 import CoolStyles from "../../utils/ui/styles/CoolStyles.jsx";
 import {FRACTO_ASSET_PORT, FRACTO_TILES_PORT, FRACTO_UI_PORT} from "../../../../../constants.js";
-import FractoColors from "../../utils/render/FractoColors.jsx";
 
 const UPDATE_INTERVAL_MS = 1000
 
