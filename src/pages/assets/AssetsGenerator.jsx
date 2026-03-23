@@ -133,7 +133,7 @@ export class AssetsGenerator extends Component {
 
    render_button_block = (resolution) => {
       const {selected_level} = this.state
-      if (!resolution) {
+      if (!selected_level) {
          return []
       }
       const resolution_select =
