@@ -186,6 +186,7 @@ export class AssetsGenerator extends Component {
          section_key: KEY_ASSETS_SPLITTER_POS_PX,
       }
       const splitter_pos = AppSettings.get(KEY_ASSETS_GENERATOR_SPLITTER_POS)
+      const leftmost_splitter_pos = AppSettings.get(KEY_ASSETS_SPLITTER_POS_PX)
       const right_block_style = {
          left: `${splitter_pos + MARGIN_PX}px`,
          top: `${top + MARGIN_PX}px`,
@@ -193,7 +194,7 @@ export class AssetsGenerator extends Component {
       const image_style = {
          left: `${splitter_pos + MARGIN_PX}px`,
          top: `${top + 2 * MARGIN_PX + frame_settings.width_px}px`,
-         width: `${rendered_width - 2 * MARGIN_PX - splitter_pos}px`,
+         width: `${rendered_width - leftmost_splitter_pos - 2 * MARGIN_PX}px`,
          height: `${rendered_height - frame_settings.width_px - top - 2 * MARGIN_PX}px`,
          overflow: "scroll",
       }
