@@ -193,7 +193,7 @@ export class AssetsGenerator extends Component {
       const image_style = {
          left: `${splitter_pos + MARGIN_PX}px`,
          top: `${top + 2 * MARGIN_PX + frame_settings.width_px}px`,
-         width: `${rendered_width - MARGIN_PX}px`,
+         width: `${rendered_width - 5 * MARGIN_PX}px`,
          height: `${rendered_height - frame_settings.width_px - top - 2 * MARGIN_PX}px`,
          overflow: "scroll",
       }
