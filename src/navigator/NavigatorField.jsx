@@ -161,6 +161,7 @@ export class NavigatorField extends Component {
          [frame_settings_key]: {
             focal_point: frame_settings.focal_point,
             scope: frame_settings.scope,
+            canvas_buffer,
             width_px,
          }
       })

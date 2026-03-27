@@ -11,6 +11,7 @@ import {
    STUDY_FIELDS,
    STUDY_POINTS,
    STUDY_MAGNITUDES,
+   STUDY_MINIBROTS, STUDY_PATHS,
 } from "../settings/StudySettings.jsx";
 import AppText from "../AppText.jsx";
 import {
@@ -21,7 +22,9 @@ import {
 import {
    KEY_FIELDS_TITLE,
    KEY_MAGNITUDES_TITLE,
-   KEY_POINTS_TITLE, KEY_STUDY_FIELDS,
+   KEY_MINIBROTS_TITLE,
+   KEY_PATHS_TITLE,
+   KEY_POINTS_TITLE,
 } from "../text/StudyText.jsx";
 
 import SplitterLayout from "./utils/SplitterLayout.jsx";
@@ -33,12 +36,16 @@ import StudyStatus from "./study/StudyStatus.jsx";
 import StudyMagnitudes from "./study/StudyMagnitudes.jsx";
 import StudyPoints from "./study/StudyPoints.jsx";
 import StudyFields from "./study/StudyFields.jsx";
+import StudyMinibrots from "./study/StudyMinibrots.jsx";
+import StudyPaths from "./study/StudyPaths.jsx";
 
 const SIDEBAR_LIST = [
    {title_key: KEY_SIDEBAR_OVERVIEW, section_code: STUDY_OVERVIEW, right_pane: <StudyOverview/>},
    {section_code: SIDEBAR_BREAKER},
+   {title_key: KEY_PATHS_TITLE, section_code: STUDY_PATHS, right_pane: <StudyPaths/>},
    {title_key: KEY_POINTS_TITLE, section_code: STUDY_POINTS, right_pane: <StudyPoints/>},
    {title_key: KEY_FIELDS_TITLE, section_code: STUDY_FIELDS, right_pane: <StudyFields/>},
+   {title_key: KEY_MINIBROTS_TITLE, section_code: STUDY_MINIBROTS, right_pane: <StudyMinibrots/>},
    {title_key: KEY_MAGNITUDES_TITLE, section_code: STUDY_MAGNITUDES, right_pane: <StudyMagnitudes/>},
    {section_code: SIDEBAR_BREAKER},
    {title_key: KEY_SIDEBAR_SETTINGS, section_code: STUDY_SETTINGS, right_pane: <StudySettings/>},

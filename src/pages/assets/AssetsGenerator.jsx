@@ -94,13 +94,13 @@ export class AssetsGenerator extends Component {
    }
 
    on_level_select = (selected_level) => {
-      console.log(`on_level_select = ${selected_level}`)
+      // console.log(`on_level_select = ${selected_level}`)
       const resolution = AppSettings.get(KEY_ASSETS_GENERATOR_RESOLUTION)
       this.setState({selected_level, resolution})
    }
 
    change_resolution = (e) => {
-      console.log('change_resolution', e.target.value)
+      // console.log('change_resolution', e.target.value)
       const resolution = parseInt(e.target.value)
       this.setState({resolution})
       AppSettings.on_settings_changed({

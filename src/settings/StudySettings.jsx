@@ -9,6 +9,8 @@ const STUDY_FOLDER = 'study'
 const MAGNITUDES_FOLDER = 'study/magnitudes'
 const POINTS_FOLDER = 'study/points'
 const FIELDS_FOLDER = 'study/fields'
+const MINBROTS_FOLDER = 'study/minibrots'
+const PATHS_FOLDER = 'study/paths'
 export const KEY_STUDY_SPLITTER_POS_PX = `${STUDY_FOLDER}/splitter_pos_px`
 export const KEY_STUDY_SECTION = `${STUDY_FOLDER}/study_section`
 
@@ -30,11 +32,23 @@ export const KEY_STUDY_FIELDS_SPLITTER_POS = `${FIELDS_FOLDER}/splitter_pos`
 export const KEY_STUDY_FIELDS_LEGEND_SPLITTER_POS = `${FIELDS_FOLDER}/legend_splitter_pos`
 export const KEY_STUDY_FIELDS_STEPS_SPLITTER_POS = `${FIELDS_FOLDER}/steps_splitter_pos`
 
+export const KEY_STUDY_MINIBROTS_FRAME_SETTINGS = `${MINBROTS_FOLDER}/frame_settings`
+export const KEY_STUDY_MINIBROTS_SPLITTER_POS = `${MINBROTS_FOLDER}/splitter_pos`
+export const KEY_STUDY_MINIBROTS_LEGEND_SPLITTER_POS = `${MINBROTS_FOLDER}/legend_splitter_pos`
+export const KEY_STUDY_MINIBROTS_STEPS_SPLITTER_POS = `${MINBROTS_FOLDER}/steps_splitter_pos`
+
+export const KEY_STUDY_PATHS_FRAME_SETTINGS = `${PATHS_FOLDER}/frame_settings`
+export const KEY_STUDY_PATHS_SPLITTER_POS = `${PATHS_FOLDER}/splitter_pos`
+export const KEY_STUDY_PATHS_LEGEND_SPLITTER_POS = `${PATHS_FOLDER}/legend_splitter_pos`
+export const KEY_STUDY_PATHS_STEPS_SPLITTER_POS = `${PATHS_FOLDER}/steps_splitter_pos`
+
 export const STUDY_OVERVIEW = 'study_overview'
 export const STUDY_SETTINGS = 'study_settings'
 export const STUDY_STATUS = 'study_status'
+export const STUDY_PATHS = 'study_paths'
 export const STUDY_POINTS = 'study_points'
 export const STUDY_FIELDS = 'study_fields'
+export const STUDY_MINIBROTS = 'study_minibrots'
 export const STUDY_MAGNITUDES = 'study_magnitudes'
 
 const DEFAULT_FRAME_SETTINGS = {
@@ -144,6 +158,54 @@ export const APP_STUDY_SETTINGS = {
       data_type: TYPE_NUMBER,
       default_value: 200,
       description: 'Current position for the study fields vertical steps splitter',
+      persist: true,
+   },
+   [KEY_STUDY_MINIBROTS_FRAME_SETTINGS]: {
+      data_type: TYPE_OBJECT,
+      default_value: DEFAULT_FRAME_SETTINGS,
+      description: 'Frame settings of the study minibrots page',
+      persist: true,
+   },
+   [KEY_STUDY_MINIBROTS_SPLITTER_POS]: {
+      data_type: TYPE_NUMBER,
+      default_value: 500,
+      description: 'Current position for the study minibrots splitter',
+      persist: true,
+   },
+   [KEY_STUDY_MINIBROTS_LEGEND_SPLITTER_POS]: {
+      data_type: TYPE_NUMBER,
+      default_value: 800,
+      description: 'Current position for the study minibrots horizontal legend splitter',
+      persist: true,
+   },
+   [KEY_STUDY_MINIBROTS_STEPS_SPLITTER_POS]: {
+      data_type: TYPE_NUMBER,
+      default_value: 200,
+      description: 'Current position for the study minibrots vertical steps splitter',
+      persist: true,
+   },
+   [KEY_STUDY_PATHS_FRAME_SETTINGS]: {
+      data_type: TYPE_OBJECT,
+      default_value: DEFAULT_FRAME_SETTINGS,
+      description: 'Frame settings of the study paths page',
+      persist: true,
+   },
+   [KEY_STUDY_PATHS_SPLITTER_POS]: {
+      data_type: TYPE_NUMBER,
+      default_value: 500,
+      description: 'Current position for the study paths splitter',
+      persist: true,
+   },
+   [KEY_STUDY_PATHS_LEGEND_SPLITTER_POS]: {
+      data_type: TYPE_NUMBER,
+      default_value: 800,
+      description: 'Current position for the study paths horizontal legend splitter',
+      persist: true,
+   },
+   [KEY_STUDY_PATHS_STEPS_SPLITTER_POS]: {
+      data_type: TYPE_NUMBER,
+      default_value: 200,
+      description: 'Current position for the study paths vertical steps splitter',
       persist: true,
    },
 }
