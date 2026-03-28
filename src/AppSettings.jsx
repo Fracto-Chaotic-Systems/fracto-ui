@@ -156,7 +156,9 @@ export class AppSettings {
                   break;
                }
                AppSettings.settings_data[key] =
-                  copy_json(new_settings[key])
+                  key_definition.no_copy
+                     ? new_settings[key]
+                     : copy_json(new_settings[key])
                break
             default:
                AppSettings.settings_data[key] = new_settings[key]
@@ -164,10 +166,10 @@ export class AppSettings {
          }
          subscription_keys
             .filter(k => AppSettings.subscriptions [k].key === key)
-            .forEach(s_key => setTimeout(() => {
+            .forEach(s_key => {
                const handler_fn = AppSettings.subscriptions[s_key].handler_fn
                handler_fn(key, AppSettings.settings_data[key])
-            }, 100))
+            })
       })
       AppSettings.persist_settings(new_settings)
    }

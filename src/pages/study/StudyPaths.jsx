@@ -1,6 +1,15 @@
 import React, {Component} from "react";
 
-import {MainStyles as styles} from '../../styles/MainStyles.jsx'
+import CoolTable from "../../utils/ui/CoolTable.jsx";
+import NavigatorSplitterLayout from "../../navigator/NavigatorSplitterLayout.jsx";
+import {highlight_canvas, identify_cores} from "./StudyUtils.jsx";
+
+import {MainStyles as styles, MARGIN_PX} from '../../styles/MainStyles.jsx'
+import {
+   CELL_ALIGN_CENTER,
+   CELL_TYPE_NUMBER,
+   TABLE_CAN_SELECT
+} from "../../utils/ui/styles/CoolTableStyles.jsx";
 import AppSettings from "../../AppSettings.jsx";
 import {KEY_VIEWPORT_DIMENSIONS} from "../../settings/RootSettings.jsx";
 import {
@@ -8,14 +17,25 @@ import {
    KEY_STUDY_PATHS_LEGEND_SPLITTER_POS,
    KEY_STUDY_PATHS_SPLITTER_POS,
    KEY_STUDY_PATHS_STEPS_SPLITTER_POS,
-   KEY_STUDY_SPLITTER_POS_PX
+   KEY_STUDY_SPLITTER_POS_PX, STUDY_SPLITTER_KEYS
 } from "../../settings/StudySettings.jsx";
 import AppText from "../../AppText.jsx";
-import {KEY_STUDY_PATHS} from "../../text/StudyText.jsx";
-
-import NavigatorSplitterLayout from "../../navigator/NavigatorSplitterLayout.jsx";
+import {
+   KEY_STUDY_CARDINALITY,
+   KEY_STUDY_PATHS
+} from "../../text/StudyText.jsx";
 
 const UPDATE_INTERVAL_MS = 1000
+
+const TABLE_COLUMNS = [
+   {
+      id: "cardinality",
+      label: AppText.get(KEY_STUDY_CARDINALITY),
+      width_px: 100,
+      type: CELL_TYPE_NUMBER,
+      align: CELL_ALIGN_CENTER,
+   },
+]
 
 export class StudyPaths extends Component {
    state = {
@@ -26,14 +46,18 @@ export class StudyPaths extends Component {
       bounding_rect: {},
       frame_settings: {},
       subscription: null,
+      core_points: [],
+      selected_point: -1,
    }
 
    componentDidMount() {
       this.update_dimensions()
+      const frame_settings = AppSettings
+         .get(KEY_STUDY_PATHS_FRAME_SETTINGS)
+      this.identify_cores(frame_settings)
       this.setState({
+         frame_settings,
          interval: setInterval(this.update_dimensions, UPDATE_INTERVAL_MS),
-         frame_settings: AppSettings
-            .get(KEY_STUDY_PATHS_FRAME_SETTINGS),
          subscription: AppSettings
             .subscribe(KEY_STUDY_PATHS_FRAME_SETTINGS, this.on_frame_settings_changed)
       })
@@ -49,9 +73,26 @@ export class StudyPaths extends Component {
       }
    }
 
+   identify_cores = (frame_settings) => {
+      const {selected_point} = this.state
+      const orbital_bins = identify_cores(frame_settings)
+      const core_points = orbital_bins
+         .filter(bin => !bin.exclude)
+         .sort((a, b) => a.lowest_iterations - b.lowest_iterations)
+         .slice(0, 5)
+      core_points.forEach((point, i) => {
+         if (selected_point >= 0 && i !== selected_point) {
+            return
+         }
+         highlight_canvas(frame_settings.ctx, point.canvas_x, point.canvas_y)
+      })
+      this.setState({core_points})
+   }
+
    on_frame_settings_changed = (key, value) => {
       // console.log('on_frame_settings_changed', value)
       this.setState({frame_settings: value})
+      this.identify_cores(value)
    }
 
    update_dimensions = () => {
@@ -64,8 +105,23 @@ export class StudyPaths extends Component {
       })
    }
 
+   on_select_point = (selected_point) => {
+      const {frame_settings} = this.state
+      this.setState({selected_point})
+      setTimeout(() => {
+         this.identify_cores(frame_settings)
+      }, 250)
+   }
+
    render() {
-      const {container_ref, rendered_height, rendered_width, frame_settings} = this.state
+      const {
+         core_points,
+         container_ref,
+         rendered_height,
+         rendered_width,
+         frame_settings,
+         selected_point
+      } = this.state
       let top = 0;
       let left = 0;
       if (container_ref.current) {
@@ -79,11 +135,21 @@ export class StudyPaths extends Component {
          width: rendered_width,
          height: rendered_height,
       }
-      const splitter_keys = {
-         legend_key: KEY_STUDY_PATHS_LEGEND_SPLITTER_POS,
-         main_key: KEY_STUDY_PATHS_SPLITTER_POS,
-         steps_key: KEY_STUDY_PATHS_STEPS_SPLITTER_POS,
-         section_key: KEY_STUDY_SPLITTER_POS_PX,
+      let points_table = []
+      if (core_points) {
+         console.log('core_points', core_points)
+         points_table = <CoolTable
+            columns={TABLE_COLUMNS}
+            data={core_points}
+            options={[TABLE_CAN_SELECT]}
+            selected_row={selected_point}
+            on_select_row={this.on_select_point}
+         />
+      }
+      const splitter_pos = AppSettings.get(KEY_STUDY_PATHS_SPLITTER_POS)
+      const right_block_style = {
+         left: `${splitter_pos + MARGIN_PX}px`,
+         top: `${top + MARGIN_PX}px`,
       }
       return [
          <styles.SectionTitle
@@ -97,9 +163,12 @@ export class StudyPaths extends Component {
                bounding_rect={bounding_rect}
                frame_settings={frame_settings}
                frame_settings_key={KEY_STUDY_PATHS_FRAME_SETTINGS}
-               splitter_keys={splitter_keys}
+               splitter_keys={STUDY_SPLITTER_KEYS}
             />
-            {/*<FieldsColorChart />*/}
+            <styles.FixedInlineBlock
+               style={right_block_style}>
+               {points_table}
+            </styles.FixedInlineBlock>
          </styles.TightCenteredBlock>,
       ];
    }

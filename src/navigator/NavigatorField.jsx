@@ -154,7 +154,7 @@ export class NavigatorField extends Component {
       })
    }
 
-   on_plan_complete = (canvas_buffer) => {
+   on_plan_complete = (canvas_buffer, ctx) => {
       const {frame_settings, frame_settings_key} = this.props
       const {width_px} = this.state
       AppSettings.on_settings_changed({
@@ -163,6 +163,7 @@ export class NavigatorField extends Component {
             scope: frame_settings.scope,
             canvas_buffer,
             width_px,
+            ctx
          }
       })
    }

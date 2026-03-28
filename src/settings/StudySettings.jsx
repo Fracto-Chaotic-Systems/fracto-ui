@@ -57,6 +57,13 @@ const DEFAULT_FRAME_SETTINGS = {
    aspect_ratio: 1.0,
 }
 
+export const STUDY_SPLITTER_KEYS = {
+   legend_key: KEY_STUDY_PATHS_LEGEND_SPLITTER_POS,
+   main_key: KEY_STUDY_PATHS_SPLITTER_POS,
+   steps_key: KEY_STUDY_PATHS_STEPS_SPLITTER_POS,
+   section_key: KEY_STUDY_SPLITTER_POS_PX,
+}
+
 export const APP_STUDY_SETTINGS = {
    [KEY_STUDY_SPLITTER_POS_PX]: {
       data_type: TYPE_NUMBER,
@@ -189,6 +196,7 @@ export const APP_STUDY_SETTINGS = {
       default_value: DEFAULT_FRAME_SETTINGS,
       description: 'Frame settings of the study paths page',
       persist: true,
+      no_copy: true,
    },
    [KEY_STUDY_PATHS_SPLITTER_POS]: {
       data_type: TYPE_NUMBER,
