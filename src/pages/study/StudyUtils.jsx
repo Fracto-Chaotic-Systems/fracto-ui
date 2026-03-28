@@ -1,4 +1,8 @@
-import {MARGIN_PX} from "../../styles/MainStyles.jsx";
+import {
+   MainStyles as styles,
+   MARGIN_PX
+} from '../../styles/MainStyles.jsx'
+import FractoColors from "../../utils/render/FractoColors.jsx";
 
 const draw_highlight = (ctx, img_x, img_y, color) => {
    try {
@@ -92,4 +96,28 @@ export const identify_cores = (frame_settings) => {
       too_close.forEach(pt => pt.exclude = true)
    }
    return orbital_bins
+}
+
+export const render_magnitude = (magnitude) => {
+   const rounded = Math.round(magnitude * 100000000) / 100
+   const mu = <i>{'\u03BC'}</i>
+   return <styles.NumericValue
+      title={magnitude}
+      style={{verticalAlign: 'middle'}}> {rounded}
+      <styles.MuStyle>{mu}</styles.MuStyle>
+   </styles.NumericValue>
+}
+
+export const render_pattern_block = (pattern, font_size_px = 18) => {
+   const pattern_color = FractoColors.pattern_color(pattern);
+   // console.log('pattern_color', pattern_color)
+   const block_style = {
+      textShadow: '3px 3px 6px rgba(0,0,0,0.75)',
+      backgroundColor: pattern_color,
+      fontSize: `${font_size_px}px`,
+   }
+   return <styles.PatternBlock
+      style={block_style}>
+      {pattern}
+   </styles.PatternBlock>
 }

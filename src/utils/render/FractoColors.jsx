@@ -10,6 +10,8 @@ const ONE_BY_LOG_ONE_MILLION = 1 / Math.log(1000000);
 var COLOR_CACHE = {};
 var CACHE_SIZE = 0;
 
+export const FRACTO_COLOR_ITERATIONS = 255
+
 setInterval(() => {
    if (CACHE_SIZE > 500000) {
       console.log("resetting COLOR_CACHE")
@@ -48,7 +50,7 @@ export class FractoColors {
       return FractoColors.pattern_hues[pattern_in_range];
    }
 
-   static fracto_pattern_color_hsl = (pattern, iterations= 255, distance_to_center = 0) => {
+   static fracto_pattern_color_hsl = (pattern, iterations = FRACTO_COLOR_ITERATIONS, distance_to_center = 0) => {
       if (pattern === -1) {
          return [0, 0, 0]
       }
@@ -80,6 +82,12 @@ export class FractoColors {
 
    static pattern_color_hsl = (pattern, iteration) => {
       return FractoColors.fracto_pattern_color_hsl(pattern, iteration);
+   }
+
+   static pattern_color = (pattern, sat_pct = 50, lum_pct = 50) => {
+      const log2 = Math.log2(pattern);
+      const hue = pattern ? 360 * (log2 - Math.floor(log2)) : 0;
+      return `hsl(${hue}, ${sat_pct}%, ${lum_pct}%)`
    }
 
    static get_greys_map = (all_pixels, all_sets_object, base_value, range_value) => {

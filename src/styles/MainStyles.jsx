@@ -3,6 +3,7 @@ import {CoolStyles} from "../utils/ui/CoolImports.jsx";
 import {HEADER_BAR_HEIGHT_PX} from "../constants.jsx";
 
 export const MARGIN_PX = 10
+export const TITLE_BAR_HEIGHT_PX = 25
 export const CONTENT_BACKGROUND_COLOR = "#fcfcfc"
 
 export class MainStyles {
@@ -182,6 +183,23 @@ export class MainStyles {
    static HalfRemDown = styled(CoolStyles.Block)`
        height: 0.5rem;
    `
+   static ScrollingBlock = styled(CoolStyles.Block)`
+       overflow-y: auto;
+   `
+   static NumericValue = styled(CoolStyles.InlineBlock)`
+       ${CoolStyles.monospace}
+   `
+   static MuStyle = styled(CoolStyles.InlineBlock)`
+       ${CoolStyles.bold}
+       font-size: 0.90rem;
+   `;
+   static PatternBlock = styled(CoolStyles.InlineBlock)`
+       ${CoolStyles.monospace}
+       border: 0.1rem solid #666666;
+       border-radius: 0.25rem;
+       color: white;
+       padding: 0.125rem 0.125rem 0;
+   `;
 }
 
 export default MainStyles

@@ -20,6 +20,8 @@ export const KEY_STUDY_RANGE_MAX = `${STUDY_FOLDER}/study_range_max`
 export const KEY_STUDY_INCREMENT = `${STUDY_FOLDER}/study_increment`
 export const KEY_STUDY_RUN_NOW = `${STUDY_FOLDER}/study_run_now`
 export const KEY_STUDY_PRECISION = `${STUDY_FOLDER}/study_precision`
+export const KEY_STUDY_MAGNITUDE = `${STUDY_FOLDER}/study_magnitude`
+export const KEY_STUDY_CARDINAL = `${STUDY_FOLDER}/study_cardinal`
 
 export const APP_STUDY_TEXT = {
    [KEY_STUDY_OVERVIEW]: 'study overview',
@@ -42,4 +44,7 @@ export const APP_STUDY_TEXT = {
    [KEY_STUDY_INCREMENT]: 'increment',
    [KEY_STUDY_RUN_NOW]: 'run now',
    [KEY_STUDY_PRECISION]: 'precision',
+   [KEY_STUDY_MAGNITUDE]: 'magnitude',
+   [KEY_STUDY_CARDINAL]: 'cardinal',
+
 }
