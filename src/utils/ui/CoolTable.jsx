@@ -79,13 +79,16 @@ export class CoolTable extends Component {
                break;
          }
       }
+      const label = column.label_key
+         ? AppText.get(column.label_key)
+         : column.label
       return <styles.HeaderCell
          key={`header_cell-${column.id}`}
          onClick={e => on_click_column ? on_click_column(column.id) : null}
          style={cell_style}>
          <styles.HeaderSpan
             style={cell_style}>
-            {column.label}
+            {label}
          </styles.HeaderSpan>
       </styles.HeaderCell>
    }

@@ -30,7 +30,7 @@ const UPDATE_INTERVAL_MS = 1000
 const TABLE_COLUMNS = [
    {
       id: "cardinality",
-      label: AppText.get(KEY_STUDY_CARDINALITY),
+      label_key: KEY_STUDY_CARDINALITY,
       width_px: 100,
       type: CELL_TYPE_NUMBER,
       align: CELL_ALIGN_CENTER,
@@ -48,6 +48,7 @@ export class StudyPaths extends Component {
       subscription: null,
       core_points: [],
       selected_point: -1,
+      selected_cardinality: -1,
    }
 
    componentDidMount() {
@@ -73,14 +74,22 @@ export class StudyPaths extends Component {
       }
    }
 
-   identify_cores = (frame_settings) => {
-      const {selected_point} = this.state
+   identify_cores = (frame_settings, selected_point = -1) => {
+      const {selected_cardinality} = this.state
       const orbital_bins = identify_cores(frame_settings)
       const core_points = orbital_bins
          .filter(bin => !bin.exclude)
          .sort((a, b) => a.lowest_iterations - b.lowest_iterations)
          .slice(0, 5)
       core_points.forEach((point, i) => {
+         if (selected_cardinality > 0) {
+            if (point.cardinality !== selected_cardinality) {
+               return
+            }
+            this.setState({selected_point: i})
+         } else if (selected_cardinality > 0) {
+            return
+         }
          if (selected_point >= 0 && i !== selected_point) {
             return
          }
@@ -91,7 +100,7 @@ export class StudyPaths extends Component {
 
    on_frame_settings_changed = (key, value) => {
       // console.log('on_frame_settings_changed', value)
-      this.setState({frame_settings: value})
+      this.setState({frame_settings: value, selected_point: -1})
       this.identify_cores(value)
    }
 
@@ -105,12 +114,30 @@ export class StudyPaths extends Component {
       })
    }
 
+   find_focal_point = (selected_point) => {
+      const {frame_settings, core_points} = this.state
+      const point = core_points[selected_point]
+      const half_scope = frame_settings.scope / 2
+      const leftmost = frame_settings.focal_point.x - half_scope
+      const topmost = frame_settings.focal_point.y + half_scope
+      const increment = frame_settings.scope / frame_settings.width_px
+      const x = leftmost + increment * point.canvas_x
+      const y = topmost - increment * point.canvas_y
+      return {x, y}
+   }
+
    on_select_point = (selected_point) => {
-      const {frame_settings} = this.state
-      this.setState({selected_point})
-      setTimeout(() => {
-         this.identify_cores(frame_settings)
-      }, 250)
+      const {frame_settings, core_points} = this.state
+      const point = core_points[selected_point]
+      this.setState({
+         selected_point,
+         selected_cardinality: point.cardinality,
+      })
+      // this.identify_cores(frame_settings, selected_point)
+      frame_settings.focal_point = this.find_focal_point(selected_point)
+      AppSettings.on_settings_changed({
+         [KEY_STUDY_PATHS_FRAME_SETTINGS]: frame_settings
+      })
    }
 
    render() {
