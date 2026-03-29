@@ -193,10 +193,10 @@ export class StudyMinibrots extends Component {
          left: `${left + TABLE_WIDTH_PX}px`,
          width: `${width}px`,
          height: `${container_bounds.height}px`,
-         marginTop: `${margin}px`,
-         backgroundColor: '#eeeeee',
+         backgroundColor: '#e4e4e4',
       }
       const image_style = {
+         marginTop: `${margin}px`,
          margin: 'auto',
          width: `${width_px}px`,
          height: `${width_px}px`,
