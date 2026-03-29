@@ -1,75 +1,30 @@
 import React, {Component} from "react";
 
-import {
-   FRACTO_DATA_PORT,
-   FRACTO_UI_PORT
-} from "../../../../../constants.js";
-import CoolTable from "../../utils/ui/CoolTable.jsx";
-import {
-   render_magnitude,
-   render_pattern_block
-} from "./StudyUtils.jsx";
+import CoolSplitter, {
+   SPLITTER_TYPE_VERTICAL
+} from "../../utils/ui/CoolSplitter.jsx";
+import {SPLITTER_WIDTH_PX} from "../../constants.jsx";
 import FractoRasterImage from "../../utils/render/FractoRasterImage.jsx";
+import FractoOrbitalChart from "../../utils/render/FractoOrbitalChart.jsx";
+import MinibrotList, {
+   TABLE_WIDTH_PX
+} from "./minibrots/MinibrotList.jsx";
 
 import {
    MainStyles as styles,
    MARGIN_PX,
    TITLE_BAR_HEIGHT_PX
 } from '../../styles/MainStyles.jsx'
-import {
-   CELL_ALIGN_CENTER,
-   CELL_TYPE_CALLBACK,
-   TABLE_CAN_SELECT,
-   TABLE_NO_BORDER
-} from "../../utils/ui/styles/CoolTableStyles.jsx";
 import AppSettings from "../../AppSettings.jsx";
 import {
    KEY_STUDY_MINIBROTS_RENDER_SPLITTER_POS,
-   KEY_STUDY_MINIBROTS_SELECTED_ROW,
    KEY_STUDY_SPLITTER_POS_PX
 } from "../../settings/StudySettings.jsx";
 import {KEY_VIEWPORT_DIMENSIONS} from "../../settings/RootSettings.jsx";
 import AppText from "../../AppText.jsx";
-import {
-   KEY_STUDY_CARDINAL,
-   KEY_STUDY_MAGNITUDE,
-   KEY_STUDY_MINIBROTS
-} from "../../text/StudyText.jsx";
-import CoolSplitter, {
-   SPLITTER_TYPE_VERTICAL
-} from "../../utils/ui/CoolSplitter.jsx";
-import {SPLITTER_WIDTH_PX} from "../../constants.jsx";
-import FractoOrbitalChart from "../../utils/render/FractoOrbitalChart.jsx";
-
-const FETCH_JSON_HEADERS = {
-   'Content-Type': 'application/json',
-   'Accept': 'application/json'
-}
+import {KEY_STUDY_MINIBROTS} from "../../text/StudyText.jsx";
 
 const UPDATE_INTERVAL_MS = 1000
-const CARDINAL_WIDTH_PX = 50
-const MAGNITUDE_WIDTH_PX = 120
-const TABLE_WIDTH_PX =
-   CARDINAL_WIDTH_PX
-   + MAGNITUDE_WIDTH_PX
-   + 70;
-
-const TABLE_COLUMNS = [
-   {
-      id: "cardinality",
-      label_key: KEY_STUDY_CARDINAL,
-      width_px: CARDINAL_WIDTH_PX,
-      type: CELL_TYPE_CALLBACK,
-      align: CELL_ALIGN_CENTER,
-   },
-   {
-      id: "magnitude",
-      label_key: KEY_STUDY_MAGNITUDE,
-      width_px: MAGNITUDE_WIDTH_PX,
-      type: CELL_TYPE_CALLBACK,
-      align: CELL_ALIGN_CENTER,
-   },
-]
 const IMAGE_SIZE_DELTA = 50
 
 export class StudyMinibrots extends Component {
@@ -78,8 +33,6 @@ export class StudyMinibrots extends Component {
       rendered_height: 0,
       container_ref: React.createRef(),
       interval: null,
-      minibrot_list: [],
-      selected_row: -1,
       selected_minibrot: {},
       rendered_splitter_pos: 500,
       display_settings: {},
@@ -88,11 +41,9 @@ export class StudyMinibrots extends Component {
    }
 
    componentDidMount() {
-      this.load_minibrots()
       this.update_dimensions()
       this.setState({
          rendered_splitter_pos: AppSettings.get(KEY_STUDY_MINIBROTS_RENDER_SPLITTER_POS),
-         selected_row: AppSettings.get(KEY_STUDY_MINIBROTS_SELECTED_ROW),
          interval: setInterval(this.update_dimensions, UPDATE_INTERVAL_MS),
       })
    }
@@ -104,44 +55,14 @@ export class StudyMinibrots extends Component {
       }
    }
 
-   load_minibrots = async () => {
-      const origin = window.origin.replace(`${FRACTO_UI_PORT}`, `${FRACTO_DATA_PORT}`)
-      const url = `${origin}/minibrots`
-      console.log('url', url)
-      const fetched = await fetch(url, FETCH_JSON_HEADERS).then(res => {
-         return res.json()
-      })
-      const minibrot_list = fetched.result
-      const selected_row = AppSettings.get(KEY_STUDY_MINIBROTS_SELECTED_ROW)
-      const selected_minibrot = minibrot_list[selected_row]
-      const display_settings = JSON.parse(selected_minibrot.display_settings)
-      const core_point = JSON.parse(selected_minibrot.core_point)
-      // console.log('minibrot_list', result)
-      this.setState({
-         minibrot_list,
-         selected_minibrot,
-         display_settings,
-         core_point,
-      })
-   }
-
-   on_select_row = (row) => {
-      const {minibrot_list, ready} = this.state
-      if (!ready) {
-         return
-      }
-      const selected_minibrot = minibrot_list[row]
+   on_select_minibrot = (selected_minibrot) => {
       const display_settings = JSON.parse(selected_minibrot.display_settings)
       const core_point = JSON.parse(selected_minibrot.core_point)
       this.setState({
-         selected_row: row,
          selected_minibrot,
          display_settings,
          core_point,
          ready: false,
-      })
-      AppSettings.on_settings_changed({
-         [KEY_STUDY_MINIBROTS_SELECTED_ROW]: row
       })
    }
 
@@ -246,31 +167,22 @@ export class StudyMinibrots extends Component {
    render() {
       const {
          rendered_height, container_ref, rendered_splitter_pos,
-         minibrot_list, selected_row, ready,
+         ready,
       } = this.state
       let top = 0;
-      let left = 0;
       let container_bounds = {}
       if (container_ref.current) {
          container_bounds = container_ref.current.getBoundingClientRect()
          top = container_bounds.top
-         left = container_bounds.left
       }
-      const table_data = minibrot_list.map((row, index) => {
-         return {
-            cardinality: [render_pattern_block, row.pattern],
-            magnitude: [render_magnitude, row.magnitude],
-         }
-      })
-      const table = <CoolTable
-         columns={TABLE_COLUMNS}
-         data={table_data}
-         options={[TABLE_CAN_SELECT, TABLE_NO_BORDER]}
-         selected_row={selected_row}
-         on_select_row={this.on_select_row}
+      const list_height_px = rendered_height - 2 * MARGIN_PX - top + TITLE_BAR_HEIGHT_PX
+      const minibrot_table = <MinibrotList
+         on_select_minibrot={this.on_select_minibrot}
+         height_px={list_height_px}
+         ready={ready}
       />
       const table_style = {
-         height: `${rendered_height - 2 * MARGIN_PX - top + TITLE_BAR_HEIGHT_PX}px`,
+         height: `${list_height_px}px`,
          maxWidth: `${TABLE_WIDTH_PX}px`,
          cursor: ready ? 'pointer' : 'wait',
       }
@@ -287,7 +199,7 @@ export class StudyMinibrots extends Component {
             <styles.ScrollingBlock
                style={table_style}
                key={'input-form'}>
-               {table}
+               {minibrot_table}
                {left_panel}
                <CoolSplitter
                   type={SPLITTER_TYPE_VERTICAL}
