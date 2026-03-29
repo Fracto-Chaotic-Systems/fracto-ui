@@ -39,6 +39,7 @@ import CoolSplitter, {
    SPLITTER_TYPE_VERTICAL
 } from "../../utils/ui/CoolSplitter.jsx";
 import {SPLITTER_WIDTH_PX} from "../../constants.jsx";
+import FractoOrbitalChart from "../../utils/render/FractoOrbitalChart.jsx";
 
 const FETCH_JSON_HEADERS = {
    'Content-Type': 'application/json',
@@ -81,7 +82,9 @@ export class StudyMinibrots extends Component {
       selected_row: -1,
       selected_minibrot: {},
       rendered_splitter_pos: 500,
-      display_settings: {}
+      display_settings: {},
+      core_point: {},
+      ready: false,
    }
 
    componentDidMount() {
@@ -112,26 +115,38 @@ export class StudyMinibrots extends Component {
       const selected_row = AppSettings.get(KEY_STUDY_MINIBROTS_SELECTED_ROW)
       const selected_minibrot = minibrot_list[selected_row]
       const display_settings = JSON.parse(selected_minibrot.display_settings)
+      const core_point = JSON.parse(selected_minibrot.core_point)
       // console.log('minibrot_list', result)
       this.setState({
          minibrot_list,
          selected_minibrot,
          display_settings,
+         core_point,
       })
    }
 
    on_select_row = (row) => {
-      const {minibrot_list} = this.state
+      const {minibrot_list, ready} = this.state
+      if (!ready) {
+         return
+      }
       const selected_minibrot = minibrot_list[row]
       const display_settings = JSON.parse(selected_minibrot.display_settings)
+      const core_point = JSON.parse(selected_minibrot.core_point)
       this.setState({
          selected_row: row,
          selected_minibrot,
-         display_settings
+         display_settings,
+         core_point,
+         ready: false,
       })
       AppSettings.on_settings_changed({
          [KEY_STUDY_MINIBROTS_SELECTED_ROW]: row
       })
+   }
+
+   on_ready = () => {
+      this.setState({ready: true})
    }
 
    update_dimensions = () => {
@@ -167,6 +182,7 @@ export class StudyMinibrots extends Component {
 
    left_panel = () => {
       const {
+         core_point, ready,
          container_ref, rendered_splitter_pos, selected_minibrot, display_settings,
       } = this.state
       if (!selected_minibrot.pattern) {
@@ -196,13 +212,14 @@ export class StudyMinibrots extends Component {
          backgroundColor: '#e4e4e4',
       }
       const image_style = {
-         marginTop: `${margin}px`,
-         margin: 'auto',
+         margin: `${margin}px auto`,
          width: `${width_px}px`,
          height: `${width_px}px`,
          boxShadow: '5px 5px 10px rgba(0, 0, 0, 0.25)',
+         backgroundColor: '#f8f8f8',
+         cursor: ready ? 'crosshair' : 'wait',
       }
-      console.log("width_px, display_settings", width_px, display_settings)
+      // console.log("width_px, display_settings", width_px, display_settings)
       return <styles.FixedInlineBlock
          style={panel_style}>
          <div style={image_style}>
@@ -210,6 +227,13 @@ export class StudyMinibrots extends Component {
                width_px={width_px}
                focal_point={display_settings.focal_point}
                scope={display_settings.scope}
+               on_plan_complete={this.on_ready}
+            />
+         </div>
+         <div style={image_style}>
+            <FractoOrbitalChart
+               width_px={width_px}
+               focal_point={core_point}
             />
          </div>
       </styles.FixedInlineBlock>
@@ -222,7 +246,7 @@ export class StudyMinibrots extends Component {
    render() {
       const {
          rendered_height, container_ref, rendered_splitter_pos,
-         minibrot_list, selected_row,
+         minibrot_list, selected_row, ready,
       } = this.state
       let top = 0;
       let left = 0;
@@ -247,7 +271,8 @@ export class StudyMinibrots extends Component {
       />
       const table_style = {
          height: `${rendered_height - 2 * MARGIN_PX - top + TITLE_BAR_HEIGHT_PX}px`,
-         maxWidth: `${TABLE_WIDTH_PX}px`
+         maxWidth: `${TABLE_WIDTH_PX}px`,
+         cursor: ready ? 'pointer' : 'wait',
       }
       // console.log('selected_minibrot', selected_minibrot)
       const left_panel = this.left_panel()
