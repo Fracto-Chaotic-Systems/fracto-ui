@@ -94,6 +94,7 @@ export class CoolTable extends Component {
    }
 
    render_cell = (row, col, column, data, id) => {
+      const {selected_row} = this.props
       // console.log("render_cell = (row, col, column, data, id)", row, col, column, data, id)
       let object_data = data
       switch (column.type) {
@@ -141,6 +142,9 @@ export class CoolTable extends Component {
                console.log("unknown align option", column.align)
                break;
          }
+      }
+      if (selected_row === row) {
+         cell_style.backgroundColor = '#cccccc';
       }
       if (column["style"]) {
          cell_style = {
@@ -193,7 +197,10 @@ export class CoolTable extends Component {
    }
 
    render() {
-      const {columns, data, options, on_select_row, table_style, selected_rows} = this.props
+      const {
+         columns, data, options, on_select_row, table_style,
+         selected_row, selected_rows
+      } = this.props
       let columns_clone = columns.slice()
       if (options.includes(TABLE_CAN_SELECT)) {
          columns_clone.unshift(HEADER_COLUMN_SELECT)

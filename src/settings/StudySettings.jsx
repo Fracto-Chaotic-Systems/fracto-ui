@@ -36,6 +36,8 @@ export const KEY_STUDY_MINIBROTS_FRAME_SETTINGS = `${MINBROTS_FOLDER}/frame_sett
 export const KEY_STUDY_MINIBROTS_SPLITTER_POS = `${MINBROTS_FOLDER}/splitter_pos`
 export const KEY_STUDY_MINIBROTS_LEGEND_SPLITTER_POS = `${MINBROTS_FOLDER}/legend_splitter_pos`
 export const KEY_STUDY_MINIBROTS_STEPS_SPLITTER_POS = `${MINBROTS_FOLDER}/steps_splitter_pos`
+export const KEY_STUDY_MINIBROTS_SELECTED_ROW = `${MINBROTS_FOLDER}/selected_row`
+export const KEY_STUDY_MINIBROTS_RENDER_SPLITTER_POS =  `${MINBROTS_FOLDER}/render_splitter_pos`
 
 export const KEY_STUDY_PATHS_FRAME_SETTINGS = `${PATHS_FOLDER}/frame_settings`
 export const KEY_STUDY_PATHS_SPLITTER_POS = `${PATHS_FOLDER}/splitter_pos`
@@ -189,6 +191,18 @@ export const APP_STUDY_SETTINGS = {
       data_type: TYPE_NUMBER,
       default_value: 200,
       description: 'Current position for the study minibrots vertical steps splitter',
+      persist: true,
+   },
+   [KEY_STUDY_MINIBROTS_SELECTED_ROW] :{
+      data_type: TYPE_NUMBER,
+      default_value: -1,
+      description: 'Current selected table row of the minibrot list',
+      persist: true,
+   },
+   [KEY_STUDY_MINIBROTS_RENDER_SPLITTER_POS]: {
+      data_type: TYPE_NUMBER,
+      default_value: 200,
+      description: 'Current position for the study minibrots render splitter',
       persist: true,
    },
    [KEY_STUDY_PATHS_FRAME_SETTINGS]: {
