@@ -3,6 +3,7 @@ import {DEFAULT_SIDEBAR_WIDTH} from "../constants.jsx";
 
 const ASSETS_FOLDER = 'assets'
 const ASSETS_GENERATOR_FOLDER = 'assets/generator'
+const ASSETS_GALLERY_FOLDER = 'assets/gallery'
 export const KEY_ASSETS_SPLITTER_POS_PX = `${ASSETS_FOLDER}/splitter_pos_px`
 export const KEY_ASSETS_SECTION = `${ASSETS_FOLDER}/assets_section`
 
@@ -17,7 +18,8 @@ export const KEY_ASSETS_GENERATOR_SPLITTER_POS = `${ASSETS_GENERATOR_FOLDER}/spl
 export const KEY_ASSETS_GENERATOR_LEGEND_SPLITTER_POS = `${ASSETS_GENERATOR_FOLDER}/legend_splitter_pos`
 export const KEY_ASSETS_GENERATOR_STEPS_SPLITTER_POS = `${ASSETS_GENERATOR_FOLDER}/steps_splitter_pos`
 export const KEY_ASSETS_GENERATOR_RESOLUTION = `${ASSETS_GENERATOR_FOLDER}/generator_resolution`
-
+export const KEY_ASSETS_LIST_SELECTED_ROW = `${ASSETS_GALLERY_FOLDER}/selected_row`
+export const KEY_ASSETS_GALLERY_RENDER_SPLITTER_POS = `${ASSETS_GALLERY_FOLDER}/render_splitter_pos_px`
 const DEFAULT_FRAME_SETTINGS = {
    focal_point: {x: -0.75, y: 0.0001},
    scope: 2.5,
@@ -65,6 +67,18 @@ export const APP_ASSETS_SETTINGS = {
       data_type: TYPE_NUMBER,
       default_value: 2400,
       description: 'Current resolution of the assets generator',
+      persist: true,
+   },
+   [KEY_ASSETS_LIST_SELECTED_ROW] :{
+      data_type: TYPE_NUMBER,
+      default_value: 0,
+      description: 'Current selected table row of the assets list',
+      persist: true,
+   },
+   [KEY_ASSETS_GALLERY_RENDER_SPLITTER_POS]: {
+      data_type: TYPE_NUMBER,
+      default_value: 350,
+      description: 'Current position for the assets gallery render splitter',
       persist: true,
    },
 }

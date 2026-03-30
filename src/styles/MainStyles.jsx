@@ -186,6 +186,9 @@ export class MainStyles {
    static ScrollingBlock = styled(CoolStyles.Block)`
        overflow-y: auto;
    `
+   static ScrollingInlineBlock = styled(CoolStyles.InlineBlock)`
+       overflow-y: auto;
+   `
    static NumericValue = styled(CoolStyles.InlineBlock)`
        ${CoolStyles.monospace}
    `

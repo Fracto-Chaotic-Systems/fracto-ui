@@ -4,6 +4,11 @@ import {
 } from '../../styles/MainStyles.jsx'
 import FractoColors from "../../utils/render/FractoColors.jsx";
 
+export const FETCH_JSON_HEADERS = {
+   'Content-Type': 'application/json',
+   'Accept': 'application/json'
+}
+
 const draw_highlight = (ctx, img_x, img_y, color) => {
    try {
       ctx.strokeStyle = color

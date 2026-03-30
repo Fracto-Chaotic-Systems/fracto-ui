@@ -8,7 +8,8 @@ import {
 import CoolTable from "../../../utils/ui/CoolTable.jsx";
 import {
    render_magnitude,
-   render_pattern_block
+   render_pattern_block,
+   FETCH_JSON_HEADERS,
 } from "../StudyUtils.jsx";
 
 import {
@@ -30,11 +31,6 @@ export const TABLE_WIDTH_PX =
    CARDINAL_WIDTH_PX
    + MAGNITUDE_WIDTH_PX
    + 70;
-
-const FETCH_JSON_HEADERS = {
-   'Content-Type': 'application/json',
-   'Accept': 'application/json'
-}
 
 const TABLE_COLUMNS = [
    {

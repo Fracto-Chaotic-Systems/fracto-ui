@@ -17,6 +17,7 @@ import {
    KEY_STUDY_MINIBROTS_RENDER_SPLITTER_POS,
    KEY_STUDY_SPLITTER_POS_PX
 } from "../../../settings/StudySettings.jsx";
+
 const IMAGE_SIZE_DELTA = 50
 
 export class MinibrotPanel extends Component {
@@ -36,7 +37,8 @@ export class MinibrotPanel extends Component {
    componentDidMount() {
       this.setState({
          rendered_splitter_pos: AppSettings.get(KEY_STUDY_MINIBROTS_RENDER_SPLITTER_POS),
-      })}
+      })
+   }
 
    on_select_minibrot = (selected_minibrot) => {
       const display_settings = JSON.parse(selected_minibrot.display_settings)
