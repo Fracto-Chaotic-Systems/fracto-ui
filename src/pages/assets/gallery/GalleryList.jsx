@@ -67,10 +67,11 @@ export class GalleryList extends Component {
 
    load_assets = async () => {
       const {on_select_asset} = this.props
-      const asset_list = AssetsBackend.load_assets()
+      const asset_list = await AssetsBackend.load_assets()
       const selected_row = AppSettings.get(KEY_ASSETS_LIST_SELECTED_ROW)
       const selected_asset = asset_list[selected_row]
       on_select_asset(selected_asset)
+      console.log('asset_list',asset_list)
       this.setState({selected_row, asset_list})
    }
 

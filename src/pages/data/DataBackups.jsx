@@ -69,7 +69,7 @@ export class DataBackups extends Component {
          const response = await fetch(url)
          const result = await response.json()
          backup_data[table] = result//.split('\n')
-         this.setState({backup_data})
+         // this.setState({backup_data})
          console.log('backup_data', backup_data)
       } catch (error) {
          console.log(error.message)
@@ -78,7 +78,7 @@ export class DataBackups extends Component {
 
    render() {
       const {backup_data} = this.state
-      const table_data = TABLE_LIST.map((item, iitemdex) => {
+      const table_data = TABLE_LIST.map((item) => {
          if (!backup_data[item]) {
             return {
                table: <styles.TablePrompt>{item}</styles.TablePrompt>,
