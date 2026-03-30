@@ -77,7 +77,7 @@ export const APP_ASSETS_SETTINGS = {
    },
    [KEY_ASSETS_GALLERY_RENDER_SPLITTER_POS]: {
       data_type: TYPE_NUMBER,
-      default_value: 350,
+      default_value: 800,
       description: 'Current position for the assets gallery render splitter',
       persist: true,
    },
