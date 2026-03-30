@@ -201,7 +201,7 @@ export const APP_STUDY_SETTINGS = {
    },
    [KEY_STUDY_MINIBROTS_RENDER_SPLITTER_POS]: {
       data_type: TYPE_NUMBER,
-      default_value: 200,
+      default_value: 800,
       description: 'Current position for the study minibrots render splitter',
       persist: true,
    },
@@ -226,7 +226,7 @@ export const APP_STUDY_SETTINGS = {
    },
    [KEY_STUDY_PATHS_STEPS_SPLITTER_POS]: {
       data_type: TYPE_NUMBER,
-      default_value: 200,
+      default_value: 800,
       description: 'Current position for the study paths vertical steps splitter',
       persist: true,
    },
