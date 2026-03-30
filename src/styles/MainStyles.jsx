@@ -125,8 +125,9 @@ export class MainStyles {
        margin: 0.5rem auto;
    `
    static ConsoleWrapper = styled(CoolStyles.Block)`
+       color: #eeeeee;
        padding: 0.5rem;
-       background-color: #222222;
+       background-color: #444444;
    `
    static ConsoleLine = styled(CoolStyles.Block)`
        ${CoolStyles.monospace}
@@ -203,6 +204,9 @@ export class MainStyles {
        color: white;
        padding: 0.125rem 0.125rem 0;
    `;
+   static TablePrompt = styled(CoolStyles.InlineBlock)`
+      line-height: 2rem;
+   `
 }
 
 export default MainStyles

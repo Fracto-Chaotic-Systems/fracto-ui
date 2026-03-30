@@ -6,6 +6,7 @@ export const KEY_DATA_CONTENT_OVERVIEW = `${DATA_FOLDER}/overview`
 export const KEY_DATA_CONTENT_SETTINGS = `${DATA_FOLDER}/settings`
 export const KEY_DATA_CONTENT_STATUS = `${DATA_FOLDER}/status`
 export const KEY_DATA_CONTENT_LOGS = `${DATA_FOLDER}/logs`
+export const KEY_DATA_CONTENT_BACKUPS = `${DATA_FOLDER}/backups`
 
 export const KEY_DATA_MYSQL_HOST_LABEL = `${MYSQL_FOLDER}/host_label`
 export const KEY_DATA_MYSQL_HOST_PROMPT = `${MYSQL_FOLDER}/host_prompt`
@@ -31,8 +32,11 @@ export const KEY_DATA_MAIN_SERVER_FORM_TITLE = `${DATA_FOLDER}/main_server_form_
 export const KEY_DATA_MAIN_SERVER_FORM_SUBTITLE = `${DATA_FOLDER}/main_server_form_subtite`
 export const KEY_DATA_MAIN_SERVER_FORM_SAVE = `${DATA_FOLDER}/main_server_form_save`
 
+export const KEY_DATA_BACKUPS_SECTION_TITLE = `${DATA_FOLDER}/backups_section_title`
+
 export const APP_DATA_TEXT = {
    [KEY_DATA_CONTENT_OVERVIEW]: 'data overview',
+   [KEY_DATA_CONTENT_BACKUPS]: 'data backups',
    [KEY_DATA_CONTENT_SETTINGS]: 'data settings',
    [KEY_DATA_CONTENT_STATUS]: 'data status',
    [KEY_DATA_CONTENT_LOGS]: 'data logs',
@@ -56,5 +60,6 @@ export const APP_DATA_TEXT = {
    [KEY_DATA_MAIN_SERVER_PROMPT]: "required",
    [KEY_DATA_MAIN_SERVER_FORM_TITLE]: "Main Server Connection",
    [KEY_DATA_MAIN_SERVER_FORM_SUBTITLE]: "Specify the remote server connection details",
-   [KEY_DATA_MAIN_SERVER_FORM_SAVE]: "save main server setting"
+   [KEY_DATA_MAIN_SERVER_FORM_SAVE]: "save main server setting",
+   [KEY_DATA_BACKUPS_SECTION_TITLE]: "backups",
 }

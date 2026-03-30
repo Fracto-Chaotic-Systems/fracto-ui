@@ -6,6 +6,7 @@ import Sidebar, {SIDEBAR_BREAKER} from "./utils/Sidebar.jsx";
 import {MainStyles as styles} from '../styles/MainStyles.jsx'
 import AppSettings from "../AppSettings.jsx";
 import {
+   DATA_BACKUPS,
    DATA_LOGS,
    DATA_OVERVIEW,
    DATA_SETTINGS,
@@ -26,10 +27,13 @@ import DataOverview from "./Data/DataOverview.jsx";
 import DataSettings from "./Data/DataSettings.jsx";
 import DataStatus from "./Data/DataStatus.jsx";
 import DataLogs from "./data/DataLogs.jsx";
+import DataBackups from "./data/DataBackups.jsx";
+import {KEY_DATA_BACKUPS_SECTION_TITLE} from "../text/DataText.jsx";
 
 const SIDEBAR_LIST = [
    {title_key: KEY_SIDEBAR_OVERVIEW, section_code: DATA_OVERVIEW, right_pane: <DataOverview/>},
    {section_code: SIDEBAR_BREAKER},
+   {title_key: KEY_DATA_BACKUPS_SECTION_TITLE, section_code: DATA_BACKUPS, right_pane: <DataBackups/>},
    {section_code: SIDEBAR_BREAKER},
    {title_key: KEY_SIDEBAR_SETTINGS, section_code: DATA_SETTINGS, right_pane: <DataSettings/>},
    {title_key: KEY_SIDEBAR_STATUS, section_code: DATA_STATUS, right_pane: <DataStatus/>},

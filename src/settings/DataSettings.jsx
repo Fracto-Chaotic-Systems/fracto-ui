@@ -20,6 +20,7 @@ export const DATA_OVERVIEW = 'data_overview'
 export const DATA_SETTINGS = 'data_settings'
 export const DATA_STATUS = 'data_status'
 export const DATA_LOGS = 'data_logs'
+export const DATA_BACKUPS = 'data_backups'
 
 export const APP_DATA_SETTINGS = {
    [KEY_DATA_SPLITTER_POS_PX]: {
