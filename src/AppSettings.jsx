@@ -82,7 +82,10 @@ export class AppSettings {
                   break
                case TYPE_OBJECT:
                case TYPE_ARRAY:
-                  localStorage.setItem(key, JSON.stringify(new_settings[key]))
+                  const object_str = JSON.stringify(new_settings[key])
+                  if (object_str.length < 1000) {
+                     localStorage.setItem(key, JSON.stringify(new_settings[key]))
+                  }
                   break
                default:
                   console.log('persist_settings bad data_type', key_settings.data_type)

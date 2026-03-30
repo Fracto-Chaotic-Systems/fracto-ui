@@ -18,13 +18,14 @@ import {
 } from "../../settings/AssetsSettings.jsx";
 import AppText from "../../AppText.jsx";
 import {
+   KEY_IMAGE_ASSETS_ADD_TO_GALLERY,
    KEY_IMAGE_ASSETS_GENERATE, KEY_IMAGE_ASSETS_RENDER_NOW,
 } from "../../text/AssetsText.jsx";
 
 import NavigatorSplitterLayout from "../../navigator/NavigatorSplitterLayout.jsx";
 import FractoTileCoverage from "../../utils/render/FractoTileCoverage.jsx";
 import CoolStyles from "../../utils/ui/styles/CoolStyles.jsx";
-import {FRACTO_ASSET_PORT, FRACTO_TILES_PORT, FRACTO_UI_PORT} from "../../../../../constants.js";
+import {FRACTO_ASSET_PORT, FRACTO_DATA_PORT, FRACTO_UI_PORT} from "../../../../../constants.js";
 
 const UPDATE_INTERVAL_MS = 1000
 
@@ -51,6 +52,7 @@ export class AssetsGenerator extends Component {
       resolution: 0,
       selected_level: 0,
       image_outcome: null,
+      insert_outcome: null,
    }
 
    componentDidMount() {
@@ -119,7 +121,10 @@ export class AssetsGenerator extends Component {
          `resolution_factor=${2.0}`,
          `aspect_ratio=${1}`,
       ].join('&')
-      this.setState({image_outcome: null, in_fetch: true})
+      this.setState({
+         image_outcome: null,
+         insert_outcome: null,
+         in_fetch: true})
       const origin = window.origin.replace(`${FRACTO_UI_PORT}`, `${FRACTO_ASSET_PORT}`)
       const url = `${origin}/render_image?${all_params}`
       try {
@@ -131,8 +136,35 @@ export class AssetsGenerator extends Component {
       }
    }
 
+   add_to_gallery = async () => {
+      const {image_outcome} = this.state
+      if (!image_outcome) {
+         return
+      }
+      const all_params = [
+         `asset_id=${image_outcome.asset_id.replace('img_', '')}`,
+         `width=${image_outcome.width_px}`,
+         `height=${image_outcome.width_px}`,
+         `focal_point_x=${image_outcome.focal_point.x}`,
+         `focal_point_y=${image_outcome.focal_point.y}`,
+         `scope=${image_outcome.scope}`,
+         `filename=${image_outcome.filename}`,
+         `public_url=${image_outcome.public_url}`,
+         `asset_type=image`,
+      ].join('&')
+      const origin = window.origin.replace(`${FRACTO_UI_PORT}`, `${FRACTO_DATA_PORT}`)
+      const url = `${origin}/asset?${all_params}`
+      try {
+         const insert_outcome = await fetch(url, {}).then(res => res.json())
+         console.log('insert_outcome', insert_outcome)
+         this.setState({insert_outcome, in_fetch: false})
+      } catch (e) {
+         console.error(`error fetching ${url}`, e.message)
+      }
+   }
+
    render_button_block = (resolution) => {
-      const {selected_level} = this.state
+      const {selected_level, image_outcome, insert_outcome} = this.state
       if (!selected_level) {
          return []
       }
@@ -142,7 +174,7 @@ export class AssetsGenerator extends Component {
             value={resolution}
             on_change={this.change_resolution}
          />
-      const blue_button = <CoolStyles.Block
+      const render_now_button = <CoolStyles.Block
          onClick={this.render_image}
          key={'resolution-select'}>
          <styles.BlueButton
@@ -150,10 +182,22 @@ export class AssetsGenerator extends Component {
             {AppText.get(KEY_IMAGE_ASSETS_RENDER_NOW)}
          </styles.BlueButton>
       </CoolStyles.Block>
+      const add_to_gallery_button = image_outcome && !insert_outcome
+         ? <CoolStyles.Block
+            onClick={this.add_to_gallery}
+            key={'add-to-gallery'}>
+            <styles.BlueButton
+               key={'blue-button'}>
+               {AppText.get(KEY_IMAGE_ASSETS_ADD_TO_GALLERY)}
+            </styles.BlueButton>
+         </CoolStyles.Block>
+         : []
       return <CoolStyles.InlineBlock>
          {resolution_select}
          <styles.HalfRemDown/>
-         {blue_button}
+         {render_now_button}
+         <styles.HalfRemDown/>
+         {add_to_gallery_button}
       </CoolStyles.InlineBlock>
    }
 
