@@ -63,17 +63,15 @@ export class MinibrotList extends Component {
    state = {
       minibrot_list: [],
       selected_row: -1,
-      selected_minibrot: {},
    }
 
    componentDidMount() {
       this.load_minibrots()
-      this.setState({
-         selected_row: AppSettings.get(KEY_STUDY_MINIBROTS_SELECTED_ROW),
-      })
    }
 
    load_minibrots = async () => {
+      const {on_select_minibrot} = this.props
+
       const origin = window.origin.replace(`${FRACTO_UI_PORT}`, `${FRACTO_DATA_PORT}`)
       const url = `${origin}/minibrots`
       // console.log('url', url)
@@ -81,7 +79,10 @@ export class MinibrotList extends Component {
          return res.json()
       })
       const minibrot_list = fetched.result
-      this.setState({minibrot_list})
+      const selected_row = AppSettings.get(KEY_STUDY_MINIBROTS_SELECTED_ROW)
+      const selected_minibrot = minibrot_list[selected_row]
+      on_select_minibrot(selected_minibrot)
+      this.setState({selected_row, minibrot_list})
    }
 
    on_select_row = (row) => {

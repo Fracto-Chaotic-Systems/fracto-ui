@@ -195,7 +195,7 @@ export const APP_STUDY_SETTINGS = {
    },
    [KEY_STUDY_MINIBROTS_SELECTED_ROW] :{
       data_type: TYPE_NUMBER,
-      default_value: -1,
+      default_value: 0,
       description: 'Current selected table row of the minibrot list',
       persist: true,
    },
