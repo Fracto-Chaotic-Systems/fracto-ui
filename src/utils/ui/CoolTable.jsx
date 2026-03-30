@@ -57,6 +57,39 @@ export class CoolTable extends Component {
 
    state = {}
 
+   componentDidMount() {
+      window.addEventListener('keydown', this.handleKeyDown);
+   }
+
+   componentWillUnmount() {
+      window.removeEventListener('keydown', this.handleKeyDown);
+   }
+
+   handleKeyDown = (event) => {
+      const {options, on_select_row, selected_row, data} = this.props
+      if (!options.includes(TABLE_CAN_SELECT)) {
+         return;
+      }
+      if (!on_select_row) {
+         return;
+      }
+      if (event.key === 'ArrowUp') {
+         console.log('table ArrowUp');
+         if (selected_row === 0) {
+            return
+         }
+         on_select_row(selected_row - 1)
+         event.preventDefault(); // Prevents the page from scrolling
+      } else if (event.key === 'ArrowDown') {
+         console.log('table ArrowDown');
+         if (selected_row === data.length - 1) {
+            return
+         }
+         on_select_row(selected_row + 1)
+         event.preventDefault(); // Prevents the page from scrolling
+      }
+   };
+
    render_header_cell = (column) => {
       const {on_click_column} = this.props
       const cell_style = column.width_px ? {minWidth: `${column.width_px}px`} : {}

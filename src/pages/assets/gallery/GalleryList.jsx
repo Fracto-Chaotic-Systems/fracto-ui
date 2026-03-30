@@ -77,7 +77,10 @@ export class GalleryList extends Component {
 
    on_select_row = (row) => {
       const {asset_list} = this.state
-      const {on_select_asset} = this.props
+      const {on_select_asset, ready} = this.props
+      if (!ready) {
+         return
+      }
       const selected_asset = asset_list[row]
       this.setState({selected_row: row})
       on_select_asset(selected_asset)
