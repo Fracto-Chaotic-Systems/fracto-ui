@@ -35,6 +35,8 @@ const HEADER_COLUMN_SELECT = {
    align: CELL_ALIGN_CENTER
 }
 
+const DEFAULT_PAGE_SIZE = 25
+
 export class CoolTable extends Component {
 
    static propTypes = {
@@ -79,15 +81,28 @@ export class CoolTable extends Component {
             return
          }
          on_select_row(selected_row - 1)
-         event.preventDefault(); // Prevents the page from scrolling
       } else if (event.key === 'ArrowDown') {
          console.log('table ArrowDown');
          if (selected_row === data.length - 1) {
             return
          }
          on_select_row(selected_row + 1)
-         event.preventDefault(); // Prevents the page from scrolling
+      } else if (event.key === 'PageUp') {
+         if (selected_row <= DEFAULT_PAGE_SIZE) {
+            on_select_row(0)
+         } else {
+            on_select_row(selected_row - DEFAULT_PAGE_SIZE)
+         }
+         console.log('table PageUp');
+      } else if (event.key === 'PageDown') {
+         if (selected_row + DEFAULT_PAGE_SIZE >= data.length - 1) {
+            on_select_row(data.length - 1)
+         } else {
+            on_select_row(selected_row + DEFAULT_PAGE_SIZE)
+         }
+         console.log('table PageDown');
       }
+      event.preventDefault(); // Prevents the page from scrolling
    };
 
    render_header_cell = (column) => {
