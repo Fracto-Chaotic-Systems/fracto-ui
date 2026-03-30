@@ -25,6 +25,7 @@ import {
    KEY_COLUMN_LABEL_ASSET_ID,
    KEY_COLUMN_LABEL_ASSET_SCOPE,
 } from "../../../text/AssetsText.jsx";
+import {AssetsBackend} from "../../../backend/AssetsBackend.jsx";
 
 const ASSET_ID_WIDTH_PX = 100
 const SCOPE_WIDTH_PX = 120
@@ -66,14 +67,7 @@ export class GalleryList extends Component {
 
    load_assets = async () => {
       const {on_select_asset} = this.props
-
-      const origin = window.origin.replace(`${FRACTO_UI_PORT}`, `${FRACTO_DATA_PORT}`)
-      const url = `${origin}/assets`
-      // console.log('url', url)
-      const fetched = await fetch(url, FETCH_JSON_HEADERS).then(res => {
-         return res.json()
-      })
-      const asset_list = fetched.result
+      const asset_list = AssetsBackend.load_assets()
       const selected_row = AppSettings.get(KEY_ASSETS_LIST_SELECTED_ROW)
       const selected_asset = asset_list[selected_row]
       on_select_asset(selected_asset)
