@@ -17,7 +17,9 @@ import AppText from "../../AppText.jsx";
 import {KEY_TILES_GENERATE} from "../../text/TilesText.jsx";
 
 import NavigatorSplitterLayout from "../../navigator/NavigatorSplitterLayout.jsx";
-import FractoTileCoverage from "../../utils/render/FractoTileCoverage.jsx";
+import FractoTileCoverage, {
+   INCLUDE_CAN_DO
+} from "../../utils/render/FractoTileCoverage.jsx";
 
 const UPDATE_INTERVAL_MS = 1000
 
@@ -74,6 +76,10 @@ export class TilesGenerator extends Component {
       }
    }
 
+   on_level_select = (level) => {
+      // console.log('on_level_select', level)
+   }
+
    render() {
       const {container_ref, rendered_height, rendered_width, frame_settings} = this.state
       let top = 0;
@@ -127,6 +133,8 @@ export class TilesGenerator extends Component {
                   bounding_rect={tile_coverage_bounds}
                   frame_settings={frame_settings}
                   frame_settings_key={KEY_TILES_GENERATOR_FRAME_SETTINGS}
+                  on_level_select={this.on_level_select}
+                  options={[INCLUDE_CAN_DO]}
                />
             </styles.FixedInlineBlock>
          </styles.TightCenteredBlock>,
