@@ -99,6 +99,8 @@ export const color_wheel = (canvas_ref, radius, ring_count = 5, color_phase = 0,
    let angle = -PI_BY_2
    let pattern = 2
    const size_by_two = width_px / 2
+   draw_circle(ctx, size_by_two, size_by_two, radii[ring_count - 1],
+      `white`)
    for (let ring = 1; ring <= ring_count; ring++) {
       const limit = Math.pow(2, ring + 1) - 1
       const angle_increment = Math.PI / Math.pow(2, ring - 1)
