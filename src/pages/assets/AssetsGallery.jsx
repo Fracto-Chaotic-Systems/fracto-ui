@@ -17,6 +17,7 @@ import {
    KEY_ASSETS_SPLITTER_POS_PX
 } from "../../settings/AssetsSettings.jsx";
 import FractoRasterImage from "../../utils/render/FractoRasterImage.jsx";
+import FieldsColorWheel from "../../utils/render/FieldsColorWheel.jsx";
 
 const UPDATE_INTERVAL_MS = 1000
 const IMAGE_SIZE_DELTA = 50
@@ -28,6 +29,7 @@ export class AssetsGallery extends Component {
       container_ref: React.createRef(),
       interval: null,
       ready: true,
+      canvas_buffer: [],
    }
 
    componentDidMount() {
@@ -81,8 +83,11 @@ export class AssetsGallery extends Component {
       this.setState({rendered_splitter_pos: pos})
    }
 
-   on_ready = () => {
-      this.setState({ready: true})
+   on_ready = (canvas_buffer) => {
+      this.setState({
+         canvas_buffer,
+         ready: true,
+      })
    }
 
    left_panel = () => {
@@ -91,7 +96,7 @@ export class AssetsGallery extends Component {
          core_point,
          container_ref,
          rendered_splitter_pos,
-         asset,
+         asset, canvas_buffer,
       } = this.state
       if (!asset?.scope) {
          return []
@@ -143,7 +148,10 @@ export class AssetsGallery extends Component {
             />
          </div>
          <div style={image_style}>
-            the other one
+            <FieldsColorWheel
+               width_px={width_px}
+               canvas_buffer={canvas_buffer}
+            />
          </div>
       </styles.FixedInlineBlock>
    }

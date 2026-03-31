@@ -207,6 +207,15 @@ export class MainStyles {
    static TablePrompt = styled(CoolStyles.InlineBlock)`
       line-height: 2rem;
    `
+   static ColorWheelWrapper = styled(CoolStyles.InlineBlock)`
+       ${CoolStyles.noselect}
+       margin-right: 0.5rem;
+       margin-bottom: 0.25rem;
+   `;
+
+   static ColorWheelCanvas = styled.canvas`
+       margin: 0;
+   `
 }
 
 export default MainStyles

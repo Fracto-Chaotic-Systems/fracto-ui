@@ -77,6 +77,9 @@ export class StudyPaths extends Component {
    identify_cores = (frame_settings, selected_point = -1) => {
       const {selected_cardinality} = this.state
       const orbital_bins = identify_cores(frame_settings)
+      if (!orbital_bins) {
+         return
+      }
       const core_points = orbital_bins
          .filter(bin => !bin.exclude)
          .sort((a, b) => a.lowest_iterations - b.lowest_iterations)
@@ -164,7 +167,7 @@ export class StudyPaths extends Component {
       }
       let points_table = []
       if (core_points) {
-         console.log('core_points', core_points)
+         // console.log('core_points', core_points)
          points_table = <CoolTable
             columns={TABLE_COLUMNS}
             data={core_points}
