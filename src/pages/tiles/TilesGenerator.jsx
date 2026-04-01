@@ -20,6 +20,7 @@ import NavigatorSplitterLayout from "../../navigator/NavigatorSplitterLayout.jsx
 import FractoTileCoverage, {
    INCLUDE_CAN_DO
 } from "../../utils/render/FractoTileCoverage.jsx";
+import GeneratorRun from "./generator/GeneratorRun.jsx";
 
 const UPDATE_INTERVAL_MS = 1000
 
@@ -32,6 +33,7 @@ export class TilesGenerator extends Component {
       bounding_rect: {},
       frame_settings: {},
       subscription: null,
+      coverage_data: [],
    }
 
    componentDidMount() {
@@ -59,7 +61,9 @@ export class TilesGenerator extends Component {
    on_frame_settings_changed = (key, value) => {
       const frame_settings = AppSettings
          .get(KEY_TILES_GENERATOR_FRAME_SETTINGS)
-      this.setState({frame_settings})
+      this.setState({
+         frame_settings,
+      })
    }
 
    update_dimensions = () => {
@@ -76,12 +80,22 @@ export class TilesGenerator extends Component {
       }
    }
 
-   on_level_select = (level) => {
-      // console.log('on_level_select', level)
+   on_coverage_data = (coverage_data) => {
+      // if (!coverage_data) {
+      //    return;
+      // }
+      console.log('on_coverage_data', coverage_data)
+      this.setState({coverage_data})
+   }
+
+   on_busy = () => {
    }
 
    render() {
-      const {container_ref, rendered_height, rendered_width, frame_settings} = this.state
+      const {
+         coverage_data,
+         container_ref, rendered_height, rendered_width, frame_settings
+      } = this.state
       let top = 0;
       let left = 0;
       if (container_ref.current) {
@@ -133,8 +147,13 @@ export class TilesGenerator extends Component {
                   bounding_rect={tile_coverage_bounds}
                   frame_settings={frame_settings}
                   frame_settings_key={KEY_TILES_GENERATOR_FRAME_SETTINGS}
-                  on_level_select={this.on_level_select}
+                  on_coverage_data={this.on_coverage_data}
                   options={[INCLUDE_CAN_DO]}
+               />
+               <styles.HalfRemSpacer/>
+               <GeneratorRun
+                  coverage_data={coverage_data}
+                  on_busy={this.on_busy}
                />
             </styles.FixedInlineBlock>
          </styles.TightCenteredBlock>,

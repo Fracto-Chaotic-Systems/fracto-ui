@@ -1,18 +1,12 @@
 import React, {Component} from "react";
 import PropTypes from "prop-types";
 
-import {
-   FRACTO_TILES_PORT,
-   FRACTO_UI_PORT
-} from "../../../../../constants.js";
-
 import CoolStyles from "../ui/styles/CoolStyles.jsx";
 import {MainStyles as styles} from "../../styles/MainStyles.jsx";
 import {
    CELL_ALIGN_CENTER,
    CELL_TYPE_NUMBER,
    CELL_TYPE_TEXT,
-   TABLE_CAN_SELECT,
 } from "../ui/styles/CoolTableStyles.jsx";
 import AppSettings from "../../AppSettings.jsx";
 import {KEY_NAVIGATOR_DISABLED} from "../../settings/NavigatorSettings.jsx";
@@ -58,7 +52,7 @@ export class FractoTileCoverage extends Component {
       bounding_rect: PropTypes.object.isRequired,
       frame_settings: PropTypes.object.isRequired,
       frame_settings_key: PropTypes.string.isRequired,
-      on_level_select: PropTypes.func.isRequired,
+      on_coverage_data: PropTypes.func.isRequired,
       options: PropTypes.array,
    }
 
@@ -72,7 +66,6 @@ export class FractoTileCoverage extends Component {
       in_fetch: false,
       heat_map_buffer: [],
       coverage_data: [],
-      selected_level: LEVEL_NOT_SELECTED,
    }
 
    componentDidMount() {
@@ -127,17 +120,14 @@ export class FractoTileCoverage extends Component {
    }
 
    clear_canvas = (ctx, frame_settings, text) => {
-      const {on_level_select} = this.props
+      const {on_coverage_data} = this.props
       if (!ctx) {
          console.log('clear_canvas no ctx');
          return;
       }
-      this.setState({
-         coverage_data: [],
-         selected_level: LEVEL_NOT_SELECTED,
-      })
-      if (on_level_select) {
-         on_level_select(0)
+      this.setState({coverage_data: [],})
+      if (on_coverage_data) {
+         on_coverage_data(null)
       }
       ctx.fillStyle = 'white';
       ctx.fillRect(0, 0, frame_settings.width_px, frame_settings.width_px);
@@ -154,7 +144,7 @@ export class FractoTileCoverage extends Component {
 
    generate_heat_map = async () => {
       const {ctx} = this.state
-      const {frame_settings, options} = this.props
+      const {frame_settings, options, on_coverage_data} = this.props
       const disabled = AppSettings.get(KEY_NAVIGATOR_DISABLED)
       if (disabled || !frame_settings) {
          return;
@@ -182,6 +172,9 @@ export class FractoTileCoverage extends Component {
          heat_map_buffer: result.heat_map_buffer,
          coverage_data,
       })
+      if (on_coverage_data) {
+         on_coverage_data(coverage_data)
+      }
       this.setState({in_fetch: false})
    }
 
@@ -235,17 +228,8 @@ export class FractoTileCoverage extends Component {
       })
    }
 
-   on_select_row = (selected_level) => {
-      const {coverage_data} = this.state
-      const {on_level_select} = this.props
-      this.setState({selected_level})
-      if (on_level_select) {
-         on_level_select(selected_level + coverage_data[0].level)
-      }
-   }
-
    render() {
-      const {canvas_ref, in_fetch, coverage_data, selected_level} = this.state
+      const {canvas_ref, in_fetch, coverage_data} = this.state
       const {frame_settings} = this.props
       const canvas_block_style = {
          height: `${frame_settings.width_px}px`,
@@ -258,10 +242,7 @@ export class FractoTileCoverage extends Component {
          ? <CoolTable
             columns={TABLE_COLUMNS}
             data={coverage_data}
-            options={[TABLE_CAN_SELECT]}
             table_style={{backgroundColor: 'white'}}
-            selected_row={selected_level}
-            on_select_row={this.on_select_row}
          />
          : []
       return <CoolStyles.InlineBlock

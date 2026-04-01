@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import {CoolStyles} from "../utils/ui/CoolImports.jsx";
+import {CoolColors, CoolStyles} from "../utils/ui/CoolImports.jsx";
 import {HEADER_BAR_HEIGHT_PX} from "../constants.jsx";
 
 export const MARGIN_PX = 10
@@ -181,6 +181,9 @@ export class MainStyles {
    static OneRemSpacer = styled(CoolStyles.InlineBlock)`
        width: 1rem;
    `
+   static HalfRemSpacer = styled(CoolStyles.InlineBlock)`
+       width: 0.5rem;
+   `
    static HalfRemDown = styled(CoolStyles.Block)`
        height: 0.5rem;
    `
@@ -215,6 +218,16 @@ export class MainStyles {
 
    static ColorWheelCanvas = styled.canvas`
        margin: 0;
+   `
+   static NormalLink = styled(CoolStyles.InlineBlock)`
+       ${CoolStyles.italic}
+       ${CoolStyles.pointer}
+       font-size: 0.85rem;
+       color: ${CoolColors.deep_blue};
+       &:hover {
+           font-weight: bold;
+           color: ${CoolColors.cool_blue};
+       }
    `
 }
 
