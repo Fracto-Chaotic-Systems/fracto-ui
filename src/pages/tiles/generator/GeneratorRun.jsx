@@ -19,15 +19,15 @@ const TABLE_COLUMNS = [
       align: CELL_ALIGN_CENTER,
    },
    {
-      id: "can_do",
-      label: "can_do",
+      id: "re_do",
+      label: "re-do",
       type: CELL_TYPE_NUMBER,
       width_px: 65,
       align: CELL_ALIGN_CENTER,
    },
    {
-      id: "do_it",
-      label: "do it",
+      id: "can_do",
+      label: "can do",
       type: CELL_TYPE_TEXT,
       width_px: 65,
       align: CELL_ALIGN_CENTER,
@@ -41,35 +41,51 @@ export class GeneratorRun extends Component {
    }
 
    state = {
-      been_done: [],
+      can_do_been_done: [],
+      re_do_been_done: [],
    }
 
    componentDidMount() {
    }
 
    componentDidUpdate(prevProps, prevState, snapshot) {
-      const {been_done} = this.state
       const prev_coverage_data_str = JSON.stringify(prevProps.coverage_data)
       const curr_coverage_data_str = JSON.stringify(this.props.coverage_data)
       if (prev_coverage_data_str !== curr_coverage_data_str) {
-         this.setState({been_done: []})
+         this.setState({
+            can_do_been_done: [],
+            re_do_been_done: [],
+         })
       }
    }
 
    do_it_now = (level) => {
-      const {been_done} = this.state
+      const {can_do_been_done} = this.state
       const {on_busy} = this.props
-      if (been_done.includes(level)) {
+      if (can_do_been_done.includes(level)) {
          console.log('been done', level)
          return;
       }
-      been_done.push(level)
+      can_do_been_done.push(level)
       console.log('do_it_now', level)
       on_busy(true)
-      this.setState({been_done})
+      this.setState({can_do_been_done})
    }
 
-   process_coverage = (been_done) => {
+   re_do_it_now = (level) => {
+      const {re_do_been_done} = this.state
+      const {on_busy} = this.props
+      if (re_do_been_done.includes(level)) {
+         console.log('re-do been done', level)
+         return;
+      }
+      re_do_been_done.push(level)
+      console.log('do_it_now', level)
+      on_busy(true)
+      this.setState({re_do_been_done})
+   }
+
+   process_coverage = (can_do_been_done, re_do_been_done) => {
       const {coverage_data} = this.props
       if (!Array.isArray(coverage_data)) {
          return []
@@ -77,23 +93,32 @@ export class GeneratorRun extends Component {
       return coverage_data
          .filter(item => item.can_do)
          .map((item) => {
-            const link = been_done.includes(item.level)
+            const can_do = can_do_been_done.includes(item.level)
                ? '-'
                : <styles.NormalLink
                   onClick={e => this.do_it_now(item.level)}>
-                  now
+                  <styles.NumericValue>
+                     {item.can_do?.length}
+                  </styles.NumericValue>
+               </styles.NormalLink>
+            const re_do = re_do_been_done.includes(item.level)
+               ? '-'
+               : <styles.NormalLink
+                  onClick={e => this.re_do_it_now(item.level)}>
+                  {item.count}
                </styles.NormalLink>
             return {
                level: item.level,
-               can_do: item.can_do?.length || 0,
-               do_it: link
+               can_do,
+               re_do
             }
          })
    }
 
    render() {
-      const {been_done} = this.state
-      const table_data = this.process_coverage(been_done)
+      const {can_do_been_done, re_do_been_done} = this.state
+      const table_data = this.process_coverage(
+         can_do_been_done, re_do_been_done)
       if (!table_data.length) {
          return []
       }
