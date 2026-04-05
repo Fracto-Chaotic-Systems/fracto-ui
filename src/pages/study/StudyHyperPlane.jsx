@@ -12,7 +12,7 @@ import {
 } from "../../settings/StudySettings.jsx";
 import AppText from "../../AppText.jsx";
 
-import NavigatorSplitterLayout, {NAVIGATOR_OPTION_HYPERPLANE} from "../../navigator/NavigatorSplitterLayout.jsx";
+import NavigatorSplitterLayout from "../../navigator/NavigatorSplitterLayout.jsx";
 import {KEY_STUDY_HYPERPLANE} from "../../text/StudyText.jsx";
 import {KEY_ASSETS_SPLITTER_POS_PX} from "../../settings/AssetsSettings.jsx";
 
