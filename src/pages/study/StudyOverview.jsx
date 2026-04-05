@@ -15,9 +15,9 @@ export class StudyOverview extends Component {
          <styles.CenteredBlock
             key={'input-form'}>
             <FractoRasterImage
-               width_px={150}
+               width_px={50}
                focal_point={{x: 0, y: 0}}
-               scope={10}
+               scope={4}
                data_endpoint={'hyper_canvas_buffer'}
             />
          </styles.CenteredBlock>,
