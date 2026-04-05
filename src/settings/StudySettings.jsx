@@ -236,4 +236,29 @@ export const APP_STUDY_SETTINGS = {
       description: 'Current position for the study paths vertical steps splitter',
       persist: true,
    },
+   [KEY_STUDY_HYPERPLANE_FRAME_SETTINGS]: {
+      data_type: TYPE_OBJECT,
+      default_value: DEFAULT_FRAME_SETTINGS,
+      description: 'Frame settings of the study paths page',
+      persist: true,
+      no_copy: true,
+   },
+   [KEY_STUDY_HYPERPLANE_SPLITTER_POS]: {
+      data_type: TYPE_NUMBER,
+      default_value: 500,
+      description: 'Current position for the study paths splitter',
+      persist: true,
+   },
+   [KEY_STUDY_HYPERPLANE_LEGEND_SPLITTER_POS]: {
+      data_type: TYPE_NUMBER,
+      default_value: 800,
+      description: 'Current position for the study paths horizontal legend splitter',
+      persist: true,
+   },
+   [KEY_STUDY_HYPERPLANE_STEPS_SPLITTER_POS]: {
+      data_type: TYPE_NUMBER,
+      default_value: 800,
+      description: 'Current position for the study paths vertical steps splitter',
+      persist: true,
+   },
 }
