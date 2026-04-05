@@ -5,11 +5,13 @@ export const KEY_STUDY_SETTINGS = `${STUDY_FOLDER}/study_settings`
 export const KEY_STUDY_STATUS = `${STUDY_FOLDER}/study_status`
 export const KEY_STUDY_MAGNITUDES = `${STUDY_FOLDER}/study_magnitudes`
 export const KEY_STUDY_POINTS = `${STUDY_FOLDER}/study_points`
+export const KEY_STUDY_HYPERPLANE = `${STUDY_FOLDER}/study_hyperplane`
 export const KEY_STUDY_PATHS = `${STUDY_FOLDER}/study_paths`
 export const KEY_STUDY_FIELDS = `${STUDY_FOLDER}/study_fields`
 export const KEY_STUDY_MINIBROTS = `${STUDY_FOLDER}/study_minibrots`
 export const KEY_MAGNITUDES_TITLE = `${STUDY_FOLDER}/magnitudes_title`
 export const KEY_POINTS_TITLE = `${STUDY_FOLDER}/points_title`
+export const KEY_HYPERPLANE_TITLE = `${STUDY_FOLDER}/hyperplane_title`
 export const KEY_PATHS_TITLE = `${STUDY_FOLDER}/paths_title`
 export const KEY_FIELDS_TITLE = `${STUDY_FOLDER}/fields_title`
 export const KEY_MINIBROTS_TITLE = `${STUDY_FOLDER}/minibrots_title`
@@ -29,11 +31,13 @@ export const APP_STUDY_TEXT = {
    [KEY_STUDY_STATUS]: 'study status',
    [KEY_STUDY_MAGNITUDES]: 'orbital magnitudes',
    [KEY_STUDY_POINTS]: 'orbital points',
+   [KEY_STUDY_HYPERPLANE]: 'hyper-logistic plane',
    [KEY_STUDY_PATHS]: 'logistic paths',
    [KEY_STUDY_FIELDS]: 'orbital fields',
    [KEY_STUDY_MINIBROTS]: 'registry of minibrots',
    [KEY_MAGNITUDES_TITLE]: 'magnitudes',
    [KEY_POINTS_TITLE]: 'points',
+   [KEY_HYPERPLANE_TITLE]: 'hyperplane',
    [KEY_PATHS_TITLE]: 'paths',
    [KEY_FIELDS_TITLE]: 'fields',
    [KEY_MINIBROTS_TITLE]: 'minibrots',

@@ -11,6 +11,7 @@ const POINTS_FOLDER = 'study/points'
 const FIELDS_FOLDER = 'study/fields'
 const MINBROTS_FOLDER = 'study/minibrots'
 const PATHS_FOLDER = 'study/paths'
+const HYPERPLANE_FOLDER = 'study/hyperplane'
 export const KEY_STUDY_SPLITTER_POS_PX = `${STUDY_FOLDER}/splitter_pos_px`
 export const KEY_STUDY_SECTION = `${STUDY_FOLDER}/study_section`
 
@@ -43,6 +44,11 @@ export const KEY_STUDY_PATHS_FRAME_SETTINGS = `${PATHS_FOLDER}/frame_settings`
 export const KEY_STUDY_PATHS_SPLITTER_POS = `${PATHS_FOLDER}/splitter_pos`
 export const KEY_STUDY_PATHS_LEGEND_SPLITTER_POS = `${PATHS_FOLDER}/legend_splitter_pos`
 export const KEY_STUDY_PATHS_STEPS_SPLITTER_POS = `${PATHS_FOLDER}/steps_splitter_pos`
+
+export const KEY_STUDY_HYPERPLANE_FRAME_SETTINGS = `${HYPERPLANE_FOLDER}/frame_settings`
+export const KEY_STUDY_HYPERPLANE_SPLITTER_POS = `${HYPERPLANE_FOLDER}/splitter_pos`
+export const KEY_STUDY_HYPERPLANE_LEGEND_SPLITTER_POS = `${HYPERPLANE_FOLDER}/legend_splitter_pos`
+export const KEY_STUDY_HYPERPLANE_STEPS_SPLITTER_POS = `${HYPERPLANE_FOLDER}/steps_splitter_pos`
 
 export const STUDY_OVERVIEW = 'study_overview'
 export const STUDY_SETTINGS = 'study_settings'

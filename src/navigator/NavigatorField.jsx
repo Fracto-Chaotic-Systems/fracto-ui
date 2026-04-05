@@ -196,6 +196,9 @@ export class NavigatorField extends Component {
                focal_point={frame_settings.focal_point}
                scope={frame_settings.scope}
                on_plan_complete={this.on_plan_complete}
+               data_endpoint={frame_settings.hyper_plane
+                  ? 'hyper_canvas_buffer'
+                  : 'canvas_buffer'}
             />
          </styles.ImageWrapper>,
          crosshairs,

@@ -20,11 +20,11 @@ import {
    KEY_SIDEBAR_STATUS,
 } from "../text/RootText.jsx";
 import {
-   KEY_FIELDS_TITLE,
+   KEY_FIELDS_TITLE, KEY_HYPERPLANE_TITLE,
    KEY_MAGNITUDES_TITLE,
    KEY_MINIBROTS_TITLE,
    KEY_PATHS_TITLE,
-   KEY_POINTS_TITLE,
+   KEY_POINTS_TITLE, KEY_STUDY_HYPERPLANE,
 } from "../text/StudyText.jsx";
 
 import SplitterLayout from "./utils/SplitterLayout.jsx";
@@ -38,6 +38,7 @@ import StudyPoints from "./study/StudyPoints.jsx";
 import StudyFields from "./study/StudyFields.jsx";
 import StudyMinibrots from "./study/StudyMinibrots.jsx";
 import StudyPaths from "./study/StudyPaths.jsx";
+import StudyHyperPlane from "./study/StudyHyperPlane.jsx";
 
 const SIDEBAR_LIST = [
    {title_key: KEY_SIDEBAR_OVERVIEW, section_code: STUDY_OVERVIEW, right_pane: <StudyOverview/>},
@@ -47,6 +48,8 @@ const SIDEBAR_LIST = [
    {title_key: KEY_FIELDS_TITLE, section_code: STUDY_FIELDS, right_pane: <StudyFields/>},
    {title_key: KEY_MINIBROTS_TITLE, section_code: STUDY_MINIBROTS, right_pane: <StudyMinibrots/>},
    {title_key: KEY_MAGNITUDES_TITLE, section_code: STUDY_MAGNITUDES, right_pane: <StudyMagnitudes/>},
+   {section_code: SIDEBAR_BREAKER},
+   {title_key: KEY_HYPERPLANE_TITLE, section_code: KEY_STUDY_HYPERPLANE, right_pane: <StudyHyperPlane/>},
    {section_code: SIDEBAR_BREAKER},
    {title_key: KEY_SIDEBAR_SETTINGS, section_code: STUDY_SETTINGS, right_pane: <StudySettings/>},
    {title_key: KEY_SIDEBAR_STATUS, section_code: STUDY_STATUS, right_pane: <StudyStatus/>}
