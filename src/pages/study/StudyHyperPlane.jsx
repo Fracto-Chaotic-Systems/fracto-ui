@@ -91,6 +91,8 @@ export class StudyHyperPlane extends Component {
          steps_key: KEY_STUDY_HYPERPLANE_STEPS_SPLITTER_POS,
          section_key: KEY_STUDY_SPLITTER_POS_PX,
       }
+      const hyper_frame_settings = copy_json(frame_settings)
+      hyper_frame_settings.hyper_plane = true
       return [
          <styles.SectionTitle
             key={'study-overview-title'}>
@@ -101,7 +103,7 @@ export class StudyHyperPlane extends Component {
             key={'generator-content'}>
             <NavigatorSplitterLayout
                bounding_rect={bounding_rect}
-               frame_settings={frame_settings}
+               frame_settings={hyper_frame_settings}
                frame_settings_key={KEY_STUDY_HYPERPLANE_FRAME_SETTINGS}
                splitter_keys={splitter_keys}
             />
