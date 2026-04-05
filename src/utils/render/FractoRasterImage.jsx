@@ -22,19 +22,17 @@ export class FractoRasterImage extends Component {
       on_plan_complete: PropTypes.func,
       aspect_ratio: PropTypes.number,
       disabled: PropTypes.bool,
-      update_counter: PropTypes.number,
-      filter_level: PropTypes.number,
       color_handler: PropTypes.func,
       resolution_factor: PropTypes.number,
+      data_endpoint: PropTypes.string
    }
 
    static defaultProps = {
       aspect_ratio: 1.0,
       disabled: false,
-      update_counter: 0,
-      filter_level: 0,
       color_handler: FractoColors.pattern_color_hsl,
       resolution_factor: 1.5,
+      data_endpoint: 'canvas_buffer',
    }
 
    state = {
@@ -105,7 +103,8 @@ export class FractoRasterImage extends Component {
          scope,
          aspect_ratio,
          on_plan_complete,
-         resolution_factor
+         resolution_factor,
+         data_endpoint,
       } = this.props
       AppSettings.on_settings_changed({
          [KEY_NAVIGATOR_DISABLED]: true
@@ -119,7 +118,7 @@ export class FractoRasterImage extends Component {
          `aspect_ratio=${aspect_ratio}`,
          `resolution_factor=${resolution_factor}`,
       ].join('&')
-      const url = `http://${IP_ADDRESS}:${FRACTO_TILES_PORT}/canvas_buffer?${all_params}`
+      const url = `http://${IP_ADDRESS}:${FRACTO_TILES_PORT}/${data_endpoint}?${all_params}`
       try {
          const response = await fetch(url)
          const result = await response.json()
