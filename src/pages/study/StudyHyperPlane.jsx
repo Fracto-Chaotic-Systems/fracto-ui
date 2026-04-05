@@ -15,6 +15,7 @@ import AppText from "../../AppText.jsx";
 import NavigatorSplitterLayout from "../../navigator/NavigatorSplitterLayout.jsx";
 import {KEY_STUDY_HYPERPLANE} from "../../text/StudyText.jsx";
 import {KEY_ASSETS_SPLITTER_POS_PX} from "../../settings/AssetsSettings.jsx";
+import {copy_json} from "../../utils/Dom.jsx";
 
 const UPDATE_INTERVAL_MS = 1000
 
