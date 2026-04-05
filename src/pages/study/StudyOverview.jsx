@@ -17,7 +17,7 @@ export class StudyOverview extends Component {
             <FractoRasterImage
                width_px={455}
                focal_point={{x: -0.8, y: 0.8}}
-               scope={0.25}
+               scope={0.025}
                data_endpoint={'hyper_canvas_buffer'}
             />
          </styles.CenteredBlock>,
