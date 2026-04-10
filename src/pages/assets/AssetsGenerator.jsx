@@ -53,6 +53,7 @@ export class AssetsGenerator extends Component {
       selected_level: 0,
       image_outcome: null,
       insert_outcome: null,
+      coverage_data: null,
    }
 
    componentDidMount() {
@@ -137,8 +138,8 @@ export class AssetsGenerator extends Component {
    }
 
    render_button_block = (resolution) => {
-      const {selected_level, image_outcome, insert_outcome} = this.state
-      if (!selected_level) {
+      const { image_outcome, insert_outcome, coverage_data} = this.state
+      if (!coverage_data) {
          return []
       }
       const resolution_select =
@@ -172,6 +173,11 @@ export class AssetsGenerator extends Component {
          <styles.HalfRemDown/>
          {add_to_gallery_button}
       </CoolStyles.InlineBlock>
+   }
+
+   on_coverage_data=(coverage_data)=>{
+      console.log('coverage_data',coverage_data)
+      this.setState({coverage_data})
    }
 
    render() {
@@ -250,6 +256,7 @@ export class AssetsGenerator extends Component {
                   frame_settings={frame_settings}
                   frame_settings_key={KEY_ASSETS_GENERATOR_FRAME_SETTINGS}
                   on_level_select={this.on_level_select}
+                  on_coverage_data={this.on_coverage_data}
                />
                <styles.OneRemSpacer/>
                {this.render_button_block(resolution)}
