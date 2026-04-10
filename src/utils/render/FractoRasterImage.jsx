@@ -118,7 +118,7 @@ export class FractoRasterImage extends Component {
          `aspect_ratio=${aspect_ratio}`,
          `resolution_factor=${resolution_factor}`,
       ].join('&')
-      const url = `http://${IP_ADDRESS}:${FRACTO_TILES_PORT}/${data_endpoint}?${all_params}`
+      const url = `http://${IP_ADDRESS}:${FRACTO_TILES_PORT}/canvas_buffer?${all_params}`
       try {
          const response = await fetch(url)
          const result = await response.json()
