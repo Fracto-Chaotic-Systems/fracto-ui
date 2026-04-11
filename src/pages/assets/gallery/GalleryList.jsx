@@ -71,7 +71,7 @@ export class GalleryList extends Component {
       const selected_row = AppSettings.get(KEY_ASSETS_LIST_SELECTED_ROW)
       const selected_asset = asset_list[selected_row]
       on_select_asset(selected_asset)
-      console.log('asset_list',asset_list)
+      // console.log('asset_list',asset_list)
       this.setState({selected_row, asset_list})
    }
 

@@ -76,7 +76,7 @@ export const color_wheel = (canvas_ref, radius, ring_count = 5, color_phase = 0,
                Math.log(orbital_bins[orbital_key].bin_count) / log_greatest_bin_count
          }
       }
-      console.log('orbital_bins', orbital_bins)
+      // console.log('orbital_bins', orbital_bins)
    }
 
    const ctx = canvas.getContext('2d');

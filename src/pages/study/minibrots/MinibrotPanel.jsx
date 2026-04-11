@@ -11,12 +11,13 @@ import MinibrotList, {
    TABLE_WIDTH_PX
 } from "./MinibrotList.jsx";
 
-import {MainStyles as styles} from '../../../styles/MainStyles.jsx'
+import {MainStyles as styles, MARGIN_PX} from '../../../styles/MainStyles.jsx'
 import AppSettings from "../../../AppSettings.jsx";
 import {
    KEY_STUDY_MINIBROTS_RENDER_SPLITTER_POS,
    KEY_STUDY_SPLITTER_POS_PX
 } from "../../../settings/StudySettings.jsx";
+import {KEY_ASSETS_GALLERY_RENDER_SPLITTER_POS} from "../../../settings/AssetsSettings.jsx";
 
 const IMAGE_SIZE_DELTA = 50
 
@@ -43,6 +44,7 @@ export class MinibrotPanel extends Component {
    on_select_minibrot = (selected_minibrot) => {
       const display_settings = JSON.parse(selected_minibrot.display_settings)
       const core_point = JSON.parse(selected_minibrot.core_point)
+      console.log('on_select_minibrot', selected_minibrot)
       this.setState({
          selected_minibrot,
          display_settings,
@@ -141,6 +143,12 @@ export class MinibrotPanel extends Component {
    render() {
       const {container_ref, rendered_splitter_pos} = this.state
       const {height_px, ready} = this.props
+      let top = 0;
+      let container_bounds = {}
+      if (container_ref.current) {
+         container_bounds = container_ref.current.getBoundingClientRect()
+         top = container_bounds.top
+      }
       const table_style = {
          height: `${height_px}px`,
          maxWidth: `${TABLE_WIDTH_PX}px`,
@@ -153,9 +161,11 @@ export class MinibrotPanel extends Component {
          height_px={height_px}
          ready={ready}
       />
-      const container_bounds = container_ref.current
-         ? container_ref.current.getBoundingClientRect()
-         : {}
+      const splitter_pos = AppSettings.get(KEY_STUDY_MINIBROTS_RENDER_SPLITTER_POS)
+      const right_block_style = {
+         left: `${splitter_pos + MARGIN_PX}px`,
+         top: `${top}px`,
+      }
       return <styles.TightCenteredBlock
          ref={container_ref}>
          <styles.ScrollingBlock
@@ -171,7 +181,10 @@ export class MinibrotPanel extends Component {
                position={rendered_splitter_pos}
                on_change={this.change_splitter_pos}
             />
-            {right_panel}
+            <styles.FixedInlineBlock
+               style={right_block_style}>
+               {right_panel}
+            </styles.FixedInlineBlock>
          </styles.ScrollingBlock>
       </styles.TightCenteredBlock>
    }

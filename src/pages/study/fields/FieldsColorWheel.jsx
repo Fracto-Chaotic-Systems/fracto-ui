@@ -50,7 +50,7 @@ export class FieldsColorWheel extends Component {
       const {canvas_ref} = this.state
       const {page_settings} = this.props
       const {canvas_buffer} = page_settings
-      console.log('fill_pattern_bins')
+      // console.log('fill_pattern_bins')
       if (!canvas_buffer) {
          return false;
       }
