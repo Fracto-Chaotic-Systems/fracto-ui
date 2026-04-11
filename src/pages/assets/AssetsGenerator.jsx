@@ -137,8 +137,8 @@ export class AssetsGenerator extends Component {
       })
    }
 
-   render_button_block = (resolution) => {
-      const { image_outcome, insert_outcome, coverage_data} = this.state
+   render_button_block = () => {
+      const { image_outcome, insert_outcome, coverage_data, resolution} = this.state
       if (!coverage_data) {
          return []
       }
@@ -259,7 +259,7 @@ export class AssetsGenerator extends Component {
                   on_coverage_data={this.on_coverage_data}
                />
                <styles.OneRemSpacer/>
-               {this.render_button_block(resolution)}
+               {this.render_button_block()}
             </styles.FixedInlineBlock>
          </styles.TightCenteredBlock>,
          image
