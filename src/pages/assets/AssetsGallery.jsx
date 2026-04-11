@@ -192,11 +192,11 @@ export class AssetsGallery extends Component {
    }
 
    right_panel = () => {
-      const {asset, rendered_height} = this.state
+      const {asset, rendered_height, rendered_width, rendered_splitter_pos} = this.state
       if (!asset) {
          return "click an image to start"
       }
-      const width = Math.round(rendered_height * 0.70)
+      const width = rendered_width - 2 * MARGIN_PX // Math.round(rendered_height * 0.70)
       const upper_block_height = Math.round(rendered_height * 0.20)
       const focal_point = {
          x: asset.focal_point_x,
@@ -229,6 +229,9 @@ export class AssetsGallery extends Component {
       const legend_style = {
          margin: '0.5rem 0 0',
       }
+      const splitter_width = AppSettings.get(KEY_ASSETS_SPLITTER_POS_PX)
+      const image_width = rendered_width - rendered_splitter_pos + splitter_width
+      const magnifier_style = {height: `${rendered_height * 0.70}px`}
       return [
          <styles.ScrollingBlock
             style={{height: `${upper_block_height}px`}}>
@@ -259,18 +262,20 @@ export class AssetsGallery extends Component {
                />
             </CoolStyles.Block>
          </styles.ScrollingBlock>,
-         <Magnifier
-            width={width}
-            src={asset.public_url}
-            zoomFactor={3.5}
-            mgWidth={width / 3}
-            mgHeight={width / 3}
-         />]
+         <styles.ScrollingBlock style={magnifier_style}>
+            <Magnifier
+               width={image_width - 2 * MARGIN_PX}
+               src={asset.public_url}
+               zoomFactor={2.5}
+               mgWidth={250}
+               mgHeight={250}
+            />
+         </styles.ScrollingBlock>
+      ]
    }
 
    render() {
       const {
-         asset,
          rendered_height, container_ref, ready, rendered_splitter_pos
       } = this.state
       let top = 0;
