@@ -12,6 +12,8 @@ export const KEY_ASSETS_GALLERY = `${ASSETS_FOLDER}/assets_gallery`
 export const KEY_ASSETS_GALLERY_SIDEBAR = `${ASSETS_FOLDER}/assets_gallery_sidebar`
 export const KEY_COLUMN_LABEL_ASSET_ID = `${ASSETS_FOLDER}/label_asset_id`
 export const KEY_COLUMN_LABEL_ASSET_SCOPE = `${ASSETS_FOLDER}/label_assets_scope`
+export const KEY_COLUMN_LABEL_ASSET_SCOPE_COLON = `${ASSETS_FOLDER}/label_assets_scope_colon`
+export const KEY_COLUMN_LABEL_ASSET_FOCAL_POINT_COLON = `${ASSETS_FOLDER}/label_assets_focal_point_colon`
 
 export const APP_ASSETS_TEXT = {
    [KEY_ASSETS_OVERVIEW]: 'assets overview',
@@ -20,10 +22,12 @@ export const APP_ASSETS_TEXT = {
    [KEY_ASSETS_LOGS]: 'assets logs',
    [KEY_IMAGE_ASSETS_GENERATOR]: 'images',
    [KEY_IMAGE_ASSETS_GENERATE]: 'image generator',
-   [KEY_ASSETS_GALLERY]: 'gallery of assets',
+   [KEY_ASSETS_GALLERY]: 'gallery of artifacts',
    [KEY_ASSETS_GALLERY_SIDEBAR]: 'gallery',
    [KEY_IMAGE_ASSETS_RENDER_NOW]: 'render now',
    [KEY_IMAGE_ASSETS_ADD_TO_GALLERY]: 'add to gallery',
    [KEY_COLUMN_LABEL_ASSET_ID]: 'asset id',
    [KEY_COLUMN_LABEL_ASSET_SCOPE]: 'scope',
+   [KEY_COLUMN_LABEL_ASSET_SCOPE_COLON]: 'scope:',
+   [KEY_COLUMN_LABEL_ASSET_FOCAL_POINT_COLON]: 'focal point:',
 }

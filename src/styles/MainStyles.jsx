@@ -74,7 +74,8 @@ export class MainStyles {
        ${CoolStyles.align_center}
        ${CoolStyles.uppercase}
        ${CoolStyles.noselect}
-       margin: 1rem 0 0;
+       margin: 0.5rem 0 0;
+       padding-bottom: 0.5rem;
        font-size: 2rem;
        line-height: 2.25rem;
        border-bottom: 1px solid #cccccc;
@@ -227,6 +228,14 @@ export class MainStyles {
        &:hover {
            font-weight: bold;
            color: ${CoolColors.cool_blue};
+       }
+   `
+   static InlineHover = styled(CoolStyles.InlineBlock)`
+       opacity: 0;
+       transition: opacity 0.3s ease-in-out;
+
+       &:hover {
+           opacity: 1
        }
    `
 }

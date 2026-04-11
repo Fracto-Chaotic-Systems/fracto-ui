@@ -22,7 +22,7 @@ export const APP_ROOT_TEXT = {
    [KEY_SIDEBAR_LOGS]: 'Logs',
    [KEY_MENU_ADMIN]: 'admin',
    [KEY_MENU_DATA]: 'data',
-   [KEY_MENU_ASSETS]: 'assets',
+   [KEY_MENU_ASSETS]: 'artifacts',
    [KEY_MENU_TILES]: 'tiles',
    [KEY_MENU_STUDY]: 'study',
    [KEY_FORM_CANCEL]: 'cancel',
