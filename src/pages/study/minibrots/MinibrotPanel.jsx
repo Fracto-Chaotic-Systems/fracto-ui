@@ -1,25 +1,21 @@
 import React, {Component} from "react";
 import PropTypes from "prop-types";
 
+import {SPLITTER_WIDTH_PX} from "../../../constants.jsx";
 import CoolSplitter, {
    SPLITTER_TYPE_VERTICAL
 } from "../../../utils/ui/CoolSplitter.jsx";
-import {SPLITTER_WIDTH_PX} from "../../../constants.jsx";
-import FractoRasterImage from "../../../utils/render/FractoRasterImage.jsx";
-import FractoOrbitalChart from "../../../utils/render/FractoOrbitalChart.jsx";
 import MinibrotList, {
    TABLE_WIDTH_PX
 } from "./MinibrotList.jsx";
+import MinibrotLeftPanel from "./MinibrotLeftPanel.jsx";
 
-import {MainStyles as styles, MARGIN_PX} from '../../../styles/MainStyles.jsx'
-import AppSettings from "../../../AppSettings.jsx";
 import {
-   KEY_STUDY_MINIBROTS_RENDER_SPLITTER_POS,
-   KEY_STUDY_SPLITTER_POS_PX
-} from "../../../settings/StudySettings.jsx";
-import {KEY_ASSETS_GALLERY_RENDER_SPLITTER_POS} from "../../../settings/AssetsSettings.jsx";
-
-const IMAGE_SIZE_DELTA = 50
+   MainStyles as styles,
+   MARGIN_PX
+} from '../../../styles/MainStyles.jsx'
+import AppSettings from "../../../AppSettings.jsx";
+import {KEY_STUDY_MINIBROTS_RENDER_SPLITTER_POS} from "../../../settings/StudySettings.jsx";
 
 export class MinibrotPanel extends Component {
    static propTypes = {
@@ -30,8 +26,6 @@ export class MinibrotPanel extends Component {
       container_ref: React.createRef(),
       selected_minibrot: {},
       rendered_splitter_pos: 500,
-      display_settings: {},
-      core_point: {},
       ready: false
    }
 
@@ -42,81 +36,14 @@ export class MinibrotPanel extends Component {
    }
 
    on_select_minibrot = (selected_minibrot) => {
-      const display_settings = JSON.parse(selected_minibrot.display_settings)
-      const core_point = JSON.parse(selected_minibrot.core_point)
       console.log('on_select_minibrot', selected_minibrot)
       this.setState({
          selected_minibrot,
-         display_settings,
-         core_point,
       })
    }
 
-   left_panel = () => {
-      const {
-         ready,
-         core_point,
-         container_ref,
-         rendered_splitter_pos,
-         selected_minibrot,
-         display_settings,
-      } = this.state
-      if (!selected_minibrot.pattern) {
-         return []
-      }
-      if (!display_settings.focal_point) {
-         return []
-      }
-      let top = 0;
-      let left = 0;
-      let container_bounds = {}
-      if (container_ref.current) {
-         container_bounds = container_ref.current.getBoundingClientRect()
-         top = container_bounds.top
-         left = container_bounds.left
-      }
-      const study_splitter_pos = AppSettings.get(KEY_STUDY_SPLITTER_POS_PX)
-      const width = rendered_splitter_pos - study_splitter_pos - TABLE_WIDTH_PX - SPLITTER_WIDTH_PX
-      const width_px = Math
-         .floor(width / IMAGE_SIZE_DELTA) * IMAGE_SIZE_DELTA
-      const margin = (width - width_px) / 2
-      const panel_style = {
-         top: `${top}px`,
-         left: `${left + TABLE_WIDTH_PX}px`,
-         width: `${width}px`,
-         height: `${container_bounds.height}px`,
-         backgroundColor: '#e4e4e4',
-      }
-      const image_style = {
-         margin: `${margin}px auto`,
-         width: `${width_px}px`,
-         height: `${width_px}px`,
-         boxShadow: '5px 5px 10px rgba(0, 0, 0, 0.25)',
-         backgroundColor: '#f8f8f8',
-         cursor: ready ? 'crosshair' : 'wait',
-      }
-      // console.log("width_px, display_settings", width_px, display_settings)
-      return <styles.FixedInlineBlock
-         style={panel_style}>
-         <div style={image_style}>
-            <FractoRasterImage
-               width_px={width_px}
-               focal_point={display_settings.focal_point}
-               scope={display_settings.scope}
-               on_plan_complete={this.on_ready}
-            />
-         </div>
-         <div style={image_style}>
-            <FractoOrbitalChart
-               width_px={width_px}
-               focal_point={core_point}
-            />
-         </div>
-      </styles.FixedInlineBlock>
-   }
-
    right_panel = () => {
-      return 'right_panel'
+      return 'right_panela'
    }
 
    change_splitter_pos = (pos) => {
@@ -141,7 +68,7 @@ export class MinibrotPanel extends Component {
    }
 
    render() {
-      const {container_ref, rendered_splitter_pos} = this.state
+      const {container_ref, rendered_splitter_pos, selected_minibrot} = this.state
       const {height_px, ready} = this.props
       let top = 0;
       let container_bounds = {}
@@ -154,7 +81,10 @@ export class MinibrotPanel extends Component {
          maxWidth: `${TABLE_WIDTH_PX}px`,
          cursor: ready ? 'pointer' : 'wait',
       }
-      const left_panel = this.left_panel()
+      const left_panel = <MinibrotLeftPanel
+         selected_minibrot={selected_minibrot}
+         ready={ready}
+         container_bounds={container_bounds}/>
       const right_panel = this.right_panel()
       const minibrot_table = <MinibrotList
          on_select_minibrot={this.on_select_minibrot}
