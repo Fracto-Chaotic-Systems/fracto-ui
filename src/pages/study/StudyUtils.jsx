@@ -104,7 +104,7 @@ export const identify_cores = (frame_settings) => {
 }
 
 export const render_magnitude = (magnitude) => {
-   const rounded = Math.round(magnitude * 100000000) / 100
+   const rounded = Math.round(magnitude * 10000000000) / 10000
    const mu = <i>{'\u03BC'}</i>
    return <styles.NumericValue
       title={magnitude}
@@ -116,10 +116,15 @@ export const render_magnitude = (magnitude) => {
 export const render_pattern_block = (pattern, font_size_px = 18) => {
    const pattern_color = FractoColors.pattern_color(pattern);
    // console.log('pattern_color', pattern_color)
+   const padding_top = Math.min(2 + font_size_px / 30, 4)
+   const padding_side = 2 + font_size_px / 12
    const block_style = {
       textShadow: '3px 3px 6px rgba(0,0,0,0.75)',
       backgroundColor: pattern_color,
+      borderRadius: `${font_size_px / 4}px`,
+      padding: `${padding_top}px ${padding_side}px 0`,
       fontSize: `${font_size_px}px`,
+      lineHeight: `${font_size_px}px`,
    }
    return <styles.PatternBlock
       style={block_style}>

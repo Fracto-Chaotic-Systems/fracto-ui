@@ -16,6 +16,8 @@ import {
 } from '../../../styles/MainStyles.jsx'
 import AppSettings from "../../../AppSettings.jsx";
 import {KEY_STUDY_MINIBROTS_RENDER_SPLITTER_POS} from "../../../settings/StudySettings.jsx";
+import GalleryRightPanel from "../../assets/gallery/GalleryRightPanel.jsx";
+import MinibrotRightPanel from "./MinibrotRightPanel.jsx";
 
 export class MinibrotPanel extends Component {
    static propTypes = {
@@ -81,11 +83,19 @@ export class MinibrotPanel extends Component {
          maxWidth: `${TABLE_WIDTH_PX}px`,
          cursor: ready ? 'pointer' : 'wait',
       }
-      const left_panel = <MinibrotLeftPanel
-         selected_minibrot={selected_minibrot}
-         ready={ready}
-         container_bounds={container_bounds}/>
-      const right_panel = this.right_panel()
+      const left_panel = selected_minibrot.id
+         ? <MinibrotLeftPanel
+            selected_minibrot={selected_minibrot}
+            container_bounds={container_bounds}
+            ready={ready}/>
+         : []
+      const right_panel = selected_minibrot.id
+         ? <MinibrotRightPanel
+            selected_minibrot={selected_minibrot}
+            container_bounds={container_bounds}
+            ready={ready}
+         />
+         : []
       const minibrot_table = <MinibrotList
          on_select_minibrot={this.on_select_minibrot}
          height_px={height_px}

@@ -3,9 +3,13 @@ import PropTypes from "prop-types";
 
 import {MainStyles as styles} from '../../../styles/MainStyles.jsx'
 import AppSettings from "../../../AppSettings.jsx";
-import {KEY_STUDY_MINIBROTS_RENDER_SPLITTER_POS, KEY_STUDY_SPLITTER_POS_PX} from "../../../settings/StudySettings.jsx";
+import {
+   KEY_STUDY_MINIBROTS_RENDER_SPLITTER_POS,
+   KEY_STUDY_SPLITTER_POS_PX
+} from "../../../settings/StudySettings.jsx";
 import {TABLE_WIDTH_PX} from "./MinibrotList.jsx";
 import {SPLITTER_WIDTH_PX} from "../../../constants.jsx";
+
 import FractoRasterImage from "../../../utils/render/FractoRasterImage.jsx";
 import FractoOrbitalChart from "../../../utils/render/FractoOrbitalChart.jsx";
 

@@ -204,9 +204,7 @@ export class MainStyles {
    static PatternBlock = styled(CoolStyles.InlineBlock)`
        ${CoolStyles.monospace}
        border: 0.1rem solid #666666;
-       border-radius: 0.25rem;
        color: white;
-       padding: 0.125rem 0.125rem 0;
    `;
    static TablePrompt = styled(CoolStyles.InlineBlock)`
       line-height: 2rem;
