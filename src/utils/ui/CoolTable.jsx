@@ -68,11 +68,8 @@ export class CoolTable extends Component {
    }
 
    handleKeyDown = (event) => {
-      const {options, on_select_row, selected_row, data} = this.props
+      const {options, selected_row, data} = this.props
       if (!options.includes(TABLE_CAN_SELECT)) {
-         return;
-      }
-      if (!on_select_row) {
          return;
       }
       if (event.key === 'ArrowUp') {
@@ -80,25 +77,25 @@ export class CoolTable extends Component {
          if (selected_row === 0) {
             return
          }
-         on_select_row(selected_row - 1)
+         this.on_select_row(selected_row - 1)
       } else if (event.key === 'ArrowDown') {
          console.log('table ArrowDown');
          if (selected_row === data.length - 1) {
             return
          }
-         on_select_row(selected_row + 1)
+         this.on_select_row(selected_row + 1)
       } else if (event.key === 'PageUp') {
          if (selected_row <= DEFAULT_PAGE_SIZE) {
-            on_select_row(0)
+            this.on_select_row(0)
          } else {
-            on_select_row(selected_row - DEFAULT_PAGE_SIZE)
+            this.on_select_row(selected_row - DEFAULT_PAGE_SIZE)
          }
          console.log('table PageUp');
       } else if (event.key === 'PageDown') {
          if (selected_row + DEFAULT_PAGE_SIZE >= data.length - 1) {
-            on_select_row(data.length - 1)
+            this.on_select_row(data.length - 1)
          } else {
-            on_select_row(selected_row + DEFAULT_PAGE_SIZE)
+            this.on_select_row(selected_row + DEFAULT_PAGE_SIZE)
          }
          console.log('table PageDown');
       }
@@ -191,14 +188,19 @@ export class CoolTable extends Component {
                break;
          }
       }
-      if (selected_row === row) {
-         cell_style.backgroundColor = '#cccccc';
-      }
       if (column["style"]) {
          cell_style = {
             ...column["style"],
             ...cell_style,
          };
+      }
+      if (selected_row === row) {
+         cell_style.backgroundColor = '#cccccc';
+         return <styles.TableCell
+            style={cell_style}
+            key={`cell-${row}-${col}`}>
+            {object_data}
+         </styles.TableCell>
       }
       return <styles.TableCell
          style={cell_style}
@@ -215,7 +217,6 @@ export class CoolTable extends Component {
 
    // required by the input control but unused
    on_selector_changed = (e, row) => {
-      const {on_select_row} = this.props
       console.log(`on_selector_changed event on row #${row}, checked is ${e.target.checked}`)
    }
 
@@ -244,9 +245,16 @@ export class CoolTable extends Component {
       </styles.SelectorCell>
    }
 
+   on_select_row = (row) => {
+      const {on_select_row} = this.props
+      if (on_select_row) {
+         on_select_row(row)
+      }
+   }
+
    render() {
       const {
-         columns, data, options, on_select_row, table_style,
+         columns, data, options, table_style,
          selected_row, selected_rows
       } = this.props
       let columns_clone = columns.slice()
@@ -265,9 +273,7 @@ export class CoolTable extends Component {
          })
          const row_is_selected = (selected_rows.indexOf(row) >= 0)
          return <styles.TableRow
-            onClick={e => on_select_row
-               ? on_select_row(row, row_is_selected)
-               : console.log("no select callback")}
+            onClick={e => this.on_select_row(row, row_is_selected)}
             key={`row-${row}`}>
             {row_cells}
          </styles.TableRow>

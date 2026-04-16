@@ -107,7 +107,7 @@ export const click_point_chart = (set1, other_sets = [], in_cardioid = false, es
       },
    }
    const cardinality = set1?.length - 1 || 0
-   const in_animation = false // set2?.length > 1
+   const in_animation = other_sets?.length > 1
    const data_dataset = {
       datasets: [
          {
@@ -115,7 +115,8 @@ export const click_point_chart = (set1, other_sets = [], in_cardioid = false, es
             // label: in_cardioid ? 'Q' : 'Q',
             data: JSON.parse(JSON.stringify(other_sets)),
             backgroundColor: 'black',
-            pointRadius: in_animation ? 3 : 3,
+            pointRadius: in_animation ? 3 : 2,
+            borderColor: in_animation ? ANIMATION_COLOR : 'black',
             showLine: true
          },
          {
@@ -123,7 +124,7 @@ export const click_point_chart = (set1, other_sets = [], in_cardioid = false, es
             // label: set1_label,
             data: JSON.parse(JSON.stringify(set1)),
             backgroundColor: FractoUtil.fracto_pattern_color(cardinality || 0),
-            pointRadius: in_animation ? 3 : 3,
+            pointRadius: in_animation ? 2 : 3,
             showLine: true
          },
       ]

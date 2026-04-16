@@ -22,7 +22,24 @@ export class MinibrotLeftPanel extends Component {
       ready: PropTypes.bool.isRequired,
    }
 
+   state = {
+      in_animation: false,
+   }
+
+   componentDidUpdate(prevProps, prevState, snapshot) {
+      const selected_minibrot_changed = this.props.selected_minibrot.id !== prevProps.selected_minibrot.id;
+      if (selected_minibrot_changed) {
+         this.setState({in_animation: false});
+      }
+   }
+
+   on_click_chart = () => {
+      const {in_animation} = this.state
+      this.setState({in_animation: !in_animation})
+   }
+
    render() {
+      const {in_animation} = this.state
       const {selected_minibrot, container_bounds, ready} = this.props;
       if (!selected_minibrot.pattern) {
          return []
@@ -52,7 +69,14 @@ export class MinibrotLeftPanel extends Component {
          height: `${width_px}px`,
          boxShadow: '5px 5px 10px rgba(0, 0, 0, 0.25)',
          backgroundColor: '#f8f8f8',
-         cursor: ready ? 'crosshair' : 'wait',
+      }
+      const chart_style = {
+         margin: `${margin}px auto`,
+         width: `${width_px}px`,
+         height: `${width_px}px`,
+         boxShadow: '5px 5px 10px rgba(0, 0, 0, 0.25)',
+         backgroundColor: '#f8f8f8',
+         cursor: 'pointer',
       }
       // console.log("width_px, display_settings", width_px, display_settings)
       return <styles.FixedInlineBlock
@@ -65,10 +89,13 @@ export class MinibrotLeftPanel extends Component {
                on_plan_complete={this.on_ready}
             />
          </div>
-         <div style={image_style}>
+         <div
+            onClick={this.on_click_chart}
+            style={chart_style}>
             <FractoOrbitalChart
                width_px={width_px}
                focal_point={core_point}
+               in_animation={in_animation}
             />
          </div>
       </styles.FixedInlineBlock>
