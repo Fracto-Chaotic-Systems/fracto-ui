@@ -39,6 +39,8 @@ const RESOLUTIONS = [
    {label: '4800', value: 4800, help: 'biggliest!',},
 ]
 
+const UPDATE_INTERVAL_MS = 1000
+
 export class AssetsGenerator extends Component {
    state = {
       rendered_width: 0,
@@ -51,13 +53,12 @@ export class AssetsGenerator extends Component {
    }
 
    componentDidMount() {
-      const frame_settings = AppSettings
-         .get(KEY_ASSETS_GENERATOR_FRAME_SETTINGS)
       this.setState({
+         frame_settings: AppSettings
+            .get(KEY_ASSETS_GENERATOR_FRAME_SETTINGS),
+         interval: setInterval(this.update_dimensions, UPDATE_INTERVAL_MS),
          resolution: AppSettings.get(KEY_ASSETS_GENERATOR_RESOLUTION),
-         frame_settings,
       })
-      this.update_dimensions()
    }
 
    update_dimensions = () => {
@@ -162,8 +163,6 @@ export class AssetsGenerator extends Component {
       const splitter_pos = AppSettings.get(KEY_ASSETS_GENERATOR_SPLITTER_POS)
       const leftmost_splitter_pos = AppSettings.get(KEY_ASSETS_SPLITTER_POS_PX)
       const image_style = {
-         left: `${splitter_pos + MARGIN_PX}px`,
-         top: `${top + 2 * MARGIN_PX + frame_settings.width_px}px`,
          width: `${rendered_width - splitter_pos + leftmost_splitter_pos - 2 * MARGIN_PX}px`,
          height: `${rendered_height - frame_settings.width_px - top - 2 * MARGIN_PX}px`,
          overflow: "scroll",
