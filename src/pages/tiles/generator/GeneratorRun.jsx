@@ -37,7 +37,7 @@ const TABLE_COLUMNS = [
 export class GeneratorRun extends Component {
    static propTypes = {
       coverage_data: PropTypes.array.isRequired,
-      on_busy: PropTypes.func.isRequired,
+      on_generate: PropTypes.func.isRequired,
    }
 
    state = {
@@ -61,27 +61,29 @@ export class GeneratorRun extends Component {
 
    do_it_now = (level) => {
       const {can_do_been_done} = this.state
-      const {on_busy} = this.props
+      const { coverage_data, on_generate} = this.props
       if (can_do_been_done.includes(level)) {
          console.log('been done', level)
          return;
       }
       can_do_been_done.push(level)
-      console.log('do_it_now', level)
-      on_busy(true)
+      const level_coverage = coverage_data.find(c => c.level === level)
+      // console.log('level_coverage', level_coverage)
+      on_generate(level_coverage.can_do)
       this.setState({can_do_been_done})
    }
 
    re_do_it_now = (level) => {
       const {re_do_been_done} = this.state
-      const {on_busy} = this.props
+      const { coverage_data, on_generate} = this.props
       if (re_do_been_done.includes(level)) {
          console.log('re-do been done', level)
          return;
       }
       re_do_been_done.push(level)
-      console.log('do_it_now', level)
-      on_busy(true)
+      const level_coverage = coverage_data.find(c => c.level === level)
+      // console.log('do_it_now', level)
+      on_generate(level_coverage.re_do)
       this.setState({re_do_been_done})
    }
 

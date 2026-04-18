@@ -204,10 +204,12 @@ export class FractoTileCoverage extends Component {
             return;
          }
          next_c.can_do = []
+         c.re_do = []
          console.log('process_can_do', c.level)
          const covered_tiles = coverage[c.level]
          const next_covered_tiles = coverage[c.level + 1]
          covered_tiles.forEach(tile => {
+            c.re_do.push(tile)
             let short_code = `${tile}0`
             if (!next_covered_tiles.includes(short_code)) {
                next_c.can_do.push(short_code)
