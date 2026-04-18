@@ -20,6 +20,11 @@ export class NavigatorCoverage extends Component {
       control_block: PropTypes.array.isRequired,
       results_block: PropTypes.array.isRequired,
       on_coverage_data: PropTypes.func.isRequired,
+      options: PropTypes.array,
+   }
+
+   static defaultProps = {
+      options: [],
    }
 
    state = {
@@ -79,7 +84,13 @@ export class NavigatorCoverage extends Component {
          rendered_width,
          frame_settings,
       } = this.state
-      const {splitter_keys, control_block, results_block, on_coverage_data} = this.props
+      const {
+         splitter_keys,
+         control_block,
+         results_block,
+         on_coverage_data,
+         options
+      } = this.props
       let top = 0;
       let left = 0;
       if (container_ref.current) {
@@ -120,6 +131,7 @@ export class NavigatorCoverage extends Component {
                   frame_settings_key={splitter_keys.frame_settings_key}
                   on_level_select={this.on_level_select}
                   on_coverage_data={on_coverage_data}
+                  options={options}
                />
                <styles.HalfRemSpacer/>
                {control_block}
