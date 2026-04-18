@@ -13,7 +13,7 @@ import {
    ASSETS_SETTINGS,
    ASSETS_STATUS,
    KEY_ASSETS_SECTION,
-   KEY_ASSETS_SPLITTER_POS_PX
+   KEY_ASSETS_SPLITTER_POS_PX, VIDEO_GENERATOR
 } from "../settings/AssetsSettings.jsx";
 import AppText from "../AppText.jsx";
 import {
@@ -24,7 +24,7 @@ import {
 } from "../text/RootText.jsx";
 import {
    KEY_ASSETS_GALLERY_SIDEBAR,
-   KEY_IMAGE_ASSETS_GENERATOR
+   KEY_IMAGE_ASSETS_GENERATOR, KEY_VIDEO_ASSETS_GENERATOR
 } from "../text/AssetsText.jsx";
 
 import AssetsOverview from "./assets/AssetsOverview.jsx";
@@ -33,10 +33,12 @@ import AssetsStatus from "./assets/AssetsStatus.jsx";
 import AssetsLogs from "./assets/AssetsLogs.jsx";
 import AssetsGenerator from "./assets/AssetsGenerator.jsx";
 import AssetsGallery from "./assets/AssetsGallery.jsx";
+import AssetsVideo from "./assets/AssetsVideo.jsx";
 
 const SIDEBAR_LIST = [
    {title_key: KEY_SIDEBAR_OVERVIEW, section_code: ASSETS_OVERVIEW, right_pane: <AssetsOverview/>},
    {section_code: SIDEBAR_BREAKER},
+   {title_key: KEY_VIDEO_ASSETS_GENERATOR, section_code: VIDEO_GENERATOR, right_pane: <AssetsVideo/>},
    {title_key: KEY_IMAGE_ASSETS_GENERATOR, section_code: ASSETS_GENERATOR, right_pane: <AssetsGenerator/>},
    {title_key: KEY_ASSETS_GALLERY_SIDEBAR, section_code: ASSETS_GALLERY, right_pane: <AssetsGallery/>},
    {section_code: SIDEBAR_BREAKER},

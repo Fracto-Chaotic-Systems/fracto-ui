@@ -60,7 +60,7 @@ export class AssetsGenerator extends Component {
       const frame_settings = AppSettings
          .get(KEY_ASSETS_GENERATOR_FRAME_SETTINGS)
       this.setState({
-         resolution: AppSettings.get[KEY_ASSETS_GENERATOR_RESOLUTION],
+         resolution: AppSettings.get(KEY_ASSETS_GENERATOR_RESOLUTION),
          frame_settings,
          interval: setInterval(this.update_dimensions, UPDATE_INTERVAL_MS),
          subscription: AppSettings
@@ -103,7 +103,7 @@ export class AssetsGenerator extends Component {
    }
 
    change_resolution = (e) => {
-      // console.log('change_resolution', e.target.value)
+      console.log('change_resolution', e.target.value)
       const resolution = parseInt(e.target.value)
       this.setState({resolution})
       AppSettings.on_settings_changed({
@@ -138,7 +138,7 @@ export class AssetsGenerator extends Component {
    }
 
    render_button_block = () => {
-      const { image_outcome, insert_outcome, coverage_data, resolution} = this.state
+      const {image_outcome, insert_outcome, coverage_data, resolution} = this.state
       if (!coverage_data) {
          return []
       }
@@ -175,8 +175,8 @@ export class AssetsGenerator extends Component {
       </CoolStyles.InlineBlock>
    }
 
-   on_coverage_data=(coverage_data)=>{
-      console.log('coverage_data',coverage_data)
+   on_coverage_data = (coverage_data) => {
+      // console.log('coverage_data', coverage_data)
       this.setState({coverage_data})
    }
 

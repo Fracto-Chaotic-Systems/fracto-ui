@@ -5,6 +5,7 @@ const ROOT_FOLDER = 'root'
 export const KEY_SELECTED_PAGE = `${ROOT_FOLDER}/selected_page`
 export const KEY_VIEWPORT_DIMENSIONS = `${ROOT_FOLDER}/viewport_dimensions`
 export const KEY_SERVER_ROOT = `${ROOT_FOLDER}/server_root`
+export const KEY_CLIPBOARD_DATA = `${ROOT_FOLDER}/clipboard_data`
 
 export const APP_ROOT_SETTINGS = {
    [KEY_SELECTED_PAGE]: {
@@ -24,6 +25,12 @@ export const APP_ROOT_SETTINGS = {
       default_value: "",
       description: 'root filepath of the main server',
       persist: true,
+   },
+   [KEY_CLIPBOARD_DATA]: {
+      data_type: TYPE_OBJECT,
+      default_value: {},
+      description: 'object data of the current clipboard',
+      persist: false,
    },
 }
 

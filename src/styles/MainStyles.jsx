@@ -45,6 +45,7 @@ export class MainStyles {
    static PaneWrapper = styled(CoolStyles.Block)`
        font-size: 1rem;
        color: #444444;
+       overflow-y: auto;
    `
    static SidebarItem = styled(CoolStyles.Block)`
        ${CoolStyles.align_center}

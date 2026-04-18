@@ -33,6 +33,7 @@ import AdminStatus from "./admin/AdminStatus.jsx";
 import AdminIdentify from "./admin/AdminIdentify.jsx";
 import AdminLogs from "./admin/AdminLogs.jsx";
 import AdminVersions from "./admin/AdminVersions.jsx";
+import {KEY_VIEWPORT_DIMENSIONS} from "../settings/RootSettings.jsx";
 
 const SIDEBAR_LIST = [
    {title_key: KEY_SIDEBAR_OVERVIEW, section_code: ADMIN_OVERVIEW, right_pane: <AdminOverview/>},
@@ -81,7 +82,12 @@ export class Admin extends Component {
    render_right_pane = () => {
       const {section_code} = this.state
       const section = SIDEBAR_LIST.find((item) => item.section_code === section_code)
-      return <styles.PaneWrapper>
+      const dimensions = AppSettings.get(KEY_VIEWPORT_DIMENSIONS)
+      const pane_style = {
+         height: `${dimensions.height}px`,
+      }
+      return <styles.PaneWrapper
+         style={pane_style}>
          {section ? section.right_pane : ''}
       </styles.PaneWrapper>
    }

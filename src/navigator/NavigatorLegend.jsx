@@ -2,12 +2,14 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 
 import {
-   copy_json,
+   copy_clipboard,
+   copy_json, paste_clipboard,
    render_coordinates,
    render_scalar
 } from "../utils/Dom.jsx";
 import CoolTable from "../utils/ui/CoolTable.jsx";
 
+import {MainStyles as main_styles} from "../styles/MainStyles.jsx";
 import {NavigatorStyles as styles} from '../styles/NavigatorStyles.jsx';
 import AppSettings from "../AppSettings.jsx";
 import {
@@ -26,6 +28,8 @@ import {
 
 import NavigatorTransit from "./NavigatorTransit.jsx";
 import {KEY_NAVIGATOR_DISABLED, KEY_NAVIGATOR_HOVER_POINT} from "../settings/NavigatorSettings.jsx";
+import CoolColors from "../utils/ui/CoolColors.jsx";
+import {copy, paste} from "../utils/ui/CoolIcons.jsx";
 
 const TRANSITOR_HEIGHT_PX = 150
 
@@ -89,6 +93,25 @@ export class NavigatorLegend extends Component {
       })
    }
 
+   render_focal_point = (focal_point) => {
+      const rendered = render_coordinates(focal_point, 10, 'focal_point')
+      const icon_style = {
+         width: `20px`,
+         height: `20px`,
+         fill: CoolColors.cool_blue,
+      }
+      const paste_icon = <main_styles.InlineHover
+         title={'click to paste'}
+         onClick={() => paste_clipboard('focal_point', KEY_NAVIGATOR_FOCAL_POINT)}
+         style={icon_style}>
+         {paste}
+      </main_styles.InlineHover>
+      return [
+         rendered,
+         paste_icon,
+      ]
+   }
+
    render_stats = () => {
       const {frame_settings, bounding_rect} = this.props
       const hover_point = AppSettings.get(KEY_NAVIGATOR_HOVER_POINT)
@@ -99,7 +122,7 @@ export class NavigatorLegend extends Component {
          },
          {
             name: KEY_NAVIGATOR_FOCAL_POINT,
-            value: [render_coordinates, frame_settings.focal_point],
+            value: [this.render_focal_point, frame_settings.focal_point],
          },
          {
             name: KEY_NAVIGATOR_CURSOR_LOCATION,
