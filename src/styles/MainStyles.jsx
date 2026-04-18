@@ -5,6 +5,7 @@ import {HEADER_BAR_HEIGHT_PX} from "../constants.jsx";
 export const MARGIN_PX = 10
 export const TITLE_BAR_HEIGHT_PX = 25
 export const CONTENT_BACKGROUND_COLOR = "#fcfcfc"
+export const SECTION_BAR_HEIGHT_PX = 36
 
 export class MainStyles {
    static BodyWrapper = styled(CoolStyles.Block)`
@@ -78,7 +79,7 @@ export class MainStyles {
        margin: 0.5rem 0 0;
        padding-bottom: 0.5rem;
        font-size: 2rem;
-       line-height: 2.25rem;
+       line-height: ${SECTION_BAR_HEIGHT_PX}px;
        border-bottom: 1px solid #cccccc;
    `
    static CenteredBlock = styled(CoolStyles.Block)`

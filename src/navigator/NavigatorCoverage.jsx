@@ -3,7 +3,8 @@ import PropTypes from "prop-types";
 
 import {
    MainStyles as styles,
-   MARGIN_PX
+   MARGIN_PX,
+   SECTION_BAR_HEIGHT_PX,
 } from '../styles/MainStyles.jsx'
 import AppSettings from "../AppSettings.jsx";
 import {KEY_VIEWPORT_DIMENSIONS} from "../settings/RootSettings.jsx";
@@ -97,6 +98,10 @@ export class NavigatorCoverage extends Component {
          left: `${splitter_pos + MARGIN_PX}px`,
          top: `${top + MARGIN_PX}px`,
       }
+      const result_block_style = {
+         left: `${splitter_pos + MARGIN_PX}px`,
+         top: `${top + MARGIN_PX + frame_settings.width_px}px`,
+      }
       return [
          <styles.TightCenteredBlock
             ref={container_ref}
@@ -116,11 +121,14 @@ export class NavigatorCoverage extends Component {
                   on_level_select={this.on_level_select}
                   on_coverage_data={on_coverage_data}
                />
-               <styles.OneRemSpacer/>
+               <styles.HalfRemSpacer/>
                {control_block}
             </styles.FixedInlineBlock>
          </styles.TightCenteredBlock>,
-         results_block
+         <styles.FixedInlineBlock
+            style={result_block_style}>
+            {results_block}
+         </styles.FixedInlineBlock>
       ];
    }
 }
