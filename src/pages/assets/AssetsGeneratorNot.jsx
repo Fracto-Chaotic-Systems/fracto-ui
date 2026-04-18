@@ -6,26 +6,28 @@ import {
    MainStyles as styles,
    MARGIN_PX
 } from '../../styles/MainStyles.jsx'
-import CoolStyles from "../../utils/ui/styles/CoolStyles.jsx";
-
 import AppSettings from "../../AppSettings.jsx";
+import {KEY_VIEWPORT_DIMENSIONS} from "../../settings/RootSettings.jsx";
 import {
    KEY_ASSETS_GENERATOR_FRAME_SETTINGS,
+   KEY_ASSETS_GENERATOR_LEGEND_SPLITTER_POS,
    KEY_ASSETS_GENERATOR_RESOLUTION,
    KEY_ASSETS_GENERATOR_SPLITTER_POS,
+   KEY_ASSETS_GENERATOR_STEPS_SPLITTER_POS,
    KEY_ASSETS_SPLITTER_POS_PX
 } from "../../settings/AssetsSettings.jsx";
 import AppText from "../../AppText.jsx";
 import {
    KEY_IMAGE_ASSETS_ADD_TO_GALLERY,
-   KEY_IMAGE_ASSETS_GENERATE,
-   KEY_IMAGE_ASSETS_RENDER_NOW,
+   KEY_IMAGE_ASSETS_GENERATE, KEY_IMAGE_ASSETS_RENDER_NOW,
 } from "../../text/AssetsText.jsx";
 
+import NavigatorSplitterLayout from "../../navigator/NavigatorSplitterLayout.jsx";
+import FractoTileCoverage from "../../utils/render/FractoTileCoverage.jsx";
+import CoolStyles from "../../utils/ui/styles/CoolStyles.jsx";
 import {AssetsBackend} from "../../backend/AssetsBackend.jsx";
-import NavigatorCoverage from "../../navigator/NavigatorCoverage.jsx";
-import {ASSETS_GENERATOR_SPLITTER_KEYS} from "../../navigator/NavigatorKeys.jsx";
-import {KEY_VIEWPORT_DIMENSIONS} from "../../settings/RootSettings.jsx";
+
+const UPDATE_INTERVAL_MS = 1000
 
 const RESOLUTIONS = [
    {label: '150', value: 150, help: 'thumbnail',},
@@ -39,15 +41,19 @@ const RESOLUTIONS = [
    {label: '4800', value: 4800, help: 'biggliest!',},
 ]
 
-export class AssetsGenerator extends Component {
+export class AssetsGeneratorNot extends Component {
    state = {
       rendered_width: 0,
       rendered_height: 0,
+      interval: null,
+      container_ref: React.createRef(),
       frame_settings: {},
+      subscription: null,
       resolution: 0,
+      selected_level: 0,
       image_outcome: null,
       insert_outcome: null,
-      have_coverage: false
+      coverage_data: null,
    }
 
    componentDidMount() {
@@ -56,8 +62,24 @@ export class AssetsGenerator extends Component {
       this.setState({
          resolution: AppSettings.get(KEY_ASSETS_GENERATOR_RESOLUTION),
          frame_settings,
+         interval: setInterval(this.update_dimensions, UPDATE_INTERVAL_MS),
+         subscription: AppSettings
+            .subscribe(KEY_ASSETS_GENERATOR_FRAME_SETTINGS, this.on_frame_settings_changed)
       })
-      this.update_dimensions()
+   }
+
+   componentWillUnmount() {
+      const {interval, subscription} = this.state
+      if (interval) {
+         clearInterval(interval)
+      }
+      if (subscription) {
+         AppSettings.unsubscribe(subscription)
+      }
+   }
+
+   on_frame_settings_changed = async (key, value) => {
+      this.setState({frame_settings: value})
    }
 
    update_dimensions = () => {
@@ -74,6 +96,12 @@ export class AssetsGenerator extends Component {
       }
    }
 
+   on_level_select = (selected_level) => {
+      // console.log(`on_level_select = ${selected_level}`)
+      const resolution = AppSettings.get(KEY_ASSETS_GENERATOR_RESOLUTION)
+      this.setState({selected_level, resolution})
+   }
+
    change_resolution = (e) => {
       console.log('change_resolution', e.target.value)
       const resolution = parseInt(e.target.value)
@@ -84,13 +112,13 @@ export class AssetsGenerator extends Component {
    }
 
    render_image = async () => {
-      const {frame_settings, resolution} = this.state
+      const {frame_settings, resolution, selected_level} = this.state
       this.setState({
          image_outcome: null,
          insert_outcome: null,
          in_fetch: true
       })
-      const image_outcome = await AssetsBackend.render_image(frame_settings, resolution)
+      const image_outcome = await AssetsBackend.render_image(frame_settings, resolution, selected_level)
       this.setState({
          image_outcome,
          in_fetch: false
@@ -110,8 +138,8 @@ export class AssetsGenerator extends Component {
    }
 
    render_button_block = () => {
-      const {image_outcome, insert_outcome, resolution, have_coverage} = this.state
-      if (!have_coverage) {
+      const {image_outcome, insert_outcome, coverage_data, resolution} = this.state
+      if (!coverage_data) {
          return []
       }
       const resolution_select =
@@ -148,19 +176,44 @@ export class AssetsGenerator extends Component {
    }
 
    on_coverage_data = (coverage_data) => {
-      this.setState({have_coverage: coverage_data !== null})
+      // console.log('coverage_data', coverage_data)
+      this.setState({coverage_data})
    }
 
    render() {
       const {
+         container_ref,
          rendered_height,
          rendered_width,
          frame_settings,
+         resolution,
          image_outcome,
       } = this.state
       let top = 0;
+      let left = 0;
+      if (container_ref.current) {
+         const container_bounds = container_ref.current.getBoundingClientRect()
+         top = container_bounds.top
+         left = container_bounds.left
+      }
+      const bounding_rect = {
+         top,
+         left,
+         width: rendered_width,
+         height: rendered_height,
+      }
+      const splitter_keys = {
+         legend_key: KEY_ASSETS_GENERATOR_LEGEND_SPLITTER_POS,
+         main_key: KEY_ASSETS_GENERATOR_SPLITTER_POS,
+         steps_key: KEY_ASSETS_GENERATOR_STEPS_SPLITTER_POS,
+         section_key: KEY_ASSETS_SPLITTER_POS_PX,
+      }
       const splitter_pos = AppSettings.get(KEY_ASSETS_GENERATOR_SPLITTER_POS)
       const leftmost_splitter_pos = AppSettings.get(KEY_ASSETS_SPLITTER_POS_PX)
+      const right_block_style = {
+         left: `${splitter_pos + MARGIN_PX}px`,
+         top: `${top + MARGIN_PX}px`,
+      }
       const image_style = {
          left: `${splitter_pos + MARGIN_PX}px`,
          top: `${top + 2 * MARGIN_PX + frame_settings.width_px}px`,
@@ -187,14 +240,31 @@ export class AssetsGenerator extends Component {
             key={'assets-overview-title'}>
             {AppText.get(KEY_IMAGE_ASSETS_GENERATE)}
          </styles.SectionTitle>,
-         <NavigatorCoverage
-            splitter_keys={ASSETS_GENERATOR_SPLITTER_KEYS}
-            control_block={this.render_button_block()}
-            results_block={image}
-            on_coverage_data={this.on_coverage_data}
-         />
+         <styles.TightCenteredBlock
+            ref={container_ref}
+            key={'generator-content'}>
+            <NavigatorSplitterLayout
+               bounding_rect={bounding_rect}
+               frame_settings={frame_settings}
+               frame_settings_key={KEY_ASSETS_GENERATOR_FRAME_SETTINGS}
+               splitter_keys={splitter_keys}
+            />
+            <styles.FixedInlineBlock
+               style={right_block_style}>
+               <FractoTileCoverage
+                  bounding_rect={bounding_rect}
+                  frame_settings={frame_settings}
+                  frame_settings_key={KEY_ASSETS_GENERATOR_FRAME_SETTINGS}
+                  on_level_select={this.on_level_select}
+                  on_coverage_data={this.on_coverage_data}
+               />
+               <styles.OneRemSpacer/>
+               {this.render_button_block()}
+            </styles.FixedInlineBlock>
+         </styles.TightCenteredBlock>,
+         image
       ];
    }
 }
 
-export default AssetsGenerator
+export default AssetsGeneratorNot

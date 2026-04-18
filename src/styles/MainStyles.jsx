@@ -93,10 +93,13 @@ export class MainStyles {
        ${CoolStyles.align_center}
        margin: auto;
    `
-   static FixedInlineBlock = styled(CoolStyles.InlineBlock)`
+   static FixedCenteredBlock = styled(CoolStyles.InlineBlock)`
        ${CoolStyles.fixed}
        ${CoolStyles.align_center}
        margin: auto;
+   `
+   static FixedInlineBlock = styled(CoolStyles.InlineBlock)`
+       ${CoolStyles.fixed}
    `
    static InputPrompt = styled(CoolStyles.InlineBlock)`
        ${CoolStyles.italic}

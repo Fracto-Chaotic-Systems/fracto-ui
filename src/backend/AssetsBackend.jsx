@@ -7,10 +7,9 @@ import {FETCH_JSON_HEADERS} from "../pages/study/StudyUtils.jsx";
 
 export class AssetsBackend {
 
-   static render_image = async (frame_settings, resolution, selected_level) => {
+   static render_image = async (frame_settings, resolution) => {
       const all_params = [
          `width_px=${resolution}`,
-         `highest_level=${selected_level}`,
          `focal_point_x=${frame_settings.focal_point.x}`,
          `focal_point_y=${frame_settings.focal_point.y}`,
          `scope=${frame_settings.scope}`,
