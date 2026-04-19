@@ -1,19 +1,20 @@
 import React, {Component} from "react";
 
 import {MainStyles as styles} from '../../styles/MainStyles.jsx'
-import AppSettings from "../../AppSettings.jsx";
-import {KEY_TILES_GENERATOR_FRAME_SETTINGS} from "../../settings/TilesSettings.jsx";
 import AppText from "../../AppText.jsx";
 import {KEY_TILES_GENERATE} from "../../text/TilesText.jsx";
 
 import {INCLUDE_CAN_DO} from "../../utils/render/FractoTileCoverage.jsx";
-import GeneratorRun from "./generator/GeneratorRun.jsx";
-import NavigatorCoverage from "../../navigator/NavigatorCoverage.jsx";
 import {TILE_GENERATOR_SPLITTER_KEYS} from "../../navigator/NavigatorKeys.jsx";
+
+import NavigatorCoverage from "../../navigator/NavigatorCoverage.jsx";
+import GeneratorControl from "./generator/GeneratorControl.jsx";
+import GeneratorOperations from "./generator/GeneratorOperations.jsx";
 
 export class TilesGenerator extends Component {
    state = {
       coverage_data: [],
+      short_codes: [],
    }
 
    on_coverage_data = (coverage_data) => {
@@ -21,19 +22,23 @@ export class TilesGenerator extends Component {
    }
 
    on_generate = (short_codes) => {
-      // console.log('on_generate', short_codes)
+      console.log('on_generate', short_codes.length)
+      this.setState({short_codes})
    }
 
    control_block = () => {
       const {coverage_data} = this.state
-      return <GeneratorRun
+      return <GeneratorControl
          coverage_data={coverage_data}
          on_generate={this.on_generate}
       />
    }
 
    operations_block = () => {
-      return 'operations_block'
+      const {short_codes} = this.state
+      return <GeneratorOperations
+         short_codes={short_codes}
+      />
    }
 
    render() {

@@ -8,7 +8,6 @@ import {
    CELL_TYPE_NUMBER,
    CELL_TYPE_TEXT
 } from "../../../utils/ui/styles/CoolTableStyles.jsx";
-import * as Array from "mathjs";
 
 const TABLE_COLUMNS = [
    {
@@ -34,7 +33,7 @@ const TABLE_COLUMNS = [
    },
 ]
 
-export class GeneratorRun extends Component {
+export class GeneratorControl extends Component {
    static propTypes = {
       coverage_data: PropTypes.array.isRequired,
       on_generate: PropTypes.func.isRequired,
@@ -63,12 +62,11 @@ export class GeneratorRun extends Component {
       const {can_do_been_done} = this.state
       const { coverage_data, on_generate} = this.props
       if (can_do_been_done.includes(level)) {
-         console.log('been done', level)
          return;
       }
       can_do_been_done.push(level)
-      const level_coverage = coverage_data.find(c => c.level === level)
-      // console.log('level_coverage', level_coverage)
+      const level_coverage = coverage_data
+         .find(c => c.level === level)
       on_generate(level_coverage.can_do)
       this.setState({can_do_been_done})
    }
@@ -81,8 +79,8 @@ export class GeneratorRun extends Component {
          return;
       }
       re_do_been_done.push(level)
-      const level_coverage = coverage_data.find(c => c.level === level)
-      // console.log('do_it_now', level)
+      const level_coverage = coverage_data
+         .find(c => c.level === level)
       on_generate(level_coverage.re_do)
       this.setState({re_do_been_done})
    }
@@ -96,7 +94,7 @@ export class GeneratorRun extends Component {
          .filter(item => item.can_do)
          .map((item) => {
             const can_do = can_do_been_done.includes(item.level)
-               ? '-'
+               ? <styles.NotALink>{item.can_do?.length}</styles.NotALink>
                : <styles.NormalLink
                   onClick={e => this.do_it_now(item.level)}>
                   <styles.NumericValue>
@@ -104,7 +102,7 @@ export class GeneratorRun extends Component {
                   </styles.NumericValue>
                </styles.NormalLink>
             const re_do = re_do_been_done.includes(item.level)
-               ? '-'
+               ? <styles.NotALink>{item.count}</styles.NotALink>
                : <styles.NormalLink
                   onClick={e => this.re_do_it_now(item.level)}>
                   {item.count}
@@ -124,7 +122,7 @@ export class GeneratorRun extends Component {
       if (!table_data.length) {
          return []
       }
-      console.log('GeneratorRun', table_data)
+      // console.log('GeneratorRun', table_data)
       return <styles.FixedInlineBlock>
          <CoolTable
             columns={TABLE_COLUMNS}
@@ -135,5 +133,5 @@ export class GeneratorRun extends Component {
    }
 }
 
-export default GeneratorRun
+export default GeneratorControl
 

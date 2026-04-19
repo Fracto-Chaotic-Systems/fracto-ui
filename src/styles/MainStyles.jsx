@@ -233,6 +233,11 @@ export class MainStyles {
            color: ${CoolColors.cool_blue};
        }
    `
+   static NotALink = styled(CoolStyles.InlineBlock)`
+       ${CoolStyles.monospace}
+       cursor: normal;
+       font-size: 0.85rem;
+   `
    static InlineHover = styled(CoolStyles.InlineBlock)`
        opacity: 0;
        transition: opacity 0.3s ease-in-out;

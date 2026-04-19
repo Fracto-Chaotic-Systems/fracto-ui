@@ -194,7 +194,7 @@ export class FractoTileCoverage extends Component {
    }
 
    process_can_do = (coverage_data, coverage) => {
-      console.log('process_can_do', coverage_data, coverage)
+      // console.log('process_can_do', coverage_data, coverage)
       coverage_data.forEach((c, i) => {
          if (c.percent === NO_COVERAGE) {
             return
@@ -205,7 +205,7 @@ export class FractoTileCoverage extends Component {
          }
          next_c.can_do = []
          c.re_do = []
-         console.log('process_can_do', c.level)
+         // console.log('process_can_do', c.level)
          const covered_tiles = coverage[c.level]
          const next_covered_tiles = coverage[c.level + 1]
          covered_tiles.forEach(tile => {
@@ -247,6 +247,10 @@ export class FractoTileCoverage extends Component {
             table_style={{backgroundColor: 'white'}}
          />
          : []
+      const coverage_table_style = {
+         height: `${frame_settings.width_px}px`,
+         overflowY: 'auto',
+      }
       return <CoolStyles.InlineBlock
          key={'heat-map'}
          title={in_fetch ? 'please be patient' : 'click for heat map'}>
@@ -261,6 +265,7 @@ export class FractoTileCoverage extends Component {
          </CoolStyles.InlineBlock>
          <styles.OneRemSpacer/>
          <CoolStyles.InlineBlock
+            style={coverage_table_style}
             key={'coverage-table'}>
             {coverage_table}
          </CoolStyles.InlineBlock>
