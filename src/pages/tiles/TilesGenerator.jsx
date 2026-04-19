@@ -24,7 +24,7 @@ export class TilesGenerator extends Component {
    }
 
    on_generate = (short_codes) => {
-      console.log('on_generate', short_codes.length)
+      console.log('on_generate', short_codes ? short_codes.length : 0)
       this.setState({short_codes})
    }
 
@@ -37,7 +37,10 @@ export class TilesGenerator extends Component {
    }
 
    operations_block = () => {
-      const {short_codes} = this.state
+      const {coverage_data, short_codes} = this.state
+      if (!coverage_data) {
+         return []
+      }
       return <GeneratorOperations
          short_codes={short_codes}
       />

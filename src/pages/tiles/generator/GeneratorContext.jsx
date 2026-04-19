@@ -14,13 +14,11 @@ export class GeneatorContext extends Component {
 
    on_plan_complete = (canvas_buffer, ctx) => {
       const {on_plan_complete} = this.props
-
       const tile_width_by_scope_factor
          = (TILE_RENDER_WIDTH_PX) / SCOPE_FACTOR
       const margin
          = TILE_RENDER_WIDTH_PX * (SCOPE_FACTOR - 1) / (2 * SCOPE_FACTOR)
 
-      // draw outline
       ctx.setLineDash([6, 3]); // [dash length, gap length]
       ctx.strokeStyle = 'white';
       ctx.lineWidth = 2.5;

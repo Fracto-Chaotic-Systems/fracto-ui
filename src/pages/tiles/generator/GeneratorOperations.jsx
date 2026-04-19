@@ -4,7 +4,6 @@ import PropTypes from "prop-types";
 import {MainStyles as styles, MARGIN_PX} from '../../../styles/MainStyles.jsx'
 import {bounds_from_short_code} from "../TilesUtils.jsx";
 import FractoFastCalc from "../../../../../../sdk/FractoFastCalc.js";
-import GeneratorContext from "./GeneratorContext.jsx";
 import GeneratorActions from "./GeneratorActions.jsx";
 
 export const TILE_RENDER_WIDTH_PX = 300
@@ -81,20 +80,20 @@ export class GeneratorOperations extends Component {
 
    actions_block = () => {
       const {tile_index, tiles} = this.state
-      const context = tile_index >= 0
+      const actions = tile_index >= 0
          ? <GeneratorActions
-            tile={tiles[tile_index]}
+            tiles={tiles}
             tile_index={tile_index}
          />
          : []
       const block_style = {
          width: `${ACTIONS_WIDTH_PX}px`,
-         backgroundColor: 'lightgreen',
+         // backgroundColor: 'lightgreen',
          padding: `${MARGIN_PX}px`,
       }
       return <styles.FixedInlineBlock
          style={block_style}>
-         {context}
+         {actions}
       </styles.FixedInlineBlock>
    }
 
