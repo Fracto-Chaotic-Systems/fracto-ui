@@ -1,12 +1,14 @@
 import React, {Component} from "react";
 import PropTypes from "prop-types";
 
-import {MainStyles as styles} from '../../../styles/MainStyles.jsx'
+import {MainStyles as styles, MARGIN_PX} from '../../../styles/MainStyles.jsx'
 import {bounds_from_short_code} from "../TilesUtils.jsx";
 import FractoFastCalc from "../../../../../../sdk/FractoFastCalc.js";
 import GeneratorContext from "./GeneratorContext.jsx";
+import GeneratorActions from "./GeneratorActions.jsx";
 
 export const TILE_RENDER_WIDTH_PX = 300
+const ACTIONS_WIDTH_PX = 2 * TILE_RENDER_WIDTH_PX + 3 * MARGIN_PX
 
 export class GeneratorOperations extends Component {
    static propTypes = {
@@ -77,15 +79,40 @@ export class GeneratorOperations extends Component {
       return tile_points;
    }
 
-   render() {
+   actions_block = () => {
       const {tile_index, tiles} = this.state
-      // console.log('GeneratorOperations', tile_index)
       const context = tile_index >= 0
-         ? <GeneratorContext
-            tile={tiles[tile_index]}/>
+         ? <GeneratorActions
+            tile={tiles[tile_index]}
+            tile_index={tile_index}
+         />
          : []
-      return <styles.FixedInlineBlock>
+      const block_style = {
+         width: `${ACTIONS_WIDTH_PX}px`,
+         backgroundColor: 'lightgreen',
+         padding: `${MARGIN_PX}px`,
+      }
+      return <styles.FixedInlineBlock
+         style={block_style}>
          {context}
+      </styles.FixedInlineBlock>
+   }
+
+   history_block = () => {
+      const {tile_index, tiles} = this.state
+      const history = tile_index >= 0
+         ? []
+         : []
+      return history
+   }
+
+   render() {
+      // console.log('GeneratorOperations', tile_index)
+      const actions_block = this.actions_block()
+      const history_block = this.history_block()
+      return <styles.FixedInlineBlock>
+         {actions_block}
+         {history_block}
       </styles.FixedInlineBlock>
    }
 }

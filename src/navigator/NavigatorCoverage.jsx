@@ -20,6 +20,7 @@ export class NavigatorCoverage extends Component {
       control_block: PropTypes.array.isRequired,
       results_block: PropTypes.array.isRequired,
       on_coverage_data: PropTypes.func.isRequired,
+      on_resize: PropTypes.func,
       options: PropTypes.array,
    }
 
@@ -64,7 +65,7 @@ export class NavigatorCoverage extends Component {
 
    update_dimensions = () => {
       const {rendered_width, rendered_height} = this.state;
-      const {splitter_keys} = this.props
+      const {splitter_keys, on_resize} = this.props
       const viewport_dimensions = AppSettings.get(KEY_VIEWPORT_DIMENSIONS)
       const splitter_width = AppSettings.get(splitter_keys.section_key)
       const rendered_width_changed = rendered_width !== viewport_dimensions.width - splitter_width
@@ -74,6 +75,9 @@ export class NavigatorCoverage extends Component {
             rendered_width: viewport_dimensions.width - splitter_width,
             rendered_height: viewport_dimensions.height,
          })
+      }
+      if (on_resize) {
+         on_resize(rendered_width, rendered_height)
       }
    }
 

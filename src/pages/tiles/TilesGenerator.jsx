@@ -15,6 +15,8 @@ export class TilesGenerator extends Component {
    state = {
       coverage_data: [],
       short_codes: [],
+      width_px: 0,
+      height_px: 0,
    }
 
    on_coverage_data = (coverage_data) => {
@@ -41,6 +43,11 @@ export class TilesGenerator extends Component {
       />
    }
 
+   on_resize = (width_px, height_px) => {
+      this.setState({width_px, height_px})
+      console.log(`size is ${width_px}x${height_px}`)
+   }
+
    render() {
       return [
          <styles.SectionTitle
@@ -52,6 +59,7 @@ export class TilesGenerator extends Component {
             control_block={this.control_block()}
             results_block={this.operations_block()}
             on_coverage_data={this.on_coverage_data}
+            on_resize={this.on_resize}
             options={[INCLUDE_CAN_DO]}
          />,
       ];
