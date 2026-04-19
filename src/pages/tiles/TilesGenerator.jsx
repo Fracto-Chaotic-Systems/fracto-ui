@@ -46,7 +46,11 @@ export class TilesGenerator extends Component {
       />
    }
 
-   on_resize = (width_px, height_px) => {
+   on_resize = (new_width_px, new_height_px) => {
+      const {width_px, height_px} = this.state
+      if (new_width_px === width_px && new_height_px === height_px) {
+         return
+      }
       this.setState({width_px, height_px})
       console.log(`size is ${width_px}x${height_px}`)
    }

@@ -193,6 +193,9 @@ export class MainStyles {
    static HalfRemDown = styled(CoolStyles.Block)`
        height: 0.5rem;
    `
+   static OneRemDown = styled(CoolStyles.Block)`
+       height: 0.5rem;
+   `
    static ScrollingBlock = styled(CoolStyles.Block)`
        overflow-y: auto;
    `

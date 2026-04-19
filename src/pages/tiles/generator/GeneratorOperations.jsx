@@ -1,10 +1,11 @@
 import React, {Component} from "react";
-import PropTypes from "prop-types";
+import PropTypes, {bool} from "prop-types";
 
 import {MainStyles as styles, MARGIN_PX} from '../../../styles/MainStyles.jsx'
 import {bounds_from_short_code} from "../TilesUtils.jsx";
 import FractoFastCalc from "../../../../../../sdk/FractoFastCalc.js";
 import GeneratorActions from "./GeneratorActions.jsx";
+import {copy_json} from "../../../utils/Dom.jsx";
 
 export const TILE_RENDER_WIDTH_PX = 300
 const ACTIONS_WIDTH_PX = 2 * TILE_RENDER_WIDTH_PX + 3 * MARGIN_PX
@@ -17,6 +18,8 @@ export class GeneratorOperations extends Component {
    state = {
       tile_index: -1,
       tiles: [],
+      in_progress: false,
+      ready_short_code: null,
    }
 
    componentDidMount() {
@@ -61,29 +64,82 @@ export class GeneratorOperations extends Component {
       return tile
    }
 
-   calculate_tile = (tile) => {
+   calculate_tile = (tile, tile_points) => {
       console.log("calculate_tile", tile)
       const short_code = tile.short_code
       const level = short_code.length
-      const tile_points = this.new_tile()
       const increment = (tile.bounds.right - tile.bounds.left) / 256.0;
-      for (let img_x = 0; img_x < 256; img_x++) {
-         const x = tile.bounds.left + img_x * increment;
-         for (let img_y = 0; img_y < 256; img_y++) {
-            const y = tile.bounds.top - img_y * increment;
-            const values = FractoFastCalc.calc(x, y, level)
-            tile_points[img_x][img_y] = [values.pattern, values.iteration];
+      try {
+         for (let img_x = 0; img_x < 256; img_x++) {
+            const x = tile.bounds.left + img_x * increment;
+            for (let img_y = 0; img_y < 256; img_y++) {
+               const y = tile.bounds.top - img_y * increment;
+               const values = FractoFastCalc.calc(x, y, level)
+               tile_points[img_x][img_y] = [values.pattern, values.iteration];
+            }
          }
+         return tile_points;
+      } catch (e) {
+         console.error(e)
+         return tile_points;
       }
-      return tile_points;
+   }
+
+   on_start_pause = () => {
+      const {in_progress} = this.state
+      const new_state = !in_progress
+      this.setState({
+         in_progress: new_state
+      })
+      if (new_state) {
+         this.setState({tile_index: -1})
+         setTimeout(() => {
+            this.setState({tile_index: 0})
+         }, 100)
+      }
+   }
+
+   on_context_ready = (short_code, context_buffer) => {
+      const {tile_index, tiles, in_progress} = this.state
+      console.log(`context_ready: ${short_code}`)
+      if (!in_progress) {
+         return
+      }
+      if (tile_index >= tiles.length) {
+         this.setState({
+            in_progress: false,
+            tile_index: -1,
+         })
+         return;
+      }
+      const tile = tiles[tile_index]
+      if (tile.short_code !== short_code) {
+         console.error(`tile.short_code mismatch ${short_code}`, tile)
+         return
+      }
+      setTimeout(() => {
+         const tile_points = this.new_tile()
+         this.calculate_tile(tile, tile_points)
+         if (tile_index === tiles.length - 1) {
+            this.setState({
+               in_progress: false,
+               tile_index: -1,
+            })
+         } else {
+            this.setState({tile_index: tile_index + 1});
+         }
+      }, 250)
    }
 
    actions_block = () => {
-      const {tile_index, tiles} = this.state
+      const {tile_index, tiles, in_progress} = this.state
       const actions = tile_index >= 0
          ? <GeneratorActions
             tiles={tiles}
             tile_index={tile_index}
+            in_progress={in_progress}
+            on_start_pause={this.on_start_pause}
+            on_context_ready={this.on_context_ready}
          />
          : []
       const block_style = {
