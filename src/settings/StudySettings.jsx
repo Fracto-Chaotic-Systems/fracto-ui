@@ -10,7 +10,7 @@ const MAGNITUDES_FOLDER = 'study/magnitudes'
 const POINTS_FOLDER = 'study/points'
 const FIELDS_FOLDER = 'study/fields'
 const MINBROTS_FOLDER = 'study/minibrots'
-const PATHS_FOLDER = 'study/paths'
+const NODES_FOLDER = 'study/nodes'
 const HYPERPLANE_FOLDER = 'study/hyperplane'
 export const KEY_STUDY_SPLITTER_POS_PX = `${STUDY_FOLDER}/splitter_pos_px`
 export const KEY_STUDY_SECTION = `${STUDY_FOLDER}/study_section`
@@ -40,10 +40,10 @@ export const KEY_STUDY_MINIBROTS_STEPS_SPLITTER_POS = `${MINBROTS_FOLDER}/steps_
 export const KEY_STUDY_MINIBROTS_SELECTED_ROW = `${MINBROTS_FOLDER}/selected_row`
 export const KEY_STUDY_MINIBROTS_RENDER_SPLITTER_POS =  `${MINBROTS_FOLDER}/render_splitter_pos`
 
-export const KEY_STUDY_PATHS_FRAME_SETTINGS = `${PATHS_FOLDER}/frame_settings`
-export const KEY_STUDY_PATHS_SPLITTER_POS = `${PATHS_FOLDER}/splitter_pos`
-export const KEY_STUDY_PATHS_LEGEND_SPLITTER_POS = `${PATHS_FOLDER}/legend_splitter_pos`
-export const KEY_STUDY_PATHS_STEPS_SPLITTER_POS = `${PATHS_FOLDER}/steps_splitter_pos`
+export const KEY_STUDY_NODES_FRAME_SETTINGS = `${NODES_FOLDER}/frame_settings`
+export const KEY_STUDY_NODES_SPLITTER_POS = `${NODES_FOLDER}/splitter_pos`
+export const KEY_STUDY_NODES_LEGEND_SPLITTER_POS = `${NODES_FOLDER}/legend_splitter_pos`
+export const KEY_STUDY_NODES_STEPS_SPLITTER_POS = `${NODES_FOLDER}/steps_splitter_pos`
 
 export const KEY_STUDY_HYPERPLANE_FRAME_SETTINGS = `${HYPERPLANE_FOLDER}/frame_settings`
 export const KEY_STUDY_HYPERPLANE_SPLITTER_POS = `${HYPERPLANE_FOLDER}/splitter_pos`
@@ -53,7 +53,7 @@ export const KEY_STUDY_HYPERPLANE_STEPS_SPLITTER_POS = `${HYPERPLANE_FOLDER}/ste
 export const STUDY_OVERVIEW = 'study_overview'
 export const STUDY_SETTINGS = 'study_settings'
 export const STUDY_STATUS = 'study_status'
-export const STUDY_PATHS = 'study_paths'
+export const STUDY_NODES = 'study_nodes'
 export const STUDY_POINTS = 'study_points'
 export const STUDY_FIELDS = 'study_fields'
 export const STUDY_MINIBROTS = 'study_minibrots'
@@ -66,9 +66,9 @@ const DEFAULT_FRAME_SETTINGS = {
 }
 
 export const STUDY_SPLITTER_KEYS = {
-   legend_key: KEY_STUDY_PATHS_LEGEND_SPLITTER_POS,
-   main_key: KEY_STUDY_PATHS_SPLITTER_POS,
-   steps_key: KEY_STUDY_PATHS_STEPS_SPLITTER_POS,
+   legend_key: KEY_STUDY_NODES_LEGEND_SPLITTER_POS,
+   main_key: KEY_STUDY_NODES_SPLITTER_POS,
+   steps_key: KEY_STUDY_NODES_STEPS_SPLITTER_POS,
    section_key: KEY_STUDY_SPLITTER_POS_PX,
 }
 
@@ -211,54 +211,54 @@ export const APP_STUDY_SETTINGS = {
       description: 'Current position for the study minibrots render splitter',
       persist: true,
    },
-   [KEY_STUDY_PATHS_FRAME_SETTINGS]: {
+   [KEY_STUDY_NODES_FRAME_SETTINGS]: {
       data_type: TYPE_OBJECT,
       default_value: DEFAULT_FRAME_SETTINGS,
-      description: 'Frame settings of the study paths page',
+      description: 'Frame settings of the study nodes page',
       persist: true,
       no_copy: true,
    },
-   [KEY_STUDY_PATHS_SPLITTER_POS]: {
+   [KEY_STUDY_NODES_SPLITTER_POS]: {
       data_type: TYPE_NUMBER,
       default_value: 500,
-      description: 'Current position for the study paths splitter',
+      description: 'Current position for the study nodes splitter',
       persist: true,
    },
-   [KEY_STUDY_PATHS_LEGEND_SPLITTER_POS]: {
+   [KEY_STUDY_NODES_LEGEND_SPLITTER_POS]: {
       data_type: TYPE_NUMBER,
       default_value: 800,
-      description: 'Current position for the study paths horizontal legend splitter',
+      description: 'Current position for the study nodes horizontal legend splitter',
       persist: true,
    },
-   [KEY_STUDY_PATHS_STEPS_SPLITTER_POS]: {
+   [KEY_STUDY_NODES_STEPS_SPLITTER_POS]: {
       data_type: TYPE_NUMBER,
       default_value: 800,
-      description: 'Current position for the study paths vertical steps splitter',
+      description: 'Current position for the study nodes vertical steps splitter',
       persist: true,
    },
    [KEY_STUDY_HYPERPLANE_FRAME_SETTINGS]: {
       data_type: TYPE_OBJECT,
       default_value: DEFAULT_FRAME_SETTINGS,
-      description: 'Frame settings of the study paths page',
+      description: 'Frame settings of the study hyperplane page',
       persist: true,
       no_copy: true,
    },
    [KEY_STUDY_HYPERPLANE_SPLITTER_POS]: {
       data_type: TYPE_NUMBER,
       default_value: 500,
-      description: 'Current position for the study paths splitter',
+      description: 'Current position for the study hyperplane splitter',
       persist: true,
    },
    [KEY_STUDY_HYPERPLANE_LEGEND_SPLITTER_POS]: {
       data_type: TYPE_NUMBER,
       default_value: 800,
-      description: 'Current position for the study paths horizontal legend splitter',
+      description: 'Current position for the study hyperplane horizontal legend splitter',
       persist: true,
    },
    [KEY_STUDY_HYPERPLANE_STEPS_SPLITTER_POS]: {
       data_type: TYPE_NUMBER,
       default_value: 800,
-      description: 'Current position for the study paths vertical steps splitter',
+      description: 'Current position for the study hyperplane vertical steps splitter',
       persist: true,
    },
 }

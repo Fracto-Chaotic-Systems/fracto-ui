@@ -47,24 +47,22 @@ const find_bounds = (set1, other_sets, in_cardioid, escaper) => {
          min_y = point.y
       }
    })
-   other_sets.forEach(points => {
-      if (!Array.isArray(points)) {
-         return;
+   other_sets.forEach(point => {
+      console.log('other sets point', point.x, point.y)
+      console.log('other sets max_x, min_x', max_x, min_x)
+      console.log('other sets max_y, min_y', max_y, min_y)
+      if (point.x > max_x) {
+         max_x = point.x
       }
-      points.forEach(point => {
-         if (point.x > max_x) {
-            max_x = point.x
-         }
-         if (point.x < min_x) {
-            min_x = point.x
-         }
-         if (point.y > max_y) {
-            max_y = point.y
-         }
-         if (point.y < min_y) {
-            min_y = point.y
-         }
-      })
+      if (point.x < min_x) {
+         min_x = point.x
+      }
+      if (point.y > max_y) {
+         max_y = point.y
+      }
+      if (point.y < min_y) {
+         min_y = point.y
+      }
    })
    const x_center = (max_x + min_x) / 2
    const y_center = (max_y + min_y) / 2
@@ -107,7 +105,9 @@ export const click_point_chart = (set1, other_sets = [], in_cardioid = false, es
       },
    }
    const cardinality = set1?.length - 1 || 0
-   const in_animation = other_sets?.length > 1
+   const in_animation = set1?.find(item =>
+      (item.x === other_sets[1].x && item.y === other_sets[1].y)
+   )
    const data_dataset = {
       datasets: [
          {
@@ -116,7 +116,8 @@ export const click_point_chart = (set1, other_sets = [], in_cardioid = false, es
             data: JSON.parse(JSON.stringify(other_sets)),
             backgroundColor: 'black',
             pointRadius: in_animation ? 3 : 2,
-            borderColor: in_animation ? ANIMATION_COLOR : 'black',
+            borderColor: in_animation ? ANIMATION_COLOR : '#888888',
+            borderDash: in_animation ? [1, 0] : [5, 5],   // 5px dash, 5px gap
             showLine: true
          },
          {

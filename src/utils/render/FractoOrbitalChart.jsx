@@ -16,6 +16,7 @@ export class FractoOrbitalChart extends Component {
    state = {
       fracto_values: null,
       Q_core_neg: null,
+      Q_core_pos: null,
       animation_index: 0,
       interval: null
    }
@@ -72,9 +73,11 @@ export class FractoOrbitalChart extends Component {
       const {x, y} = focal_point
       const fracto_values = FractoFastCalc.calc(x, y)
       const Q_core_neg = FractoFastCalc.calculate_cardioid_Q(x, y, -1)
+      const Q_core_pos = FractoFastCalc.calculate_cardioid_Q(x, y, 1)
       this.setState({
          fracto_values,
          Q_core_neg,
+         Q_core_pos,
          interval: null
       })
       if (interval) {
@@ -83,14 +86,14 @@ export class FractoOrbitalChart extends Component {
    }
 
    render() {
-      const {fracto_values, Q_core_neg, animation_index} = this.state
+      const {fracto_values, Q_core_neg, Q_core_pos, animation_index} = this.state
       const {in_animation} = this.props
       if (!fracto_values || !Q_core_neg) {
          return "please, wait"
       }
       const other_sets = in_animation && fracto_values.orbital_points.length > animation_index
          ? [Q_core_neg, fracto_values.orbital_points[animation_index]]
-         : [Q_core_neg]
+         : [Q_core_neg, Q_core_pos]
       return click_point_chart(
          fracto_values.orbital_points,
          other_sets)
