@@ -8,8 +8,6 @@ import {KEY_VIEWPORT_DIMENSIONS} from "../../settings/RootSettings.jsx";
 import {
    KEY_STUDY_NODES_FRAME_SETTINGS,
    KEY_STUDY_NODES_SPLITTER_POS,
-   KEY_STUDY_SPLITTER_POS_PX,
-   STUDY_SPLITTER_KEYS
 } from "../../settings/StudySettings.jsx";
 import AppText from "../../AppText.jsx";
 import {
@@ -35,9 +33,12 @@ export class StudyNodes extends Component {
          .get(STUDY_NODES_SPLITTER_KEYS.frame_settings_key)
       this.setState({
          frame_settings,
-         interval: setInterval(this.update_dimensions, UPDATE_INTERVAL_MS),
-         subscription: AppSettings
-            .subscribe(STUDY_NODES_SPLITTER_KEYS.frame_settings_key, this.on_frame_settings_changed)
+         interval: setInterval(
+            this.update_dimensions,
+            UPDATE_INTERVAL_MS),
+         subscription: AppSettings.subscribe(
+            STUDY_NODES_SPLITTER_KEYS.frame_settings_key,
+            this.on_frame_settings_changed)
       })
    }
 
@@ -57,7 +58,7 @@ export class StudyNodes extends Component {
 
    update_dimensions = () => {
       const {rendered_width, rendered_height} = this.state;
-      const { on_resize} = this.props
+      const {on_resize} = this.props
       const viewport_dimensions = AppSettings.get(KEY_VIEWPORT_DIMENSIONS)
       const splitter_width = AppSettings.get(STUDY_NODES_SPLITTER_KEYS.section_key)
       const rendered_width_changed = rendered_width !== viewport_dimensions.width - splitter_width
@@ -74,14 +75,7 @@ export class StudyNodes extends Component {
    }
 
    render() {
-      const {
-         core_points,
-         container_ref,
-         rendered_height,
-         rendered_width,
-         frame_settings,
-         selected_point
-      } = this.state
+      const {container_ref, rendered_height, rendered_width, frame_settings} = this.state
       let top = 0;
       let left = 0;
       if (container_ref.current) {
@@ -112,7 +106,7 @@ export class StudyNodes extends Component {
                bounding_rect={bounding_rect}
                frame_settings={frame_settings}
                frame_settings_key={KEY_STUDY_NODES_FRAME_SETTINGS}
-               splitter_keys={STUDY_SPLITTER_KEYS}
+               splitter_keys={STUDY_NODES_SPLITTER_KEYS}
             />
          </styles.TightCenteredBlock>,
       ];

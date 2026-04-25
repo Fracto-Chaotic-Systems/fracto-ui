@@ -19,18 +19,30 @@ export class MinibrotLeftPanel extends Component {
    static propTypes = {
       selected_minibrot: PropTypes.object.isRequired,
       container_bounds: PropTypes.object.isRequired,
+      on_ready: PropTypes.func.isRequired,
       ready: PropTypes.bool.isRequired,
    }
 
    state = {
       in_animation: false,
+      core_point: null,
+   }
+
+   componentDidMount() {
+      this.update_core_point()
    }
 
    componentDidUpdate(prevProps, prevState, snapshot) {
-      const selected_minibrot_changed = this.props.selected_minibrot.id !== prevProps.selected_minibrot.id;
+      const selected_minibrot_changed = this.props.selected_minibrot?.id !== prevProps.selected_minibrot.id;
       if (selected_minibrot_changed) {
-         this.setState({in_animation: false});
+         setTimeout(this.update_core_point, 5000)
       }
+   }
+
+   update_core_point() {
+      const {selected_minibrot} = this.props;
+      const core_point = JSON.parse(selected_minibrot.core_point)
+      this.setState({core_point, in_animation: false});
    }
 
    on_click_chart = () => {
@@ -40,12 +52,12 @@ export class MinibrotLeftPanel extends Component {
 
    render() {
       const {in_animation} = this.state
-      const {selected_minibrot, container_bounds, ready} = this.props;
+      const {selected_minibrot, container_bounds, on_ready} = this.props;
       if (!selected_minibrot.pattern) {
          return []
       }
-      const rendered_splitter_pos = AppSettings.get(KEY_STUDY_MINIBROTS_RENDER_SPLITTER_POS)
       const core_point = JSON.parse(selected_minibrot.core_point)
+      const rendered_splitter_pos = AppSettings.get(KEY_STUDY_MINIBROTS_RENDER_SPLITTER_POS)
       const display_settings = JSON.parse(selected_minibrot.display_settings)
       // console.log('MinibrotLeftPanel, core_point, display_settings', core_point, display_settings)
 
@@ -86,16 +98,18 @@ export class MinibrotLeftPanel extends Component {
                width_px={width_px}
                focal_point={display_settings.focal_point}
                scope={display_settings.scope}
-               on_plan_complete={this.on_ready}
+               on_plan_complete={on_ready}
             />
          </div>
          <div
             onClick={this.on_click_chart}
             style={chart_style}>
             <FractoOrbitalChart
+               key={selected_minibrot.id}
                width_px={width_px}
                focal_point={core_point}
                in_animation={in_animation}
+               ready={true}
             />
          </div>
       </styles.FixedInlineBlock>

@@ -86,10 +86,10 @@ export class MinibrotList extends Component {
       const {on_select_minibrot} = this.props
       const selected_minibrot = minibrot_list[row]
       this.setState({selected_row: row})
-      on_select_minibrot(selected_minibrot)
       AppSettings.on_settings_changed({
          [KEY_STUDY_MINIBROTS_SELECTED_ROW]: row
       })
+      on_select_minibrot(selected_minibrot)
    }
 
    render() {

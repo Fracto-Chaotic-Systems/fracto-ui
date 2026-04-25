@@ -28,7 +28,7 @@ export class MinibrotPanel extends Component {
       container_ref: React.createRef(),
       selected_minibrot: {},
       rendered_splitter_pos: 500,
-      ready: false
+      ready: false,
    }
 
    componentDidMount() {
@@ -70,8 +70,8 @@ export class MinibrotPanel extends Component {
    }
 
    render() {
-      const {container_ref, rendered_splitter_pos, selected_minibrot} = this.state
-      const {height_px, ready} = this.props
+      const {ready, container_ref, rendered_splitter_pos, selected_minibrot} = this.state
+      const {height_px} = this.props
       let top = 0;
       let container_bounds = {}
       if (container_ref.current) {
@@ -83,13 +83,14 @@ export class MinibrotPanel extends Component {
          maxWidth: `${TABLE_WIDTH_PX}px`,
          cursor: ready ? 'pointer' : 'wait',
       }
-      const left_panel = selected_minibrot.id
+      const left_panel = selected_minibrot?.id
          ? <MinibrotLeftPanel
             selected_minibrot={selected_minibrot}
             container_bounds={container_bounds}
+            on_ready={this.on_ready}
             ready={ready}/>
          : []
-      const right_panel = selected_minibrot.id
+      const right_panel = selected_minibrot?.id
          ? <MinibrotRightPanel
             selected_minibrot={selected_minibrot}
             container_bounds={container_bounds}
