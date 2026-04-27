@@ -6,7 +6,7 @@ import {TILE_RENDER_WIDTH_PX} from "./GeneratorOperations.jsx";
 
 const SCOPE_FACTOR = 5
 
-export class GeneatorContext extends Component {
+export class GeneratorContext extends Component {
    static propTypes = {
       tile: PropTypes.string.isRequired,
       on_plan_complete: PropTypes.func.isRequired,
@@ -42,10 +42,11 @@ export class GeneatorContext extends Component {
       return <FractoRasterImage
          width_px={TILE_RENDER_WIDTH_PX}
          focal_point={focal_point}
-         scope={tile_width_by_two * SCOPE_FACTOR}
+         scope={tile_width_by_two * SCOPE_FACTOR * 2}
          on_plan_complete={this.on_plan_complete}
+         resolution_factor={0.5}
       />
    }
 }
 
-export default GeneatorContext
+export default GeneratorContext

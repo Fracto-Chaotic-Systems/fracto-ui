@@ -7,6 +7,8 @@ import {MainStyles as styles} from "../../../styles/MainStyles.jsx";
 import {TILE_RENDER_WIDTH_PX} from "./GeneratorOperations.jsx";
 
 import GeneratorContext from "./GeneratorContext.jsx";
+import GeneratorTile from "./GeneratorTile.jsx";
+import {render_coordinates} from "../../../utils/Dom.jsx";
 
 const TITLE_TEXT_STYLE = {
    textTransform: 'uppercase',
@@ -26,6 +28,7 @@ export class GeneratorActions extends Component {
    static propTypes = {
       tiles: PropTypes.array.isRequired,
       tile_index: PropTypes.number.isRequired,
+      tile_points: PropTypes.array.isRequired,
       in_progress: PropTypes.bool.isRequired,
       on_start_pause: PropTypes.func.isRequired,
       on_context_ready: PropTypes.func.isRequired,
@@ -40,32 +43,40 @@ export class GeneratorActions extends Component {
       ready_short_code: null,
    }
 
-   context_ready = (canvas_buffer) => {
+   context_ready = () => {
       const {tiles, tile_index, on_context_ready} = this.props
       const tile = tiles[tile_index]
-      on_context_ready(tile.short_code, canvas_buffer)
+      on_context_ready(tile.short_code)
    }
 
    render_context = () => {
       const {tiles, tile_index} = this.props
       const tile = tiles[tile_index]
-      if (tile_index < 0) {
-         return []
-      }
       const context_style = {
          height: `${TILE_RENDER_WIDTH_PX}px`,
          boxShadow: '5px 5px 10px rgba(0, 0, 0, 0.25)',
       }
-      return <CoolStyles.Block
-         key={'tile-context'}>
-         <CoolStyles.InlineBlock
-            style={context_style}>
+      const tile_center = {
+         x: (tile.bounds.left + tile.bounds.right) / 2,
+         y: (tile.bounds.bottom + tile.bounds.top) / 2,
+      }
+      const coords_style = {
+         margin: '-8px auto',
+         width: 'min-content',
+      }
+      return <CoolStyles.InlineBlock
+         key={'tile-context'}
+         style={context_style}>
+         <div>
             <GeneratorContext
                tile={tile}
                on_plan_complete={this.context_ready}
             />
-         </CoolStyles.InlineBlock>
-      </CoolStyles.Block>
+         </div>
+         <div style={coords_style}>
+            {render_coordinates(tile_center)}
+         </div>
+      </CoolStyles.InlineBlock>
    }
 
    render_preamble = () => {
@@ -90,8 +101,11 @@ export class GeneratorActions extends Component {
       </styles.CenteredBlock>
    }
 
-   render_progress = () => {
+   render_progress = (canvas_buffer) => {
       const {tiles, tile_index} = this.props
+      if (tile_index < 0) {
+         return []
+      }
       const completed = <styles.NumericValue
          style={NUMERAL_STYLE}>
          {tile_index}
@@ -100,7 +114,7 @@ export class GeneratorActions extends Component {
          style={NUMERAL_STYLE}>
          {tiles.length - tile_index}
       </styles.NumericValue>
-      const percent = Math.round(tile_index * 1000 / tiles.length) / 100
+      const percent = Math.round(tile_index * 10000 / tiles.length) / 100
       const progress = [
          completed,
          ` completed (${percent}%), `,
@@ -114,12 +128,21 @@ export class GeneratorActions extends Component {
    }
 
    render_scale = () => {
-      const {tiles, tile_index} = this.props
-      const percent = Math.round(tile_index * 1000 / tiles.length) / 100
-      return <styles.CenteredBlock>
+      const {tiles, tile_index, canvas_buffer} = this.props
+      if (tile_index < 0) {
+         return []
+      }
+      const percent = Math.round(tile_index * 10000 / tiles.length) / 100
+      const scale_style = {
+         paddingTop: '10px',
+         width: `${1.85 * TILE_RENDER_WIDTH_PX}px`,
+      }
+      return <styles.CenteredBlock
+         style={scale_style}>
          <LinearProgress
             variant="determinate"
             value={percent}
+            sx={{height: '8px'}}
          />
       </styles.CenteredBlock>
    }
@@ -139,19 +162,54 @@ export class GeneratorActions extends Component {
       </styles.CenteredBlock>
    }
 
+   render_generated = (tile_points) => {
+      const {tiles, tile_index} = this.props
+      const tile = tiles[tile_index]
+      if (tile_index < 0) {
+         return []
+      }
+      const generated_style = {
+         height: `${TILE_RENDER_WIDTH_PX}px`,
+         boxShadow: '5px 5px 10px rgba(0, 0, 0, 0.25)',
+      }
+      const short_code_style = {
+         margin: '-8px auto',
+         width: 'min-content',
+      }
+      return <CoolStyles.InlineBlock
+         key={'tile-generated'}
+         style={generated_style}>
+         <div>
+            <GeneratorTile
+               width_px={TILE_RENDER_WIDTH_PX}
+               short_code={tile.short_code}
+               canvas_buffer={tile_points}
+            />
+         </div>
+         <div style={short_code_style}>
+            {tile.short_code}
+         </div>
+      </CoolStyles.InlineBlock>
+   }
+
    render() {
-      const {tile_index} = this.props
+      const {tile_index, canvas_buffer, tile_points} = this.props
       if (tile_index < 0) {
          return []
       }
       const preamble = this.render_preamble()
-      const context = this.render_context()
-      const progress = this.render_progress()
+      const context = this.render_context(canvas_buffer)
+      const progress = this.render_progress(canvas_buffer)
       const scale = this.render_scale()
       const button = this.render_button()
+      const generated = this.render_generated(tile_points)
       return [
          preamble,
-         context,
+         <styles.CenteredBlock>
+            {context}
+            <styles.OneRemSpacer/>
+            {generated}
+         </styles.CenteredBlock>,
          <styles.OneRemDown/>,
          scale,
          progress,

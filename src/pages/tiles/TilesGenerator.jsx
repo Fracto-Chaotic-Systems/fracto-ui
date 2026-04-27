@@ -20,6 +20,7 @@ export class TilesGenerator extends Component {
    }
 
    on_coverage_data = (coverage_data) => {
+      // console.log('on_coverage_data', coverage_data)
       this.setState({coverage_data})
    }
 
@@ -51,8 +52,11 @@ export class TilesGenerator extends Component {
       if (new_width_px === width_px && new_height_px === height_px) {
          return
       }
-      this.setState({width_px, height_px})
-      console.log(`size is ${width_px}x${height_px}`)
+      this.setState({
+         width_px: new_width_px,
+         height_px: new_height_px
+      })
+      console.log(`size is ${new_width_px}x${new_height_px}`)
    }
 
    render() {

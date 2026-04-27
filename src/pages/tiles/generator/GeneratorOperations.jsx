@@ -5,10 +5,11 @@ import {MainStyles as styles, MARGIN_PX} from '../../../styles/MainStyles.jsx'
 import {bounds_from_short_code} from "../TilesUtils.jsx";
 import FractoFastCalc from "../../../../../../sdk/FractoFastCalc.js";
 import GeneratorActions from "./GeneratorActions.jsx";
-import {copy_json} from "../../../utils/Dom.jsx";
 
 export const TILE_RENDER_WIDTH_PX = 300
 const ACTIONS_WIDTH_PX = 2 * TILE_RENDER_WIDTH_PX + 3 * MARGIN_PX
+
+const NEXT_TILE_DELAY_MS = 150
 
 export class GeneratorOperations extends Component {
    static propTypes = {
@@ -20,6 +21,7 @@ export class GeneratorOperations extends Component {
       tiles: [],
       in_progress: false,
       ready_short_code: null,
+      tile_points: null,
    }
 
    componentDidMount() {
@@ -69,6 +71,7 @@ export class GeneratorOperations extends Component {
       const short_code = tile.short_code
       const level = short_code.length
       const increment = (tile.bounds.right - tile.bounds.left) / 256.0;
+      let estimated = 0
       try {
          for (let img_x = 0; img_x < 256; img_x++) {
             const x = tile.bounds.left + img_x * increment;
@@ -76,11 +79,18 @@ export class GeneratorOperations extends Component {
                const y = tile.bounds.top - img_y * increment;
                const values = FractoFastCalc.calc(x, y, level)
                tile_points[img_x][img_y] = [values.pattern, values.iteration];
+               if (values.estimated) {
+                  estimated++
+               }
             }
+         }
+         if (estimated) {
+            console.log(`tile ${tile.short_code} has ${estimated} estimated point(s)`)
          }
          return tile_points;
       } catch (e) {
          console.error(e)
+         debugger;
          return tile_points;
       }
    }
@@ -99,7 +109,7 @@ export class GeneratorOperations extends Component {
       }
    }
 
-   on_context_ready = (short_code, context_buffer) => {
+   on_context_ready = (short_code) => {
       const {tile_index, tiles, in_progress} = this.state
       console.log(`context_ready: ${short_code}`)
       if (!in_progress) {
@@ -120,6 +130,7 @@ export class GeneratorOperations extends Component {
       setTimeout(() => {
          const tile_points = this.new_tile()
          this.calculate_tile(tile, tile_points)
+         this.setState({tile_points})
          if (tile_index === tiles.length - 1) {
             this.setState({
                in_progress: false,
@@ -128,23 +139,21 @@ export class GeneratorOperations extends Component {
          } else {
             this.setState({tile_index: tile_index + 1});
          }
-      }, 250)
+      }, NEXT_TILE_DELAY_MS)
    }
 
    actions_block = () => {
-      const {tile_index, tiles, in_progress} = this.state
-      const actions = tile_index >= 0
-         ? <GeneratorActions
-            tiles={tiles}
-            tile_index={tile_index}
-            in_progress={in_progress}
-            on_start_pause={this.on_start_pause}
-            on_context_ready={this.on_context_ready}
-         />
-         : []
+      const {tile_index, tiles, in_progress, tile_points} = this.state
+      const actions = <GeneratorActions
+         tiles={tiles}
+         tile_index={tile_index}
+         tile_points={tile_points}
+         in_progress={in_progress}
+         on_start_pause={this.on_start_pause}
+         on_context_ready={this.on_context_ready}
+      />
       const block_style = {
          width: `${ACTIONS_WIDTH_PX}px`,
-         // backgroundColor: 'lightgreen',
          padding: `${MARGIN_PX}px`,
       }
       return <styles.FixedInlineBlock

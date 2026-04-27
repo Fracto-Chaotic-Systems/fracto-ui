@@ -13,6 +13,54 @@ import {
 const IP_ADDRESS = window.location.host.replace(`:${FRACTO_UI_PORT}`, '')
 console.log(`Server IP Address: ${IP_ADDRESS}`);
 
+export const fill_canvas = async (
+   ctx,
+   width_px,
+   focal_point,
+   scope,
+   aspect_ratio,
+   on_plan_complete,
+   resolution_factor,
+   opacity = 1.0) => {
+   // console.log('fill_canvas', {
+   //    ctx,
+   //    width_px,
+   //    focal_point,
+   //    scope,
+   //    aspect_ratio,
+   //    on_plan_complete,
+   //    resolution_factor,
+   //    opacity})
+   AppSettings.on_settings_changed({
+      [KEY_NAVIGATOR_DISABLED]: true
+   })
+   const all_params = [
+      `width_px=${width_px}`,
+      `focal_point_x=${focal_point.x}`,
+      `focal_point_y=${focal_point.y}`,
+      `scope=${scope}`,
+      `aspect_ratio=${aspect_ratio}`,
+      `resolution_factor=${resolution_factor}`,
+   ].join('&')
+   const url = `http://${IP_ADDRESS}:${FRACTO_TILES_PORT}/canvas_buffer?${all_params}`
+   try {
+      const response = await fetch(url)
+      const result = await response.json()
+      FractoColors.buffer_to_canvas(result.canvas_buffer, ctx, 1, opacity)
+      if (on_plan_complete) {
+         on_plan_complete(result.canvas_buffer, ctx)
+      }
+      AppSettings.on_settings_changed({
+         [KEY_NAVIGATOR_DISABLED]: false
+      })
+   } catch (e) {
+      console.error('exception thrown in fill_canvas', e)
+      AppSettings.on_settings_changed({
+         [KEY_NAVIGATOR_DISABLED]: false
+      })
+   }
+}
+
 export class FractoRasterImage extends Component {
 
    static propTypes = {
@@ -104,38 +152,21 @@ export class FractoRasterImage extends Component {
          aspect_ratio,
          on_plan_complete,
          resolution_factor,
-         data_endpoint,
       } = this.props
-      AppSettings.on_settings_changed({
-         [KEY_NAVIGATOR_DISABLED]: true
-      })
       this.setState({loading_tiles: true})
-      const all_params = [
-         `width_px=${width_px}`,
-         `focal_point_x=${focal_point.x}`,
-         `focal_point_y=${focal_point.y}`,
-         `scope=${scope}`,
-         `aspect_ratio=${aspect_ratio}`,
-         `resolution_factor=${resolution_factor}`,
-      ].join('&')
-      const url = `http://${IP_ADDRESS}:${FRACTO_TILES_PORT}/canvas_buffer?${all_params}`
       try {
-         const response = await fetch(url)
-         const result = await response.json()
-         FractoColors.buffer_to_canvas(result.canvas_buffer, ctx)
-         if (on_plan_complete) {
-            on_plan_complete(result.canvas_buffer, ctx)
-         }
-         this.setState({loading_tiles: false})
-         AppSettings.on_settings_changed({
-            [KEY_NAVIGATOR_DISABLED]: false
-         })
-      } catch (e) {
-         console.error('exception thrown in fill_canvas', e)
-         AppSettings.on_settings_changed({
-            [KEY_NAVIGATOR_DISABLED]: false
-         })
+         await fill_canvas(
+            ctx,
+            width_px,
+            focal_point,
+            scope,
+            aspect_ratio,
+            on_plan_complete,
+            resolution_factor)
+      } catch (error) {
+         console.error('fill_canvas error', error)
       }
+      this.setState({loading_tiles: false})
    }
 
    render() {

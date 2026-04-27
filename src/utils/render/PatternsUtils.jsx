@@ -48,9 +48,9 @@ const find_bounds = (set1, other_sets, in_cardioid, escaper) => {
       }
    })
    other_sets.forEach(point => {
-      console.log('other sets point', point.x, point.y)
-      console.log('other sets max_x, min_x', max_x, min_x)
-      console.log('other sets max_y, min_y', max_y, min_y)
+      // console.log('other sets point', point.x, point.y)
+      // console.log('other sets max_x, min_x', max_x, min_x)
+      // console.log('other sets max_y, min_y', max_y, min_y)
       if (point.x > max_x) {
          max_x = point.x
       }
@@ -76,10 +76,16 @@ const find_bounds = (set1, other_sets, in_cardioid, escaper) => {
    return {min_x, max_x, min_y, max_y}
 }
 
-export const click_point_chart = (set1, other_sets = [], in_cardioid = false, escaper = false) => {
+export const click_point_chart = (
+   set1,
+   other_sets = [],
+   in_cardioid = false,
+   escaper = false,
+   backgroundImagePlugin = null) => {
    if (!set1) {
       return []
    }
+   // console.log(`click_point_chart ${set1.length} points`)
    const bounds = find_bounds(set1, other_sets, in_cardioid, escaper)
    const options = {
       scales: {
@@ -133,7 +139,9 @@ export const click_point_chart = (set1, other_sets = [], in_cardioid = false, es
    try {
       return <Scatter
          datasetIdKey='id1'
-         data={data_dataset} options={options}
+         data={data_dataset}
+         options={options}
+         plugins={backgroundImagePlugin ? [backgroundImagePlugin] : []}
       />
    } catch (e) {
       debugger;
@@ -231,7 +239,6 @@ export const iteration_chart = (set1, in_cardioid, escaper, animation_index = -1
    try {
       // console.log('data_dataset', data_dataset)
       return <Scatter
-         datasetIdKey='id1'
          data={data_dataset} options={options}
       />
    } catch (e) {

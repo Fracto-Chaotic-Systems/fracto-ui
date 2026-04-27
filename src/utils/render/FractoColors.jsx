@@ -132,7 +132,7 @@ export class FractoColors {
       return greys_map;
    }
 
-   static buffer_to_canvas = (canvas_buffer, ctx, scale_factor = 1) => {
+   static buffer_to_canvas = (canvas_buffer, ctx, scale_factor = 1, opacity = 1.0) => {
       if (!canvas_buffer || !ctx) {
          console.log('!canvas_buffer || !ctx', ctx)
          return;
@@ -187,14 +187,20 @@ export class FractoColors {
       for (let i = 0; i < all_not_pattern_pixels.length; i++) {
          const pixel = all_not_pattern_pixels[i];
          const key = `_${pixel.iteration}`;
-         const grey_value = not_pattern_greys_map[key];
+         let grey_value = not_pattern_greys_map[key];
+         if (opacity < 1) {
+            grey_value += 3 * (256 - grey_value) / 4
+         }
          ctx.fillStyle = `rgb(${grey_value},${grey_value},${grey_value})`;
          ctx.fillRect(scale_factor * pixel.canvas_x, scale_factor * pixel.canvas_y, pixel_size, pixel_size);
       }
       for (let i = 0; i < all_inner_pattern_pixels.length; i++) {
          const pixel = all_inner_pattern_pixels[i];
          const key = `_${Math.abs(pixel.iteration)}`;
-         const lum_factor = inner_pattern_greys_map[key];
+         let lum_factor = inner_pattern_greys_map[key];
+         if (opacity < 1) {
+            lum_factor /= 4
+         }
          const hue = FractoColors.pattern_hue(pixel.pattern);
          ctx.fillStyle = `hsl(${hue}, 80%, ${100 - lum_factor}%)`;
          ctx.fillRect(scale_factor * pixel.canvas_x, scale_factor * pixel.canvas_y, pixel_size, pixel_size);
@@ -202,7 +208,10 @@ export class FractoColors {
       for (let i = 0; i < all_outer_pattern_pixels.length; i++) {
          const pixel = all_outer_pattern_pixels[i];
          const key = `_${Math.abs(pixel.iteration)}`;
-         const lum_factor = outer_pattern_greys_map[key];
+         let lum_factor = outer_pattern_greys_map[key];
+         if (opacity < 1) {
+            lum_factor /= 4
+         }
          const hue = FractoColors.pattern_hue(pixel.pattern);
          ctx.fillStyle = `hsl(${hue}, 80%, ${100 - lum_factor}%)`;
          ctx.fillRect(scale_factor * pixel.canvas_x, scale_factor * pixel.canvas_y, pixel_size, pixel_size);
