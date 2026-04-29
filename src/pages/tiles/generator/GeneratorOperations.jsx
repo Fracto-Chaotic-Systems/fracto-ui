@@ -22,6 +22,7 @@ export class GeneratorOperations extends Component {
       in_progress: false,
       ready_short_code: null,
       tile_points: null,
+      resume_index: 0,
    }
 
    componentDidMount() {
@@ -53,17 +54,22 @@ export class GeneratorOperations extends Component {
       this.setState({tiles, tile_index})
    }
 
+   static tile_points = null
+
    new_tile = () => {
-      const tile = new Array(256)
+      if (GeneratorOperations.tile_points) {
+         return GeneratorOperations.tile_points
+      }
+      GeneratorOperations.tile_points = new Array(256)
          .fill(0)
          .map(() => new Array(256)
             .fill([0, 0]));
       for (let img_x = 0; img_x < 256; img_x++) {
          for (let img_y = 0; img_y < 256; img_y++) {
-            tile[img_x][img_y] = [0, 0]
+            GeneratorOperations.tile_points[img_x][img_y] = [0, 0]
          }
       }
-      return tile
+      return GeneratorOperations.tile_points
    }
 
    calculate_tile = (tile, tile_points) => {
@@ -78,7 +84,8 @@ export class GeneratorOperations extends Component {
             for (let img_y = 0; img_y < 256; img_y++) {
                const y = tile.bounds.top - img_y * increment;
                const values = FractoFastCalc.calc(x, y, level)
-               tile_points[img_x][img_y] = [values.pattern, values.iteration];
+               tile_points[img_x][img_y][0] = values.pattern;
+               tile_points[img_x][img_y][1] = values.iteration;
                if (values.estimated) {
                   estimated++
                }
@@ -96,15 +103,17 @@ export class GeneratorOperations extends Component {
    }
 
    on_start_pause = () => {
-      const {in_progress} = this.state
+      const {in_progress, tile_index} = this.state
       const new_state = !in_progress
       this.setState({
-         in_progress: new_state
+         in_progress: new_state,
+         resume_index: tile_index,
       })
+      console.log('on_start_pause', this.state)
       if (new_state) {
          this.setState({tile_index: -1})
          setTimeout(() => {
-            this.setState({tile_index: 0})
+            this.setState({tile_index: this.state.resume_index})
          }, 100)
       }
    }
