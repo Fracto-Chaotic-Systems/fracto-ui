@@ -244,10 +244,12 @@ export class MainStyles {
    static InlineHover = styled(CoolStyles.InlineBlock)`
        opacity: 0;
        transition: opacity 0.3s ease-in-out;
-
        &:hover {
            opacity: 1
        }
+   `
+   static CenteredCell = styled(CoolStyles.InlineBlock)`
+      ${CoolStyles.align_center}
    `
 }
 

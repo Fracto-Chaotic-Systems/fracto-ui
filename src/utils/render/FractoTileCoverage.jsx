@@ -2,12 +2,6 @@ import React, {Component} from "react";
 import PropTypes from "prop-types";
 
 import CoolStyles from "../ui/styles/CoolStyles.jsx";
-import {MainStyles as styles} from "../../styles/MainStyles.jsx";
-import {
-   CELL_ALIGN_CENTER,
-   CELL_TYPE_NUMBER,
-   CELL_TYPE_TEXT,
-} from "../ui/styles/CoolTableStyles.jsx";
 import AppSettings from "../../AppSettings.jsx";
 import {KEY_NAVIGATOR_DISABLED} from "../../settings/NavigatorSettings.jsx";
 import AppText from "../../AppText.jsx";
@@ -17,34 +11,8 @@ import {
 } from "../../text/NavigatorText.jsx";
 
 import FractoColors from "./FractoColors.jsx";
-import CoolTable from "../ui/CoolTable.jsx";
 import TilesBackend from "../../backend/TilesBackend.jsx";
 
-const TABLE_COLUMNS = [
-   {
-      id: "level",
-      label: "level",
-      type: CELL_TYPE_NUMBER,
-      width_px: 65,
-      align: CELL_ALIGN_CENTER,
-   },
-   {
-      id: "count",
-      label: "count",
-      type: CELL_TYPE_NUMBER,
-      width_px: 65,
-      align: CELL_ALIGN_CENTER,
-   },
-   {
-      id: "percent",
-      label: "portion",
-      type: CELL_TYPE_TEXT,
-      width_px: 65,
-      align: CELL_ALIGN_CENTER,
-   },
-]
-const LEVEL_NOT_SELECTED = -1
-const NO_COVERAGE = '-'
 export const INCLUDE_CAN_DO = 'include_can_do'
 
 export class FractoTileCoverage extends Component {
@@ -152,82 +120,16 @@ export class FractoTileCoverage extends Component {
       this.clear_canvas(ctx, frame_settings, AppText.get(KEY_HEAT_MAP_FETCHING))
       this.setState({in_fetch: true})
       const result = await TilesBackend.get_heat_map(frame_settings)
+      console.log('TilesBackend.get_heat_map result', result)
       FractoColors.buffer_to_canvas(result.heat_map_buffer, ctx)
-      const coverage_data = result.coverage
-         .filter(coverage => coverage.length > 0)
-         .map((coverage) => {
-            const level = coverage[0].length
-            const percent = this.find_level_percent(level, result.heat_map_buffer)
-            return {
-               level,
-               count: coverage.length,
-               percent: percent ? `${percent}%` : NO_COVERAGE,
-            }
-         })
-      if (options && options.includes(INCLUDE_CAN_DO)) {
-         this.process_can_do(coverage_data, result.coverage)
-      }
-      // console.log('coverage_data', coverage_data)
       this.setState({
          heat_map_buffer: result.heat_map_buffer,
-         coverage_data,
+         coverage_data: result.coverage,
       })
       if (on_coverage_data) {
-         on_coverage_data(coverage_data)
+         on_coverage_data(result.coverage)
       }
       this.setState({in_fetch: false})
-   }
-
-   find_level_percent = (level, heat_map_buffer) => {
-      let count = 0
-      let total = 0
-      for (let canvas_x = 0; canvas_x < heat_map_buffer.length; canvas_x++) {
-         for (let canvas_y = 0; canvas_y < heat_map_buffer[canvas_x].length; canvas_y++) {
-            const [zero, pixel_level] = heat_map_buffer[canvas_x][canvas_y]
-            if (pixel_level === level) {
-               count += 1
-            }
-            total++
-         }
-      }
-      return Math.round(count * 10000 / total) / 100
-   }
-
-   process_can_do = (coverage_data, coverage) => {
-      // console.log('process_can_do', coverage_data, coverage)
-      coverage_data.forEach((c, i) => {
-         if (c.percent === NO_COVERAGE) {
-            return
-         }
-         const next_c = coverage_data[i + 1]
-         if (!next_c) {
-            return;
-         }
-         next_c.can_do = []
-         c.re_do = []
-         // console.log('process_can_do', c.level)
-         const covered_tiles = coverage[c.level]
-         const next_covered_tiles = coverage[c.level + 1]
-         covered_tiles.forEach(tile => {
-            c.re_do.push(tile)
-            let short_code = `${tile}0`
-            if (!next_covered_tiles.includes(short_code)) {
-               next_c.can_do.push(short_code)
-            }
-            short_code = `${tile}1`
-            if (!next_covered_tiles.includes(short_code)) {
-               next_c.can_do.push(short_code)
-            }
-            short_code = `${tile}2`
-            if (!next_covered_tiles.includes(short_code)) {
-               next_c.can_do.push(short_code)
-            }
-            short_code = `${tile}3`
-            if (!next_covered_tiles.includes(short_code)) {
-               next_c.can_do.push(short_code)
-            }
-         })
-      })
    }
 
    render() {
@@ -240,17 +142,6 @@ export class FractoTileCoverage extends Component {
          border: '1px solid #666666',
          borderRadius: '0.25rem',
       }
-      const coverage_table = coverage_data.length
-         ? <CoolTable
-            columns={TABLE_COLUMNS}
-            data={coverage_data}
-            table_style={{backgroundColor: 'white'}}
-         />
-         : []
-      const coverage_table_style = {
-         height: `${frame_settings.width_px}px`,
-         overflowY: 'auto',
-      }
       return <CoolStyles.InlineBlock
          key={'heat-map'}
          title={in_fetch ? 'please be patient' : 'click for heat map'}>
@@ -262,12 +153,6 @@ export class FractoTileCoverage extends Component {
                width={frame_settings.width_px}
                height={frame_settings.width_px}
             />
-         </CoolStyles.InlineBlock>
-         <styles.OneRemSpacer/>
-         <CoolStyles.InlineBlock
-            style={coverage_table_style}
-            key={'coverage-table'}>
-            {coverage_table}
          </CoolStyles.InlineBlock>
       </CoolStyles.InlineBlock>
    }

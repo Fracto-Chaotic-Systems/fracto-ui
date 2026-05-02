@@ -43,10 +43,10 @@ export class GeneratorActions extends Component {
       ready_short_code: null,
    }
 
-   context_ready = () => {
+   context_ready = (context_buffer) => {
       const {tiles, tile_index, on_context_ready} = this.props
       const tile = tiles[tile_index]
-      on_context_ready(tile.short_code)
+      on_context_ready(tile.short_code, context_buffer)
    }
 
    render_context = () => {

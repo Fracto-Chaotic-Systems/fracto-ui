@@ -1,37 +1,70 @@
 import React, {Component} from "react";
 import PropTypes from "prop-types";
+import styled from "styled-components";
 
 import {MainStyles as styles} from '../../../styles/MainStyles.jsx'
 import CoolTable from "../../../utils/ui/CoolTable.jsx";
+import CoolStyles from "../../../utils/ui/styles/CoolStyles.jsx";
 import {
    CELL_ALIGN_CENTER,
    CELL_TYPE_NUMBER,
    CELL_TYPE_TEXT
 } from "../../../utils/ui/styles/CoolTableStyles.jsx";
 
-const TABLE_COLUMNS = [
+const LinkedCell = styled(CoolStyles.InlineBlock)`
+    margin: 0;
+`
+
+const COVERAGE_TABLE_COLUMNS = [
    {
       id: "level",
       label: "level",
       type: CELL_TYPE_NUMBER,
-      width_px: 65,
-      align: CELL_ALIGN_CENTER,
+      width_px: 40,
+      align: CELL_ALIGN_CENTER
    },
    {
-      id: "re_do",
-      label: "re-do",
+      id: "tile_count",
+      label: "tile count",
       type: CELL_TYPE_NUMBER,
-      width_px: 65,
-      align: CELL_ALIGN_CENTER,
+      width_px: 80,
+      align: CELL_ALIGN_CENTER
    },
    {
       id: "can_do",
       label: "can do",
-      type: CELL_TYPE_TEXT,
-      width_px: 65,
-      align: CELL_ALIGN_CENTER,
+      type: CELL_TYPE_NUMBER,
+      width_px: 80,
+      align: CELL_ALIGN_CENTER
+   },
+   {
+      id: "blank_tiles",
+      label: "blank",
+      type: CELL_TYPE_NUMBER,
+      width_px: 80,
+      align: CELL_ALIGN_CENTER
+   },
+   {
+      id: "interior_tiles",
+      label: "interior",
+      type: CELL_TYPE_NUMBER,
+      width_px: 80,
+      align: CELL_ALIGN_CENTER
+   },
+   {
+      id: "needs_update_tiles",
+      label: "update?",
+      type: CELL_TYPE_NUMBER,
+      width_px: 80,
+      align: CELL_ALIGN_CENTER
    },
 ]
+
+export const GENERATOR_CODE_REDO = 'tiles_redo'
+export const GENERATOR_CODE_CAN_DO = 'tiles_can_do'
+export const GENERATOR_CODE_BLANK = 'tiles_blank'
+export const GENERATOR_CODE_INTERIOR = 'tiles_interior'
+export const GENERATOR_CODE_NEEDS_UPDATE = 'tiles_needs_update'
 
 export class GeneratorControl extends Component {
    static propTypes = {
@@ -39,98 +72,94 @@ export class GeneratorControl extends Component {
       on_generate: PropTypes.func.isRequired,
    }
 
-   state = {
-      can_do_been_done: [],
-      re_do_been_done: [],
-   }
+   state = {}
 
    componentDidMount() {
    }
 
    componentDidUpdate(prevProps, prevState, snapshot) {
-      const prev_coverage_data_str = JSON.stringify(prevProps.coverage_data)
-      const curr_coverage_data_str = JSON.stringify(this.props.coverage_data)
-      if (prev_coverage_data_str !== curr_coverage_data_str) {
-         this.setState({
-            can_do_been_done: [],
-            re_do_been_done: [],
-         })
-      }
    }
 
-   do_it_now = (level) => {
-      const {can_do_been_done} = this.state
-      const { coverage_data, on_generate} = this.props
-      if (can_do_been_done.includes(level)) {
-         return;
-      }
-      can_do_been_done.push(level)
-      const level_coverage = coverage_data
-         .find(c => c.level === level)
-      on_generate(level_coverage.can_do)
-      this.setState({can_do_been_done})
+   generate_redo = (tiles, level) => {
+      const {on_generate} = this.props
+      on_generate(tiles, level, GENERATOR_CODE_REDO);
    }
 
-   re_do_it_now = (level) => {
-      const {re_do_been_done} = this.state
-      const { coverage_data, on_generate} = this.props
-      if (re_do_been_done.includes(level)) {
-         console.log('re-do been done', level)
-         return;
-      }
-      re_do_been_done.push(level)
-      const level_coverage = coverage_data
-         .find(c => c.level === level)
-      on_generate(level_coverage.re_do)
-      this.setState({re_do_been_done})
+   generate_can_do = (tiles, level) => {
+      const {on_generate} = this.props
+      on_generate(tiles, level, GENERATOR_CODE_CAN_DO);
    }
 
-   process_coverage = (can_do_been_done, re_do_been_done) => {
-      const {coverage_data} = this.props
-      if (!Array.isArray(coverage_data)) {
-         return []
-      }
-      return coverage_data
-         .filter(item => item.can_do)
-         .map((item) => {
-            const can_do = can_do_been_done.includes(item.level)
-               ? <styles.NotALink>{item.can_do?.length}</styles.NotALink>
-               : <styles.NormalLink
-                  onClick={e => this.do_it_now(item.level)}>
-                  <styles.NumericValue>
-                     {item.can_do?.length}
-                  </styles.NumericValue>
-               </styles.NormalLink>
-            const re_do = re_do_been_done.includes(item.level)
-               ? <styles.NotALink>{item.count}</styles.NotALink>
-               : <styles.NormalLink
-                  onClick={e => this.re_do_it_now(item.level)}>
-                  {item.count}
-               </styles.NormalLink>
-            return {
-               level: item.level,
-               can_do,
-               re_do
-            }
-         })
+   generate_blank = (tiles, level) => {
+      const {on_generate} = this.props
+      on_generate(tiles, level, GENERATOR_CODE_BLANK);
+   }
+
+   generate_interior = (tiles, level) => {
+      const {on_generate} = this.props
+      on_generate(tiles, level, GENERATOR_CODE_INTERIOR);
+   }
+
+   generate_needs_update = (tiles, level) => {
+      const {on_generate} = this.props
+      on_generate(tiles, level, GENERATOR_CODE_NEEDS_UPDATE);
    }
 
    render() {
-      const {can_do_been_done, re_do_been_done} = this.state
-      const table_data = this.process_coverage(
-         can_do_been_done, re_do_been_done)
-      if (!table_data.length) {
+      const {coverage_data} = this.props
+      if (!Array.isArray(coverage_data)) {
+         // console.log('coverage_data is not an array', coverage_data)
          return []
       }
-      // console.log('GeneratorRun', table_data)
-      return <styles.FixedInlineBlock>
+      const coverage_rows = coverage_data
+         .filter((data, i) => {
+            return (data.filtered_by_level.length
+               || data.blanks_by_level.length
+               || data.interiors_with_bounds.length
+               || data.needs_update_with_bounds.length
+               || data.tiles.length > 1)
+         })
+         .map(data => {
+            data.can_do = data.filtered_by_level.length
+               ? <LinkedCell
+                  onClick={e => this.generate_can_do(data.filtered_by_level, data.level, false)}>
+                  <CoolStyles.LinkSpan>{data.filtered_by_level.length}</CoolStyles.LinkSpan>
+               </LinkedCell>
+               : '-';
+            data.blank_tiles = data.blanks_by_level.length
+               ? <LinkedCell
+                  onClick={e => this.generate_blank(data.blanks_by_level, data.level, false)}>
+                  <CoolStyles.LinkSpan>{data.blanks_by_level.length}</CoolStyles.LinkSpan>
+               </LinkedCell> : '-';
+            data.interior_tiles = data.interiors_with_bounds.length
+               ? <LinkedCell
+                  onClick={e => this.generate_interior(data.interiors_with_bounds, data.level, true)}>
+                  <CoolStyles.LinkSpan>{data.interiors_with_bounds.length}</CoolStyles.LinkSpan>
+               </LinkedCell>
+               : '-';
+            data.needs_update_tiles = data.needs_update_with_bounds.length
+               ? <LinkedCell
+                  onClick={e => this.generate_needs_update(data.needs_update_with_bounds, data.level)}>
+                  <CoolStyles.LinkSpan>{data.needs_update_with_bounds.length}</CoolStyles.LinkSpan>
+               </LinkedCell>
+               : '-';
+            data.tile_count = data.tiles.length
+               ? <LinkedCell
+                  onClick={e => this.generate_redo(data.tiles, data.level)}>
+                  <CoolStyles.LinkSpan>{data.tiles.length}</CoolStyles.LinkSpan>
+               </LinkedCell>
+               : '-';
+            return data
+         });
+
+      return <CoolStyles.InlineBlock>
          <CoolTable
-            columns={TABLE_COLUMNS}
-            data={table_data}
-            table_style={{backgroundColor: 'white'}}
+            data={coverage_rows}
+            columns={COVERAGE_TABLE_COLUMNS}
          />
-      </styles.FixedInlineBlock>
+      </CoolStyles.InlineBlock>;
    }
+
 }
 
 export default GeneratorControl

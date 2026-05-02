@@ -5,6 +5,9 @@ import {MainStyles as styles, MARGIN_PX} from '../../../styles/MainStyles.jsx'
 import {bounds_from_short_code} from "../TilesUtils.jsx";
 import FractoFastCalc from "../../../../../../sdk/FractoFastCalc.js";
 import GeneratorActions from "./GeneratorActions.jsx";
+import GeneratorHistory from "./GeneratorHistory.jsx";
+import {KEY_TILES_GENERATOR_SPLITTER_POS} from "../../../settings/TilesSettings.jsx";
+import AppSettings from "../../../AppSettings.jsx";
 
 export const TILE_RENDER_WIDTH_PX = 300
 const ACTIONS_WIDTH_PX = 2 * TILE_RENDER_WIDTH_PX + 3 * MARGIN_PX
@@ -14,6 +17,7 @@ const NEXT_TILE_DELAY_MS = 150
 export class GeneratorOperations extends Component {
    static propTypes = {
       short_codes: PropTypes.array.isRequired,
+      generate_code: PropTypes.string.isRequired,
    }
 
    state = {
@@ -23,6 +27,7 @@ export class GeneratorOperations extends Component {
       ready_short_code: null,
       tile_points: null,
       resume_index: 0,
+      history: []
    }
 
    componentDidMount() {
@@ -118,9 +123,39 @@ export class GeneratorOperations extends Component {
       }
    }
 
-   on_context_ready = (short_code) => {
-      const {tile_index, tiles, in_progress} = this.state
-      console.log(`context_ready: ${short_code}`)
+   test_interior = (context_buffer) => {
+      for (let col = 0; col < context_buffer.length; col++) {
+         for (let row = 0; row < context_buffer[col].length; row++) {
+            const pattern = context_buffer[col][row][0]
+            if (pattern === 0) {
+               return false
+            }
+         }
+      }
+      return true
+   }
+
+   test_blank = (tile_points) => {
+      const first_iteration = tile_points[0][0][1]
+      for (let col = 0; col < tile_points.length; col++) {
+         for (let row = 0; row < tile_points[col].length; row++) {
+            const pattern = tile_points[col][row][0]
+            if (pattern > 0) {
+               return false
+            }
+            const iteration = tile_points[col][row][1]
+            if (first_iteration !== iteration) {
+               return false
+            }
+         }
+      }
+      return true
+   }
+
+   on_context_ready = (short_code, context_buffer) => {
+      const {tile_index, tiles, in_progress, history} = this.state
+      // console.log(`context_ready: ${short_code}`)
+      const is_interior = this.test_interior(context_buffer)
       if (!in_progress) {
          return
       }
@@ -138,12 +173,25 @@ export class GeneratorOperations extends Component {
       }
       setTimeout(() => {
          const tile_points = this.new_tile()
+         const start = performance.now()
          this.calculate_tile(tile, tile_points)
-         this.setState({tile_points})
+         const is_blank = this.test_blank(tile_points)
+         const end = performance.now()
+         const record = {
+            tile,
+            is_interior,
+            is_blank,
+            duration: end - start,
+            timestamp: Date.now(),
+            tile_index: this.state.tile_index,
+         }
+         history.push(record)
+         this.setState({tile_points, history})
          if (tile_index === tiles.length - 1) {
             this.setState({
                in_progress: false,
                tile_index: -1,
+               resume_index: 0,
             })
          } else {
             this.setState({tile_index: tile_index + 1});
@@ -171,18 +219,24 @@ export class GeneratorOperations extends Component {
       </styles.FixedInlineBlock>
    }
 
-   history_block = () => {
-      const {tile_index, tiles} = this.state
-      const history = tile_index >= 0
-         ? []
-         : []
-      return history
+   history_block = (history) => {
+      const splitter_pos = AppSettings.get(KEY_TILES_GENERATOR_SPLITTER_POS)
+      const block_style = {
+         left: `${ACTIONS_WIDTH_PX + MARGIN_PX + splitter_pos}px`,
+         paddingLeft: `1rem`,
+      }
+      return <styles.FixedInlineBlock
+         style={block_style}>
+         <GeneratorHistory
+            all_records={history}
+         />
+      </styles.FixedInlineBlock>
    }
 
    render() {
-      // console.log('GeneratorOperations', tile_index)
+      const {history} = this.state
       const actions_block = this.actions_block()
-      const history_block = this.history_block()
+      const history_block = this.history_block(history)
       return <styles.FixedInlineBlock>
          {actions_block}
          {history_block}
