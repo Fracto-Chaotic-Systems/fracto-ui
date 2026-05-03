@@ -109,7 +109,10 @@ export class AssetsGenerator extends Component {
    change_resolution = (e) => {
       console.log('change_resolution', e.target.value)
       const resolution = parseInt(e.target.value)
-      this.setState({resolution})
+      this.setState({
+         resolution,
+         image_outcome: null,
+      })
       AppSettings.on_settings_changed({
          [KEY_ASSETS_GENERATOR_RESOLUTION]: resolution,
       })
@@ -167,7 +170,7 @@ export class AssetsGenerator extends Component {
          return []
       }
       const proportions = this.get_proportions()
-      console.log('proportions', proportions)
+      // console.log('proportions', proportions)
       const table_data = coverage_data
          .filter(item => item.tiles?.length > 1)
          .map((item, index) => {
@@ -190,11 +193,13 @@ export class AssetsGenerator extends Component {
          return []
       }
       const resolution_select =
-         <CoolSelect
-            options={RESOLUTIONS}
-            value={resolution}
-            on_change={this.change_resolution}
-         />
+         <CoolStyles.Block>
+            <CoolSelect
+               options={RESOLUTIONS}
+               value={resolution}
+               on_change={this.change_resolution}
+            />
+         </CoolStyles.Block>
       const render_now_button = <CoolStyles.Block
          onClick={this.render_image}
          key={'resolution-select'}>
@@ -226,11 +231,12 @@ export class AssetsGenerator extends Component {
    }
 
    on_coverage_data = (coverage_data, heat_map_buffer) => {
-      console.log('coverage_data, heat_map_buffer',
-         coverage_data, heat_map_buffer)
+      // console.log('coverage_data, heat_map_buffer',
+      //    coverage_data, heat_map_buffer)
       this.setState({
          coverage_data,
          heat_map_buffer,
+         image_outcome: null,
       })
    }
 
