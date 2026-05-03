@@ -114,11 +114,12 @@ export class GeneratorOperations extends Component {
          in_progress: new_state,
          resume_index: tile_index,
       })
-      console.log('on_start_pause', this.state)
+      // console.log('on_start_pause', this.state)
       if (new_state) {
          this.setState({tile_index: -1})
          setTimeout(() => {
-            this.setState({tile_index: this.state.resume_index})
+            this.setState({
+               tile_index: this.state.resume_index})
          }, 100)
       }
    }
@@ -220,6 +221,8 @@ export class GeneratorOperations extends Component {
    }
 
    history_block = (history) => {
+      const {tile_index} = this.state
+      const {generate_code, short_codes} = this.props
       const splitter_pos = AppSettings.get(KEY_TILES_GENERATOR_SPLITTER_POS)
       const block_style = {
          left: `${ACTIONS_WIDTH_PX + MARGIN_PX + splitter_pos}px`,
@@ -229,6 +232,9 @@ export class GeneratorOperations extends Component {
          style={block_style}>
          <GeneratorHistory
             all_records={history}
+            tile_index={tile_index}
+            generate_code={generate_code}
+            tile_count={short_codes.length}
          />
       </styles.FixedInlineBlock>
    }

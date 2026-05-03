@@ -16,6 +16,7 @@ const TITLE_TEXT_STYLE = {
    fontSize: '1.0rem',
    color: '#666666',
    lineHeight: '28px',
+   margin: '0 auto',
 }
 const NUMERAL_STYLE = {
    fontSize: '1.25rem',
@@ -136,15 +137,16 @@ export class GeneratorActions extends Component {
       const scale_style = {
          paddingTop: '10px',
          width: `${1.85 * TILE_RENDER_WIDTH_PX}px`,
+         margin: '0 auto',
       }
-      return <styles.CenteredBlock
+      return <div
          style={scale_style}>
          <LinearProgress
             variant="determinate"
             value={percent}
             sx={{height: '8px'}}
          />
-      </styles.CenteredBlock>
+      </div>
    }
 
    render_button = () => {
@@ -153,13 +155,11 @@ export class GeneratorActions extends Component {
          padding: `0 0.5rem 0.25rem`,
       }
       const button_text = in_progress ? 'pause' : 'start'
-      return <styles.CenteredBlock>
-         <styles.BlueButton
-            onClick={on_start_pause}
-            style={button_style}>
-            {button_text}
-         </styles.BlueButton>
-      </styles.CenteredBlock>
+      return <styles.BlueButton
+         onClick={on_start_pause}
+         style={button_style}>
+         {button_text}
+      </styles.BlueButton>
    }
 
    render_generated = (tile_points) => {
@@ -211,9 +211,11 @@ export class GeneratorActions extends Component {
             {generated}
          </styles.CenteredBlock>,
          <styles.OneRemDown/>,
-         scale,
-         progress,
-         button,
+         <styles.CenteredBlock>
+            {scale}
+            {progress}
+            {button}
+         </styles.CenteredBlock>,
       ]
    }
 }
