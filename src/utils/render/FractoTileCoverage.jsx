@@ -127,7 +127,7 @@ export class FractoTileCoverage extends Component {
          coverage_data: result.coverage,
       })
       if (on_coverage_data) {
-         on_coverage_data(result.coverage)
+         on_coverage_data(result.coverage, result.heat_map_buffer)
       }
       this.setState({in_fetch: false})
    }

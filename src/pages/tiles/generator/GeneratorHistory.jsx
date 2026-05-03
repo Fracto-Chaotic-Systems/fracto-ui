@@ -142,7 +142,7 @@ export class GeneratorHistory extends Component {
                short_code: [this.render_short_code, record.tile.short_code],
             }
          })
-      console.log('subset_records, table_data', subset_records, table_data)
+      // console.log('subset_records, table_data', subset_records, table_data)
       return <styles.ContentWrapper>
          <CoolTable columns={TABLE_COLUMNS} data={table_data}/>
       </styles.ContentWrapper>
