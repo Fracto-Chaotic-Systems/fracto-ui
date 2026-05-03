@@ -169,7 +169,7 @@ export class AssetsGenerator extends Component {
       const proportions = this.get_proportions()
       console.log('proportions', proportions)
       const table_data = coverage_data
-         .filter(item => item.tiles.length > 1)
+         .filter(item => item.tiles?.length > 1)
          .map((item, index) => {
             const pro = proportions.find(pro => item.level === pro.level)
             return {
