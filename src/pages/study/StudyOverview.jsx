@@ -12,15 +12,6 @@ export class StudyOverview extends Component {
             key={'study-overview-title'}>
             {AppText.get(KEY_STUDY_OVERVIEW)}
          </styles.SectionTitle>,
-         <styles.CenteredBlock
-            key={'input-form'}>
-            <FractoRasterImage
-               width_px={455}
-               focal_point={{x: -0.75, y: 0.75}}
-               scope={0.0025}
-               data_endpoint={'hyper_canvas_buffer'}
-            />
-         </styles.CenteredBlock>,
       ];
    }
 }

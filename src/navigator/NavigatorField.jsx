@@ -48,6 +48,9 @@ export class NavigatorField extends Component {
 
    adjust_canvas_size = () => {
       const {bounding_rect, frame_settings, frame_settings_key} = this.props
+      if (!frame_settings) {
+         return;
+      }
       const largest_width_px = Math
          .min(bounding_rect.width, bounding_rect.height)
       const width_px = Math
@@ -171,6 +174,9 @@ export class NavigatorField extends Component {
    render() {
       const {image_ref, width_px, show_crosshairs} = this.state
       const {bounding_rect, frame_settings} = this.props
+      if (!frame_settings) {
+         return []
+      }
       if (!frame_settings.focal_point || !frame_settings.scope) {
          return []
       }
@@ -196,9 +202,6 @@ export class NavigatorField extends Component {
                focal_point={frame_settings.focal_point}
                scope={frame_settings.scope}
                on_plan_complete={this.on_plan_complete}
-               data_endpoint={frame_settings.hyper_plane
-                  ? 'hyper_canvas_buffer'
-                  : 'canvas_buffer'}
             />
          </styles.ImageWrapper>,
          crosshairs,

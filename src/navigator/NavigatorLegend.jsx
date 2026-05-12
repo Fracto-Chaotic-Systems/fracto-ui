@@ -115,6 +115,9 @@ export class NavigatorLegend extends Component {
    render_stats = () => {
       const {frame_settings, bounding_rect} = this.props
       const hover_point = AppSettings.get(KEY_NAVIGATOR_HOVER_POINT)
+      if (!frame_settings) {
+         return []
+      }
       const table_data = [
          {
             name: KEY_NAVIGATOR_SCOPE,
@@ -147,8 +150,8 @@ export class NavigatorLegend extends Component {
       const {frame_settings} = this.props
       const transitor = <NavigatorTransit
          width_px={TRANSITOR_HEIGHT_PX}
-         scope={frame_settings.scope}
-         focal_point={frame_settings.focal_point}
+         scope={frame_settings?.scope}
+         focal_point={frame_settings?.focal_point}
          on_focal_point_changed={this.on_focal_point_changed}
          in_wait={in_wait}
       />

@@ -21,7 +21,8 @@ export const fill_canvas = async (
    aspect_ratio,
    on_plan_complete,
    resolution_factor,
-   opacity = 1.0) => {
+   opacity = 1.0,
+   data_endpoint = 'canvas_buffer') => {
    // console.log('fill_canvas', {
    //    ctx,
    //    width_px,
@@ -42,7 +43,7 @@ export const fill_canvas = async (
       `aspect_ratio=${aspect_ratio}`,
       `resolution_factor=${resolution_factor}`,
    ].join('&')
-   const url = `http://${IP_ADDRESS}:${FRACTO_TILES_PORT}/canvas_buffer?${all_params}`
+   const url = `http://${IP_ADDRESS}:${FRACTO_TILES_PORT}/${data_endpoint}?${all_params}`
    try {
       const response = await fetch(url)
       const result = await response.json()
@@ -152,6 +153,7 @@ export class FractoRasterImage extends Component {
          aspect_ratio,
          on_plan_complete,
          resolution_factor,
+         data_endpoint,
       } = this.props
       this.setState({loading_tiles: true})
       try {
@@ -162,7 +164,9 @@ export class FractoRasterImage extends Component {
             scope,
             aspect_ratio,
             on_plan_complete,
-            resolution_factor)
+            resolution_factor,
+            1.0,
+            data_endpoint)
       } catch (error) {
          console.error('fill_canvas error', error)
       }

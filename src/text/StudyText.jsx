@@ -38,7 +38,7 @@ export const APP_STUDY_TEXT = {
    [KEY_STUDY_FIELDS]: 'orbital fields',
    [KEY_STUDY_MINIBROTS]: 'registry of minibrots',
    [KEY_MAGNITUDES_TITLE]: 'magnitudes',
-   [KEY_POINTS_TITLE]: 'points',
+   [KEY_POINTS_TITLE]: 'orbitals',
    [KEY_HYPERPLANE_TITLE]: 'hyperplane',
    [KEY_NODES_TITLE]: 'nodes',
    [KEY_FIELDS_TITLE]: 'fields',
