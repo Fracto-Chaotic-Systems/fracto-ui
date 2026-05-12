@@ -2,10 +2,7 @@ import React, {Component} from "react";
 
 import CoolSelect from "../../utils/ui/CoolSelect.jsx";
 
-import {
-   MainStyles as styles,
-   MARGIN_PX
-} from '../../styles/MainStyles.jsx'
+import {MainStyles as styles, MARGIN_PX} from '../../styles/MainStyles.jsx'
 import CoolStyles from "../../utils/ui/styles/CoolStyles.jsx";
 
 import AppSettings from "../../AppSettings.jsx";
@@ -26,52 +23,11 @@ import {AssetsBackend} from "../../backend/AssetsBackend.jsx";
 import NavigatorCoverage from "../../navigator/NavigatorCoverage.jsx";
 import {ASSETS_GENERATOR_SPLITTER_KEYS} from "../../navigator/NavigatorKeys.jsx";
 import {KEY_VIEWPORT_DIMENSIONS} from "../../settings/RootSettings.jsx";
-import {
-   CELL_ALIGN_CENTER,
-   CELL_ALIGN_RIGHT,
-   CELL_TYPE_NUMBER, CELL_TYPE_TEXT,
-   CELL_TYPE_TEXT_KEY
-} from "../../utils/ui/styles/CoolTableStyles.jsx";
-import CoolTable from "../../utils/ui/CoolTable.jsx";
-
-const RESOLUTIONS = [
-   {label: '150', value: 150, help: 'thumbnail',},
-   {label: '300', value: 300, help: 'tiny',},
-   {label: '600', value: 600, help: 'small',},
-   {label: '1200', value: 1200, help: 'medium',},
-   {label: '1800', value: 1800, help: 'large',},
-   {label: '2400', value: 2400, help: 'super',},
-   {label: '3200', value: 3200, help: 'way big',},
-   {label: '3600', value: 3600, help: 'bigger still',},
-   {label: '4800', value: 4800, help: 'biggliest!',},
-]
+import {render_coverage_table, RESOLUTIONS} from "./AssetsUtils.jsx";
 
 const UPDATE_INTERVAL_MS = 1000
-const TABLE_COLUMNS = [
-   {
-      id: "level",
-      label: "level",
-      type: CELL_TYPE_NUMBER,
-      width_px: 35,
-      align: CELL_ALIGN_CENTER,
-   },
-   {
-      id: "tile_count",
-      label: "tile count",
-      type: CELL_TYPE_NUMBER,
-      width_px: 80,
-      align: CELL_ALIGN_CENTER,
-   },
-   {
-      id: "percent",
-      label: "percent",
-      type: CELL_TYPE_TEXT,
-      width_px: 80,
-      align: CELL_ALIGN_CENTER,
-   },
-]
 
-export class AssetsGenerator extends Component {
+export class AssetsImageGenerator extends Component {
    state = {
       rendered_width: 0,
       rendered_height: 0,
@@ -144,51 +100,8 @@ export class AssetsGenerator extends Component {
       })
    }
 
-   get_proportions = () => {
-      const {heat_map_buffer} = this.state
-      const result = new Array(50).fill(0)
-      for (let col = 0; col < heat_map_buffer.length; col++) {
-         for (let row = 0; row < heat_map_buffer[col].length; row++) {
-            const level = heat_map_buffer[col][row][1]
-            result[level]++
-         }
-      }
-      const total_points = heat_map_buffer.length * heat_map_buffer.length
-      return result
-         .map((count, level) => {
-            return {
-               level: level,
-               percent: Math.round(count * 10000 / total_points) / 100,
-            }
-         })
-         .filter(item => item.percent > 0)
-   }
-
-   render_coverage_table = () => {
-      const {coverage_data} = this.state
-      if (!coverage_data) {
-         return []
-      }
-      const proportions = this.get_proportions()
-      // console.log('proportions', proportions)
-      const table_data = coverage_data
-         .filter(item => item.tiles?.length > 1)
-         .map((item, index) => {
-            const pro = proportions.find(pro => item.level === pro.level)
-            return {
-               level: item.level,
-               tile_count: item.tiles.length,
-               percent: pro ? `${pro.percent}%` : '-'
-            }
-         })
-      return <CoolTable
-         columns={TABLE_COLUMNS}
-         data={table_data}
-      />
-   }
-
    render_button_block = () => {
-      const {image_outcome, insert_outcome, resolution, coverage_data} = this.state
+      const {image_outcome, insert_outcome, resolution, coverage_data, heat_map_buffer} = this.state
       if (!coverage_data) {
          return []
       }
@@ -218,7 +131,7 @@ export class AssetsGenerator extends Component {
             </styles.BlueButton>
          </CoolStyles.Block>
          : []
-      const coverage_table = this.render_coverage_table()
+      const coverage_table = render_coverage_table(coverage_data, heat_map_buffer)
       return <CoolStyles.InlineBlock>
          {coverage_table}
          <styles.HalfRemDown/>
@@ -231,8 +144,6 @@ export class AssetsGenerator extends Component {
    }
 
    on_coverage_data = (coverage_data, heat_map_buffer) => {
-      // console.log('coverage_data, heat_map_buffer',
-      //    coverage_data, heat_map_buffer)
       this.setState({
          coverage_data,
          heat_map_buffer,
@@ -284,4 +195,4 @@ export class AssetsGenerator extends Component {
    }
 }
 
-export default AssetsGenerator
+export default AssetsImageGenerator

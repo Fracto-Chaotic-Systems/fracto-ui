@@ -1,13 +1,13 @@
 import React, {Component} from "react";
 
-import CoolSelect from "../../utils/ui/CoolSelect.jsx";
+import CoolSelect from "../src/utils/ui/CoolSelect.jsx";
 
 import {
    MainStyles as styles,
    MARGIN_PX
-} from '../../styles/MainStyles.jsx'
-import AppSettings from "../../AppSettings.jsx";
-import {KEY_VIEWPORT_DIMENSIONS} from "../../settings/RootSettings.jsx";
+} from '../src/styles/MainStyles.jsx'
+import AppSettings from "../src/AppSettings.jsx";
+import {KEY_VIEWPORT_DIMENSIONS} from "../src/settings/RootSettings.jsx";
 import {
    KEY_ASSETS_GENERATOR_FRAME_SETTINGS,
    KEY_ASSETS_GENERATOR_LEGEND_SPLITTER_POS,
@@ -15,17 +15,17 @@ import {
    KEY_ASSETS_GENERATOR_SPLITTER_POS,
    KEY_ASSETS_GENERATOR_STEPS_SPLITTER_POS,
    KEY_ASSETS_SPLITTER_POS_PX
-} from "../../settings/AssetsSettings.jsx";
-import AppText from "../../AppText.jsx";
+} from "../src/settings/AssetsSettings.jsx";
+import AppText from "../src/AppText.jsx";
 import {
    KEY_IMAGE_ASSETS_ADD_TO_GALLERY,
    KEY_IMAGE_ASSETS_GENERATE, KEY_IMAGE_ASSETS_RENDER_NOW,
-} from "../../text/AssetsText.jsx";
+} from "../src/text/AssetsText.jsx";
 
-import NavigatorSplitterLayout from "../../navigator/NavigatorSplitterLayout.jsx";
-import FractoTileCoverage from "../../utils/render/FractoTileCoverage.jsx";
-import CoolStyles from "../../utils/ui/styles/CoolStyles.jsx";
-import {AssetsBackend} from "../../backend/AssetsBackend.jsx";
+import NavigatorSplitterLayout from "../src/navigator/NavigatorSplitterLayout.jsx";
+import FractoTileCoverage from "../src/utils/render/FractoTileCoverage.jsx";
+import CoolStyles from "../src/utils/ui/styles/CoolStyles.jsx";
+import {AssetsBackend} from "../src/backend/AssetsBackend.jsx";
 
 const UPDATE_INTERVAL_MS = 1000
 

@@ -26,7 +26,7 @@ import GalleryRightPanel from "./gallery/GalleryRightPanel.jsx";
 
 const UPDATE_INTERVAL_MS = 1000
 
-export class AssetsGallery extends Component {
+export class AssetsImageGallery extends Component {
    state = {
       rendered_width: 0,
       rendered_height: 0,
@@ -155,4 +155,4 @@ export class AssetsGallery extends Component {
    }
 }
 
-export default AssetsGallery
+export default AssetsImageGallery
