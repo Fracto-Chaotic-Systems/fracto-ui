@@ -1,28 +1,28 @@
 import React, {Component} from "react";
 
-import {
-   MainStyles as styles,
-   MARGIN_PX,
-   TITLE_BAR_HEIGHT_PX
-} from '../../styles/MainStyles.jsx'
-import AppSettings from "../../AppSettings.jsx";
-import {KEY_VIEWPORT_DIMENSIONS} from "../../settings/RootSettings.jsx";
-import AppText from "../../AppText.jsx";
-import {KEY_ASSETS_GALLERY} from "../../text/AssetsText.jsx";
+import {SPLITTER_WIDTH_PX} from "../../constants.jsx";
 import CoolSplitter, {
    SPLITTER_TYPE_VERTICAL
 } from "../../utils/ui/CoolSplitter.jsx";
-import {SPLITTER_WIDTH_PX} from "../../constants.jsx";
-import {
-   KEY_ASSETS_GALLERY_RENDER_SPLITTER_POS,
-   KEY_ASSETS_SPLITTER_POS_PX
-} from "../../settings/AssetsSettings.jsx";
 
 import GalleryList, {
    GALLERY_TABLE_WIDTH_PX
 } from "./gallery/GalleryList.jsx";
 import GalleryLeftPanel from "./gallery/GalleryLeftPanel.jsx";
 import GalleryRightPanel from "./gallery/GalleryRightPanel.jsx";
+
+import {
+   MainStyles as styles,
+   MARGIN_PX,
+   TITLE_BAR_HEIGHT_PX
+} from '../../styles/MainStyles.jsx'
+import AppSettings from "../../AppSettings.jsx";
+import {
+   KEY_ASSETS_GALLERY_RENDER_SPLITTER_POS,
+   KEY_ASSETS_SPLITTER_POS_PX
+} from "../../settings/AssetsSettings.jsx";
+import AppText from "../../AppText.jsx";
+import {KEY_ASSETS_GALLERY} from "../../text/AssetsText.jsx";
 
 const UPDATE_INTERVAL_MS = 1000
 
@@ -53,15 +53,9 @@ export class AssetsImageGallery extends Component {
 
    update_dimensions = () => {
       const {rendered_width, rendered_height} = this.state;
-      const viewport_dimensions = AppSettings.get(KEY_VIEWPORT_DIMENSIONS)
-      const splitter_width = AppSettings.get(KEY_ASSETS_SPLITTER_POS_PX)
-      const rendered_width_changed = rendered_width !== viewport_dimensions.width - splitter_width
-      const rendered_height_changed = rendered_height !== viewport_dimensions.height
-      if (rendered_height_changed || rendered_width_changed) {
-         this.setState({
-            rendered_width: viewport_dimensions.width - splitter_width,
-            rendered_height: viewport_dimensions.height,
-         })
+      const new_values = update_dimensions(rendered_width, rendered_height)
+      if (new_values) {
+         this.setState(new_values)
       }
    }
 

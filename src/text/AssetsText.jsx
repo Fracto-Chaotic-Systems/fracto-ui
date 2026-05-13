@@ -1,4 +1,5 @@
 const ASSETS_FOLDER = 'assets'
+const VIDEO_FOLDER = 'assets/video'
 
 export const KEY_ASSETS_OVERVIEW = `${ASSETS_FOLDER}/assets_overview`
 export const KEY_ASSETS_SETTINGS = `${ASSETS_FOLDER}/assets_settings`
@@ -15,7 +16,8 @@ export const KEY_COLUMN_LABEL_ASSET_ID = `${ASSETS_FOLDER}/label_asset_id`
 export const KEY_COLUMN_LABEL_ASSET_SCOPE = `${ASSETS_FOLDER}/label_assets_scope`
 export const KEY_COLUMN_LABEL_ASSET_SCOPE_COLON = `${ASSETS_FOLDER}/label_assets_scope_colon`
 export const KEY_COLUMN_LABEL_ASSET_FOCAL_POINT_COLON = `${ASSETS_FOLDER}/label_assets_focal_point_colon`
-export const KEY_VIDEO_ASSETS_GENERATOR = `${ASSETS_FOLDER}/video_generator`
+export const KEY_VIDEO_ASSETS_GENERATOR = `${VIDEO_FOLDER}/video_generator`
+export const KEY_VIDEO_ASSETS_NEW_VIDEO = `${VIDEO_FOLDER}/render_now`
 
 export const APP_ASSETS_TEXT = {
    [KEY_ASSETS_OVERVIEW]: 'assets overview',
@@ -25,6 +27,7 @@ export const APP_ASSETS_TEXT = {
    [KEY_ASSETS_LOGS]: 'assets logs',
    [KEY_IMAGE_ASSETS_GENERATOR]: 'images',
    [KEY_VIDEO_ASSETS_GENERATOR]: 'video',
+   [KEY_VIDEO_ASSETS_NEW_VIDEO]: 'new video',
    [KEY_IMAGE_ASSETS_GENERATE]: 'image generator',
    [KEY_ASSETS_GALLERY]: 'gallery of artifacts',
    [KEY_ASSETS_GALLERY_SIDEBAR]: 'gallery',

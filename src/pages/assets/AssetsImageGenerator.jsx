@@ -1,9 +1,14 @@
 import React, {Component} from "react";
 
-import CoolSelect from "../../utils/ui/CoolSelect.jsx";
+import {AssetsBackend} from "../../backend/AssetsBackend.jsx";
+import NavigatorCoverage from "../../navigator/NavigatorCoverage.jsx";
+import {ASSETS_GENERATOR_SPLITTER_KEYS} from "../../navigator/NavigatorKeys.jsx";
+import {render_coverage_table, RESOLUTIONS} from "./AssetsUtils.jsx";
+import {update_dimensions} from "./AssetsUtils.jsx";
 
 import {MainStyles as styles, MARGIN_PX} from '../../styles/MainStyles.jsx'
 import CoolStyles from "../../utils/ui/styles/CoolStyles.jsx";
+import CoolSelect from "../../utils/ui/CoolSelect.jsx";
 
 import AppSettings from "../../AppSettings.jsx";
 import {
@@ -18,12 +23,6 @@ import {
    KEY_IMAGE_ASSETS_GENERATE,
    KEY_IMAGE_ASSETS_RENDER_NOW,
 } from "../../text/AssetsText.jsx";
-
-import {AssetsBackend} from "../../backend/AssetsBackend.jsx";
-import NavigatorCoverage from "../../navigator/NavigatorCoverage.jsx";
-import {ASSETS_GENERATOR_SPLITTER_KEYS} from "../../navigator/NavigatorKeys.jsx";
-import {KEY_VIEWPORT_DIMENSIONS} from "../../settings/RootSettings.jsx";
-import {render_coverage_table, RESOLUTIONS} from "./AssetsUtils.jsx";
 
 const UPDATE_INTERVAL_MS = 1000
 
@@ -50,15 +49,9 @@ export class AssetsImageGenerator extends Component {
 
    update_dimensions = () => {
       const {rendered_width, rendered_height} = this.state;
-      const viewport_dimensions = AppSettings.get(KEY_VIEWPORT_DIMENSIONS)
-      const splitter_width = AppSettings.get(KEY_ASSETS_SPLITTER_POS_PX)
-      const rendered_width_changed = rendered_width !== viewport_dimensions.width - splitter_width
-      const rendered_height_changed = rendered_height !== viewport_dimensions.height
-      if (rendered_height_changed || rendered_width_changed) {
-         this.setState({
-            rendered_width: viewport_dimensions.width - splitter_width,
-            rendered_height: viewport_dimensions.height,
-         })
+      const new_values = update_dimensions(rendered_width, rendered_height)
+      if (new_values) {
+         this.setState(new_values)
       }
    }
 

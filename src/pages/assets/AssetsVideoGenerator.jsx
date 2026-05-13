@@ -2,18 +2,15 @@ import React, {Component} from "react";
 
 import NavigatorCoverage from "../../navigator/NavigatorCoverage.jsx";
 import {VIDEO_GENERATOR_SPLITTER_KEYS} from "../../navigator/NavigatorKeys.jsx";
-import {render_coverage_table} from "./AssetsUtils.jsx";
-import {CoolStyles} from "../../utils/ui/styles/CoolStyles.jsx";
+import {update_dimensions} from "./AssetsUtils.jsx";
+import VideoControlBlock from "./video/VideoControlBlock.jsx";
 
 import {MainStyles as styles} from '../../styles/MainStyles.jsx'
 import AppSettings from "../../AppSettings.jsx";
 import {
    KEY_ASSETS_GENERATOR_FRAME_SETTINGS,
    KEY_ASSETS_GENERATOR_RESOLUTION,
-   KEY_ASSETS_SPLITTER_POS_PX
 } from "../../settings/AssetsSettings.jsx";
-import {KEY_VIEWPORT_DIMENSIONS} from "../../settings/RootSettings.jsx";
-
 import AppText from "../../AppText.jsx";
 import {KEY_ASSETS_VIDEO} from "../../text/AssetsText.jsx";
 
@@ -29,6 +26,7 @@ export class AssetsVideoGenerator extends Component {
       insert_outcome: null,
       coverage_data: null,
       heat_map_buffer: null,
+      steps_list: null,
    }
 
    componentDidMount() {
@@ -42,25 +40,10 @@ export class AssetsVideoGenerator extends Component {
 
    update_dimensions = () => {
       const {rendered_width, rendered_height} = this.state;
-      const viewport_dimensions = AppSettings.get(KEY_VIEWPORT_DIMENSIONS)
-      const splitter_width = AppSettings.get(KEY_ASSETS_SPLITTER_POS_PX)
-      const rendered_width_changed = rendered_width !== viewport_dimensions.width - splitter_width
-      const rendered_height_changed = rendered_height !== viewport_dimensions.height
-      if (rendered_height_changed || rendered_width_changed) {
-         this.setState({
-            rendered_width: viewport_dimensions.width - splitter_width,
-            rendered_height: viewport_dimensions.height,
-         })
+      const new_values = update_dimensions(rendered_width, rendered_height)
+      if (new_values) {
+         this.setState(new_values)
       }
-   }
-
-   control_block = () => {
-      const {coverage_data, heat_map_buffer} = this.state
-      const coverage_table = render_coverage_table(
-         coverage_data, heat_map_buffer)
-      return <CoolStyles.InlineBlock>
-         {coverage_table}
-      </CoolStyles.InlineBlock>
    }
 
    on_coverage_data = (coverage_data, heat_map_buffer) => {
@@ -75,7 +58,18 @@ export class AssetsVideoGenerator extends Component {
       return 'AssetsVideo operations block'
    }
 
+   on_control_action = (code) => {
+      console.log("on_control_action", code)
+   }
+
    render() {
+      const {coverage_data, heat_map_buffer, steps_list} = this.state
+      const control_block = <VideoControlBlock
+         steps_list={steps_list}
+         coverage_data={coverage_data}
+         heat_map_buffer={heat_map_buffer}
+         on_control_action={this.on_control_action}
+      />
       return [
          <styles.SectionTitle
             key={'assets-video-title'}>
@@ -83,7 +77,7 @@ export class AssetsVideoGenerator extends Component {
          </styles.SectionTitle>,
          <NavigatorCoverage
             splitter_keys={VIDEO_GENERATOR_SPLITTER_KEYS}
-            control_block={this.control_block()}
+            control_block={[control_block]}
             results_block={this.operations_block()}
             on_coverage_data={this.on_coverage_data}
          />
