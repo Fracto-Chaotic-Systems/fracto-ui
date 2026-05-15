@@ -5,14 +5,11 @@ import {render_coverage_table} from "../AssetsUtils.jsx";
 
 import {CoolStyles} from "../../../utils/ui/styles/CoolStyles.jsx";
 import {MainStyles as styles} from '../../../styles/MainStyles.jsx'
-import AppText from "../../../AppText.jsx";
-import {KEY_VIDEO_ASSETS_NEW_VIDEO} from "../../../text/AssetsText.jsx";
-
-export const CONTROL_ACTION_NEW_VIDEO = 'new_video'
+import VideoControlButtons from "./VideoControlButtons.jsx";
 
 export class VideoControlBlock extends Component {
    static propTypes = {
-      steps_list: PropTypes.array.isRequired,
+      video_script: PropTypes.object.isRequired,
       coverage_data: PropTypes.object.isRequired,
       heat_map_buffer: PropTypes.object.isRequired,
       on_control_action: PropTypes.func.isRequired,
@@ -27,28 +24,17 @@ export class VideoControlBlock extends Component {
       </CoolStyles.InlineBlock>
    }
 
-   render_new_video_button = () => {
-      const {coverage_data, on_control_action} = this.props
-      if (!coverage_data) {
-         return []
-      }
-      return <CoolStyles.InlineBlock
-         onClick={() => on_control_action(CONTROL_ACTION_NEW_VIDEO)}
-         key={'resolution-select'}>
-         <styles.BlueButton
-            key={'blue-button'}>
-            {AppText.get(KEY_VIDEO_ASSETS_NEW_VIDEO)}
-         </styles.BlueButton>
-      </CoolStyles.InlineBlock>
-   }
-
    render() {
+      const {on_control_action, video_script, coverage_data, heat_map_buffer} = this.props
       const coverage_table = this.render_coverage_table();
-      const new_video_button = this.render_new_video_button();
       return [
          coverage_table,
-         <styles.HalfRemSpacer />,
-         new_video_button,
+         <styles.HalfRemSpacer/>,
+         <VideoControlButtons
+            video_script={video_script}
+            coverage_data={coverage_data}
+            heat_map_buffer={heat_map_buffer}
+            on_control_action={on_control_action}/>
       ]
    }
 }

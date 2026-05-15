@@ -93,6 +93,8 @@ export const update_dimensions = (rendered_width, rendered_height) => {
    const rendered_width_changed = rendered_width !== viewport_dimensions.width - splitter_width
    const rendered_height_changed = rendered_height !== viewport_dimensions.height
    if (rendered_height_changed || rendered_width_changed) {
+      console.log('update_dimensions, rendered_width_changed, rendered_height_changed',
+         viewport_dimensions, rendered_width_changed, rendered_height_changed)
       return {
          rendered_width: viewport_dimensions.width - splitter_width,
          rendered_height: viewport_dimensions.height,

@@ -13,8 +13,12 @@ import {
 } from "../../settings/AssetsSettings.jsx";
 import AppText from "../../AppText.jsx";
 import {KEY_ASSETS_VIDEO} from "../../text/AssetsText.jsx";
+import {CONTROL_ACTION_NEW_VIDEO, CONTROL_ACTION_SAVE_VIDEO} from "./video/VideoControlButtons.jsx";
+import VideoOperationsBlock from "./video/VideoOperationsBlock.jsx";
 
 const UPDATE_INTERVAL_MS = 1000
+const DEFAULT_VIDEO_RESOLUTION = 1024
+const DEFAULT_VIDEO_FPS = 30
 
 export class AssetsVideoGenerator extends Component {
    state = {
@@ -26,7 +30,7 @@ export class AssetsVideoGenerator extends Component {
       insert_outcome: null,
       coverage_data: null,
       heat_map_buffer: null,
-      steps_list: null,
+      video_script: null,
    }
 
    componentDidMount() {
@@ -58,17 +62,72 @@ export class AssetsVideoGenerator extends Component {
       return 'AssetsVideo operations block'
    }
 
-   on_control_action = (code) => {
+   first_step = () => {
+      const {frame_settings} = this.state
+      return {
+         focal_point: frame_settings.focal_point,
+         scope: frame_settings.scope,
+         frame_count: 1,
+      }
+   }
+
+   open_video = (data) => {
+      console.log('opening video...', data)
+   }
+
+   save_video = (data) => {
+      console.log('saving video...', data)
+   }
+
+   new_video = () => {
+      const {video_script} = this.state
+      if (video_script) {
+         this.save_video(video_script)
+      }
+      const random_name = `vid_${Math.round(Math.random() * 100000000)}`
+      const first_step = this.first_step()
+      const new_video_script = {
+         asset_id: random_name,
+         resolution: DEFAULT_VIDEO_RESOLUTION,
+         fps: DEFAULT_VIDEO_FPS,
+         steps: [first_step],
+      }
+      this.setState({video_script: new_video_script})
+   }
+
+   on_control_action = (code, data) => {
       console.log("on_control_action", code)
+      switch (code) {
+         case CONTROL_ACTION_NEW_VIDEO:
+            this.new_video()
+            break;
+         case CONTROL_ACTION_SAVE_VIDEO:
+            this.save_video(data)
+            break;
+         case CONTROL_ACTION_OPEN_VIDEO:
+            this.open_video(data)
+            break;
+         default:
+            console.log('on_control_action unknown code', code)
+            break;
+      }
+   }
+
+   on_update_script = (video_script) =>{
+      this.setState({video_script})
    }
 
    render() {
-      const {coverage_data, heat_map_buffer, steps_list} = this.state
+      const {coverage_data, heat_map_buffer, video_script} = this.state
       const control_block = <VideoControlBlock
-         steps_list={steps_list}
+         video_script={video_script}
          coverage_data={coverage_data}
          heat_map_buffer={heat_map_buffer}
          on_control_action={this.on_control_action}
+      />
+      const operations_block = <VideoOperationsBlock
+         video_script={video_script}
+         on_update_script={this.on_update_script}
       />
       return [
          <styles.SectionTitle
@@ -78,7 +137,7 @@ export class AssetsVideoGenerator extends Component {
          <NavigatorCoverage
             splitter_keys={VIDEO_GENERATOR_SPLITTER_KEYS}
             control_block={[control_block]}
-            results_block={this.operations_block()}
+            results_block={[operations_block]}
             on_coverage_data={this.on_coverage_data}
          />
       ];
