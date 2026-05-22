@@ -8,6 +8,10 @@ export class VideoOperationsBlock extends Component {
    }
 
    render() {
+      const {video_script} = this.props;
+      if (!video_script) {
+         return []
+      }
       return 'VideoOperationsBlock'
    }
 }

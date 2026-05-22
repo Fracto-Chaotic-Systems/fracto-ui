@@ -29,7 +29,7 @@ export class VideoControlBlock extends Component {
       const coverage_table = this.render_coverage_table();
       return [
          coverage_table,
-         <styles.HalfRemSpacer/>,
+         coverage_data ? <styles.HalfRemSpacer/> : '',
          <VideoControlButtons
             video_script={video_script}
             coverage_data={coverage_data}

@@ -62,10 +62,7 @@ export class VideoControlButtons extends Component {
    }
 
    render_open_video_button = () => {
-      const {coverage_data, on_control_action} = this.props
-      if (!coverage_data) {
-         return []
-      }
+      const {on_control_action} = this.props
       return <CoolStyles.InlineBlock
          onClick={() => on_control_action(CONTROL_ACTION_OPEN_VIDEO)}
          key={'open-video-button'}>
@@ -78,11 +75,11 @@ export class VideoControlButtons extends Component {
 
    render() {
       const new_video_button = this.render_new_video_button();
-      const save_video_button = this.render_save_video_button();
       const open_video_button = this.render_open_video_button();
+      const save_video_button = this.render_save_video_button();
       return <ButtonGroup>
-         {open_video_button}
          {new_video_button}
+         {open_video_button}
          {save_video_button}
       </ButtonGroup>
    }
