@@ -53,7 +53,7 @@ export class AssetsImageGallery extends Component {
 
    update_dimensions = () => {
       const {rendered_width, rendered_height} = this.state;
-      const new_values = update_dimensions(rendered_width, rendered_height)
+      const new_values = update_dimensions(rendered_width, rendered_height, KEY_ASSETS_SPLITTER_POS_PX)
       if (new_values) {
          this.setState(new_values)
       }

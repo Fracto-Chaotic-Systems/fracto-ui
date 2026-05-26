@@ -2,14 +2,14 @@ import React, {Component} from "react";
 
 import NavigatorCoverage from "../../navigator/NavigatorCoverage.jsx";
 import {VIDEO_GENERATOR_SPLITTER_KEYS} from "../../navigator/NavigatorKeys.jsx";
-import {update_dimensions} from "./AssetsUtils.jsx";
+import {update_dimensions} from "./../PageUtils.jsx";
 import VideoControlBlock from "./video/VideoControlBlock.jsx";
 
 import {MainStyles as styles} from '../../styles/MainStyles.jsx'
 import AppSettings from "../../AppSettings.jsx";
 import {
    KEY_ASSETS_GENERATOR_FRAME_SETTINGS,
-   KEY_ASSETS_GENERATOR_RESOLUTION,
+   KEY_ASSETS_GENERATOR_RESOLUTION, KEY_ASSETS_SPLITTER_POS_PX,
 } from "../../settings/AssetsSettings.jsx";
 import AppText from "../../AppText.jsx";
 import {KEY_ASSETS_VIDEO} from "../../text/AssetsText.jsx";
@@ -44,7 +44,7 @@ export class AssetsVideoGenerator extends Component {
 
    update_dimensions = () => {
       const {rendered_width, rendered_height} = this.state;
-      const new_values = update_dimensions(rendered_width, rendered_height)
+      const new_values = update_dimensions(rendered_width, rendered_height, KEY_ASSETS_SPLITTER_POS_PX)
       if (new_values) {
          this.setState(new_values)
       }

@@ -4,7 +4,7 @@ import {AssetsBackend} from "../../backend/AssetsBackend.jsx";
 import NavigatorCoverage from "../../navigator/NavigatorCoverage.jsx";
 import {ASSETS_GENERATOR_SPLITTER_KEYS} from "../../navigator/NavigatorKeys.jsx";
 import {render_coverage_table, RESOLUTIONS} from "./AssetsUtils.jsx";
-import {update_dimensions} from "./AssetsUtils.jsx";
+import {update_dimensions} from "./../PageUtils.jsx";
 
 import {MainStyles as styles, MARGIN_PX} from '../../styles/MainStyles.jsx'
 import CoolStyles from "../../utils/ui/styles/CoolStyles.jsx";
@@ -49,7 +49,7 @@ export class AssetsImageGenerator extends Component {
 
    update_dimensions = () => {
       const {rendered_width, rendered_height} = this.state;
-      const new_values = update_dimensions(rendered_width, rendered_height)
+      const new_values = update_dimensions(rendered_width, rendered_height, KEY_ASSETS_SPLITTER_POS_PX)
       if (new_values) {
          this.setState(new_values)
       }

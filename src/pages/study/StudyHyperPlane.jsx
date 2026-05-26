@@ -213,7 +213,7 @@ export class StudyHyperPlane extends Component {
          <styles.FixedInlineBlock
             style={result_block_style}>
             {this.render_image()}
-         </styles.FixedInlineBlock>
+         </styles.FixedInlineBlock>,
       ];
    }
 }

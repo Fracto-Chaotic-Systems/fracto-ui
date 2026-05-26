@@ -86,19 +86,3 @@ export const render_coverage_table = (coverage_data, heat_map_buffer) => {
       data={table_data}
    />
 }
-
-export const update_dimensions = (rendered_width, rendered_height) => {
-   const viewport_dimensions = AppSettings.get(KEY_VIEWPORT_DIMENSIONS)
-   const splitter_width = AppSettings.get(KEY_ASSETS_SPLITTER_POS_PX)
-   const rendered_width_changed = rendered_width !== viewport_dimensions.width - splitter_width
-   const rendered_height_changed = rendered_height !== viewport_dimensions.height
-   if (rendered_height_changed || rendered_width_changed) {
-      console.log('update_dimensions, rendered_width_changed, rendered_height_changed',
-         viewport_dimensions, rendered_width_changed, rendered_height_changed)
-      return {
-         rendered_width: viewport_dimensions.width - splitter_width,
-         rendered_height: viewport_dimensions.height,
-      }
-   }
-   return null
-}

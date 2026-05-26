@@ -1,8 +1,8 @@
 import React, {Component} from "react";
 
-import {MainStyles as styles} from '../../styles/MainStyles.jsx'
+import {MainStyles as styles, MARGIN_PX} from '../../styles/MainStyles.jsx'
 import AppSettings from "../../AppSettings.jsx";
-import {KEY_VIEWPORT_DIMENSIONS} from "../../settings/RootSettings.jsx";
+import {update_dimensions} from "../PageUtils.jsx"
 import {
    KEY_STUDY_POINTS_FRAME_SETTINGS,
    KEY_STUDY_POINTS_LEGEND_SPLITTER_POS,
@@ -14,6 +14,7 @@ import AppText from "../../AppText.jsx";
 
 import NavigatorSplitterLayout from "../../navigator/NavigatorSplitterLayout.jsx";
 import {KEY_STUDY_POINTS} from "../../text/StudyText.jsx";
+import PointsMainPanel from "./points/PointsMainPanel.jsx";
 
 const UPDATE_INTERVAL_MS = 1000
 
@@ -49,19 +50,16 @@ export class StudyPoints extends Component {
       }
    }
 
-   on_frame_settings_changed = (key, value) => {
-      // console.log('on_frame_settings_changed', value)
-      this.setState({frame_settings: value})
+   update_dimensions = () => {
+      const {rendered_width, rendered_height} = this.state;
+      const new_values = update_dimensions(rendered_width, rendered_height, KEY_STUDY_SPLITTER_POS_PX)
+      if (new_values) {
+         this.setState(new_values)
+      }
    }
 
-   update_dimensions = () => {
-      const viewport_dimensions = AppSettings.get(KEY_VIEWPORT_DIMENSIONS)
-      // console.log('viewport_dimensions', viewport_dimensions)
-      const splitter_width = AppSettings.get(KEY_STUDY_SPLITTER_POS_PX)
-      this.setState({
-         rendered_width: viewport_dimensions.width - splitter_width,
-         rendered_height: viewport_dimensions.height,
-      })
+   render_content = () => {
+      return <PointsMainPanel />
    }
 
    render() {
@@ -85,6 +83,11 @@ export class StudyPoints extends Component {
          steps_key: KEY_STUDY_POINTS_STEPS_SPLITTER_POS,
          section_key: KEY_STUDY_SPLITTER_POS_PX,
       }
+      const splitter_pos = AppSettings.get(splitter_keys.main_key)
+      const result_block_style = {
+         left: `${splitter_pos + MARGIN_PX}px`,
+         top: `${top}px`,
+      }
       return [
          <styles.SectionTitle
             key={'study-overview-title'}>
@@ -100,6 +103,10 @@ export class StudyPoints extends Component {
                splitter_keys={splitter_keys}
             />
          </styles.TightCenteredBlock>,
+         <styles.FixedInlineBlock
+            style={result_block_style}>
+            {this.render_content()}
+         </styles.FixedInlineBlock>,
       ];
    }
 }
