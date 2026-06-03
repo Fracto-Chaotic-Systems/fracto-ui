@@ -111,9 +111,11 @@ export const click_point_chart = (
       },
    }
    const cardinality = set1?.length - 1 || 0
-   const in_animation = set1?.find(item =>
-      (item.x === other_sets[1].x && item.y === other_sets[1].y)
-   )
+   const in_animation = other_sets.length > 1
+      ? set1?.find(item =>
+         (item.x === other_sets[1].x && item.y === other_sets[1].y)
+      )
+      : false
    const data_dataset = {
       datasets: [
          {

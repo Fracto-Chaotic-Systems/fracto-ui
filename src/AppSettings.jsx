@@ -171,7 +171,9 @@ export class AppSettings {
             .filter(k => AppSettings.subscriptions [k].key === key)
             .forEach(s_key => {
                const handler_fn = AppSettings.subscriptions[s_key].handler_fn
-               handler_fn(key, AppSettings.settings_data[key])
+               if (typeof handler_fn === 'function') {
+                  handler_fn(key, AppSettings.settings_data[key])
+               }
             })
       })
       AppSettings.persist_settings(new_settings)

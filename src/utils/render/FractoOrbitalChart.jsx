@@ -7,7 +7,7 @@ import {copy_json} from "../Dom.jsx";
 
 const ANIMATION_REFRESH_MS = 500
 
-const backgroundImagePlugin = {
+export const backgroundImagePlugin = {
    id: 'customCanvasBackgroundImage',
    beforeDraw: async (chart) => {
       const focal_point = {

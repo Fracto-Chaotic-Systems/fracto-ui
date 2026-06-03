@@ -58,6 +58,11 @@ export class StudyPoints extends Component {
       }
    }
 
+   on_frame_settings_changed = (key, value) => {
+      // console.log('on_frame_settings_changed', value)
+      this.setState({frame_settings: value})
+   }
+
    render_content = () => {
       return <PointsMainPanel />
    }

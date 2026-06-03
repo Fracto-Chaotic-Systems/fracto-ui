@@ -45,6 +45,7 @@ export const fill_canvas = async (
    ].join('&')
    const url = `http://${IP_ADDRESS}:${FRACTO_TILES_PORT}/${data_endpoint}?${all_params}`
    try {
+      console.log('fetch', url)
       const response = await fetch(url)
       const result = await response.json()
       FractoColors.buffer_to_canvas(result.canvas_buffer, ctx, 1, opacity)
@@ -55,7 +56,7 @@ export const fill_canvas = async (
          [KEY_NAVIGATOR_DISABLED]: false
       })
    } catch (e) {
-      console.error('exception thrown in fill_canvas', e)
+      console.error('exception thrown in fill_canvas', url, e)
       AppSettings.on_settings_changed({
          [KEY_NAVIGATOR_DISABLED]: false
       })
