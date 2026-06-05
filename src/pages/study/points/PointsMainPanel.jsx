@@ -1,38 +1,46 @@
 import React, {Component} from "react";
 
-import {
-   FRACTO_DATA_PORT,
-   FRACTO_UI_PORT
-} from "../../../../../../constants.js";
 import FractoFastCalc from "../../../../../../sdk/FractoFastCalc.js";
 
 import {MainStyles as styles, MARGIN_PX} from '../../../styles/MainStyles.jsx'
 import AppSettings from "../../../AppSettings.jsx";
 import {KEY_STUDY_POINTS_FRAME_SETTINGS, KEY_STUDY_SPLITTER_POS_PX} from "../../../settings/StudySettings.jsx";
-import {FETCH_JSON_HEADERS} from "../StudyUtils.jsx";
 
 import {update_dimensions} from "./../../PageUtils.jsx";
-import {
-   CELL_ALIGN_CENTER,
-   CELL_TYPE_TEXT,
-   TABLE_CAN_SELECT,
-   TABLE_NO_HEADER
-} from "../../../utils/ui/styles/CoolTableStyles.jsx";
-import CoolTable from "../../../utils/ui/CoolTable.jsx";
 import {click_point_chart} from "../../../utils/render/PatternsUtils.jsx";
+import ChartOrbitals from "../../../chart/ChartOrbitals.jsx";
+import DataBackend from "../../../backend/DataBackend.jsx";
+import PointsSeriesTable from "./PointsSeriesTable.jsx";
 
 const UPDATE_INTERVAL_MS = 1000
-const MAX_DEPTH = 12
 
-const TABLE_COLUMNS = [
-   {
-      id: "code",
-      label: "code",
-      type: CELL_TYPE_TEXT,
-      width_px: 35,
-      align: CELL_ALIGN_CENTER,
-   },
-]
+const reduce_point_data = (point_data) => {
+   return point_data
+   const re_strs = point_data.map((data) => {
+      return data.point.re
+   })
+   const im_strs = point_data.map((data) => {
+      return data.point.im
+   })
+   const reduced_re_strs = reduce_str_list(re_strs)
+   const reduced_im_strs = reduce_str_list(re_strs)
+
+
+   const firstWord = strs[0];
+
+   for (let i = 0; i < firstWord.length; i++) {
+      const char = firstWord[i];
+
+      // Check if this character matches all other words
+      for (let j = 1; j < strs.length; j++) {
+         if (strs[j][i] !== char) {
+            return i; // Mismatch found, return the count so far
+         }
+      }
+   }
+
+   return firstWord.length; // All words are perfectly identical
+}
 
 export class PointsMainPanel extends Component {
    state = {
@@ -43,9 +51,6 @@ export class PointsMainPanel extends Component {
       point_data: null,
       subscription: null,
       in_fetch: false,
-      data_runs: [],
-      unique_points: {},
-      selected_run: null,
       chart_data: [],
       set2: [],
    }
@@ -72,7 +77,6 @@ export class PointsMainPanel extends Component {
    }
 
    on_frame_settings_changed = (key, value) => {
-      const {in_fetch, chart_data} = this.state
       if (Number.isNaN(value.focal_point.x) || Number.isNaN(value.focal_point.y)) {
          console.log('on_frame_settings_changed bad number', value)
          return
@@ -102,34 +106,43 @@ export class PointsMainPanel extends Component {
    }
 
    on_chart_update = (key, value) => {
+      const {in_fetch} = this.state
+      if (in_fetch) {
+         return
+      }
       this.setState({in_fetch: true})
-      const origin = window.origin.replace(`${FRACTO_UI_PORT}`, `${FRACTO_DATA_PORT}`)
-      setTimeout(async () => {
+      DataBackend.get_orbital(value.focal_point, 1, point_data => {
          const {set2} = this.state
-         const all_params = [
-            `re=${value.focal_point.x}`,
-            `im=${value.focal_point.y}`,
-         ].join('&')
-         const url = `${origin}/orbital?${all_params}`
-         console.log(`fetching ${url}`)
-         const point_data = await fetch(url, FETCH_JSON_HEADERS)
-            .then(res => {
-               return res.json()
+         if (!point_data || !point_data.result) {
+            this.setState({
+               chart_data: [],
+               in_fetch: false,
             })
-         let chart_data = []
-         if (point_data) {
-            // console.log('point_data.result', point_data.result)
-            chart_data = point_data.result.map(data => {
-               return {
-                  x: parseFloat(data.point.re),
-                  y: parseFloat(data.point.im),
-               }
-            })
+            return
          }
-         // console.log('chart_data', chart_data)
+         let chart_data = []
+         chart_data = point_data.result.map(data => {
+            return {
+               x: parseFloat(data.point.re),
+               y: parseFloat(data.point.im),
+               x_str: data.point.re,
+               y_str: data.point.im,
+            }
+         })
          chart_data.unshift({x: set2[0].x, y: set2[0].y})
-         this.setState({chart_data, in_fetch: false})
-      }, 250)
+         this.setState({
+            chart_data,
+            in_fetch: false
+         })
+      })
+   }
+
+   get_table_data = () => {
+      const {chart_data} = this.state
+      return chart_data.map((data, step) => {
+         const {x_str, y_str} = data
+         return {x: x_str, y: y_str, step}
+      })
    }
 
    render() {
@@ -144,7 +157,13 @@ export class PointsMainPanel extends Component {
          backgroundColor: '#f8f8f8',
          cursor: 'pointer',
       }
-      return [
+      const table_data = this.get_table_data()
+      const page_style = {
+         height: '100rem',
+      }
+      return <styles.ScrollingBlock
+         style={page_style}
+         key={'orbitals-table'}>
          <div style={chart_style}>
             {click_point_chart(
                chart_data,
@@ -153,8 +172,16 @@ export class PointsMainPanel extends Component {
                false,
                // backgroundImagePlugin)}
             )}
-         </div>,
-      ]
+         </div>
+         <ChartOrbitals
+            key={'orbitals-chart'}
+            width_px={width_px}
+            height_px={width_px}
+         />
+         <PointsSeriesTable
+            table_data={table_data}
+         />
+      </styles.ScrollingBlock>
    }
 }
 
