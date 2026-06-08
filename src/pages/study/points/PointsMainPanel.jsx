@@ -4,7 +4,10 @@ import FractoFastCalc from "../../../../../../sdk/FractoFastCalc.js";
 
 import {MainStyles as styles, MARGIN_PX} from '../../../styles/MainStyles.jsx'
 import AppSettings from "../../../AppSettings.jsx";
-import {KEY_STUDY_POINTS_FRAME_SETTINGS, KEY_STUDY_SPLITTER_POS_PX} from "../../../settings/StudySettings.jsx";
+import {
+   KEY_STUDY_POINTS_FRAME_SETTINGS,
+   KEY_STUDY_SPLITTER_POS_PX,
+} from "../../../settings/StudySettings.jsx";
 
 import {update_dimensions} from "./../../PageUtils.jsx";
 import {click_point_chart} from "../../../utils/render/PatternsUtils.jsx";
@@ -51,7 +54,8 @@ export class PointsMainPanel extends Component {
       point_data: null,
       subscription: null,
       in_fetch: false,
-      chart_data: [],
+      pro_chart_data: [],
+      retro_chart_data: [],
       set2: [],
    }
 
@@ -105,48 +109,52 @@ export class PointsMainPanel extends Component {
       }
    }
 
+   format_point_data = (derived) => {
+      let {point_list} = derived
+      return point_list.map(data => {
+         return {
+            x_unscaled: parseFloat(data.point.re),
+            y_unscaled: parseFloat(data.point.im),
+            x_str: data.point.re,
+            y_str: data.point.im,
+            x: parseFloat(data.scaled_point.re),
+            y: parseFloat(data.scaled_point.im),
+            x_scaled_str: data.scaled_point.re,
+            y_scaled_str: data.scaled_point.im,
+         }
+      })
+   }
+
    on_chart_update = (key, value) => {
       const {in_fetch} = this.state
       if (in_fetch) {
          return
       }
       this.setState({in_fetch: true})
-      DataBackend.get_orbital(value.focal_point, 1, point_data => {
-         const {set2} = this.state
-         if (!point_data || !point_data.result) {
-            this.setState({
-               chart_data: [],
-               in_fetch: false,
-            })
-            return
-         }
-         let chart_data = []
-         chart_data = point_data.result.map(data => {
-            return {
-               x: parseFloat(data.point.re),
-               y: parseFloat(data.point.im),
-               x_str: data.point.re,
-               y_str: data.point.im,
-            }
-         })
-         chart_data.unshift({x: set2[0].x, y: set2[0].y})
+      DataBackend.get_orbitals(value.focal_point, 1000, all_results => {
+         const {pro_derived, retro_derived} = all_results.result
+         const pro_chart_data = this.format_point_data(pro_derived)
+         const retro_chart_data = this.format_point_data(retro_derived)
+         console.log('pro_chart_data', pro_chart_data)
          this.setState({
-            chart_data,
+            pro_chart_data,
+            retro_chart_data,
             in_fetch: false
          })
       })
    }
 
-   get_table_data = () => {
-      const {chart_data} = this.state
-      return chart_data.map((data, step) => {
+   get_table_data = (chart_data) => {
+      return chart_data
+         .reverse()
+         .map((data, step) => {
          const {x_str, y_str} = data
          return {x: x_str, y: y_str, step}
       })
    }
 
    render() {
-      const {set2, chart_data} = this.state
+      const {pro_chart_data, retro_chart_data} = this.state
       const width_px = 400
       const chart_style = {
          display: 'inline-block',
@@ -157,30 +165,45 @@ export class PointsMainPanel extends Component {
          backgroundColor: '#f8f8f8',
          cursor: 'pointer',
       }
-      const table_data = this.get_table_data()
+      const pro_table_data = this.get_table_data(pro_chart_data)
+      const retro_table_data = this.get_table_data(retro_chart_data)
       const page_style = {
-         height: '100rem',
+         minHeight: '350rem',
+         minWidth: '350rem',
       }
       return <styles.ScrollingBlock
          style={page_style}
          key={'orbitals-table'}>
          <div style={chart_style}>
             {click_point_chart(
-               chart_data,
-               set2,
+               pro_chart_data,
+               [], //set2,
                false,
                false,
                // backgroundImagePlugin)}
             )}
          </div>
-         <ChartOrbitals
-            key={'orbitals-chart'}
-            width_px={width_px}
-            height_px={width_px}
-         />
-         <PointsSeriesTable
-            table_data={table_data}
-         />
+         <div style={chart_style}>
+            {click_point_chart(
+               retro_chart_data,
+               [], //set2,
+               false,
+               false,
+               // backgroundImagePlugin)}
+            )}
+         </div>
+         <styles.ScrollingBlock>
+            <styles.ScrollingInlineBlock>
+               <PointsSeriesTable
+                  table_data={pro_table_data}
+               />
+            </styles.ScrollingInlineBlock>
+            <styles.ScrollingInlineBlock>
+               <PointsSeriesTable
+                  table_data={retro_table_data}
+               />
+            </styles.ScrollingInlineBlock>
+         </styles.ScrollingBlock>
       </styles.ScrollingBlock>
    }
 }

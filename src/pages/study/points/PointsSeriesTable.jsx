@@ -20,14 +20,14 @@ const TABLE_COLUMNS = [
       id: "x",
       label: "re",
       type: CELL_TYPE_TEXT,
-      width_px: 350,
+      width_px: 200,
       align: CELL_ALIGN_LEFT,
    },
    {
       id: "y",
       label: "im",
       type: CELL_TYPE_TEXT,
-      width_px: 350,
+      width_px: 200,
       align: CELL_ALIGN_LEFT,
    },
 ]
