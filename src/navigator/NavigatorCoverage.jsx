@@ -148,7 +148,7 @@ export class NavigatorCoverage extends Component {
             style={result_block_style}>
             <CoolStyles.Block style={{
                marginTop: `${MARGIN_PX}px`,
-               overflowY: 'scroll',
+               overflowY: 'auto',
                height: '30rem',
             }}>
                {results_block}

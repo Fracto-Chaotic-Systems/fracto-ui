@@ -52,7 +52,9 @@ export class GeneratorActions extends Component {
 
    render_context = () => {
       const {tiles, tile_index} = this.props
-      const tile = tiles[tile_index]
+      const tile = tile_index === tiles.length
+         ? tiles[tile_index - 1]
+         : tiles[tile_index]
       const context_style = {
          height: `${TILE_RENDER_WIDTH_PX}px`,
          boxShadow: '5px 5px 10px rgba(0, 0, 0, 0.25)',
@@ -84,18 +86,26 @@ export class GeneratorActions extends Component {
       const {tiles, tile_index} = this.props
       const level = <styles.NumericValue
          style={NUMERAL_STYLE}>
-         {tiles[tile_index].short_code.length}
+         {tiles[0].short_code.length}
       </styles.NumericValue>
       const count = <styles.NumericValue
          style={NUMERAL_STYLE}>
          {tiles.length}
       </styles.NumericValue>
-      const message = [
+      let message = [
          `Generating `,
          count,
          ` tiles of level `,
          level,
       ]
+      if (tile_index === tiles.length) {
+         message = [
+            `Generated `,
+            count,
+            ` tiles of level `,
+            level,
+         ]
+      }
       return <styles.CenteredBlock
          style={TITLE_TEXT_STYLE}>
          {message}
@@ -164,7 +174,9 @@ export class GeneratorActions extends Component {
 
    render_generated = (tile_points) => {
       const {tiles, tile_index} = this.props
-      const tile = tiles[tile_index]
+      const tile = tile_index === tiles.length
+         ? tiles[tile_index - 1]
+         : tiles[tile_index]
       if (tile_index < 0) {
          return []
       }
