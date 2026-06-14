@@ -166,7 +166,7 @@ export class GeneratorOperations extends Component {
       if (tile_index >= tiles.length) {
          this.setState({
             in_progress: false,
-            tile_index: -1,
+            tile_index: tiles.length,
          })
          return;
       }
@@ -195,7 +195,7 @@ export class GeneratorOperations extends Component {
             this.setState({
                in_progress: false,
                tile_index: tiles.length,
-               q// resume_index: 0,
+               // resume_index: 0,
             })
          } else {
             this.setState({tile_index: tile_index + 1});
