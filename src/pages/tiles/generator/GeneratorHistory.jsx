@@ -22,7 +22,9 @@ import {
 import CoolTable from "../../../utils/ui/CoolTable.jsx";
 import {checkmark_icon} from "../../../utils/ui/CoolIcons.jsx";
 import CoolStyles from "../../../utils/ui/styles/CoolStyles.jsx";
-import {GENERATOR_CODE_INTERIOR, GENERATOR_CODE_NEEDS_UPDATE, GENERATOR_CODE_REDO} from "./GeneratorControl.jsx";
+import {
+   GENERATOR_CODE_REDO
+} from "./GeneratorControl.jsx";
 
 const TABLE_COLUMNS = [
    {
@@ -171,8 +173,8 @@ export class GeneratorHistory extends Component {
          let descriptor = 'new'
          if (generate_code === GENERATOR_CODE_REDO) {
             descriptor = 'redone'
-         } else if (generate_code === GENERATOR_CODE_NEEDS_UPDATE) {
-            descriptor = 'updated'
+         // } else if (generate_code === GENERATOR_CODE_NEEDS_UPDATE) {
+         //    descriptor = 'updated'
          }
          all_forms.push(`${new_count} ${descriptor}`)
       }

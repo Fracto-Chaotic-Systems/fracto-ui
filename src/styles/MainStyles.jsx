@@ -102,6 +102,9 @@ export class MainStyles {
    static FixedInlineBlock = styled(CoolStyles.InlineBlock)`
        ${CoolStyles.fixed}
    `
+   static FixedBlock = styled(CoolStyles.Block)`
+       ${CoolStyles.fixed}
+   `
    static InputPrompt = styled(CoolStyles.InlineBlock)`
        ${CoolStyles.italic}
        ${CoolStyles.noselect}

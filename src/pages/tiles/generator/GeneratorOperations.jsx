@@ -2,6 +2,8 @@ import React, {Component} from "react";
 import PropTypes, {bool} from "prop-types";
 
 import {MainStyles as styles, MARGIN_PX} from '../../../styles/MainStyles.jsx'
+import CoolStyles from '../../../utils/ui/styles/CoolStyles.jsx'
+
 import {bounds_from_short_code} from "../TilesUtils.jsx";
 import FractoFastCalc from "../../../../../../sdk/FractoFastCalc.js";
 import GeneratorActions from "./GeneratorActions.jsx";
@@ -56,7 +58,7 @@ export class GeneratorOperations extends Component {
             (a.bounds.left > b.bounds.left ? 1 : -1)
       })
       const tile_index = tiles.length ? 0 : -1
-      this.setState({tiles, tile_index})
+      this.setState({tiles, tile_index, history: []})
    }
 
    static tile_points = null
@@ -119,7 +121,8 @@ export class GeneratorOperations extends Component {
          this.setState({tile_index: -1})
          setTimeout(() => {
             this.setState({
-               tile_index: this.state.resume_index})
+               tile_index: this.state.resume_index
+            })
          }, 100)
       }
    }
@@ -191,8 +194,8 @@ export class GeneratorOperations extends Component {
          if (tile_index === tiles.length - 1) {
             this.setState({
                in_progress: false,
-               tile_index: -1,
-               resume_index: 0,
+               tile_index: tiles.length,
+               q// resume_index: 0,
             })
          } else {
             this.setState({tile_index: tile_index + 1});
@@ -214,10 +217,10 @@ export class GeneratorOperations extends Component {
          width: `${ACTIONS_WIDTH_PX}px`,
          padding: `${MARGIN_PX}px`,
       }
-      return <styles.FixedInlineBlock
+      return <CoolStyles.Block
          style={block_style}>
          {actions}
-      </styles.FixedInlineBlock>
+      </CoolStyles.Block>
    }
 
    history_block = (history) => {
@@ -225,10 +228,9 @@ export class GeneratorOperations extends Component {
       const {generate_code, short_codes} = this.props
       const splitter_pos = AppSettings.get(KEY_TILES_GENERATOR_SPLITTER_POS)
       const block_style = {
-         left: `${ACTIONS_WIDTH_PX + MARGIN_PX + splitter_pos}px`,
          paddingLeft: `1rem`,
       }
-      return <styles.FixedInlineBlock
+      return <CoolStyles.Block
          style={block_style}>
          <GeneratorHistory
             all_records={history}
@@ -236,17 +238,17 @@ export class GeneratorOperations extends Component {
             generate_code={generate_code}
             tile_count={short_codes.length}
          />
-      </styles.FixedInlineBlock>
+      </CoolStyles.Block>
    }
 
    render() {
       const {history} = this.state
       const actions_block = this.actions_block()
       const history_block = this.history_block(history)
-      return <styles.FixedInlineBlock>
+      return <CoolStyles.Block style={{height: 'fit-content'}}>
          {actions_block}
          {history_block}
-      </styles.FixedInlineBlock>
+      </CoolStyles.Block>
    }
 }
 

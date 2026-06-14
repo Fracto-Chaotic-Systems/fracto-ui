@@ -176,7 +176,7 @@ export class PointsMainPanel extends Component {
          key={'orbitals-table'}>
          <div style={chart_style}>
             {click_point_chart(
-               pro_chart_data,
+               retro_chart_data,
                [], //set2,
                false,
                false,
@@ -185,7 +185,7 @@ export class PointsMainPanel extends Component {
          </div>
          <div style={chart_style}>
             {click_point_chart(
-               retro_chart_data,
+               pro_chart_data,
                [], //set2,
                false,
                false,
@@ -195,12 +195,12 @@ export class PointsMainPanel extends Component {
          <styles.ScrollingBlock>
             <styles.ScrollingInlineBlock>
                <PointsSeriesTable
-                  table_data={pro_table_data}
+                  table_data={retro_table_data}
                />
             </styles.ScrollingInlineBlock>
             <styles.ScrollingInlineBlock>
                <PointsSeriesTable
-                  table_data={retro_table_data}
+                  table_data={pro_table_data}
                />
             </styles.ScrollingInlineBlock>
          </styles.ScrollingBlock>

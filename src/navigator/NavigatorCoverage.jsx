@@ -8,6 +8,7 @@ import {
 } from '../styles/MainStyles.jsx'
 import AppSettings from "../AppSettings.jsx";
 import {KEY_VIEWPORT_DIMENSIONS} from "../settings/RootSettings.jsx";
+import CoolStyles from "../utils/ui/styles/CoolStyles.jsx";
 
 import NavigatorSplitterLayout from "./NavigatorSplitterLayout.jsx";
 import FractoTileCoverage from "../utils/render/FractoTileCoverage.jsx";
@@ -129,21 +130,29 @@ export class NavigatorCoverage extends Component {
             />
             <styles.FixedInlineBlock
                style={right_block_style}>
-               <FractoTileCoverage
-                  bounding_rect={bounding_rect}
-                  frame_settings={frame_settings}
-                  frame_settings_key={splitter_keys.frame_settings_key}
-                  on_level_select={this.on_level_select}
-                  on_coverage_data={on_coverage_data}
-                  options={options}
-               />
-               <styles.HalfRemSpacer/>
-               {control_block}
+               <CoolStyles.Block style={{width: '1000rem'}}>
+                  <FractoTileCoverage
+                     bounding_rect={bounding_rect}
+                     frame_settings={frame_settings}
+                     frame_settings_key={splitter_keys.frame_settings_key}
+                     on_level_select={this.on_level_select}
+                     on_coverage_data={on_coverage_data}
+                     options={options}
+                  />
+                  <styles.HalfRemSpacer/>
+                  {control_block}
+               </CoolStyles.Block>
             </styles.FixedInlineBlock>
          </styles.TightCenteredBlock>,
          <styles.FixedInlineBlock
             style={result_block_style}>
-            {results_block}
+            <CoolStyles.Block style={{
+               marginTop: `${MARGIN_PX}px`,
+               overflowY: 'scroll',
+               height: '30rem',
+            }}>
+               {results_block}
+            </CoolStyles.Block>
          </styles.FixedInlineBlock>
       ];
    }
