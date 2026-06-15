@@ -245,7 +245,7 @@ export class GeneratorOperations extends Component {
       const {history} = this.state
       const actions_block = this.actions_block()
       const history_block = this.history_block(history)
-      return <CoolStyles.Block style={{height: `40rem`, overflowY: 'auto'}}>
+      return <CoolStyles.Block style={{height: `40rem`}}>
          {actions_block}
          {history_block}
       </CoolStyles.Block>

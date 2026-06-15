@@ -9,7 +9,7 @@ import {
    CELL_ALIGN_CENTER,
    CELL_ALIGN_LEFT,
    CELL_TYPE_CALLBACK,
-   CELL_TYPE_NUMBER
+   CELL_TYPE_NUMBER,
 } from "../../../utils/ui/styles/CoolTableStyles.jsx";
 import {
    KEY_TILES_GENERATOR_DONE_AT,
@@ -49,13 +49,6 @@ const TABLE_COLUMNS = [
       align: CELL_ALIGN_CENTER,
    },
    {
-      id: "short_code",
-      label_key: KEY_TILES_GENERATOR_SHORT_CODE,
-      width_px: 240,
-      type: CELL_TYPE_CALLBACK,
-      align: CELL_ALIGN_LEFT,
-   },
-   {
       id: "is_blank",
       label_key: KEY_TILES_GENERATOR_IS_BLANK,
       width_px: 60,
@@ -68,6 +61,13 @@ const TABLE_COLUMNS = [
       width_px: 60,
       type: CELL_TYPE_CALLBACK,
       align: CELL_ALIGN_CENTER,
+   },
+   {
+      id: "short_code",
+      label_key: KEY_TILES_GENERATOR_SHORT_CODE,
+      width_px: 240,
+      type: CELL_TYPE_CALLBACK,
+      align: CELL_ALIGN_LEFT,
    },
 ]
 
@@ -273,6 +273,7 @@ export class GeneratorHistory extends Component {
          <CoolTable
             columns={TABLE_COLUMNS}
             data={table_data}
+            options={[]}
          />
       </styles.ContentWrapper>
    }

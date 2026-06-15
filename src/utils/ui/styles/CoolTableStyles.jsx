@@ -56,7 +56,6 @@ export class CoolTableStyles {
    `
 
    static TableHeader = styled(CoolStyles.TableHeader)`
-       position: fixed;
        background-color: #dddddd;
        padding: 0;
    `

@@ -17,7 +17,7 @@ export class AppText {
       if (AppText.text_keys.includes(key)) {
          return AppText.text_data[key]
       } else {
-         console.log('text key not found', key)
+         // console.log('text key not found', key)
       }
       return undefined
    }
