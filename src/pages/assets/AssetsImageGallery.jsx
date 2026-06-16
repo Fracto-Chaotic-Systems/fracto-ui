@@ -23,6 +23,7 @@ import {
 } from "../../settings/AssetsSettings.jsx";
 import AppText from "../../AppText.jsx";
 import {KEY_ASSETS_GALLERY} from "../../text/AssetsText.jsx";
+import {update_dimensions} from "../PageUtils.jsx"
 
 const UPDATE_INTERVAL_MS = 1000
 

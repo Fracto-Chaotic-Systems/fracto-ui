@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import PropTypes, {bool} from "prop-types";
+import PropTypes from "prop-types";
 
 import {MARGIN_PX} from '../../../styles/MainStyles.jsx'
 import CoolStyles from '../../../utils/ui/styles/CoolStyles.jsx'
