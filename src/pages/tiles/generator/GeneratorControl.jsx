@@ -2,13 +2,11 @@ import React, {Component} from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
 
-import {MainStyles as styles} from '../../../styles/MainStyles.jsx'
 import CoolTable from "../../../utils/ui/CoolTable.jsx";
 import CoolStyles from "../../../utils/ui/styles/CoolStyles.jsx";
 import {
    CELL_ALIGN_CENTER,
    CELL_TYPE_NUMBER,
-   CELL_TYPE_TEXT
 } from "../../../utils/ui/styles/CoolTableStyles.jsx";
 
 const LinkedCell = styled(CoolStyles.InlineBlock)`
@@ -51,20 +49,12 @@ const COVERAGE_TABLE_COLUMNS = [
       width_px: 80,
       align: CELL_ALIGN_CENTER
    },
-   // {
-   //    id: "needs_update_tiles",
-   //    label: "update?",
-   //    type: CELL_TYPE_NUMBER,
-   //    width_px: 80,
-   //    align: CELL_ALIGN_CENTER
-   // },
 ]
 
 export const GENERATOR_CODE_REDO = 'tiles_redo'
 export const GENERATOR_CODE_CAN_DO = 'tiles_can_do'
 export const GENERATOR_CODE_BLANK = 'tiles_blank'
 export const GENERATOR_CODE_INTERIOR = 'tiles_interior'
-// export const GENERATOR_CODE_NEEDS_UPDATE = 'tiles_needs_update'
 
 export class GeneratorControl extends Component {
    static propTypes = {
@@ -100,11 +90,6 @@ export class GeneratorControl extends Component {
       on_generate(tiles, level, GENERATOR_CODE_INTERIOR);
    }
 
-   // generate_needs_update = (tiles, level) => {
-   //    const {on_generate} = this.props
-   //    on_generate(tiles, level, GENERATOR_CODE_NEEDS_UPDATE);
-   // }
-
    render() {
       const {coverage_data} = this.props
       if (!Array.isArray(coverage_data)) {
@@ -137,12 +122,6 @@ export class GeneratorControl extends Component {
                   <CoolStyles.LinkSpan>{data.interiors_with_bounds.length}</CoolStyles.LinkSpan>
                </LinkedCell>
                : '-';
-            // data.needs_update_tiles = data.needs_update_with_bounds.length
-            //    ? <LinkedCell
-            //       onClick={e => this.generate_needs_update(data.needs_update_with_bounds, data.level)}>
-            //       <CoolStyles.LinkSpan>{data.needs_update_with_bounds.length}</CoolStyles.LinkSpan>
-            //    </LinkedCell>
-            //    : '-';
             data.tile_count = data.tiles.length
                ? <LinkedCell
                   onClick={e => this.generate_redo(data.tiles, data.level)}>

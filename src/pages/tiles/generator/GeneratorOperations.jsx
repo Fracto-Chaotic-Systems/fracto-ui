@@ -1,15 +1,14 @@
 import React, {Component} from "react";
 import PropTypes, {bool} from "prop-types";
 
-import {MainStyles as styles, MARGIN_PX} from '../../../styles/MainStyles.jsx'
+import {MARGIN_PX} from '../../../styles/MainStyles.jsx'
 import CoolStyles from '../../../utils/ui/styles/CoolStyles.jsx'
 
+import {generate_tile_points} from "./GeneratorInterface.jsx";
 import {bounds_from_short_code} from "../TilesUtils.jsx";
-import FractoFastCalc from "../../../../../../sdk/FractoFastCalc.js";
 import GeneratorActions from "./GeneratorActions.jsx";
 import GeneratorHistory from "./GeneratorHistory.jsx";
-import {KEY_TILES_GENERATOR_SPLITTER_POS} from "../../../settings/TilesSettings.jsx";
-import AppSettings from "../../../AppSettings.jsx";
+import {copy_json} from "../../../utils/Dom.jsx";
 
 export const TILE_RENDER_WIDTH_PX = 300
 const ACTIONS_WIDTH_PX = 2 * TILE_RENDER_WIDTH_PX + 3 * MARGIN_PX
@@ -26,7 +25,6 @@ export class GeneratorOperations extends Component {
       tile_index: -1,
       tiles: [],
       in_progress: false,
-      ready_short_code: null,
       tile_points: null,
       resume_index: 0,
       history: []
@@ -61,54 +59,6 @@ export class GeneratorOperations extends Component {
       this.setState({tiles, tile_index, history: []})
    }
 
-   static tile_points = null
-
-   new_tile = () => {
-      if (GeneratorOperations.tile_points) {
-         return GeneratorOperations.tile_points
-      }
-      GeneratorOperations.tile_points = new Array(256)
-         .fill(0)
-         .map(() => new Array(256)
-            .fill([0, 0]));
-      for (let img_x = 0; img_x < 256; img_x++) {
-         for (let img_y = 0; img_y < 256; img_y++) {
-            GeneratorOperations.tile_points[img_x][img_y] = [0, 0]
-         }
-      }
-      return GeneratorOperations.tile_points
-   }
-
-   calculate_tile = (tile, tile_points) => {
-      console.log("calculate_tile", tile)
-      const short_code = tile.short_code
-      const level = short_code.length
-      const increment = (tile.bounds.right - tile.bounds.left) / 256.0;
-      let estimated = 0
-      try {
-         for (let img_x = 0; img_x < 256; img_x++) {
-            const x = tile.bounds.left + img_x * increment;
-            for (let img_y = 0; img_y < 256; img_y++) {
-               const y = tile.bounds.top - img_y * increment;
-               const values = FractoFastCalc.calc(x, y, level)
-               tile_points[img_x][img_y][0] = values.pattern;
-               tile_points[img_x][img_y][1] = values.iteration;
-               if (values.estimated) {
-                  estimated++
-               }
-            }
-         }
-         if (estimated) {
-            console.log(`tile ${tile.short_code} has ${estimated} estimated point(s)`)
-         }
-         return tile_points;
-      } catch (e) {
-         console.error(e)
-         debugger;
-         return tile_points;
-      }
-   }
-
    on_start_pause = () => {
       const {in_progress, tile_index} = this.state
       const new_state = !in_progress
@@ -127,39 +77,9 @@ export class GeneratorOperations extends Component {
       }
    }
 
-   test_interior = (context_buffer) => {
-      for (let col = 0; col < context_buffer.length; col++) {
-         for (let row = 0; row < context_buffer[col].length; row++) {
-            const pattern = context_buffer[col][row][0]
-            if (pattern === 0) {
-               return false
-            }
-         }
-      }
-      return true
-   }
-
-   test_blank = (tile_points) => {
-      const first_iteration = tile_points[0][0][1]
-      for (let col = 0; col < tile_points.length; col++) {
-         for (let row = 0; row < tile_points[col].length; row++) {
-            const pattern = tile_points[col][row][0]
-            if (pattern > 0) {
-               return false
-            }
-            const iteration = tile_points[col][row][1]
-            if (first_iteration !== iteration) {
-               return false
-            }
-         }
-      }
-      return true
-   }
-
    on_context_ready = (short_code, context_buffer) => {
       const {tile_index, tiles, in_progress, history} = this.state
       // console.log(`context_ready: ${short_code}`)
-      const is_interior = this.test_interior(context_buffer)
       if (!in_progress) {
          return
       }
@@ -176,26 +96,19 @@ export class GeneratorOperations extends Component {
          return
       }
       setTimeout(() => {
-         const tile_points = this.new_tile()
-         const start = performance.now()
-         this.calculate_tile(tile, tile_points)
-         const is_blank = this.test_blank(tile_points)
-         const end = performance.now()
-         const record = {
-            tile,
-            is_interior,
-            is_blank,
-            duration: end - start,
-            timestamp: Date.now(),
-            tile_index: this.state.tile_index,
-         }
-         history.push(record)
-         this.setState({tile_points, history})
+         const {generate_code} = this.props
+         const record = generate_tile_points(tile, generate_code, context_buffer)
+         this.setState({tile_points: copy_json(record.tile_points)})
+
+         delete record.tile_points
+         record.tile_index = this.state.tile_index
+         history.push(copy_json(record))
+         this.setState({history})
+
          if (tile_index === tiles.length - 1) {
             this.setState({
                in_progress: false,
                tile_index: tiles.length,
-               // resume_index: 0,
             })
          } else {
             this.setState({tile_index: tile_index + 1});
@@ -226,7 +139,6 @@ export class GeneratorOperations extends Component {
    history_block = (history) => {
       const {tile_index} = this.state
       const {generate_code, short_codes} = this.props
-      const splitter_pos = AppSettings.get(KEY_TILES_GENERATOR_SPLITTER_POS)
       const block_style = {
          paddingLeft: `1rem`,
       }
