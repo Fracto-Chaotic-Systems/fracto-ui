@@ -15,6 +15,7 @@ export const ASSETS_LOGS = 'assets_logs'
 export const ASSETS_GENERATOR = 'assets_generator'
 export const VIDEO_GENERATOR = 'video_generator'
 export const ASSETS_GALLERY = 'assets_gallery'
+export const ASSETS_LORE = 'assets_lore'
 
 export const KEY_ASSETS_GENERATOR_FRAME_SETTINGS = `${ASSETS_GENERATOR_FOLDER}/frame_settings`
 export const KEY_ASSETS_GENERATOR_SPLITTER_POS = `${ASSETS_GENERATOR_FOLDER}/splitter_pos`

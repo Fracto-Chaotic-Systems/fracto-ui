@@ -54,11 +54,11 @@ export class DataBackups extends Component {
    }
 
    componentDidMount() {
-      TABLE_LIST.forEach((table, i) => {
-         setTimeout(() => {
-            this.backup_table(table)
-         }, i * 5000)
-      })
+      // TABLE_LIST.forEach((table, i) => {
+      //    setTimeout(() => {
+      //       this.backup_table(table)
+      //    }, i * 5000)
+      // })
    }
 
    backup_table = async (table) => {

@@ -98,10 +98,12 @@ export class NavigatorCoverage extends Component {
       } = this.props
       let top = 0;
       let left = 0;
+      let width = 0;
       if (container_ref.current) {
          const container_bounds = container_ref.current.getBoundingClientRect()
          top = container_bounds.top
          left = container_bounds.left
+         width = container_bounds.width
       }
       const bounding_rect = {
          top,
@@ -118,6 +120,11 @@ export class NavigatorCoverage extends Component {
          left: `${splitter_pos + MARGIN_PX}px`,
          top: `${top + MARGIN_PX + frame_settings.width_px}px`,
       }
+      const splitter_width = AppSettings.get(splitter_keys.section_key)
+      const pane_styles = {
+         height: `${rendered_height}px`,
+         width: `${splitter_width - splitter_pos + 2 * MARGIN_PX}px`,
+      }
       return [
          <styles.TightCenteredBlock
             ref={container_ref}
@@ -130,7 +137,7 @@ export class NavigatorCoverage extends Component {
             />
             <styles.FixedInlineBlock
                style={right_block_style}>
-               <CoolStyles.Block style={{width: '1000rem'}}>
+               <styles.PaneWrapper style={pane_styles}>
                   <FractoTileCoverage
                      bounding_rect={bounding_rect}
                      frame_settings={frame_settings}
@@ -141,19 +148,11 @@ export class NavigatorCoverage extends Component {
                   />
                   <styles.HalfRemSpacer/>
                   {control_block}
-               </CoolStyles.Block>
+                  <styles.OneRemDown/>
+                  {results_block}
+               </styles.PaneWrapper>
             </styles.FixedInlineBlock>
          </styles.TightCenteredBlock>,
-         <styles.FixedInlineBlock
-            style={result_block_style}>
-            <CoolStyles.Block style={{
-               marginTop: `${MARGIN_PX}px`,
-               overflowY: 'auto',
-               height: '30rem',
-            }}>
-               {results_block}
-            </CoolStyles.Block>
-         </styles.FixedInlineBlock>
       ];
    }
 }
