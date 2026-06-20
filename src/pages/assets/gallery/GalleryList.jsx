@@ -2,21 +2,14 @@ import React, {Component} from "react";
 import PropTypes from "prop-types";
 
 import CoolTable from "../../../utils/ui/CoolTable.jsx";
-import {
-   FETCH_JSON_HEADERS,
-   render_magnitude,
-} from "../../study/StudyUtils.jsx";
-import {
-   FRACTO_DATA_PORT,
-   FRACTO_UI_PORT
-} from "../../../../../../constants.js";
+import {render_magnitude} from "../../study/StudyUtils.jsx";
 
 import {MainStyles as styles} from '../../../styles/MainStyles.jsx'
 import AppSettings from "../../../AppSettings.jsx";
 import {KEY_ASSETS_LIST_SELECTED_ROW} from "../../../settings/AssetsSettings.jsx";
 import {
-   CELL_ALIGN_CENTER, CELL_TYPE_CALLBACK,
-   CELL_TYPE_NUMBER,
+   CELL_ALIGN_CENTER,
+   CELL_TYPE_CALLBACK,
    CELL_TYPE_TEXT,
    TABLE_CAN_SELECT,
    TABLE_NO_BORDER

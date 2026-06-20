@@ -65,4 +65,18 @@ export class AssetsBackend {
          return error
       }
    }
+
+   static lore_categories = async () => {
+      const origin = window.origin.replace(`${FRACTO_UI_PORT}`, `${FRACTO_DATA_PORT}`)
+      const url = `${origin}/lore_categories`
+      try {
+         const fetched = await fetch(url, FETCH_JSON_HEADERS).then(res => {
+            return res.json()
+         })
+         return fetched.result
+      } catch (error) {
+         console.error(`error fetching ${url}`, error.message)
+         return error
+      }
+   }
 }

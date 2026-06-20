@@ -45,7 +45,7 @@ export const poll_viewport_dimensions = (cb = null) => {
       const width_changed = current_viewport?.width !== new_viewport.width
       const height_changed = current_viewport?.height !== new_viewport.height
       if (width_changed || height_changed) {
-         console.log('viewport changed', new_viewport)
+         // console.log('viewport changed', new_viewport)
          AppSettings.on_settings_changed({
             [KEY_VIEWPORT_DIMENSIONS]: new_viewport
          })

@@ -1,0 +1,103 @@
+import React, {Component} from "react";
+import PropTypes from "prop-types";
+
+import {LoreStyles as styles} from './LoreStyles.jsx'
+import {AssetsBackend} from "../../../backend/AssetsBackend.jsx";
+import CoolTable from "../../../utils/ui/CoolTable.jsx";
+import {
+   CELL_ALIGN_CENTER,
+   CELL_ALIGN_LEFT,
+   CELL_TYPE_CALLBACK,
+   TABLE_NO_BORDER,
+   TABLE_NO_HEADER,
+} from "../../../utils/ui/styles/CoolTableStyles.jsx";
+import {wand_icon} from "../../../utils/ui/CoolIcons.jsx";
+
+const TABLE_COLUMNS = [
+   {
+      id: "category_name",
+      label: 'category',
+      width_px: 100,
+      type: CELL_TYPE_CALLBACK,
+      align: CELL_ALIGN_LEFT,
+   },
+   {
+      id: 'new_link',
+      label: 'new',
+      type: CELL_TYPE_CALLBACK,
+      align: CELL_ALIGN_CENTER,
+   }
+]
+
+export class LoreCategoryList extends Component {
+   static propTypes = {
+      height_px: PropTypes.number.isRequired,
+      width_px: PropTypes.number.isRequired,
+   }
+
+   state = {
+      category_list: [],
+      selected_row: -1,
+   }
+
+   componentDidMount() {
+      this.get_categories()
+   }
+
+   get_categories = async () => {
+      const unsorted = await AssetsBackend.lore_categories()
+      const category_list = unsorted
+         .sort((a, b) => a.id > b.id ? 1 : -1)
+      this.setState({category_list})
+   }
+
+   on_select_row = (selected_row) => {
+      this.setState({selected_row})
+   }
+
+   category_link = (id) => {
+      const {category_list} = this.state
+      const category = category_list.find(c => c.id === id)
+      return <styles.NewLoreIcon
+         title={`new ${category.category_name}`}
+      >{wand_icon}</styles.NewLoreIcon>
+   }
+
+   category_name = (plural_name) => {
+      const {category_list} = this.state
+      const category = category_list.find(c => c.plural_name === plural_name)
+      console.log('category', category)
+      return <styles.CategoryTitle
+         title={category.description}
+      >{plural_name}</styles.CategoryTitle>
+   }
+
+   render() {
+      const {category_list, selected_row} = this.state
+      const {height_px, width_px} = this.props
+      const table_style = {
+         height: `${height_px}px`,
+         width: `${width_px}px`,
+         cursor: 'pointer',
+      }
+      const table_data = category_list.map(category => {
+         return {
+            'category_name': [this.category_name, category.plural_name],
+            'new_link': [this.category_link, category.id],
+         }
+      })
+      const table = <CoolTable
+         columns={TABLE_COLUMNS}
+         data={table_data}
+         options={[TABLE_NO_HEADER, TABLE_NO_BORDER]}
+         selected_row={selected_row}
+         on_select_row={this.on_select_row}
+      />
+      return <styles.ScrollingLoreList
+         style={table_style}>
+         {table}
+      </styles.ScrollingLoreList>
+   }
+}
+
+export default LoreCategoryList
