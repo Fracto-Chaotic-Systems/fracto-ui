@@ -7,7 +7,6 @@ export class LoreStyles {
 
    static ScrollingLoreList = styled(CoolStyles.InlineBlock)`
        overflow-y: auto;
-       border-right: 0.125rem solid #cccccc;
    `
 
    static CategoryTitle = styled(CoolStyles.InlineBlock)`
@@ -30,6 +29,13 @@ export class LoreStyles {
        &:hover {
            opacity: 1.0;
        }
+   `
+   static KeyPrefix = styled(CoolStyles.InlineBlock)`
+       ${CoolStyles.monospace}
+       ${CoolStyles.bold}
+       ${CoolStyles.align_middle}
+       line-height: 2rem;
+       padding: 0 0.5rem;
    `
 }
 

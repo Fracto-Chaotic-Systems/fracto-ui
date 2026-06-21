@@ -93,6 +93,7 @@ export class LoreCategoryList extends Component {
          height: `${height_px}px`,
          width: `${width_px}px`,
          cursor: 'pointer',
+         borderRight: `0.125rem solid #bbbbbb`,
       }
       const table_data = category_list.map(category => {
          return {

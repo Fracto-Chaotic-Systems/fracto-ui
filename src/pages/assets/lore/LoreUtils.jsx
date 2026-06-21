@@ -1,14 +1,14 @@
-import CategoryDefinition from "./categories/CategoryDefinition.jsx";
-import CategorySubject from "./categories/CategorySubject.jsx";
-import CategoryStudy from "./categories/CategoryStudy.jsx";
-import CategoryTaxonomy from "./categories/CategoryTaxonomy.jsx";
-import CategoryDerivation from "./categories/CategoryDerivation.jsx";
-import CategoryOperation from "./categories/CategoryOperation.jsx";
-import CategoryDialog from "./categories/CategoryDialog.jsx";
-import CategoryThesis from "./categories/CategoryThesis.jsx";
-import CategoryArticle from "./categories/CategoryArticle.jsx";
-import CategoryReference from "./categories/CategoryReference.jsx";
-import CategoryDiagram from "./categories/CategoryDiagram.jsx";
+import ContentDefinition from "./content/ContentDefinition.jsx";
+import ContentSubject from "./content/ContentSubject.jsx";
+import ContentStudy from "./content/ContentStudy.jsx";
+import ContentTaxonomy from "./content/ContentTaxonomy.jsx";
+import ContentDerivation from "./content/ContentDerivation.jsx";
+import ContentOperation from "./content/ContentOperation.jsx";
+import ContentDialog from "./content/ContentDialog.jsx";
+import ContentThesis from "./content/ContentThesis.jsx";
+import ContentArticle from "./content/ContentArticle.jsx";
+import ContentReference from "./content/ContentReference.jsx";
+import ContentDiagram from "./content/ContentDiagram.jsx";
 
 export const LORE_CATEGORY_DEFINITION = 1
 export const LORE_CATEGORY_SUBJECT = 2
@@ -26,77 +26,77 @@ export const new_lore_component = (
    category, width_px, height_px) => {
    switch (category.id) {
       case  LORE_CATEGORY_DEFINITION:
-         return <CategoryDefinition
+         return <ContentDefinition
             item_id={-1}
             category={category}
             width_px={width_px}
             height_px={height_px}
          />
       case  LORE_CATEGORY_SUBJECT:
-         return <CategorySubject
+         return <ContentSubject
             item_id={-1}
             category={category}
             width_px={width_px}
             height_px={height_px}
          />
       case  LORE_CATEGORY_STUDY:
-         return <CategoryStudy
+         return <ContentStudy
             item_id={-1}
             category={category}
             width_px={width_px}
             height_px={height_px}
          />
       case  LORE_CATEGORY_TAXONOMY:
-         return <CategoryTaxonomy
+         return <ContentTaxonomy
             item_id={-1}
             category={category}
             width_px={width_px}
             height_px={height_px}
          />
       case  LORE_CATEGORY_DERIVATION:
-         return <CategoryDerivation
+         return <ContentDerivation
             item_id={-1}
             category={category}
             width_px={width_px}
             height_px={height_px}
          />
       case  LORE_CATEGORY_OPERATION:
-         return <CategoryOperation
+         return <ContentOperation
             item_id={-1}
             category={category}
             width_px={width_px}
             height_px={height_px}
          />
       case  LORE_CATEGORY_DIALOG:
-         return <CategoryDialog
+         return <ContentDialog
             item_id={-1}
             category={category}
             width_px={width_px}
             height_px={height_px}
          />
       case  LORE_CATEGORY_THESIS:
-         return <CategoryThesis
+         return <ContentThesis
             item_id={-1}
             category={category}
             width_px={width_px}
             height_px={height_px}
          />
       case  LORE_CATEGORY_ARTICLE:
-         return <CategoryArticle
+         return <ContentArticle
             item_id={-1}
             category={category}
             width_px={width_px}
             height_px={height_px}
          />
       case  LORE_CATEGORY_REFERENCE:
-         return <CategoryReference
+         return <ContentReference
             item_id={-1}
             category={category}
             width_px={width_px}
             height_px={height_px}
          />
       case  LORE_CATEGORY_DIAGRAM:
-         return <CategoryDiagram
+         return <ContentDiagram
             item_id={-1}
             category={category}
             width_px={width_px}
