@@ -39,6 +39,18 @@ export const TABLE_EDITOR_COLUMNS = [
    },
 ]
 
+export const LORE_INITIAL_STATE = {
+   item_data: {
+      edit_key: "-1",
+      title: "use your words",
+   },
+   meta_data: {
+      hidden: false,
+      published: true,
+      modified: `<date not set>`
+   }
+}
+
 const render_edit_key = (key_data) => {
    const {edit_key, key_prefix, on_update_data} = key_data
    return [
@@ -66,8 +78,20 @@ const render_title = (title_data) => {
    </CoolStyles.Block>
 }
 
+const render_type = (category) => {
+   const {category_name, description} = category
+   return <CoolStyles.Block style={{lineHeight: "1.75rem"}}>
+      <styles.LoreTypeText>{category_name}</styles.LoreTypeText>
+      <styles.LoreTypeDescription>({description})</styles.LoreTypeDescription>
+   </CoolStyles.Block>
+}
+
 export const render_preamble = (item_data, category, on_update_data) => {
    const table_data = [
+      {
+         edit_key: 'type',
+         edit_value: [render_type, category],
+      },
       {
          edit_key: 'key',
          edit_value: [render_edit_key, {
@@ -90,3 +114,33 @@ export const render_preamble = (item_data, category, on_update_data) => {
       options={[TABLE_NO_HEADER, TABLE_NO_BORDER]}
    />
 }
+
+const render_meta_data = (obj_meta) =>{
+   const {meta_data, on_update_meta} = obj_meta
+   return <CoolStyles.Block style={{lineHeight: "1.75rem"}}>
+      <styles.MetaElement>
+         {meta_data.published ? 'published' : 'not published'},
+      </styles.MetaElement>
+      <styles.MetaElement>
+         {meta_data.hidden ? 'hidden' : 'not hidden'},
+      </styles.MetaElement>
+      <styles.MetaElement>
+         {meta_data.modified},
+      </styles.MetaElement>
+   </CoolStyles.Block>
+}
+
+export const render_meta = (meta_data, on_update_meta) => {
+   const table_data = [
+      {
+         edit_key: 'meta',
+         edit_value: [render_meta_data, {meta_data, on_update_meta}]
+      },
+   ]
+   return <CoolTable
+      columns={TABLE_EDITOR_COLUMNS}
+      data={table_data}
+      options={[TABLE_NO_HEADER, TABLE_NO_BORDER]}
+   />
+}
+

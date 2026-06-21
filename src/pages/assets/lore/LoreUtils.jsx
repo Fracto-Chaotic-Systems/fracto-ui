@@ -9,6 +9,8 @@ import ContentThesis from "./content/ContentThesis.jsx";
 import ContentArticle from "./content/ContentArticle.jsx";
 import ContentReference from "./content/ContentReference.jsx";
 import ContentDiagram from "./content/ContentDiagram.jsx";
+import ContentImage from "./content/ContentImage.jsx";
+import ContentVideo from "./content/ContentVideo.jsx";
 
 export const LORE_CATEGORY_DEFINITION = 1
 export const LORE_CATEGORY_SUBJECT = 2
@@ -21,6 +23,8 @@ export const LORE_CATEGORY_THESIS = 8
 export const LORE_CATEGORY_ARTICLE = 9
 export const LORE_CATEGORY_REFERENCE = 10
 export const LORE_CATEGORY_DIAGRAM = 11
+export const LORE_CATEGORY_IMAGE = 12
+export const LORE_CATEGORY_VIDEO = 13
 
 export const new_lore_component = (
    category, width_px, height_px) => {
@@ -95,8 +99,22 @@ export const new_lore_component = (
             width_px={width_px}
             height_px={height_px}
          />
-      case  LORE_CATEGORY_DIAGRAM:
+      case LORE_CATEGORY_DIAGRAM:
          return <ContentDiagram
+            item_id={-1}
+            category={category}
+            width_px={width_px}
+            height_px={height_px}
+         />
+      case LORE_CATEGORY_IMAGE:
+         return <ContentImage
+            item_id={-1}
+            category={category}
+            width_px={width_px}
+            height_px={height_px}
+         />
+      case LORE_CATEGORY_VIDEO:
+         return <ContentVideo
             item_id={-1}
             category={category}
             width_px={width_px}

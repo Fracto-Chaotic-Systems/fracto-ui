@@ -1,8 +1,9 @@
 import React, {Component} from "react";
 import PropTypes from "prop-types";
 
-import {render_preamble} from "./ContentUtils.jsx";
+import {LORE_INITIAL_STATE, render_meta, render_preamble} from "./ContentUtils.jsx";
 import {LoreStyles as styles} from '../LoreStyles.jsx'
+import {copy_json} from "../../../../utils/Dom.jsx";
 
 export class ContentStudy extends Component {
    static propTypes = {
@@ -13,10 +14,7 @@ export class ContentStudy extends Component {
    }
 
    state = {
-      item_data: {
-         edit_key: "-1",
-         title: "use your words",
-      }
+      ...copy_json(LORE_INITIAL_STATE),
    }
 
    on_update_data = (obj) => {
@@ -32,12 +30,15 @@ export class ContentStudy extends Component {
    }
 
    render() {
-      const {item_data} = this.state
+      const {item_data, meta_data} = this.state
       const {category} = this.props
       const preamble = render_preamble(
          item_data, category, this.on_update_data)
+      const meta = render_meta(
+         meta_data, this.on_update_meta)
       return <styles.ScrollingLoreList>
          {preamble}
+         {meta}
       </styles.ScrollingLoreList>
    }
 }

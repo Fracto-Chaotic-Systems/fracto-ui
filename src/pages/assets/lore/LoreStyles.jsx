@@ -37,6 +37,29 @@ export class LoreStyles {
        line-height: 2rem;
        padding: 0 0.5rem;
    `
+   static MetaElement = styled(CoolStyles.InlineBlock)`
+       ${CoolStyles.monospace}
+       ${CoolStyles.bold}
+       ${CoolStyles.align_middle}
+       line-height: 2rem;
+       font-size: 0.8rem;
+       padding: 0 0.5rem;
+   `
+
+   static LoreTypeText= styled(CoolStyles.InlineBlock)`
+       ${CoolStyles.bold}
+       ${CoolStyles.align_middle}
+       line-height: 2rem;
+       font-size: 1.125rem;
+       padding: 0 0.5rem;
+   `
+   static LoreTypeDescription= styled(CoolStyles.InlineBlock)`
+       ${CoolStyles.italic}
+       ${CoolStyles.align_middle}
+       line-height: 2rem;
+       font-size: 1rem;
+       color: #888888;
+   `
 }
 
 export default LoreStyles

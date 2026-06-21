@@ -5,7 +5,7 @@ import {LORE_INITIAL_STATE, render_meta, render_preamble} from "./ContentUtils.j
 import {LoreStyles as styles} from '../LoreStyles.jsx'
 import {copy_json} from "../../../../utils/Dom.jsx";
 
-export class ContentDefinition extends Component {
+export class ContentVideo extends Component {
    static propTypes = {
       item_id: PropTypes.number.isRequired,
       category: PropTypes.object.isRequired,
@@ -43,4 +43,4 @@ export class ContentDefinition extends Component {
    }
 }
 
-export default ContentDefinition
+export default ContentVideo
