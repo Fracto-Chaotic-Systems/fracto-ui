@@ -1,0 +1,17 @@
+import React, {Component} from "react";
+import PropTypes from "prop-types";
+
+export class CategoryDerivation extends Component {
+   static propTypes = {
+      id: PropTypes.number.isRequired,
+      width_px: PropTypes.number.isRequired,
+      height_px: PropTypes.number.isRequired,
+   }
+
+   render() {
+      const {id, width_px, height_px} = this.props;
+      return `${id < 0 ? 'new ' : ''}CategoryDerivation (${width_px}x${height_px})`
+   }
+}
+
+export default CategoryDerivation

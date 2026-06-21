@@ -16,6 +16,7 @@ export class AssetsLore extends Component {
       rendered_width: 0,
       rendered_height: 0,
       interval: null,
+      edit_component: []
    }
 
    componentDidMount() {
@@ -40,8 +41,12 @@ export class AssetsLore extends Component {
       }
    }
 
+   on_new_item = (edit_component) => {
+      this.setState({edit_component})
+   }
+
    render() {
-      const {rendered_height} = this.state
+      const {rendered_width, rendered_height, edit_component} = this.state
       return [
          <styles.SectionTitle
             key={'assets-status-title'}>
@@ -52,7 +57,10 @@ export class AssetsLore extends Component {
             <LoreCategoryList
                height_px={rendered_height}
                width_px={CATEGORY_LIST_WIDTH_PX}
+               on_new_item={this.on_new_item}
+               content_width_px={rendered_width - CATEGORY_LIST_WIDTH_PX}
             />
+            {edit_component}
          </styles.BodyWrapper>,
       ];
    }

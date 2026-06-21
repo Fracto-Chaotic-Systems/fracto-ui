@@ -1,7 +1,7 @@
 import React, {Component} from "react";
 import PropTypes from "prop-types";
 
-import {LoreStyles as styles} from './LoreStyles.jsx'
+import {CATEGORY_LIST_WIDTH_PX, LoreStyles as styles} from './LoreStyles.jsx'
 import {AssetsBackend} from "../../../backend/AssetsBackend.jsx";
 import CoolTable from "../../../utils/ui/CoolTable.jsx";
 import {
@@ -12,6 +12,7 @@ import {
    TABLE_NO_HEADER,
 } from "../../../utils/ui/styles/CoolTableStyles.jsx";
 import {wand_icon} from "../../../utils/ui/CoolIcons.jsx";
+import {new_lore_component} from "./LoreUtils.jsx";
 
 const TABLE_COLUMNS = [
    {
@@ -31,8 +32,10 @@ const TABLE_COLUMNS = [
 
 export class LoreCategoryList extends Component {
    static propTypes = {
-      height_px: PropTypes.number.isRequired,
       width_px: PropTypes.number.isRequired,
+      height_px: PropTypes.number.isRequired,
+      on_new_item: PropTypes.func.isRequired,
+      content_width_px: PropTypes.number.isRequired,
    }
 
    state = {
@@ -55,10 +58,20 @@ export class LoreCategoryList extends Component {
       this.setState({selected_row})
    }
 
+   new_lore = (category_id) => {
+      const {on_new_item, content_width_px, height_px} = this.props
+      const edit_component = new_lore_component(
+         category_id,
+         content_width_px - CATEGORY_LIST_WIDTH_PX,
+         height_px)
+      on_new_item(edit_component)
+   }
+
    category_link = (id) => {
       const {category_list} = this.state
       const category = category_list.find(c => c.id === id)
       return <styles.NewLoreIcon
+         onClick={() => this.new_lore(id)}
          title={`new ${category.category_name}`}
       >{wand_icon}</styles.NewLoreIcon>
    }
@@ -66,7 +79,6 @@ export class LoreCategoryList extends Component {
    category_name = (plural_name) => {
       const {category_list} = this.state
       const category = category_list.find(c => c.plural_name === plural_name)
-      console.log('category', category)
       return <styles.CategoryTitle
          title={category.description}
       >{plural_name}</styles.CategoryTitle>
