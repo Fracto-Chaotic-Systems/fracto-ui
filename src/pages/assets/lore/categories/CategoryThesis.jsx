@@ -1,7 +1,7 @@
 import React, {Component} from "react";
 import PropTypes from "prop-types";
 
-export class CategoryDerivation extends Component {
+export class CategoryThesis extends Component {
    static propTypes = {
       item_id: PropTypes.number.isRequired,
       category: PropTypes.object.isRequired,
@@ -11,8 +11,8 @@ export class CategoryDerivation extends Component {
 
    render() {
       const {item_id, width_px, height_px} = this.props;
-      return `${item_id < 0 ? 'new ' : ''}CategoryDerivation (${width_px}x${height_px})`
+      return `${item_id < 0 ? 'new ' : ''}CategoryThesis (${width_px}x${height_px})`
    }
 }
 
-export default CategoryDerivation
+export default CategoryThesis

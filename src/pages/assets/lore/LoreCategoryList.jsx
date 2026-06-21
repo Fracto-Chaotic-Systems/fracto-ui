@@ -59,9 +59,11 @@ export class LoreCategoryList extends Component {
    }
 
    new_lore = (category_id) => {
+      const {category_list} = this.state
       const {on_new_item, content_width_px, height_px} = this.props
+      const category = category_list.find(c => c.id === category_id)
       const edit_component = new_lore_component(
-         category_id,
+         category,
          content_width_px - CATEGORY_LIST_WIDTH_PX,
          height_px)
       on_new_item(edit_component)
