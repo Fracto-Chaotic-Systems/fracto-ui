@@ -43,14 +43,14 @@ export class LoreStyles {
        ${CoolStyles.align_middle}
        line-height: 2rem;
        font-size: 0.8rem;
-       padding: 0 0.5rem;
+       padding: 0 0.25rem;
    `
 
    static LoreTypeText= styled(CoolStyles.InlineBlock)`
        ${CoolStyles.bold}
        ${CoolStyles.align_middle}
        line-height: 2rem;
-       font-size: 1.125rem;
+       font-size: 1.25rem;
        padding: 0 0.5rem;
    `
    static LoreTypeDescription= styled(CoolStyles.InlineBlock)`

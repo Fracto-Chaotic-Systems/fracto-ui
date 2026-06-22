@@ -1,7 +1,12 @@
 import React, {Component} from "react";
 import PropTypes from "prop-types";
 
-import {LORE_INITIAL_STATE, render_meta, render_preamble} from "./ContentUtils.jsx";
+import {
+   LORE_INITIAL_DATA_STATE,
+   LORE_INITIAL_META_STATE,
+   render_meta,
+   render_preamble,
+} from "./ContentUtils.jsx";
 import {LoreStyles as styles} from '../LoreStyles.jsx'
 import {copy_json} from "../../../../utils/Dom.jsx";
 
@@ -14,28 +19,29 @@ export class ContentReference extends Component {
    }
 
    state = {
-      ...copy_json(LORE_INITIAL_STATE),
+      item_data: copy_json(LORE_INITIAL_DATA_STATE),
+      meta_data: copy_json(LORE_INITIAL_META_STATE),
    }
 
-   on_update_data = (obj) => {
-      const {item_data} = this.state
-      // console.log('on_update_data', item_data)
-      if (obj.edit_key) {
-         item_data.edit_key = obj.edit_key
-      }
-      if (obj.title) {
-         item_data.title = obj.title
-      }
-      this.setState({item_data})
+   update_item_data = (item_data) => {
+      const {meta_data} = this.state
+      meta_data.can_store = true;
+      meta_data.modified = item_data.modified;
+      this.setState({item_data, meta_data})
+   }
+
+   update_meta_data = (meta_data) => {
+      this.setState({meta_data})
    }
 
    render() {
       const {item_data, meta_data} = this.state
       const {category} = this.props
+      console.log('item_data, meta_data', item_data, meta_data)
       const preamble = render_preamble(
-         item_data, category, this.on_update_data)
+         item_data, category, this.update_item_data)
       const meta = render_meta(
-         meta_data, this.on_update_meta)
+         meta_data, item_data, category, this.update_meta_data)
       return <styles.ScrollingLoreList>
          {preamble}
          {meta}
