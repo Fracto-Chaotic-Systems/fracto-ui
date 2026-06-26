@@ -111,18 +111,25 @@ export class PointsMainPanel extends Component {
 
    format_point_data = (derived) => {
       let {point_list} = derived
-      return point_list.map(data => {
-         return {
-            x_unscaled: parseFloat(data.point.re),
-            y_unscaled: parseFloat(data.point.im),
-            x_str: data.point.re,
-            y_str: data.point.im,
-            x: parseFloat(data.scaled_point.re),
-            y: parseFloat(data.scaled_point.im),
-            x_scaled_str: data.scaled_point.re,
-            y_scaled_str: data.scaled_point.im,
-         }
-      })
+      const min_step = point_list.length - 100
+      console.log(`min_step ${min_step} point_list.length ${point_list.length} `)
+      return point_list
+         .slice(-250)
+         // .filter((data, step) => {
+         //    step > min_step
+         // })
+         .map(data => {
+            return {
+               x_unscaled: parseFloat(data.point.re),
+               y_unscaled: parseFloat(data.point.im),
+               x_str: data.point.re,
+               y_str: data.point.im,
+               x: parseFloat(data.scaled_point.re),
+               y: parseFloat(data.scaled_point.im),
+               x_scaled_str: data.scaled_point.re,
+               y_scaled_str: data.scaled_point.im,
+            }
+         })
    }
 
    on_chart_update = (key, value) => {
@@ -131,7 +138,7 @@ export class PointsMainPanel extends Component {
          return
       }
       this.setState({in_fetch: true})
-      DataBackend.get_orbitals(value.focal_point, 1000, all_results => {
+      DataBackend.get_orbitals(value.focal_point, 25000, all_results => {
          const {pro_derived, retro_derived} = all_results.result
          const pro_chart_data = this.format_point_data(pro_derived)
          const retro_chart_data = this.format_point_data(retro_derived)
@@ -148,9 +155,9 @@ export class PointsMainPanel extends Component {
       return chart_data
          .reverse()
          .map((data, step) => {
-         const {x_str, y_str} = data
-         return {x: x_str, y: y_str, step}
-      })
+            const {x_str, y_str} = data
+            return {x: x_str, y: y_str, step}
+         })
    }
 
    render() {

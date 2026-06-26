@@ -4,11 +4,11 @@ import PropTypes from "prop-types";
 import {
    LORE_INITIAL_DATA_STATE,
    LORE_INITIAL_META_STATE,
-   render_meta,
-   render_preamble,
 } from "./ContentUtils.jsx";
 import {LoreStyles as styles} from '../LoreStyles.jsx'
 import {copy_json} from "../../../../utils/Dom.jsx";
+import {render_meta} from "../LoreMetaData.jsx";
+import {render_preamble} from "../LorePreamble.jsx";
 
 export class ContentDialog extends Component {
    static propTypes = {

@@ -4,6 +4,7 @@ import {
    FRACTO_UI_PORT
 } from "../../../../constants.js";
 import {FETCH_JSON_HEADERS} from "../pages/study/StudyUtils.jsx";
+import {copy_json} from "../utils/Dom.jsx";
 
 export class AssetsBackend {
 
@@ -62,7 +63,7 @@ export class AssetsBackend {
          return fetched.result
       } catch (error) {
          console.error(`error fetching ${url}`, error.message)
-         return error
+         return []
       }
    }
 
@@ -79,4 +80,5 @@ export class AssetsBackend {
          return error
       }
    }
+
 }

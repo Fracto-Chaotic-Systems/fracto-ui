@@ -1,17 +1,12 @@
 import React from "react";
-
 import {
    CELL_ALIGN_LEFT,
    CELL_ALIGN_RIGHT,
    CELL_TYPE_CALLBACK,
    CELL_TYPE_TEXT,
-   TABLE_NO_BORDER,
-   TABLE_NO_HEADER
 } from "../../../../utils/ui/styles/CoolTableStyles.jsx";
-import CoolTable from "../../../../utils/ui/CoolTable.jsx";
-import {CoolInputText, CoolStyles} from "../../../../utils/ui/CoolImports.jsx";
-import {LoreStyles as styles} from '../LoreStyles.jsx'
-import CoolButton from "../../../../utils/ui/CoolButton.jsx";
+import CoolStyles from "../../../../utils/ui/styles/CoolStyles.jsx";
+import {CoolInputText} from "../../../../utils/ui/CoolImports.jsx";
 
 export const TABLE_EDITOR_COLUMNS = [
    {
@@ -46,6 +41,8 @@ export const TABLE_EDITOR_COLUMNS = [
 export const LORE_INITIAL_DATA_STATE = {
    key: "-1",
    title: "",
+   entry: "",
+   source: "",
 }
 export const LORE_INITIAL_META_STATE = {
    hidden: false,
@@ -54,7 +51,7 @@ export const LORE_INITIAL_META_STATE = {
    can_store: false,
 }
 
-const on_update_item_data = (
+export const on_update_item_data = (
    item_data,
    edit_key,
    value,
@@ -65,7 +62,7 @@ const on_update_item_data = (
    update_item_data(item_data)
 }
 
-const on_update_meta_data = (
+export const on_update_meta_data = (
    meta_data,
    edit_key,
    value,
@@ -76,127 +73,39 @@ const on_update_meta_data = (
    update_meta_data(meta_data)
 }
 
-const render_edit_key = (key_data) => {
-   const {
-      edit_key,
-      key_prefix,
-      item_data,
-      update_item_data
-   } = key_data
-   return [
-      <styles.KeyPrefix key={`${key_prefix}-prompt`}>
-         {`${key_prefix}`}
-      </styles.KeyPrefix>,
+export const render_entry_text = (data_obj) => {
+   const {item_data, on_entry_data_change} = data_obj
+   return <CoolStyles.InlineBlock>
       <CoolInputText
-         value={edit_key}
-         key={`${key_prefix}-${edit_key}`}
-         style_extra={{width: '10rem'}}
-         on_change={value => on_update_item_data(
-            item_data, 'key', value, update_item_data
-         )}
-      />
-   ]
-}
-
-const render_title = (title_data) => {
-   const {title, item_data, update_item_data} = title_data
-   return <CoolStyles.Block style={{lineHeight: "1.75rem"}}>
-      <CoolInputText
-         value={title}
+         value={item_data.entry}
          placeholder={'use your words'}
+         on_change={on_entry_data_change}
          style_extra={{marginLeft: '0.5rem', width: '40rem'}}
-         key={`item_id-input`}
-         on_change={value => on_update_item_data(
-            item_data, 'title', value, update_item_data
-         )}
+         is_text_area={true}
       />
-   </CoolStyles.Block>
+   </CoolStyles.InlineBlock>
 }
 
-const render_type = (category) => {
-   const {category_name, description} = category
-   return <CoolStyles.Block style={{lineHeight: "1.75rem"}}>
-      <styles.LoreTypeText>{category_name}</styles.LoreTypeText>
-      <styles.LoreTypeDescription>({description})</styles.LoreTypeDescription>
-   </CoolStyles.Block>
+export const render_source_text = (data_obj) => {
+   const {item_data, on_source_change} = data_obj
+   return <CoolStyles.InlineBlock style={{lineHeight: "1.75rem"}}>
+      <CoolInputText
+         value={item_data.source}
+         placeholder={'describe the source generally'}
+         on_change={on_source_change}
+         style_extra={{marginLeft: '0.5rem', width: '40rem'}}
+      />
+   </CoolStyles.InlineBlock>
 }
 
-export const render_preamble = (item_data, category, update_item_data) => {
-   const table_data = [
-      {
-         edit_key: 'type',
-         edit_value: [render_type, category],
-      },
-      {
-         edit_key: 'key',
-         edit_value: [render_edit_key, {
-            edit_key: item_data.edit_key,
-            key_prefix: category.key_prefix,
-            item_data,
-            update_item_data,
-         }]
-      },
-      {
-         edit_key: 'title',
-         edit_value: [render_title, {
-            title: item_data.title,
-            item_data,
-            update_item_data
-         }],
-      }
-   ]
-   return <CoolTable
-      columns={TABLE_EDITOR_COLUMNS}
-      data={table_data}
-      options={[TABLE_NO_HEADER, TABLE_NO_BORDER]}
-   />
+export const render_link_text = (data_obj) => {
+   const {item_data, on_link_change} = data_obj
+   return <CoolStyles.InlineBlock style={{lineHeight: "1.75rem"}}>
+      <CoolInputText
+         value={item_data.link}
+         placeholder={'complete url with protocol'}
+         on_change={on_link_change}
+         style_extra={{marginLeft: '0.5rem', width: '40rem'}}
+      />
+   </CoolStyles.InlineBlock>
 }
-
-const render_meta_data = (obj_meta) => {
-   const {meta_data, item_data, category, on_update_meta} = obj_meta
-   const button_style = {
-      padding: '0 0.5rem',
-      letterSpacing: '0.0625rem',
-      fontFamily: 'sans-serif',
-   };
-   const blue_button = <CoolButton
-      on_click={on_update_meta}
-      content={'store'}
-      primary={true}
-      disabled={!meta_data.can_store}
-      style={button_style}
-   />
-   const all_elements = [
-      blue_button,
-      meta_data.published ? 'published,' : 'not published,',
-      meta_data.hidden ? 'hidden,' : 'not hidden,',
-      `modified: ${meta_data.modified}`,
-   ].map(item_data => {
-      return <styles.MetaElement>
-         {item_data}
-      </styles.MetaElement>
-   })
-   return <CoolStyles.Block style={{lineHeight: "1.75rem"}}>
-      {all_elements}
-   </CoolStyles.Block>
-}
-
-export const render_meta = (meta_data, item_data, category, on_update_meta) => {
-   const table_data = [
-      {
-         edit_key: 'meta',
-         edit_value: [render_meta_data, {
-            meta_data,
-            item_data,
-            category,
-            on_update_meta
-         }]
-      },
-   ]
-   return <CoolTable
-      columns={TABLE_EDITOR_COLUMNS}
-      data={table_data}
-      options={[TABLE_NO_HEADER, TABLE_NO_BORDER]}
-   />
-}
-
