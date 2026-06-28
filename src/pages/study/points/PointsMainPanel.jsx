@@ -5,45 +5,16 @@ import FractoFastCalc from "../../../../../../sdk/FractoFastCalc.js";
 import {MainStyles as styles, MARGIN_PX} from '../../../styles/MainStyles.jsx'
 import AppSettings from "../../../AppSettings.jsx";
 import {
-   KEY_STUDY_POINTS_FRAME_SETTINGS,
+   KEY_STUDY_POINTS_FRAME_SETTINGS, KEY_STUDY_POINTS_SPLITTER_POS,
    KEY_STUDY_SPLITTER_POS_PX,
 } from "../../../settings/StudySettings.jsx";
 
 import {update_dimensions} from "./../../PageUtils.jsx";
-import {click_point_chart} from "../../../utils/render/PatternsUtils.jsx";
-import ChartOrbitals from "../../../chart/ChartOrbitals.jsx";
 import DataBackend from "../../../backend/DataBackend.jsx";
 import PointsSeriesTable from "./PointsSeriesTable.jsx";
+import PointsSeriesChart from "./PointsSeriesChart.jsx";
 
 const UPDATE_INTERVAL_MS = 1000
-
-const reduce_point_data = (point_data) => {
-   return point_data
-   const re_strs = point_data.map((data) => {
-      return data.point.re
-   })
-   const im_strs = point_data.map((data) => {
-      return data.point.im
-   })
-   const reduced_re_strs = reduce_str_list(re_strs)
-   const reduced_im_strs = reduce_str_list(re_strs)
-
-
-   const firstWord = strs[0];
-
-   for (let i = 0; i < firstWord.length; i++) {
-      const char = firstWord[i];
-
-      // Check if this character matches all other words
-      for (let j = 1; j < strs.length; j++) {
-         if (strs[j][i] !== char) {
-            return i; // Mismatch found, return the count so far
-         }
-      }
-   }
-
-   return firstWord.length; // All words are perfectly identical
-}
 
 export class PointsMainPanel extends Component {
    state = {
@@ -51,11 +22,12 @@ export class PointsMainPanel extends Component {
       rendered_height: 0,
       interval: null,
       frame_settings: {},
-      point_data: null,
       subscription: null,
       in_fetch: false,
       pro_chart_data: [],
       retro_chart_data: [],
+      pro_derived: [],
+      retro_derived: [],
       set2: [],
    }
 
@@ -111,13 +83,9 @@ export class PointsMainPanel extends Component {
 
    format_point_data = (derived) => {
       let {point_list} = derived
-      const min_step = point_list.length - 100
-      console.log(`min_step ${min_step} point_list.length ${point_list.length} `)
       return point_list
+         .sort((a, b) => a.step - b.step)
          .slice(-250)
-         // .filter((data, step) => {
-         //    step > min_step
-         // })
          .map(data => {
             return {
                x_unscaled: parseFloat(data.point.re),
@@ -144,6 +112,8 @@ export class PointsMainPanel extends Component {
          const retro_chart_data = this.format_point_data(retro_derived)
          console.log('pro_chart_data', pro_chart_data)
          this.setState({
+            pro_derived,
+            retro_derived,
             pro_chart_data,
             retro_chart_data,
             in_fetch: false
@@ -160,45 +130,34 @@ export class PointsMainPanel extends Component {
          })
    }
 
+   get_chart_width_px = () => {
+      const {rendered_width,} = this.state
+      const splitter_pos_1 = AppSettings.get(KEY_STUDY_POINTS_SPLITTER_POS)
+      const splitter_pos_2 = AppSettings.get(KEY_STUDY_SPLITTER_POS_PX)
+      return (rendered_width - splitter_pos_1 + splitter_pos_2 - 2 * MARGIN_PX) / 2 - 2 * MARGIN_PX
+   }
+
    render() {
-      const {pro_chart_data, retro_chart_data} = this.state
-      const width_px = 400
-      const chart_style = {
-         display: 'inline-block',
-         margin: `${MARGIN_PX}px auto`,
-         width: `${width_px}px`,
-         height: `${width_px}px`,
-         boxShadow: '5px 5px 10px rgba(0, 0, 0, 0.25)',
-         backgroundColor: '#f8f8f8',
-         cursor: 'pointer',
-      }
+      const {
+         in_fetch, pro_derived, retro_derived, pro_chart_data, retro_chart_data
+      } = this.state
+      const chart_width = this.get_chart_width_px()
       const pro_table_data = this.get_table_data(pro_chart_data)
       const retro_table_data = this.get_table_data(retro_chart_data)
-      const page_style = {
-         minHeight: '350rem',
-         minWidth: '350rem',
-      }
       return <styles.ScrollingBlock
-         style={page_style}
          key={'orbitals-table'}>
-         <div style={chart_style}>
-            {click_point_chart(
-               retro_chart_data,
-               [], //set2,
-               false,
-               false,
-               // backgroundImagePlugin)}
-            )}
-         </div>
-         <div style={chart_style}>
-            {click_point_chart(
-               pro_chart_data,
-               [], //set2,
-               false,
-               false,
-               // backgroundImagePlugin)}
-            )}
-         </div>
+         <PointsSeriesChart
+            chart_data={retro_derived.point_list}
+            width_px={chart_width}
+            waiting={!in_fetch}
+            title={'retro-iterative'}
+         />
+         <PointsSeriesChart
+            chart_data={pro_derived.point_list}
+            width_px={chart_width}
+            waiting={!in_fetch}
+            title={'pro-iterative'}
+         />
          <styles.ScrollingBlock>
             <styles.ScrollingInlineBlock>
                <PointsSeriesTable

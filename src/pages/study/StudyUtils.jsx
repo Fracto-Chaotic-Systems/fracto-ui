@@ -103,9 +103,11 @@ export const identify_cores = (frame_settings) => {
    return orbital_bins
 }
 
-export const render_magnitude = (magnitude) => {
-   const rounded = Math.round(magnitude * 10000000000) / 10000
-   const mu = <i>{'\u03BC'}</i>
+export const render_magnitude = (magnitude, is_pico = false) => {
+   const rounded = Math.round(magnitude * 1000000000000000) / 1000000000
+   const mu = is_pico
+      ? <i>{'p'}</i>
+      : <i>{'\u03BC'}</i>
    return <styles.NumericValue
       title={magnitude}
       style={{verticalAlign: 'middle'}}> {rounded}
