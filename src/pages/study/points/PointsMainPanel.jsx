@@ -106,7 +106,7 @@ export class PointsMainPanel extends Component {
          return
       }
       this.setState({in_fetch: true})
-      DataBackend.get_orbitals(value.focal_point, 25000, all_results => {
+      DataBackend.get_orbitals(value.focal_point, 50000, all_results => {
          const {pro_derived, retro_derived} = all_results.result
          const pro_chart_data = this.format_point_data(pro_derived)
          const retro_chart_data = this.format_point_data(retro_derived)
