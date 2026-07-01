@@ -23,12 +23,6 @@ export class GeneratorActions extends Component {
       canvas_buffer: null,
    }
 
-   context_ready = (context_buffer) => {
-      const {tiles, tile_index, on_context_ready} = this.props
-      const tile = tiles[tile_index]
-      on_context_ready(tile.short_code, context_buffer)
-   }
-
    render_preamble = () => {
       const {tiles, tile_index} = this.props
       const level = <styles.NumericValue
@@ -60,7 +54,10 @@ export class GeneratorActions extends Component {
    }
 
    render() {
-      const {on_start_pause, in_progress, tiles, tile_index, canvas_buffer, tile_points} = this.props
+      const {
+         on_context_ready, on_start_pause, in_progress,
+         tiles, tile_index, canvas_buffer, tile_points
+      } = this.props
       if (tile_index < 0) {
          return []
       }
@@ -70,6 +67,7 @@ export class GeneratorActions extends Component {
          tile_index={tile_index}
          tile_points={tile_points}
          canvas_buffer={canvas_buffer}
+         on_context_ready={on_context_ready}
       />
       const active_progress = <GeneratorActiveProgress
          tiles={tiles}

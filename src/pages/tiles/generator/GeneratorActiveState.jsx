@@ -14,7 +14,14 @@ export class GeneratorActiveState extends Component {
       tiles: PropTypes.array.isRequired,
       tile_index: PropTypes.number.isRequired,
       tile_points: PropTypes.array.isRequired,
+      on_context_ready: PropTypes.func.isRequired,
       canvas_buffer: PropTypes.array.isRequired,
+   }
+
+   context_ready = (context_buffer) => {
+      const {tiles, tile_index, on_context_ready} = this.props
+      const tile = tiles[tile_index]
+      on_context_ready(tile.short_code, context_buffer)
    }
 
    render_context = () => {
@@ -85,7 +92,7 @@ export class GeneratorActiveState extends Component {
       const {canvas_buffer, tile_points} = this.props
       const context = this.render_context(canvas_buffer)
       const generated = this.render_generated(tile_points)
-      return <styles.CenteredBlock>
+      return <styles.CenteredBlock key={'active-state'}>
          {context}
          <styles.OneRemSpacer/>
          {generated}

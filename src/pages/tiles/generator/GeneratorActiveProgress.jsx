@@ -94,7 +94,7 @@ export class GeneratorActiveProgress extends Component {
       const scale = this.render_scale()
       const progress = this.render_progress()
       const button = this.render_button()
-      return <styles.CenteredBlock>
+      return <styles.CenteredBlock key={'active-progress'}>
          {scale}
          {progress}
          {button}
