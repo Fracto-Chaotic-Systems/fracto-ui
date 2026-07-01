@@ -110,7 +110,7 @@ export class PointsMainPanel extends Component {
          const {pro_derived, retro_derived} = all_results.result
          const pro_chart_data = this.format_point_data(pro_derived)
          const retro_chart_data = this.format_point_data(retro_derived)
-         console.log('pro_chart_data', pro_chart_data)
+         console.log('retro_chart_data', retro_chart_data)
          this.setState({
             pro_derived,
             retro_derived,
