@@ -1,7 +1,10 @@
+import axios from "axios";
+
 import {
    FRACTO_TILES_PORT,
    FRACTO_UI_PORT
 } from "../../../../constants.js";
+import network from "../../../../config/network.json" with {type: "json"};
 
 export class TilesBackend {
 
@@ -16,11 +19,27 @@ export class TilesBackend {
       const origin = window.origin.replace(`${FRACTO_UI_PORT}`, `${FRACTO_TILES_PORT}`)
       const url = `${origin}/heat_map_buffer?${all_params}`
       try {
-         const result = await fetch(url, {}).then(res => res.json())
-         return result
+         return await fetch(url, {}).then(res => res.json())
       } catch (error) {
          console.error(`error fetching ${url}`, error.message)
          return error
+      }
+   }
+
+   static upload_points = (short_code, tile_points, dir) => {
+      const url = `${network["fracto-prod"]}/new_tile.php?short_code=${short_code}&dir=${dir}`
+      try {
+         axios.post(url, tile_points, {
+            headers: {
+               'Access-Control-Allow-Origin': '*',
+               'Access-Control-Expose-Headers': 'Access-Control-*',
+               'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
+            },
+            mode: 'no-cors',
+            crossdomain: true,
+         })
+      } catch (e) {
+         console.log('upload_points error', e)
       }
    }
 }

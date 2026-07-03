@@ -3,12 +3,12 @@ import PropTypes from "prop-types";
 
 import {MARGIN_PX} from '../../../styles/MainStyles.jsx'
 import CoolStyles from '../../../utils/ui/styles/CoolStyles.jsx'
+import {copy_json} from "../../../utils/Dom.jsx";
 
 import {generate_tile_points} from "./GeneratorInterface.jsx";
 import {bounds_from_short_code} from "../TilesUtils.jsx";
 import GeneratorActions from "./GeneratorActions.jsx";
 import GeneratorHistory from "./GeneratorHistory.jsx";
-import {copy_json} from "../../../utils/Dom.jsx";
 
 export const TILE_RENDER_WIDTH_PX = 300
 const ACTIONS_WIDTH_PX = 2 * TILE_RENDER_WIDTH_PX + 3 * MARGIN_PX

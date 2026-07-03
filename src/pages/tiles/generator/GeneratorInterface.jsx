@@ -1,16 +1,20 @@
 import {GENERATOR_CODE_INTERIOR} from "./GeneratorControl.jsx";
 import FractoFastCalc from "../../../../../../sdk/FractoFastCalc.js";
+import TilesBackend from "../../../backend/TilesBackend.jsx";
 
 const register_interior_tile = (tile) => {
    console.log('register_interior_tile', tile)
+   TilesBackend.upload_points(tile.short_code, {}, 'interior')
 }
 
 const register_blank_tile = (tile) => {
    console.log('register_blank_tile', tile)
+   TilesBackend.upload_points(tile.short_code, {}, 'blank')
 }
 
 const upload_tile_data = (tile, tile_points) => {
    console.log('upload_tile_data', tile)
+   TilesBackend.upload_points(tile.short_code, tile_points, 'new')
 }
 
 let tile_points = null
