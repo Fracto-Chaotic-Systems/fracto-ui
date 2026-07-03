@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 
 import {MARGIN_PX} from '../../../styles/MainStyles.jsx'
 import CoolStyles from '../../../utils/ui/styles/CoolStyles.jsx'
-import {copy_json} from "../../../utils/Dom.jsx";
 
 import {generate_tile_points} from "./GeneratorInterface.jsx";
 import {bounds_from_short_code} from "../TilesUtils.jsx";
@@ -98,11 +97,11 @@ export class GeneratorOperations extends Component {
       setTimeout(() => {
          const {generate_code} = this.props
          const record = generate_tile_points(tile, generate_code, context_buffer)
-         this.setState({tile_points: copy_json(record.tile_points)})
+         this.setState({tile_points: record.tile_points})
 
-         delete record.tile_points
+         record.tile_points =  null
          record.tile_index = this.state.tile_index
-         history.push(copy_json(record))
+         history.push(record)
          this.setState({history})
 
          if (tile_index === tiles.length - 1) {
