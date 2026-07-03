@@ -1,19 +1,19 @@
-import {GENERATOR_CODE_INTERIOR} from "./GeneratorControl.jsx";
+import {GENERATOR_CODE_CAN_DO, GENERATOR_CODE_INTERIOR} from "./GeneratorControl.jsx";
 import FractoFastCalc from "../../../../../../sdk/FractoFastCalc.js";
 import TilesBackend from "../../../backend/TilesBackend.jsx";
 
 const register_interior_tile = (tile) => {
-   console.log('register_interior_tile', tile)
+   console.log('interior', tile)
    TilesBackend.upload_points(tile.short_code, {}, 'interior')
 }
 
 const register_blank_tile = (tile) => {
-   console.log('register_blank_tile', tile)
+   console.log('blank', tile)
    TilesBackend.upload_points(tile.short_code, {}, 'blank')
 }
 
 const upload_tile_data = (tile, tile_points) => {
-   console.log('upload_tile_data', tile)
+   console.log('new', tile)
    TilesBackend.upload_points(tile.short_code, tile_points, 'new')
 }
 
@@ -64,7 +64,7 @@ const test_blank = (tile_points) => {
    return true
 }
 const calculate_tile = (tile, tile_points) => {
-   console.log("calculate_tile", tile)
+   // console.log("calculate_tile", tile)
    const short_code = tile.short_code
    const level = short_code.length
    const increment = (tile.bounds.right - tile.bounds.left) / 256.0;
@@ -98,7 +98,7 @@ export const generate_tile_points = (tile, generate_code, context_buffer) => {
    let duration = 0
    const is_interior = test_interior(context_buffer)
    let is_blank = false
-   if (is_interior && generate_code !== GENERATOR_CODE_INTERIOR) {
+   if (is_interior && generate_code === GENERATOR_CODE_CAN_DO) {
       console.log('interior tile is bypassed')
       register_interior_tile(tile)
    } else {
