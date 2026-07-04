@@ -122,8 +122,8 @@ export class NavigatorCoverage extends Component {
       }
       const splitter_width = AppSettings.get(splitter_keys.section_key)
       const pane_styles = {
-         height: `${rendered_height}px`,
-         width: `${splitter_width - splitter_pos + 2 * MARGIN_PX}px`,
+         height: `${rendered_height - SECTION_BAR_HEIGHT_PX}px`,
+         width: `${rendered_width - splitter_width}px`,
       }
       return [
          <styles.TightCenteredBlock

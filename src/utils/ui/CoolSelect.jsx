@@ -5,11 +5,11 @@ import styled from "styled-components";
 // import {AppStyles} from "../../app/AppImports";
 
 const SelectWrapper = styled.select`
-   padding: 0.25rem 0.5rem;
+    padding: 0.25rem 0.5rem;
 `;
 
 const CoolOption = styled.option`
-   padding: 0.5rem 1rem;
+    padding: 0.5rem 1rem;
 `;
 
 export class CoolSelect extends Component {
@@ -18,10 +18,14 @@ export class CoolSelect extends Component {
       options: PropTypes.array.isRequired,
       value: PropTypes.number.isRequired,
       on_change: PropTypes.func.isRequired,
+      extra_style: PropTypes.object,
+   }
+   static defaultProps = {
+      extra_style: {},
    }
 
    render() {
-      const {options, on_change, value} = this.props;
+      const {options, on_change, value, extra_style} = this.props;
       const all_options = options.map((data, index) => {
          const help = !data.help ? '' : ` (${data.help})`
          return <CoolOption
@@ -32,10 +36,10 @@ export class CoolSelect extends Component {
          </CoolOption>
       });
       return <SelectWrapper
+         style={extra_style}
          onChange={on_change}>
          {all_options}
       </SelectWrapper>
-
    }
 }
 

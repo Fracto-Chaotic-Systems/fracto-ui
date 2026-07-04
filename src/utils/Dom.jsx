@@ -8,7 +8,7 @@ import AppSettings from "../AppSettings.jsx";
 import {KEY_CLIPBOARD_DATA} from "../settings/RootSettings.jsx";
 import {KEY_NAVIGATOR_FOCAL_POINT} from "../text/NavigatorText.jsx";
 
-const NumberSpan = styled.span`
+export const NumberSpan = styled.span`
     ${CoolStyles.monospace}
     ${CoolStyles.deep_blue_text}
     font-size: 0.95rem;
@@ -98,3 +98,4 @@ export const render_scalar = (x, digits = 10) => {
    const x_rounded = round_places(x, digits);
    return <NumberSpan>{x_rounded}</NumberSpan>
 }
+

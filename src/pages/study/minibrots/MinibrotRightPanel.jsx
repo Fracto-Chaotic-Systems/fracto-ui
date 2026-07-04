@@ -27,6 +27,8 @@ import {
    KEY_STUDY_COLUMN_LABEL_CORE_POINT,
    KEY_STUDY_COLUMN_LABEL_MAGNITUDE
 } from "../../../text/StudyText.jsx";
+import {KEY_NAVIGATOR_SEND_TO} from "../../../text/NavigatorText.jsx";
+import {render_send_to} from "../../utils/SendTo.jsx";
 
 const TABLE_COLUMNS = [
    {
@@ -85,6 +87,7 @@ export class MinibrotRightPanel extends Component {
          height_px={150}
          focal_point={core_point}
       />
+      const display_settings = JSON.parse(selected_minibrot.display_settings)
       const table_data = [
          {
             name: KEY_STUDY_COLUMN_LABEL_MAGNITUDE,
@@ -93,6 +96,10 @@ export class MinibrotRightPanel extends Component {
          {
             name: KEY_STUDY_COLUMN_LABEL_CORE_POINT,
             value: [render_coordinates, core_point],
+         },
+         {
+            name: KEY_NAVIGATOR_SEND_TO,
+            value: [render_send_to, display_settings],
          },
       ]
 

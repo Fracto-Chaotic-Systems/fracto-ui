@@ -5,7 +5,7 @@ import {
    copy_clipboard,
    copy_json, paste_clipboard,
    render_coordinates,
-   render_scalar
+   render_scalar,
 } from "../utils/Dom.jsx";
 import CoolTable from "../utils/ui/CoolTable.jsx";
 
@@ -15,7 +15,7 @@ import AppSettings from "../AppSettings.jsx";
 import {
    KEY_NAVIGATOR_CURSOR_LOCATION,
    KEY_NAVIGATOR_FOCAL_POINT,
-   KEY_NAVIGATOR_SCOPE
+   KEY_NAVIGATOR_SCOPE, KEY_NAVIGATOR_SEND_TO
 } from "../text/NavigatorText.jsx";
 import {
    CELL_ALIGN_LEFT,
@@ -30,6 +30,7 @@ import NavigatorTransit from "./NavigatorTransit.jsx";
 import {KEY_NAVIGATOR_DISABLED, KEY_NAVIGATOR_HOVER_POINT} from "../settings/NavigatorSettings.jsx";
 import CoolColors from "../utils/ui/CoolColors.jsx";
 import {copy, paste} from "../utils/ui/CoolIcons.jsx";
+import {render_send_to} from "../pages/utils/SendTo.jsx";
 
 const TRANSITOR_HEIGHT_PX = 150
 
@@ -126,6 +127,10 @@ export class NavigatorLegend extends Component {
          {
             name: KEY_NAVIGATOR_FOCAL_POINT,
             value: [this.render_focal_point, frame_settings.focal_point],
+         },
+         {
+            name: KEY_NAVIGATOR_SEND_TO,
+            value: [render_send_to, frame_settings],
          },
          {
             name: KEY_NAVIGATOR_CURSOR_LOCATION,

@@ -53,7 +53,7 @@ export const APP_TILES_SETTINGS = {
    },
    [KEY_TILES_GENERATOR_LEGEND_SPLITTER_POS]: {
       data_type: TYPE_NUMBER,
-      default_value: 800,
+      default_value: 400,
       description: 'Current position for the horizontal legend splitter',
       persist: true,
    },
