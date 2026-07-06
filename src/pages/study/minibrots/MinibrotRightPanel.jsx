@@ -6,7 +6,7 @@ import CoolStyles from "../../../utils/ui/styles/CoolStyles.jsx";
 import AppSettings from "../../../AppSettings.jsx";
 import {
    KEY_STUDY_MINIBROTS_RENDER_SPLITTER_POS,
-   KEY_STUDY_SPLITTER_POS_PX
+   KEY_STUDY_SPLITTER_POS_PX,
 } from "../../../settings/StudySettings.jsx";
 import {
    render_magnitude,
@@ -20,15 +20,19 @@ import {
    CELL_TYPE_CALLBACK,
    CELL_TYPE_TEXT_KEY,
    TABLE_NO_BORDER,
-   TABLE_NO_HEADER
+   TABLE_NO_HEADER,
 } from "../../../utils/ui/styles/CoolTableStyles.jsx";
 import CoolTable from "../../../utils/ui/CoolTable.jsx";
 import {
    KEY_STUDY_COLUMN_LABEL_CORE_POINT,
-   KEY_STUDY_COLUMN_LABEL_MAGNITUDE
+   KEY_STUDY_COLUMN_LABEL_MAGNITUDE,
 } from "../../../text/StudyText.jsx";
-import {KEY_NAVIGATOR_SEND_TO} from "../../../text/NavigatorText.jsx";
+import {
+   KEY_NAVIGATOR_COVERAGE,
+   KEY_NAVIGATOR_SEND_TO,
+} from "../../../text/NavigatorText.jsx";
 import {render_send_to} from "../../utils/SendTo.jsx";
+import {render_coverage} from "../../utils/Coverage.jsx";
 
 const TABLE_COLUMNS = [
    {
@@ -96,6 +100,10 @@ export class MinibrotRightPanel extends Component {
          {
             name: KEY_STUDY_COLUMN_LABEL_CORE_POINT,
             value: [render_coordinates, core_point],
+         },
+         {
+            name: KEY_NAVIGATOR_COVERAGE,
+            value: [render_coverage, display_settings],
          },
          {
             name: KEY_NAVIGATOR_SEND_TO,

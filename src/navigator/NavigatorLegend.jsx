@@ -13,6 +13,7 @@ import {MainStyles as main_styles} from "../styles/MainStyles.jsx";
 import {NavigatorStyles as styles} from '../styles/NavigatorStyles.jsx';
 import AppSettings from "../AppSettings.jsx";
 import {
+   KEY_NAVIGATOR_COVERAGE,
    KEY_NAVIGATOR_CURSOR_LOCATION,
    KEY_NAVIGATOR_FOCAL_POINT,
    KEY_NAVIGATOR_SCOPE, KEY_NAVIGATOR_SEND_TO
@@ -31,6 +32,7 @@ import {KEY_NAVIGATOR_DISABLED, KEY_NAVIGATOR_HOVER_POINT} from "../settings/Nav
 import CoolColors from "../utils/ui/CoolColors.jsx";
 import {copy, paste} from "../utils/ui/CoolIcons.jsx";
 import {render_send_to} from "../pages/utils/SendTo.jsx";
+import {render_coverage} from "../pages/utils/Coverage.jsx";
 
 const TRANSITOR_HEIGHT_PX = 150
 
@@ -129,13 +131,17 @@ export class NavigatorLegend extends Component {
             value: [this.render_focal_point, frame_settings.focal_point],
          },
          {
+            name: KEY_NAVIGATOR_CURSOR_LOCATION,
+            value: [render_coordinates, hover_point],
+         },
+         {
+            name: KEY_NAVIGATOR_COVERAGE,
+            value: [render_coverage, frame_settings],
+         },
+         {
             name: KEY_NAVIGATOR_SEND_TO,
             value: [render_send_to, frame_settings],
          },
-         {
-            name: KEY_NAVIGATOR_CURSOR_LOCATION,
-            value: [render_coordinates, hover_point],
-         }
       ]
       const stats_style = {width: `${bounding_rect.width - TRANSITOR_HEIGHT_PX - 20}px`}
       return <styles.StatsWrapper style={stats_style}>
