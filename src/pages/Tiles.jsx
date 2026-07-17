@@ -13,18 +13,19 @@ import {
    TILES_SETTINGS,
    TILES_STATUS,
    TILES_LOGS,
+   TILES_INSPECTOR,
 } from "../settings/TilesSettings.jsx";
 
 import AppText from "../AppText.jsx";
 import {
-   KEY_SIDEBAR_LOGS,
    KEY_SIDEBAR_OVERVIEW,
    KEY_SIDEBAR_SETTINGS,
-   KEY_SIDEBAR_STATUS
+   KEY_SIDEBAR_STATUS,
 } from "../text/RootText.jsx";
 import {
    KEY_TILES_GENERATOR,
-   KEY_TILES_LOGS
+   KEY_TILES_INSPECTOR,
+   KEY_TILES_LOGS,
 } from "../text/TilesText.jsx";
 
 import TilesOverview from "./tiles/TilesOverview.jsx";
@@ -32,11 +33,13 @@ import TilesSettings from "./tiles/TilesSettings.jsx";
 import TilesStatus from "./tiles/TilesStatus.jsx";
 import TilesLogs from "./tiles/TilesLogs.jsx";
 import TilesGenerator from "./tiles/TilesGenerator.jsx";
+import TilesInspector from "./tiles/TilesInspector.jsx";
 
 const SIDEBAR_LIST = [
    {title_key: KEY_SIDEBAR_OVERVIEW, section_code: TILES_OVERVIEW, right_pane: <TilesOverview/>},
    {section_code: SIDEBAR_BREAKER},
    {title_key: KEY_TILES_GENERATOR, section_code: TILES_GENERATOR, right_pane: <TilesGenerator/>},
+   {title_key: KEY_TILES_INSPECTOR, section_code: TILES_INSPECTOR, right_pane: <TilesInspector/>},
    {section_code: SIDEBAR_BREAKER},
    {title_key: KEY_SIDEBAR_SETTINGS, section_code: TILES_SETTINGS, right_pane: <TilesSettings/>},
    {title_key: KEY_SIDEBAR_STATUS, section_code: TILES_STATUS, right_pane: <TilesStatus/>},

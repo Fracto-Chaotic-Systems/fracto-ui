@@ -57,14 +57,42 @@ export class CoolTable extends Component {
       table_style: {},
    }
 
-   state = {}
+   state = {
+      scroller_ref: React.createRef(),
+   }
 
    componentDidMount() {
       window.addEventListener('keydown', this.handleKeyDown);
+      setTimeout(this.scroll_selection, 5000)
+   }
+
+   componentDidUpdate(prevProps, prevState, snapshot) {
+      if (this.props.selected_row !== prevProps.selected_row) {
+         setTimeout(this.scroll_selection, 5000)
+      }
    }
 
    componentWillUnmount() {
       window.removeEventListener('keydown', this.handleKeyDown);
+   }
+
+   scroll_selection = async () => {
+      const {selected_row, options} = this.props
+      const {scroller_ref} = this.state
+      if (!options.includes(TABLE_CAN_SELECT)) {
+         // console.log('scroll_selection: table is not selectable')
+         // return;
+      }
+      if (!scroller_ref.current) {
+         console.log('scroll_selection: scroller_ref.current null')
+         return
+      }
+      if (selected_row < 0) {
+         console.log('scroll_selection: selected_row < 0')
+         return
+      }
+      console.log('scrolling to', selected_row)
+      // scroller_ref.current.scrollIntoView(true)
    }
 
    handleKeyDown = (event) => {
@@ -253,6 +281,7 @@ export class CoolTable extends Component {
    }
 
    render() {
+      const {scroller_ref} = this.state
       const {
          columns, data, options, table_style,
          selected_row, selected_rows
@@ -271,12 +300,20 @@ export class CoolTable extends Component {
                return this.render_empty_cell(row, col)
             }
          })
-         const row_is_selected = (selected_rows.indexOf(row) >= 0)
-         return <styles.TableRow
-            onClick={e => this.on_select_row(row, row_is_selected)}
-            key={`row-${row}`}>
-            {row_cells}
-         </styles.TableRow>
+         const row_is_selected = (selected_row === row)
+         if (row_is_selected) {
+            return <styles.TableRow
+               ref={scroller_ref}
+               key={`row-${row}`}>
+               {row_cells}
+            </styles.TableRow>
+         } else {
+            return <styles.TableRow
+               onClick={e => this.on_select_row(row, row_is_selected)}
+               key={`row-${row}`}>
+               {row_cells}
+            </styles.TableRow>
+         }
       })
       let table_header = ''
       if (!options.includes(TABLE_NO_HEADER)) {
@@ -296,9 +333,12 @@ export class CoolTable extends Component {
       // const rows = options.includes(TABLE_NO_HEADER)
       //    ? <styles.TableBodyNoHeader>{table_rows}</styles.TableBodyNoHeader>
       //    : <styles.TableBody>{table_rows}</styles.TableBody>
-      const rows = <styles.TableBodyNoHeader>{table_rows}</styles.TableBodyNoHeader>
+      const rows = <styles.TableBodyNoHeader>
+         {table_rows}
+      </styles.TableBodyNoHeader>
       return <CoolStyles.Table>
-         <styles.TableScrollable style={extra_style}>
+         <styles.TableScrollable
+            style={extra_style}>
             {table_header}
             {rows}
          </styles.TableScrollable>

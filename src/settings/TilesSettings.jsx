@@ -19,6 +19,7 @@ export const TILES_SETTINGS = 'tiles_settings'
 export const TILES_STATUS = 'tiles_status'
 export const TILES_LOGS = 'tiles_logs'
 export const TILES_GENERATOR = 'tiles_generator'
+export const TILES_INSPECTOR = 'tiles_inspector'
 
 const DEFAULT_FRAME_SETTINGS = {
    focal_point: {x: -0.75, y: 0.0001},

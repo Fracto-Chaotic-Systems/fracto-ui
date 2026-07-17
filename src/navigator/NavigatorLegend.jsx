@@ -51,12 +51,6 @@ const TABLE_COLUMNS = [
       type: CELL_TYPE_CALLBACK,
       align: CELL_ALIGN_LEFT,
    },
-   {
-      id: "cursor",
-      label: "cursor location",
-      type: CELL_TYPE_CALLBACK,
-      align: CELL_ALIGN_LEFT,
-   },
 ]
 
 export class NavigatorLegend extends Component {
