@@ -3,6 +3,7 @@ import {DEFAULT_SIDEBAR_WIDTH} from "../constants.jsx";
 
 const ASSETS_FOLDER = 'assets'
 const ASSETS_GENERATOR_FOLDER = 'assets/generator'
+const ASSETS_DETECTOR_FOLDER = 'assets/detector'
 const ASSETS_GALLERY_FOLDER = 'assets/gallery'
 const VIDEO_GENERATOR_FOLDER = 'assets/video'
 export const KEY_ASSETS_SPLITTER_POS_PX = `${ASSETS_FOLDER}/splitter_pos_px`
@@ -16,6 +17,7 @@ export const ASSETS_GENERATOR = 'assets_generator'
 export const VIDEO_GENERATOR = 'video_generator'
 export const ASSETS_GALLERY = 'assets_gallery'
 export const ASSETS_LORE = 'assets_lore'
+export const ASSETS_DETECTOR = 'assets_detector'
 
 export const KEY_ASSETS_GENERATOR_FRAME_SETTINGS = `${ASSETS_GENERATOR_FOLDER}/frame_settings`
 export const KEY_ASSETS_GENERATOR_SPLITTER_POS = `${ASSETS_GENERATOR_FOLDER}/splitter_pos`
@@ -27,6 +29,12 @@ export const KEY_VIDEO_GENERATOR_FRAME_SETTINGS = `${VIDEO_GENERATOR_FOLDER}/fra
 export const KEY_VIDEO_GENERATOR_SPLITTER_POS = `${VIDEO_GENERATOR_FOLDER}/splitter_pos`
 export const KEY_VIDEO_GENERATOR_LEGEND_SPLITTER_POS = `${VIDEO_GENERATOR_FOLDER}/legend_splitter_pos`
 export const KEY_VIDEO_GENERATOR_STEPS_SPLITTER_POS = `${VIDEO_GENERATOR_FOLDER}/steps_splitter_pos`
+
+export const KEY_ASSETS_DETECTOR_FRAME_SETTINGS = `${ASSETS_DETECTOR_FOLDER}/frame_settings`
+export const KEY_ASSETS_DETECTOR_SPLITTER_POS = `${ASSETS_DETECTOR_FOLDER}/splitter_pos`
+export const KEY_ASSETS_DETECTOR_LEGEND_SPLITTER_POS = `${ASSETS_DETECTOR_FOLDER}/legend_splitter_pos`
+export const KEY_ASSETS_DETECTOR_STEPS_SPLITTER_POS = `${ASSETS_DETECTOR_FOLDER}/steps_splitter_pos`
+export const KEY_ASSETS_DETECTOR_RESOLUTION = `${ASSETS_DETECTOR_FOLDER}/generator_resolution`
 
 export const KEY_ASSETS_LIST_SELECTED_ROW = `${ASSETS_GALLERY_FOLDER}/selected_row`
 export const KEY_ASSETS_GALLERY_RENDER_SPLITTER_POS = `${ASSETS_GALLERY_FOLDER}/render_splitter_pos_px`
@@ -113,6 +121,30 @@ export const APP_ASSETS_SETTINGS = {
       data_type: TYPE_NUMBER,
       default_value: 200,
       description: 'Current position for the video generator vertical steps splitter',
+      persist: true,
+   },
+   [KEY_ASSETS_DETECTOR_FRAME_SETTINGS]: {
+      data_type: TYPE_OBJECT,
+      default_value: DEFAULT_FRAME_SETTINGS,
+      description: 'Frame settings of the assets detector page',
+      persist: true,
+   },
+   [KEY_ASSETS_DETECTOR_SPLITTER_POS]: {
+      data_type: TYPE_NUMBER,
+      default_value: 500,
+      description: 'Current position for the assets detector splitter',
+      persist: true,
+   },
+   [KEY_ASSETS_DETECTOR_LEGEND_SPLITTER_POS]: {
+      data_type: TYPE_NUMBER,
+      default_value: 800,
+      description: 'Current position for the assets detector horizontal legend splitter',
+      persist: true,
+   },
+   [KEY_ASSETS_DETECTOR_STEPS_SPLITTER_POS]: {
+      data_type: TYPE_NUMBER,
+      default_value: 200,
+      description: 'Current position for the assets detector vertical steps splitter',
       persist: true,
    },
 }

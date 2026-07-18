@@ -6,6 +6,7 @@ import SplitterLayout from "./utils/SplitterLayout.jsx";
 import {MainStyles as styles} from '../styles/MainStyles.jsx'
 import AppSettings from "../AppSettings.jsx";
 import {
+   ASSETS_DETECTOR,
    ASSETS_GALLERY,
    ASSETS_GENERATOR,
    ASSETS_LOGS, ASSETS_LORE,
@@ -13,7 +14,8 @@ import {
    ASSETS_SETTINGS,
    ASSETS_STATUS,
    KEY_ASSETS_SECTION,
-   KEY_ASSETS_SPLITTER_POS_PX, VIDEO_GENERATOR
+   KEY_ASSETS_SPLITTER_POS_PX,
+   VIDEO_GENERATOR
 } from "../settings/AssetsSettings.jsx";
 import AppText from "../AppText.jsx";
 import {
@@ -23,6 +25,7 @@ import {
    KEY_SIDEBAR_STATUS
 } from "../text/RootText.jsx";
 import {
+   KEY_ASSETS_DETECTOR_SIDEBAR,
    KEY_ASSETS_GALLERY_SIDEBAR,
    KEY_ASSETS_LORE_SIDEBAR,
    KEY_IMAGE_ASSETS_GENERATOR,
@@ -37,6 +40,7 @@ import AssetsImageGenerator from "./assets/AssetsImageGenerator.jsx";
 import AssetsImageGallery from "./assets/AssetsImageGallery.jsx";
 import AssetsVideoGenerator from "./assets/AssetsVideoGenerator.jsx";
 import AssetsLore from "./assets/AssetsLore.jsx";
+import AssetsDetector from "./assets/AssetsDetector.jsx";
 
 const SIDEBAR_LIST = [
    {title_key: KEY_SIDEBAR_OVERVIEW, section_code: ASSETS_OVERVIEW, right_pane: <AssetsOverview/>},
@@ -45,6 +49,7 @@ const SIDEBAR_LIST = [
    {title_key: KEY_IMAGE_ASSETS_GENERATOR, section_code: ASSETS_GENERATOR, right_pane: <AssetsImageGenerator/>},
    {title_key: KEY_ASSETS_GALLERY_SIDEBAR, section_code: ASSETS_GALLERY, right_pane: <AssetsImageGallery/>},
    {title_key: KEY_ASSETS_LORE_SIDEBAR, section_code: ASSETS_LORE, right_pane: <AssetsLore/>},
+   {title_key: KEY_ASSETS_DETECTOR_SIDEBAR, section_code: ASSETS_DETECTOR, right_pane: <AssetsDetector/>},
    {section_code: SIDEBAR_BREAKER},
    {title_key: KEY_SIDEBAR_SETTINGS, section_code: ASSETS_SETTINGS, right_pane: <AssetsSettings/>},
    {title_key: KEY_SIDEBAR_STATUS, section_code: ASSETS_STATUS, right_pane: <AssetsStatus/>},

@@ -10,7 +10,8 @@ import {
    TILES_GENERATOR
 } from "../../settings/TilesSettings.jsx";
 import {
-   ASSETS_GENERATOR,
+   ASSETS_DETECTOR,
+   ASSETS_GENERATOR, KEY_ASSETS_DETECTOR_FRAME_SETTINGS,
    KEY_ASSETS_GENERATOR_FRAME_SETTINGS,
    KEY_ASSETS_SECTION
 } from "../../settings/AssetsSettings.jsx";
@@ -18,6 +19,7 @@ import {
 const SEND_TO_PROMPT = -1
 const PAGE_TILES_GENERATE = 1
 const PAGE_ASSETS_IMAGE_GENERATE = 2
+const PAGE_ASSETS_DETECTOR = 3
 
 const send_to = (frame_settings, destination) => {
    switch (parseInt(destination)) {
@@ -39,6 +41,15 @@ const send_to = (frame_settings, destination) => {
          window.location = '/assets'
          break;
 
+      case PAGE_ASSETS_DETECTOR:
+         console.log('it is asset detector', frame_settings);
+         AppSettings.on_settings_changed({
+            [KEY_ASSETS_DETECTOR_FRAME_SETTINGS]: frame_settings,
+            [KEY_ASSETS_SECTION]: ASSETS_DETECTOR,
+         })
+         window.location = '/assets'
+         break;
+
       default:
          console.log('it is not known', destination);
          break;
@@ -49,6 +60,7 @@ const SEND_TO_OPTIONS = [
    {label: 'select', value: -1, help: 'where to go',},
    {label: 'tiles', value: PAGE_TILES_GENERATE, help: 'generate',},
    {label: 'images', value: PAGE_ASSETS_IMAGE_GENERATE, help: 'generate',},
+   {label: 'detector', value: PAGE_ASSETS_DETECTOR, help: 'artrifact',},
 ]
 
 export class SendTo extends Component {
