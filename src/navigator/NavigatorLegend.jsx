@@ -128,10 +128,10 @@ export class NavigatorLegend extends Component {
             name: KEY_NAVIGATOR_CURSOR_LOCATION,
             value: [render_coordinates, hover_point],
          },
-         {
-            name: KEY_NAVIGATOR_COVERAGE,
-            value: [render_coverage, frame_settings],
-         },
+         // {
+         //    name: KEY_NAVIGATOR_COVERAGE,
+         //    value: [render_coverage, frame_settings],
+         // },
          {
             name: KEY_NAVIGATOR_SEND_TO,
             value: [render_send_to, frame_settings],

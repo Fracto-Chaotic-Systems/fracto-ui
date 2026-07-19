@@ -128,6 +128,7 @@ export const APP_ASSETS_SETTINGS = {
       default_value: DEFAULT_FRAME_SETTINGS,
       description: 'Frame settings of the assets detector page',
       persist: true,
+      no_copy: true,
    },
    [KEY_ASSETS_DETECTOR_SPLITTER_POS]: {
       data_type: TYPE_NUMBER,

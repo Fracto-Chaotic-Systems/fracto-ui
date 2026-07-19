@@ -5,14 +5,18 @@ import {update_dimensions} from "./../PageUtils.jsx";
 import {MainStyles as styles, MARGIN_PX} from '../../styles/MainStyles.jsx'
 import AppSettings from "../../AppSettings.jsx";
 import {
-   KEY_ASSETS_DETECTOR_FRAME_SETTINGS, KEY_ASSETS_DETECTOR_SPLITTER_POS,
+   KEY_ASSETS_DETECTOR_FRAME_SETTINGS,
+   KEY_ASSETS_DETECTOR_SPLITTER_POS,
    KEY_ASSETS_SPLITTER_POS_PX
 } from "../../settings/AssetsSettings.jsx";
 import AppText from "../../AppText.jsx";
 import {KEY_ASSETS_DETECTOR} from "../../text/AssetsText.jsx";
 import {ASSETS_DETECTOR_SPLITTER_KEYS} from "../../navigator/NavigatorKeys.jsx";
 import NavigatorSplitterLayout from "../../navigator/NavigatorSplitterLayout.jsx";
-import * as canvas from "@fortawesome/free-solid-svg-icons/fa0";
+import {FRACTO_DATA_PORT, FRACTO_UI_PORT} from "../../../../../constants.js";
+import {FETCH_JSON_HEADERS} from "../study/StudyUtils.jsx";
+import {find_minibrot} from "./AssetsUtils.jsx";
+import MinibrotBackend from "../../backend/MinibrotBackend.jsx";
 
 const UPDATE_INTERVAL_MS = 1000
 
@@ -25,6 +29,8 @@ export class AssetsDetector extends Component {
       interval: null,
       subscription: null,
       all_minima: [],
+      minibrot_list: [],
+      new_bailiwick: null,
    }
 
    componentDidMount() {
@@ -36,6 +42,7 @@ export class AssetsDetector extends Component {
             ASSETS_DETECTOR_SPLITTER_KEYS.frame_settings_key,
             this.on_frame_settings_changed)
       })
+      this.load_minibrots()
    }
 
    componentWillUnmount() {
@@ -54,13 +61,24 @@ export class AssetsDetector extends Component {
    }
 
    on_frame_settings_changed = async (key, value) => {
-      this.find_minima(value)
-      console.log('on_frame_settings_changed',value)
       this.setState({frame_settings: value})
+      // setTimeout(this.find_minima, 500)
+      setTimeout(this.highlight_existing, 500)
    }
 
-   find_minima = (value) => {
-      const {canvas_buffer} = value
+   load_minibrots = async () => {
+      const origin = window.origin.replace(`${FRACTO_UI_PORT}`, `${FRACTO_DATA_PORT}`)
+      const url = `${origin}/minibrots`
+      const fetched = await fetch(url, FETCH_JSON_HEADERS).then(res => {
+         return res.json()
+      })
+      const minibrot_list = fetched.result
+      this.setState({minibrot_list})
+   }
+
+   find_minima = () => {
+      const {frame_settings} = this.state
+      const {canvas_buffer} = frame_settings
       if (!canvas_buffer) {
          return;
       }
@@ -84,10 +102,120 @@ export class AssetsDetector extends Component {
       const all_minima = Object
          .values(pattern_minima)
          .sort((a, b) => a.interations - b.interations)
-         .slice(0, 15)
+         .slice(0, 10)
 
-      // console.log('all_minima', all_minima)
       this.setState({all_minima})
+   }
+
+   highlight_potentials = () => {
+      const {frame_settings, all_minima} = this.state
+      const {ctx} = frame_settings
+      if (!ctx || typeof ctx.beginPath !== 'function') {
+         console.log('highlight_potentials: ctx bad', ctx)
+         return;
+      }
+      all_minima.forEach(minima => {
+         if (!minima.x) {
+            console.log('highlight_potentials: minima.x bad', minima)
+            return
+         }
+         ctx.beginPath();
+         ctx.strokeStyle = '#FFFFFFF0';
+         ctx.lineWidth = 1;
+         ctx.arc(minima.x, minima.y, 12, 0, 2 * Math.PI);
+         ctx.stroke();
+      })
+   }
+
+   highlight_existing = () => {
+      const {minibrot_list, frame_settings} = this.state
+      if (!Object.hasOwn(frame_settings, 'focal_point')) {
+         return
+      }
+      const {ctx} = frame_settings
+      if (!ctx || typeof ctx.beginPath !== 'function') {
+         console.log('highlight_potentials: ctx bad', ctx)
+         return;
+      }
+      const half_scope = frame_settings.scope / 2
+      const leftmost = frame_settings.focal_point.x - half_scope
+      const rightmost = frame_settings.focal_point.x + half_scope
+      const topmost = frame_settings.focal_point.y + half_scope
+      const bottommost = frame_settings.focal_point.y - half_scope
+      const minibrots_in_field = minibrot_list
+         .filter(minibrot => {
+            const core_point = JSON.parse(minibrot.core_point)
+            if (core_point.x < leftmost) {
+               return false
+            }
+            if (core_point.x > rightmost) {
+               return false
+            }
+            if (core_point.y > topmost) {
+               return false
+            }
+            if (core_point.y < bottommost) {
+               return false
+            }
+            return true
+         })
+      minibrots_in_field
+         .forEach(minibrot => {
+            const core_point = JSON.parse(minibrot.core_point)
+            const x = (core_point.x - leftmost) * frame_settings.width_px / frame_settings.scope
+            const y = (topmost - core_point.y) * frame_settings.width_px / frame_settings.scope
+            ctx.beginPath();
+            ctx.strokeStyle = '#FFFFFFF0';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x - 6, y - 6, 12, 12);
+         })
+   }
+
+   detect_now = () => {
+      const {frame_settings} = this.state
+      if (!Object.hasOwn(frame_settings, 'canvas_buffer')) {
+         return
+      }
+      const {canvas_buffer} = frame_settings
+      if (!canvas_buffer) {
+         return;
+      }
+      const [core_point, octave_point, pattern] = find_minibrot(
+         canvas_buffer,
+         frame_settings.focal_point,
+         frame_settings.scope)
+      if (!pattern) {
+         this.setState({new_bailiwick: null})
+         return
+      }
+      const x_diff = core_point.x - octave_point.x
+      const y_diff = core_point.y - octave_point.y
+      const magnitude = Math.sqrt(x_diff * x_diff + y_diff * y_diff)
+      const new_bailiwick = {
+         pattern,
+         magnitude,
+         core_point,
+         octave_point,
+         display_settings: {
+            focal_point: {
+               x: (core_point.x + octave_point.x) / 2,
+               y: (core_point.y + octave_point.y) / 2
+            },
+            scope: magnitude * 3
+         },
+      }
+      console.log('new_bailiwick', new_bailiwick)
+      this.setState({new_bailiwick})
+      AppSettings.on_settings_changed({
+         [KEY_ASSETS_DETECTOR_FRAME_SETTINGS]: {
+            focal_point: new_bailiwick.display_settings.focal_point,
+            scope: new_bailiwick.display_settings.scope,
+         }
+      })
+      MinibrotBackend.save_bailiwick(
+         new_bailiwick, 0, response => {
+            console.log(response)
+         })
    }
 
    render() {
@@ -110,6 +238,11 @@ export class AssetsDetector extends Component {
          left: `${splitter_pos + MARGIN_PX}px`,
          top: `${top + MARGIN_PX}px`,
       }
+      // this.highlight_potentials()
+      const detect_button = <styles.BlueButton
+         onClick={this.detect_now}>
+         detect now
+      </styles.BlueButton>
       return [
          <styles.SectionTitle
             key={'study-overview-title'}>
@@ -126,7 +259,7 @@ export class AssetsDetector extends Component {
             />
          </styles.TightCenteredBlock>,
          <styles.FixedBlock style={right_block_style}>
-            right content
+            {detect_button}
          </styles.FixedBlock>
       ];
    }

@@ -4,7 +4,6 @@ import {
    FRACTO_UI_PORT
 } from "../../../../constants.js";
 import {FETCH_JSON_HEADERS} from "../pages/study/StudyUtils.jsx";
-import {copy_json} from "../utils/Dom.jsx";
 
 export class AssetsBackend {
 

@@ -11,7 +11,8 @@ import {
 } from "../../settings/TilesSettings.jsx";
 import {
    ASSETS_DETECTOR,
-   ASSETS_GENERATOR, KEY_ASSETS_DETECTOR_FRAME_SETTINGS,
+   ASSETS_GENERATOR,
+   KEY_ASSETS_DETECTOR_FRAME_SETTINGS,
    KEY_ASSETS_GENERATOR_FRAME_SETTINGS,
    KEY_ASSETS_SECTION
 } from "../../settings/AssetsSettings.jsx";
