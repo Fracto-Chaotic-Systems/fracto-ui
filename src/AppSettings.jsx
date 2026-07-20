@@ -92,6 +92,7 @@ export class AppSettings {
                   break;
             }
          })
+      // console.log('persist_settings complete', new_settings)
    }
 
    static load_settings = () => {
@@ -156,6 +157,7 @@ export class AppSettings {
             case TYPE_ARRAY:
             case TYPE_OBJECT:
                if (typeof new_settings[key] !== 'object') {
+                  console.log("typeof new_settings[key] !== 'object'")
                   break;
                }
                AppSettings.settings_data[key] =

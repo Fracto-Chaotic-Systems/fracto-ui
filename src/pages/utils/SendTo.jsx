@@ -16,6 +16,7 @@ import {
    KEY_ASSETS_GENERATOR_FRAME_SETTINGS,
    KEY_ASSETS_SECTION
 } from "../../settings/AssetsSettings.jsx";
+import {copy_json} from "../../utils/Dom.jsx";
 
 const SEND_TO_PROMPT = -1
 const PAGE_TILES_GENERATE = 1
@@ -23,37 +24,49 @@ const PAGE_ASSETS_IMAGE_GENERATE = 2
 const PAGE_ASSETS_DETECTOR = 3
 
 const send_to = (frame_settings, destination) => {
+   let routing = null
+   console.log('send_to', frame_settings, destination)
+   const frame_settings_copy = copy_json(frame_settings)
+   delete frame_settings_copy.canvas_buffer
+   delete frame_settings_copy.ctx
+   delete frame_settings_copy.width_px
    switch (parseInt(destination)) {
       case PAGE_TILES_GENERATE:
-         console.log('it is tiles generate', frame_settings);
+         console.log('it is tiles generate', frame_settings_copy);
          AppSettings.on_settings_changed({
-            [KEY_TILES_GENERATOR_FRAME_SETTINGS]: frame_settings,
+            [KEY_TILES_GENERATOR_FRAME_SETTINGS]: frame_settings_copy,
             [KEY_TILES_SECTION]: TILES_GENERATOR,
          })
-         window.location = '/tiles'
+         routing = '/tiles'
          break;
 
       case PAGE_ASSETS_IMAGE_GENERATE:
-         console.log('it is image generate', frame_settings);
+         console.log('it is image generate', frame_settings_copy);
          AppSettings.on_settings_changed({
-            [KEY_ASSETS_GENERATOR_FRAME_SETTINGS]: frame_settings,
+            [KEY_ASSETS_GENERATOR_FRAME_SETTINGS]: frame_settings_copy,
             [KEY_ASSETS_SECTION]: ASSETS_GENERATOR,
          })
-         window.location = '/assets'
+         routing = '/assets'
          break;
 
       case PAGE_ASSETS_DETECTOR:
-         console.log('it is asset detector', frame_settings);
+         console.log('it is asset detector', frame_settings_copy);
          AppSettings.on_settings_changed({
-            [KEY_ASSETS_DETECTOR_FRAME_SETTINGS]: frame_settings,
+            [KEY_ASSETS_DETECTOR_FRAME_SETTINGS]: frame_settings_copy,
             [KEY_ASSETS_SECTION]: ASSETS_DETECTOR,
          })
-         window.location = '/assets'
+         routing = '/assets'
          break;
 
       default:
          console.log('it is not known', destination);
-         break;
+         return;
+   }
+   if (routing) {
+      setTimeout(() => {
+         console.log('window.location', routing)
+         window.location.assign(routing)
+      }, 1000)
    }
 }
 

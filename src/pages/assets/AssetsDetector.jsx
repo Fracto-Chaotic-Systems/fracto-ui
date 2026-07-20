@@ -34,6 +34,7 @@ export class AssetsDetector extends Component {
    }
 
    componentDidMount() {
+      this.load_minibrots()
       this.setState({
          frame_settings: AppSettings
             .get(KEY_ASSETS_DETECTOR_FRAME_SETTINGS),
@@ -42,7 +43,6 @@ export class AssetsDetector extends Component {
             ASSETS_DETECTOR_SPLITTER_KEYS.frame_settings_key,
             this.on_frame_settings_changed)
       })
-      this.load_minibrots()
    }
 
    componentWillUnmount() {
@@ -61,8 +61,8 @@ export class AssetsDetector extends Component {
    }
 
    on_frame_settings_changed = async (key, value) => {
+      console.log('on_frame_settings_changed', value)
       this.setState({frame_settings: value})
-      // setTimeout(this.find_minima, 500)
       setTimeout(this.highlight_existing, 500)
    }
 
@@ -73,6 +73,7 @@ export class AssetsDetector extends Component {
          return res.json()
       })
       const minibrot_list = fetched.result
+      console.log('minibrot_list',minibrot_list)
       this.setState({minibrot_list})
    }
 
@@ -134,7 +135,7 @@ export class AssetsDetector extends Component {
       }
       const {ctx} = frame_settings
       if (!ctx || typeof ctx.beginPath !== 'function') {
-         console.log('highlight_potentials: ctx bad', ctx)
+         console.log('highlight_existing: ctx bad', frame_settings)
          return;
       }
       const half_scope = frame_settings.scope / 2
@@ -191,25 +192,26 @@ export class AssetsDetector extends Component {
       const x_diff = core_point.x - octave_point.x
       const y_diff = core_point.y - octave_point.y
       const magnitude = Math.sqrt(x_diff * x_diff + y_diff * y_diff)
+      const display_settings = {
+         focal_point: {
+            x: (core_point.x + octave_point.x) / 2,
+            y: (core_point.y + octave_point.y) / 2
+         },
+         scope: magnitude * 3
+      }
       const new_bailiwick = {
          pattern,
          magnitude,
          core_point,
          octave_point,
-         display_settings: {
-            focal_point: {
-               x: (core_point.x + octave_point.x) / 2,
-               y: (core_point.y + octave_point.y) / 2
-            },
-            scope: magnitude * 3
-         },
+         display_settings,
       }
       console.log('new_bailiwick', new_bailiwick)
       this.setState({new_bailiwick})
       AppSettings.on_settings_changed({
          [KEY_ASSETS_DETECTOR_FRAME_SETTINGS]: {
-            focal_point: new_bailiwick.display_settings.focal_point,
-            scope: new_bailiwick.display_settings.scope,
+            focal_point: display_settings.focal_point,
+            scope: display_settings.scope,
          }
       })
       MinibrotBackend.save_bailiwick(
@@ -219,7 +221,7 @@ export class AssetsDetector extends Component {
    }
 
    render() {
-      const {container_ref, rendered_height, rendered_width, frame_settings} = this.state
+      const {new_bailiwick, container_ref, rendered_height, rendered_width, frame_settings} = this.state
       let top = 0;
       let left = 0;
       if (container_ref.current) {
@@ -239,6 +241,10 @@ export class AssetsDetector extends Component {
          top: `${top + MARGIN_PX}px`,
       }
       // this.highlight_potentials()
+      this.highlight_existing()
+      const details = new_bailiwick
+         ? `pattern: ${new_bailiwick.pattern}, magnitide: ${new_bailiwick.magnitude}`
+         : ''
       const detect_button = <styles.BlueButton
          onClick={this.detect_now}>
          detect now
@@ -259,7 +265,7 @@ export class AssetsDetector extends Component {
             />
          </styles.TightCenteredBlock>,
          <styles.FixedBlock style={right_block_style}>
-            {detect_button}
+            {detect_button} {details}
          </styles.FixedBlock>
       ];
    }
