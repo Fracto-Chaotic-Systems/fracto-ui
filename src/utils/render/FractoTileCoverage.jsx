@@ -56,6 +56,7 @@ export class FractoTileCoverage extends Component {
          subscription: AppSettings
             .subscribe(frame_settings_key, this.on_frame_settings_changed)
       })
+      setTimeout(this.generate_heat_map, 250)
    }
 
    componentDidUpdate(prevProps, prevState, snapshot) {
@@ -77,6 +78,7 @@ export class FractoTileCoverage extends Component {
             stored_width_px: frame_settings.width_px,
          })
          this.clear_canvas(ctx, frame_settings, AppText.get(KEY_HEAT_MAP_CLICK_TO_TEST));
+         setTimeout(this.generate_heat_map, 1500)
       }
    }
 

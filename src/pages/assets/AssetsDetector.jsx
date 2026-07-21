@@ -1,5 +1,9 @@
 import React, {Component} from "react";
 
+import {
+   render_magnitude,
+   render_pattern_block,
+} from "../../pages/study/StudyUtils.jsx";
 import {update_dimensions} from "./../PageUtils.jsx";
 
 import {MainStyles as styles, MARGIN_PX} from '../../styles/MainStyles.jsx'
@@ -17,6 +21,7 @@ import {FRACTO_DATA_PORT, FRACTO_UI_PORT} from "../../../../../constants.js";
 import {FETCH_JSON_HEADERS} from "../study/StudyUtils.jsx";
 import {find_minibrot} from "./AssetsUtils.jsx";
 import MinibrotBackend from "../../backend/MinibrotBackend.jsx";
+import {PAGE_TILES_GENERATE, send_to} from "../utils/SendTo.jsx";
 
 const UPDATE_INTERVAL_MS = 1000
 
@@ -73,7 +78,7 @@ export class AssetsDetector extends Component {
          return res.json()
       })
       const minibrot_list = fetched.result
-      console.log('minibrot_list',minibrot_list)
+      console.log('minibrot_list', minibrot_list)
       this.setState({minibrot_list})
    }
 
@@ -220,6 +225,11 @@ export class AssetsDetector extends Component {
          })
    }
 
+   enhance = () => {
+      const {frame_settings} = this.state
+      send_to(frame_settings, PAGE_TILES_GENERATE)
+   }
+
    render() {
       const {new_bailiwick, container_ref, rendered_height, rendered_width, frame_settings} = this.state
       let top = 0;
@@ -242,8 +252,18 @@ export class AssetsDetector extends Component {
       }
       // this.highlight_potentials()
       this.highlight_existing()
+      const enhance_button = <styles.BlueButton
+         onClick={this.enhance}>
+         enhance
+      </styles.BlueButton>
       const details = new_bailiwick
-         ? `pattern: ${new_bailiwick.pattern}, magnitide: ${new_bailiwick.magnitude}`
+         ? [
+            render_pattern_block(new_bailiwick.pattern),
+            <styles.HalfRemSpacer/>,
+            render_magnitude(new_bailiwick.magnitude),
+            <styles.HalfRemSpacer/>,
+            enhance_button,
+         ]
          : ''
       const detect_button = <styles.BlueButton
          onClick={this.detect_now}>

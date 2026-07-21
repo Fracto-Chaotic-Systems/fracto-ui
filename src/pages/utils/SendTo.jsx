@@ -19,11 +19,11 @@ import {
 import {copy_json} from "../../utils/Dom.jsx";
 
 const SEND_TO_PROMPT = -1
-const PAGE_TILES_GENERATE = 1
-const PAGE_ASSETS_IMAGE_GENERATE = 2
-const PAGE_ASSETS_DETECTOR = 3
+export const PAGE_TILES_GENERATE = 1
+export const PAGE_ASSETS_IMAGE_GENERATE = 2
+export const PAGE_ASSETS_DETECTOR = 3
 
-const send_to = (frame_settings, destination) => {
+export const send_to = (frame_settings, destination) => {
    let routing = null
    console.log('send_to', frame_settings, destination)
    const frame_settings_copy = copy_json(frame_settings)
