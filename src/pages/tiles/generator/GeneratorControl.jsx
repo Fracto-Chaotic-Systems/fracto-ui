@@ -8,6 +8,8 @@ import {
    CELL_ALIGN_CENTER,
    CELL_TYPE_NUMBER,
 } from "../../../utils/ui/styles/CoolTableStyles.jsx";
+import {forEach} from "mathjs";
+import {bounds_from_short_code} from "../TilesUtils.jsx";
 
 const LinkedCell = styled(CoolStyles.InlineBlock)`
     margin: 0;
@@ -130,6 +132,46 @@ export class GeneratorControl extends Component {
                : '-';
             return data
          });
+      if (coverage_rows.length) {
+         const last_row = coverage_rows[coverage_rows.length - 1]
+         const level = last_row.level + 1
+         console.log('last_row', last_row)
+         const extra_tiles = []
+         last_row.filtered_by_level.forEach(tile => {
+            const short_code_0 = `${tile.short_code}0`
+            extra_tiles.push({
+               short_code: short_code_0,
+               bounds: bounds_from_short_code(short_code_0)
+            })
+            const short_code_1 = `${tile.short_code}1`
+            extra_tiles.push({
+               short_code: short_code_1,
+               bounds: bounds_from_short_code(short_code_1)
+            })
+            const short_code_2 = `${tile.short_code}2`
+            extra_tiles.push({
+               short_code: short_code_2,
+               bounds: bounds_from_short_code(short_code_2)
+            })
+            const short_code_3 = `${tile.short_code}3`
+            extra_tiles.push({
+               short_code: short_code_3,
+               bounds: bounds_from_short_code(short_code_3)
+            })
+         })
+         coverage_rows.push({
+            'level': level,
+            'tile_count': '-',
+            'can_do': <LinkedCell
+               onClick={e => this.generate_can_do(extra_tiles, level)}>
+               <CoolStyles.LinkSpan>
+                  {last_row.filtered_by_level.length * 4}
+               </CoolStyles.LinkSpan>
+            </LinkedCell>,
+            'blank_tiles': '-',
+            'interior_tiles': '-',
+         })
+      }
 
       return <CoolStyles.InlineBlock>
          <CoolTable
