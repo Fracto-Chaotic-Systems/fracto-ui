@@ -66,7 +66,7 @@ export class AssetsDetector extends Component {
    }
 
    on_frame_settings_changed = async (key, value) => {
-      console.log('on_frame_settings_changed', value)
+      // console.log('on_frame_settings_changed', value)
       this.setState({frame_settings: value})
       setTimeout(this.highlight_existing, 500)
    }
@@ -166,14 +166,46 @@ export class AssetsDetector extends Component {
             return true
          })
       minibrots_in_field
-         .forEach(minibrot => {
+         .sort((a, b) => {
+            return b.magnitude - a.magnitude
+         })
+         .forEach((minibrot, i) => {
             const core_point = JSON.parse(minibrot.core_point)
             const x = (core_point.x - leftmost) * frame_settings.width_px / frame_settings.scope
             const y = (topmost - core_point.y) * frame_settings.width_px / frame_settings.scope
+            let width_px = 0
+            let color = '#FFFFFF00'
+            let line_width = 0
+            let text = ''
+            if (i < 10) {
+               color = '#FFFFFFFF'
+               width_px = 12
+               line_width = 1.25
+               text = `${Math.round(minibrot.magnitude * 1000000)}`
+            } else if (i < 50) {
+               color = '#FFFFFFa0'
+               width_px = 6
+               line_width = 1.0
+            } else if (i < 250) {
+               color = '#FFFFFF80'
+               width_px = 3
+               line_width = 0.75
+            } else if (i < 1250) {
+               color = '#FFFFFF40'
+               width_px = 1
+               line_width = 0.5
+            }
             ctx.beginPath();
-            ctx.strokeStyle = '#FFFFFFF0';
-            ctx.lineWidth = 1;
-            ctx.strokeRect(x - 6, y - 6, 12, 12);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = line_width;
+            ctx.strokeRect(
+               x - (width_px / 2),
+               y - (width_px / 2),
+               width_px,
+               width_px);
+            ctx.fillStyle = '#eeeeeeC0';
+            ctx.fillText(text, x + width_px, y + width_px / 2);
+            ctx.font = '14px monospace';
          })
    }
 
