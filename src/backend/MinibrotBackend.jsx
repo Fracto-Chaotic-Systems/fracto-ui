@@ -57,9 +57,9 @@ const CQ_code_from_point = (x, y) => {
    return cq_code
 }
 
-const bailiwick_name = (pattern, core_point, best_level) => {
+const bailiwick_name = (pattern, core_point, best_level, is_node = false) => {
    const cq_code = CQ_code_from_point(core_point.x, core_point.y)
-   return `B${pattern}-CP${cq_code.slice(0, best_level)}`
+   return `${is_node ? 'N' : 'B'}${pattern}-CP${cq_code.slice(0, best_level)}`
 }
 
 const process_json_str = (json) => {
@@ -95,7 +95,7 @@ export class MinibrotBackend {
    static save_bailiwick = (bailiwick, bailiwick_index, cb = null) => {
       console.log('save_bailiwick', bailiwick)
       const highest_level = get_ideal_level(BAILIWICK_MAX_SIZE, bailiwick.display_settings.scope, 1.5);
-      const name = bailiwick_name(bailiwick.pattern, bailiwick.core_point, highest_level)
+      const name = bailiwick_name(bailiwick.pattern, bailiwick.core_point, highest_level, bailiwick.is_node)
       const cq_code = CQ_code_from_point(bailiwick.core_point.x, bailiwick.core_point.y)
       const core_point = process_json_str(bailiwick.core_point)
       const octave_point = process_json_str(bailiwick.octave_point)

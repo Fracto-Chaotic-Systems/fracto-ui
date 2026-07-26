@@ -1,6 +1,6 @@
 import {find_minibrot} from "../AssetsUtils.jsx";
 import AppSettings from "../../../AppSettings.jsx";
-import {KEY_ASSETS_DETECTOR_FRAME_SETTINGS} from "../../../settings/AssetsSettings.jsx";
+import {KEY_ASSETS_DETECTOR_FRAME_SETTINGS, KEY_ASSETS_DETECTOR_IS_NODE} from "../../../settings/AssetsSettings.jsx";
 
 export const find_minima = (frame_settings) => {
    const {canvas_buffer} = frame_settings
@@ -154,6 +154,7 @@ export const detect_now = (frame_settings) => {
       core_point,
       octave_point,
       display_settings,
+      is_node: AppSettings.get(KEY_ASSETS_DETECTOR_IS_NODE) ? 1 : 0,
    }
    console.log('new_bailiwick', new_bailiwick)
    AppSettings.on_settings_changed({

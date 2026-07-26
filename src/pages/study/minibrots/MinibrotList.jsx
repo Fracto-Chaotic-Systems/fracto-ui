@@ -70,16 +70,19 @@ export class MinibrotList extends Component {
       const {on_select_minibrot} = this.props
       const is_node = AppSettings.get(KEY_ASSETS_DETECTOR_IS_NODE)
       const origin = window.origin.replace(`${FRACTO_UI_PORT}`, `${FRACTO_DATA_PORT}`)
-      const url = `${origin}/minibrots?is_node=${is_node}`
-      console.log('url', url)
+      const url = `${origin}/minibrots?is_node=${is_node ? 1 : 0}`
       const fetched = await fetch(url, FETCH_JSON_HEADERS).then(res => {
          return res.json()
       })
       const minibrot_list = fetched.result
       const selected_row = AppSettings.get(KEY_STUDY_MINIBROTS_SELECTED_ROW)
-      const selected_minibrot = minibrot_list[selected_row]
-      on_select_minibrot(selected_minibrot)
-      this.setState({selected_row, minibrot_list})
+      if (selected_row < minibrot_list.length) {
+         const selected_minibrot = minibrot_list[selected_row]
+         on_select_minibrot(selected_minibrot)
+         this.setState({selected_row})
+      }
+      console.log('minibrot_list', minibrot_list)
+      this.setState({minibrot_list})
    }
 
    on_select_row = (row) => {
