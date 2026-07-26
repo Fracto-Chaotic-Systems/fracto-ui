@@ -1,4 +1,4 @@
-import {TYPE_NUMBER, TYPE_OBJECT, TYPE_STRING} from "../AppSettings.jsx";
+import {TYPE_BOOLEAN, TYPE_NUMBER, TYPE_OBJECT, TYPE_STRING} from "../AppSettings.jsx";
 import {DEFAULT_SIDEBAR_WIDTH} from "../constants.jsx";
 
 const ASSETS_FOLDER = 'assets'
@@ -8,6 +8,7 @@ const ASSETS_GALLERY_FOLDER = 'assets/gallery'
 const VIDEO_GENERATOR_FOLDER = 'assets/video'
 export const KEY_ASSETS_SPLITTER_POS_PX = `${ASSETS_FOLDER}/splitter_pos_px`
 export const KEY_ASSETS_SECTION = `${ASSETS_FOLDER}/assets_section`
+export const KEY_ASSETS_DETECTOR_IS_NODE = `${ASSETS_FOLDER}/detector_is_node`
 
 export const ASSETS_OVERVIEW = 'assets_overview'
 export const ASSETS_SETTINGS = 'assets_settings'
@@ -146,6 +147,12 @@ export const APP_ASSETS_SETTINGS = {
       data_type: TYPE_NUMBER,
       default_value: 200,
       description: 'Current position for the assets detector vertical steps splitter',
+      persist: true,
+   },
+   [KEY_ASSETS_DETECTOR_IS_NODE]: {
+      data_type: TYPE_BOOLEAN,
+      default_value: false,
+      description: 'Detector queries for nodal vs. freeform bailiwicks',
       persist: true,
    },
 }

@@ -24,6 +24,7 @@ import {
    KEY_STUDY_CARDINAL,
    KEY_STUDY_MAGNITUDE
 } from "../../../text/StudyText.jsx";
+import {KEY_ASSETS_DETECTOR_IS_NODE} from "../../../settings/AssetsSettings.jsx";
 
 const CARDINAL_WIDTH_PX = 50
 const MAGNITUDE_WIDTH_PX = 120
@@ -67,10 +68,10 @@ export class MinibrotList extends Component {
 
    load_minibrots = async () => {
       const {on_select_minibrot} = this.props
-
+      const is_node = AppSettings.get(KEY_ASSETS_DETECTOR_IS_NODE)
       const origin = window.origin.replace(`${FRACTO_UI_PORT}`, `${FRACTO_DATA_PORT}`)
-      const url = `${origin}/minibrots`
-      // console.log('url', url)
+      const url = `${origin}/minibrots?is_node=${is_node}`
+      console.log('url', url)
       const fetched = await fetch(url, FETCH_JSON_HEADERS).then(res => {
          return res.json()
       })

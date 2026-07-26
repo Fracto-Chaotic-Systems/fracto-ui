@@ -235,8 +235,7 @@ export class MainStyles {
        font-size: 0.85rem;
        color: ${CoolColors.deep_blue};
        &:hover {
-           font-weight: bold;
-           color: ${CoolColors.cool_blue};
+           ${CoolStyles.underline}
        }
    `
    static NotALink = styled(CoolStyles.InlineBlock)`
