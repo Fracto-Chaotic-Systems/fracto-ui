@@ -125,7 +125,7 @@ export class AssetsDetector extends Component {
       const new_setting = is_node ? 0 : 1
       this.setState({is_node: new_setting})
       AppSettings.on_settings_changed({
-         KEY_ASSETS_DETECTOR_IS_NODE: new_setting,
+         [KEY_ASSETS_DETECTOR_IS_NODE]: new_setting,
       })
    }
 
