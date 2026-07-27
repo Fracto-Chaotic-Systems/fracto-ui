@@ -26,7 +26,7 @@ export class AppSettings {
          }
          return AppSettings.setting_definitions[key].default_value
       } else {
-         console.log('key not found', key, AppSettings.setting_definitions, AppSettings.settings_data)
+         // console.log('key not found', key, AppSettings.setting_definitions, AppSettings.settings_data)
       }
       return undefined
    }

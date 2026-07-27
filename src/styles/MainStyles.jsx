@@ -222,8 +222,6 @@ export class MainStyles {
    `
    static ColorWheelWrapper = styled(CoolStyles.InlineBlock)`
        ${CoolStyles.noselect}
-       margin-right: 0.5rem;
-       margin-bottom: 0.25rem;
    `;
 
    static ColorWheelCanvas = styled.canvas`
