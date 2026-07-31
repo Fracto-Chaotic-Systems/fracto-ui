@@ -37,6 +37,14 @@ export class MainStyles {
        opacity: 0.8;
        border-bottom: 0.1rem solid #555555;
    `;
+    static FixedBodyWrapper = styled(CoolStyles.Block)`
+        ${CoolStyles.fixed}
+        ${CoolStyles.noselect}
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+    `;
    static MenuItem = styled(CoolStyles.InlineBlock)`
        ${CoolStyles.bold}
        margin: 0 0.5rem 0 1rem;

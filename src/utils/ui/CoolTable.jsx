@@ -68,7 +68,7 @@ export class CoolTable extends Component {
 
    componentDidUpdate(prevProps, prevState, snapshot) {
       if (this.props.selected_row !== prevProps.selected_row) {
-         setTimeout(this.scroll_selection, 5000)
+         setTimeout(this.scroll_selection, 500)
       }
    }
 
@@ -92,7 +92,7 @@ export class CoolTable extends Component {
          return
       }
       console.log('scrolling to', selected_row)
-      // scroller_ref.current.scrollIntoView(true)
+      scroller_ref.current.scrollIntoView(true)
    }
 
    handleKeyDown = (event) => {
