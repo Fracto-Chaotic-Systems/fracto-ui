@@ -63,13 +63,7 @@ export class CoolTable extends Component {
 
    componentDidMount() {
       window.addEventListener('keydown', this.handleKeyDown);
-      setTimeout(this.scroll_selection, 5000)
-   }
-
-   componentDidUpdate(prevProps, prevState, snapshot) {
-      if (this.props.selected_row !== prevProps.selected_row) {
-         setTimeout(this.scroll_selection, 500)
-      }
+      setTimeout(this.scroll_selection, 500)
    }
 
    componentWillUnmount() {
