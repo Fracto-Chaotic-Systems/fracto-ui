@@ -92,7 +92,7 @@ export class CoolTable extends Component {
          return
       }
       console.log('scrolling to', selected_row)
-      scroller_ref.current.scrollIntoView(true)
+      scroller_ref.current.scrollIntoView({behavior: "smooth"}, )
    }
 
    handleKeyDown = (event) => {
