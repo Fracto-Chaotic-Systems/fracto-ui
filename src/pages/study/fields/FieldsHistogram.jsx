@@ -7,7 +7,7 @@ import {
    BarElement,
    Title,
    Tooltip,
-   Legend,
+   Legend, PointElement, LineElement,
 } from 'chart.js';
 import {Bar} from 'react-chartjs-2';
 
@@ -22,6 +22,8 @@ import PageSettings from "../../../PageSettings";
 
 ChartJS.register(
    CategoryScale,
+    LineElement,
+    PointElement,
    LinearScale,
    BarElement,
    Title,

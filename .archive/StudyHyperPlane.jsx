@@ -4,27 +4,27 @@ import styled from "styled-components";
 import {
    FRACTO_DATA_PORT,
    FRACTO_UI_PORT
-} from "../../../../../constants.js";
-import {copy_json} from "../../utils/Dom.jsx";
-import NavigatorSplitterLayout from "../../navigator/NavigatorSplitterLayout.jsx";
-import FractoColors from "../../utils/render/FractoColors.jsx";
+} from "../../../constants.js";
+import {copy_json} from "../src/utils/Dom.jsx";
+import NavigatorSplitterLayout from "../src/navigator/NavigatorSplitterLayout.jsx";
+import FractoColors from "../src/utils/render/FractoColors.jsx";
 
-import {MainStyles as styles, MARGIN_PX} from '../../styles/MainStyles.jsx'
-import {CoolStyles} from "../../utils/ui/CoolImports.jsx";
+import {MainStyles as styles, MARGIN_PX} from '../src/styles/MainStyles.jsx'
+import {CoolStyles} from "../src/utils/ui/CoolImports.jsx";
 
-import AppSettings from "../../AppSettings.jsx";
-import {KEY_VIEWPORT_DIMENSIONS} from "../../settings/RootSettings.jsx";
+import AppSettings from "../src/AppSettings.jsx";
+import {KEY_VIEWPORT_DIMENSIONS} from "../src/settings/RootSettings.jsx";
 import {
    KEY_STUDY_HYPERPLANE_FRAME_SETTINGS,
    KEY_STUDY_HYPERPLANE_LEGEND_SPLITTER_POS,
    KEY_STUDY_HYPERPLANE_SPLITTER_POS,
    KEY_STUDY_HYPERPLANE_STEPS_SPLITTER_POS,
    KEY_STUDY_SPLITTER_POS_PX
-} from "../../settings/StudySettings.jsx";
-import {KEY_NAVIGATOR_DISABLED} from "../../settings/NavigatorSettings.jsx";
+} from "../src/settings/StudySettings.jsx";
+import {KEY_NAVIGATOR_DISABLED} from "../src/settings/NavigatorSettings.jsx";
 
-import AppText from "../../AppText.jsx";
-import {KEY_STUDY_HYPERPLANE} from "../../text/StudyText.jsx";
+import AppText from "../src/AppText.jsx";
+import {KEY_STUDY_HYPERPLANE} from "../src/text/StudyText.jsx";
 
 const IP_ADDRESS = window.location.host.replace(`:${FRACTO_UI_PORT}`, '')
 const UPDATE_INTERVAL_MS = 1000

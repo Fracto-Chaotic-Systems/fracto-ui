@@ -18,7 +18,7 @@ export const click_point_chart = (
    if (!set1) {
       return []
    }
-   // console.log(`click_point_chart ${set1.length} points`)
+   console.log(`click_point_chart ${set1.length} points`)
 
    const cardinality = set1?.length - 1 || 0
    const in_animation = other_sets.length > 1

@@ -3,19 +3,19 @@ import {Component} from "react";
 import {
    MainStyles as styles,
    MARGIN_PX
-} from '../../styles/MainStyles.jsx'
-import CoolStyles from '../../utils/ui/styles/CoolStyles.jsx'
-import CoolWindowListener from "../../utils/ui/CoolWindowListener.jsx";
-import AppSettings from "../../AppSettings.jsx";
-import {KEY_VIEWPORT_DIMENSIONS} from "../../settings/RootSettings.jsx";
-import {KEY_STUDY_SPLITTER_POS_PX} from "../../settings/StudySettings.jsx";
-import AppText from "../../AppText.jsx";
-import {KEY_STUDY_MAGNITUDES} from "../../text/StudyText.jsx";
+} from '../src/styles/MainStyles.jsx'
+import CoolStyles from '../src/utils/ui/styles/CoolStyles.jsx'
+import CoolWindowListener from "../src/utils/ui/CoolWindowListener.jsx";
+import AppSettings from "../src/AppSettings.jsx";
+import {KEY_VIEWPORT_DIMENSIONS} from "../src/settings/RootSettings.jsx";
+import {KEY_STUDY_SPLITTER_POS_PX} from "../src/settings/StudySettings.jsx";
+import AppText from "../src/AppText.jsx";
+import {KEY_STUDY_MAGNITUDES} from "../src/text/StudyText.jsx";
 
-import MeridianChart from "../utils/MeridianChart.jsx";
+import MeridianChart from "../src/pages/utils/MeridianChart.jsx";
 
-import OrbitalMagnitudes from "./magnitudes/OrbitalMagnitudes.jsx";
-import FareySequenceList from "./magnitudes/FareySequenceList.jsx";
+import OrbitalMagnitudes from "../src/pages/study/magnitudes/OrbitalMagnitudes.jsx";
+import FareySequenceList from "../src/pages/study/magnitudes/FareySequenceList.jsx";
 
 const HEIGHT_FACTOR = 0.43
 const RADIAN_SIZE_FACTOR = 3.5
