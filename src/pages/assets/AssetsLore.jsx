@@ -63,7 +63,6 @@ export class AssetsLore extends Component {
                 on_select_content={this.on_select_content}
                 category_id={category.id}
             />
-            {category.category_name}
         </lore_styles.ScrollingLoreList>
         this.setState({list_component, edit_component: []})
     }

@@ -1,7 +1,47 @@
 import React, {Component} from "react";
 import PropTypes from "prop-types";
+
 import DataBackend from "../../../backend/DataBackend.jsx";
 import {LoreStyles as styles} from './LoreStyles.jsx'
+import {
+    CELL_ALIGN_CENTER,
+    CELL_ALIGN_LEFT,
+    CELL_TYPE_TEXT,
+    CELL_TYPE_TEXT_KEY,
+    CELL_TYPE_TIME_AGO
+} from "../../../utils/ui/styles/CoolTableStyles.jsx";
+import {
+    KEY_LORE_CONTENT_DRAFT,
+    KEY_LORE_CONTENT_MODIFIED,
+    KEY_LORE_CONTENT_PUBLISHED,
+    KEY_LORE_CONTENT_STATUS,
+    KEY_LORE_CONTENT_TITLE
+} from "../../../text/AssetsText.jsx";
+import CoolTable from "../../../utils/ui/CoolTable.jsx";
+
+const TABLE_COLUMNS = [
+    {
+        id: "title",
+        label_key: KEY_LORE_CONTENT_TITLE,
+        width_px: 150,
+        type: CELL_TYPE_TEXT,
+        align: CELL_ALIGN_LEFT,
+    },
+    {
+        id: "modified",
+        label_key: KEY_LORE_CONTENT_MODIFIED,
+        width_px: 100,
+        type: CELL_TYPE_TIME_AGO,
+        align: CELL_ALIGN_LEFT,
+    },
+    {
+        id: "status",
+        label_key: KEY_LORE_CONTENT_STATUS,
+        width_px: 80,
+        type: CELL_TYPE_TEXT_KEY,
+        align: CELL_ALIGN_CENTER,
+    },
+]
 
 export class LoreContentList extends Component {
     static propTypes = {
@@ -36,7 +76,19 @@ export class LoreContentList extends Component {
 
     render_content_list = () => {
         const {content_list} = this.state
-        return `content_list has ${content_list.length} items`
+        const table_data = content_list.map((item) => {
+            return {
+                title: item.title,
+                modified: item.content_meta.modified,
+                status: item.content_meta.published
+                    ? KEY_LORE_CONTENT_PUBLISHED
+                    : KEY_LORE_CONTENT_DRAFT,
+            }
+        })
+        return <CoolTable
+            data={table_data}
+            columns={TABLE_COLUMNS}
+        />
     }
 
     render() {

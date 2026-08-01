@@ -1,5 +1,6 @@
 const ASSETS_FOLDER = 'assets'
 const VIDEO_FOLDER = 'assets/video'
+const LORE_FOLDER = 'assets/lore'
 
 export const KEY_ASSETS_OVERVIEW = `${ASSETS_FOLDER}/assets_overview`
 export const KEY_ASSETS_SETTINGS = `${ASSETS_FOLDER}/assets_settings`
@@ -26,29 +27,40 @@ export const KEY_VIDEO_ASSETS_NEW_VIDEO = `${VIDEO_FOLDER}/new_video`
 export const KEY_VIDEO_ASSETS_SAVE_VIDEO = `${VIDEO_FOLDER}/save_video`
 export const KEY_VIDEO_ASSETS_OPEN_VIDEO = `${VIDEO_FOLDER}/open_video`
 
+export const KEY_LORE_CONTENT_TITLE = `${LORE_FOLDER}/content_title`
+export const KEY_LORE_CONTENT_MODIFIED = `${LORE_FOLDER}/content_modified`
+export const KEY_LORE_CONTENT_STATUS = `${LORE_FOLDER}/content_status`
+export const KEY_LORE_CONTENT_PUBLISHED = `${LORE_FOLDER}/content_published`
+export const KEY_LORE_CONTENT_DRAFT = `${LORE_FOLDER}/content_draft`
+
 export const APP_ASSETS_TEXT = {
-   [KEY_ASSETS_OVERVIEW]: 'assets overview',
-   [KEY_ASSETS_VIDEO]: 'video generator',
-   [KEY_ASSETS_SETTINGS]: 'assets settings',
-   [KEY_ASSETS_STATUS]: 'assets status',
-   [KEY_ASSETS_LORE]: 'fracto lore',
-   [KEY_ASSETS_DETECTOR]: 'artifact detector',
-   [KEY_ASSETS_LOGS]: 'assets logs',
-   [KEY_IMAGE_ASSETS_GENERATOR]: 'images',
-   [KEY_VIDEO_ASSETS_GENERATOR]: 'video',
-   [KEY_VIDEO_ASSETS_NEW_VIDEO]: 'new video',
-   [KEY_VIDEO_ASSETS_SAVE_VIDEO]: 'save video',
-   [KEY_VIDEO_ASSETS_OPEN_VIDEO]: 'open video',
-   [KEY_IMAGE_ASSETS_GENERATE]: 'image generator',
-   [KEY_IMAGE_ASSETS_DETECT]: 'artifact detector',
-   [KEY_ASSETS_GALLERY]: 'gallery of artifacts',
-   [KEY_ASSETS_GALLERY_SIDEBAR]: 'gallery',
-   [KEY_ASSETS_LORE_SIDEBAR]: 'lore',
-   [KEY_ASSETS_DETECTOR_SIDEBAR]: 'detector',
-   [KEY_IMAGE_ASSETS_RENDER_NOW]: 'render now',
-   [KEY_IMAGE_ASSETS_ADD_TO_GALLERY]: 'add to gallery',
-   [KEY_COLUMN_LABEL_ASSET_ID]: 'asset id',
-   [KEY_COLUMN_LABEL_ASSET_SCOPE]: 'scope',
-   [KEY_COLUMN_LABEL_ASSET_SCOPE_COLON]: 'scope:',
-   [KEY_COLUMN_LABEL_ASSET_FOCAL_POINT_COLON]: 'focal point:',
+    [KEY_ASSETS_OVERVIEW]: 'assets overview',
+    [KEY_ASSETS_VIDEO]: 'video generator',
+    [KEY_ASSETS_SETTINGS]: 'assets settings',
+    [KEY_ASSETS_STATUS]: 'assets status',
+    [KEY_ASSETS_LORE]: 'fracto lore',
+    [KEY_ASSETS_DETECTOR]: 'artifact detector',
+    [KEY_ASSETS_LOGS]: 'assets logs',
+    [KEY_IMAGE_ASSETS_GENERATOR]: 'images',
+    [KEY_VIDEO_ASSETS_GENERATOR]: 'video',
+    [KEY_VIDEO_ASSETS_NEW_VIDEO]: 'new video',
+    [KEY_VIDEO_ASSETS_SAVE_VIDEO]: 'save video',
+    [KEY_VIDEO_ASSETS_OPEN_VIDEO]: 'open video',
+    [KEY_IMAGE_ASSETS_GENERATE]: 'image generator',
+    [KEY_IMAGE_ASSETS_DETECT]: 'artifact detector',
+    [KEY_ASSETS_GALLERY]: 'gallery of artifacts',
+    [KEY_ASSETS_GALLERY_SIDEBAR]: 'gallery',
+    [KEY_ASSETS_LORE_SIDEBAR]: 'lore',
+    [KEY_ASSETS_DETECTOR_SIDEBAR]: 'detector',
+    [KEY_IMAGE_ASSETS_RENDER_NOW]: 'render now',
+    [KEY_IMAGE_ASSETS_ADD_TO_GALLERY]: 'add to gallery',
+    [KEY_COLUMN_LABEL_ASSET_ID]: 'asset id',
+    [KEY_COLUMN_LABEL_ASSET_SCOPE]: 'scope',
+    [KEY_COLUMN_LABEL_ASSET_SCOPE_COLON]: 'scope:',
+    [KEY_COLUMN_LABEL_ASSET_FOCAL_POINT_COLON]: 'focal point:',
+    [KEY_LORE_CONTENT_TITLE]: 'title',
+    [KEY_LORE_CONTENT_MODIFIED]: 'modified',
+    [KEY_LORE_CONTENT_STATUS]: 'status',
+    [KEY_LORE_CONTENT_PUBLISHED]: 'public',
+    [KEY_LORE_CONTENT_DRAFT]: 'draft',
 }

@@ -15,7 +15,7 @@ export class LoreStyles {
        font-size: 1.125rem;
        color: #555555;
        padding: 0.125rem 0.25rem;
-       line-height: 1.125rem;
+       line-height: 1.25rem;
    `
 
    static NewLoreIcon = styled(CoolStyles.InlineBlock)`
@@ -24,7 +24,7 @@ export class LoreStyles {
        width: 14px;
        height: 14px;
        fill: #7799bb;
-       line-height: 1.5rem;
+       line-height: 1.25rem;
        opacity: 0.5;
        &:hover {
            opacity: 1.0;
