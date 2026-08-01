@@ -124,3 +124,7 @@ export const new_lore_component = (
          return `unknown category ${id}`
    }
 }
+
+export const list_category_items = (category, width_px) => {
+
+}

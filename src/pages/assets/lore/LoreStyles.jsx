@@ -25,7 +25,7 @@ export class LoreStyles {
        height: 14px;
        fill: #7799bb;
        line-height: 1.5rem;
-       opacity: 0.25;
+       opacity: 0.5;
        &:hover {
            opacity: 1.0;
        }

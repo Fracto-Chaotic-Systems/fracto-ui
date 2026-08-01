@@ -10,22 +10,23 @@ import {
    KEY_STUDY_SPLITTER_POS_PX,
    STUDY_FIELDS,
    STUDY_POINTS,
-   STUDY_MAGNITUDES,
    STUDY_MINIBROTS,
    STUDY_NODES,
+    STUDY_INLINE,
 } from "../settings/StudySettings.jsx";
 import AppText from "../AppText.jsx";
 import {
+   KEY_BREAKER_BAILIWICKS,
    KEY_SIDEBAR_OVERVIEW,
    KEY_SIDEBAR_SETTINGS,
    KEY_SIDEBAR_STATUS,
 } from "../text/RootText.jsx";
 import {
-   KEY_FIELDS_TITLE, KEY_HYPERPLANE_TITLE,
-   KEY_MAGNITUDES_TITLE,
+   KEY_FIELDS_TITLE,
+   KEY_INLINE_TITLE,
    KEY_MINIBROTS_TITLE,
    KEY_NODES_TITLE,
-   KEY_POINTS_TITLE, KEY_STUDY_HYPERPLANE,
+   KEY_POINTS_TITLE,
 } from "../text/StudyText.jsx";
 
 import SplitterLayout from "./utils/SplitterLayout.jsx";
@@ -38,14 +39,16 @@ import StudyPoints from "./study/StudyPoints.jsx";
 import StudyFields from "./study/StudyFields.jsx";
 import StudyMinibrots from "./study/StudyMinibrots.jsx";
 import StudyNodes from "./study/StudyNodes.jsx";
+import StudyInline from "./study/StudyInline.jsx";
 
 const SIDEBAR_LIST = [
    {title_key: KEY_SIDEBAR_OVERVIEW, section_code: STUDY_OVERVIEW, right_pane: <StudyOverview/>},
    {section_code: SIDEBAR_BREAKER},
    {title_key: KEY_FIELDS_TITLE, section_code: STUDY_FIELDS, right_pane: <StudyFields/>},
    {title_key: KEY_POINTS_TITLE, section_code: STUDY_POINTS, right_pane: <StudyPoints/>},
-   {section_code: SIDEBAR_BREAKER},
+   {section_code: SIDEBAR_BREAKER, section_text_key: KEY_BREAKER_BAILIWICKS },
    {title_key: KEY_NODES_TITLE, section_code: STUDY_NODES, right_pane: <StudyNodes/>},
+   {title_key: KEY_INLINE_TITLE, section_code: STUDY_INLINE, right_pane: <StudyInline/>},
    {title_key: KEY_MINIBROTS_TITLE, section_code: STUDY_MINIBROTS, right_pane: <StudyMinibrots/>},
    {section_code: SIDEBAR_BREAKER},
    {title_key: KEY_SIDEBAR_SETTINGS, section_code: STUDY_SETTINGS, right_pane: <StudySettings/>},

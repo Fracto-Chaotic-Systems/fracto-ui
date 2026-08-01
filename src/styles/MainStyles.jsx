@@ -76,10 +76,21 @@ export class MainStyles {
    static SidebarBreaker = styled(CoolStyles.Block)`
        ${CoolStyles.align_center}
        ${CoolStyles.noselect}
-       border-bottom: 0.15rem solid #cccccc;
-       margin: 0.25rem 1rem;
+       border-top: 0.15rem solid #cccccc;
+       margin: 0.5rem 0 0.5rem;
        line-height: 0.25rem;
    `
+    static SideBarBreakerText    = styled(CoolStyles.Block)`
+        ${CoolStyles.uppercase}
+        ${CoolStyles.bold}
+        ${CoolStyles.align_center}
+        font-size: 0.5rem;
+        letter-spacing: 4px;
+        color: #666666;
+        background-color: #dddddd;
+        padding: 0.125rem 0 0.125rem;
+    `
+
    static SectionTitle = styled(CoolStyles.Block)`
        ${CoolStyles.align_center}
        ${CoolStyles.uppercase}

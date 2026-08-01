@@ -40,7 +40,7 @@ export class ContentDefinition extends Component {
 
    on_entry_data_change = (entry) => {
       const {item_data} = this.state
-      console.log('on_entry_data_change', entry)
+      // console.log('on_entry_data_change', entry)
       item_data.entry = entry
       this.update_item_data(item_data)
    }
@@ -76,7 +76,7 @@ export class ContentDefinition extends Component {
    render() {
       const {item_data, meta_data} = this.state
       const {category} = this.props
-      console.log('ContentDefinition item_data, meta_data', item_data, meta_data)
+      // console.log('ContentDefinition item_data, meta_data', item_data, meta_data)
       const preamble = render_preamble(
          item_data, category, this.update_item_data)
       const content = this.render_content()
