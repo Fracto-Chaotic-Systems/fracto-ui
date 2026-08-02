@@ -53,6 +53,7 @@ const render_type = (category) => {
 }
 
 export const render_preamble = (item_data, category, update_item_data) => {
+   const item_key = item_data.category_key.slice(category.key_prefix.length)
    const table_data = [
       {
          edit_key: 'type',
@@ -61,7 +62,7 @@ export const render_preamble = (item_data, category, update_item_data) => {
       {
          edit_key: 'key',
          edit_value: [render_edit_key, {
-            edit_key: item_data.edit_key,
+            edit_key: item_key,
             key_prefix: category.key_prefix,
             item_data,
             update_item_data,

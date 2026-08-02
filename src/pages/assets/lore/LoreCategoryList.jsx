@@ -2,7 +2,6 @@ import React, {Component} from "react";
 import PropTypes from "prop-types";
 
 import {CATEGORY_LIST_WIDTH_PX, LoreStyles as styles} from './LoreStyles.jsx'
-import {AssetsBackend} from "../../../backend/AssetsBackend.jsx";
 import CoolTable from "../../../utils/ui/CoolTable.jsx";
 import {
     CELL_ALIGN_CENTER,
@@ -12,7 +11,7 @@ import {
     TABLE_NO_HEADER,
 } from "../../../utils/ui/styles/CoolTableStyles.jsx";
 import {wand_icon} from "../../../utils/ui/CoolIcons.jsx";
-import {new_lore_component} from "./LoreUtils.jsx";
+import {new_lore_component, get_categories} from "./LoreUtils.jsx";
 
 const TABLE_COLUMNS = [
     {
@@ -46,17 +45,11 @@ export class LoreCategoryList extends Component {
     }
 
     componentDidMount() {
-        this.get_categories()
+        this.get_category_list()
     }
 
-    get_categories = async () => {
-        const unsorted = await AssetsBackend.lore_categories()
-        if (!unsorted) {
-            console.log('get_categories fails')
-            return
-        }
-        const category_list = unsorted
-            .sort((a, b) => a.id > b.id ? 1 : -1)
+    get_category_list = async () => {
+        const category_list = await get_categories()
         this.setState({category_list})
     }
 
@@ -108,6 +101,7 @@ export class LoreCategoryList extends Component {
     render() {
         const {category_list, selected_row} = this.state
         const {height_px, width_px} = this.props
+        // console.log('category_list', category_list)
         const table_style = {
             height: `${height_px}px`,
             width: `${width_px}px`,

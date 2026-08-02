@@ -30,8 +30,14 @@ export const KEY_VIDEO_ASSETS_OPEN_VIDEO = `${VIDEO_FOLDER}/open_video`
 export const KEY_LORE_CONTENT_TITLE = `${LORE_FOLDER}/content_title`
 export const KEY_LORE_CONTENT_MODIFIED = `${LORE_FOLDER}/content_modified`
 export const KEY_LORE_CONTENT_STATUS = `${LORE_FOLDER}/content_status`
+export const KEY_LORE_CONTENT_OPS = `${LORE_FOLDER}/content_ops`
 export const KEY_LORE_CONTENT_PUBLISHED = `${LORE_FOLDER}/content_published`
 export const KEY_LORE_CONTENT_DRAFT = `${LORE_FOLDER}/content_draft`
+
+export const KEY_LORE_OP_EDIT_CONTENT = `${LORE_FOLDER}/edit_content`
+export const KEY_LORE_OP_VIEW_CONTENT = `${LORE_FOLDER}/view_content`
+export const KEY_LORE_OP_CLONE_CONTENT = `${LORE_FOLDER}/clone_content`
+export const KEY_LORE_OP_REMOVE_CONTENT = `${LORE_FOLDER}/remove_content`
 
 export const APP_ASSETS_TEXT = {
     [KEY_ASSETS_OVERVIEW]: 'assets overview',
@@ -61,6 +67,11 @@ export const APP_ASSETS_TEXT = {
     [KEY_LORE_CONTENT_TITLE]: 'title',
     [KEY_LORE_CONTENT_MODIFIED]: 'modified',
     [KEY_LORE_CONTENT_STATUS]: 'status',
+    [KEY_LORE_CONTENT_OPS]: 'ops',
     [KEY_LORE_CONTENT_PUBLISHED]: 'public',
     [KEY_LORE_CONTENT_DRAFT]: 'draft',
+    [KEY_LORE_OP_EDIT_CONTENT]: 'edit',
+    [KEY_LORE_OP_VIEW_CONTENT]: 'view',
+    [KEY_LORE_OP_CLONE_CONTENT]: 'clone',
+    [KEY_LORE_OP_REMOVE_CONTENT]: 'remove',
 }

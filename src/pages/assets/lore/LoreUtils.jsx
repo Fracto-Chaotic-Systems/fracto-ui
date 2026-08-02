@@ -11,6 +11,8 @@ import ContentReference from "./content/ContentReference.jsx";
 import ContentDiagram from "./content/ContentDiagram.jsx";
 import ContentImage from "./content/ContentImage.jsx";
 import ContentVideo from "./content/ContentVideo.jsx";
+import {AssetsBackend} from "../../../backend/AssetsBackend.jsx";
+import {copy_json} from "../../../utils/Dom.jsx";
 
 export const LORE_CATEGORY_DEFINITION = 1
 export const LORE_CATEGORY_SUBJECT = 2
@@ -26,105 +28,137 @@ export const LORE_CATEGORY_DIAGRAM = 11
 export const LORE_CATEGORY_IMAGE = 12
 export const LORE_CATEGORY_VIDEO = 13
 
-export const new_lore_component = (
-   category, width_px, height_px) => {
-   switch (category.id) {
-      case  LORE_CATEGORY_DEFINITION:
-         return <ContentDefinition
-            item_id={-1}
-            category={category}
-            width_px={width_px}
-            height_px={height_px}
-         />
-      case  LORE_CATEGORY_SUBJECT:
-         return <ContentSubject
-            item_id={-1}
-            category={category}
-            width_px={width_px}
-            height_px={height_px}
-         />
-      case  LORE_CATEGORY_STUDY:
-         return <ContentStudy
-            item_id={-1}
-            category={category}
-            width_px={width_px}
-            height_px={height_px}
-         />
-      case  LORE_CATEGORY_TAXONOMY:
-         return <ContentTaxonomy
-            item_id={-1}
-            category={category}
-            width_px={width_px}
-            height_px={height_px}
-         />
-      case  LORE_CATEGORY_DERIVATION:
-         return <ContentDerivation
-            item_id={-1}
-            category={category}
-            width_px={width_px}
-            height_px={height_px}
-         />
-      case  LORE_CATEGORY_OPERATION:
-         return <ContentOperation
-            item_id={-1}
-            category={category}
-            width_px={width_px}
-            height_px={height_px}
-         />
-      case  LORE_CATEGORY_DIALOG:
-         return <ContentDialog
-            item_id={-1}
-            category={category}
-            width_px={width_px}
-            height_px={height_px}
-         />
-      case  LORE_CATEGORY_THESIS:
-         return <ContentThesis
-            item_id={-1}
-            category={category}
-            width_px={width_px}
-            height_px={height_px}
-         />
-      case  LORE_CATEGORY_ARTICLE:
-         return <ContentArticle
-            item_id={-1}
-            category={category}
-            width_px={width_px}
-            height_px={height_px}
-         />
-      case  LORE_CATEGORY_REFERENCE:
-         return <ContentReference
-            item_id={-1}
-            category={category}
-            width_px={width_px}
-            height_px={height_px}
-         />
-      case LORE_CATEGORY_DIAGRAM:
-         return <ContentDiagram
-            item_id={-1}
-            category={category}
-            width_px={width_px}
-            height_px={height_px}
-         />
-      case LORE_CATEGORY_IMAGE:
-         return <ContentImage
-            item_id={-1}
-            category={category}
-            width_px={width_px}
-            height_px={height_px}
-         />
-      case LORE_CATEGORY_VIDEO:
-         return <ContentVideo
-            item_id={-1}
-            category={category}
-            width_px={width_px}
-            height_px={height_px}
-         />
-      default:
-         return `unknown category ${id}`
-   }
+const op_lore_component = (item_id, category, width_px, height_px) => {
+    switch (category.id) {
+        case  LORE_CATEGORY_DEFINITION:
+            return <ContentDefinition
+                item_id={item_id}
+                category={category}
+                width_px={width_px}
+                height_px={height_px}
+            />
+        case  LORE_CATEGORY_SUBJECT:
+            return <ContentSubject
+                item_id={item_id}
+                category={category}
+                width_px={width_px}
+                height_px={height_px}
+            />
+        case  LORE_CATEGORY_STUDY:
+            return <ContentStudy
+                item_id={item_id}
+                category={category}
+                width_px={width_px}
+                height_px={height_px}
+            />
+        case  LORE_CATEGORY_TAXONOMY:
+            return <ContentTaxonomy
+                item_id={item_id}
+                category={category}
+                width_px={width_px}
+                height_px={height_px}
+            />
+        case  LORE_CATEGORY_DERIVATION:
+            return <ContentDerivation
+                item_id={item_id}
+                category={category}
+                width_px={width_px}
+                height_px={height_px}
+            />
+        case  LORE_CATEGORY_OPERATION:
+            return <ContentOperation
+                item_id={item_id}
+                category={category}
+                width_px={width_px}
+                height_px={height_px}
+            />
+        case  LORE_CATEGORY_DIALOG:
+            return <ContentDialog
+                item_id={item_id}
+                category={category}
+                width_px={width_px}
+                height_px={height_px}
+            />
+        case  LORE_CATEGORY_THESIS:
+            return <ContentThesis
+                item_id={item_id}
+                category={category}
+                width_px={width_px}
+                height_px={height_px}
+            />
+        case  LORE_CATEGORY_ARTICLE:
+            return <ContentArticle
+                item_id={item_id}
+                category={category}
+                width_px={width_px}
+                height_px={height_px}
+            />
+        case  LORE_CATEGORY_REFERENCE:
+            return <ContentReference
+                item_id={item_id}
+                category={category}
+                width_px={width_px}
+                height_px={height_px}
+            />
+        case LORE_CATEGORY_DIAGRAM:
+            return <ContentDiagram
+                item_id={item_id}
+                category={category}
+                width_px={width_px}
+                height_px={height_px}
+            />
+        case LORE_CATEGORY_IMAGE:
+            return <ContentImage
+                item_id={item_id}
+                category={category}
+                width_px={width_px}
+                height_px={height_px}
+            />
+        case LORE_CATEGORY_VIDEO:
+            return <ContentVideo
+                item_id={item_id}
+                category={category}
+                width_px={width_px}
+                height_px={height_px}
+            />
+        default:
+            return `unknown category ${id}`
+    }
 }
 
-export const list_category_items = (category, width_px) => {
-
+export const new_lore_component = (category, width_px, height_px) => {
+    return op_lore_component(-1, category, width_px, height_px)
 }
+
+export const edit_lore_component = async (content, width_px, height_px) => {
+    const category = await get_category(content.category)
+    return op_lore_component(content.id, category, width_px, height_px)
+}
+
+let ALL_CATEGORIES = null
+
+export const get_categories = async () => {
+    if (ALL_CATEGORIES) {
+        console.log('found ALL_CATEGORIES', ALL_CATEGORIES)
+        return ALL_CATEGORIES
+    }
+    const unsorted = await AssetsBackend.lore_categories()
+    if (!unsorted) {
+        console.log('get_categories fails')
+        return
+    }
+    console.log('unsorted', unsorted)
+    const category_list = unsorted
+        .sort((a, b) => a.id > b.id ? 1 : -1)
+    ALL_CATEGORIES = copy_json(category_list)
+    return ALL_CATEGORIES
+}
+
+export const get_category = async (category_id) => {
+    if (!ALL_CATEGORIES) {
+        await get_categories()
+    }
+    console.log('ALL_CATEGORIES,category_id', ALL_CATEGORIES, category_id)
+    return ALL_CATEGORIES.find(cat => cat.id === category_id)
+}
+

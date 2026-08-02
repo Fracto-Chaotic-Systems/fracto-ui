@@ -3,12 +3,17 @@ import React, {Component} from "react";
 import {MainStyles as styles} from '../../styles/MainStyles.jsx'
 import {LoreStyles as lore_styles} from './lore/LoreStyles.jsx'
 import AppText from "../../AppText.jsx";
-import {KEY_ASSETS_LORE} from "../../text/AssetsText.jsx";
+import {
+    KEY_ASSETS_LORE,
+    KEY_LORE_OP_EDIT_CONTENT
+} from "../../text/AssetsText.jsx";
 import {KEY_STUDY_SPLITTER_POS_PX} from "../../settings/StudySettings.jsx";
 import {update_dimensions} from "../PageUtils.jsx"
 import LoreCategoryList from "./lore/LoreCategoryList.jsx";
 import {CATEGORY_LIST_WIDTH_PX} from "./lore/LoreStyles.jsx";
-import {LoreContentList} from "./lore/LoreContentList.jsx";
+import {LoreContentList, OP_EDIT_CONTENT} from "./lore/LoreContentList.jsx";
+import {edit_lore_component, get_category, new_lore_component} from "./lore/LoreUtils.jsx";
+import CoolStyles from "../../utils/ui/styles/CoolStyles.jsx";
 
 const UPDATE_INTERVAL_MS = 1000
 
@@ -21,6 +26,7 @@ export class AssetsLore extends Component {
         edit_component: [],
         list_component: [],
         content: [],
+        category: null,
     }
 
     componentDidMount() {
@@ -53,18 +59,36 @@ export class AssetsLore extends Component {
         this.setState({content})
     }
 
+    on_content_ops = async (op, content) => {
+        const {rendered_width, rendered_height} = this.state
+        switch (op) {
+            case OP_EDIT_CONTENT: {
+                const edit_component = await edit_lore_component(content, rendered_width, rendered_height)
+                this.setState({edit_component})
+            }
+                break;
+            default:
+                console.log('soon', op, content)
+                break
+        }
+    }
+
     on_select_category = (category) => {
         const {rendered_width, rendered_height} = this.state
-        console.log('on_select_category', category)
         const list_component = <lore_styles.ScrollingLoreList>
             <LoreContentList
                 width_px={rendered_width - CATEGORY_LIST_WIDTH_PX}
                 height_px={rendered_height}
                 on_select_content={this.on_select_content}
                 category_id={category.id}
+                on_content_ops={this.on_content_ops}
             />
         </lore_styles.ScrollingLoreList>
-        this.setState({list_component, edit_component: []})
+        this.setState({
+            category,
+            list_component,
+            edit_component: [],
+        })
     }
 
     render() {
@@ -72,6 +96,7 @@ export class AssetsLore extends Component {
             rendered_width, rendered_height,
             edit_component, list_component
         } = this.state
+        console.log('edit_component', edit_component)
         return [
             <styles.SectionTitle
                 key={'assets-status-title'}>
@@ -86,8 +111,15 @@ export class AssetsLore extends Component {
                     on_new_item={this.on_new_item}
                     content_width_px={rendered_width - CATEGORY_LIST_WIDTH_PX}
                 />
-                {edit_component}
-                {list_component}
+                <CoolStyles.InlineBlock>
+                    <CoolStyles.Block>
+                        {list_component}
+                    </CoolStyles.Block>
+                    <styles.OneRemDown/>
+                    <CoolStyles.Block>
+                        {edit_component}
+                    </CoolStyles.Block>
+                </CoolStyles.InlineBlock>
             </styles.BodyWrapper>,
         ];
     }

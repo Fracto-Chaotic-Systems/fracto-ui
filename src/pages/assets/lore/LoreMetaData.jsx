@@ -30,9 +30,9 @@ const render_meta_data = (obj_meta) => {
       meta_data.published ? 'published,' : 'not published,',
       meta_data.hidden ? 'hidden,' : 'not hidden,',
       `modified: ${meta_data.modified}`,
-   ].map(item_data => {
+   ].map(element => {
       return <styles.MetaElement>
-         {item_data}
+         {element}
       </styles.MetaElement>
    })
    return <CoolStyles.Block style={{lineHeight: "1.75rem"}}>
