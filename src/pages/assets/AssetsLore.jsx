@@ -52,7 +52,7 @@ export class AssetsLore extends Component {
     }
 
     on_new_item = (edit_component) => {
-        this.setState({edit_component})
+        this.setState({edit_component, list_component: []})
     }
 
     on_select_content = (content) => {

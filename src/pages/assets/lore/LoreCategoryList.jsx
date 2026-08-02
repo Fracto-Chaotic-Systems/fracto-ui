@@ -11,7 +11,7 @@ import {
     TABLE_NO_HEADER,
 } from "../../../utils/ui/styles/CoolTableStyles.jsx";
 import {wand_icon} from "../../../utils/ui/CoolIcons.jsx";
-import {new_lore_component, get_categories} from "./LoreUtils.jsx";
+import {new_lore_component, get_categories, get_category} from "./LoreUtils.jsx";
 
 const TABLE_COLUMNS = [
     {
@@ -57,10 +57,9 @@ export class LoreCategoryList extends Component {
         this.setState({selected_row})
     }
 
-    new_lore = (category_id) => {
-        const {category_list} = this.state
+    new_lore = async (category_id) => {
         const {on_new_item, content_width_px, height_px} = this.props
-        const category = category_list.find(c => c.id === category_id)
+        const category = await get_category(category_id)
         const edit_component = new_lore_component(
             category,
             content_width_px - CATEGORY_LIST_WIDTH_PX,

@@ -11,6 +11,7 @@ import {LoreStyles as styles} from '../LoreStyles.jsx'
 import {render_meta} from "../LoreMetaData.jsx";
 import {render_preamble} from "../LorePreamble.jsx";
 import {
+    empty_content,
     LORE_INITIAL_DATA_STATE,
     LORE_INITIAL_META_STATE,
     render_link_text,
@@ -36,8 +37,10 @@ export class ContentReference extends Component {
     }
 
     load_content = async () => {
-        const {item_id} = this.props
-        const content = await AssetsBackend.get_lore_content(item_id)
+        const {item_id, category} = this.props
+        const content = item_id > 0
+            ? await AssetsBackend.get_lore_content(item_id)
+            : empty_content(category)
         this.setState({content})
     }
 

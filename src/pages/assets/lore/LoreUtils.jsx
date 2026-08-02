@@ -147,7 +147,6 @@ export const get_categories = async () => {
         console.log('get_categories fails')
         return
     }
-    console.log('unsorted', unsorted)
     const category_list = unsorted
         .sort((a, b) => a.id > b.id ? 1 : -1)
     ALL_CATEGORIES = copy_json(category_list)
@@ -158,7 +157,6 @@ export const get_category = async (category_id) => {
     if (!ALL_CATEGORIES) {
         await get_categories()
     }
-    console.log('ALL_CATEGORIES,category_id', ALL_CATEGORIES, category_id)
     return ALL_CATEGORIES.find(cat => cat.id === category_id)
 }
 

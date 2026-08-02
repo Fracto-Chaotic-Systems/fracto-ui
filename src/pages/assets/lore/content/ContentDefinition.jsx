@@ -9,6 +9,7 @@ import {
 } from "../../../../utils/ui/styles/CoolTableStyles.jsx";
 
 import {
+    empty_content,
     render_entry_text,
     TABLE_EDITOR_COLUMNS,
 } from "./ContentUtils.jsx";
@@ -34,8 +35,10 @@ export class ContentDefinition extends Component {
     }
 
     load_content = async () => {
-        const {item_id} = this.props
-        const content = await AssetsBackend.get_lore_content(item_id)
+        const {item_id, category} = this.props
+        const content = item_id > 0
+            ? await AssetsBackend.get_lore_content(item_id)
+            : empty_content(category)
         this.setState({content})
     }
 
