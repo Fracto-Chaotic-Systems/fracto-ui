@@ -8,6 +8,18 @@ const DATA_ORIGIN = window.origin.replace(
 
 export class DataBackend {
 
+    static get_minibrots = (params, cb) => {
+        setTimeout(async () => {
+            const all_params = Object.keys(params).map(key => {
+                return `${key}=${params[key]}`;
+            }).join('&');
+            const url = `${DATA_ORIGIN}/minibrots?${all_params}`
+            const minibrots = await fetch(url, FETCH_JSON_HEADERS)
+                .then(response => response.json())
+            cb(minibrots.result)
+        }, 250)
+    }
+
     static get_orbital = (focal_point, limit, cb) => {
         setTimeout(async () => {
             const all_params = [

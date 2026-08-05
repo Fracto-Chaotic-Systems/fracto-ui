@@ -41,6 +41,10 @@ import StudyMinibrots from "./study/StudyMinibrots.jsx";
 import StudyNodes from "./study/StudyNodes.jsx";
 import StudyInline from "./study/StudyInline.jsx";
 
+export const BAILIWICK_TYPE_FREEFORM = 'bailiwick_type_freeform'
+export const BAILIWICK_TYPE_INLINE = 'bailiwick_type_inline'
+export const BAILIWICK_TYPE_NODES = 'bailiwick_type_nodes'
+
 const SIDEBAR_LIST = [
    {title_key: KEY_SIDEBAR_OVERVIEW, section_code: STUDY_OVERVIEW, right_pane: <StudyOverview/>},
    {section_code: SIDEBAR_BREAKER},

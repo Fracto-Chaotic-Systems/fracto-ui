@@ -16,11 +16,11 @@ import {
 } from '../../../styles/MainStyles.jsx'
 import AppSettings from "../../../AppSettings.jsx";
 import {KEY_STUDY_MINIBROTS_RENDER_SPLITTER_POS} from "../../../settings/StudySettings.jsx";
-import GalleryRightPanel from "../../assets/gallery/GalleryRightPanel.jsx";
 import MinibrotRightPanel from "./MinibrotRightPanel.jsx";
 
 export class MinibrotPanel extends Component {
     static propTypes = {
+        bailiwick_type: PropTypes.string.isRequired,
         height_px: PropTypes.number.isRequired,
     }
 
@@ -45,10 +45,6 @@ export class MinibrotPanel extends Component {
         })
     }
 
-    right_panel = () => {
-        return 'right_panela'
-    }
-
     change_splitter_pos = (pos) => {
         const {container_ref} = this.state
         if (container_ref.current) {
@@ -70,9 +66,10 @@ export class MinibrotPanel extends Component {
         this.setState({ready: true, canvas_buffer})
     }
 
+
     render() {
         const {canvas_buffer, ready, container_ref, rendered_splitter_pos, selected_minibrot} = this.state
-        const {height_px} = this.props
+        const {height_px, bailiwick_type} = this.props
         let top = 0;
         let container_bounds = {}
         if (container_ref.current) {
@@ -101,6 +98,7 @@ export class MinibrotPanel extends Component {
             />
             : []
         const minibrot_table = <MinibrotList
+            bailiwick_type={bailiwick_type}
             on_select_minibrot={this.on_select_minibrot}
             height_px={height_px}
             ready={ready}
