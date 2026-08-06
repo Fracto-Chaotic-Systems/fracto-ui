@@ -67,7 +67,7 @@ const process_json_str = (json) => {
       ? json
       : JSON.stringify(json)
    const clean_json_str = json_str.replaceAll('"', '\"')
-   return `'${clean_json_str}'`
+   return `${clean_json_str}`
 }
 
 export class MinibrotBackend {
@@ -101,8 +101,8 @@ export class MinibrotBackend {
       const octave_point = process_json_str(bailiwick.octave_point)
       const display_settings = process_json_str(bailiwick.display_settings)
       const data = {
-         name: `'${name}'`,
-         CQ_code: `'${cq_code.slice(0, 25)}'`,
+         name: `${name}`,
+         CQ_code: `${cq_code.slice(0, 25)}`,
          pattern: bailiwick.pattern,
          magnitude: bailiwick.magnitude,
          best_level: highest_level,

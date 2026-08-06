@@ -1,6 +1,7 @@
 import {find_minibrot} from "../AssetsUtils.jsx";
 import AppSettings from "../../../AppSettings.jsx";
 import {KEY_ASSETS_DETECTOR_FRAME_SETTINGS, KEY_ASSETS_DETECTOR_IS_NODE} from "../../../settings/AssetsSettings.jsx";
+import {KEY_NAVIGATOR_DISABLED} from "../../../settings/NavigatorSettings.jsx";
 
 export const find_minima = (frame_settings) => {
    const {canvas_buffer} = frame_settings
@@ -31,6 +32,7 @@ export const find_minima = (frame_settings) => {
 }
 
 export const highlight_potentials = (ctx, all_minima) => {
+   const disabled = AppSettings.get(KEY_NAVIGATOR_DISABLED)
    if (!ctx || typeof ctx.beginPath !== 'function') {
       console.log('highlight_potentials: ctx bad', ctx)
       return;
@@ -49,6 +51,11 @@ export const highlight_potentials = (ctx, all_minima) => {
 }
 
 export const highlight_existing = (minibrot_list, frame_settings) => {
+   const disabled = AppSettings.get(KEY_NAVIGATOR_DISABLED)
+   if (disabled) {
+      console.log('highlight_potentials: rendering disabled')
+      return
+   }
    if (!Object.hasOwn(frame_settings, 'focal_point')) {
       return
    }
