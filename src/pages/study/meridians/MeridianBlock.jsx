@@ -15,17 +15,29 @@ export class StudyMeridians extends Component {
         const {cardinality, aspects} = this.props
         console.log('StudyMeridians, cardinality, aspects', cardinality, aspects)
         const aspect_list = aspects.map(aspect => {
+            const block_style = {
+                lineHeight: '20px',
+                marginBottom: '5px',
+            }
             return <CoolStyles.InlineBlock
+                style={block_style}
                 key={`${aspect.num}/${aspect.den}`}>
                 <input type={'checkbox'}/>
                 {render_aspect_badge(aspect.num, cardinality, 12)}
             </CoolStyles.InlineBlock>
         })
-        const block_style = {maxWidth: `${5 + Math.sqrt(cardinality + aspect_list.length)}rem`};
+        const wrapper_style = {maxWidth: `${5 + Math.sqrt(cardinality + aspect_list.length)}rem`};
+
+        const block_style = {
+            padding: '5px',
+            borderBottom: '1px solid #444444',
+            marginBottom: '8px',
+            backgroundColor: '#eeeeee',
+        }
         const cardinality_block = <styles.CardinalityWrapper
-            style={block_style}>
+            style={wrapper_style}>
             <CoolStyles.Block
-                style={{margin: '0 5px 5px 0'}}>
+                style={block_style}>
                 <input type={'checkbox'}/>
                 {render_pattern_block(cardinality, 22)}
             </CoolStyles.Block>

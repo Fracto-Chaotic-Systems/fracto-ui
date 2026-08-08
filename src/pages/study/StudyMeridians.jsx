@@ -20,12 +20,13 @@ import MeridianBlock from "./meridians/MeridianBlock.jsx";
 import CoolStyles from "../../utils/ui/styles/CoolStyles.jsx";
 
 const UPDATE_INTERVAL_MS = 1000
-const MAX_CARDINALITY = 64
+const MAX_CARDINALITY = 128
 
 const BlocksBackground = styled(CoolStyles.Block)`
     background-color: #dddddd;
     overflow-y: auto;
     padding: 0.5rem;
+    height: 90vh;
 `
 
 export class StudyMeridians extends Component {
@@ -95,10 +96,7 @@ export class StudyMeridians extends Component {
                 aspects={aspects}/>
             all_blocks.push(cardinality_block)
         }
-        const background_style = {
-            height: `${rendered_height}px`
-        }
-        return <BlocksBackground style={background_style}>
+        return <BlocksBackground>
             {all_blocks}
         </BlocksBackground>
     }
@@ -128,7 +126,6 @@ export class StudyMeridians extends Component {
         const result_block_style = {
             left: `${splitter_pos}px`,
             top: `${top}px`,
-            height: `${rendered_height + top}px`
         }
         return [
             <styles.SectionTitle
