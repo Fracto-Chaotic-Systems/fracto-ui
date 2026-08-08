@@ -12,7 +12,7 @@ import {
    STUDY_POINTS,
    STUDY_MINIBROTS,
    STUDY_NODES,
-    STUDY_INLINE,
+   STUDY_INLINE, STUDY_MERIDIANS,
 } from "../settings/StudySettings.jsx";
 import AppText from "../AppText.jsx";
 import {
@@ -23,7 +23,7 @@ import {
 } from "../text/RootText.jsx";
 import {
    KEY_FIELDS_TITLE,
-   KEY_INLINE_TITLE,
+   KEY_INLINE_TITLE, KEY_MERIDIANS_TITLE,
    KEY_MINIBROTS_TITLE,
    KEY_NODES_TITLE,
    KEY_POINTS_TITLE,
@@ -40,6 +40,7 @@ import StudyFields from "./study/StudyFields.jsx";
 import StudyMinibrots from "./study/StudyMinibrots.jsx";
 import StudyNodes from "./study/StudyNodes.jsx";
 import StudyInline from "./study/StudyInline.jsx";
+import StudyMeridians from "./study/StudyMeridians.jsx";
 
 export const BAILIWICK_TYPE_FREEFORM = 'bailiwick_type_freeform'
 export const BAILIWICK_TYPE_INLINE = 'bailiwick_type_inline'
@@ -50,6 +51,7 @@ const SIDEBAR_LIST = [
    {section_code: SIDEBAR_BREAKER},
    {title_key: KEY_FIELDS_TITLE, section_code: STUDY_FIELDS, right_pane: <StudyFields/>},
    {title_key: KEY_POINTS_TITLE, section_code: STUDY_POINTS, right_pane: <StudyPoints/>},
+   {title_key: KEY_MERIDIANS_TITLE, section_code: STUDY_MERIDIANS, right_pane: <StudyMeridians/>},
    {section_code: SIDEBAR_BREAKER, section_text_key: KEY_BREAKER_BAILIWICKS },
    {title_key: KEY_NODES_TITLE, section_code: STUDY_NODES, right_pane: <StudyNodes/>},
    {title_key: KEY_INLINE_TITLE, section_code: STUDY_INLINE, right_pane: <StudyInline/>},

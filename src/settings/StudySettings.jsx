@@ -8,6 +8,7 @@ import {DEFAULT_SIDEBAR_WIDTH} from "../constants.jsx";
 const STUDY_FOLDER = 'study'
 const MAGNITUDES_FOLDER = 'study/magnitudes'
 const POINTS_FOLDER = 'study/points'
+const MERIDIANS_FOLDER = 'study/meridians'
 const FIELDS_FOLDER = 'study/fields'
 const MINBROTS_FOLDER = 'study/minibrots'
 const NODES_FOLDER = 'study/nodes'
@@ -27,6 +28,11 @@ export const KEY_STUDY_POINTS_FRAME_SETTINGS = `${POINTS_FOLDER}/frame_settings`
 export const KEY_STUDY_POINTS_SPLITTER_POS = `${POINTS_FOLDER}/splitter_pos`
 export const KEY_STUDY_POINTS_LEGEND_SPLITTER_POS = `${POINTS_FOLDER}/legend_splitter_pos`
 export const KEY_STUDY_POINTS_STEPS_SPLITTER_POS = `${POINTS_FOLDER}/steps_splitter_pos`
+
+export const KEY_STUDY_MERIDIANS_FRAME_SETTINGS = `${MERIDIANS_FOLDER}/frame_settings`
+export const KEY_STUDY_MERIDIANS_SPLITTER_POS = `${MERIDIANS_FOLDER}/splitter_pos`
+export const KEY_STUDY_MERIDIANS_LEGEND_SPLITTER_POS = `${MERIDIANS_FOLDER}/legend_splitter_pos`
+export const KEY_STUDY_MERIDIANS_STEPS_SPLITTER_POS = `${MERIDIANS_FOLDER}/steps_splitter_pos`
 
 export const KEY_STUDY_FIELDS_FRAME_SETTINGS = `${FIELDS_FOLDER}/frame_settings`
 export const KEY_STUDY_FIELDS_SPLITTER_POS = `${FIELDS_FOLDER}/splitter_pos`
@@ -58,7 +64,7 @@ export const STUDY_INLINE = 'study_inline'
 export const STUDY_POINTS = 'study_points'
 export const STUDY_FIELDS = 'study_fields'
 export const STUDY_MINIBROTS = 'study_minibrots'
-export const STUDY_MAGNITUDES = 'study_magnitudes'
+export const STUDY_MERIDIANS = 'study_meridians'
 
 const DEFAULT_FRAME_SETTINGS = {
    focal_point: {x: -0.75, y: 0.0001},
@@ -253,6 +259,30 @@ export const APP_STUDY_SETTINGS = {
       data_type: TYPE_NUMBER,
       default_value: 800,
       description: 'Current position for the study hyperplane vertical steps splitter',
+      persist: true,
+   },
+   [KEY_STUDY_MERIDIANS_FRAME_SETTINGS]: {
+      data_type: TYPE_OBJECT,
+      default_value: DEFAULT_FRAME_SETTINGS,
+      description: 'Frame settings of the study meridians page',
+      persist: true,
+   },
+   [KEY_STUDY_MERIDIANS_SPLITTER_POS]: {
+      data_type: TYPE_NUMBER,
+      default_value: 500,
+      description: 'Current position for the study meridians splitter',
+      persist: true,
+   },
+   [KEY_STUDY_MERIDIANS_LEGEND_SPLITTER_POS]: {
+      data_type: TYPE_NUMBER,
+      default_value: 800,
+      description: 'Current position for the study meridians horizontal legend splitter',
+      persist: true,
+   },
+   [KEY_STUDY_MERIDIANS_STEPS_SPLITTER_POS]: {
+      data_type: TYPE_NUMBER,
+      default_value: 200,
+      description: 'Current position for the study meridians vertical steps splitter',
       persist: true,
    },
 }

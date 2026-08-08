@@ -1,10 +1,11 @@
 import {FRACTO_DATA_PORT, FRACTO_UI_PORT} from "../../../../constants.js";
 import {FETCH_JSON_HEADERS} from "../pages/study/StudyUtils.jsx";
-import {copy_json} from "../utils/Dom.jsx";
 
 const DATA_ORIGIN = window.origin.replace(
     `${FRACTO_UI_PORT}`,
     `${FRACTO_DATA_PORT}`)
+
+const MAX_DENOMINATOR = 128
 
 export class DataBackend {
 
@@ -95,6 +96,28 @@ export class DataBackend {
         } catch (e) {
             console.error('lore_storage response', e.message);
         }
+    }
+
+    FAREY_SEQUENCE = []
+
+    static get_farey_sequence = async () => {
+        if (DataBackend.FAREY_SEQUENCE?.length > 0) {
+            return DataBackend.FAREY_SEQUENCE
+        }
+        const url = `${DATA_ORIGIN}/utils/farey_sequence`
+        const full_farey_sequence = await fetch(url, {}).then(res => res.json())
+        const farey_sequence = full_farey_sequence
+            .filter(f => f.den <= MAX_DENOMINATOR)
+            .filter(f => f.num > 0 && f.den > 2)
+        // console.log(`${farey_sequence.length} members in farey_sequence`)
+        DataBackend.FAREY_SEQUENCE = farey_sequence.map(element=>{
+            return {
+                num: parseInt(element.num),
+                den: parseInt(element.den),
+                ratio: parseFloat(element.ratio),
+            }
+        })
+        return DataBackend.FAREY_SEQUENCE
     }
 }
 
