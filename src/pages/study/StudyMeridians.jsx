@@ -5,10 +5,10 @@ import {MainStyles as styles, MARGIN_PX} from '../../styles/MainStyles.jsx'
 import AppSettings from "../../AppSettings.jsx";
 import {update_dimensions} from "../PageUtils.jsx"
 import {
+    KEY_STUDY_MERIDIANS_FRAME_SETTINGS,
     KEY_STUDY_MERIDIANS_LEGEND_SPLITTER_POS,
     KEY_STUDY_MERIDIANS_SPLITTER_POS,
     KEY_STUDY_MERIDIANS_STEPS_SPLITTER_POS,
-    KEY_STUDY_POINTS_FRAME_SETTINGS,
     KEY_STUDY_SPLITTER_POS_PX
 } from "../../settings/StudySettings.jsx";
 import AppText from "../../AppText.jsx";
@@ -47,9 +47,9 @@ export class StudyMeridians extends Component {
         this.setState({
             interval: setInterval(this.update_dimensions, UPDATE_INTERVAL_MS),
             frame_settings: AppSettings
-                .get(KEY_STUDY_POINTS_FRAME_SETTINGS),
+                .get(KEY_STUDY_MERIDIANS_FRAME_SETTINGS),
             subscription: AppSettings
-                .subscribe(KEY_STUDY_POINTS_FRAME_SETTINGS, this.on_frame_settings_changed)
+                .subscribe(KEY_STUDY_MERIDIANS_FRAME_SETTINGS, this.on_frame_settings_changed)
         })
     }
 
@@ -138,7 +138,7 @@ export class StudyMeridians extends Component {
                 <NavigatorSplitterLayout
                     bounding_rect={bounding_rect}
                     frame_settings={frame_settings}
-                    frame_settings_key={KEY_STUDY_POINTS_FRAME_SETTINGS}
+                    frame_settings_key={KEY_STUDY_MERIDIANS_FRAME_SETTINGS}
                     splitter_keys={splitter_keys}
                 />
             </styles.TightCenteredBlock>,
