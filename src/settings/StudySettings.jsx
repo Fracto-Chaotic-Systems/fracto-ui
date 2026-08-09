@@ -141,7 +141,7 @@ export const APP_STUDY_SETTINGS = {
    },
    [KEY_STUDY_POINTS_LEGEND_SPLITTER_POS]: {
       data_type: TYPE_NUMBER,
-      default_value: 800,
+      default_value: 500,
       description: 'Current position for the study points horizontal legend splitter',
       persist: true,
    },
@@ -165,7 +165,7 @@ export const APP_STUDY_SETTINGS = {
    },
    [KEY_STUDY_FIELDS_LEGEND_SPLITTER_POS]: {
       data_type: TYPE_NUMBER,
-      default_value: 800,
+      default_value: 500,
       description: 'Current position for the study fields horizontal legend splitter',
       persist: true,
    },
@@ -189,7 +189,7 @@ export const APP_STUDY_SETTINGS = {
    },
    [KEY_STUDY_MINIBROTS_LEGEND_SPLITTER_POS]: {
       data_type: TYPE_NUMBER,
-      default_value: 800,
+      default_value: 500,
       description: 'Current position for the study minibrots horizontal legend splitter',
       persist: true,
    },
@@ -226,7 +226,7 @@ export const APP_STUDY_SETTINGS = {
    },
    [KEY_STUDY_NODES_LEGEND_SPLITTER_POS]: {
       data_type: TYPE_NUMBER,
-      default_value: 800,
+      default_value: 500,
       description: 'Current position for the study nodes horizontal legend splitter',
       persist: true,
    },
@@ -251,7 +251,7 @@ export const APP_STUDY_SETTINGS = {
    },
    [KEY_STUDY_HYPERPLANE_LEGEND_SPLITTER_POS]: {
       data_type: TYPE_NUMBER,
-      default_value: 800,
+      default_value: 500,
       description: 'Current position for the study hyperplane horizontal legend splitter',
       persist: true,
    },
@@ -275,7 +275,7 @@ export const APP_STUDY_SETTINGS = {
    },
    [KEY_STUDY_MERIDIANS_LEGEND_SPLITTER_POS]: {
       data_type: TYPE_NUMBER,
-      default_value: 800,
+      default_value: 500,
       description: 'Current position for the study meridians horizontal legend splitter',
       persist: true,
    },
