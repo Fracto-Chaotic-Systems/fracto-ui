@@ -9,7 +9,7 @@ import {
 } from '../../styles/MainStyles.jsx'
 import {KEY_STUDY_SPLITTER_POS_PX} from "../../settings/StudySettings.jsx";
 import AppText from "../../AppText.jsx";
-import {KEY_STUDY_MINIBROTS, KEY_STUDY_NODES} from "../../text/StudyText.jsx";
+import {KEY_STUDY_NODES} from "../../text/StudyText.jsx";
 import {update_dimensions} from "../PageUtils.jsx"
 import {BAILIWICK_TYPE_NODES} from "../Study.jsx";
 

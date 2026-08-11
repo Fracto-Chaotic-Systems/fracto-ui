@@ -22,7 +22,7 @@ export class CoolTableStyles {
 
    static TableRow = styled(CoolStyles.TableRow)`
        padding: 0 0.125rem;
-       background-color: white;
+       //background-color: white;
        
        &: hover {
            ${CoolStyles.pointer}

@@ -206,6 +206,17 @@ export class MainStyles {
         line-height: 1.25rem;
         padding: 0 0.5rem 0.125rem;
     `
+    static HoverBlueButton = styled(MainStyles.BlueButton)`
+        color: #444444;
+        border: 0.1rem solid #888888;
+        background: linear-gradient(15deg, #aaaaaa 0%, #dddddd 50%, #eeeeee 90%);
+        &:hover {
+            ${CoolStyles.tight_box_shadow}
+            color: white;
+            border: 0.1rem solid #444444;
+            background: linear-gradient(15deg, #557799 0%, #7799bb 50%, #bbddff 90%);
+        }
+    `
     static OneRemSpacer = styled(CoolStyles.InlineBlock)`
         width: 1rem;
     `

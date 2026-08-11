@@ -21,9 +21,10 @@ import CoolStyles from "../../utils/ui/styles/CoolStyles.jsx";
 
 const UPDATE_INTERVAL_MS = 1000
 const MAX_CARDINALITY = 128
+const LEGEND_BACKGROUND_COLOR = "linear-gradient(75deg, #bbbbbb 0%, #eeeeee 50%, #ffffff 90%)";
 
 const BlocksBackground = styled(CoolStyles.Block)`
-    background-color: #dddddd;
+    background: ${LEGEND_BACKGROUND_COLOR};
     overflow-y: auto;
     padding: 0.5rem;
     height: 90vh;

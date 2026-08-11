@@ -139,7 +139,8 @@ export class FractoOrbitalChart extends Component {
          other_sets,
          false,
          false,
-         in_animation ? null : backgroundImagePlugin)
+         // in_animation ? null : backgroundImagePlugin)
+      )
    }
 }
 

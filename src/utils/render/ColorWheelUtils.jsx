@@ -85,11 +85,11 @@ export const color_wheel = (canvas_ref, radius, ring_count = 5, color_phase = 0,
    const bounds = canvas.getBoundingClientRect();
    const width_px = bounds.width;
 
-   const gradient = ctx.createLinearGradient(180, 0, 0, 180); // Horizontal gradient
-   gradient.addColorStop(0, '#bbbbbb'); // Start color
-   gradient.addColorStop(1, '#ffffff'); // End color
-   ctx.fillStyle = gradient
-   ctx.fillRect(0, 0, width_px, width_px);
+   // const gradient = ctx.createLinearGradient(180, 0, 0, 180); // Horizontal gradient
+   // gradient.addColorStop(0, '#bbbbbb'); // Start color
+   // gradient.addColorStop(1, '#ffffff'); // End color
+   // ctx.fillStyle = gradient
+   // ctx.fillRect(0, 0, width_px, width_px);
 
    const radii = [];
    for (let i = 1; i <= ring_count; i++) {

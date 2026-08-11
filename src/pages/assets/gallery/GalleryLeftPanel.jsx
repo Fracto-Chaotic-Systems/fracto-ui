@@ -16,6 +16,7 @@ import FractoRasterImage from "../../../utils/render/FractoRasterImage.jsx";
 import FieldsColorWheel from "../../../utils/render/FieldsColorWheel.jsx";
 
 const IMAGE_SIZE_DELTA = 50
+export const LEGEND_BACKGROUND_COLOR = "linear-gradient(75deg, #bbbbbb 0%, #eeeeee 50%, #ffffff 90%)";
 
 export class GalleryLeftPanel extends Component {
    static propTypes = {
@@ -58,7 +59,7 @@ export class GalleryLeftPanel extends Component {
          left: `${container_bounds.left + GALLERY_TABLE_WIDTH_PX}px`,
          width: `${width}px`,
          height: `${container_bounds.height}px`,
-         backgroundColor: '#e4e4e4',
+         background: LEGEND_BACKGROUND_COLOR,
       }
       const image_style = {
          margin: `${margin}px auto`,
@@ -72,6 +73,11 @@ export class GalleryLeftPanel extends Component {
          x: asset.focal_point_x,
          y: asset.focal_point_y,
       }
+      const color_wheel_style = {
+         borderRadius: '50%',
+         filter: `drop-shadow(-8px 8px 8px rgba(0, 0, 0, 0.25))`,
+         textAlign: 'center',
+      }
       return <styles.FixedInlineBlock
          style={panel_style}>
          <div style={image_style}>
@@ -82,7 +88,7 @@ export class GalleryLeftPanel extends Component {
                on_plan_complete={this.on_ready}
             />
          </div>
-         <div style={image_style}>
+         <div style={color_wheel_style}>
             <FieldsColorWheel
                width_px={width_px}
                canvas_buffer={canvas_buffer}

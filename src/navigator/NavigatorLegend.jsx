@@ -14,7 +14,8 @@ import AppSettings from "../AppSettings.jsx";
 import {
     KEY_NAVIGATOR_CURSOR_LOCATION,
     KEY_NAVIGATOR_FOCAL_POINT,
-    KEY_NAVIGATOR_SCOPE, KEY_NAVIGATOR_SEND_TO
+    KEY_NAVIGATOR_SCOPE,
+    KEY_NAVIGATOR_SEND_TO
 } from "../text/NavigatorText.jsx";
 import {
     CELL_ALIGN_LEFT,
@@ -26,11 +27,15 @@ import {
 } from "../utils/ui/styles/CoolTableStyles.jsx";
 
 import NavigatorTransit from "./NavigatorTransit.jsx";
-import {KEY_NAVIGATOR_DISABLED, KEY_NAVIGATOR_HOVER_POINT} from "../settings/NavigatorSettings.jsx";
+import {
+    KEY_NAVIGATOR_DISABLED,
+    KEY_NAVIGATOR_HOVER_POINT
+} from "../settings/NavigatorSettings.jsx";
 import CoolColors from "../utils/ui/CoolColors.jsx";
 import {copy, paste} from "../utils/ui/CoolIcons.jsx";
 import {render_send_to} from "../pages/utils/SendTo.jsx";
 import CoolStyles from "../utils/ui/styles/CoolStyles.jsx";
+import FieldsColorWheel from "../utils/render/FieldsColorWheel.jsx";
 
 const TRANSITOR_HEIGHT_PX = 150
 const ZOOM_FACTOR = 1.618
@@ -142,7 +147,9 @@ export class NavigatorLegend extends Component {
                 value: [render_send_to, frame_settings],
             },
         ]
-        const stats_style = {width: `${bounding_rect.width - TRANSITOR_HEIGHT_PX - 20}px`}
+        const stats_style = {
+            width: `${bounding_rect.width - TRANSITOR_HEIGHT_PX - 20}px`
+        }
         return <styles.StatsWrapper style={stats_style}>
             <CoolTable
                 columns={TABLE_COLUMNS}
@@ -169,7 +176,7 @@ export class NavigatorLegend extends Component {
 
     render() {
         const {in_wait} = this.state
-        const {frame_settings} = this.props
+        const {frame_settings, bounding_rect} = this.props
         const transitor = <NavigatorTransit
             width_px={TRANSITOR_HEIGHT_PX}
             scope={frame_settings?.scope}
@@ -178,14 +185,15 @@ export class NavigatorLegend extends Component {
             in_wait={in_wait}
         />
         const stats = this.render_stats()
+        const width_px = bounding_rect.width - TRANSITOR_HEIGHT_PX - 20
         return [
             <CoolStyles.InlineBlock>
                 <CoolStyles.Block
                     style={{textAlign: 'center', marginTop: '0.5rem'}}>
-                    <main_styles.BlueButton
-                        onClick={e=>this.on_zoom_out(e)}>
+                    <main_styles.HoverBlueButton
+                        onClick={e => this.on_zoom_out(e)}>
                         zoom out
-                    </main_styles.BlueButton>
+                    </main_styles.HoverBlueButton>
                 </CoolStyles.Block>
                 <main_styles.QuarterRemDown/>
                 <CoolStyles.Block>
@@ -193,13 +201,26 @@ export class NavigatorLegend extends Component {
                 </CoolStyles.Block>
                 <CoolStyles.Block
                     style={{textAlign: 'center', margin: '0'}}>
-                    <main_styles.BlueButton
-                        onClick={e=>this.on_zoom_in(e)}>
+                    <main_styles.HoverBlueButton
+                        onClick={e => this.on_zoom_in(e)}>
                         zoom in
-                    </main_styles.BlueButton>
+                    </main_styles.HoverBlueButton>
                 </CoolStyles.Block>
             </CoolStyles.InlineBlock>,
-            stats,
+            <CoolStyles.InlineBlock style={{width: `${width_px}px`}}>
+                {stats}
+                <CoolStyles.Block style={{
+                    textAlign: 'center',
+                    marginLeft: '0.5rem',
+                    borderRadius: '50%',
+                    filter: `drop-shadow(-8px 8px 8px rgba(0, 0, 0, 0.25))`,
+                }}>
+                    <FieldsColorWheel
+                        width_px={width_px}
+                        canvas_buffer={frame_settings?.canvas_buffer || []}
+                    />
+                </CoolStyles.Block>
+            </CoolStyles.InlineBlock>,
         ];
     }
 }
