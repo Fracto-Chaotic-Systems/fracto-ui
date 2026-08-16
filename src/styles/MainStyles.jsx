@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import {CoolColors, CoolStyles} from "../utils/ui/CoolImports.jsx";
 import {HEADER_BAR_HEIGHT_PX} from "../constants.jsx";
+import {LEGEND_BACKGROUND_COLOR} from "../pages/assets/gallery/GalleryLeftPanel.jsx";
 
 export const MARGIN_PX = 10
 export const TITLE_BAR_HEIGHT_PX = 25
@@ -9,7 +10,7 @@ export const SECTION_BAR_HEIGHT_PX = 36
 
 export class MainStyles {
     static BodyWrapper = styled(CoolStyles.Block)`
-        background-color: #fcfcfc;
+        background: ${LEGEND_BACKGROUND_COLOR};
         height: 100vh;
         overflow: hidden;
     `

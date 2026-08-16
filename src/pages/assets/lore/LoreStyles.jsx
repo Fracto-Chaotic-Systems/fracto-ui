@@ -8,9 +8,6 @@ export class LoreStyles {
    static ScrollingLoreList = styled(CoolStyles.InlineBlock)`
        overflow-y: auto;
        overflow-x: hidden;
-       border-bottom: 1px solid #aaaaaa;
-       border-right: 1px solid #aaaaaa;
-       border-radius: 4px;
    `
 
    static CategoryTitle = styled(CoolStyles.InlineBlock)`

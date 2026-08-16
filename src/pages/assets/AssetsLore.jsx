@@ -14,6 +14,7 @@ import {CATEGORY_LIST_WIDTH_PX} from "./lore/LoreStyles.jsx";
 import {LoreContentList, OP_EDIT_CONTENT, OP_REMOVE_CONTENT} from "./lore/LoreContentList.jsx";
 import {edit_lore_component, get_category, new_lore_component} from "./lore/LoreUtils.jsx";
 import CoolStyles from "../../utils/ui/styles/CoolStyles.jsx";
+import {LEGEND_BACKGROUND_COLOR} from "./gallery/GalleryLeftPanel.jsx";
 
 const UPDATE_INTERVAL_MS = 1000
 
@@ -78,7 +79,11 @@ export class AssetsLore extends Component {
 
     on_select_category = (category) => {
         const {rendered_width, rendered_height} = this.state
-        const list_component = <lore_styles.ScrollingLoreList>
+        const list_component = <lore_styles.ScrollingLoreList
+            style={{
+                backgroundColor: 'white',
+                boxShadow: '0.5rem 0.5rem 1rem rgba(0,0,0,0.25)',
+        }}>
             <LoreContentList
                 width_px={rendered_width - CATEGORY_LIST_WIDTH_PX}
                 height_px={rendered_height}

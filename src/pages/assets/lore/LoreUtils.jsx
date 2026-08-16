@@ -13,6 +13,7 @@ import ContentImage from "./content/ContentImage.jsx";
 import ContentVideo from "./content/ContentVideo.jsx";
 import {AssetsBackend} from "../../../backend/AssetsBackend.jsx";
 import {copy_json} from "../../../utils/Dom.jsx";
+import CoolStyles from "../../../utils/ui/styles/CoolStyles.jsx";
 
 export const LORE_CATEGORY_DEFINITION = 1
 export const LORE_CATEGORY_SUBJECT = 2
@@ -132,7 +133,11 @@ export const new_lore_component = (category, width_px, height_px) => {
 
 export const edit_lore_component = async (content, width_px, height_px) => {
     const category = await get_category(content.category)
-    return op_lore_component(content.id, category, width_px, height_px)
+    const component = op_lore_component(content.id, category, width_px, height_px)
+    const wrapper_style = {boxShadow: '0.5rem 0.5rem 1rem rgba(0, 0, 0, 0.25)'};
+    return <CoolStyles.InlineBlock style={wrapper_style}>
+        {component}
+    </CoolStyles.InlineBlock>
 }
 
 let ALL_CATEGORIES = null

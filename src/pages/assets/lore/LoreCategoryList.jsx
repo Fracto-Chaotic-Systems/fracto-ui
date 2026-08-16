@@ -12,6 +12,7 @@ import {
 } from "../../../utils/ui/styles/CoolTableStyles.jsx";
 import {wand_icon} from "../../../utils/ui/CoolIcons.jsx";
 import {new_lore_component, get_categories, get_category} from "./LoreUtils.jsx";
+import {LEGEND_BACKGROUND_COLOR} from "../gallery/GalleryLeftPanel.jsx";
 
 const TABLE_COLUMNS = [
     {
@@ -106,6 +107,7 @@ export class LoreCategoryList extends Component {
             width: `${width_px}px`,
             cursor: 'pointer',
             borderRight: `0.125rem solid #bbbbbb`,
+            background: `${LEGEND_BACKGROUND_COLOR}`,
         }
         const table_data = category_list.map(category => {
             return {
