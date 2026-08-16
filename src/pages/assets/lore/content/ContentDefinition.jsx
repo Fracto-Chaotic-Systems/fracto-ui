@@ -39,6 +39,12 @@ export class ContentDefinition extends Component {
         }
     }
 
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (prevProps.item_id !== this.props.item_id) {
+            this.load_content()
+        }
+    }
+
     load_content = async () => {
         const {item_id, category} = this.props
         const content = await AssetsBackend.get_lore_content(item_id)
@@ -110,7 +116,7 @@ export class ContentDefinition extends Component {
         const {content} = this.state
         const {category} = this.props
         if (!content) {
-            console.log('content null', content)
+            // console.log('content null', content)
             return []
         }
         const {content_data} = content

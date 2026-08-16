@@ -91,7 +91,7 @@ export class LoreContentList extends Component {
     }
 
     cell_operations = (item) => {
-        const {on_content_ops}=this.props
+        const {on_content_ops} = this.props
         const edit_link = <main_styles.NormalLink
             onClick={() => on_content_ops(OP_EDIT_CONTENT, item)}>
             {AppText.get(KEY_LORE_OP_EDIT_CONTENT)}
@@ -121,16 +121,20 @@ export class LoreContentList extends Component {
 
     render_content_list = () => {
         const {content_list} = this.state
-        const table_data = content_list.map((item) => {
-            return {
-                title: item.title,
-                modified: item.content_meta.modified,
-                status: item.content_meta.published
-                    ? KEY_LORE_CONTENT_PUBLISHED
-                    : KEY_LORE_CONTENT_DRAFT,
-                operations: [this.cell_operations, item],
-            }
-        })
+        const table_data = content_list
+            .sort((a, b) =>
+                Date.parse(b.content_meta.modified)
+                - Date.parse(a.content_meta.modified))
+            .map((item) => {
+                return {
+                    title: item.title,
+                    modified: item.content_meta.modified,
+                    status: item.content_meta.published
+                        ? KEY_LORE_CONTENT_PUBLISHED
+                        : KEY_LORE_CONTENT_DRAFT,
+                    operations: [this.cell_operations, item],
+                }
+            })
         return <CoolTable
             data={table_data}
             columns={TABLE_COLUMNS}
@@ -139,7 +143,10 @@ export class LoreContentList extends Component {
 
     render() {
         const content_list = this.render_content_list()
-        return <styles.ScrollingLoreList>
+        const list_style = {
+            height: '15rem',
+        }
+        return <styles.ScrollingLoreList style={list_style}>
             {content_list}
         </styles.ScrollingLoreList>
     }

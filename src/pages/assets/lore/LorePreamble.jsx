@@ -16,12 +16,7 @@ import {
 } from "./content/ContentUtils.jsx";
 
 const render_edit_key = (key_data) => {
-    const {
-        edit_key,
-        key_prefix,
-        content,
-        update_content
-    } = key_data
+    const {edit_key, key_prefix, content, update_content} = key_data
     return [
         <styles.KeyPrefix key={`${key_prefix}-prompt`}>
             {`${key_prefix}`}
@@ -40,7 +35,6 @@ const render_edit_key = (key_data) => {
 
 const render_title = (title_data) => {
     const {content, update_content} = title_data
-    console.log('render_title', content.title)
     return <CoolStyles.Block style={{lineHeight: "1.75rem"}}>
         <CoolInputText
             value={content.title}
@@ -69,7 +63,7 @@ export const render_preamble = (content, category, update_content) => {
             edit_value: [render_type, category],
         },
         {
-            edit_key: 'category_key',
+            edit_key: 'key',
             edit_value: [render_edit_key, {
                 edit_key: content.category_key,
                 key_prefix: category.key_prefix,

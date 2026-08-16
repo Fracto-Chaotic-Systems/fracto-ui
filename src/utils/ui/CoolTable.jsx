@@ -78,7 +78,7 @@ export class CoolTable extends Component {
          // return;
       }
       if (!scroller_ref.current) {
-         console.log('scroll_selection: scroller_ref.current null')
+         // console.log('scroll_selection: scroller_ref.current null')
          return
       }
       if (selected_row < 0) {

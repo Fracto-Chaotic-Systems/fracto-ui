@@ -11,7 +11,7 @@ import {KEY_STUDY_SPLITTER_POS_PX} from "../../settings/StudySettings.jsx";
 import {update_dimensions} from "../PageUtils.jsx"
 import LoreCategoryList from "./lore/LoreCategoryList.jsx";
 import {CATEGORY_LIST_WIDTH_PX} from "./lore/LoreStyles.jsx";
-import {LoreContentList, OP_EDIT_CONTENT} from "./lore/LoreContentList.jsx";
+import {LoreContentList, OP_EDIT_CONTENT, OP_REMOVE_CONTENT} from "./lore/LoreContentList.jsx";
 import {edit_lore_component, get_category, new_lore_component} from "./lore/LoreUtils.jsx";
 import CoolStyles from "../../utils/ui/styles/CoolStyles.jsx";
 
@@ -67,6 +67,9 @@ export class AssetsLore extends Component {
                 this.setState({edit_component})
             }
                 break;
+            case OP_REMOVE_CONTENT: {
+                console.log('remove', content)
+            }
             default:
                 console.log('soon', op, content)
                 break
@@ -96,7 +99,6 @@ export class AssetsLore extends Component {
             rendered_width, rendered_height,
             edit_component, list_component
         } = this.state
-        console.log('edit_component', edit_component)
         return [
             <styles.SectionTitle
                 key={'assets-status-title'}>

@@ -102,7 +102,7 @@ export class ContentReference extends Component {
         const {content} = this.state
         const {category} = this.props
         if (!content) {
-            console.log('content null', content)
+            // console.log('content null', content)
             return []
         }
         const {content_data, content_meta} = content

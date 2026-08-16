@@ -132,7 +132,6 @@ export const new_lore_component = (category, width_px, height_px) => {
 
 export const edit_lore_component = async (content, width_px, height_px) => {
     const category = await get_category(content.category)
-    console.log('edit_lore_component, content', content)
     return op_lore_component(content.id, category, width_px, height_px)
 }
 
@@ -140,7 +139,6 @@ let ALL_CATEGORIES = null
 
 export const get_categories = async () => {
     if (ALL_CATEGORIES) {
-        console.log('found ALL_CATEGORIES', ALL_CATEGORIES)
         return ALL_CATEGORIES
     }
     const unsorted = await AssetsBackend.lore_categories()
