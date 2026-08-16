@@ -12,7 +12,7 @@ export const KEY_HEAT_MAP_FETCHING = `${HEAT_MAP_FOLDER}/fetching`
 export const APP_NAVIGATOR_TEXT = {
    [KEY_NAVIGATOR_SCOPE]: 'scope:',
    [KEY_NAVIGATOR_FOCAL_POINT]: 'focal point:',
-   [KEY_NAVIGATOR_CURSOR_LOCATION]: 'cursor location:',
+   [KEY_NAVIGATOR_CURSOR_LOCATION]: 'cursor at:',
    [KEY_NAVIGATOR_SEND_TO]: 'send to:',
    [KEY_NAVIGATOR_COVERAGE]: 'coverage:',
    [KEY_HEAT_MAP_CLICK_TO_TEST]: 'click to test coverage',

@@ -62,22 +62,18 @@ export class DataBackend {
         }, 250)
     }
 
-    static lore_storage = async (
-        meta_data,
-        item_data,
-        category,
-        on_update_meta) => {
+    static lore_storage = async (content) => {
+        const {content_data, content_meta, title, category, category_key} = content
         try {
-            const title = item_data.title;
-            const key = item_data.key;
-            ['type', 'key', 'title']
-                .forEach(key => delete item_data[key])
             const body = {
-                title: title,
-                category: category.id,
-                content_data: item_data,
-                content_meta: meta_data,
-                category_key: `${category.key_prefix}${key}`,
+                title,
+                category,
+                content_data,
+                content_meta,
+                category_key,
+            }
+            if (content.id > 0) {
+                body.id = content.id
             }
 
             const url = `${DATA_ORIGIN}/lore_storage`
@@ -92,7 +88,6 @@ export class DataBackend {
             });
             const data = await response.json();
             console.log('lore_storage response', data)
-            on_update_meta(meta_data);
         } catch (e) {
             console.error('lore_storage response', e.message);
         }
@@ -110,7 +105,7 @@ export class DataBackend {
             .filter(f => f.den <= MAX_DENOMINATOR)
             .filter(f => f.num > 0 && f.den > 2)
         // console.log(`${farey_sequence.length} members in farey_sequence`)
-        DataBackend.FAREY_SEQUENCE = farey_sequence.map(element=>{
+        DataBackend.FAREY_SEQUENCE = farey_sequence.map(element => {
             return {
                 num: parseInt(element.num),
                 den: parseInt(element.den),

@@ -34,6 +34,7 @@ import {
    highlight_existing,
 } from "./detector/DetectorUtils.js";
 import CoolStyles from "../../utils/ui/styles/CoolStyles.jsx";
+import DataBackend from "../../backend/DataBackend.jsx";
 
 const UPDATE_INTERVAL_MS = 1000
 
@@ -85,22 +86,25 @@ export class AssetsDetector extends Component {
       }
    }
 
+   highlight_existing=()=>{
+      const {minibrot_list, frame_settings} = this.state
+      highlight_existing(minibrot_list, frame_settings)
+   }
+
    on_frame_settings_changed = async (key, value) => {
       // console.log('on_frame_settings_changed', value)
       this.setState({frame_settings: value})
-      setTimeout(this.highlight_existing, 500)
+      setTimeout(this.highlight_existing, 150)
    }
 
    load_minibrots = async () => {
       const {is_node} = this.state
-      const origin = window.origin.replace(`${FRACTO_UI_PORT}`, `${FRACTO_DATA_PORT}`)
-      const url = `${origin}/minibrots?is_node=${is_node ? 1 : 0}`
-      const fetched = await fetch(url, FETCH_JSON_HEADERS).then(res => {
-         return res.json()
+      const params = {
+         is_node: is_node ? 1 : 0,
+      }
+      DataBackend.get_minibrots(params, minibrot_list=>{
+         this.setState({minibrot_list})
       })
-      const minibrot_list = fetched.result
-      console.log('load_minibrots', url)
-      this.setState({minibrot_list})
    }
 
    detect_now = () => {
@@ -122,11 +126,10 @@ export class AssetsDetector extends Component {
 
    set_nodal = () => {
       const {is_node} = this.state
-      const new_setting = is_node ? 0 : 1
-      this.setState({is_node: new_setting})
       AppSettings.on_settings_changed({
-         [KEY_ASSETS_DETECTOR_IS_NODE]: new_setting,
+         [KEY_ASSETS_DETECTOR_IS_NODE]: !is_node,
       })
+      this.setState({is_node: !is_node})
    }
 
    render_nodal_check = () => {
@@ -202,7 +205,7 @@ export class AssetsDetector extends Component {
    render() {
       const {minibrot_list, frame_settings, container_ref} = this.state
       const bounding_rect = this.get_bounding_rect()
-      highlight_existing(minibrot_list, frame_settings)
+      // highlight_existing(minibrot_list, frame_settings)
       return [
          <styles.SectionTitle
             key={'study-overview-title'}>

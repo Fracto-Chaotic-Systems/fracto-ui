@@ -30,9 +30,9 @@ export class FieldsColorWheel extends Component {
    fill_pattern_bins = () => {
       const {canvas_ref} = this.state
       const {canvas_buffer, width_px} = this.props
-      console.log('fill_pattern_bins')
+      // console.log('fill_pattern_bins')
       const orbital_bins = collect_orbitals(canvas_buffer)
-      const radius = width_px / 2 - 10
+      const radius = width_px / 2
       if (radius > 0) {
          color_wheel(canvas_ref, radius, 9, 0, orbital_bins)
       }

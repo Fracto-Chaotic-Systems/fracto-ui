@@ -135,7 +135,7 @@ export class StudyMeridians extends Component {
             </styles.SectionTitle>,
             <styles.TightCenteredBlock
                 ref={container_ref}
-                key={'meridians-content'}>
+                key={'meridians-layout'}>
                 <NavigatorSplitterLayout
                     bounding_rect={bounding_rect}
                     frame_settings={frame_settings}
@@ -144,6 +144,7 @@ export class StudyMeridians extends Component {
                 />
             </styles.TightCenteredBlock>,
             <styles.FixedInlineBlock
+                key={'meridians-content'}
                 style={result_block_style}>
                 {this.render_content()}
             </styles.FixedInlineBlock>,

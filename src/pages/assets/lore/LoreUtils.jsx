@@ -132,6 +132,7 @@ export const new_lore_component = (category, width_px, height_px) => {
 
 export const edit_lore_component = async (content, width_px, height_px) => {
     const category = await get_category(content.category)
+    console.log('edit_lore_component, content', content)
     return op_lore_component(content.id, category, width_px, height_px)
 }
 

@@ -67,7 +67,7 @@ export class CoolInputText extends Component {
          <CoolStyles.InputTextArea
             ref={input_ref}
             autoFocus
-            size={current_value.length}
+            size={current_value?.length}
             style={style_extra}
             value={current_value || value}
             name={name}

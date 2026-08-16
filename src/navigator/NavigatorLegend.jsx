@@ -185,7 +185,7 @@ export class NavigatorLegend extends Component {
             in_wait={in_wait}
         />
         const stats = this.render_stats()
-        const width_px = bounding_rect.width - TRANSITOR_HEIGHT_PX - 20
+        const width_px = bounding_rect.width - TRANSITOR_HEIGHT_PX
         return [
             <CoolStyles.InlineBlock>
                 <CoolStyles.Block
@@ -211,12 +211,11 @@ export class NavigatorLegend extends Component {
                 {stats}
                 <CoolStyles.Block style={{
                     textAlign: 'center',
-                    marginLeft: '0.5rem',
                     borderRadius: '50%',
                     filter: `drop-shadow(-8px 8px 8px rgba(0, 0, 0, 0.25))`,
                 }}>
                     <FieldsColorWheel
-                        width_px={width_px}
+                        width_px={width_px - 20}
                         canvas_buffer={frame_settings?.canvas_buffer || []}
                     />
                 </CoolStyles.Block>

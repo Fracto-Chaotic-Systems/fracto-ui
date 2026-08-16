@@ -31,23 +31,28 @@ export class ContentDefinition extends Component {
     }
 
     componentDidMount() {
-        this.load_content()
+        const {item_id, category} = this.props
+        const content = empty_content(category);
+        this.setState({content})
+        if (item_id > 0) {
+            this.load_content()
+        }
     }
 
     load_content = async () => {
         const {item_id, category} = this.props
-        const content = item_id > 0
-            ? await AssetsBackend.get_lore_content(item_id)
-            : empty_content(category)
+        const content = await AssetsBackend.get_lore_content(item_id)
         this.setState({content})
     }
 
-    update_item_data = (content_data) => {
+    update_content = (new_content) => {
         const {content} = this.state
         const {content_meta} = content
         content_meta.can_store = true;
-        content_meta.modified = content_data.modified;
-        content.content_data = copy_json(content_data)
+        const modified = new Date();
+        content_meta.modified = modified.toISOString();
+        content.title = new_content.title
+        content.key = new_content.key
         this.setState({content})
     }
 
@@ -55,13 +60,14 @@ export class ContentDefinition extends Component {
         const {content} = this.state
         content.content_meta = copy_json(content_meta)
         this.setState({content})
+        console.log('update_meta_data', content)
     }
 
     on_entry_data_change = (entry) => {
+        console.log('on_entry_data_change', entry)
         const {content} = this.state
         const {content_data} = content
         content_data.entry = entry
-        this.update_item_data(content_data)
     }
 
     render_references = (item_data) => {
@@ -96,6 +102,10 @@ export class ContentDefinition extends Component {
         />
     }
 
+    store_content = (content) => {
+        console.log('store_content', store_content)
+    }
+
     render() {
         const {content} = this.state
         const {category} = this.props
@@ -103,16 +113,16 @@ export class ContentDefinition extends Component {
             console.log('content null', content)
             return []
         }
-        const {content_data, content_meta} = content
+        const {content_data} = content
         if (!content_data) {
             console.log('content_data null', content)
             return []
         }
         const preamble_section = render_preamble(
-            content, category, this.update_item_data)
+            content, category, this.update_content)
         const content_section = this.render_content()
         const meta_section = render_meta(
-            content_meta, content_data, category, this.update_meta_data)
+            content, this.update_meta_data, this.store_content)
         return <styles.ScrollingLoreList>
             {preamble_section}
             {content_section}

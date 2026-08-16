@@ -41,7 +41,6 @@ export const TABLE_EDITOR_COLUMNS = [
 
 export const LORE_INITIAL_DATA_STATE = {
     key: "-1",
-    title: "",
     entry: "",
     source: "",
 }
@@ -68,15 +67,27 @@ export const empty_content = (category) => {
     }
 }
 
+export const on_update_content = (
+    content,
+    edit_key,
+    value,
+    update_content) => {
+    const modified = new Date();
+    content.modified = modified.toISOString();
+    content[edit_key] = value
+    update_content(content)
+}
+
 export const on_update_item_data = (
-    item_data,
+    content,
     edit_key,
     value,
     update_item_data) => {
+    const {content_data} = content
     const modified = new Date();
-    item_data.modified = modified.toISOString();
-    item_data[edit_key] = value
-    update_item_data(item_data)
+    content_data.modified = modified.toISOString();
+    content_data[edit_key] = value
+    update_item_data(content_data)
 }
 
 export const on_update_meta_data = (
