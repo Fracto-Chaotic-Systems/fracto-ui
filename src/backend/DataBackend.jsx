@@ -63,7 +63,9 @@ export class DataBackend {
     }
 
     static lore_storage = async (content) => {
-        const {content_data, content_meta, title, category, category_key} = content
+        const {content_data, content_meta, id, title, category, category_key} = content
+        content_meta.can_store = false
+        console.log('lore_storage content', content)
         try {
             const body = {
                 title,
@@ -72,8 +74,8 @@ export class DataBackend {
                 content_meta,
                 category_key,
             }
-            if (content.id > 0) {
-                body.id = content.id
+            if (id > 0) {
+                body.id = id
             }
 
             const url = `${DATA_ORIGIN}/lore_storage`

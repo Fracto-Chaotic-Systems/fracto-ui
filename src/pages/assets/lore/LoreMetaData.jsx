@@ -10,18 +10,25 @@ import {LoreStyles as styles} from './LoreStyles.jsx'
 import {TABLE_EDITOR_COLUMNS} from "./content/ContentUtils.jsx";
 import DataBackend from "../../../backend/DataBackend.jsx";
 
+const store_content = async (content, on_update_meta, on_store_content) => {
+   await DataBackend.lore_storage(content, on_update_meta)
+   on_store_content(content)
+}
+
 const render_meta_data = (obj_meta) => {
-   const {content, on_update_meta} = obj_meta
+   const {content, on_update_meta, on_store_content} = obj_meta
    const {content_data, content_meta} = content
    const button_style = {
       padding: '0 0.5rem',
       letterSpacing: '0.0625rem',
       fontFamily: 'sans-serif',
    };
+   const button_content = content.id < 0
+      ? 'create'
+      : `update id=${content.id}`
    const blue_button = <CoolButton
-      on_click={() => DataBackend.lore_storage(
-          content, on_update_meta)}
-      content={'store'}
+      on_click={() => store_content(content, on_update_meta, on_store_content) }
+      content={button_content}
       primary={true}
       disabled={!content_meta.can_store}
       style={button_style}

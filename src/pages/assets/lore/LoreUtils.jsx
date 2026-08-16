@@ -29,7 +29,7 @@ export const LORE_CATEGORY_DIAGRAM = 11
 export const LORE_CATEGORY_IMAGE = 12
 export const LORE_CATEGORY_VIDEO = 13
 
-const op_lore_component = (item_id, category, width_px, height_px) => {
+const op_lore_component = (item_id, category, width_px, height_px, on_update) => {
     switch (category.id) {
         case  LORE_CATEGORY_DEFINITION:
             return <ContentDefinition
@@ -37,6 +37,7 @@ const op_lore_component = (item_id, category, width_px, height_px) => {
                 category={category}
                 width_px={width_px}
                 height_px={height_px}
+                on_update={on_update}
             />
         case  LORE_CATEGORY_SUBJECT:
             return <ContentSubject
@@ -127,13 +128,13 @@ const op_lore_component = (item_id, category, width_px, height_px) => {
     }
 }
 
-export const new_lore_component = (category, width_px, height_px) => {
-    return op_lore_component(-1, category, width_px, height_px)
+export const new_lore_component = (category, width_px, height_px, on_update) => {
+    return op_lore_component(-1, category, width_px, height_px, on_update)
 }
 
-export const edit_lore_component = async (content, width_px, height_px) => {
+export const edit_lore_component = async (content, width_px, height_px, on_update) => {
     const category = await get_category(content.category)
-    const component = op_lore_component(content.id, category, width_px, height_px)
+    const component = op_lore_component(content.id, category, width_px, height_px, on_update)
     const wrapper_style = {boxShadow: '0.5rem 0.5rem 1rem rgba(0, 0, 0, 0.25)'};
     return <CoolStyles.InlineBlock style={wrapper_style}>
         {component}
@@ -164,3 +165,12 @@ export const get_category = async (category_id) => {
     return ALL_CATEGORIES.find(cat => cat.id === category_id)
 }
 
+export const update_content = (new_content, old_content) => {
+    const {content_meta} = old_content
+    content_meta.can_store = true;
+    const modified = new Date();
+    content_meta.modified = modified.toISOString();
+    old_content.title = new_content.title
+    old_content.key = new_content.key
+    return old_content
+}

@@ -84,6 +84,9 @@ export class LoreContentList extends Component {
 
     load_content = () => {
         const {category_id} = this.props
+        if (!category_id) {
+            return;
+        }
         DataBackend.lore_content_listing(category_id, response => {
             console.log('load_content', category_id, response)
             this.setState({content_list: response.result})

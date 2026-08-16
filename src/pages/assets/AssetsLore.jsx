@@ -59,12 +59,17 @@ export class AssetsLore extends Component {
     on_select_content = (content) => {
         this.setState({content})
     }
+    
+    on_update_list = (content)=> {
+        this.on_select_category(content.category)
+    }
 
     on_content_ops = async (op, content) => {
         const {rendered_width, rendered_height} = this.state
         switch (op) {
             case OP_EDIT_CONTENT: {
-                const edit_component = await edit_lore_component(content, rendered_width, rendered_height)
+                const edit_component = await edit_lore_component(
+                   content, rendered_width, rendered_height, this.on_update_list)
                 this.setState({edit_component})
             }
                 break;
@@ -78,7 +83,7 @@ export class AssetsLore extends Component {
     }
 
     on_select_category = (category) => {
-        const {rendered_width, rendered_height} = this.state
+        const {content, rendered_width, rendered_height} = this.state
         const list_component = <lore_styles.ScrollingLoreList
             style={{
                 backgroundColor: 'white',
