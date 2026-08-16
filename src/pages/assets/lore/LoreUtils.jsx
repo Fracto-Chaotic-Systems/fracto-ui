@@ -14,6 +14,7 @@ import ContentVideo from "./content/ContentVideo.jsx";
 import {AssetsBackend} from "../../../backend/AssetsBackend.jsx";
 import {copy_json} from "../../../utils/Dom.jsx";
 import CoolStyles from "../../../utils/ui/styles/CoolStyles.jsx";
+import DataBackend from "../../../backend/DataBackend.jsx";
 
 export const LORE_CATEGORY_DEFINITION = 1
 export const LORE_CATEGORY_SUBJECT = 2
@@ -139,6 +140,11 @@ export const edit_lore_component = async (content, width_px, height_px, on_updat
     return <CoolStyles.InlineBlock style={wrapper_style}>
         {component}
     </CoolStyles.InlineBlock>
+}
+
+export const remove_content = async (content) => {
+    content.content_meta.hidden = true
+    await DataBackend.lore_storage(content)
 }
 
 let ALL_CATEGORIES = null

@@ -25,7 +25,7 @@ export class ContentDefinition extends Component {
       category: PropTypes.object.isRequired,
       width_px: PropTypes.number.isRequired,
       height_px: PropTypes.number.isRequired,
-      on_update: PropTypes.func.isRequired,
+      on_update: PropTypes.func,
    }
    
    state = {
@@ -71,6 +71,8 @@ export class ContentDefinition extends Component {
       const {content} = this.state
       const {content_data, content_meta} = content
       content_data.entry = entry
+         .replaceAll('\n', '\\n')
+         .replaceAll('\t', '\\t')
       content_meta.can_store = true
       this.setState({content})
    }
@@ -111,7 +113,9 @@ export class ContentDefinition extends Component {
       const {on_update} = this.props
       console.log('store_content', stored_content)
       this.setState({content: stored_content})
-      on_update(stored_content)
+      if (on_update) {
+         on_update(stored_content)
+      }
    }
    
    render() {

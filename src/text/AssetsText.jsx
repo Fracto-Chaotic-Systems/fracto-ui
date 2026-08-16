@@ -73,5 +73,5 @@ export const APP_ASSETS_TEXT = {
     [KEY_LORE_OP_EDIT_CONTENT]: 'edit',
     [KEY_LORE_OP_VIEW_CONTENT]: 'view',
     [KEY_LORE_OP_CLONE_CONTENT]: 'clone',
-    [KEY_LORE_OP_REMOVE_CONTENT]: 'remove',
+    [KEY_LORE_OP_REMOVE_CONTENT]: 'hide',
 }
