@@ -19,6 +19,7 @@ import ContentVideo from "./content/ContentVideo.jsx";
 import ContentStyle from "./content/ContentStyle.jsx";
 import {Component} from "react";
 import PropTypes from "prop-types";
+import {ID_NOT_SET} from "./content/ContentUtils.jsx";
 
 export const LORE_CATEGORY_DEFINITION = 1
 export const LORE_CATEGORY_SUBJECT = 2
@@ -48,6 +49,7 @@ export const LORE_INITIAL_META_STATE = {
 }
 
 export const DEFAULT_CONTENT = {
+    id: ID_NOT_SET,
     content_data: {
         style_list: [EMPTY_STYLE],
     },

@@ -6,8 +6,10 @@ import {copy_json} from "../../../../utils/Dom.jsx";
 import {render_meta} from "../LoreMetaData.jsx";
 import {render_preamble} from "../LorePreamble.jsx";
 import {AssetsBackend} from "../../../../backend/AssetsBackend.jsx";
-import {empty_content} from "./ContentUtils.jsx";
+import {empty_content, render_style_grid, TABLE_EDITOR_COLUMNS} from "./ContentUtils.jsx";
 import {DEFAULT_CONTENT} from "../LoreUtils.jsx";
+import CoolTable from "../../../../utils/ui/CoolTable.jsx";
+import {TABLE_NO_BORDER, TABLE_NO_HEADER} from "../../../../utils/ui/styles/CoolTableStyles.jsx";
 
 export class ContentStudy extends Component {
    static propTypes = {
@@ -15,6 +17,7 @@ export class ContentStudy extends Component {
       category: PropTypes.object.isRequired,
       width_px: PropTypes.number.isRequired,
       height_px: PropTypes.number.isRequired,
+      on_update: PropTypes.func,
    }
 
    state = {
@@ -27,8 +30,6 @@ export class ContentStudy extends Component {
       this.setState({content})
       if (item_id > 0) {
          this.load_content()
-      } else {
-         this.setState({content: DEFAULT_CONTENT})
       }
    }
    
@@ -59,7 +60,41 @@ export class ContentStudy extends Component {
       content.content_meta = copy_json(content_meta)
       this.setState({content})
    }
-
+   
+   render_references = (item_data) => {
+      return 'references'
+   }
+   
+   render_content = () => {
+      const {content} = this.state
+      if (!content) {
+         return []
+      }
+      const {content_data} = content
+      const table_data = [
+         {
+            edit_key: 'refs',
+            edit_value: [this.render_references, {
+               item_data: content_data,
+            }]
+         },
+      ]
+      return <CoolTable
+         columns={TABLE_EDITOR_COLUMNS}
+         data={table_data}
+         options={[TABLE_NO_HEADER, TABLE_NO_BORDER]}
+      />
+   }
+   
+   store_content = (stored_content) => {
+      const {on_update} = this.props
+      console.log('store_content', stored_content)
+      this.setState({content: stored_content})
+      if (on_update) {
+         on_update(stored_content)
+      }
+   }
+   
    render() {
       const {content} = this.state
       const {category} = this.props
@@ -74,10 +109,12 @@ export class ContentStudy extends Component {
       }
       const preamble_section = render_preamble(
           content, category, this.update_item_data)
+      const content_section = this.render_content()
       const meta_section = render_meta(
-          content_meta, content_data, category, this.update_meta_data)
+         content, this.update_meta_data, this.store_content)
       return <styles.ScrollingLoreList>
          {preamble_section}
+         {content_section}
          {meta_section}
       </styles.ScrollingLoreList>
    }

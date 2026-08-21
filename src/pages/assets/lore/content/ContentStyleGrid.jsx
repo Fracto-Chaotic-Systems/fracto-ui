@@ -77,6 +77,9 @@ export class ContentStyleGrid extends Component {
    
    render() {
       const {style_list} = this.props;
+      if (!style_list) {
+         return []
+      }
       const table_data = style_list.map((item, index) => {
          return {
             key: [this.render_key, {item, index}],

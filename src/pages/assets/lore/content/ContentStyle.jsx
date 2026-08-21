@@ -41,8 +41,6 @@ export class ContentStyle extends Component {
       this.setState({content})
       if (item_id > 0) {
          this.load_content()
-      } else {
-         this.setState({content: DEFAULT_CONTENT})
       }
    }
    

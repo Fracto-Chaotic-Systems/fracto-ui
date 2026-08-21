@@ -25,6 +25,7 @@ export class ContentReference extends Component {
         category: PropTypes.object.isRequired,
         width_px: PropTypes.number.isRequired,
         height_px: PropTypes.number.isRequired,
+        on_update: PropTypes.func,
     }
 
     state = {
@@ -37,8 +38,6 @@ export class ContentReference extends Component {
         this.setState({content})
         if (item_id > 0) {
             this.load_content()
-        } else {
-            this.setState({content: DEFAULT_CONTENT})
         }
     }
     
@@ -68,7 +67,11 @@ export class ContentReference extends Component {
         item_data.link = link
         this.update_item_data(item_data)
     }
-
+    
+    render_references = (item_data) => {
+        return 'references'
+    }
+    
     render_content = () => {
         const {item_data} = this.state
         const table_data = [
@@ -88,12 +91,21 @@ export class ContentReference extends Component {
             },
         ]
         return <CoolTable
-            columns={TABLE_EDITOR_COLUMNS}
-            data={table_data}
-            options={[TABLE_NO_HEADER, TABLE_NO_BORDER]}
+           columns={TABLE_EDITOR_COLUMNS}
+           data={table_data}
+           options={[TABLE_NO_HEADER, TABLE_NO_BORDER]}
         />
     }
-
+    
+    store_content = (stored_content) => {
+        const {on_update} = this.props
+        console.log('store_content', stored_content)
+        this.setState({content: stored_content})
+        if (on_update) {
+            on_update(stored_content)
+        }
+    }
+    
     update_item_data = (content_data) => {
         const {content} = this.state
         const {content_meta} = content
@@ -125,7 +137,7 @@ export class ContentReference extends Component {
             content, category, this.update_item_data)
         const content_section = this.render_content()
         const meta_section = render_meta(
-            content_meta, content_data, category, this.update_meta_data)
+           content, this.update_meta_data, this.store_content)
         return <styles.ScrollingLoreList>
             {preamble_section}
             {content_section}
