@@ -7,6 +7,7 @@ import {render_meta} from "../LoreMetaData.jsx";
 import {render_preamble} from "../LorePreamble.jsx";
 import {AssetsBackend} from "../../../../backend/AssetsBackend.jsx";
 import {empty_content} from "./ContentUtils.jsx";
+import {DEFAULT_CONTENT} from "../LoreUtils.jsx";
 
 export class ContentImage extends Component {
    static propTypes = {
@@ -19,19 +20,31 @@ export class ContentImage extends Component {
    state = {
       content: null,
    }
-
+   
    componentDidMount() {
-      this.load_content()
+      const {item_id, category} = this.props
+      const content = empty_content(category);
+      this.setState({content})
+      if (item_id > 0) {
+         this.load_content()
+      } else {
+         this.setState({content: DEFAULT_CONTENT})
+      }
    }
-
+   
+   componentDidUpdate(prevProps, prevState, snapshot) {
+      if (prevProps.item_id !== this.props.item_id) {
+         this.load_content()
+      }
+   }
+   
    load_content = async () => {
       const {item_id, category} = this.props
-      const content = item_id > 0
-          ? await AssetsBackend.get_lore_content(item_id)
-          : empty_content(category)
+      const content = await AssetsBackend.get_lore_content(item_id)
+      content.content_meta.can_store = false
       this.setState({content})
    }
-
+   
    update_item_data = (content_data) => {
       const {content} = this.state
       const {content_meta} = content

@@ -132,7 +132,7 @@ export const render_source_text = (data_obj) => {
 export const render_link_text = (data_obj) => {
    const {item_data, on_link_change} = data_obj
     if (!item_data) {
-        console.log('render_source_text', data_obj)
+        console.log('render_link_text', data_obj)
         return []
     }
    return <CoolStyles.InlineBlock style={{lineHeight: "1.75rem"}}>

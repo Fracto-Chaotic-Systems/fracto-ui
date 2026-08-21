@@ -17,6 +17,7 @@ import {
     TABLE_EDITOR_COLUMNS,
 } from "./ContentUtils.jsx";
 import {AssetsBackend} from "../../../../backend/AssetsBackend.jsx";
+import {DEFAULT_CONTENT} from "../LoreUtils.jsx";
 
 export class ContentReference extends Component {
     static propTypes = {
@@ -29,19 +30,31 @@ export class ContentReference extends Component {
     state = {
         content: null,
     }
-
+    
     componentDidMount() {
-        this.load_content()
+        const {item_id, category} = this.props
+        const content = empty_content(category);
+        this.setState({content})
+        if (item_id > 0) {
+            this.load_content()
+        } else {
+            this.setState({content: DEFAULT_CONTENT})
+        }
     }
-
+    
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (prevProps.item_id !== this.props.item_id) {
+            this.load_content()
+        }
+    }
+    
     load_content = async () => {
         const {item_id, category} = this.props
-        const content = item_id > 0
-            ? await AssetsBackend.get_lore_content(item_id)
-            : empty_content(category)
+        const content = await AssetsBackend.get_lore_content(item_id)
+        content.content_meta.can_store = false
         this.setState({content})
     }
-
+    
     on_source_change = (source) => {
         const {item_data} = this.state
         console.log('on_source_change', source)
