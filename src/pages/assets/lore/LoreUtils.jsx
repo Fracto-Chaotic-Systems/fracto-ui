@@ -1,3 +1,8 @@
+import AssetsBackend from "../../../backend/AssetsBackend.jsx";
+import DataBackend from "../../../backend/DataBackend.jsx";
+import {copy_json} from "../../../utils/Dom.jsx";
+import CoolStyles from "../../../utils/ui/styles/CoolStyles.jsx";
+
 import ContentDefinition from "./content/ContentDefinition.jsx";
 import ContentSubject from "./content/ContentSubject.jsx";
 import ContentStudy from "./content/ContentStudy.jsx";
@@ -11,10 +16,9 @@ import ContentReference from "./content/ContentReference.jsx";
 import ContentDiagram from "./content/ContentDiagram.jsx";
 import ContentImage from "./content/ContentImage.jsx";
 import ContentVideo from "./content/ContentVideo.jsx";
-import {AssetsBackend} from "../../../backend/AssetsBackend.jsx";
-import {copy_json} from "../../../utils/Dom.jsx";
-import CoolStyles from "../../../utils/ui/styles/CoolStyles.jsx";
-import DataBackend from "../../../backend/DataBackend.jsx";
+import ContentStyle from "./content/ContentStyle.jsx";
+import {Component} from "react";
+import PropTypes from "prop-types";
 
 export const LORE_CATEGORY_DEFINITION = 1
 export const LORE_CATEGORY_SUBJECT = 2
@@ -29,6 +33,26 @@ export const LORE_CATEGORY_REFERENCE = 10
 export const LORE_CATEGORY_DIAGRAM = 11
 export const LORE_CATEGORY_IMAGE = 12
 export const LORE_CATEGORY_VIDEO = 13
+export const LORE_CATEGORY_STYLE = 14
+
+export const EMPTY_STYLE = {
+    key: 'margin',
+    value: 'auto',
+}
+
+export const LORE_INITIAL_META_STATE = {
+    hidden: false,
+    published: false,
+    modified: `<date not set>`,
+    can_store: false,
+}
+
+export const DEFAULT_CONTENT = {
+    content_data: {
+        style_list: [EMPTY_STYLE],
+    },
+    content_meta: LORE_INITIAL_META_STATE
+}
 
 const op_lore_component = (item_id, category, width_px, height_px, on_update) => {
     switch (category.id) {
@@ -124,6 +148,13 @@ const op_lore_component = (item_id, category, width_px, height_px, on_update) =>
                 width_px={width_px}
                 height_px={height_px}
             />
+        case LORE_CATEGORY_STYLE:
+            return <ContentStyle
+               item_id={item_id}
+               category={category}
+               width_px={width_px}
+               height_px={height_px}
+            />
         default:
             return `unknown category ${id}`
     }
@@ -136,7 +167,10 @@ export const new_lore_component = (category, width_px, height_px, on_update) => 
 export const edit_lore_component = async (content, width_px, height_px, on_update) => {
     const category = await get_category(content.category)
     const component = op_lore_component(content.id, category, width_px, height_px, on_update)
-    const wrapper_style = {boxShadow: '0.5rem 0.5rem 1rem rgba(0, 0, 0, 0.25)'};
+    const wrapper_style = {
+        boxShadow: '0.5rem 0.5rem 1rem rgba(0, 0, 0, 0.25)',
+        backgroundColor: 'white',
+    };
     return <CoolStyles.InlineBlock style={wrapper_style}>
         {component}
     </CoolStyles.InlineBlock>

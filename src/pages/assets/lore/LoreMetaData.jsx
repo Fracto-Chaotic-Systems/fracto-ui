@@ -9,6 +9,7 @@ import {
 import {LoreStyles as styles} from './LoreStyles.jsx'
 import {TABLE_EDITOR_COLUMNS} from "./content/ContentUtils.jsx";
 import DataBackend from "../../../backend/DataBackend.jsx";
+import {LORE_INITIAL_META_STATE} from "./LoreUtils.jsx"
 
 const store_content = async (content, on_update_meta, on_store_content) => {
    await DataBackend.lore_storage(content, on_update_meta)
@@ -49,6 +50,9 @@ const render_meta_data = (obj_meta) => {
 }
 
 export const render_meta = (content, on_update_meta, on_store_content) => {
+   if (!content.content_meta) {
+      content.content_meta = LORE_INITIAL_META_STATE
+   }
    const table_data = [
       {
          edit_key: 'meta',

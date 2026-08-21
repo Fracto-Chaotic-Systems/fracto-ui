@@ -22,6 +22,7 @@ const SEND_TO_PROMPT = -1
 export const PAGE_TILES_GENERATE = 1
 export const PAGE_ASSETS_IMAGE_GENERATE = 2
 export const PAGE_ASSETS_DETECTOR = 3
+export const PAGE_LORE_IMAGE = 3
 
 export const send_to = (frame_settings, destination) => {
    let routing = null

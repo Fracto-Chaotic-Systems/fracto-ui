@@ -12,8 +12,6 @@ import {render_meta} from "../LoreMetaData.jsx";
 import {render_preamble} from "../LorePreamble.jsx";
 import {
     empty_content,
-    LORE_INITIAL_DATA_STATE,
-    LORE_INITIAL_META_STATE,
     render_link_text,
     render_source_text,
     TABLE_EDITOR_COLUMNS,

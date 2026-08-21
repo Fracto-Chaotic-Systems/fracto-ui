@@ -16,7 +16,7 @@ import FractoRasterImage from "../../../utils/render/FractoRasterImage.jsx";
 import FieldsColorWheel from "../../../utils/render/FieldsColorWheel.jsx";
 
 const IMAGE_SIZE_DELTA = 50
-export const LEGEND_BACKGROUND_COLOR = "linear-gradient(75deg, #bbbbbb 0%, #eeeeee 50%, #ffffff 90%)";
+export const LEGEND_BACKGROUND_COLOR = "linear-gradient(280deg, #bbbbbb 0%, #eeeeee 50%, #ffffff 90%)";
 
 export class GalleryLeftPanel extends Component {
    static propTypes = {

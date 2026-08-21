@@ -5,7 +5,6 @@ import {LoreStyles as lore_styles} from './lore/LoreStyles.jsx'
 import AppText from "../../AppText.jsx";
 import {
    KEY_ASSETS_LORE,
-   KEY_LORE_OP_EDIT_CONTENT
 } from "../../text/AssetsText.jsx";
 import {KEY_STUDY_SPLITTER_POS_PX} from "../../settings/StudySettings.jsx";
 import {update_dimensions} from "../PageUtils.jsx"
@@ -21,7 +20,6 @@ import {
    remove_content
 } from "./lore/LoreUtils.jsx";
 import CoolStyles from "../../utils/ui/styles/CoolStyles.jsx";
-import {LEGEND_BACKGROUND_COLOR} from "./gallery/GalleryLeftPanel.jsx";
 
 const UPDATE_INTERVAL_MS = 1000
 
@@ -85,13 +83,14 @@ export class AssetsLore extends Component {
             await remove_content(content)
             this.refresh_list(category.id)
          }
+            break
          default:
             console.log('soon', op, content)
             break
       }
    }
    
-   refresh_list=(category_id)=>{
+   refresh_list = (category_id) => {
       const {content, rendered_width, rendered_height} = this.state
       const list_component = <lore_styles.ScrollingLoreList
          style={{

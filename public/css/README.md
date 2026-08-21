@@ -1,0 +1,1 @@
+Files obtained at: https://github.com/mdn/data/blob/main/css/selectors.json
