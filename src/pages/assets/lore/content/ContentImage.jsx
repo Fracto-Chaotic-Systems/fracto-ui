@@ -21,7 +21,7 @@ export class ContentImage extends Component {
       height_px: PropTypes.number.isRequired,
       on_update: PropTypes.func,
    }
-
+   
    state = {
       content: null,
    }
@@ -56,15 +56,27 @@ export class ContentImage extends Component {
       content.content_data = copy_json(content_data)
       this.setState({content})
    }
-
+   
    update_meta_data = (content_meta) => {
       const {content} = this.state
       content.content_meta = copy_json(content_meta)
       this.setState({content})
    }
    
-   render_references = (item_data) => {
+   render_references = (content_data) => {
       return 'references'
+   }
+   
+   render_asset_url = (content_data) => {
+      return 'asset_url'
+   }
+   
+   render_asset_id = (content_data) => {
+      return 'asset_id'
+   }
+   
+   render_asset_comment = (content_data) => {
+      return 'asset_comment'
    }
    
    render_content = () => {
@@ -75,9 +87,27 @@ export class ContentImage extends Component {
       const {content_data} = content
       const table_data = [
          {
+            edit_key: 'id',
+            edit_value: [this.render_asset_id, {
+               content_data,
+            }]
+         },
+         {
+            edit_key: 'url',
+            edit_value: [this.render_asset_url, {
+               content_data,
+            }]
+         },
+         {
+            edit_key: 'text',
+            edit_value: [this.render_asset_comment, {
+               content_data,
+            }]
+         },
+         {
             edit_key: 'refs',
             edit_value: [this.render_references, {
-               item_data: content_data,
+               content_data,
             }]
          },
       ]
@@ -110,7 +140,7 @@ export class ContentImage extends Component {
          return []
       }
       const preamble_section = render_preamble(
-          content, category, this.update_item_data)
+         content, category, this.update_item_data)
       const content_section = this.render_content()
       const meta_section = render_meta(
          content, this.update_meta_data, this.store_content)

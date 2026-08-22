@@ -28,7 +28,7 @@ const render_meta_data = (obj_meta) => {
       ? 'create'
       : `update id=${content.id}`
    const blue_button = <CoolButton
-      on_click={() => store_content(content, on_update_meta, on_store_content) }
+      on_click={() => store_content(content, on_update_meta, on_store_content)}
       content={button_content}
       primary={true}
       disabled={!content_meta.can_store}
@@ -63,9 +63,11 @@ export const render_meta = (content, on_update_meta, on_store_content) => {
          }]
       },
    ]
-   return <CoolTable
-      columns={TABLE_EDITOR_COLUMNS}
-      data={table_data}
-      options={[TABLE_NO_HEADER, TABLE_NO_BORDER]}
-   />
+   return <styles.LoreSectionWrapper>
+      <CoolTable
+         columns={TABLE_EDITOR_COLUMNS}
+         data={table_data}
+         options={[TABLE_NO_HEADER, TABLE_NO_BORDER]}
+      />
+   </styles.LoreSectionWrapper>
 }

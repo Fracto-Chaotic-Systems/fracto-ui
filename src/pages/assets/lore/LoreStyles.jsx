@@ -61,6 +61,8 @@ export class LoreStyles {
        font-size: 1rem;
        color: #888888;
    `
+   static LoreSectionWrapper = styled(CoolStyles.Block)`
+   `
 }
 
 export default LoreStyles

@@ -19,7 +19,7 @@ export const TABLE_NO_HEADER = "table_no_header"
 export const TABLE_NO_BORDER = "table_no_border"
 
 export class CoolTableStyles {
-
+   
    static TableRow = styled(CoolStyles.TableRow)`
        padding: 0 0.125rem;
        //background-color: white;
@@ -29,7 +29,7 @@ export class CoolTableStyles {
            background-color: #eeeeee;
        }
    `
-
+   
    static TableCell = styled(CoolStyles.TableCell)`
        ${CoolStyles.ellipsis}
        ${CoolStyles.noselect}
@@ -37,13 +37,13 @@ export class CoolTableStyles {
        line-height: 16px;
        max-height: 16px;
    `
-
+   
    static SelectorCell = styled(CoolStyles.TableCell)`
        padding-left: 0.25rem;
        line-height: 16px;
        max-height: 16px;
    `
-
+   
    static HeaderSpan = styled(CoolStyles.InlineBlock)`
        ${CoolStyles.uppercase}
        ${CoolStyles.narrow_text_shadow}
@@ -54,7 +54,7 @@ export class CoolTableStyles {
        background-color: #888888;
        margin: 0.125rem 0;
    `
-
+   
    static TableHeader = styled(CoolStyles.TableHeader)`
        background-color: #dddddd;
        padding: 0;
@@ -62,21 +62,21 @@ export class CoolTableStyles {
    static HeaderCell = styled(CoolStyles.TableCell)`
        ${CoolStyles.noselect}
    `
-
+   
    static TableBody = styled(CoolStyles.TableBody)`
        overflow: auto;
        padding-top: 27px;
    `
-
+   
    static TableBodyNoHeader = styled(CoolStyles.TableBody)`
        overflow: auto;
    `
-
+   
    static TableScrollable = styled(CoolStyles.Block)`
        overflow-x: hidden;
        overflow-y: auto;
    `
-
+   
    static NumericSpan = styled(CoolStyles.InlineBlock)`
        ${CoolStyles.monospace}
        ${CoolStyles.ellipsis}
