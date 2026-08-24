@@ -53,7 +53,7 @@ export const copy_clipboard = (copy_name, copy_value) => {
    const clipboard_data = AppSettings.get(KEY_CLIPBOARD_DATA);
    clipboard_data[copy_name] = copy_value;
    AppSettings.on_settings_changed({
-      [KEY_CLIPBOARD_DATA]: clipboard_data
+      [KEY_CLIPBOARD_DATA]: clipboard_data,
    })
 }
 
@@ -77,20 +77,11 @@ export const render_coordinates = (point, digits = 12, copy_name = 'focal_point'
       fill: CoolColors.cool_blue,
       marginLeft: '0.25rem',
    }
-   const copy_link = copy_name
-      ? <styles.InlineHover
-         title={'copy to clipboard'}
-         onClick={() => copy_clipboard(copy_name, point)}
-         style={icon_style}>
-         {copy}
-      </styles.InlineHover>
-      : []
    return [
       <NumberSpan key={'number-part'}>
          {`${x_rounded}+${y_rounded}`}
       </NumberSpan>,
       <ItalicSpan key={'just-i'}>i</ItalicSpan>,
-      copy_link,
    ]
 }
 

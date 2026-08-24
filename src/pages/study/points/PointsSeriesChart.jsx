@@ -79,15 +79,28 @@ export class PointsSeriesChart extends Component {
          .sort((a, b) => a.step - b.step)
          .slice(slice_start, slice_start + point_count)
          .map(data => {
-            return {
-               x_unscaled: parseFloat(data.point.re),
-               y_unscaled: parseFloat(data.point.im),
-               x_str: data.point.re,
-               y_str: data.point.im,
-               x: parseFloat(data.scaled_point.re),
-               y: parseFloat(data.scaled_point.im),
-               x_scaled_str: data.scaled_point.re,
-               y_scaled_str: data.scaled_point.im,
+            if (data.scaled_point.re === 'NaN' || data.scaled_point.im === 'NaN') {
+               return {
+                  x_unscaled: parseFloat(data.point.re),
+                  y_unscaled: parseFloat(data.point.im),
+                  x_str: data.point.re,
+                  y_str: data.point.im,
+                  x: parseFloat(data.point.re),
+                  y: parseFloat(data.point.im),
+                  x_scaled_str: data.point.re,
+                  y_scaled_str: data.point.im,
+               }
+            } else {
+               return {
+                  x_unscaled: parseFloat(data.point.re),
+                  y_unscaled: parseFloat(data.point.im),
+                  x_str: data.point.re,
+                  y_str: data.point.im,
+                  x: parseFloat(data.scaled_point.re),
+                  y: parseFloat(data.scaled_point.im),
+                  x_scaled_str: data.scaled_point.re,
+                  y_scaled_str: data.scaled_point.im,
+               }
             }
          })
       const bounds = find_bounds(point_data, [], false, false)
