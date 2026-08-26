@@ -17,12 +17,14 @@ import {
    KEY_ASSETS_SECTION
 } from "../../settings/AssetsSettings.jsx";
 import {copy_json} from "../../utils/Dom.jsx";
+import {KEY_STUDY_CIRCUITRY_FRAME_SETTINGS, KEY_STUDY_SECTION, STUDY_CIRCUITRY} from "../../settings/StudySettings.jsx";
 
 const SEND_TO_PROMPT = -1
 export const PAGE_TILES_GENERATE = 1
 export const PAGE_ASSETS_IMAGE_GENERATE = 2
 export const PAGE_ASSETS_DETECTOR = 3
-export const PAGE_LORE_IMAGE = 3
+export const PAGE_LORE_IMAGE = 4
+export const PAGE_STUDY_CIRCUITRY = 5
 
 export const send_to = (frame_settings, destination) => {
    let routing = null
@@ -58,6 +60,15 @@ export const send_to = (frame_settings, destination) => {
          })
          routing = '/assets'
          break;
+      
+      case PAGE_STUDY_CIRCUITRY:
+         console.log('it is study circuitry', frame_settings_copy);
+         AppSettings.on_settings_changed({
+            [KEY_STUDY_CIRCUITRY_FRAME_SETTINGS]: frame_settings_copy,
+            [KEY_STUDY_SECTION]: STUDY_CIRCUITRY,
+         })
+         routing = '/assets'
+         break;
 
       default:
          console.log('it is not known', destination);
@@ -76,6 +87,7 @@ const SEND_TO_OPTIONS = [
    {label: 'tiles', value: PAGE_TILES_GENERATE, help: 'generate',},
    {label: 'images', value: PAGE_ASSETS_IMAGE_GENERATE, help: 'generate',},
    {label: 'detector', value: PAGE_ASSETS_DETECTOR, help: 'artrifact',},
+   {label: 'circuitry', value: PAGE_STUDY_CIRCUITRY, help: 'of orbitals',},
 ]
 
 export class SendTo extends Component {

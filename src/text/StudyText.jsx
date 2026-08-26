@@ -10,13 +10,14 @@ export const KEY_STUDY_HYPERPLANE = `${STUDY_FOLDER}/study_hyperplane`
 export const KEY_STUDY_NODES = `${STUDY_FOLDER}/study_nodes`
 export const KEY_STUDY_INLINES = `${STUDY_FOLDER}/study_inlines`
 export const KEY_STUDY_FIELDS = `${STUDY_FOLDER}/study_fields`
+export const KEY_STUDY_CIRCUITRY = `${STUDY_FOLDER}/study_circuitry`
 export const KEY_STUDY_MINIBROTS = `${STUDY_FOLDER}/study_minibrots`
 export const KEY_MAGNITUDES_TITLE = `${STUDY_FOLDER}/magnitudes_title`
 export const KEY_POINTS_TITLE = `${STUDY_FOLDER}/points_title`
 export const KEY_MERIDIANS_TITLE = `${STUDY_FOLDER}/meridians_title`
 export const KEY_HYPERPLANE_TITLE = `${STUDY_FOLDER}/hyperplane_title`
 export const KEY_NODES_TITLE = `${STUDY_FOLDER}/nodes_title`
-export const KEY_FIELDS_TITLE = `${STUDY_FOLDER}/fields_title`
+export const KEY_CIRCUITRY_TITLE = `${STUDY_FOLDER}/circuitry_title`
 export const KEY_MINIBROTS_TITLE = `${STUDY_FOLDER}/minibrots_title`
 export const KEY_INLINE_TITLE = `${STUDY_FOLDER}/inline_title`
 export const KEY_STUDY_ASPECT = `${STUDY_FOLDER}/study_aspect`
@@ -43,12 +44,13 @@ export const APP_STUDY_TEXT = {
    [KEY_STUDY_MINIBROTS]: 'freeform bailiwicks',
    [KEY_STUDY_INLINES]: 'inline bailiwicks',
    [KEY_STUDY_FIELDS]: 'orbital fields',
+   [KEY_STUDY_CIRCUITRY]: 'orbital circuitry',
    [KEY_MAGNITUDES_TITLE]: 'magnitudes',
    [KEY_POINTS_TITLE]: 'orbitals',
    [KEY_MERIDIANS_TITLE]: 'meridians',
    [KEY_HYPERPLANE_TITLE]: 'hyperplane',
    [KEY_NODES_TITLE]: 'nodal',
-   [KEY_FIELDS_TITLE]: 'fields',
+   [KEY_CIRCUITRY_TITLE]: 'circuitry',
    [KEY_MINIBROTS_TITLE]: 'freeform',
    [KEY_INLINE_TITLE]: 'inline',
    [KEY_STUDY_ASPECT]: 'aspect',

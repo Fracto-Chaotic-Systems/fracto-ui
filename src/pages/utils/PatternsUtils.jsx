@@ -1,5 +1,8 @@
 import React from "react";
-import {Scatter} from "react-chartjs-2";
+import { Chart as ChartJS, registerables } from 'chart.js';
+ChartJS.register(...registerables);
+
+import {Scatter} from 'react-chartjs-2';
 
 import Complex from "../../../../../sdk/math/Complex";
 import FractoUtil from "../../../../../sdk/FractoUtil";

@@ -8,11 +8,10 @@ import {
    STUDY_STATUS,
    KEY_STUDY_SECTION,
    KEY_STUDY_SPLITTER_POS_PX,
-   STUDY_FIELDS,
    STUDY_POINTS,
    STUDY_MINIBROTS,
    STUDY_NODES,
-   STUDY_INLINE, STUDY_MERIDIANS,
+   STUDY_INLINE, STUDY_MERIDIANS, STUDY_CIRCUITRY,
 } from "../settings/StudySettings.jsx";
 import AppText from "../AppText.jsx";
 import {
@@ -22,8 +21,9 @@ import {
    KEY_SIDEBAR_STATUS,
 } from "../text/RootText.jsx";
 import {
-   KEY_FIELDS_TITLE,
-   KEY_INLINE_TITLE, KEY_MERIDIANS_TITLE,
+   KEY_CIRCUITRY_TITLE,
+   KEY_INLINE_TITLE,
+   KEY_MERIDIANS_TITLE,
    KEY_MINIBROTS_TITLE,
    KEY_NODES_TITLE,
    KEY_POINTS_TITLE,
@@ -36,11 +36,11 @@ import StudyOverview from "./study/StudyOverview.jsx";
 import StudySettings from "./study/StudySettings.jsx";
 import StudyStatus from "./study/StudyStatus.jsx";
 import StudyPoints from "./study/StudyPoints.jsx";
-import StudyFields from "./study/StudyFields.jsx";
 import StudyMinibrots from "./study/StudyMinibrots.jsx";
 import StudyNodes from "./study/StudyNodes.jsx";
 import StudyInline from "./study/StudyInline.jsx";
 import StudyMeridians from "./study/StudyMeridians.jsx";
+import StudyCircuitry from "./study/StudyCircuitry.jsx";
 
 export const BAILIWICK_TYPE_FREEFORM = 'bailiwick_type_freeform'
 export const BAILIWICK_TYPE_INLINE = 'bailiwick_type_inline'
@@ -49,7 +49,7 @@ export const BAILIWICK_TYPE_NODES = 'bailiwick_type_nodes'
 const SIDEBAR_LIST = [
    {title_key: KEY_SIDEBAR_OVERVIEW, section_code: STUDY_OVERVIEW, right_pane: <StudyOverview/>},
    {section_code: SIDEBAR_BREAKER},
-   {title_key: KEY_FIELDS_TITLE, section_code: STUDY_FIELDS, right_pane: <StudyFields/>},
+   {title_key: KEY_CIRCUITRY_TITLE, section_code: STUDY_CIRCUITRY, right_pane: <StudyCircuitry/>},
    {title_key: KEY_POINTS_TITLE, section_code: STUDY_POINTS, right_pane: <StudyPoints/>},
    {title_key: KEY_MERIDIANS_TITLE, section_code: STUDY_MERIDIANS, right_pane: <StudyMeridians/>},
    {section_code: SIDEBAR_BREAKER, section_text_key: KEY_BREAKER_BAILIWICKS },

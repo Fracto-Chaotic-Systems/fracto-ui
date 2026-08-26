@@ -2,6 +2,9 @@ import React, {Component} from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
 
+import { Chart as ChartJS, registerables } from 'chart.js';
+ChartJS.register(...registerables);
+
 import {MainStyles as styles, MARGIN_PX} from '../../../styles/MainStyles.jsx'
 import {click_point_chart} from "../../../utils/render/PatternsUtils.jsx";
 import {copy_json} from "../../../utils/Dom.jsx";
