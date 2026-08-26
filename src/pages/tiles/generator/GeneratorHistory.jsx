@@ -100,6 +100,9 @@ export class GeneratorHistory extends Component {
          prevProps.all_records.length !== this.props.all_records.length
       if (all_records_changed || records_length_changed) {
          this.process_records()
+         this.setState({
+            run_start: performance.now()
+         })
       }
    }
 
