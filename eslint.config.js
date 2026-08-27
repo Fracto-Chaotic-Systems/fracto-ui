@@ -30,7 +30,9 @@ export default defineConfig([
       'no-dupe-else-if': 'warn',
       'no-undef': 'warn',
       'no-useless-escape': 'warn',
-      'react-refresh/only-export-components': 'warn',
+      // This project intentionally colocates reusable helpers and constants with
+      // components, so the Vite preset's component-only export rule is not a fit.
+      'react-refresh/only-export-components': 'off',
     },
   },
 ])

@@ -88,7 +88,6 @@ const calculate_tile = (tile, tile_points) => {
       return tile_points;
    } catch (e) {
       console.error(e)
-      debugger;
       return tile_points;
    }
 }

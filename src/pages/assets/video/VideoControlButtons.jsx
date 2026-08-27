@@ -47,7 +47,7 @@ export class VideoControlButtons extends Component {
    }
 
    render_save_video_button = () => {
-      const {video_script} = this.props
+      const {video_script, on_control_action} = this.props
       if (!video_script) {
          return []
       }

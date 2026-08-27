@@ -25,7 +25,7 @@ export const bounds_from_short_code = (short_code) => {
             top -= half_scope;
             break;
          default:
-            debugger;
+            break;
       }
       scope = half_scope;
    }

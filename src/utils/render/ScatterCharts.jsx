@@ -44,7 +44,7 @@ export class ScatterCharts extends Component {
          width: `${width_px}px`,
          height: `${height_px}px`,
       }
-      return <AppErrorBoundary fallback={rendered_area}>
+      return <AppErrorBoundary fallback={content}>
          <styles.GraphWrapper
             style={chart_style}>
             {content}

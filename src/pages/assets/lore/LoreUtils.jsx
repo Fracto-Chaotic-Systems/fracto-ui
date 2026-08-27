@@ -158,7 +158,7 @@ const op_lore_component = (item_id, category, width_px, height_px, on_update) =>
                height_px={height_px}
             />
         default:
-            return `unknown category ${id}`
+            return `unknown category ${category.id}`
     }
 }
 

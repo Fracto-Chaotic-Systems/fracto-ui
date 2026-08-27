@@ -33,6 +33,7 @@ const COMP_HEIGHT_FACTOR = 0.40
 export class FieldsColorChart extends Component {
    static propTypes = {
       bounding_rect: PropTypes.object.isRequired,
+      page_settings: PropTypes.object.isRequired,
       frame_settings: PropTypes.object.isRequired,
       frame_settings_key: PropTypes.string.isRequired,
    }
@@ -92,7 +93,7 @@ export class FieldsColorChart extends Component {
 
    render() {
       const {orbital_bins} = this.state
-      const {page_settings} = this.props
+      const {bounding_rect, page_settings} = this.props
       const bin_keys = Object.keys(orbital_bins)
          .filter(key => orbital_bins[key].orbital > 0)
          .filter(key => orbital_bins[key].bin_count > 10)
@@ -122,8 +123,8 @@ export class FieldsColorChart extends Component {
          },
       };
       const chartStyle = {
-         height: `${page_settings[KEY_COMPS_HEIGHT_PX] * COMP_HEIGHT_FACTOR}px`,
-         width: `${page_settings[KEY_COMPS_WIDTH_PX] * COMP_WIDTH_FACTOR}px`,
+         height: `${bounding_rect.height * COMP_HEIGHT_FACTOR}px`,
+         width: `${bounding_rect.width * COMP_WIDTH_FACTOR}px`,
       }
       return <CoolStyles.InlineBlock style={chartStyle}>
          <Bar data={data} options={options}/>

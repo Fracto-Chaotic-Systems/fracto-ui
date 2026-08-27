@@ -185,7 +185,6 @@ export const iteration_chart = (set1, in_cardioid, escaper, animation_index = -1
          data={data_dataset} options={options}
       />
    } catch (e) {
-      debugger;
       return [e.message]
    }
 }

@@ -13,7 +13,11 @@ import {
 } from "../../settings/AssetsSettings.jsx";
 import AppText from "../../AppText.jsx";
 import {KEY_ASSETS_VIDEO} from "../../text/AssetsText.jsx";
-import {CONTROL_ACTION_NEW_VIDEO, CONTROL_ACTION_SAVE_VIDEO} from "./video/VideoControlButtons.jsx";
+import {
+   CONTROL_ACTION_NEW_VIDEO,
+   CONTROL_ACTION_OPEN_VIDEO,
+   CONTROL_ACTION_SAVE_VIDEO
+} from "./video/VideoControlButtons.jsx";
 import VideoOperationsBlock from "./video/VideoOperationsBlock.jsx";
 
 const UPDATE_INTERVAL_MS = 1000

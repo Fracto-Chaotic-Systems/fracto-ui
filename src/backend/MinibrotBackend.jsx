@@ -66,7 +66,7 @@ const process_json_str = (json) => {
    const json_str = typeof json === 'string'
       ? json
       : JSON.stringify(json)
-   const clean_json_str = json_str.replaceAll('"', '\"')
+   const clean_json_str = json_str.replaceAll('"', '\\"')
    return `${clean_json_str}`
 }
 

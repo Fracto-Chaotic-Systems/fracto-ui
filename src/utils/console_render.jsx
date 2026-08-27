@@ -5,6 +5,7 @@ import {KEY_VIEWPORT_DIMENSIONS} from "../settings/RootSettings.jsx";
 
 const remove_color_codes = (str) => {
    // Regex to match common ANSI escape codes
+   // eslint-disable-next-line no-control-regex
    return str.replace(/\x1b\[[0-9;]*m/g, '');
 };
 

@@ -9,6 +9,7 @@ import {
 import AppSettings from "../../AppSettings.jsx";
 import {KEY_VIEWPORT_DIMENSIONS} from "../../settings/RootSettings.jsx";
 import {KEY_ASSETS_SPLITTER_POS_PX} from "../../settings/AssetsSettings.jsx";
+import MinibrotBackend from "../../backend/MinibrotBackend.jsx";
 
 export const RESOLUTIONS = [
    {label: '150', value: 150, help: 'thumbnail',},

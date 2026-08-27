@@ -5,7 +5,7 @@ import Complex from "./../../../../../sdk/math/Complex";
 import FractoUtil from "./../../../../../sdk/FractoUtil.js";
 import FractoFastCalc from "../../../../../sdk/FractoFastCalc.js";
 import {find_bounds} from "../../chart/ChartUtils.jsx";
-import {get_scatter_options} from "../../chart/ChartOrbitals.jsx";
+import {get_scatter_options, GRID_CONFIG} from "../../chart/ChartOrbitals.jsx";
 
 const ANIMATION_COLOR = 'red'
 
@@ -58,7 +58,6 @@ export const click_point_chart = (
          plugins={backgroundImagePlugin ? [backgroundImagePlugin] : []}
       />
    } catch (e) {
-      debugger;
       return [e.message]
    }
 }
@@ -156,7 +155,6 @@ export const iteration_chart = (set1, in_cardioid, escaper, animation_index = -1
          data={data_dataset} options={options}
       />
    } catch (e) {
-      debugger;
       return [e.message]
    }
 }
