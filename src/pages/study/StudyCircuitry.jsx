@@ -14,6 +14,8 @@ import AppText from "../../AppText.jsx";
 import {KEY_STUDY_CIRCUITRY} from "../../text/StudyText.jsx";
 
 import NavigatorSplitterLayout from "../../navigator/NavigatorSplitterLayout.jsx";
+import CircuitryChart from "./circuitry/CircuitryChart.jsx";
+import CoolStyles from "../../utils/ui/styles/CoolStyles.jsx";
 
 const UPDATE_INTERVAL_MS = 1000
 
@@ -85,6 +87,9 @@ export class StudyCircuitry extends Component {
          steps_key: KEY_STUDY_CIRCUITRY_STEPS_SPLITTER_POS,
          section_key: KEY_STUDY_SPLITTER_POS_PX,
       }
+      const wrapper_style = {
+         textAlign: "left"
+      }
       return [
          <styles.SectionTitle
             key={'study-overview-title'}>
@@ -99,7 +104,13 @@ export class StudyCircuitry extends Component {
                frame_settings_key={KEY_STUDY_CIRCUITRY_FRAME_SETTINGS}
                splitter_keys={splitter_keys}
             />
-            {/*<FieldsColorChart />*/}
+            <CoolStyles.InlineBlock style={wrapper_style}>
+               <CircuitryChart
+                  focal_point={frame_settings.focal_point}
+                  rendered_height={rendered_height}
+                  rendered_width={rendered_width}
+               />
+            </CoolStyles.InlineBlock>
          </styles.TightCenteredBlock>,
       ];
    }
