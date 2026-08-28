@@ -5,13 +5,7 @@ import {copy_json} from "../Dom.jsx";
 import AppSettings from "../../AppSettings.jsx";
 import {KEY_NAVIGATOR_DISABLED} from "../../settings/NavigatorSettings.jsx";
 import FractoColors from "./FractoColors";
-import {
-   FRACTO_TILES_PORT,
-   FRACTO_UI_PORT
-} from "../../../../../constants.js";
-
-const IP_ADDRESS = window.location.host.replace(`:${FRACTO_UI_PORT}`, '')
-console.log(`Server IP Address: ${IP_ADDRESS}`);
+import {FRACTO_TILES_PORT} from "../../../../../constants.js";
 
 export const fill_canvas = async (
    ctx,
@@ -43,7 +37,10 @@ export const fill_canvas = async (
       `aspect_ratio=${aspect_ratio}`,
       `resolution_factor=${resolution_factor}`,
    ].join('&')
-   const url = `http://${IP_ADDRESS}:${FRACTO_TILES_PORT}/${data_endpoint}?${all_params}`
+   const tile_url = new URL(`/${data_endpoint}`, window.location.origin)
+   tile_url.port = FRACTO_TILES_PORT
+   tile_url.search = all_params
+   const url = tile_url.toString()
    try {
       // console.log('fetch', url)
       const response = await fetch(url)
