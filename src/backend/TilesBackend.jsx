@@ -4,7 +4,9 @@ import {
    FRACTO_TILES_PORT,
    FRACTO_UI_PORT
 } from "../../../../constants.js";
-import network from "../../../../config/network.json" with {type: "json"};
+
+const FRACTO_PROD_URL = import.meta.env.VITE_FRACTO_PROD_URL
+   || 'https://fracto.mikehallstudio.com'
 
 export class TilesBackend {
 
@@ -27,7 +29,7 @@ export class TilesBackend {
    }
 
    static upload_points = (short_code, tile_points, dir) => {
-      const url = `${network["fracto-prod"]}/new_tile.php?short_code=${short_code}&dir=${dir}`
+      const url = `${FRACTO_PROD_URL}/new_tile.php?short_code=${short_code}&dir=${dir}`
       try {
          axios.post(url, tile_points, {
             headers: {

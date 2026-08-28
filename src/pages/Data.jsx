@@ -23,9 +23,9 @@ import {
    KEY_SIDEBAR_STATUS
 } from "../text/RootText.jsx";
 
-import DataOverview from "./Data/DataOverview.jsx";
-import DataSettings from "./Data/DataSettings.jsx";
-import DataStatus from "./Data/DataStatus.jsx";
+import DataOverview from "./data/DataOverview.jsx";
+import DataSettings from "./data/DataSettings.jsx";
+import DataStatus from "./data/DataStatus.jsx";
 import DataLogs from "./data/DataLogs.jsx";
 import DataBackups from "./data/DataBackups.jsx";
 import {KEY_DATA_BACKUPS_SECTION_TITLE} from "../text/DataText.jsx";
