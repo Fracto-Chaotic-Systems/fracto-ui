@@ -14,6 +14,7 @@ export const KEY_VERSIONS_TITLE = `${ADMIN_FOLDER}/versions`
 export const KEY_ADMIN_OVERVIEW = `${ADMIN_FOLDER}/admin_overview`
 export const KEY_ADMIN_SETTINGS = `${ADMIN_FOLDER}/admin_settings`
 export const KEY_ADMIN_STATUS = `${ADMIN_FOLDER}/admin_status`
+export const KEY_ADMIN_STATUS_REFRESH = `${ADMIN_FOLDER}/admin_status_refresh`
 export const KEY_ADMIN_VERSIONS_TITLE = `${ADMIN_FOLDER}/admin_versions`
 export const KEY_ADMIN_LOGS = `${ADMIN_FOLDER}/admin_logs`
 export const KEY_ADMIN_IDENTITY_FORM_TITLE = `${ADMIN_FOLDER}/identity_form_title`
@@ -33,6 +34,7 @@ export const APP_ADMIN_TEXT = {
    [KEY_ADMIN_OVERVIEW]: 'admin overview',
    [KEY_ADMIN_SETTINGS]: 'admin settings',
    [KEY_ADMIN_STATUS]: 'admin status',
+   [KEY_ADMIN_STATUS_REFRESH]: 'refresh status',
    [KEY_ADMIN_VERSIONS_TITLE]: 'versions',
    [KEY_ADMIN_LOGS]: 'admin logs',
    [KEY_ADMIN_IDENTITY_FORM_TITLE]: 'Operator Identification System',
