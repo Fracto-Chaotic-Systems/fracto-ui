@@ -23,7 +23,7 @@ const chart_options = {
    responsive: true,
    maintainAspectRatio: false,
    animation: false,
-   scales: {y: {beginAtZero: true}},
+   scales: {y: {type: 'logarithmic', beginAtZero: false, min: 1}},
 }
 
 export class TilesStatus extends Component {
