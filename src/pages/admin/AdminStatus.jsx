@@ -16,8 +16,8 @@ import {KEY_ADMIN_STATUS, KEY_ADMIN_STATUS_REFRESH} from "../../text/AdminText.j
 const REFRESH_INTERVAL_MS = 5000
 const ERROR_REFRESH_INTERVAL_MS = 60000
 const STATUS_COLORS = {
-   healthy: '#228b22', ready: '#228b22', degraded: '#c47f00', starting: '#c47f00',
-   pending: '#777777', failed: '#b22222', unavailable: '#b22222',
+   healthy: '#228b22', ready: '#228b22', current: '#228b22', degraded: '#c47f00', starting: '#c47f00',
+   pending: '#777777', failed: '#b22222', unavailable: '#b22222', 'attention required': '#b22222',
 }
 const status_cell = status => {
    const value = status || 'unavailable'
@@ -77,7 +77,12 @@ export class AdminStatus extends Component {
    render() {
       const {health, readiness, error, updated_at, refreshing} = this.state
       const services = health?.services || {}
-      const repositories = health?.build_info?.repositories || {}
+      const build_info = health?.build_info
+      const repositories = build_info?.repositories || {}
+      const repository_entries = Object.values(repositories)
+      const build_status = build_info && repository_entries.length && repository_entries.every(repository => repository.revision && !repository.dirty)
+         ? 'current'
+         : 'attention required'
       const rows = ALL_SERVICES.map(service => ({
          service: service.name,
          status: [() => status_cell(services[service.name]), null],
@@ -92,6 +97,11 @@ export class AdminStatus extends Component {
                {updated_at && <span style={{marginLeft: '1rem', color: '#777777'}}>
                   Updated <ReactTimeAgo date={updated_at}/> ({updated_at.toLocaleString()})
                </span>}
+            </div>
+            <div style={{margin: '0.5rem auto', color: '#555555'}}>
+               Build version: <strong>{build_info?.version || 'unavailable'}</strong>
+               {' '}({build_info?.generated_at ? new Date(build_info.generated_at).toLocaleString() : 'no build manifest'})
+               {' — '}<span style={{color: STATUS_COLORS[build_status] || STATUS_COLORS.unavailable, fontWeight: 'bold'}}>{build_status}</span>
             </div>
             {error && <>
                <div style={{color: '#b22222', fontStyle: 'italic', fontWeight: 'bold', marginBottom: '0.75rem'}}>Unable to reach the main health endpoint: {error}</div>
