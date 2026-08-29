@@ -28,7 +28,7 @@ const TABLE_COLUMNS = [
       style: {backgroundColor: 'white', textTransform: 'uppercase', fontSize: '12px', fontWeight: 'bold'}},
    {id: 'status', label: 'health:', type: CELL_TYPE_CALLBACK, width_px: 180, align: CELL_ALIGN_CENTER,
       style: {backgroundColor: 'white'}},
-   {id: 'detail', label: 'endpoint:', type: CELL_TYPE_TEXT, width_px: 260, align: CELL_ALIGN_LEFT,
+   {id: 'detail', label: 'revision:', type: CELL_TYPE_TEXT, width_px: 260, align: CELL_ALIGN_LEFT,
       style: {backgroundColor: 'white'}},
 ]
 
@@ -77,10 +77,11 @@ export class AdminStatus extends Component {
    render() {
       const {health, readiness, error, updated_at, refreshing} = this.state
       const services = health?.services || {}
+      const repositories = health?.build_info?.repositories || {}
       const rows = ALL_SERVICES.map(service => ({
          service: service.name,
          status: [() => status_cell(services[service.name]), null],
-         detail: `http://127.0.0.1:${service.port}${service.health_path || '/'}`,
+         detail: repositories[service.name]?.short_revision || 'unavailable',
       }))
       const overall_status = error ? 'unavailable' : (readiness?.status === 'ready' ? 'ready' : (health?.status || 'pending'))
       return [
