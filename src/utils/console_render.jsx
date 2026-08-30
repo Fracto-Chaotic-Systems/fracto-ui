@@ -39,6 +39,19 @@ export const relative_time = timestamp => {
 
 const LOG_TIME_GAP_MS = 5 * 60 * 1000
 
+const highlight_text = (text, search_term, key_prefix) => {
+   if (search_term.length < 3) return text
+   const escaped_term = search_term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+   const matcher = new RegExp(`(${escaped_term})`, 'gi')
+   return text.split(matcher).map((part, index) => part.toLowerCase() === search_term.toLowerCase()
+      ? <span
+         key={`${key_prefix}-match-${index}`}
+         style={{color: 'black', backgroundColor: 'lightyellow'}}
+      >{part}</span>
+      : part
+   )
+}
+
 const gap_length = duration_ms => {
    const units = [
       [KEY_LOG_GAP_DAY, 86400000],
@@ -51,7 +64,7 @@ const gap_length = duration_ms => {
    return `${Math.round(duration_ms / duration)} ${AppText.get(unit_key)} ${AppText.get(KEY_LOG_GAP)}`
 }
 
-export const render_lines = (console_lines, timestamps = [], styled_segments = [], levels = []) => {
+export const render_lines = (console_lines, timestamps = [], styled_segments = [], levels = [], search_term = '') => {
    return console_lines.flatMap((line, i) => {
       const text_line = typeof line === 'string' ? line : String(line ?? '')
       let formatted_line = text_line
@@ -71,14 +84,16 @@ export const render_lines = (console_lines, timestamps = [], styled_segments = [
          let markedup_line = remove_color_codes(line_part)
          const segments = formatted_line === line ? styled_segments[i] : null
          if (levels[i] === 'error') {
-            markedup_line = <styles.ErrorLine>{markedup_line}</styles.ErrorLine>
+            markedup_line = <styles.ErrorLine>{highlight_text(markedup_line, search_term, `line-${i}-${part_index}`)}</styles.ErrorLine>
          } else if (segments?.length) {
             markedup_line = segments.map((segment, segment_index) => (
                <span
                   key={`segment-${i}-${part_index}-${segment_index}`}
                   style={segment.color ? {color: segment.color} : undefined}
-               >{remove_color_codes(segment.text)}</span>
+               >{highlight_text(remove_color_codes(segment.text), search_term, `segment-${i}-${part_index}-${segment_index}`)}</span>
             ))
+         } else if (search_term.length >= 3) {
+            markedup_line = highlight_text(markedup_line, search_term, `line-${i}-${part_index}`)
          } else if (markedup_line.indexOf('fracto-') === 0) {
             markedup_line = <styles.FractoLine>{markedup_line}</styles.FractoLine>
          } else if (markedup_line.indexOf('[') === 0) {

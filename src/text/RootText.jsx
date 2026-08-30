@@ -27,6 +27,8 @@ export const KEY_LOG_GAP_HOUR = `${LOGS_FOLDER}/gap_hour`
 export const KEY_LOG_GAP_DAY = `${LOGS_FOLDER}/gap_day`
 export const KEY_LOG_UPDATED = `${LOGS_FOLDER}/updated`
 export const KEY_LOG_UPDATED_MOMENTS = `${LOGS_FOLDER}/updated_moments`
+export const KEY_LOG_SEARCH = `${LOGS_FOLDER}/search`
+export const KEY_LOG_CLEAR = `${LOGS_FOLDER}/clear`
 
 export const APP_ROOT_TEXT = {
    [KEY_SIDEBAR_OVERVIEW]: 'Overview',
@@ -51,4 +53,6 @@ export const APP_ROOT_TEXT = {
    [KEY_LOG_GAP_DAY]: 'day',
    [KEY_LOG_UPDATED]: 'updated',
    [KEY_LOG_UPDATED_MOMENTS]: 'moments ago',
+   [KEY_LOG_SEARCH]: 'search logs',
+   [KEY_LOG_CLEAR]: 'clear',
 }

@@ -9,6 +9,8 @@ import {
    KEY_LOG_AUTO_SCROLL,
    KEY_LOG_LOAD_ERROR,
    KEY_LOG_LOADING_FILE,
+   KEY_LOG_CLEAR,
+   KEY_LOG_SEARCH,
    KEY_LOG_UPDATED,
    KEY_LOG_UPDATED_MOMENTS,
    KEY_LOG_SHOW_TIMESTAMPS,
@@ -30,7 +32,7 @@ export class LogViewer extends Component {
       refresh_interval_ms: 1000,
    }
 
-   state = {logs_data: {}, interval: null, error: null, auto_scroll: true, show_timestamps: true, last_refreshed_at: null}
+   state = {logs_data: {}, interval: null, error: null, auto_scroll: true, show_timestamps: true, last_refreshed_at: null, search_text: ''}
    console_ref = createRef()
    auto_scrolling = false
 
@@ -94,7 +96,15 @@ export class LogViewer extends Component {
          : []
       const styled_segments = records.map(record => record.segments)
       const levels = records.map(record => record.level)
-      return render_lines(lines, timestamps, styled_segments, levels)
+      return render_lines(lines, timestamps, styled_segments, levels, this.state.search_text)
+   }
+
+   update_search = event => {
+      this.setState({search_text: event.target.value})
+   }
+
+   clear_search = () => {
+      this.setState({search_text: ''})
    }
 
    updated_label = () => {
@@ -140,6 +150,15 @@ export class LogViewer extends Component {
                      />{' '}
                      {AppText.get(KEY_LOG_SHOW_TIMESTAMPS)}
                   </label>
+                  <input
+                     type="search"
+                     value={this.state.search_text}
+                     placeholder={AppText.get(KEY_LOG_SEARCH)}
+                     onChange={this.update_search}
+                  />
+                  <button type="button" onClick={this.clear_search}>
+                     {AppText.get(KEY_LOG_CLEAR)}
+                  </button>
                </div>
                <div style={{textAlign: 'right', lineHeight: '1rem', marginRight: '1rem'}}>
                   <styles.FilenameWrapper style={{margin: 0, color: 'black'}}>
