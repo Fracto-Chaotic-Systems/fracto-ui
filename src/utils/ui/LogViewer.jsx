@@ -1,0 +1,112 @@
+import {Component, createRef} from 'react'
+import PropTypes from 'prop-types'
+
+import {MainStyles as styles} from '../../styles/MainStyles.jsx'
+import {load_logs_data, render_lines} from '../console_render.jsx'
+
+const LOG_CONTROLS_HEIGHT_PX = 20
+
+export class LogViewer extends Component {
+   static propTypes = {
+      port: PropTypes.number.isRequired,
+      splitter_key: PropTypes.string.isRequired,
+      title: PropTypes.node,
+      refresh_interval_ms: PropTypes.number,
+   }
+
+   static defaultProps = {
+      title: null,
+      refresh_interval_ms: 1000,
+   }
+
+   state = {logs_data: {}, interval: null, error: null, auto_scroll: true}
+   console_ref = createRef()
+   auto_scrolling = false
+
+   componentDidMount() {
+      this.refresh()
+      this.setState({interval: setInterval(this.refresh, this.props.refresh_interval_ms)})
+   }
+
+   componentWillUnmount() {
+      if (this.state.interval) clearInterval(this.state.interval)
+      this.unmounted = true
+   }
+
+   refresh = async () => {
+      try {
+         const logs_data = await load_logs_data(this.props.port, this.props.splitter_key)
+         if (!this.unmounted) this.setState({logs_data, error: null})
+      } catch (error) {
+         if (!this.unmounted) this.setState({error: error.message})
+      }
+   }
+
+   componentDidUpdate(previous_props, previous_state) {
+      const logs_changed = previous_state.logs_data.console_lines !== this.state.logs_data.console_lines
+      const auto_scroll_enabled = this.state.auto_scroll && !previous_state.auto_scroll
+      if ((logs_changed || auto_scroll_enabled) && this.state.auto_scroll) {
+         this.scroll_to_bottom()
+      }
+   }
+
+   scroll_to_bottom = () => {
+      const element = this.console_ref.current
+      if (!element) return
+      this.auto_scrolling = true
+      element.scrollTop = element.scrollHeight
+      setTimeout(() => { this.auto_scrolling = false }, 0)
+   }
+
+   disable_auto_scroll = () => {
+      if (!this.auto_scrolling && this.state.auto_scroll) this.setState({auto_scroll: false})
+   }
+
+   toggle_auto_scroll = event => {
+      this.setState({auto_scroll: event.target.checked})
+   }
+
+   render() {
+      const {logs_data, error} = this.state
+      const console_style = {
+         height: `${Math.max(0, (logs_data.content_area?.height_px || 0) - LOG_CONTROLS_HEIGHT_PX)}px`,
+         maxWidth: `${logs_data.content_area?.width_px || 0}px`,
+         paddingBottom: '1rem',
+         overflowX: 'auto',
+         overflowY: 'scroll',
+      }
+      return <>
+         {this.props.title}
+         <styles.CenteredBlock>
+            <label style={{display: 'block', margin: '0.25rem auto', fontSize: '0.8rem'}}>
+               <input
+                  type="checkbox"
+                  checked={this.state.auto_scroll}
+                  onChange={this.toggle_auto_scroll}
+               />{' '}
+               Auto-scroll logs
+            </label>
+            <styles.CenteredBlock
+               ref={this.console_ref}
+               style={console_style}
+               onClick={this.disable_auto_scroll}
+               onScroll={() => {
+                  if (!this.auto_scrolling) this.disable_auto_scroll()
+               }}>
+            {error && <div style={{color: '#b22222', fontStyle: 'italic', fontWeight: 'bold'}}>
+               Unable to load logs: {error}
+            </div>}
+            <styles.FilenameWrapper>
+               {logs_data.logfile_name || 'loading file...'}
+            </styles.FilenameWrapper>
+            <styles.ConsoleWrapper>
+               {render_lines(logs_data.console_lines || [])}
+               <styles.ConsoleLine key="console-line-end">{' '}</styles.ConsoleLine>
+            </styles.ConsoleWrapper>
+            </styles.CenteredBlock>
+         </styles.CenteredBlock>
+      </>
+   }
+}
+
+export default LogViewer
