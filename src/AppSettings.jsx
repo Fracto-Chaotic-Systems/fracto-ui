@@ -104,7 +104,7 @@ export class AppSettings {
          if (setting_str) {
             switch (AppSettings.setting_definitions[key].data_type) {
                case TYPE_BOOLEAN:
-                  AppSettings.settings_data[key] = !!setting_str;
+                  AppSettings.settings_data[key] = setting_str === 'true';
                   break;
                case TYPE_STRING:
                   AppSettings.settings_data[key] = setting_str;

@@ -1,5 +1,5 @@
 import {MainStyles as styles} from '../../styles/MainStyles.jsx'
-import {KEY_ASSETS_SPLITTER_POS_PX} from "../../settings/AssetsSettings.jsx";
+import {KEY_ASSETS_LOGS_SHOW_TIMESTAMPS, KEY_ASSETS_SPLITTER_POS_PX} from "../../settings/AssetsSettings.jsx";
 import {FRACTO_ASSET_PORT} from "../../../../../constants.js";
 
 import AppText from "../../AppText.jsx";
@@ -11,6 +11,7 @@ export const AssetsLogs = () => {
    return <LogViewer
       port={FRACTO_ASSET_PORT}
       splitter_key={KEY_ASSETS_SPLITTER_POS_PX}
+      timestamp_key={KEY_ASSETS_LOGS_SHOW_TIMESTAMPS}
       title={<styles.SectionTitle>{AppText.get(KEY_ASSETS_LOGS)}</styles.SectionTitle>}
    />
 }

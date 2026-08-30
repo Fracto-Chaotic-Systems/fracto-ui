@@ -1,6 +1,7 @@
 
 import {MainStyles as styles} from '../styles/MainStyles.jsx'
 import AppSettings from "../AppSettings.jsx";
+import {TIME_AGO_LOCALE} from "../constants.jsx";
 import {KEY_VIEWPORT_DIMENSIONS} from "../settings/RootSettings.jsx";
 
 const remove_color_codes = (str) => {
@@ -9,7 +10,26 @@ const remove_color_codes = (str) => {
    return str.replace(/\x1b\[[0-9;]*m/g, '');
 };
 
-export const render_lines = (console_lines) => {
+const relative_time = timestamp => {
+   const elapsed_ms = Date.parse(timestamp) - Date.now()
+   if (Number.isNaN(elapsed_ms)) return timestamp
+   const units = [
+      ['year', 31536000000],
+      ['month', 2592000000],
+      ['week', 604800000],
+      ['day', 86400000],
+      ['hour', 3600000],
+      ['minute', 60000],
+      ['second', 1000],
+   ]
+   const [unit, duration] = units.find(([, unit_duration]) =>
+      Math.abs(elapsed_ms) >= unit_duration
+   ) || units[units.length - 1]
+   const value = Math.round(elapsed_ms / duration)
+   return new Intl.RelativeTimeFormat(TIME_AGO_LOCALE, {numeric: 'auto'}).format(value, unit)
+}
+
+export const render_lines = (console_lines, timestamps = []) => {
    return console_lines.map((line, i) => {
       let markedup_line = remove_color_codes(line)
       if (markedup_line.indexOf('fracto-') === 0) {
@@ -28,6 +48,10 @@ export const render_lines = (console_lines) => {
       }
       return <styles.ConsoleLine
          key={`console-line-${i}`}>
+         {timestamps[i] && <span
+            style={{color: '#aaaaaa'}}
+            title={relative_time(timestamps[i])}
+         >[{timestamps[i]}] </span>}
          {markedup_line}
       </styles.ConsoleLine>
    })
@@ -41,6 +65,7 @@ export const load_logs_data = async (port, splitter_key ) => {
    const sidebar_position_px = AppSettings.get(splitter_key)
    return {
       console_lines: data.lines,
+      records: data.records || data.lines.map(message => ({timestamp: null, message})),
       logfile_name: data.logfile_name,
       content_area: {
          width_px: viewport_dimensions.width - sidebar_position_px - 20,

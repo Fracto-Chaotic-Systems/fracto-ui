@@ -3,13 +3,15 @@ import PropTypes from 'prop-types'
 
 import {MainStyles as styles} from '../../styles/MainStyles.jsx'
 import {load_logs_data, render_lines} from '../console_render.jsx'
+import AppSettings from '../../AppSettings.jsx'
 
-const LOG_CONTROLS_HEIGHT_PX = 20
+const LOG_CONTROLS_HEIGHT_PX = 30
 
 export class LogViewer extends Component {
    static propTypes = {
       port: PropTypes.number.isRequired,
       splitter_key: PropTypes.string.isRequired,
+      timestamp_key: PropTypes.string.isRequired,
       title: PropTypes.node,
       refresh_interval_ms: PropTypes.number,
    }
@@ -19,13 +21,16 @@ export class LogViewer extends Component {
       refresh_interval_ms: 1000,
    }
 
-   state = {logs_data: {}, interval: null, error: null, auto_scroll: true}
+   state = {logs_data: {}, interval: null, error: null, auto_scroll: true, show_timestamps: true}
    console_ref = createRef()
    auto_scrolling = false
 
    componentDidMount() {
       this.refresh()
-      this.setState({interval: setInterval(this.refresh, this.props.refresh_interval_ms)})
+      this.setState({
+         interval: setInterval(this.refresh, this.props.refresh_interval_ms),
+         show_timestamps: AppSettings.get(this.props.timestamp_key),
+      })
    }
 
    componentWillUnmount() {
@@ -66,6 +71,21 @@ export class LogViewer extends Component {
       this.setState({auto_scroll: event.target.checked})
    }
 
+   toggle_timestamps = event => {
+      const show_timestamps = event.target.checked
+      AppSettings.on_settings_changed({[this.props.timestamp_key]: show_timestamps})
+      this.setState({show_timestamps})
+   }
+
+   rendered_lines = () => {
+      const records = this.state.logs_data.records || []
+      const lines = records.map(record => record.message)
+      const timestamps = this.state.show_timestamps
+         ? records.map(record => record.timestamp)
+         : []
+      return render_lines(lines, timestamps)
+   }
+
    render() {
       const {logs_data, error} = this.state
       const console_style = {
@@ -78,14 +98,27 @@ export class LogViewer extends Component {
       return <>
          {this.props.title}
          <styles.CenteredBlock>
-            <label style={{display: 'block', margin: '0.25rem auto', fontSize: '0.8rem'}}>
-               <input
-                  type="checkbox"
-                  checked={this.state.auto_scroll}
-                  onChange={this.toggle_auto_scroll}
-               />{' '}
-               Auto-scroll logs
-            </label>
+            <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', margin: '0.25rem auto', fontSize: '0.8rem'}}>
+               <label>
+                  <input
+                     type="checkbox"
+                     checked={this.state.auto_scroll}
+                     onChange={this.toggle_auto_scroll}
+                  />{' '}
+                  Auto-scroll logs
+               </label>
+               <label>
+                  <input
+                     type="checkbox"
+                     checked={this.state.show_timestamps}
+                     onChange={this.toggle_timestamps}
+                  />{' '}
+                  Show timestamps
+               </label>
+               <styles.FilenameWrapper style={{display: 'inline-block', margin: 0}}>
+                  {logs_data.logfile_name || 'loading file...'}
+               </styles.FilenameWrapper>
+            </div>
             <styles.CenteredBlock
                ref={this.console_ref}
                style={console_style}
@@ -96,11 +129,8 @@ export class LogViewer extends Component {
             {error && <div style={{color: '#b22222', fontStyle: 'italic', fontWeight: 'bold'}}>
                Unable to load logs: {error}
             </div>}
-            <styles.FilenameWrapper>
-               {logs_data.logfile_name || 'loading file...'}
-            </styles.FilenameWrapper>
             <styles.ConsoleWrapper>
-               {render_lines(logs_data.console_lines || [])}
+               {this.rendered_lines()}
                <styles.ConsoleLine key="console-line-end">{' '}</styles.ConsoleLine>
             </styles.ConsoleWrapper>
             </styles.CenteredBlock>

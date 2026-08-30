@@ -9,6 +9,7 @@ const VIDEO_GENERATOR_FOLDER = 'assets/video'
 const ASSETS_LORE_FOLDER = 'assets/lore'
 export const KEY_ASSETS_SPLITTER_POS_PX = `${ASSETS_FOLDER}/splitter_pos_px`
 export const KEY_ASSETS_SECTION = `${ASSETS_FOLDER}/assets_section`
+export const KEY_ASSETS_LOGS_SHOW_TIMESTAMPS = `${ASSETS_FOLDER}/logs_show_timestamps`
 export const KEY_ASSETS_DETECTOR_IS_NODE = `${ASSETS_FOLDER}/detector_is_node`
 
 export const ASSETS_OVERVIEW = 'assets_overview'
@@ -60,6 +61,12 @@ export const APP_ASSETS_SETTINGS = {
       data_type: TYPE_STRING,
       default_value: ASSETS_OVERVIEW,
       description: 'selected section of the assets page',
+      persist: true,
+   },
+   [KEY_ASSETS_LOGS_SHOW_TIMESTAMPS]: {
+      data_type: TYPE_BOOLEAN,
+      default_value: true,
+      description: 'show timestamps in asset logs',
       persist: true,
    },
    [KEY_ASSETS_GENERATOR_FRAME_SETTINGS]: {

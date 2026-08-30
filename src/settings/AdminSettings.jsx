@@ -10,6 +10,7 @@ const IDENTITY_FOLDER = `${ADMIN_FOLDER}/identity`
 
 export const KEY_ADMIN_SPLITTER_POS_PX = `${ADMIN_FOLDER}/splitter_pos_px`
 export const KEY_ADMIN_SECTION = `${ADMIN_FOLDER}/admin_section`
+export const KEY_ADMIN_LOGS_SHOW_TIMESTAMPS = `${ADMIN_FOLDER}/logs_show_timestamps`
 
 export const KEY_ID_OPERATOR_NAME = `${IDENTITY_FOLDER}/id_operator_name`
 export const KEY_ID_OPERATOR_EMAIL = `${IDENTITY_FOLDER}/id_operator_email`
@@ -33,6 +34,12 @@ export const APP_ADMIN_SETTINGS = {
       data_type: TYPE_STRING,
       default_value: ADMIN_IDENTIFY,
       description: 'selected section of the admin page',
+      persist: true,
+   },
+   [KEY_ADMIN_LOGS_SHOW_TIMESTAMPS]: {
+      data_type: TYPE_BOOLEAN,
+      default_value: true,
+      description: 'show timestamps in admin logs',
       persist: true,
    },
    [KEY_ID_OPERATOR_NAME]: {

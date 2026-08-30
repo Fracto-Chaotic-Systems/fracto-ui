@@ -1,14 +1,11 @@
-import {
-   TYPE_NUMBER,
-   TYPE_OBJECT,
-   TYPE_STRING
-} from "../AppSettings.jsx";
+import {TYPE_BOOLEAN, TYPE_NUMBER, TYPE_OBJECT, TYPE_STRING} from "../AppSettings.jsx";
 import {DEFAULT_SIDEBAR_WIDTH} from "../constants.jsx";
 
 const TILES_FOLDER = 'tiles'
 const TILES_GENERATOR_FOLDER = 'tiles_generator'
 export const KEY_TILES_SPLITTER_POS_PX = `${TILES_FOLDER}/splitter_pos_px`
 export const KEY_TILES_SECTION = `${TILES_FOLDER}/tiles_section`
+export const KEY_TILES_LOGS_SHOW_TIMESTAMPS = `${TILES_FOLDER}/logs_show_timestamps`
 export const KEY_TILES_GENERATOR_FRAME_SETTINGS = `${TILES_GENERATOR_FOLDER}/frame_settings`
 export const KEY_TILES_GENERATOR_SPLITTER_POS = `${TILES_GENERATOR_FOLDER}/splitter_pos`
 export const KEY_TILES_GENERATOR_LEGEND_SPLITTER_POS = `${TILES_GENERATOR_FOLDER}/legend_splitter_pos`
@@ -38,6 +35,12 @@ export const APP_TILES_SETTINGS = {
       data_type: TYPE_STRING,
       default_value: TILES_OVERVIEW,
       description: 'selected section of the tiles page',
+      persist: true,
+   },
+   [KEY_TILES_LOGS_SHOW_TIMESTAMPS]: {
+      data_type: TYPE_BOOLEAN,
+      default_value: true,
+      description: 'show timestamps in tile logs',
       persist: true,
    },
    [KEY_TILES_GENERATOR_FRAME_SETTINGS]: {

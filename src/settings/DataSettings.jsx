@@ -1,7 +1,4 @@
-import {
-   TYPE_NUMBER,
-   TYPE_STRING
-} from "../AppSettings.jsx";
+import {TYPE_BOOLEAN, TYPE_NUMBER, TYPE_STRING} from "../AppSettings.jsx";
 import {DEFAULT_SIDEBAR_WIDTH} from "../constants.jsx";
 
 const DATA_FOLDER = 'data'
@@ -9,6 +6,7 @@ const AUTH_FOLDER = `${DATA_FOLDER}/auth`
 
 export const KEY_DATA_SPLITTER_POS_PX = `${DATA_FOLDER}/splitter_pos_px`
 export const KEY_DATA_SECTION = `${DATA_FOLDER}/data_section`
+export const KEY_DATA_LOGS_SHOW_TIMESTAMPS = `${DATA_FOLDER}/logs_show_timestamps`
 export const KEY_DATA_MYSQL_HOST = `${AUTH_FOLDER}/mysql_host`
 export const KEY_DATA_MYSQL_PORT = `${AUTH_FOLDER}/mysql_port`
 export const KEY_DATA_MYSQL_USER = `${AUTH_FOLDER}/mysql_user`
@@ -33,6 +31,12 @@ export const APP_DATA_SETTINGS = {
       data_type: TYPE_STRING,
       default_value: DATA_OVERVIEW,
       description: 'selected section of the data page',
+      persist: true,
+   },
+   [KEY_DATA_LOGS_SHOW_TIMESTAMPS]: {
+      data_type: TYPE_BOOLEAN,
+      default_value: true,
+      description: 'show timestamps in data logs',
       persist: true,
    },
    [KEY_DATA_MYSQL_HOST]: {
