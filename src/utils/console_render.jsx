@@ -52,6 +52,17 @@ const highlight_text = (text, search_term, key_prefix) => {
    )
 }
 
+const segments_by_line = segments => {
+   const lines = [[]]
+   segments.forEach(segment => {
+      segment.text.split(/\r?\n/).forEach((line_part, part_index, parts) => {
+         if (line_part) lines[lines.length - 1].push({...segment, text: line_part})
+         if (part_index < parts.length - 1) lines.push([])
+      })
+   })
+   return lines
+}
+
 const gap_length = duration_ms => {
    const units = [
       [KEY_LOG_GAP_DAY, 86400000],
@@ -85,10 +96,11 @@ export const render_lines = (console_lines, timestamps = [], styled_segments = [
          const line_has_match = search_term.length >= 3
             && markedup_line.toLowerCase().includes(search_term.toLowerCase())
          const segments = formatted_line === line ? styled_segments[i] : null
+         const line_segments = segments?.length ? segments_by_line(segments)[part_index] : null
          if (levels[i] === 'error') {
             markedup_line = <styles.ErrorLine>{highlight_text(markedup_line, search_term, `line-${i}-${part_index}`)}</styles.ErrorLine>
-         } else if (segments?.length) {
-            markedup_line = segments.map((segment, segment_index) => (
+         } else if (line_segments?.length) {
+            markedup_line = line_segments.map((segment, segment_index) => (
                <span
                   key={`segment-${i}-${part_index}-${segment_index}`}
                   style={segment.color ? {color: segment.color} : undefined}
@@ -117,6 +129,7 @@ export const render_lines = (console_lines, timestamps = [], styled_segments = [
                style={{color: '#aaaaaa'}}
                title={relative_time(timestamps[i])}
             >[{timestamps[i]}] </span>}
+            {part_index > 0 && timestamps[i] && ' '.repeat(`[${timestamps[i]}] `.length)}
             {markedup_line}
          </styles.ConsoleLine>
       })

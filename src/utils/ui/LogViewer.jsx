@@ -93,7 +93,7 @@ export class LogViewer extends Component {
 
    rendered_lines = () => {
       const records = this.state.logs_data.records || []
-      const lines = records.map(record => record.message)
+      const lines = records.map(record => record.statement || record.message)
       const timestamps = this.state.show_timestamps
          ? records.map(record => record.timestamp)
          : []
@@ -119,7 +119,7 @@ export class LogViewer extends Component {
       let line_count = 0
       const records = this.state.logs_data.records || []
       records.forEach(record => {
-         const message = String(record.message ?? '')
+         const message = String(record.statement || record.message || '')
          const matches = message.match(matcher) || []
          match_count += matches.length
          if (matches.length) line_count += 1
