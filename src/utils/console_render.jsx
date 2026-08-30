@@ -29,31 +29,50 @@ const relative_time = timestamp => {
    return new Intl.RelativeTimeFormat(TIME_AGO_LOCALE, {numeric: 'auto'}).format(value, unit)
 }
 
-export const render_lines = (console_lines, timestamps = []) => {
-   return console_lines.map((line, i) => {
-      let markedup_line = remove_color_codes(line)
-      if (markedup_line.indexOf('fracto-') === 0) {
-         markedup_line = <styles.FractoLine>{markedup_line}</styles.FractoLine>
-      } else if (markedup_line.indexOf('[') === 0) {
-         const end_bracket = markedup_line.indexOf(']')
-         if (end_bracket > 0) {
-            markedup_line = [
-               '[',
-               <styles.HighlightSpan>
-                  {markedup_line.slice(1, end_bracket)}
-               </styles.HighlightSpan>,
-               markedup_line.slice(end_bracket),
-            ]
+export const render_lines = (console_lines, timestamps = [], styled_segments = []) => {
+   return console_lines.flatMap((line, i) => {
+      let formatted_line = line
+      try {
+         const parsed = JSON.parse(remove_color_codes(line))
+         if (parsed && typeof parsed === 'object') {
+            formatted_line = JSON.stringify(parsed, null, 2)
          }
+      } catch {
+         // Plain-text log messages are rendered as-is.
       }
-      return <styles.ConsoleLine
-         key={`console-line-${i}`}>
-         {timestamps[i] && <span
-            style={{color: '#aaaaaa'}}
-            title={relative_time(timestamps[i])}
-         >[{timestamps[i]}] </span>}
-         {markedup_line}
-      </styles.ConsoleLine>
+      return formatted_line.split(/\r?\n/).map((line_part, part_index) => {
+         let markedup_line = remove_color_codes(line_part)
+         const segments = formatted_line === line ? styled_segments[i] : null
+         if (segments?.length) {
+            markedup_line = segments.map((segment, segment_index) => (
+               <span
+                  key={`segment-${i}-${part_index}-${segment_index}`}
+                  style={segment.color ? {color: segment.color} : undefined}
+               >{remove_color_codes(segment.text)}</span>
+            ))
+         } else if (markedup_line.indexOf('fracto-') === 0) {
+            markedup_line = <styles.FractoLine>{markedup_line}</styles.FractoLine>
+         } else if (markedup_line.indexOf('[') === 0) {
+            const end_bracket = markedup_line.indexOf(']')
+            if (end_bracket > 0) {
+               markedup_line = [
+                  '[',
+                  <styles.HighlightSpan key={`highlight-${i}-${part_index}`}>
+                     {markedup_line.slice(1, end_bracket)}
+                  </styles.HighlightSpan>,
+                  markedup_line.slice(end_bracket),
+               ]
+            }
+         }
+         return <styles.ConsoleLine
+            key={`console-line-${i}-${part_index}`}>
+            {part_index === 0 && timestamps[i] && <span
+               style={{color: '#aaaaaa'}}
+               title={relative_time(timestamps[i])}
+            >[{timestamps[i]}] </span>}
+            {markedup_line}
+         </styles.ConsoleLine>
+      })
    })
 }
 

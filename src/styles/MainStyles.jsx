@@ -163,6 +163,7 @@ export class MainStyles {
         font-size: 0.85rem;
         line-height: 1rem;
         color: white;
+        white-space: pre;
     `
     static FilenameWrapper = styled(CoolStyles.Block)`
         ${CoolStyles.monospace}

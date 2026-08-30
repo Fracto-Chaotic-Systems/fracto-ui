@@ -90,7 +90,8 @@ export class LogViewer extends Component {
       const timestamps = this.state.show_timestamps
          ? records.map(record => record.timestamp)
          : []
-      return render_lines(lines, timestamps)
+      const styled_segments = records.map(record => record.segments)
+      return render_lines(lines, timestamps, styled_segments)
    }
 
    render() {
