@@ -31,14 +31,19 @@ const relative_time = timestamp => {
 
 export const render_lines = (console_lines, timestamps = [], styled_segments = []) => {
    return console_lines.flatMap((line, i) => {
-      let formatted_line = line
-      try {
-         const parsed = JSON.parse(remove_color_codes(line))
-         if (parsed && typeof parsed === 'object') {
-            formatted_line = JSON.stringify(parsed, null, 2)
+      const text_line = typeof line === 'string' ? line : String(line ?? '')
+      let formatted_line = text_line
+      const json_candidate = remove_color_codes(text_line).trim()
+      if ((json_candidate.startsWith('{') && json_candidate.endsWith('}'))
+         || (json_candidate.startsWith('[') && json_candidate.endsWith(']'))) {
+         try {
+            const parsed = JSON.parse(json_candidate)
+            if (parsed && typeof parsed === 'object') {
+               formatted_line = JSON.stringify(parsed, null, 2)
+            }
+         } catch {
+            // Plain-text log messages are rendered as-is.
          }
-      } catch {
-         // Plain-text log messages are rendered as-is.
       }
       return formatted_line.split(/\r?\n/).map((line_part, part_index) => {
          let markedup_line = remove_color_codes(line_part)
