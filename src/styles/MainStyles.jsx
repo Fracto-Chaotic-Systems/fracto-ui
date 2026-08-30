@@ -156,7 +156,7 @@ export class MainStyles {
     static ConsoleWrapper = styled(CoolStyles.Block)`
         color: #eeeeee;
         padding: 0.5rem;
-        background-color: #444444;
+        background-color: #333333;
     `
     static ConsoleLine = styled(CoolStyles.Block)`
         ${CoolStyles.monospace}
