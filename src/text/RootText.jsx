@@ -25,6 +25,8 @@ export const KEY_LOG_GAP_SECOND = `${LOGS_FOLDER}/gap_second`
 export const KEY_LOG_GAP_MINUTE = `${LOGS_FOLDER}/gap_minute`
 export const KEY_LOG_GAP_HOUR = `${LOGS_FOLDER}/gap_hour`
 export const KEY_LOG_GAP_DAY = `${LOGS_FOLDER}/gap_day`
+export const KEY_LOG_UPDATED = `${LOGS_FOLDER}/updated`
+export const KEY_LOG_UPDATED_MOMENTS = `${LOGS_FOLDER}/updated_moments`
 
 export const APP_ROOT_TEXT = {
    [KEY_SIDEBAR_OVERVIEW]: 'Overview',
@@ -38,8 +40,8 @@ export const APP_ROOT_TEXT = {
    [KEY_MENU_TILES]: 'tiles',
    [KEY_MENU_STUDY]: 'study',
    [KEY_FORM_CANCEL]: 'cancel',
-   [KEY_LOG_AUTO_SCROLL]: 'Auto-scroll logs',
-   [KEY_LOG_SHOW_TIMESTAMPS]: 'Show timestamps',
+   [KEY_LOG_AUTO_SCROLL]: 'auto-scroll',
+   [KEY_LOG_SHOW_TIMESTAMPS]: 'timestamps',
    [KEY_LOG_LOADING_FILE]: 'loading file...',
    [KEY_LOG_LOAD_ERROR]: 'Unable to load logs:',
    [KEY_LOG_GAP]: 'gap',
@@ -47,4 +49,6 @@ export const APP_ROOT_TEXT = {
    [KEY_LOG_GAP_MINUTE]: 'min',
    [KEY_LOG_GAP_HOUR]: 'hr',
    [KEY_LOG_GAP_DAY]: 'day',
+   [KEY_LOG_UPDATED]: 'updated',
+   [KEY_LOG_UPDATED_MOMENTS]: 'moments ago',
 }

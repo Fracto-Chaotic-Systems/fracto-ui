@@ -2,17 +2,19 @@ import {Component, createRef} from 'react'
 import PropTypes from 'prop-types'
 
 import {MainStyles as styles} from '../../styles/MainStyles.jsx'
-import {load_logs_data, render_lines} from '../console_render.jsx'
+import {load_logs_data, relative_time, render_lines} from '../console_render.jsx'
 import AppSettings from '../../AppSettings.jsx'
 import AppText from '../../AppText.jsx'
 import {
    KEY_LOG_AUTO_SCROLL,
    KEY_LOG_LOAD_ERROR,
    KEY_LOG_LOADING_FILE,
+   KEY_LOG_UPDATED,
+   KEY_LOG_UPDATED_MOMENTS,
    KEY_LOG_SHOW_TIMESTAMPS,
 } from '../../text/RootText.jsx'
 
-const LOG_CONTROLS_HEIGHT_PX = 30
+const LOG_CONTROLS_HEIGHT_PX = 40
 
 export class LogViewer extends Component {
    static propTypes = {
@@ -28,7 +30,7 @@ export class LogViewer extends Component {
       refresh_interval_ms: 1000,
    }
 
-   state = {logs_data: {}, interval: null, error: null, auto_scroll: true, show_timestamps: true}
+   state = {logs_data: {}, interval: null, error: null, auto_scroll: true, show_timestamps: true, last_refreshed_at: null}
    console_ref = createRef()
    auto_scrolling = false
 
@@ -48,7 +50,7 @@ export class LogViewer extends Component {
    refresh = async () => {
       try {
          const logs_data = await load_logs_data(this.props.port, this.props.splitter_key)
-         if (!this.unmounted) this.setState({logs_data, error: null})
+         if (!this.unmounted) this.setState({logs_data, error: null, last_refreshed_at: Date.now()})
       } catch (error) {
          if (!this.unmounted) this.setState({error: error.message})
       }
@@ -91,7 +93,21 @@ export class LogViewer extends Component {
          ? records.map(record => record.timestamp)
          : []
       const styled_segments = records.map(record => record.segments)
-      return render_lines(lines, timestamps, styled_segments)
+      const levels = records.map(record => record.level)
+      return render_lines(lines, timestamps, styled_segments, levels)
+   }
+
+   updated_label = () => {
+      const records = this.state.logs_data.records || []
+      const last_message = [...records].reverse().find(record => record.timestamp)
+      const updated_at = last_message?.timestamp || this.state.last_refreshed_at
+      const time_ago = !updated_at || Date.now() - new Date(updated_at).getTime() < 60000
+         ? AppText.get(KEY_LOG_UPDATED_MOMENTS)
+         : relative_time(new Date(updated_at).toISOString())
+      return <>
+         <strong>{AppText.get(KEY_LOG_UPDATED)}:</strong>{' '}
+         <em>{time_ago}</em>
+      </>
    }
 
    render() {
@@ -106,26 +122,31 @@ export class LogViewer extends Component {
       return <>
          {this.props.title}
          <styles.CenteredBlock>
-            <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', margin: '0.25rem auto', fontSize: '0.8rem'}}>
-               <label>
-                  <input
-                     type="checkbox"
-                     checked={this.state.auto_scroll}
-                     onChange={this.toggle_auto_scroll}
-                  />{' '}
-                  {AppText.get(KEY_LOG_AUTO_SCROLL)}
-               </label>
-               <label>
-                  <input
-                     type="checkbox"
-                     checked={this.state.show_timestamps}
-                     onChange={this.toggle_timestamps}
-                  />{' '}
-                  {AppText.get(KEY_LOG_SHOW_TIMESTAMPS)}
-               </label>
-               <styles.FilenameWrapper style={{display: 'inline-block', margin: 0}}>
-                  {logs_data.logfile_name || AppText.get(KEY_LOG_LOADING_FILE)}
-               </styles.FilenameWrapper>
+            <div style={{display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', margin: '0.25rem auto', fontSize: '0.8rem'}}>
+               <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+                  <label style={{marginLeft: '0.5rem', textTransform: 'uppercase'}}>
+                     <input
+                        type="checkbox"
+                        checked={this.state.auto_scroll}
+                        onChange={this.toggle_auto_scroll}
+                     />{' '}
+                     {AppText.get(KEY_LOG_AUTO_SCROLL)}
+                  </label>
+                  <label style={{textTransform: 'uppercase'}}>
+                     <input
+                        type="checkbox"
+                        checked={this.state.show_timestamps}
+                        onChange={this.toggle_timestamps}
+                     />{' '}
+                     {AppText.get(KEY_LOG_SHOW_TIMESTAMPS)}
+                  </label>
+               </div>
+               <div style={{textAlign: 'right', lineHeight: '1rem', marginRight: '1rem'}}>
+                  <styles.FilenameWrapper style={{margin: 0, color: 'black'}}>
+                     {logs_data.logfile_name || AppText.get(KEY_LOG_LOADING_FILE)}
+                  </styles.FilenameWrapper>
+                  <div>{this.updated_label()}</div>
+               </div>
             </div>
             <styles.CenteredBlock
                ref={this.console_ref}

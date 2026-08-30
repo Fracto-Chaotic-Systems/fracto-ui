@@ -18,7 +18,7 @@ const remove_color_codes = (str) => {
    return str.replace(/\x1b\[[0-9;]*m/g, '');
 };
 
-const relative_time = timestamp => {
+export const relative_time = timestamp => {
    const elapsed_ms = Date.parse(timestamp) - Date.now()
    if (Number.isNaN(elapsed_ms)) return timestamp
    const units = [
@@ -51,7 +51,7 @@ const gap_length = duration_ms => {
    return `${Math.round(duration_ms / duration)} ${AppText.get(unit_key)} ${AppText.get(KEY_LOG_GAP)}`
 }
 
-export const render_lines = (console_lines, timestamps = [], styled_segments = []) => {
+export const render_lines = (console_lines, timestamps = [], styled_segments = [], levels = []) => {
    return console_lines.flatMap((line, i) => {
       const text_line = typeof line === 'string' ? line : String(line ?? '')
       let formatted_line = text_line
@@ -70,7 +70,9 @@ export const render_lines = (console_lines, timestamps = [], styled_segments = [
       const rendered_parts = formatted_line.split(/\r?\n/).map((line_part, part_index) => {
          let markedup_line = remove_color_codes(line_part)
          const segments = formatted_line === line ? styled_segments[i] : null
-         if (segments?.length) {
+         if (levels[i] === 'error') {
+            markedup_line = <styles.ErrorLine>{markedup_line}</styles.ErrorLine>
+         } else if (segments?.length) {
             markedup_line = segments.map((segment, segment_index) => (
                <span
                   key={`segment-${i}-${part_index}-${segment_index}`}

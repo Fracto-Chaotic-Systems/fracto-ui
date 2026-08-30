@@ -194,6 +194,9 @@ export class MainStyles {
     static FractoLine = styled(MainStyles.ConsoleLine)`
         color: lightgreen;
     `
+    static ErrorLine = styled(MainStyles.ConsoleLine)`
+        color: #ff6b6b;
+    `
     static TableWrapper = styled(CoolStyles.InlineBlock)`
         box-shadow: 0.25rem 0.25rem 1.5rem rgba(0, 0, 0, 0.25);
         margin: 0.5rem auto;
