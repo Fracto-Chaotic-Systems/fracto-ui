@@ -29,6 +29,9 @@ export const KEY_LOG_UPDATED = `${LOGS_FOLDER}/updated`
 export const KEY_LOG_UPDATED_MOMENTS = `${LOGS_FOLDER}/updated_moments`
 export const KEY_LOG_SEARCH = `${LOGS_FOLDER}/search`
 export const KEY_LOG_CLEAR = `${LOGS_FOLDER}/clear`
+export const KEY_LOG_MATCHES = `${LOGS_FOLDER}/matches`
+export const KEY_LOG_LINES = `${LOGS_FOLDER}/lines`
+export const KEY_LOG_NO_MATCHES = `${LOGS_FOLDER}/no_matches`
 
 export const APP_ROOT_TEXT = {
    [KEY_SIDEBAR_OVERVIEW]: 'Overview',
@@ -55,4 +58,7 @@ export const APP_ROOT_TEXT = {
    [KEY_LOG_UPDATED_MOMENTS]: 'moments ago',
    [KEY_LOG_SEARCH]: 'search logs',
    [KEY_LOG_CLEAR]: 'clear',
+   [KEY_LOG_MATCHES]: 'matches',
+   [KEY_LOG_LINES]: 'lines',
+   [KEY_LOG_NO_MATCHES]: 'no matches found',
 }

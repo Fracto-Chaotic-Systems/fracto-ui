@@ -10,6 +10,9 @@ import {
    KEY_LOG_LOAD_ERROR,
    KEY_LOG_LOADING_FILE,
    KEY_LOG_CLEAR,
+   KEY_LOG_LINES,
+   KEY_LOG_MATCHES,
+   KEY_LOG_NO_MATCHES,
    KEY_LOG_SEARCH,
    KEY_LOG_UPDATED,
    KEY_LOG_UPDATED_MOMENTS,
@@ -107,6 +110,30 @@ export class LogViewer extends Component {
       this.setState({search_text: ''})
    }
 
+   search_summary = () => {
+      const search_term = this.state.search_text
+      if (search_term.length < 3) return null
+      const escaped_term = search_term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const matcher = new RegExp(escaped_term, 'gi')
+      let match_count = 0
+      let line_count = 0
+      const records = this.state.logs_data.records || []
+      records.forEach(record => {
+         const message = String(record.message ?? '')
+         const matches = message.match(matcher) || []
+         match_count += matches.length
+         if (matches.length) line_count += 1
+      })
+      if (!match_count) return <em>{AppText.get(KEY_LOG_NO_MATCHES)}</em>
+      const count_style = {fontFamily: 'monospace', fontWeight: 'bold'}
+      return <>
+         <span style={count_style}>{match_count}</span>{' '}
+         <em>{AppText.get(KEY_LOG_MATCHES)} </em>
+         <span style={count_style}>{line_count}</span>{' '}
+         <em>{AppText.get(KEY_LOG_LINES)}</em>
+      </>
+   }
+
    updated_label = () => {
       const records = this.state.logs_data.records || []
       const last_message = [...records].reverse().find(record => record.timestamp)
@@ -159,6 +186,7 @@ export class LogViewer extends Component {
                   <button type="button" onClick={this.clear_search}>
                      {AppText.get(KEY_LOG_CLEAR)}
                   </button>
+                  {this.search_summary() && <span>{this.search_summary()}</span>}
                </div>
                <div style={{textAlign: 'right', lineHeight: '1rem', marginRight: '1rem'}}>
                   <styles.FilenameWrapper style={{margin: 0, color: 'black'}}>

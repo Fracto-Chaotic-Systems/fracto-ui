@@ -46,7 +46,7 @@ const highlight_text = (text, search_term, key_prefix) => {
    return text.split(matcher).map((part, index) => part.toLowerCase() === search_term.toLowerCase()
       ? <span
          key={`${key_prefix}-match-${index}`}
-         style={{color: 'black', backgroundColor: 'lightyellow'}}
+         style={{color: 'black', backgroundColor: 'yellow'}}
       >{part}</span>
       : part
    )
@@ -82,6 +82,8 @@ export const render_lines = (console_lines, timestamps = [], styled_segments = [
       }
       const rendered_parts = formatted_line.split(/\r?\n/).map((line_part, part_index) => {
          let markedup_line = remove_color_codes(line_part)
+         const line_has_match = search_term.length >= 3
+            && markedup_line.toLowerCase().includes(search_term.toLowerCase())
          const segments = formatted_line === line ? styled_segments[i] : null
          if (levels[i] === 'error') {
             markedup_line = <styles.ErrorLine>{highlight_text(markedup_line, search_term, `line-${i}-${part_index}`)}</styles.ErrorLine>
@@ -109,7 +111,8 @@ export const render_lines = (console_lines, timestamps = [], styled_segments = [
             }
          }
          return <styles.ConsoleLine
-            key={`console-line-${i}-${part_index}`}>
+            key={`console-line-${i}-${part_index}`}
+            style={line_has_match ? {backgroundColor: '#555555'} : undefined}>
             {part_index === 0 && timestamps[i] && <span
                style={{color: '#aaaaaa'}}
                title={relative_time(timestamps[i])}
