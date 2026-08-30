@@ -177,7 +177,7 @@ export class MainStyles {
         &::after {
             content: '';
             flex: 1;
-            border-top: 1px solid lightgreen;
+            border-top: 1px solid lightpink;
         }
     `
     static FilenameWrapper = styled(CoolStyles.Block)`
