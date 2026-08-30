@@ -169,7 +169,7 @@ export class MainStyles {
         display: flex;
         align-items: center;
         gap: 0.75rem;
-        margin: 0.25rem 0;
+        margin: 0;
         color: white;
         font-size: 0.75rem;
         font-family: monospace;

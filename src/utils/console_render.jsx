@@ -1,8 +1,16 @@
 
 import {MainStyles as styles} from '../styles/MainStyles.jsx'
 import AppSettings from "../AppSettings.jsx";
+import AppText from "../AppText.jsx";
 import {TIME_AGO_LOCALE} from "../constants.jsx";
 import {KEY_VIEWPORT_DIMENSIONS} from "../settings/RootSettings.jsx";
+import {
+   KEY_LOG_GAP,
+   KEY_LOG_GAP_DAY,
+   KEY_LOG_GAP_HOUR,
+   KEY_LOG_GAP_MINUTE,
+   KEY_LOG_GAP_SECOND,
+} from "../text/RootText.jsx";
 
 const remove_color_codes = (str) => {
    // Regex to match common ANSI escape codes
@@ -30,6 +38,18 @@ const relative_time = timestamp => {
 }
 
 const LOG_TIME_GAP_MS = 5 * 60 * 1000
+
+const gap_length = duration_ms => {
+   const units = [
+      [KEY_LOG_GAP_DAY, 86400000],
+      [KEY_LOG_GAP_HOUR, 3600000],
+      [KEY_LOG_GAP_MINUTE, 60000],
+      [KEY_LOG_GAP_SECOND, 1000],
+   ]
+   const [unit_key, duration] = units.find(([, unit_duration]) => duration_ms >= unit_duration)
+      || units[units.length - 1]
+   return `${Math.round(duration_ms / duration)} ${AppText.get(unit_key)} ${AppText.get(KEY_LOG_GAP)}`
+}
 
 export const render_lines = (console_lines, timestamps = [], styled_segments = []) => {
    return console_lines.flatMap((line, i) => {
@@ -85,7 +105,7 @@ export const render_lines = (console_lines, timestamps = [], styled_segments = [
       const gap_ms = current_timestamp - previous_timestamp
       const time_gap = gap_ms > LOG_TIME_GAP_MS
          ? <styles.LogTimeGap key={`log-time-gap-${i}`}>
-            {relative_time(new Date(Date.now() - gap_ms).toISOString())}
+            {relative_time(timestamps[i])} ({gap_length(gap_ms)})
          </styles.LogTimeGap>
          : null
       return time_gap ? [time_gap, ...rendered_parts] : rendered_parts

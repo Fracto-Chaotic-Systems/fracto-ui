@@ -20,6 +20,11 @@ export const KEY_LOG_AUTO_SCROLL = `${LOGS_FOLDER}/auto_scroll`
 export const KEY_LOG_SHOW_TIMESTAMPS = `${LOGS_FOLDER}/show_timestamps`
 export const KEY_LOG_LOADING_FILE = `${LOGS_FOLDER}/loading_file`
 export const KEY_LOG_LOAD_ERROR = `${LOGS_FOLDER}/load_error`
+export const KEY_LOG_GAP = `${LOGS_FOLDER}/gap`
+export const KEY_LOG_GAP_SECOND = `${LOGS_FOLDER}/gap_second`
+export const KEY_LOG_GAP_MINUTE = `${LOGS_FOLDER}/gap_minute`
+export const KEY_LOG_GAP_HOUR = `${LOGS_FOLDER}/gap_hour`
+export const KEY_LOG_GAP_DAY = `${LOGS_FOLDER}/gap_day`
 
 export const APP_ROOT_TEXT = {
    [KEY_SIDEBAR_OVERVIEW]: 'Overview',
@@ -37,4 +42,9 @@ export const APP_ROOT_TEXT = {
    [KEY_LOG_SHOW_TIMESTAMPS]: 'Show timestamps',
    [KEY_LOG_LOADING_FILE]: 'loading file...',
    [KEY_LOG_LOAD_ERROR]: 'Unable to load logs:',
+   [KEY_LOG_GAP]: 'gap',
+   [KEY_LOG_GAP_SECOND]: 'sec',
+   [KEY_LOG_GAP_MINUTE]: 'min',
+   [KEY_LOG_GAP_HOUR]: 'hr',
+   [KEY_LOG_GAP_DAY]: 'day',
 }
