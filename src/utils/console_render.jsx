@@ -29,6 +29,8 @@ const relative_time = timestamp => {
    return new Intl.RelativeTimeFormat(TIME_AGO_LOCALE, {numeric: 'auto'}).format(value, unit)
 }
 
+const LOG_TIME_GAP_MS = 5 * 60 * 1000
+
 export const render_lines = (console_lines, timestamps = [], styled_segments = []) => {
    return console_lines.flatMap((line, i) => {
       const text_line = typeof line === 'string' ? line : String(line ?? '')
@@ -45,7 +47,7 @@ export const render_lines = (console_lines, timestamps = [], styled_segments = [
             // Plain-text log messages are rendered as-is.
          }
       }
-      return formatted_line.split(/\r?\n/).map((line_part, part_index) => {
+      const rendered_parts = formatted_line.split(/\r?\n/).map((line_part, part_index) => {
          let markedup_line = remove_color_codes(line_part)
          const segments = formatted_line === line ? styled_segments[i] : null
          if (segments?.length) {
@@ -78,6 +80,15 @@ export const render_lines = (console_lines, timestamps = [], styled_segments = [
             {markedup_line}
          </styles.ConsoleLine>
       })
+      const previous_timestamp = i > 0 ? Date.parse(timestamps[i - 1]) : NaN
+      const current_timestamp = Date.parse(timestamps[i])
+      const gap_ms = current_timestamp - previous_timestamp
+      const time_gap = gap_ms > LOG_TIME_GAP_MS
+         ? <styles.LogTimeGap key={`log-time-gap-${i}`}>
+            {relative_time(new Date(Date.now() - gap_ms).toISOString())}
+         </styles.LogTimeGap>
+         : null
+      return time_gap ? [time_gap, ...rendered_parts] : rendered_parts
    })
 }
 

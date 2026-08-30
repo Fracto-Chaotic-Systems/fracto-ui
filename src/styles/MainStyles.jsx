@@ -165,6 +165,21 @@ export class MainStyles {
         color: white;
         white-space: pre;
     `
+    static LogTimeGap = styled(CoolStyles.Block)`
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin: 0.5rem 0;
+        color: #aaaaaa;
+        font-size: 0.75rem;
+        font-family: monospace;
+        &::before,
+        &::after {
+            content: '';
+            flex: 1;
+            border-top: 1px solid #666666;
+        }
+    `
     static FilenameWrapper = styled(CoolStyles.Block)`
         ${CoolStyles.monospace}
         ${CoolStyles.align_middle}
