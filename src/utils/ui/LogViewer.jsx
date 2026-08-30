@@ -4,6 +4,13 @@ import PropTypes from 'prop-types'
 import {MainStyles as styles} from '../../styles/MainStyles.jsx'
 import {load_logs_data, render_lines} from '../console_render.jsx'
 import AppSettings from '../../AppSettings.jsx'
+import AppText from '../../AppText.jsx'
+import {
+   KEY_LOG_AUTO_SCROLL,
+   KEY_LOG_LOAD_ERROR,
+   KEY_LOG_LOADING_FILE,
+   KEY_LOG_SHOW_TIMESTAMPS,
+} from '../../text/RootText.jsx'
 
 const LOG_CONTROLS_HEIGHT_PX = 30
 
@@ -105,7 +112,7 @@ export class LogViewer extends Component {
                      checked={this.state.auto_scroll}
                      onChange={this.toggle_auto_scroll}
                   />{' '}
-                  Auto-scroll logs
+                  {AppText.get(KEY_LOG_AUTO_SCROLL)}
                </label>
                <label>
                   <input
@@ -113,10 +120,10 @@ export class LogViewer extends Component {
                      checked={this.state.show_timestamps}
                      onChange={this.toggle_timestamps}
                   />{' '}
-                  Show timestamps
+                  {AppText.get(KEY_LOG_SHOW_TIMESTAMPS)}
                </label>
                <styles.FilenameWrapper style={{display: 'inline-block', margin: 0}}>
-                  {logs_data.logfile_name || 'loading file...'}
+                  {logs_data.logfile_name || AppText.get(KEY_LOG_LOADING_FILE)}
                </styles.FilenameWrapper>
             </div>
             <styles.CenteredBlock
@@ -127,7 +134,7 @@ export class LogViewer extends Component {
                   if (!this.auto_scrolling) this.disable_auto_scroll()
                }}>
             {error && <div style={{color: '#b22222', fontStyle: 'italic', fontWeight: 'bold'}}>
-               Unable to load logs: {error}
+               {AppText.get(KEY_LOG_LOAD_ERROR)} {error}
             </div>}
             <styles.ConsoleWrapper>
                {this.rendered_lines()}
