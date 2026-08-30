@@ -156,7 +156,7 @@ export class MainStyles {
     static ConsoleWrapper = styled(CoolStyles.Block)`
         color: #eeeeee;
         padding: 0.5rem;
-        background-color: #333333;
+        background-color: #222222;
     `
     static ConsoleLine = styled(CoolStyles.Block)`
         ${CoolStyles.monospace}
@@ -169,15 +169,15 @@ export class MainStyles {
         display: flex;
         align-items: center;
         gap: 0.75rem;
-        margin: 0.5rem 0;
-        color: #aaaaaa;
+        margin: 0.25rem 0;
+        color: white;
         font-size: 0.75rem;
         font-family: monospace;
         &::before,
         &::after {
             content: '';
             flex: 1;
-            border-top: 1px solid #666666;
+            border-top: 1px solid lightgreen;
         }
     `
     static FilenameWrapper = styled(CoolStyles.Block)`
