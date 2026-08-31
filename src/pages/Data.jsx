@@ -9,6 +9,7 @@ import {
    DATA_BACKUPS,
    DATA_LOGS,
    DATA_OVERVIEW,
+   DATA_QUERIES,
    DATA_SETTINGS,
    DATA_STATUS,
    KEY_DATA_SECTION,
@@ -27,13 +28,13 @@ import DataOverview from "./data/DataOverview.jsx";
 import DataSettings from "./data/DataSettings.jsx";
 import DataStatus from "./data/DataStatus.jsx";
 import DataLogs from "./data/DataLogs.jsx";
-import DataBackups from "./data/DataBackups.jsx";
-import {KEY_DATA_BACKUPS_SECTION_TITLE} from "../text/DataText.jsx";
+import AdminQueries from "./admin/AdminQueries.jsx";
+import {KEY_DATA_QUERIES_SECTION_TITLE} from "../text/DataText.jsx";
 
 const SIDEBAR_LIST = [
    {title_key: KEY_SIDEBAR_OVERVIEW, section_code: DATA_OVERVIEW, right_pane: <DataOverview/>},
    {section_code: SIDEBAR_BREAKER},
-   {title_key: KEY_DATA_BACKUPS_SECTION_TITLE, section_code: DATA_BACKUPS, right_pane: <DataBackups/>},
+   {title_key: KEY_DATA_QUERIES_SECTION_TITLE, section_code: DATA_QUERIES, right_pane: <AdminQueries/>},
    {section_code: SIDEBAR_BREAKER},
    {title_key: KEY_SIDEBAR_SETTINGS, section_code: DATA_SETTINGS, right_pane: <DataSettings/>},
    {title_key: KEY_SIDEBAR_STATUS, section_code: DATA_STATUS, right_pane: <DataStatus/>},
@@ -51,7 +52,8 @@ export class Data extends Component {
    }
 
    componentDidMount() {
-      const section_code = AppSettings.get(KEY_DATA_SECTION)
+      const saved_section_code = AppSettings.get(KEY_DATA_SECTION)
+      const section_code = saved_section_code === DATA_BACKUPS ? DATA_QUERIES : saved_section_code
       this.setState({section_code})
    }
 

@@ -9,6 +9,7 @@ import CoolSplitter, {
 
 import {NavigatorStyles as styles} from "../styles/NavigatorStyles.jsx";
 import {
+   BACKGROUND_FIELD_GRADIENT,
    DEFAULT_SIDEBAR_WIDTH,
    SPLITTER_WIDTH_PX,
    STEPS_WIDTH_MAX_PX,
@@ -23,7 +24,6 @@ import NavigatorField from "./NavigatorField.jsx";
 const MAX_MAIN_SPLITTER_POS = 800;
 const FIELD_BACKGROUND_COLOR = "#666666";
 const STEPS_BACKGROUND_COLOR = "#aaaaaa";
-const LEGEND_BACKGROUND_COLOR = "linear-gradient(75deg, #bbbbbb 0%, #eeeeee 50%, #ffffff 90%)";
 
 export class NavigatorSplitterLayout extends Component {
    static propTypes = {
@@ -166,7 +166,7 @@ export class NavigatorSplitterLayout extends Component {
          left: bounding_rect.left,
          width: main_splitter_pos - page_splitter_pos,
          height: bounding_rect.height - bounding_rect.top - steps_bounding_rect.height,
-         background: LEGEND_BACKGROUND_COLOR,
+         background: BACKGROUND_FIELD_GRADIENT,
       }
       const all_panes = [
          <styles.FixedWrapper

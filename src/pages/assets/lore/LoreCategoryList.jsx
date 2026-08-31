@@ -15,7 +15,7 @@ import {
    new_lore_component,
    get_categories,
    get_category} from "./LoreUtils.jsx";
-import {LEGEND_BACKGROUND_COLOR} from "../gallery/GalleryLeftPanel.jsx";
+import {BACKGROUND_FIELD_GRADIENT} from "../../../constants.jsx";
 import AppSettings from "../../../AppSettings.jsx";
 import {KEY_ASSETS_LORE_SELECTED_CATEGORY_ID} from "../../../settings/AssetsSettings.jsx";
 
@@ -122,7 +122,7 @@ export class LoreCategoryList extends Component {
          width: `${width_px}px`,
          cursor: 'pointer',
          borderRight: `0.125rem solid #bbbbbb`,
-         background: `${LEGEND_BACKGROUND_COLOR}`,
+         background: BACKGROUND_FIELD_GRADIENT,
       }
       const table_data = category_list.map(category => {
          return {

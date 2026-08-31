@@ -14,9 +14,9 @@ import {GALLERY_TABLE_WIDTH_PX} from "./GalleryList.jsx";
 import {SPLITTER_WIDTH_PX} from "../../../constants.jsx";
 import FractoRasterImage from "../../../utils/render/FractoRasterImage.jsx";
 import FieldsColorWheel from "../../../utils/render/FieldsColorWheel.jsx";
+import {BACKGROUND_FIELD_GRADIENT} from "../../../constants.jsx";
 
 const IMAGE_SIZE_DELTA = 50
-export const LEGEND_BACKGROUND_COLOR = "linear-gradient(280deg, #bbbbbb 0%, #eeeeee 50%, #ffffff 90%)";
 
 export class GalleryLeftPanel extends Component {
    static propTypes = {
@@ -59,7 +59,7 @@ export class GalleryLeftPanel extends Component {
          left: `${container_bounds.left + GALLERY_TABLE_WIDTH_PX}px`,
          width: `${width}px`,
          height: `${container_bounds.height}px`,
-         background: LEGEND_BACKGROUND_COLOR,
+         background: BACKGROUND_FIELD_GRADIENT,
       }
       const image_style = {
          margin: `${margin}px auto`,

@@ -7,6 +7,7 @@ export const KEY_DATA_CONTENT_SETTINGS = `${DATA_FOLDER}/settings`
 export const KEY_DATA_CONTENT_STATUS = `${DATA_FOLDER}/status`
 export const KEY_DATA_CONTENT_LOGS = `${DATA_FOLDER}/logs`
 export const KEY_DATA_CONTENT_BACKUPS = `${DATA_FOLDER}/backups`
+export const KEY_DATA_CONTENT_QUERIES = `${DATA_FOLDER}/queries`
 
 export const KEY_DATA_MYSQL_HOST_LABEL = `${MYSQL_FOLDER}/host_label`
 export const KEY_DATA_MYSQL_HOST_PROMPT = `${MYSQL_FOLDER}/host_prompt`
@@ -33,6 +34,13 @@ export const KEY_DATA_MAIN_SERVER_FORM_SUBTITLE = `${DATA_FOLDER}/main_server_fo
 export const KEY_DATA_MAIN_SERVER_FORM_SAVE = `${DATA_FOLDER}/main_server_form_save`
 
 export const KEY_DATA_BACKUPS_SECTION_TITLE = `${DATA_FOLDER}/backups_section_title`
+export const KEY_DATA_QUERIES_SECTION_TITLE = `${DATA_FOLDER}/queries_section_title`
+const QUERY_TABLE_FOLDER = `${DATA_FOLDER}/query_tables`
+export const KEY_DATA_QUERY_TABLE_ASSETS = `${QUERY_TABLE_FOLDER}/assets`
+export const KEY_DATA_QUERY_TABLE_FREE_BAILIWICKS = `${QUERY_TABLE_FOLDER}/free_bailiwicks`
+export const KEY_DATA_QUERY_TABLE_LORE_CATEGORY = `${QUERY_TABLE_FOLDER}/lore_category`
+export const KEY_DATA_QUERY_TABLE_LORE_FILES = `${QUERY_TABLE_FOLDER}/lore_files`
+export const KEY_DATA_QUERY_TABLE_TILES = `${QUERY_TABLE_FOLDER}/tiles`
 
 export const APP_DATA_TEXT = {
    [KEY_DATA_CONTENT_OVERVIEW]: 'data overview',
@@ -40,6 +48,7 @@ export const APP_DATA_TEXT = {
    [KEY_DATA_CONTENT_SETTINGS]: 'data settings',
    [KEY_DATA_CONTENT_STATUS]: 'data status',
    [KEY_DATA_CONTENT_LOGS]: 'data logs',
+   [KEY_DATA_CONTENT_QUERIES]: 'data queries',
    [KEY_DATA_MYSQL_HOST_LABEL]: "host",
    [KEY_DATA_MYSQL_HOST_PROMPT]: "localhost?",
    [KEY_DATA_MYSQL_PORT_LABEL]: "port",
@@ -62,4 +71,10 @@ export const APP_DATA_TEXT = {
    [KEY_DATA_MAIN_SERVER_FORM_SUBTITLE]: "Specify the remote server connection details",
    [KEY_DATA_MAIN_SERVER_FORM_SAVE]: "save main server setting",
    [KEY_DATA_BACKUPS_SECTION_TITLE]: "backups",
+   [KEY_DATA_QUERIES_SECTION_TITLE]: "queries",
+   [KEY_DATA_QUERY_TABLE_ASSETS]: "assets",
+   [KEY_DATA_QUERY_TABLE_FREE_BAILIWICKS]: "free bailiwicks",
+   [KEY_DATA_QUERY_TABLE_LORE_CATEGORY]: "lore category",
+   [KEY_DATA_QUERY_TABLE_LORE_FILES]: "lore files",
+   [KEY_DATA_QUERY_TABLE_TILES]: "tiles",
 }

@@ -5,7 +5,7 @@ This directory contains the routed application areas and the feature components 
 ## Routed areas
 
 - `Admin.jsx` (`/admin`) - service identification, overview, status, versions, logs, and administrative settings.
-- `Data.jsx` (`/data`) - data-service overview, status, backups, logs, and connection/settings forms.
+- `Data.jsx` (`/data`) - data-service overview, queries, status, logs, and connection/settings forms.
 - `Assets.jsx` (`/assets`) - asset overview/status, image generation and gallery tools, lore content, video generation, logs, and settings.
 - `Tiles.jsx` (`/tiles`) - tile overview/status, inspection, generation, logs, and settings.
 - `Study.jsx` (`/study`) - fractal studies including points, minibrots, nodes, inline studies, meridians, circuitry, fields, overview, status, and settings.
@@ -16,7 +16,7 @@ Each top-level page follows the same broad pattern: read the selected section fr
 
 - `admin/` contains panels for the admin page.
 - `assets/` contains asset panels plus gallery, lore, detector, and video subcomponents.
-- `data/` contains data-service panels such as backups, logs, overview, settings, and status.
+- `data/` contains data-service panels such as logs, overview, settings, and status; query administration is in `admin/AdminQueries.jsx`.
 - `study/` contains study panels and specialized implementations for fields, magnitudes, meridians, minibrots, and points.
 - `tiles/` contains tile panels and the tile generator's control, progress, context, history, and operation components.
 - `utils/` contains page-level layout and interaction helpers: `Sidebar`, `SplitterLayout`, forms, coverage, charts, send-to actions, and shared page utilities.

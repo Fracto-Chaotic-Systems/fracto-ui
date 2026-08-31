@@ -28,7 +28,6 @@ import {
 import {send_to_icon} from "../../../utils/ui/CoolIcons.jsx";
 import FractoLegend from "../../../utils/render/FractoLegend.jsx";
 import Magnifier from "react-magnifier";
-import {LEGEND_BACKGROUND_COLOR} from "./GalleryLeftPanel.jsx";
 
 const TABLE_COLUMNS = [
     {

@@ -18,13 +18,12 @@ import {KEY_STUDY_MERIDIANS} from "../../text/StudyText.jsx";
 import DataBackend from "../../backend/DataBackend.jsx";
 import MeridianBlock from "./meridians/MeridianBlock.jsx";
 import CoolStyles from "../../utils/ui/styles/CoolStyles.jsx";
+import {BACKGROUND_FIELD_GRADIENT} from "../../constants.jsx";
 
 const UPDATE_INTERVAL_MS = 1000
 const MAX_CARDINALITY = 128
-const LEGEND_BACKGROUND_COLOR = "linear-gradient(75deg, #bbbbbb 0%, #eeeeee 50%, #ffffff 90%)";
-
 const BlocksBackground = styled(CoolStyles.Block)`
-    background: ${LEGEND_BACKGROUND_COLOR};
+    background: ${BACKGROUND_FIELD_GRADIENT};
     overflow-y: auto;
     padding: 0.5rem;
     height: 90vh;
