@@ -2,7 +2,6 @@ import React, {Component} from "react";
 import {Bar, Line} from 'react-chartjs-2';
 import {Chart as ChartJS, registerables} from 'chart.js';
 
-import {FRACTO_TILES_PORT} from "../../../../../constants.js";
 import CoolTable from "../../utils/ui/CoolTable.jsx";
 import {CELL_ALIGN_LEFT, CELL_ALIGN_RIGHT, CELL_TYPE_TEXT} from "../../utils/ui/styles/CoolTableStyles.jsx";
 import {MainStyles as styles, MARGIN_PX, TITLE_BAR_HEIGHT_PX} from '../../styles/MainStyles.jsx'
@@ -11,7 +10,7 @@ import AppText from "../../AppText.jsx";
 import {KEY_TILES_STATUS, KEY_TILES_STATUS_EFFECTIVENESS} from "../../text/TilesText.jsx";
 import {KEY_TILES_SPLITTER_POS_PX} from "../../settings/TilesSettings.jsx";
 import {update_dimensions} from "../PageUtils.jsx";
-import {service_origin} from "../../utils/service_origin.jsx";
+import TilesBackend from "../../backend/TilesBackend.jsx";
 
 ChartJS.register(...registerables)
 
@@ -67,9 +66,7 @@ export class TilesStatus extends Component {
 
    refresh_stats = async () => {
       try {
-         const response = await fetch(`${service_origin(FRACTO_TILES_PORT)}/cache_status`)
-         if (!response.ok) throw new Error(`HTTP ${response.status}`)
-         const stats = await response.json()
+         const stats = await TilesBackend.cache_status()
          if (this.unmounted) return
          const server_history = Array.isArray(stats.history)
             ? stats.history.map(point => ({

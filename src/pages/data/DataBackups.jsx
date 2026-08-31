@@ -9,10 +9,7 @@ import {
    CELL_ALIGN_RIGHT,
    CELL_TYPE_TEXT
 } from "../../utils/ui/styles/CoolTableStyles.jsx";
-import {
-   FRACTO_DATA_PORT,
-} from "../../../../../constants.js";
-import {service_origin} from "../../utils/service_origin.jsx";
+import DataBackend from "../../backend/DataBackend.jsx";
 
 const TABLE_COLUMNS = [
    {
@@ -63,11 +60,8 @@ export class DataBackups extends Component {
 
    backup_table = async (table) => {
       const {backup_data} = this.state
-      const origin = service_origin(FRACTO_DATA_PORT)
-      const url = `${origin}/backup?table=${table}`
       try {
-         const response = await fetch(url)
-         const result = await response.json()
+         const result = await DataBackend.backup_status(table)
          backup_data[table] = result//.split('\n')
          // this.setState({backup_data})
          console.log('backup_data', backup_data)

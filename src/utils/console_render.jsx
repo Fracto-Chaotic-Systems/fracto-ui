@@ -4,7 +4,7 @@ import AppSettings from "../AppSettings.jsx";
 import AppText from "../AppText.jsx";
 import {TIME_AGO_LOCALE} from "../constants.jsx";
 import {KEY_VIEWPORT_DIMENSIONS} from "../settings/RootSettings.jsx";
-import {service_origin} from "./service_origin.jsx";
+import LogsBackend from "../backend/LogsBackend.jsx";
 import {
    KEY_LOG_GAP,
    KEY_LOG_GAP_DAY,
@@ -147,9 +147,7 @@ export const render_lines = (console_lines, timestamps = [], styled_segments = [
 }
 
 export const load_logs_data = async (port, splitter_key ) => {
-   const url = `${service_origin(port)}/logs`
-   const response = await fetch(url)
-   const data = await response.json()
+   const data = await LogsBackend.load(port)
    const viewport_dimensions = AppSettings.get(KEY_VIEWPORT_DIMENSIONS)
    const sidebar_position_px = AppSettings.get(splitter_key)
    return {

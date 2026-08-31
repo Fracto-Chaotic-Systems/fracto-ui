@@ -9,8 +9,7 @@ import AppSettings from "../../AppSettings.jsx";
 import {KEY_DATA_QUERIES_TAB, KEY_DATA_SPLITTER_POS_PX} from "../../settings/DataSettings.jsx";
 import {BACKGROUND_FIELD_GRADIENT} from "../../constants.jsx";
 import {update_dimensions} from "../PageUtils.jsx";
-import {FRACTO_DATA_PORT} from "../../../../../constants.js";
-import {service_origin} from "../../utils/service_origin.jsx";
+import DataBackend from "../../backend/DataBackend.jsx";
 import CoolTable from "../../utils/ui/CoolTable.jsx";
 import {CELL_ALIGN_LEFT, CELL_TYPE_NUMBER, CELL_TYPE_TEXT} from "../../utils/ui/styles/CoolTableStyles.jsx";
 
@@ -99,11 +98,8 @@ export class AdminQueries extends Component {
          loading: previous.loading.map((value, index) => index === tab_index ? true : value),
          errors: previous.errors.map((value, index) => index === tab_index ? null : value),
       }))
-      const origin = service_origin(FRACTO_DATA_PORT)
       try {
-         const response = await fetch(`${origin}/query?table=${encodeURIComponent(table)}&limit=${TABLE_LIMIT}&order=id%20DESC`)
-         if (!response.ok) throw new Error(`HTTP ${response.status}`)
-         const payload = await response.json()
+         const payload = await DataBackend.query_table(table, TABLE_LIMIT)
          if (this.unmounted) return
          this.setState(previous => ({
             records: previous.records.map((value, index) => index === tab_index ? (payload.result || []) : value),

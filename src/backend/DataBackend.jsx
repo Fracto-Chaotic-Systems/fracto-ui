@@ -1,12 +1,21 @@
 import {FRACTO_DATA_PORT} from "../../../../constants.js";
 import {FETCH_JSON_HEADERS} from "../pages/study/StudyUtils.jsx";
 import {service_origin} from "../utils/service_origin.jsx";
+import {request_json} from "./BackendUtils.jsx";
 
 const DATA_ORIGIN = service_origin(FRACTO_DATA_PORT)
 
 const MAX_DENOMINATOR = 128
 
 export class DataBackend {
+
+   static query_table = (table, limit = 1000) => request_json(
+      `${DATA_ORIGIN}/query?${new URLSearchParams({table, limit: `${limit}`, order: 'id DESC'})}`)
+
+   static backup_status = table => request_json(`${DATA_ORIGIN}/backup?table=${encodeURIComponent(table)}`)
+
+   static radian_data = (theta_num = 5, theta_den = 11, precision = 24) => request_json(
+      `${DATA_ORIGIN}/radian_data?${new URLSearchParams({theta_num, theta_den, precision})}`)
    
    static get_minibrots = (params, cb) => {
       setTimeout(async () => {

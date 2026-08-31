@@ -2,11 +2,8 @@ import {Component} from "react";
 import PropTypes from "prop-types";
 
 import {CoolTable} from "../../../utils/ui/CoolImports.jsx";
-import {
-   FRACTO_DATA_PORT
-} from "../../../../../../constants.js";
 import FractoUtil from "../../../../../../sdk/FractoUtil.js";
-import {service_origin} from "../../../utils/service_origin.jsx";
+import DataBackend from "../../../backend/DataBackend.jsx";
 
 import {
    CELL_ALIGN_CENTER,
@@ -63,12 +60,7 @@ export class FareySequenceList extends Component {
    }
 
    get_farey_sequence = async () => {
-      const origin = service_origin(FRACTO_DATA_PORT)
-      const url = `${origin}/utils/farey_sequence`
-      const full_farey_sequence = await fetch(url, {}).then(res => res.json())
-      const farey_sequence = full_farey_sequence
-         .filter(f => f.den <= MAX_DENOMINATOR)
-         .filter(f => f.num > 0 && f.den > 2)
+      const farey_sequence = await DataBackend.get_farey_sequence()
       this.setState({farey_sequence})
       console.log(`${farey_sequence.length} members in farey_sequence`)
    }

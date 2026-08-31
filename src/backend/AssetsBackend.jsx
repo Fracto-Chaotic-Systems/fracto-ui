@@ -4,11 +4,14 @@ import {
 } from "../../../../constants.js";
 import {FETCH_JSON_HEADERS} from "../pages/study/StudyUtils.jsx";
 import {service_origin} from "../utils/service_origin.jsx";
+import {request_json} from "./BackendUtils.jsx";
 
 const ASSETS_ORIGIN = service_origin(FRACTO_ASSET_PORT)
 const DATA_ORIGIN = service_origin(FRACTO_DATA_PORT)
 
 export class AssetsBackend {
+
+    static load_style_properties = () => request_json('/css/properties.json')
 
     static render_image = async (frame_settings, resolution) => {
         const all_params = [

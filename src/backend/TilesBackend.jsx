@@ -4,11 +4,20 @@ import {
    FRACTO_TILES_PORT,
 } from "../../../../constants.js";
 import {service_origin} from "../utils/service_origin.jsx";
+import {request_json} from "./BackendUtils.jsx";
 
 const FRACTO_PROD_URL = import.meta.env.VITE_FRACTO_PROD_URL
    || 'https://fracto.mikehallstudio.com'
 
 export class TilesBackend {
+
+   static cache_status = () => request_json(`${service_origin(FRACTO_TILES_PORT)}/cache_status`)
+
+   static tile_coverage = params => request_json(
+      `${service_origin(FRACTO_TILES_PORT)}/tile_coverage?${new URLSearchParams(params)}`)
+
+   static canvas_buffer = (data_endpoint, params) => request_json(
+      `${service_origin(FRACTO_TILES_PORT)}/${data_endpoint}?${new URLSearchParams(params)}`)
 
    static get_heat_map = async (frame_settings) => {
       const all_params = [

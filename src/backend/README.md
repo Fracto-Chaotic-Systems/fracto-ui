@@ -16,7 +16,7 @@ DataBackend.get_orbitals({x: -0.75, y: 0.1}, 200, (data) => {
 
 ### `DataBackend.jsx`
 
-Calls the data service (normally port 3002) for minibrot listings, orbital data, lore listings/content, and Farey sequences. Most query methods use callbacks and defer the request by 250 ms. `get_farey_sequence()` is asynchronous and caches its filtered result in `DataBackend.FAREY_SEQUENCE`; it keeps positive terms with denominators up to 128. `lore_storage()` sends a JSON `PUT` and does not return the saved record.
+Calls the data service (normally port 3002) for minibrot listings, orbital data, lore listings/content, Farey sequences, backups, and query-table records. Most query methods use callbacks and defer the request by 250 ms. `get_farey_sequence()` is asynchronous and caches its filtered result in `DataBackend.FAREY_SEQUENCE`; it keeps positive terms with denominators up to 128. `lore_storage()` sends a JSON `PUT` and does not return the saved record.
 
 ### `AssetsBackend.jsx`
 
@@ -24,11 +24,17 @@ Calls the asset service (normally port 3003) to render an image, and the data se
 
 ### `TilesBackend.jsx`
 
-Calls the tile service (normally port 3004) for a heat-map buffer. `upload_points()` posts generated tile points to the configured `fracto-prod` endpoint from the root `config/network.json`; this is a remote write and should only be used with the intended environment.
+Calls the tile service (normally port 3004) for heat-map/canvas buffers, cache status, and tile coverage. `upload_points()` posts generated tile points to the configured `fracto-prod` endpoint from the root `config/network.json`; this is a remote write and should only be used with the intended environment.
 
 ### `MinibrotBackend.jsx`
 
 Publishes minibrot/bailiwick records to the data service (normally port 3002). It exports `get_ideal_level()` and status constants (`BIN_VERB_*`) used by study components. `save_bailiwick()` converts the points and display settings into the service payload, then reports completion through its optional callback.
+
+### `ServerBackend.jsx`, `AdminBackend.jsx`, and `LogsBackend.jsx`
+
+Contain requests for the main server health/readiness endpoints, admin-service
+version information, and log endpoints respectively. `BackendUtils.jsx` provides
+the shared JSON request and query-string helpers used by these clients.
 
 ## Service origins
 

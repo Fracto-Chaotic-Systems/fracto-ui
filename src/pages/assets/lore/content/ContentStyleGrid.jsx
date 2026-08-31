@@ -1,5 +1,6 @@
 import React, {Component} from "react";
 import PropTypes from "prop-types";
+import AssetsBackend from "../../../../backend/AssetsBackend.jsx";
 
 import CoolTable from "../../../../utils/ui/CoolTable.jsx";
 import {
@@ -42,13 +43,7 @@ export class ContentStyleGrid extends Component {
    }
    
    load_properties() {
-      fetch('/css/properties.json')
-         .then((response) => {
-            if (!response.ok) {
-               throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json();
-         })
+      AssetsBackend.load_style_properties()
          .then((properties) => {
             console.log('properties', properties);
             this.setState({

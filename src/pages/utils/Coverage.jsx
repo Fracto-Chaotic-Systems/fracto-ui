@@ -1,7 +1,6 @@
 import React, {Component} from "react";
 import PropTypes from "prop-types";
-import {FRACTO_TILES_PORT} from "../../../../../constants.js";
-import {service_origin} from "../../utils/service_origin.jsx";
+import TilesBackend from "../../backend/TilesBackend.jsx";
 
 import {MainStyles as styles} from '../../styles/MainStyles.jsx'
 
@@ -34,10 +33,8 @@ export class Coverage extends Component {
          `re=${frame_settings.focal_point.x}`,
          `im=${frame_settings.focal_point.y}`,
       ].join('&')
-      const url = `${service_origin(FRACTO_TILES_PORT)}/tile_coverage?${all_params}`
       try {
-         const response = await fetch(url)
-         const result = await response.json()
+         const result = await TilesBackend.tile_coverage(Object.fromEntries(new URLSearchParams(all_params)))
          this.setState({coverage: result.coverage})
       } catch (e) {
          console.log(e.message)

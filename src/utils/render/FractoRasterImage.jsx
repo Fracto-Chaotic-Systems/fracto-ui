@@ -5,8 +5,7 @@ import {copy_json} from "../Dom.jsx";
 import AppSettings from "../../AppSettings.jsx";
 import {KEY_NAVIGATOR_DISABLED} from "../../settings/NavigatorSettings.jsx";
 import FractoColors from "./FractoColors";
-import {FRACTO_TILES_PORT} from "../../../../../constants.js";
-import {service_origin} from "../service_origin.jsx";
+import TilesBackend from "../../backend/TilesBackend.jsx";
 
 export const fill_canvas = async (
    ctx,
@@ -38,13 +37,8 @@ export const fill_canvas = async (
       `aspect_ratio=${aspect_ratio}`,
       `resolution_factor=${resolution_factor}`,
    ].join('&')
-   const tile_url = new URL(`/${data_endpoint}`, service_origin(FRACTO_TILES_PORT))
-   tile_url.search = all_params
-   const url = tile_url.toString()
    try {
-      // console.log('fetch', url)
-      const response = await fetch(url)
-      const result = await response.json()
+      const result = await TilesBackend.canvas_buffer(data_endpoint, Object.fromEntries(new URLSearchParams(all_params)))
       FractoColors.buffer_to_canvas(result.canvas_buffer, ctx, 1, opacity)
       if (on_plan_complete) {
          on_plan_complete(result.canvas_buffer, ctx)
