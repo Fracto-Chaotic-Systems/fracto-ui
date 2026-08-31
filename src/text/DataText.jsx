@@ -35,6 +35,8 @@ export const KEY_DATA_MAIN_SERVER_FORM_SAVE = `${DATA_FOLDER}/main_server_form_s
 
 export const KEY_DATA_BACKUPS_SECTION_TITLE = `${DATA_FOLDER}/backups_section_title`
 export const KEY_DATA_QUERIES_SECTION_TITLE = `${DATA_FOLDER}/queries_section_title`
+export const KEY_DATA_QUERIES_LOADING = `${DATA_FOLDER}/queries_loading`
+export const KEY_DATA_QUERIES_LOAD_ERROR = `${DATA_FOLDER}/queries_load_error`
 const QUERY_TABLE_FOLDER = `${DATA_FOLDER}/query_tables`
 export const KEY_DATA_QUERY_TABLE_ASSETS = `${QUERY_TABLE_FOLDER}/assets`
 export const KEY_DATA_QUERY_TABLE_FREE_BAILIWICKS = `${QUERY_TABLE_FOLDER}/free_bailiwicks`
@@ -72,6 +74,8 @@ export const APP_DATA_TEXT = {
    [KEY_DATA_MAIN_SERVER_FORM_SAVE]: "save main server setting",
    [KEY_DATA_BACKUPS_SECTION_TITLE]: "backups",
    [KEY_DATA_QUERIES_SECTION_TITLE]: "queries",
+   [KEY_DATA_QUERIES_LOADING]: "loading records...",
+   [KEY_DATA_QUERIES_LOAD_ERROR]: "unable to load records:",
    [KEY_DATA_QUERY_TABLE_ASSETS]: "assets",
    [KEY_DATA_QUERY_TABLE_FREE_BAILIWICKS]: "free bailiwicks",
    [KEY_DATA_QUERY_TABLE_LORE_CATEGORY]: "lore category",

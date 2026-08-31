@@ -127,6 +127,11 @@ export class CoolTable extends Component {
    render_header_cell = (column) => {
       const {on_click_column} = this.props
       const cell_style = column.width_px ? {minWidth: `${column.width_px}px`} : {}
+      if (column.max_width_px) {
+         cell_style.width = `${column.max_width_px}px`
+         cell_style.maxWidth = `${column.max_width_px}px`
+         cell_style.boxSizing = 'border-box'
+      }
       if (on_click_column) {
          cell_style.cursor = "pointer"
       }
@@ -194,6 +199,11 @@ export class CoolTable extends Component {
             break;
       }
       let cell_style = {minWidth: `${column.width_px}px`}
+      if (column.max_width_px) {
+         cell_style.width = `${column.max_width_px}px`
+         cell_style.maxWidth = `${column.max_width_px}px`
+         cell_style.boxSizing = 'border-box'
+      }
       if (column.align) {
          switch (column.align) {
             case CELL_ALIGN_LEFT:

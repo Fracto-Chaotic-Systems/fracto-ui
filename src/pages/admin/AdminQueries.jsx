@@ -4,11 +4,14 @@ import {MainStyles as styles} from '../../styles/MainStyles.jsx'
 import AppText from "../../AppText.jsx";
 import CoolTabs from "../../utils/ui/CoolTabs.jsx";
 import {CoolStyles} from "../../utils/ui/CoolImports.jsx";
-import {KEY_DATA_CONTENT_QUERIES, KEY_DATA_QUERY_TABLE_ASSETS, KEY_DATA_QUERY_TABLE_FREE_BAILIWICKS, KEY_DATA_QUERY_TABLE_LORE_CATEGORY, KEY_DATA_QUERY_TABLE_LORE_FILES, KEY_DATA_QUERY_TABLE_TILES} from "../../text/DataText.jsx";
+import {KEY_DATA_CONTENT_QUERIES, KEY_DATA_QUERIES_LOAD_ERROR, KEY_DATA_QUERIES_LOADING, KEY_DATA_QUERY_TABLE_ASSETS, KEY_DATA_QUERY_TABLE_FREE_BAILIWICKS, KEY_DATA_QUERY_TABLE_LORE_CATEGORY, KEY_DATA_QUERY_TABLE_LORE_FILES, KEY_DATA_QUERY_TABLE_TILES} from "../../text/DataText.jsx";
 import AppSettings from "../../AppSettings.jsx";
 import {KEY_DATA_QUERIES_TAB, KEY_DATA_SPLITTER_POS_PX} from "../../settings/DataSettings.jsx";
 import {BACKGROUND_FIELD_GRADIENT} from "../../constants.jsx";
 import {update_dimensions} from "../PageUtils.jsx";
+import {FRACTO_DATA_PORT, FRACTO_UI_PORT} from "../../../../../constants.js";
+import CoolTable from "../../utils/ui/CoolTable.jsx";
+import {CELL_ALIGN_LEFT, CELL_TYPE_NUMBER, CELL_TYPE_TEXT} from "../../utils/ui/styles/CoolTableStyles.jsx";
 
 const TABLE_TABS = [
    KEY_DATA_QUERY_TABLE_ASSETS,
@@ -18,6 +21,38 @@ const TABLE_TABS = [
    KEY_DATA_QUERY_TABLE_TILES,
 ]
 
+const TABLE_NAMES = ['assets', 'free_bailiwicks', 'lore_category', 'lore_files', 'tiles']
+const TABLE_LIMIT = 1000
+const TABLE_HEADER_SPACE_PX = 40
+const MONOSPACE_CHARACTER_WIDTH_PX = 8
+const COLUMN_HORIZONTAL_PADDING_PX = 16
+const MIN_COLUMN_WIDTH_PX = 64
+const cell_text = value => {
+   if (value === null || value === undefined) return ''
+   if (typeof value === 'object') return JSON.stringify(value)
+   return String(value)
+}
+const table_columns = records => {
+   const fields = [...new Set(records.flatMap(record => Object.keys(record)))]
+   return fields.map(field => {
+      const sample = records.find(record => record[field] !== null && record[field] !== undefined)?.[field]
+      const width_px = Math.ceil(Math.max(
+         MIN_COLUMN_WIDTH_PX,
+         Math.max(field.length, ...records.map(record => cell_text(record[field]).length))
+            * MONOSPACE_CHARACTER_WIDTH_PX + COLUMN_HORIZONTAL_PADDING_PX,
+      ) * 1.1)
+      return {
+         id: field,
+         label: field,
+         type: typeof sample === 'number' ? CELL_TYPE_NUMBER : CELL_TYPE_TEXT,
+         width_px,
+         max_width_px: width_px,
+         align: CELL_ALIGN_LEFT,
+         style: {backgroundColor: 'white', fontFamily: 'monospace'},
+      }
+   })
+}
+
 export class AdminQueries extends Component {
    state = {
       tab_index: 0,
@@ -25,6 +60,9 @@ export class AdminQueries extends Component {
       rendered_height: 0,
       dimensions_interval: null,
       field_ref: React.createRef(),
+      records: TABLE_NAMES.map(() => []),
+      loading: TABLE_NAMES.map(() => false),
+      errors: TABLE_NAMES.map(() => null),
    }
 
    componentDidMount() {
@@ -33,6 +71,7 @@ export class AdminQueries extends Component {
       this.setState({tab_index})
       this.update_dimensions()
       this.setState({dimensions_interval: setInterval(this.update_dimensions, 1000)})
+      this.load_table(tab_index)
    }
 
    componentWillUnmount() {
@@ -49,12 +88,49 @@ export class AdminQueries extends Component {
    on_tab_select = tab_index => {
       AppSettings.on_settings_changed({[KEY_DATA_QUERIES_TAB]: tab_index})
       this.setState({tab_index})
+      this.load_table(tab_index)
+   }
+
+   load_table = async tab_index => {
+      const table = TABLE_NAMES[tab_index]
+      if (!table) return
+      this.setState(previous => ({
+         loading: previous.loading.map((value, index) => index === tab_index ? true : value),
+         errors: previous.errors.map((value, index) => index === tab_index ? null : value),
+      }))
+      const origin = window.origin.replace(`${FRACTO_UI_PORT}`, `${FRACTO_DATA_PORT}`)
+      try {
+         const response = await fetch(`${origin}/query?table=${encodeURIComponent(table)}&limit=${TABLE_LIMIT}&order=id%20DESC`)
+         if (!response.ok) throw new Error(`HTTP ${response.status}`)
+         const payload = await response.json()
+         if (this.unmounted) return
+         this.setState(previous => ({
+            records: previous.records.map((value, index) => index === tab_index ? (payload.result || []) : value),
+            loading: previous.loading.map((value, index) => index === tab_index ? false : value),
+         }))
+      } catch (error) {
+         if (!this.unmounted) this.setState(previous => ({
+            loading: previous.loading.map((value, index) => index === tab_index ? false : value),
+            errors: previous.errors.map((value, index) => index === tab_index ? error.message : value),
+         }))
+      }
    }
 
    render() {
-      const {tab_index, rendered_height, field_ref} = this.state
+      const {tab_index, rendered_height, field_ref, records, loading, errors} = this.state
       const labels = TABLE_TABS.map(key => AppText.get(key))
-      const selected_content = <CoolStyles.Block style={{backgroundColor: 'white', minHeight: '12rem'}} />
+      const table_records = records[tab_index] || []
+      const table_error = errors[tab_index]
+      const selected_content = <CoolStyles.Block style={{backgroundColor: 'white', minHeight: '12rem'}}>
+         <CoolStyles.Block style={{height: `${TABLE_HEADER_SPACE_PX}px`}} />
+         {loading[tab_index] && <CoolStyles.Block>{AppText.get(KEY_DATA_QUERIES_LOADING)}</CoolStyles.Block>}
+         {table_error && <CoolStyles.Block style={{color: '#b22222'}}>{AppText.get(KEY_DATA_QUERIES_LOAD_ERROR)} {table_error}</CoolStyles.Block>}
+         {!loading[tab_index] && !table_error && <CoolTable
+            columns={table_columns(table_records)}
+            data={table_records}
+            table_style={{backgroundColor: 'white'}}
+         />}
+      </CoolStyles.Block>
       const field_top = field_ref.current?.getBoundingClientRect()?.top || 0
       const field_height = rendered_height ? Math.max(0, rendered_height - field_top) : undefined
       return <styles.PaneWrapper>
