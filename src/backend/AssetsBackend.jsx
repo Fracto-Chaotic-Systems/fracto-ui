@@ -11,8 +11,18 @@ const DATA_ORIGIN = service_origin(FRACTO_DATA_PORT)
 
 export class AssetsBackend {
 
+    /** Loads the UI style-property catalog used by the lore editor.
+     * @returns {Promise<Object>} The JSON property definitions.
+     * @calledBy ContentStyleGrid
+     */
     static load_style_properties = () => request_json('/css/properties.json')
 
+    /** Renders an asset image through the asset service.
+     * @param {Object} frame_settings Focal point and scope settings.
+     * @param {number} resolution Requested pixel resolution.
+     * @returns {Promise<Object|Error>} Render response, or an error value on failure.
+     * @calledBy AssetsImageGenerator
+     */
     static render_image = async (frame_settings, resolution) => {
         const all_params = [
             `width_px=${resolution}`,
@@ -33,6 +43,11 @@ export class AssetsBackend {
         }
     }
 
+    /** Adds a rendered image record to the data service gallery.
+     * @param {Object} image_outcome Render result containing asset metadata.
+     * @returns {Promise<Object|Error>} Insert response, or an error value on failure.
+     * @calledBy AssetsImageGenerator
+     */
     static add_to_gallery = async (image_outcome) => {
         const all_params = [
             `asset_id=${image_outcome.asset_id.replace('img_', '')}`,
@@ -56,6 +71,10 @@ export class AssetsBackend {
         }
     }
 
+    /** Lists asset records from the data service.
+     * @returns {Promise<Object[]>} Asset result rows; returns [] on failure.
+     * @calledBy GalleryList
+     */
     static load_assets = async () => {
         const url = `${DATA_ORIGIN}/assets`
         try {
@@ -69,6 +88,10 @@ export class AssetsBackend {
         }
     }
 
+    /** Lists lore categories from the data service.
+     * @returns {Promise<Object[]|Error>} Category rows or an error value.
+     * @calledBy LoreUtils
+     */
     static lore_categories = async () => {
         const url = `${DATA_ORIGIN}/lore_categories`
         try {
@@ -82,6 +105,11 @@ export class AssetsBackend {
         }
     }
 
+    /** Loads one lore-content record.
+     * @param {number|string} content_id Content identifier.
+     * @returns {Promise<Object|Error>} The first result row or an error value.
+     * @calledBy lore content renderer components
+     */
     static get_lore_content = async (content_id) => {
         const url = `${DATA_ORIGIN}/lore_content?id=${content_id}`
         try {

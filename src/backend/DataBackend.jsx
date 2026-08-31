@@ -9,14 +9,42 @@ const MAX_DENOMINATOR = 128
 
 export class DataBackend {
 
+   /**
+    * Fetches the newest rows from a whitelisted database table.
+    * @param {string} table Table name accepted by the data server query route.
+    * @param {number} [limit=1000] Maximum number of rows to return.
+    * @returns {Promise<{result: Object[]}>} Rows ordered by descending id.
+    * @calledBy AdminQueries
+    */
    static query_table = (table, limit = 1000) => request_json(
       `${DATA_ORIGIN}/query?${new URLSearchParams({table, limit: `${limit}`, order: 'id DESC'})}`)
 
+   /**
+    * Requests the status of a table backup operation.
+    * @param {string} table Table name to inspect.
+    * @returns {Promise<Object>} Data-server backup status payload.
+    * @calledBy DataBackups (legacy maintenance view)
+    */
    static backup_status = table => request_json(`${DATA_ORIGIN}/backup?table=${encodeURIComponent(table)}`)
 
+   /**
+    * Retrieves radian/vector data for a rational angle.
+    * @param {number} [theta_num=5] Angle numerator.
+    * @param {number} [theta_den=11] Angle denominator.
+    * @param {number} [precision=24] Requested calculation precision.
+    * @returns {Promise<Object[]>} Radian data returned by the data server.
+    * @calledBy OrbitalMagnitudes
+    */
    static radian_data = (theta_num = 5, theta_den = 11, precision = 24) => request_json(
       `${DATA_ORIGIN}/radian_data?${new URLSearchParams({theta_num, theta_den, precision})}`)
-   
+
+   /**
+    * Lists minibrot records using the supplied query parameters.
+    * @param {Object} params Data-server query parameters.
+    * @param {Function} cb Called with the returned result array.
+    * @returns {void} The request is deferred by 250ms.
+    * @calledBy MinibrotList, AssetsDetector
+    */
    static get_minibrots = (params, cb) => {
       setTimeout(async () => {
          const all_params = Object.keys(params).map(key => {
@@ -29,6 +57,14 @@ export class DataBackend {
       }, 250)
    }
    
+   /**
+    * Retrieves orbital points for one focal point.
+    * @param {{x:number,y:number}} focal_point Complex-plane focal point.
+    * @param {number} limit Maximum number of points.
+    * @param {Function} cb Called with the service response.
+    * @returns {void} The request is deferred by 250ms.
+    * @calledBy study point/orbital views
+    */
    static get_orbital = (focal_point, limit, cb) => {
       setTimeout(async () => {
          const all_params = [
@@ -43,6 +79,14 @@ export class DataBackend {
       }, 250)
    }
    
+   /**
+    * Retrieves multiple orbital series for one focal point.
+    * @param {{x:number,y:number}} focal_point Complex-plane focal point.
+    * @param {number} limit Maximum number of points.
+    * @param {Function} cb Called with the response or an error object.
+    * @returns {void} The request is deferred by 250ms.
+    * @calledBy PointsMainPanel
+    */
    static get_orbitals = (focal_point, limit, cb) => {
       setTimeout(async () => {
          const all_params = [
@@ -62,6 +106,13 @@ export class DataBackend {
       }, 250)
    }
    
+   /**
+    * Lists lore content for a category.
+    * @param {number|string} category_id Lore category identifier.
+    * @param {Function} cb Called with the service response.
+    * @returns {void} The request is deferred by 250ms.
+    * @calledBy LoreContentList
+    */
    static lore_content_listing = (category_id, cb) => {
       const url = `${DATA_ORIGIN}/lore_storage`
       setTimeout(async () => {
@@ -75,6 +126,13 @@ export class DataBackend {
       }, 250)
    }
    
+   /**
+    * Stores or updates lore content through the data service.
+    * @param {Object} content Content payload containing metadata and optional id.
+    * @returns {Promise<void>} Resolves after the request is handled; errors are logged.
+    * @calledBy LoreUtils, LoreMetaData
+    * @note Mutates content_meta.can_store before sending and does not return the saved record.
+    */
    static lore_storage = async (content) => {
       const {content_data, content_meta, id, title, category, category_key} = content
       content_meta.can_store = false
@@ -110,6 +168,12 @@ export class DataBackend {
    
    FAREY_SEQUENCE = []
    
+   /**
+    * Loads and caches the filtered Farey sequence.
+    * @returns {Promise<Object[]>} Positive terms with denominator <= 128.
+    * @calledBy FareySequenceList, StudyMeridians
+    * @note Subsequent callers use the in-memory DataBackend.FAREY_SEQUENCE cache.
+    */
    static get_farey_sequence = async () => {
       if (DataBackend.FAREY_SEQUENCE?.length > 0) {
          return DataBackend.FAREY_SEQUENCE

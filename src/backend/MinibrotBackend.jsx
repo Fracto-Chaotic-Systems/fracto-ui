@@ -72,6 +72,12 @@ const process_json_str = (json) => {
 
 export class MinibrotBackend {
 
+   /** Publishes a minibrot payload to the data service.
+    * @param {Object} data JSON record sent with PUT /minibrot.
+    * @param {Function} cb Optional completion callback.
+    * @returns {void} Completion is reported through cb.
+    * @calledBy save_bailiwick
+    */
    static post_data = (data, cb) => {
       const origin = service_origin(FRACTO_DATA_PORT)
       const url = `${origin}/minibrot`
@@ -92,6 +98,13 @@ export class MinibrotBackend {
       });
    }
 
+   /** Converts and saves a bailiwick as a minibrot record.
+    * @param {Object} bailiwick Bailiwick display and geometry data.
+    * @param {number} bailiwick_index Legacy index argument (not used in payload construction).
+    * @param {Function} [cb=null] Optional completion callback.
+    * @returns {void} Sends the request through post_data.
+    * @calledBy AssetsDetector, AssetsUtils
+    */
    static save_bailiwick = (bailiwick, bailiwick_index, cb = null) => {
       console.log('save_bailiwick', bailiwick)
       const highest_level = get_ideal_level(BAILIWICK_MAX_SIZE, bailiwick.display_settings.scope, 1.5);
