@@ -6,6 +6,7 @@ import AppSettings from "../../AppSettings.jsx";
 import {KEY_NAVIGATOR_DISABLED} from "../../settings/NavigatorSettings.jsx";
 import FractoColors from "./FractoColors";
 import {FRACTO_TILES_PORT} from "../../../../../constants.js";
+import {service_origin} from "../service_origin.jsx";
 
 export const fill_canvas = async (
    ctx,
@@ -37,8 +38,7 @@ export const fill_canvas = async (
       `aspect_ratio=${aspect_ratio}`,
       `resolution_factor=${resolution_factor}`,
    ].join('&')
-   const tile_url = new URL(`/${data_endpoint}`, window.location.origin)
-   tile_url.port = FRACTO_TILES_PORT
+   const tile_url = new URL(`/${data_endpoint}`, service_origin(FRACTO_TILES_PORT))
    tile_url.search = all_params
    const url = tile_url.toString()
    try {

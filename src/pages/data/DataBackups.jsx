@@ -11,8 +11,8 @@ import {
 } from "../../utils/ui/styles/CoolTableStyles.jsx";
 import {
    FRACTO_DATA_PORT,
-   FRACTO_UI_PORT,
 } from "../../../../../constants.js";
+import {service_origin} from "../../utils/service_origin.jsx";
 
 const TABLE_COLUMNS = [
    {
@@ -63,7 +63,7 @@ export class DataBackups extends Component {
 
    backup_table = async (table) => {
       const {backup_data} = this.state
-      const origin = window.origin.replace(`${FRACTO_UI_PORT}`, `${FRACTO_DATA_PORT}`)
+      const origin = service_origin(FRACTO_DATA_PORT)
       const url = `${origin}/backup?table=${table}`
       try {
          const response = await fetch(url)

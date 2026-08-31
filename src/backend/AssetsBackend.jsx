@@ -1,16 +1,12 @@
 import {
     FRACTO_ASSET_PORT,
-    FRACTO_DATA_PORT,
-    FRACTO_UI_PORT
+    FRACTO_DATA_PORT
 } from "../../../../constants.js";
 import {FETCH_JSON_HEADERS} from "../pages/study/StudyUtils.jsx";
+import {service_origin} from "../utils/service_origin.jsx";
 
-const ASSETS_ORIGIN = window.origin.replace(
-    `${FRACTO_UI_PORT}`,
-    `${FRACTO_ASSET_PORT}`)
-const DATA_ORIGIN = window.origin.replace(
-    `${FRACTO_UI_PORT}`,
-    `${FRACTO_DATA_PORT}`)
+const ASSETS_ORIGIN = service_origin(FRACTO_ASSET_PORT)
+const DATA_ORIGIN = service_origin(FRACTO_DATA_PORT)
 
 export class AssetsBackend {
 
@@ -46,7 +42,6 @@ export class AssetsBackend {
             `public_url=${image_outcome.public_url}`,
             `asset_type=image`,
         ].join('&')
-        const origin = window.origin.replace(`${FRACTO_UI_PORT}`, `${FRACTO_DATA_PORT}`)
         const url = `${DATA_ORIGIN}/asset?${all_params}`
         try {
             const insert_outcome = await fetch(url, {}).then(res => res.json())

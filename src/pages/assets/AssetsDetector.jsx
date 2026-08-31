@@ -1,7 +1,5 @@
 import React, {Component} from "react";
 
-import {FRACTO_DATA_PORT, FRACTO_UI_PORT} from "../../../../../constants.js";
-
 import {
    MainStyles as styles,
    MARGIN_PX
@@ -20,7 +18,6 @@ import {checkmark_icon} from "../../utils/ui/CoolIcons.jsx";
 import MinibrotBackend from "../../backend/MinibrotBackend.jsx";
 import NavigatorSplitterLayout from "../../navigator/NavigatorSplitterLayout.jsx";
 import {update_dimensions} from "../PageUtils.jsx";
-import {FETCH_JSON_HEADERS} from "../study/StudyUtils.jsx";
 import {
    PAGE_TILES_GENERATE,
    send_to

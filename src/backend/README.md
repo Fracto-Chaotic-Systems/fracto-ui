@@ -32,12 +32,12 @@ Publishes minibrot/bailiwick records to the data service (normally port 3002). I
 
 ## Service origins
 
-The clients derive local service origins by replacing the UI port in `window.origin` with the configured service port from the root `constants.js`. The UI is expected to run on port 3006, with the data, asset, tile, and admin services on their normal ports. There is no Vite development proxy or centralized runtime origin setting.
+The clients derive service origins from the browser's current host and the configured service port from the root `constants.js`, using `utils/service_origin.jsx`. This keeps requests on the same machine when the UI is opened remotely, including the development port range.
 
 This means that:
 
 - backend services must be reachable from the browser using the same hostname as the UI for origin replacement to work;
-- some existing calls use explicit `localhost` or a configured production URL, so remote-browser support is not uniform; and
+- the configured production URL is still used only for the remote tile upload workflow; and
 - backend CORS rules must allow the UI origin.
 
 The clients assume browser globals (`window`, `fetch`, and in `TilesBackend` the bundled `axios` dependency). Do not import them from Node-only scripts.

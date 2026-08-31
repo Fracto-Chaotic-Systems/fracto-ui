@@ -1,9 +1,8 @@
-import {FRACTO_DATA_PORT, FRACTO_UI_PORT} from "../../../../constants.js";
+import {FRACTO_DATA_PORT} from "../../../../constants.js";
 import {FETCH_JSON_HEADERS} from "../pages/study/StudyUtils.jsx";
+import {service_origin} from "../utils/service_origin.jsx";
 
-const DATA_ORIGIN = window.origin.replace(
-   `${FRACTO_UI_PORT}`,
-   `${FRACTO_DATA_PORT}`)
+const DATA_ORIGIN = service_origin(FRACTO_DATA_PORT)
 
 const MAX_DENOMINATOR = 128
 

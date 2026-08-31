@@ -2,8 +2,8 @@ import axios from "axios";
 
 import {
    FRACTO_TILES_PORT,
-   FRACTO_UI_PORT
 } from "../../../../constants.js";
+import {service_origin} from "../utils/service_origin.jsx";
 
 const FRACTO_PROD_URL = import.meta.env.VITE_FRACTO_PROD_URL
    || 'https://fracto.mikehallstudio.com'
@@ -18,7 +18,7 @@ export class TilesBackend {
          `scope=${frame_settings.scope}`,
          `aspect_ratio=${1}`,
       ].join('&')
-      const origin = window.origin.replace(`${FRACTO_UI_PORT}`, `${FRACTO_TILES_PORT}`)
+      const origin = service_origin(FRACTO_TILES_PORT)
       const url = `${origin}/heat_map_buffer?${all_params}`
       try {
          return await fetch(url, {}).then(res => res.json())

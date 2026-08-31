@@ -14,6 +14,7 @@ import {
 } from "../../utils/ui/styles/CoolTableStyles.jsx"
 import AppText from "../../AppText.jsx";
 import {KEY_ADMIN_VERSIONS_TITLE} from "../../text/AdminText.jsx";
+import {service_origin} from "../../utils/service_origin.jsx";
 
 const TABLE_COLUMNS = [
    {
@@ -59,7 +60,7 @@ export class AdminVersions extends Component {
 
    load_version = async (service_name) => {
       const {version_data} = this.state
-      const url = `http://localhost:${FRACTO_ADMIN_PORT}/version?service_name=${service_name}`
+      const url = `${service_origin(FRACTO_ADMIN_PORT)}/version?service_name=${service_name}`
       const response = await fetch(url)
       const result = await response.json()
       version_data[service_name] = result[service_name].split('\n')

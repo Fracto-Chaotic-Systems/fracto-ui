@@ -9,7 +9,8 @@ import {
    PointElement,
 } from 'chart.js';
 import {Scatter} from 'react-chartjs-2';
-import {FRACTO_DATA_PORT, FRACTO_UI_PORT} from "../../../../../../constants.js";
+import {FRACTO_DATA_PORT} from "../../../../../../constants.js";
+import {service_origin} from "../../../utils/service_origin.jsx";
 
 ChartJS.register(
    LinearScale,
@@ -23,7 +24,7 @@ ChartJS.register(
 export class OrbitalMagnitudes {
 
    static read_vector_data = async (theta_num = 5, theta_den = 11, precision = 24) => {
-      const origin = window.origin.replace(`${FRACTO_UI_PORT}`, `${FRACTO_DATA_PORT}`)
+      const origin = service_origin(FRACTO_DATA_PORT)
       const url = `${origin}/radian_data?theta_num=${theta_num}&theta_den=${theta_den}&precision=${precision}`
       const output_json = await fetch(url, {}).then(res => res.json())
       // console.log('url', url)

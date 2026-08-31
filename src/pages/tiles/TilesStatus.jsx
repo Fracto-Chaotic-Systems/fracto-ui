@@ -11,6 +11,7 @@ import AppText from "../../AppText.jsx";
 import {KEY_TILES_STATUS, KEY_TILES_STATUS_EFFECTIVENESS} from "../../text/TilesText.jsx";
 import {KEY_TILES_SPLITTER_POS_PX} from "../../settings/TilesSettings.jsx";
 import {update_dimensions} from "../PageUtils.jsx";
+import {service_origin} from "../../utils/service_origin.jsx";
 
 ChartJS.register(...registerables)
 
@@ -66,7 +67,7 @@ export class TilesStatus extends Component {
 
    refresh_stats = async () => {
       try {
-         const response = await fetch(`http://127.0.0.1:${FRACTO_TILES_PORT}/cache_status`)
+         const response = await fetch(`${service_origin(FRACTO_TILES_PORT)}/cache_status`)
          if (!response.ok) throw new Error(`HTTP ${response.status}`)
          const stats = await response.json()
          if (this.unmounted) return

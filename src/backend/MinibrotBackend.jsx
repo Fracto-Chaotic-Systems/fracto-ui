@@ -1,9 +1,9 @@
 import ComplexQuarternary from "../utils/ComplexQuarternary.jsx";
 
 import {
-   FRACTO_DATA_PORT,
-   FRACTO_UI_PORT
+   FRACTO_DATA_PORT
 } from "../../../../constants.js";
+import {service_origin} from "../utils/service_origin.jsx";
 
 const BAILIWICK_MAX_SIZE = 4096;
 const BAILIWICK_SIZE_PX = 650;
@@ -73,7 +73,7 @@ const process_json_str = (json) => {
 export class MinibrotBackend {
 
    static post_data = (data, cb) => {
-      const origin = window.origin.replace(`${FRACTO_UI_PORT}`, `${FRACTO_DATA_PORT}`)
+      const origin = service_origin(FRACTO_DATA_PORT)
       const url = `${origin}/minibrot`
       fetch(url, {
          body: JSON.stringify(data), // data you send.

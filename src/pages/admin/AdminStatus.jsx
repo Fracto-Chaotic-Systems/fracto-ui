@@ -12,6 +12,7 @@ import {
 import {MainStyles as styles} from '../../styles/MainStyles.jsx'
 import AppText from "../../AppText.jsx";
 import {KEY_ADMIN_STATUS, KEY_ADMIN_STATUS_REFRESH} from "../../text/AdminText.jsx";
+import {service_origin} from "../../utils/service_origin.jsx";
 
 const REFRESH_INTERVAL_MS = 5000
 const ERROR_REFRESH_INTERVAL_MS = 60000
@@ -50,8 +51,8 @@ export class AdminStatus extends Component {
       this.setState({refreshing: true})
       try {
          const [health_response, readiness_response] = await Promise.all([
-            fetch(`http://127.0.0.1:${FRACTO_SERVER_PORT}/healthz`),
-            fetch(`http://127.0.0.1:${FRACTO_SERVER_PORT}/readyz`),
+            fetch(`${service_origin(FRACTO_SERVER_PORT)}/healthz`),
+            fetch(`${service_origin(FRACTO_SERVER_PORT)}/readyz`),
          ])
          const [health, readiness] = await Promise.all([health_response.json(), readiness_response.json()])
          if (!this.unmounted) {
