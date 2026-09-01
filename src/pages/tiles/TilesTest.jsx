@@ -57,7 +57,7 @@ const get_step = fixture => {
    return Number.isFinite(fallback) ? fallback : null
 }
 
-const build_chart_data = (benchmark_results, combine_results = false) => {
+const build_chart_data = (benchmark_results, combine_results = false, hidden_legend_keys = []) => {
    const datasets = []
    for (const strategy of ['legacy', 'turbo']) {
       const fixtures = benchmark_results?.[strategy]?.report?.fixtures || []
@@ -85,6 +85,7 @@ const build_chart_data = (benchmark_results, combine_results = false) => {
             datasets.push({
                label: `${strategy} ${source_key} ${metric.key}`,
                legend_key: `${strategy}_${metric.key}`,
+               hidden: hidden_legend_keys.includes(`${strategy}_${metric.key}`),
                data: combine_results
                   ? [...grouped_points.entries()].map(([x, values]) => ({
                      x,
@@ -112,7 +113,7 @@ const get_chart_minimum = chart_data => {
    return Math.max(0.1, Math.floor(Math.min(...values)) - 1)
 }
 
-const chart_options = (step_label, duration_label, minimum) => ({
+const chart_options = (step_label, duration_label, minimum, on_toggle_legend) => ({
    responsive: true,
    maintainAspectRatio: false,
    animation: false,
@@ -125,7 +126,7 @@ const chart_options = (step_label, duration_label, minimum) => ({
                   .map((dataset, index) => dataset.legend_key === entry.key ? index : -1)
                   .filter(index => index >= 0)
                const hidden = dataset_indexes.length > 0 && dataset_indexes.every(index =>
-                  chart.getDatasetMeta(index).hidden)
+                  !chart.isDatasetVisible(index))
                return {
                   text: AppText.get(entry.text_key),
                   fillStyle: entry.color,
@@ -136,15 +137,7 @@ const chart_options = (step_label, duration_label, minimum) => ({
                }
             }),
          },
-         onClick: (_, legend_item, legend) => {
-            const chart = legend.chart
-            const indexes = chart.data.datasets
-               .map((dataset, index) => dataset.legend_key === legend_item.legend_key ? index : -1)
-               .filter(index => index >= 0)
-            const visible = indexes.some(index => !chart.getDatasetMeta(index).hidden)
-            indexes.forEach(index => chart.setDatasetVisibility(index, !visible))
-            chart.update()
-         },
+         onClick: (_, legend_item) => on_toggle_legend(legend_item.legend_key),
       },
    },
    scales: {
@@ -162,6 +155,7 @@ export class TilesTest extends Component {
       benchmark_results: null,
       benchmark_error: null,
       combine_results: AppSettings.get(KEY_TILES_TEST_COMBINE_RESULTS_SETTING),
+      hidden_legend_keys: [],
       rendered_width: 0,
       rendered_height: 0,
       dimensions_interval: null,
@@ -190,9 +184,17 @@ export class TilesTest extends Component {
       if (new_values && !this.unmounted) this.setState(new_values)
    }
 
+   toggle_legend = legend_key => {
+      this.setState(previous => ({
+         hidden_legend_keys: previous.hidden_legend_keys.includes(legend_key)
+            ? previous.hidden_legend_keys.filter(key => key !== legend_key)
+            : [...previous.hidden_legend_keys, legend_key],
+      }))
+   }
+
    render() {
-      const {benchmark_results, rendered_height, container_ref, combine_results} = this.state
-      const chart_data = benchmark_results && build_chart_data(benchmark_results, combine_results)
+      const {benchmark_results, rendered_height, container_ref, combine_results, hidden_legend_keys} = this.state
+      const chart_data = benchmark_results && build_chart_data(benchmark_results, combine_results, hidden_legend_keys)
       const top = container_ref.current?.getBoundingClientRect().top || TITLE_BAR_HEIGHT_PX
       const available_height = Math.max(0, rendered_height - top)
       const half_height = Math.floor(available_height / 2)
@@ -240,7 +242,8 @@ export class TilesTest extends Component {
                      options={chart_options(
                         AppText.get(KEY_TILES_TEST_STEP_INDEX),
                         AppText.get(KEY_TILES_TEST_DURATION_MS),
-                        get_chart_minimum(chart_data))}
+                        get_chart_minimum(chart_data),
+                        this.toggle_legend)}
                   />}
                </div>
             </div>
