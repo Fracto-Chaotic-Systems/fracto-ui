@@ -33,8 +33,8 @@ const METRICS = [
    {key: 'max_ms', color: '#ed7d31'},
 ]
 const STRATEGY_COLORS = {
-   legacy: ['#4472c4', '#70ad47', '#ed7d31'],
-   turbo: ['#7030a0', '#00a6a6', '#c00000'],
+   legacy: ['#7030a0', '#4472c4', '#70ad47'],
+   turbo: ['#ffd966', '#ed7d31', '#c00000'],
 }
 const LEGEND_ENTRIES = [
    {key: 'legacy_min_ms', text_key: KEY_TILES_TEST_LEGACY_MIN, color: STRATEGY_COLORS.legacy[0]},
