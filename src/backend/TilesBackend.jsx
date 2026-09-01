@@ -11,6 +11,13 @@ const FRACTO_PROD_URL = import.meta.env.VITE_FRACTO_PROD_URL
 
 export class TilesBackend {
 
+   /** Fetches the newest stored benchmark report for legacy and turbo.
+    * @returns {Promise<Object>} Report envelopes keyed by strategy, or null when absent.
+    * @calledBy TilesTest
+    */
+   static benchmark_results = () => request_json(
+      `${service_origin(FRACTO_TILES_PORT)}/benchmark_results`)
+
    /** Fetches current tile-cache counters and recent history.
     * @returns {Promise<Object>} Cache status payload with metric fields and history.
     * @calledBy TilesStatus
