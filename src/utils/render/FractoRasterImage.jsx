@@ -47,7 +47,7 @@ export const fill_canvas = async (
          [KEY_NAVIGATOR_DISABLED]: false
       })
    } catch (e) {
-      console.error('exception thrown in fill_canvas', url, e)
+      console.error('exception thrown in fill_canvas', {data_endpoint, params: all_params}, e)
       AppSettings.on_settings_changed({
          [KEY_NAVIGATOR_DISABLED]: false
       })
