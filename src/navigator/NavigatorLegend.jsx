@@ -12,11 +12,17 @@ import CoolTable from "../utils/ui/CoolTable.jsx";
 import {MainStyles as main_styles} from "../styles/MainStyles.jsx";
 import {NavigatorStyles as styles} from '../styles/NavigatorStyles.jsx';
 import AppSettings from "../AppSettings.jsx";
+import AppText from "../AppText.jsx";
 import {
    KEY_NAVIGATOR_CURSOR_LOCATION,
    KEY_NAVIGATOR_FOCAL_POINT,
    KEY_NAVIGATOR_SCOPE,
-   KEY_NAVIGATOR_SEND_TO
+   KEY_NAVIGATOR_SEND_TO,
+   KEY_NAVIGATOR_STRATEGY,
+   KEY_NAVIGATOR_STRATEGY_LEGACY,
+   KEY_NAVIGATOR_STRATEGY_LEGACY_HELP,
+   KEY_NAVIGATOR_STRATEGY_TURBO,
+   KEY_NAVIGATOR_STRATEGY_TURBO_HELP,
 } from "../text/NavigatorText.jsx";
 import {
    CELL_ALIGN_LEFT,
@@ -30,7 +36,8 @@ import {
 import NavigatorTransit from "./NavigatorTransit.jsx";
 import {
    KEY_NAVIGATOR_DISABLED,
-   KEY_NAVIGATOR_HOVER_POINT
+   KEY_NAVIGATOR_HOVER_POINT,
+   KEY_NAVIGATOR_STRATEGY as KEY_NAVIGATOR_STRATEGY_SETTING,
 } from "../settings/NavigatorSettings.jsx";
 import CoolColors from "../utils/ui/CoolColors.jsx";
 import {copy, paste} from "../utils/ui/CoolIcons.jsx";
@@ -38,6 +45,7 @@ import {render_send_to} from "../pages/utils/SendTo.jsx";
 import CoolStyles from "../utils/ui/styles/CoolStyles.jsx";
 import FieldsColorWheel from "../utils/render/FieldsColorWheel.jsx";
 import {KEY_CLIPBOARD_DATA} from "../settings/RootSettings.jsx";
+import CoolSelect from "../utils/ui/CoolSelect.jsx";
 
 const TRANSITOR_HEIGHT_PX = 150
 const ZOOM_FACTOR = 1.618
@@ -58,6 +66,11 @@ const TABLE_COLUMNS = [
       type: CELL_TYPE_CALLBACK,
       align: CELL_ALIGN_LEFT,
    },
+]
+
+const STRATEGY_OPTIONS = [
+   {value: 'turbo', label: KEY_NAVIGATOR_STRATEGY_TURBO, help: KEY_NAVIGATOR_STRATEGY_TURBO_HELP},
+   {value: 'legacy', label: KEY_NAVIGATOR_STRATEGY_LEGACY, help: KEY_NAVIGATOR_STRATEGY_LEGACY_HELP},
 ]
 
 export class NavigatorLegend extends Component {
@@ -170,6 +183,10 @@ export class NavigatorLegend extends Component {
             name: KEY_NAVIGATOR_SEND_TO,
             value: [render_send_to, frame_settings],
          },
+         {
+            name: KEY_NAVIGATOR_STRATEGY,
+            value: [this.render_strategy, AppSettings.get(KEY_NAVIGATOR_STRATEGY_SETTING)],
+         },
       ]
       const stats_style = {
          width: `${bounding_rect.width - TRANSITOR_HEIGHT_PX - 20}px`
@@ -184,6 +201,27 @@ export class NavigatorLegend extends Component {
             ]}
          />
       </styles.StatsWrapper>
+   }
+
+   render_strategy = (strategy) => {
+      const select_style = {
+         padding: 0,
+         border: 0,
+      }
+      return <CoolStyles.InlineBlock style={select_style}>
+         <CoolSelect
+            extra_style={select_style}
+            options={STRATEGY_OPTIONS.map(option => ({
+               ...option,
+               label: AppText.get(option.label),
+               help: AppText.get(option.help),
+            }))}
+            value={strategy || 'turbo'}
+            on_change={event => AppSettings.on_settings_changed({
+               [KEY_NAVIGATOR_STRATEGY_SETTING]: event.target.value,
+            })}
+         />
+      </CoolStyles.InlineBlock>
    }
    
    on_zoom_in = (e) => {

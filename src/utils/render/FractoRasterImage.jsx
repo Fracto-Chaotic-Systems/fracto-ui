@@ -3,7 +3,10 @@ import PropTypes from "prop-types";
 
 import {copy_json} from "../Dom.jsx";
 import AppSettings from "../../AppSettings.jsx";
-import {KEY_NAVIGATOR_DISABLED} from "../../settings/NavigatorSettings.jsx";
+import {
+   KEY_NAVIGATOR_DISABLED,
+   KEY_NAVIGATOR_STRATEGY,
+} from "../../settings/NavigatorSettings.jsx";
 import FractoColors from "./FractoColors";
 import TilesBackend from "../../backend/TilesBackend.jsx";
 
@@ -36,6 +39,7 @@ export const fill_canvas = async (
       `scope=${scope}`,
       `aspect_ratio=${aspect_ratio}`,
       `resolution_factor=${resolution_factor}`,
+      `strategy=${AppSettings.get(KEY_NAVIGATOR_STRATEGY) || 'turbo'}`,
    ].join('&')
    try {
       const result = await TilesBackend.canvas_buffer(data_endpoint, Object.fromEntries(new URLSearchParams(all_params)))
@@ -84,6 +88,9 @@ export class FractoRasterImage extends Component {
    }
 
    componentDidMount() {
+      this.strategy_subscription = AppSettings.subscribe(
+         KEY_NAVIGATOR_STRATEGY,
+         this.on_strategy_changed)
       const {canvas_ref} = this.state;
       const {width_px, aspect_ratio, scope, focal_point} = this.props;
       const canvas = canvas_ref.current;
@@ -109,6 +116,18 @@ export class FractoRasterImage extends Component {
       setTimeout(() => {
          this.fill_canvas(ctx)
       }, 100)
+   }
+
+   componentWillUnmount() {
+      if (this.strategy_subscription) {
+         AppSettings.unsubscribe(this.strategy_subscription)
+      }
+   }
+
+   on_strategy_changed = () => {
+      if (this.state.ctx) {
+         this.fill_canvas(this.state.ctx)
+      }
    }
 
    componentDidUpdate(prevProps, prevState, snapshot) {

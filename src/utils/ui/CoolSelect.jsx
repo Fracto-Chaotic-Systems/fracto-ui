@@ -16,7 +16,7 @@ export class CoolSelect extends Component {
 
    static propTypes = {
       options: PropTypes.array.isRequired,
-      value: PropTypes.number.isRequired,
+      value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
       on_change: PropTypes.func.isRequired,
       extra_style: PropTypes.object,
    }
