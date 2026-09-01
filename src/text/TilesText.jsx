@@ -13,6 +13,9 @@ export const KEY_TILES_TEST = `${TILES_FOLDER}/tiles_test`
 export const KEY_TILES_TEST_HARNESS = `${TILES_FOLDER}/test_harness`
 export const KEY_TILES_TEST_BENCHMARKS = `${TILES_FOLDER}/test_benchmarks`
 export const KEY_TILES_TEST_ANIMATION = `${TILES_FOLDER}/test_animation`
+export const KEY_TILES_TEST_ANIMATION_FRAME_RATE = `${TILES_FOLDER}/test_animation_frame_rate`
+export const KEY_TILES_TEST_ANIMATION_IMAGE_SIZE = `${TILES_FOLDER}/test_animation_image_size`
+export const KEY_TILES_TEST_ANIMATION_CUSTOM = `${TILES_FOLDER}/test_animation_custom`
 export const KEY_TILES_TEST_STEP_INDEX = `${TILES_FOLDER}/test_step_index`
 export const KEY_TILES_TEST_DURATION_MS = `${TILES_FOLDER}/test_duration_ms`
 export const KEY_TILES_TEST_COMBINE_RESULTS = `${TILES_FOLDER}/test_combine_results`
@@ -43,6 +46,9 @@ export const APP_TILES_TEXT = {
    [KEY_TILES_TEST_HARNESS]: 'test harness',
    [KEY_TILES_TEST_BENCHMARKS]: 'benchmarks',
    [KEY_TILES_TEST_ANIMATION]: 'animation',
+   [KEY_TILES_TEST_ANIMATION_FRAME_RATE]: 'frame rate',
+   [KEY_TILES_TEST_ANIMATION_IMAGE_SIZE]: 'image size',
+   [KEY_TILES_TEST_ANIMATION_CUSTOM]: 'custom',
    [KEY_TILES_TEST_STEP_INDEX]: 'step index',
    [KEY_TILES_TEST_DURATION_MS]: 'duration (ms)',
    [KEY_TILES_TEST_COMBINE_RESULTS]: 'combine results',

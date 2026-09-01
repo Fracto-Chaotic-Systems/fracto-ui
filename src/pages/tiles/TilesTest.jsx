@@ -10,6 +10,9 @@ import {
    KEY_TILES_TEST_COMBINE_RESULTS,
    KEY_TILES_TEST_BENCHMARKS,
    KEY_TILES_TEST_ANIMATION,
+   KEY_TILES_TEST_ANIMATION_FRAME_RATE,
+   KEY_TILES_TEST_ANIMATION_IMAGE_SIZE,
+   KEY_TILES_TEST_ANIMATION_CUSTOM,
    KEY_TILES_TEST_HARNESS,
    KEY_TILES_TEST_LEGACY_MAX,
    KEY_TILES_TEST_LEGACY_MEDIAN,
@@ -26,11 +29,28 @@ import {update_dimensions} from "../PageUtils.jsx";
 import {
    KEY_TILES_SPLITTER_POS_PX,
    KEY_TILES_TEST_COMBINE_RESULTS as KEY_TILES_TEST_COMBINE_RESULTS_SETTING,
+   KEY_TILES_TEST_ANIMATION_FRAME_RATE_MS,
+   KEY_TILES_TEST_ANIMATION_IMAGE_SIZE_PX,
 } from "../../settings/TilesSettings.jsx";
 
 ChartJS.register(...registerables)
 
 const TAB_HEADER_HEIGHT_PX = 32
+const FRAME_RATE_OPTIONS_FPS = [40, 30, 25, 20, 15, 12, 10]
+const FRAME_RATE_OPTIONS_MS = FRAME_RATE_OPTIONS_FPS.map(frames_per_second => 1000 / frames_per_second)
+const IMAGE_SIZE_OPTIONS_PX = [256, 384, 512, 640, 768, 896, 1024]
+const CUSTOM_OPTION = 'custom'
+const format_frame_rate = frame_rate_ms => {
+   const frames_per_second = 1000 / frame_rate_ms
+   const rounded_frames_per_second = Math.round(frames_per_second)
+   const milliseconds_per_frame = frame_rate_ms.toFixed(1).replace(/\.0$/, '')
+   return `${rounded_frames_per_second} fps (${milliseconds_per_frame} ms/frame)`
+}
+const format_pixel_count = image_size_px => {
+   const pixel_count = image_size_px * image_size_px
+   if (pixel_count >= 1000000) return `${(pixel_count / 1000000).toFixed(2).replace(/\.00$/, '')}M px`
+   return `${(pixel_count / 1000).toFixed(1).replace(/\.0$/, '')}K px`
+}
 
 const METRICS = [
    {key: 'min_ms', color: '#4472c4'},
@@ -160,6 +180,10 @@ export class TilesTest extends Component {
       benchmark_results: null,
       benchmark_error: null,
       tab_index: 0,
+      animation_frame_rate_ms: AppSettings.get(KEY_TILES_TEST_ANIMATION_FRAME_RATE_MS),
+      animation_image_size_px: AppSettings.get(KEY_TILES_TEST_ANIMATION_IMAGE_SIZE_PX),
+      animation_frame_rate_custom: false,
+      animation_image_size_custom: false,
       combine_results: AppSettings.get(KEY_TILES_TEST_COMBINE_RESULTS_SETTING),
       hidden_legend_keys: [],
       rendered_width: 0,
@@ -201,7 +225,11 @@ export class TilesTest extends Component {
    on_tab_select = tab_index => this.setState({tab_index})
 
    render() {
-      const {benchmark_results, rendered_height, container_ref, combine_results, hidden_legend_keys, tab_index} = this.state
+      const {
+         benchmark_results, rendered_height, container_ref, combine_results, hidden_legend_keys, tab_index,
+         animation_frame_rate_ms, animation_image_size_px,
+         animation_frame_rate_custom, animation_image_size_custom,
+      } = this.state
       const chart_data = benchmark_results && build_chart_data(benchmark_results, combine_results, hidden_legend_keys)
       const top = container_ref.current?.getBoundingClientRect().top || TITLE_BAR_HEIGHT_PX
       const available_height = Math.max(0, rendered_height - top)
@@ -236,7 +264,59 @@ export class TilesTest extends Component {
             />}
          </div>
       </CoolStyles.Block>
-      const animation_content = <CoolStyles.Block style={{height: `${tab_content_height}px`}} />
+      const update_animation_setting = (key, state_key) => event => {
+         const value = Number(event.target.value)
+         if (!Number.isFinite(value) || value <= 0) return
+         this.setState({[state_key]: value})
+         AppSettings.on_settings_changed({[key]: value})
+      }
+      const select_animation_setting = (key, state_key, custom_state_key) => event => {
+         if (event.target.value === CUSTOM_OPTION) {
+            this.setState({[custom_state_key]: true})
+            return
+         }
+         const value = Number(event.target.value)
+         this.setState({[state_key]: value, [custom_state_key]: false})
+         AppSettings.on_settings_changed({[key]: value})
+      }
+      const frame_rate_value = animation_frame_rate_custom || !FRAME_RATE_OPTIONS_MS.includes(animation_frame_rate_ms)
+         ? CUSTOM_OPTION : String(animation_frame_rate_ms)
+      const image_size_value = animation_image_size_custom || !IMAGE_SIZE_OPTIONS_PX.includes(animation_image_size_px)
+         ? CUSTOM_OPTION : String(animation_image_size_px)
+      const animation_content = <CoolStyles.Block style={{height: `${tab_content_height}px`}}>
+         <div style={{height: '2rem', display: 'flex', alignItems: 'center', gap: '1rem', paddingLeft: '0.5rem'}}>
+            <label>
+               {AppText.get(KEY_TILES_TEST_ANIMATION_FRAME_RATE)}
+               <select
+                  value={frame_rate_value}
+                  onChange={select_animation_setting(KEY_TILES_TEST_ANIMATION_FRAME_RATE_MS, 'animation_frame_rate_ms', 'animation_frame_rate_custom')}
+                  style={{marginLeft: '0.35rem'}}>
+                  {FRAME_RATE_OPTIONS_MS.map(value => <option key={value} value={value}>{format_frame_rate(value)}</option>)}
+                  <option value={CUSTOM_OPTION}>{AppText.get(KEY_TILES_TEST_ANIMATION_CUSTOM)}</option>
+               </select>
+               {frame_rate_value === CUSTOM_OPTION && <input
+                  type={'number'} min={'1'} step={'1'} value={animation_frame_rate_ms}
+                  onChange={update_animation_setting(KEY_TILES_TEST_ANIMATION_FRAME_RATE_MS, 'animation_frame_rate_ms')}
+                  style={{marginLeft: '0.35rem', width: '5rem'}}
+               />}
+            </label>
+            <label>
+               {AppText.get(KEY_TILES_TEST_ANIMATION_IMAGE_SIZE)}
+               <select
+                  value={image_size_value}
+                  onChange={select_animation_setting(KEY_TILES_TEST_ANIMATION_IMAGE_SIZE_PX, 'animation_image_size_px', 'animation_image_size_custom')}
+                  style={{marginLeft: '0.35rem'}}>
+                  {IMAGE_SIZE_OPTIONS_PX.map(value => <option key={value} value={value}>{value} ({format_pixel_count(value)})</option>)}
+                  <option value={CUSTOM_OPTION}>{AppText.get(KEY_TILES_TEST_ANIMATION_CUSTOM)}</option>
+               </select>
+               {image_size_value === CUSTOM_OPTION && <input
+                  type={'number'} min={'1'} step={'1'} value={animation_image_size_px}
+                  onChange={update_animation_setting(KEY_TILES_TEST_ANIMATION_IMAGE_SIZE_PX, 'animation_image_size_px')}
+                  style={{marginLeft: '0.35rem', width: '5rem'}}
+               />}
+            </label>
+         </div>
+      </CoolStyles.Block>
       return [
          <styles.SectionTitle key={'test-harness-title'}>
             {AppText.get(KEY_TILES_TEST_HARNESS)}
