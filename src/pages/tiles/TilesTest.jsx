@@ -29,7 +29,7 @@ import {update_dimensions} from "../PageUtils.jsx";
 import {
    KEY_TILES_SPLITTER_POS_PX,
    KEY_TILES_TEST_COMBINE_RESULTS as KEY_TILES_TEST_COMBINE_RESULTS_SETTING,
-   KEY_TILES_TEST_ANIMATION_FRAME_RATE_MS,
+   KEY_TILES_TEST_ANIMATION_FRAME_RATE_FPS,
    KEY_TILES_TEST_ANIMATION_IMAGE_SIZE_PX,
 } from "../../settings/TilesSettings.jsx";
 
@@ -37,14 +37,11 @@ ChartJS.register(...registerables)
 
 const TAB_HEADER_HEIGHT_PX = 32
 const FRAME_RATE_OPTIONS_FPS = [40, 30, 25, 20, 15, 12, 10]
-const FRAME_RATE_OPTIONS_MS = FRAME_RATE_OPTIONS_FPS.map(frames_per_second => 1000 / frames_per_second)
 const IMAGE_SIZE_OPTIONS_PX = [256, 384, 512, 640, 768, 896, 1024]
 const CUSTOM_OPTION = 'custom'
-const format_frame_rate = frame_rate_ms => {
-   const frames_per_second = 1000 / frame_rate_ms
-   const rounded_frames_per_second = Math.round(frames_per_second)
-   const milliseconds_per_frame = frame_rate_ms.toFixed(1).replace(/\.0$/, '')
-   return `${rounded_frames_per_second} fps (${milliseconds_per_frame} ms/frame)`
+const format_frame_rate = frames_per_second => {
+   const milliseconds_per_frame = (1000 / frames_per_second).toFixed(1).replace(/\.0$/, '')
+   return `${frames_per_second} fps (${milliseconds_per_frame} ms/frame)`
 }
 const format_pixel_count = image_size_px => {
    const pixel_count = image_size_px * image_size_px
@@ -180,7 +177,7 @@ export class TilesTest extends Component {
       benchmark_results: null,
       benchmark_error: null,
       tab_index: 0,
-      animation_frame_rate_ms: AppSettings.get(KEY_TILES_TEST_ANIMATION_FRAME_RATE_MS),
+      animation_frame_rate_fps: AppSettings.get(KEY_TILES_TEST_ANIMATION_FRAME_RATE_FPS),
       animation_image_size_px: AppSettings.get(KEY_TILES_TEST_ANIMATION_IMAGE_SIZE_PX),
       animation_frame_rate_custom: false,
       animation_image_size_custom: false,
@@ -227,7 +224,7 @@ export class TilesTest extends Component {
    render() {
       const {
          benchmark_results, rendered_height, container_ref, combine_results, hidden_legend_keys, tab_index,
-         animation_frame_rate_ms, animation_image_size_px,
+         animation_frame_rate_fps, animation_image_size_px,
          animation_frame_rate_custom, animation_image_size_custom,
       } = this.state
       const chart_data = benchmark_results && build_chart_data(benchmark_results, combine_results, hidden_legend_keys)
@@ -279,8 +276,8 @@ export class TilesTest extends Component {
          this.setState({[state_key]: value, [custom_state_key]: false})
          AppSettings.on_settings_changed({[key]: value})
       }
-      const frame_rate_value = animation_frame_rate_custom || !FRAME_RATE_OPTIONS_MS.includes(animation_frame_rate_ms)
-         ? CUSTOM_OPTION : String(animation_frame_rate_ms)
+      const frame_rate_value = animation_frame_rate_custom || !FRAME_RATE_OPTIONS_FPS.includes(animation_frame_rate_fps)
+         ? CUSTOM_OPTION : String(animation_frame_rate_fps)
       const image_size_value = animation_image_size_custom || !IMAGE_SIZE_OPTIONS_PX.includes(animation_image_size_px)
          ? CUSTOM_OPTION : String(animation_image_size_px)
       const animation_content = <CoolStyles.Block style={{height: `${tab_content_height}px`}}>
@@ -289,14 +286,14 @@ export class TilesTest extends Component {
                {AppText.get(KEY_TILES_TEST_ANIMATION_FRAME_RATE)}
                <select
                   value={frame_rate_value}
-                  onChange={select_animation_setting(KEY_TILES_TEST_ANIMATION_FRAME_RATE_MS, 'animation_frame_rate_ms', 'animation_frame_rate_custom')}
+                  onChange={select_animation_setting(KEY_TILES_TEST_ANIMATION_FRAME_RATE_FPS, 'animation_frame_rate_fps', 'animation_frame_rate_custom')}
                   style={{marginLeft: '0.35rem'}}>
-                  {FRAME_RATE_OPTIONS_MS.map(value => <option key={value} value={value}>{format_frame_rate(value)}</option>)}
+                  {FRAME_RATE_OPTIONS_FPS.map(value => <option key={value} value={value}>{format_frame_rate(value)}</option>)}
                   <option value={CUSTOM_OPTION}>{AppText.get(KEY_TILES_TEST_ANIMATION_CUSTOM)}</option>
                </select>
                {frame_rate_value === CUSTOM_OPTION && <input
-                  type={'number'} min={'1'} step={'1'} value={animation_frame_rate_ms}
-                  onChange={update_animation_setting(KEY_TILES_TEST_ANIMATION_FRAME_RATE_MS, 'animation_frame_rate_ms')}
+                  type={'number'} min={'1'} step={'1'} value={animation_frame_rate_fps}
+                  onChange={update_animation_setting(KEY_TILES_TEST_ANIMATION_FRAME_RATE_FPS, 'animation_frame_rate_fps')}
                   style={{marginLeft: '0.35rem', width: '5rem'}}
                />}
             </label>

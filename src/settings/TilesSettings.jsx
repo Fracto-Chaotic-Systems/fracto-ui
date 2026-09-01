@@ -7,7 +7,7 @@ export const KEY_TILES_SPLITTER_POS_PX = `${TILES_FOLDER}/splitter_pos_px`
 export const KEY_TILES_SECTION = `${TILES_FOLDER}/tiles_section`
 export const KEY_TILES_LOGS_SHOW_TIMESTAMPS = `${TILES_FOLDER}/logs_show_timestamps`
 export const KEY_TILES_TEST_COMBINE_RESULTS = `${TILES_FOLDER}/test_combine_results`
-export const KEY_TILES_TEST_ANIMATION_FRAME_RATE_MS = `${TILES_FOLDER}/test_animation_frame_rate_ms`
+export const KEY_TILES_TEST_ANIMATION_FRAME_RATE_FPS = `${TILES_FOLDER}/test_animation_frame_rate_fps`
 export const KEY_TILES_TEST_ANIMATION_IMAGE_SIZE_PX = `${TILES_FOLDER}/test_animation_image_size_px`
 export const KEY_TILES_GENERATOR_FRAME_SETTINGS = `${TILES_GENERATOR_FOLDER}/frame_settings`
 export const KEY_TILES_GENERATOR_SPLITTER_POS = `${TILES_GENERATOR_FOLDER}/splitter_pos`
@@ -53,10 +53,10 @@ export const APP_TILES_SETTINGS = {
       description: 'combine benchmark result lines',
       persist: true,
    },
-   [KEY_TILES_TEST_ANIMATION_FRAME_RATE_MS]: {
+   [KEY_TILES_TEST_ANIMATION_FRAME_RATE_FPS]: {
       data_type: TYPE_NUMBER,
-      default_value: 50,
-      description: 'animation frame interval in milliseconds',
+      default_value: 20,
+      description: 'animation frame rate in frames per second (fps)',
       persist: true,
    },
    [KEY_TILES_TEST_ANIMATION_IMAGE_SIZE_PX]: {
