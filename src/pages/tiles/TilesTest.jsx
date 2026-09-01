@@ -197,7 +197,6 @@ export class TilesTest extends Component {
       const chart_data = benchmark_results && build_chart_data(benchmark_results, combine_results, hidden_legend_keys)
       const top = container_ref.current?.getBoundingClientRect().top || TITLE_BAR_HEIGHT_PX
       const available_height = Math.max(0, rendered_height - top)
-      const half_height = Math.floor(available_height / 2)
       return [
          <styles.SectionTitle key={'test-harness-title'}>
             {AppText.get(KEY_TILES_TEST_HARNESS)}
@@ -206,46 +205,37 @@ export class TilesTest extends Component {
             key={'test-harness-grid'}
             ref={container_ref}
             style={{
-               display: 'grid',
-               gridTemplateColumns: '1fr 1fr',
-               gridTemplateRows: `${half_height}px ${half_height}px`,
-               height: `${half_height * 2}px`,
-               border: '1px solid #cccccc',
-               overflow: 'auto',
+               height: `${available_height}px`,
+               position: 'relative',
+               overflow: 'hidden',
             }}>
-            <div style={{borderRight: '1px solid #cccccc', borderBottom: '1px solid #cccccc', overflow: 'auto'}}>
+            <div style={{height: '2rem', display: 'flex', alignItems: 'center', paddingLeft: '0.5rem'}}>
+               <label>
+                  <input
+                     type={'checkbox'}
+                     checked={combine_results}
+                     onChange={event => {
+                        const combine_results = event.target.checked
+                        this.setState({combine_results})
+                        AppSettings.on_settings_changed({
+                           [KEY_TILES_TEST_COMBINE_RESULTS_SETTING]: combine_results,
+                        })
+                     }}
+                  />
+                  <span style={{marginLeft: '0.35rem'}}>
+                     {AppText.get(KEY_TILES_TEST_COMBINE_RESULTS)}
+                  </span>
+               </label>
             </div>
-            <div style={{borderBottom: '1px solid #cccccc', overflow: 'auto'}}>
-            </div>
-            <div style={{gridColumn: '1 / span 2', minHeight: 0, height: `${half_height}px`, position: 'relative', overflow: 'hidden'}}>
-               <div style={{height: '2rem', display: 'flex', alignItems: 'center', paddingLeft: '0.5rem'}}>
-                  <label>
-                     <input
-                        type={'checkbox'}
-                        checked={combine_results}
-                        onChange={event => {
-                           const combine_results = event.target.checked
-                           this.setState({combine_results})
-                           AppSettings.on_settings_changed({
-                              [KEY_TILES_TEST_COMBINE_RESULTS_SETTING]: combine_results,
-                           })
-                        }}
-                     />
-                     <span style={{marginLeft: '0.35rem'}}>
-                        {AppText.get(KEY_TILES_TEST_COMBINE_RESULTS)}
-                     </span>
-                  </label>
-               </div>
-               <div style={{height: 'calc(100% - 2rem)', position: 'relative'}}>
-                  {chart_data && <Line
-                     data={chart_data}
-                     options={chart_options(
-                        AppText.get(KEY_TILES_TEST_STEP_INDEX),
-                        AppText.get(KEY_TILES_TEST_DURATION_MS),
-                        get_chart_minimum(chart_data),
-                        this.toggle_legend)}
-                  />}
-               </div>
+            <div style={{height: 'calc(100% - 2rem)', position: 'relative'}}>
+               {chart_data && <Line
+                  data={chart_data}
+                  options={chart_options(
+                     AppText.get(KEY_TILES_TEST_STEP_INDEX),
+                     AppText.get(KEY_TILES_TEST_DURATION_MS),
+                     get_chart_minimum(chart_data),
+                     this.toggle_legend)}
+               />}
             </div>
          </CoolStyles.Block>,
       ]
