@@ -11,6 +11,15 @@ export const KEY_TILES_GENERATOR = `${TILES_FOLDER}/tiles_generator`
 export const KEY_TILES_INSPECTOR = `${TILES_FOLDER}/tiles_inspector`
 export const KEY_TILES_TEST = `${TILES_FOLDER}/tiles_test`
 export const KEY_TILES_TEST_HARNESS = `${TILES_FOLDER}/test_harness`
+export const KEY_TILES_TEST_STEP_INDEX = `${TILES_FOLDER}/test_step_index`
+export const KEY_TILES_TEST_DURATION_MS = `${TILES_FOLDER}/test_duration_ms`
+export const KEY_TILES_TEST_COMBINE_RESULTS = `${TILES_FOLDER}/test_combine_results`
+export const KEY_TILES_TEST_LEGACY_MIN = `${TILES_FOLDER}/test_legacy_min`
+export const KEY_TILES_TEST_LEGACY_MEDIAN = `${TILES_FOLDER}/test_legacy_median`
+export const KEY_TILES_TEST_LEGACY_MAX = `${TILES_FOLDER}/test_legacy_max`
+export const KEY_TILES_TEST_TURBO_MIN = `${TILES_FOLDER}/test_turbo_min`
+export const KEY_TILES_TEST_TURBO_MEDIAN = `${TILES_FOLDER}/test_turbo_median`
+export const KEY_TILES_TEST_TURBO_MAX = `${TILES_FOLDER}/test_turbo_max`
 export const KEY_TILES_GENERATE = `${TILES_FOLDER}/tiles_generate`
 export const KEY_TILES_GENERATOR_INDEX = `${GENERATOR_FOLDER}/tile_index`
 export const KEY_TILES_GENERATOR_DURATION = `${GENERATOR_FOLDER}/tile_duration`
@@ -30,6 +39,15 @@ export const APP_TILES_TEXT = {
    [KEY_TILES_INSPECTOR]: 'inspect',
    [KEY_TILES_TEST]: 'test',
    [KEY_TILES_TEST_HARNESS]: 'test harness',
+   [KEY_TILES_TEST_STEP_INDEX]: 'step index',
+   [KEY_TILES_TEST_DURATION_MS]: 'duration (ms)',
+   [KEY_TILES_TEST_COMBINE_RESULTS]: 'combine results',
+   [KEY_TILES_TEST_LEGACY_MIN]: 'legacy min',
+   [KEY_TILES_TEST_LEGACY_MEDIAN]: 'legacy med',
+   [KEY_TILES_TEST_LEGACY_MAX]: 'legacy max',
+   [KEY_TILES_TEST_TURBO_MIN]: 'turbo min',
+   [KEY_TILES_TEST_TURBO_MEDIAN]: 'turbo med',
+   [KEY_TILES_TEST_TURBO_MAX]: 'turbo max',
    [KEY_TILES_GENERATE]: 'generate tiles',
    [KEY_TILES_GENERATOR_INDEX]: 'index',
    [KEY_TILES_GENERATOR_DURATION]: 'dur (s)',
