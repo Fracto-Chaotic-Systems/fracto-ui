@@ -8,6 +8,8 @@ import AppSettings from "../../AppSettings.jsx";
 import {
    KEY_TILES_TEST_DURATION_MS,
    KEY_TILES_TEST_COMBINE_RESULTS,
+   KEY_TILES_TEST_BENCHMARKS,
+   KEY_TILES_TEST_ANIMATION,
    KEY_TILES_TEST_HARNESS,
    KEY_TILES_TEST_LEGACY_MAX,
    KEY_TILES_TEST_LEGACY_MEDIAN,
@@ -19,6 +21,7 @@ import {
 } from "../../text/TilesText.jsx";
 import TilesBackend from "../../backend/TilesBackend.jsx";
 import CoolStyles from "../../utils/ui/styles/CoolStyles.jsx";
+import CoolTabs from "../../utils/ui/CoolTabs.jsx";
 import {update_dimensions} from "../PageUtils.jsx";
 import {
    KEY_TILES_SPLITTER_POS_PX,
@@ -26,6 +29,8 @@ import {
 } from "../../settings/TilesSettings.jsx";
 
 ChartJS.register(...registerables)
+
+const TAB_HEADER_HEIGHT_PX = 32
 
 const METRICS = [
    {key: 'min_ms', color: '#4472c4'},
@@ -154,6 +159,7 @@ export class TilesTest extends Component {
    state = {
       benchmark_results: null,
       benchmark_error: null,
+      tab_index: 0,
       combine_results: AppSettings.get(KEY_TILES_TEST_COMBINE_RESULTS_SETTING),
       hidden_legend_keys: [],
       rendered_width: 0,
@@ -192,51 +198,63 @@ export class TilesTest extends Component {
       }))
    }
 
+   on_tab_select = tab_index => this.setState({tab_index})
+
    render() {
-      const {benchmark_results, rendered_height, container_ref, combine_results, hidden_legend_keys} = this.state
+      const {benchmark_results, rendered_height, container_ref, combine_results, hidden_legend_keys, tab_index} = this.state
       const chart_data = benchmark_results && build_chart_data(benchmark_results, combine_results, hidden_legend_keys)
       const top = container_ref.current?.getBoundingClientRect().top || TITLE_BAR_HEIGHT_PX
       const available_height = Math.max(0, rendered_height - top)
+      const tab_content_height = Math.max(0, available_height - TAB_HEADER_HEIGHT_PX)
+      const benchmark_content = <CoolStyles.Block style={{height: `${tab_content_height}px`, position: 'relative', overflow: 'hidden'}}>
+         <div style={{height: '2rem', display: 'flex', alignItems: 'center', paddingLeft: '0.5rem'}}>
+            <label>
+               <input
+                  type={'checkbox'}
+                  checked={combine_results}
+                  onChange={event => {
+                     const combine_results = event.target.checked
+                     this.setState({combine_results})
+                     AppSettings.on_settings_changed({
+                        [KEY_TILES_TEST_COMBINE_RESULTS_SETTING]: combine_results,
+                     })
+                  }}
+               />
+               <span style={{marginLeft: '0.35rem'}}>
+                  {AppText.get(KEY_TILES_TEST_COMBINE_RESULTS)}
+               </span>
+            </label>
+         </div>
+         <div style={{height: 'calc(100% - 2rem)', position: 'relative'}}>
+            {chart_data && <Line
+               data={chart_data}
+               options={chart_options(
+                  AppText.get(KEY_TILES_TEST_STEP_INDEX),
+                  AppText.get(KEY_TILES_TEST_DURATION_MS),
+                  get_chart_minimum(chart_data),
+                  this.toggle_legend)}
+            />}
+         </div>
+      </CoolStyles.Block>
+      const animation_content = <CoolStyles.Block style={{height: `${tab_content_height}px`}} />
       return [
          <styles.SectionTitle key={'test-harness-title'}>
             {AppText.get(KEY_TILES_TEST_HARNESS)}
          </styles.SectionTitle>,
          <CoolStyles.Block
-            key={'test-harness-grid'}
+            key={'test-harness-tabs'}
             ref={container_ref}
             style={{
                height: `${available_height}px`,
                position: 'relative',
                overflow: 'hidden',
             }}>
-            <div style={{height: '2rem', display: 'flex', alignItems: 'center', paddingLeft: '0.5rem'}}>
-               <label>
-                  <input
-                     type={'checkbox'}
-                     checked={combine_results}
-                     onChange={event => {
-                        const combine_results = event.target.checked
-                        this.setState({combine_results})
-                        AppSettings.on_settings_changed({
-                           [KEY_TILES_TEST_COMBINE_RESULTS_SETTING]: combine_results,
-                        })
-                     }}
-                  />
-                  <span style={{marginLeft: '0.35rem'}}>
-                     {AppText.get(KEY_TILES_TEST_COMBINE_RESULTS)}
-                  </span>
-               </label>
-            </div>
-            <div style={{height: 'calc(100% - 2rem)', position: 'relative'}}>
-               {chart_data && <Line
-                  data={chart_data}
-                  options={chart_options(
-                     AppText.get(KEY_TILES_TEST_STEP_INDEX),
-                     AppText.get(KEY_TILES_TEST_DURATION_MS),
-                     get_chart_minimum(chart_data),
-                     this.toggle_legend)}
-               />}
-            </div>
+            <CoolTabs
+               labels={[AppText.get(KEY_TILES_TEST_BENCHMARKS), AppText.get(KEY_TILES_TEST_ANIMATION)]}
+               tab_index={tab_index}
+               on_tab_select={this.on_tab_select}
+               selected_content={tab_index === 0 ? benchmark_content : animation_content}
+            />
          </CoolStyles.Block>,
       ]
    }

@@ -11,6 +11,8 @@ export const KEY_TILES_GENERATOR = `${TILES_FOLDER}/tiles_generator`
 export const KEY_TILES_INSPECTOR = `${TILES_FOLDER}/tiles_inspector`
 export const KEY_TILES_TEST = `${TILES_FOLDER}/tiles_test`
 export const KEY_TILES_TEST_HARNESS = `${TILES_FOLDER}/test_harness`
+export const KEY_TILES_TEST_BENCHMARKS = `${TILES_FOLDER}/test_benchmarks`
+export const KEY_TILES_TEST_ANIMATION = `${TILES_FOLDER}/test_animation`
 export const KEY_TILES_TEST_STEP_INDEX = `${TILES_FOLDER}/test_step_index`
 export const KEY_TILES_TEST_DURATION_MS = `${TILES_FOLDER}/test_duration_ms`
 export const KEY_TILES_TEST_COMBINE_RESULTS = `${TILES_FOLDER}/test_combine_results`
@@ -39,6 +41,8 @@ export const APP_TILES_TEXT = {
    [KEY_TILES_INSPECTOR]: 'inspect',
    [KEY_TILES_TEST]: 'test',
    [KEY_TILES_TEST_HARNESS]: 'test harness',
+   [KEY_TILES_TEST_BENCHMARKS]: 'benchmarks',
+   [KEY_TILES_TEST_ANIMATION]: 'animation',
    [KEY_TILES_TEST_STEP_INDEX]: 'step index',
    [KEY_TILES_TEST_DURATION_MS]: 'duration (ms)',
    [KEY_TILES_TEST_COMBINE_RESULTS]: 'combine results',
