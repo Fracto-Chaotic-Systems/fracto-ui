@@ -7,6 +7,7 @@ export const KEY_TILES_SPLITTER_POS_PX = `${TILES_FOLDER}/splitter_pos_px`
 export const KEY_TILES_SECTION = `${TILES_FOLDER}/tiles_section`
 export const KEY_TILES_LOGS_SHOW_TIMESTAMPS = `${TILES_FOLDER}/logs_show_timestamps`
 export const KEY_TILES_TEST_COMBINE_RESULTS = `${TILES_FOLDER}/test_combine_results`
+export const KEY_TILES_TEST_COMBINATION_METHOD = `${TILES_FOLDER}/test_combination_method`
 export const KEY_TILES_TEST_ANIMATION_FRAME_RATE_FPS = `${TILES_FOLDER}/test_animation_frame_rate_fps`
 export const KEY_TILES_TEST_ANIMATION_IMAGE_SIZE_PX = `${TILES_FOLDER}/test_animation_image_size_px`
 export const KEY_TILES_TEST_ANIMATION_FRAME_COUNT = `${TILES_FOLDER}/test_animation_frame_count`
@@ -53,6 +54,12 @@ export const APP_TILES_SETTINGS = {
       data_type: TYPE_BOOLEAN,
       default_value: false,
       description: 'combine benchmark result lines',
+      persist: true,
+   },
+   [KEY_TILES_TEST_COMBINATION_METHOD]: {
+      data_type: TYPE_STRING,
+      default_value: 'interpolated',
+      description: 'method used to combine benchmark result lines',
       persist: true,
    },
    [KEY_TILES_TEST_ANIMATION_FRAME_RATE_FPS]: {

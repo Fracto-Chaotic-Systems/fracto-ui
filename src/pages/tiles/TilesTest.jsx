@@ -11,6 +11,10 @@ import {KEY_NAVIGATOR_FOCAL_POINT, KEY_NAVIGATOR_SCOPE} from "../../text/Navigat
 import {
    KEY_TILES_TEST_DURATION_MS,
    KEY_TILES_TEST_COMBINE_RESULTS,
+   KEY_TILES_TEST_COMBINATION_SIMPLE,
+   KEY_TILES_TEST_COMBINATION_SIMPLE_HELP,
+   KEY_TILES_TEST_COMBINATION_INTERPOLATED,
+   KEY_TILES_TEST_COMBINATION_INTERPOLATED_HELP,
    KEY_TILES_TEST_BENCHMARKS,
    KEY_TILES_TEST_ANIMATION,
    KEY_TILES_TEST_ANIMATION_FRAME_RATE,
@@ -32,6 +36,7 @@ import TilesBackend from "../../backend/TilesBackend.jsx";
 import CoolStyles from "../../utils/ui/styles/CoolStyles.jsx";
 import CoolTabs from "../../utils/ui/CoolTabs.jsx";
 import CoolTable from "../../utils/ui/CoolTable.jsx";
+import CoolSelect from "../../utils/ui/CoolSelect.jsx";
 import FractoRasterImage from "../../utils/render/FractoRasterImage.jsx";
 import DataBackend from "../../backend/DataBackend.jsx";
 import CoolMediaTransport, {
@@ -53,6 +58,7 @@ import {update_dimensions} from "../PageUtils.jsx";
 import {
    KEY_TILES_SPLITTER_POS_PX,
    KEY_TILES_TEST_COMBINE_RESULTS as KEY_TILES_TEST_COMBINE_RESULTS_SETTING,
+   KEY_TILES_TEST_COMBINATION_METHOD,
    KEY_TILES_TEST_ANIMATION_FRAME_RATE_FPS,
    KEY_TILES_TEST_ANIMATION_IMAGE_SIZE_PX,
    KEY_TILES_TEST_ANIMATION_FRAME_COUNT as KEY_TILES_TEST_ANIMATION_FRAME_COUNT_SETTING,
@@ -112,7 +118,28 @@ const get_step = fixture => {
    return Number.isFinite(fallback) ? fallback : null
 }
 
-const build_chart_data = (benchmark_results, combine_results = false, hidden_legend_keys = []) => {
+/**
+ * Aggregate one step while limiting the influence of rare timing spikes.
+ * Percentile bounds, trimming, winsorization, and log-space averaging are
+ * intentionally kept here so interpolated mode remains stepwise and jagged.
+ */
+const robust_step_value = (values, metric_index) => {
+   const sorted = [...values].sort((left, right) => left - right)
+   if (!sorted.length) return 0.1
+   const percentile = fraction => sorted[Math.min(sorted.length - 1, Math.floor((sorted.length - 1) * fraction))]
+   if (metric_index === 1) return percentile(0.5)
+   const lower = percentile(0.1)
+   const upper = percentile(0.95)
+   const trim_count = Math.floor(sorted.length * 0.1)
+   const trimmed = sorted.slice(trim_count, Math.max(trim_count + 1, sorted.length - trim_count))
+   const winsorized = sorted.map(value => Math.min(upper, Math.max(lower, value)))
+   const arithmetic_mean = trimmed.reduce((sum, value) => sum + value, 0) / trimmed.length
+   const log_mean = Math.exp(winsorized.reduce((sum, value) => sum + Math.log(Math.max(0.1, value)), 0) / winsorized.length)
+   const percentile_target = metric_index === 0 ? lower : upper
+   return Math.max(0.1, (arithmetic_mean + log_mean + percentile_target) / 3)
+}
+
+const build_chart_data = (benchmark_results, combine_results = false, hidden_legend_keys = [], combination_method = 'interpolated') => {
    const datasets = []
    for (const strategy of ['legacy', 'turbo']) {
       const fixtures = benchmark_results?.[strategy]?.report?.fixtures || []
@@ -132,6 +159,7 @@ const build_chart_data = (benchmark_results, combine_results = false, hidden_leg
                x: get_step(fixture),
                y: fixture.summary?.[metric.key],
             })).filter(point => Number.isFinite(point.x) && Number.isFinite(point.y))
+            const step_values = [...new Set(points.map(point => point.x))].sort((left, right) => left - right)
             const grouped_points = new Map()
             points.forEach(point => {
                if (!grouped_points.has(point.x)) grouped_points.set(point.x, [])
@@ -142,14 +170,19 @@ const build_chart_data = (benchmark_results, combine_results = false, hidden_leg
                legend_key: `${strategy}_${metric.key}`,
                hidden: hidden_legend_keys.includes(`${strategy}_${metric.key}`),
                data: combine_results
-                  ? [...grouped_points.entries()].map(([x, values]) => ({
-                     x,
-                     y: values.reduce((sum, value) => sum + value, 0) / values.length,
-                  }))
+                  ? combination_method === 'interpolated'
+                     ? step_values.map(x => ({
+                        x,
+                        y: robust_step_value(grouped_points.get(x), metric_index),
+                     }))
+                     : [...grouped_points.entries()].map(([x, values]) => ({
+                        x,
+                        y: values.reduce((sum, value) => sum + value, 0) / values.length,
+                     }))
                   : points,
                borderColor: STRATEGY_COLORS[strategy][metric_index],
                backgroundColor: STRATEGY_COLORS[strategy][metric_index],
-               borderWidth: combine_results ? 1.5 : 0.75,
+               borderWidth: metric_index === 1 ? 2.5 : (combine_results ? 1.5 : 0.75),
                pointRadius: 1.5,
                tension: 0.15,
                fill: false,
@@ -220,6 +253,7 @@ export class TilesTest extends Component {
       animation_frame_rate_custom: false,
       animation_image_size_custom: false,
       combine_results: AppSettings.get(KEY_TILES_TEST_COMBINE_RESULTS_SETTING),
+      combination_method: AppSettings.get(KEY_TILES_TEST_COMBINATION_METHOD),
       hidden_legend_keys: [],
       rendered_width: 0,
       rendered_height: 0,
@@ -325,12 +359,12 @@ export class TilesTest extends Component {
 
    render() {
       const {
-         benchmark_results, rendered_width, rendered_height, container_ref, combine_results, hidden_legend_keys, tab_index,
+         benchmark_results, rendered_width, rendered_height, container_ref, combine_results, combination_method, hidden_legend_keys, tab_index,
          animation_frame_rate_fps, animation_image_size_px, animation_frame_count, animation_frame_count_custom,
          animation_frame_rate_custom, animation_image_size_custom,
          animation_frame_settings,
       } = this.state
-      const chart_data = benchmark_results && build_chart_data(benchmark_results, combine_results, hidden_legend_keys)
+      const chart_data = benchmark_results && build_chart_data(benchmark_results, combine_results, hidden_legend_keys, combination_method)
       const top = container_ref.current?.getBoundingClientRect().top || TITLE_BAR_HEIGHT_PX
       const available_height = Math.max(0, rendered_height - top)
       const tab_content_height = Math.max(0, available_height - TAB_HEADER_HEIGHT_PX)
@@ -352,6 +386,19 @@ export class TilesTest extends Component {
                   {AppText.get(KEY_TILES_TEST_COMBINE_RESULTS)}
                </span>
             </label>
+            <CoolSelect
+               options={[
+                  {value: 'simple', label: AppText.get(KEY_TILES_TEST_COMBINATION_SIMPLE), help: AppText.get(KEY_TILES_TEST_COMBINATION_SIMPLE_HELP)},
+                  {value: 'interpolated', label: AppText.get(KEY_TILES_TEST_COMBINATION_INTERPOLATED), help: AppText.get(KEY_TILES_TEST_COMBINATION_INTERPOLATED_HELP)},
+               ]}
+               value={combination_method}
+               on_change={event => {
+                  const combination_method = event.target.value
+                  this.setState({combination_method})
+                  AppSettings.on_settings_changed({[KEY_TILES_TEST_COMBINATION_METHOD]: combination_method})
+               }}
+               extra_style={{padding: 0}}
+            />
          </div>
          <div style={{height: 'calc(100% - 2rem)', position: 'relative'}}>
             {chart_data && <Line

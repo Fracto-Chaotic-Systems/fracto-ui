@@ -22,6 +22,10 @@ export const KEY_TILES_TEST_ANIMATION_CUSTOM = `${TILES_FOLDER}/test_animation_c
 export const KEY_TILES_TEST_STEP_INDEX = `${TILES_FOLDER}/test_step_index`
 export const KEY_TILES_TEST_DURATION_MS = `${TILES_FOLDER}/test_duration_ms`
 export const KEY_TILES_TEST_COMBINE_RESULTS = `${TILES_FOLDER}/test_combine_results`
+export const KEY_TILES_TEST_COMBINATION_SIMPLE = `${TILES_FOLDER}/test_combination_simple`
+export const KEY_TILES_TEST_COMBINATION_SIMPLE_HELP = `${TILES_FOLDER}/test_combination_simple_help`
+export const KEY_TILES_TEST_COMBINATION_INTERPOLATED = `${TILES_FOLDER}/test_combination_interpolated`
+export const KEY_TILES_TEST_COMBINATION_INTERPOLATED_HELP = `${TILES_FOLDER}/test_combination_interpolated_help`
 export const KEY_TILES_TEST_LEGACY_MIN = `${TILES_FOLDER}/test_legacy_min`
 export const KEY_TILES_TEST_LEGACY_MEDIAN = `${TILES_FOLDER}/test_legacy_median`
 export const KEY_TILES_TEST_LEGACY_MAX = `${TILES_FOLDER}/test_legacy_max`
@@ -58,6 +62,10 @@ export const APP_TILES_TEXT = {
    [KEY_TILES_TEST_STEP_INDEX]: 'step index',
    [KEY_TILES_TEST_DURATION_MS]: 'duration (ms)',
    [KEY_TILES_TEST_COMBINE_RESULTS]: 'combine results',
+   [KEY_TILES_TEST_COMBINATION_SIMPLE]: 'simple',
+   [KEY_TILES_TEST_COMBINATION_SIMPLE_HELP]: 'averaged',
+   [KEY_TILES_TEST_COMBINATION_INTERPOLATED]: 'interpolated',
+   [KEY_TILES_TEST_COMBINATION_INTERPOLATED_HELP]: 'robust fit',
    [KEY_TILES_TEST_LEGACY_MIN]: 'legacy min',
    [KEY_TILES_TEST_LEGACY_MEDIAN]: 'legacy med',
    [KEY_TILES_TEST_LEGACY_MAX]: 'legacy max',
