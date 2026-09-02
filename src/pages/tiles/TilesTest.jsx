@@ -182,7 +182,7 @@ const build_chart_data = (benchmark_results, combine_results = false, hidden_leg
                   : points,
                borderColor: STRATEGY_COLORS[strategy][metric_index],
                backgroundColor: STRATEGY_COLORS[strategy][metric_index],
-               borderWidth: metric_index === 1 ? 2.5 : (combine_results ? 1.5 : 0.75),
+               borderWidth: metric_index === 1 ? 5 : (combine_results ? 1.5 : 0.75),
                pointRadius: 1.5,
                tension: 0.15,
                fill: false,
@@ -382,11 +382,11 @@ export class TilesTest extends Component {
                      })
                   }}
                />
-               <span style={{marginLeft: '0.35rem'}}>
+               <span style={{...CELL_LABEL_STYLE, marginLeft: '0.35rem'}}>
                   {AppText.get(KEY_TILES_TEST_COMBINE_RESULTS)}
                </span>
             </label>
-            <CoolSelect
+            {combine_results && <CoolSelect
                options={[
                   {value: 'simple', label: AppText.get(KEY_TILES_TEST_COMBINATION_SIMPLE), help: AppText.get(KEY_TILES_TEST_COMBINATION_SIMPLE_HELP)},
                   {value: 'interpolated', label: AppText.get(KEY_TILES_TEST_COMBINATION_INTERPOLATED), help: AppText.get(KEY_TILES_TEST_COMBINATION_INTERPOLATED_HELP)},
@@ -397,8 +397,8 @@ export class TilesTest extends Component {
                   this.setState({combination_method})
                   AppSettings.on_settings_changed({[KEY_TILES_TEST_COMBINATION_METHOD]: combination_method})
                }}
-               extra_style={{padding: 0}}
-            />
+               extra_style={{padding: 0, marginLeft: '0.5rem'}}
+            />}
          </div>
          <div style={{height: 'calc(100% - 2rem)', position: 'relative'}}>
             {chart_data && <Line
