@@ -3,8 +3,11 @@ import {Line} from 'react-chartjs-2';
 import {Chart as ChartJS, registerables} from 'chart.js';
 
 import {MainStyles as styles, TITLE_BAR_HEIGHT_PX} from '../../styles/MainStyles.jsx'
+import {BACKGROUND_FIELD_GRADIENT} from '../../constants.jsx';
 import AppText from "../../AppText.jsx";
 import AppSettings from "../../AppSettings.jsx";
+import {render_coordinates, render_scalar} from "../../utils/Dom.jsx";
+import {KEY_NAVIGATOR_FOCAL_POINT, KEY_NAVIGATOR_SCOPE} from "../../text/NavigatorText.jsx";
 import {
    KEY_TILES_TEST_DURATION_MS,
    KEY_TILES_TEST_COMBINE_RESULTS,
@@ -14,6 +17,7 @@ import {
    KEY_TILES_TEST_ANIMATION_IMAGE_SIZE,
    KEY_TILES_TEST_ANIMATION_FRAME_COUNT,
    KEY_TILES_TEST_ANIMATION_FRAME_INDEX,
+   KEY_TILES_TEST_ANIMATION_LOAD,
    KEY_TILES_TEST_ANIMATION_CUSTOM,
    KEY_TILES_TEST_HARNESS,
    KEY_TILES_TEST_LEGACY_MAX,
@@ -28,6 +32,8 @@ import TilesBackend from "../../backend/TilesBackend.jsx";
 import CoolStyles from "../../utils/ui/styles/CoolStyles.jsx";
 import CoolTabs from "../../utils/ui/CoolTabs.jsx";
 import CoolTable from "../../utils/ui/CoolTable.jsx";
+import FractoRasterImage from "../../utils/render/FractoRasterImage.jsx";
+import DataBackend from "../../backend/DataBackend.jsx";
 import CoolMediaTransport, {
    TRANSPORT_BEGIN,
    TRANSPORT_END,
@@ -37,10 +43,11 @@ import CoolMediaTransport, {
 } from "../../utils/ui/CoolMediaTransport.jsx";
 import {
    CELL_ALIGN_LEFT,
-   CELL_TYPE_NUMBER,
+   CELL_TYPE_CALLBACK,
    CELL_TYPE_TEXT_KEY,
    TABLE_NO_BORDER,
    TABLE_NO_HEADER,
+   CELL_LABEL_STYLE,
 } from "../../utils/ui/styles/CoolTableStyles.jsx";
 import {update_dimensions} from "../PageUtils.jsx";
 import {
@@ -61,8 +68,8 @@ const IMAGE_SIZE_OPTIONS_PX = [256, 384, 512, 640, 768, 896, 1024]
 const FRAME_COUNT_OPTIONS = [100, 150, 200, 250, 300, 350, 400, 450, 500]
 const CUSTOM_OPTION = 'custom'
 const ANIMATION_STATS_COLUMNS = [
-   {id: 'name', label: 'name', type: CELL_TYPE_TEXT_KEY, align: CELL_ALIGN_LEFT, style: {fontWeight: 'bold', color: '#666666', fontStyle: 'italic'}},
-   {id: 'value', label: 'value', type: CELL_TYPE_NUMBER, align: CELL_ALIGN_LEFT},
+   {id: 'name', label: 'name', type: CELL_TYPE_TEXT_KEY, align: CELL_ALIGN_LEFT, style: CELL_LABEL_STYLE},
+   {id: 'value', label: 'value', type: CELL_TYPE_CALLBACK, align: CELL_ALIGN_LEFT},
 ]
 const format_frame_rate = frames_per_second => {
    const milliseconds_per_frame = (1000 / frames_per_second).toFixed(1).replace(/\.0$/, '')
@@ -207,6 +214,8 @@ export class TilesTest extends Component {
       animation_frame_count: AppSettings.get(KEY_TILES_TEST_ANIMATION_FRAME_COUNT_SETTING),
       animation_frame_count_custom: false,
       animation_playing: false,
+      animation_frame_settings: null,
+      animation_loading: false,
       animation_frame_rate_custom: false,
       animation_image_size_custom: false,
       combine_results: AppSettings.get(KEY_TILES_TEST_COMBINE_RESULTS_SETTING),
@@ -223,6 +232,7 @@ export class TilesTest extends Component {
       this.setState({tab_index})
       this.update_dimensions()
       this.setState({dimensions_interval: setInterval(this.update_dimensions, 1000)})
+      this.load_test()
       TilesBackend.benchmark_results()
          .then(benchmark_results => this.setState({benchmark_results}))
          .catch(benchmark_error => {
@@ -269,11 +279,55 @@ export class TilesTest extends Component {
       if (operation === TRANSPORT_BEGIN || operation === TRANSPORT_END) this.on_animation_stop()
    }
 
+   // Match the benchmark sampler: merge the three bailiwick categories,
+   // sort by descending magnitude, then choose one random record in 500-1000.
+   load_test = () => {
+      this.setState({animation_loading: true})
+      const categories = [
+         {is_node: 0, is_inline: 0},
+         {is_node: 0, is_inline: 1},
+         {is_node: 1, is_inline: 0},
+      ]
+      const requests = categories.map(params => new Promise((resolve, reject) => {
+         try {
+            DataBackend.get_minibrots(params, resolve)
+         } catch (error) {
+            reject(error)
+         }
+      }))
+      Promise.all(requests).then(results => {
+         const records = results.flat()
+            .filter(record => record && Number.isFinite(Number(record.magnitude)))
+            .sort((left, right) => Number(right.magnitude) - Number(left.magnitude))
+         const candidates = records.slice(500, 1001)
+         if (!candidates.length) throw new Error('No benchmark starting points available')
+         const record = candidates[Math.floor(Math.random() * candidates.length)]
+         const display_settings = typeof record.display_settings === 'string'
+            ? JSON.parse(record.display_settings) : record.display_settings
+         const focal_point = display_settings?.focal_point
+         const scope = Number(display_settings?.scope)
+         if (!focal_point || !Number.isFinite(Number(focal_point.x)) || !Number.isFinite(Number(focal_point.y)) || !Number.isFinite(scope) || scope <= 0) {
+            throw new Error('Selected starting point has invalid display settings')
+         }
+         if (!this.unmounted) this.setState({
+            animation_frame_settings: {
+               focal_point: {x: Number(focal_point.x), y: Number(focal_point.y)},
+               scope,
+            },
+            animation_loading: false,
+         })
+      }).catch(error => {
+         console.error('animation test load error', error)
+         if (!this.unmounted) this.setState({animation_loading: false})
+      })
+   }
+
    render() {
       const {
          benchmark_results, rendered_width, rendered_height, container_ref, combine_results, hidden_legend_keys, tab_index,
          animation_frame_rate_fps, animation_image_size_px, animation_frame_count, animation_frame_count_custom,
          animation_frame_rate_custom, animation_image_size_custom,
+         animation_frame_settings,
       } = this.state
       const chart_data = benchmark_results && build_chart_data(benchmark_results, combine_results, hidden_legend_keys)
       const top = container_ref.current?.getBoundingClientRect().top || TITLE_BAR_HEIGHT_PX
@@ -331,10 +385,17 @@ export class TilesTest extends Component {
       const frame_count_value = animation_frame_count_custom || !FRAME_COUNT_OPTIONS.includes(animation_frame_count)
          ? CUSTOM_OPTION : String(animation_frame_count)
       const animation_image_column_width = Math.max(rendered_width / 2, animation_image_size_px + SCROLLBAR_WIDTH_PX)
+      const animation_stats = [
+         {name: KEY_TILES_TEST_ANIMATION_FRAME_INDEX, value: 0},
+         ...(animation_frame_settings ? [
+            {name: KEY_NAVIGATOR_FOCAL_POINT, value: [render_coordinates, animation_frame_settings.focal_point]},
+            {name: KEY_NAVIGATOR_SCOPE, value: [render_scalar, animation_frame_settings.scope]},
+         ] : []),
+      ]
       const animation_content = <CoolStyles.Block style={{height: `${tab_content_height}px`, position: 'relative', overflow: 'hidden'}}>
          <div style={{height: '2rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '1rem', paddingLeft: '0.5rem'}}>
             <label>
-               {AppText.get(KEY_TILES_TEST_ANIMATION_FRAME_RATE)}
+               <span style={CELL_LABEL_STYLE}>{AppText.get(KEY_TILES_TEST_ANIMATION_FRAME_RATE)}</span>
                <select
                   value={frame_rate_value}
                   onChange={select_animation_setting(KEY_TILES_TEST_ANIMATION_FRAME_RATE_FPS, 'animation_frame_rate_fps', 'animation_frame_rate_custom')}
@@ -349,7 +410,7 @@ export class TilesTest extends Component {
                />}
             </label>
             <label>
-               {AppText.get(KEY_TILES_TEST_ANIMATION_IMAGE_SIZE)}
+               <span style={CELL_LABEL_STYLE}>{AppText.get(KEY_TILES_TEST_ANIMATION_IMAGE_SIZE)}</span>
                <select
                   value={image_size_value}
                   onChange={select_animation_setting(KEY_TILES_TEST_ANIMATION_IMAGE_SIZE_PX, 'animation_image_size_px', 'animation_image_size_custom')}
@@ -364,7 +425,7 @@ export class TilesTest extends Component {
                />}
             </label>
             <label>
-               {AppText.get(KEY_TILES_TEST_ANIMATION_FRAME_COUNT)}
+               <span style={CELL_LABEL_STYLE}>{AppText.get(KEY_TILES_TEST_ANIMATION_FRAME_COUNT)}</span>
                <select
                   value={frame_count_value}
                   onChange={select_animation_setting(KEY_TILES_TEST_ANIMATION_FRAME_COUNT_SETTING, 'animation_frame_count', 'animation_frame_count_custom')}
@@ -372,30 +433,40 @@ export class TilesTest extends Component {
                   {FRAME_COUNT_OPTIONS.map(value => <option key={value} value={value}>{value}</option>)}
                   <option value={CUSTOM_OPTION}>{AppText.get(KEY_TILES_TEST_ANIMATION_CUSTOM)}</option>
                </select>
-               {frame_count_value === CUSTOM_OPTION && <input
+            {frame_count_value === CUSTOM_OPTION && <input
                   type={'number'} min={'1'} step={'1'} value={animation_frame_count}
                   onChange={update_animation_setting(KEY_TILES_TEST_ANIMATION_FRAME_COUNT_SETTING, 'animation_frame_count')}
                   style={{marginLeft: '0.35rem', width: '5rem'}}
                />}
             </label>
+            <styles.BlueButton onClick={this.load_test}>
+               {AppText.get(KEY_TILES_TEST_ANIMATION_LOAD)}
+            </styles.BlueButton>
          </div>
          <div style={{height: 'calc(100% - 3rem)', display: 'flex', minWidth: 0}}>
-            <div style={{flex: `0 0 ${animation_image_column_width}px`, minWidth: 0, display: 'flex', justifyContent: 'flex-start', alignItems: 'flex-start', overflow: 'auto'}}>
-               <canvas
+            <div style={{flex: `0 0 ${animation_image_column_width}px`, minWidth: 0, display: 'flex', justifyContent: 'flex-start', alignItems: 'flex-start', overflow: 'auto', background: BACKGROUND_FIELD_GRADIENT}}>
+               {animation_frame_settings ? <div style={{marginLeft: 'auto', flex: '0 0 auto'}}><FractoRasterImage
+                  width_px={animation_image_size_px}
+                  focal_point={animation_frame_settings.focal_point}
+                  scope={animation_frame_settings.scope}
+                  aspect_ratio={1.0}
+               /></div> : <canvas
                   width={animation_image_size_px}
                   height={animation_image_size_px}
                   style={{width: `${animation_image_size_px}px`, height: `${animation_image_size_px}px`, marginLeft: 'auto', flex: '0 0 auto', aspectRatio: '1 / 1', backgroundColor: '#d3d3d3'}}
-               />
+               />}
             </div>
             <div style={{width: '1px', flex: '0 0 1px', margin: '0 1rem', backgroundColor: '#aaaaaa'}} />
             <div style={{flex: '1 1 0', minWidth: 0, overflow: 'auto'}}>
-               <CoolMediaTransport
-                  width_px={120}
-                  on_operation={this.on_animation_operation}
-               />
+               <div style={{marginBottom: '1rem'}}>
+                  <CoolMediaTransport
+                     width_px={120}
+                     on_operation={this.on_animation_operation}
+                  />
+               </div>
                <CoolTable
                   columns={ANIMATION_STATS_COLUMNS}
-                  data={[{name: KEY_TILES_TEST_ANIMATION_FRAME_INDEX, value: 0}]}
+                  data={animation_stats}
                   options={[TABLE_NO_HEADER, TABLE_NO_BORDER]}
                />
             </div>

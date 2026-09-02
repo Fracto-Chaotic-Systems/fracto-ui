@@ -18,6 +18,13 @@ export const TABLE_CAN_SELECT = "table_can_select"
 export const TABLE_NO_HEADER = "table_no_header"
 export const TABLE_NO_BORDER = "table_no_border"
 
+// Shared styling for descriptive labels used beside values in compact tables and controls.
+export const CELL_LABEL_STYLE = {
+   fontWeight: 'bold',
+   color: '#666666',
+   fontStyle: 'italic',
+}
+
 export class CoolTableStyles {
    
    static TableRow = styled(CoolStyles.TableRow)`
