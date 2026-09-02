@@ -28,6 +28,13 @@ import TilesBackend from "../../backend/TilesBackend.jsx";
 import CoolStyles from "../../utils/ui/styles/CoolStyles.jsx";
 import CoolTabs from "../../utils/ui/CoolTabs.jsx";
 import CoolTable from "../../utils/ui/CoolTable.jsx";
+import CoolMediaTransport, {
+   TRANSPORT_BEGIN,
+   TRANSPORT_END,
+   TRANSPORT_PAUSE,
+   TRANSPORT_PLAY,
+   TRANSPORT_REVERSE,
+} from "../../utils/ui/CoolMediaTransport.jsx";
 import {
    CELL_ALIGN_LEFT,
    CELL_TYPE_NUMBER,
@@ -199,6 +206,7 @@ export class TilesTest extends Component {
       animation_image_size_px: AppSettings.get(KEY_TILES_TEST_ANIMATION_IMAGE_SIZE_PX),
       animation_frame_count: AppSettings.get(KEY_TILES_TEST_ANIMATION_FRAME_COUNT_SETTING),
       animation_frame_count_custom: false,
+      animation_playing: false,
       animation_frame_rate_custom: false,
       animation_image_size_custom: false,
       combine_results: AppSettings.get(KEY_TILES_TEST_COMBINE_RESULTS_SETTING),
@@ -245,6 +253,20 @@ export class TilesTest extends Component {
    on_tab_select = tab_index => {
       this.setState({tab_index})
       AppSettings.on_settings_changed({[KEY_TILES_TEST_TAB]: tab_index})
+   }
+
+   on_animation_play = () => this.setState({animation_playing: true})
+   on_animation_reverse = () => this.setState({animation_playing: true})
+   on_animation_pause = () => this.setState({animation_playing: false})
+   on_animation_stop = () => this.setState({animation_playing: false})
+
+   // The transport is intentionally state-only for now; frame generation will
+   // consume these operations once the animation pipeline is connected.
+   on_animation_operation = operation => {
+      if (operation === TRANSPORT_PLAY) this.on_animation_play()
+      if (operation === TRANSPORT_REVERSE) this.on_animation_reverse()
+      if (operation === TRANSPORT_PAUSE) this.on_animation_pause()
+      if (operation === TRANSPORT_BEGIN || operation === TRANSPORT_END) this.on_animation_stop()
    }
 
    render() {
@@ -367,6 +389,10 @@ export class TilesTest extends Component {
             </div>
             <div style={{width: '1px', flex: '0 0 1px', margin: '0 1rem', backgroundColor: '#aaaaaa'}} />
             <div style={{flex: '1 1 0', minWidth: 0, overflow: 'auto'}}>
+               <CoolMediaTransport
+                  width_px={120}
+                  on_operation={this.on_animation_operation}
+               />
                <CoolTable
                   columns={ANIMATION_STATS_COLUMNS}
                   data={[{name: KEY_TILES_TEST_ANIMATION_FRAME_INDEX, value: 0}]}
