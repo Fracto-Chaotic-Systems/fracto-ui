@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import {MainStyles as styles,} from '../../../styles/MainStyles.jsx'
 import CoolStyles from "../../../utils/ui/styles/CoolStyles.jsx";
 import AppSettings from "../../../AppSettings.jsx";
+import AppText from "../../../AppText.jsx";
 import {
    KEY_STUDY_MINIBROTS_RENDER_SPLITTER_POS,
    KEY_STUDY_SPLITTER_POS_PX,
@@ -18,9 +19,9 @@ import {
    CELL_ALIGN_LEFT,
    CELL_ALIGN_RIGHT,
    CELL_TYPE_CALLBACK,
-   CELL_TYPE_TEXT_KEY,
    TABLE_NO_BORDER,
    TABLE_NO_HEADER,
+   CELL_LABEL_STYLE,
 } from "../../../utils/ui/styles/CoolTableStyles.jsx";
 import CoolTable from "../../../utils/ui/CoolTable.jsx";
 import {
@@ -38,9 +39,9 @@ const TABLE_COLUMNS = [
    {
       id: "name",
       label: "name",
-      type: CELL_TYPE_TEXT_KEY,
+      type: CELL_TYPE_CALLBACK,
       width_px: 35,
-      style: {fontWeight: 'bold', color: '#666666', fontStyle: 'italic'},
+      style: CELL_LABEL_STYLE,
       align: CELL_ALIGN_RIGHT,
    },
    {
@@ -50,6 +51,8 @@ const TABLE_COLUMNS = [
       align: CELL_ALIGN_LEFT,
    },
 ]
+
+const render_label = label_key => <span>{AppText.get(label_key)}:</span>
 
 export class MinibrotRightPanel extends Component {
    static propTypes = {
@@ -94,19 +97,19 @@ export class MinibrotRightPanel extends Component {
       const display_settings = JSON.parse(selected_minibrot.display_settings)
       const table_data = [
          {
-            name: KEY_STUDY_COLUMN_LABEL_MAGNITUDE,
+            name: [render_label, KEY_STUDY_COLUMN_LABEL_MAGNITUDE],
             value: [render_magnitude, selected_minibrot.magnitude],
          },
          {
-            name: KEY_STUDY_COLUMN_LABEL_CORE_POINT,
+            name: [render_label, KEY_STUDY_COLUMN_LABEL_CORE_POINT],
             value: [render_coordinates, core_point],
          },
          {
-            name: KEY_NAVIGATOR_COVERAGE,
+            name: [render_label, KEY_NAVIGATOR_COVERAGE],
             value: [render_coverage, display_settings],
          },
          {
-            name: KEY_NAVIGATOR_SEND_TO,
+            name: [render_label, KEY_NAVIGATOR_SEND_TO],
             value: [render_send_to, display_settings],
          },
       ]

@@ -28,9 +28,9 @@ import {
    CELL_ALIGN_LEFT,
    CELL_ALIGN_RIGHT,
    CELL_TYPE_CALLBACK,
-   CELL_TYPE_TEXT_KEY,
    TABLE_NO_BORDER,
-   TABLE_NO_HEADER
+   TABLE_NO_HEADER,
+   CELL_LABEL_STYLE,
 } from "../utils/ui/styles/CoolTableStyles.jsx";
 
 import NavigatorTransit from "./NavigatorTransit.jsx";
@@ -55,9 +55,9 @@ const TABLE_COLUMNS = [
    {
       id: "name",
       label: "name",
-      type: CELL_TYPE_TEXT_KEY,
+      type: CELL_TYPE_CALLBACK,
       width_px: 35,
-      style: {fontWeight: 'bold', color: '#666666', fontStyle: 'italic'},
+      style: CELL_LABEL_STYLE,
       align: CELL_ALIGN_RIGHT,
    },
    {
@@ -67,6 +67,8 @@ const TABLE_COLUMNS = [
       align: CELL_ALIGN_LEFT,
    },
 ]
+
+const render_label = label_key => <span>{AppText.get(label_key)}:</span>
 
 const STRATEGY_OPTIONS = [
    {value: 'turbo', label: KEY_NAVIGATOR_STRATEGY_TURBO, help: KEY_NAVIGATOR_STRATEGY_TURBO_HELP},
@@ -168,23 +170,23 @@ export class NavigatorLegend extends Component {
       }
       const table_data = [
          {
-            name: KEY_NAVIGATOR_SCOPE,
+            name: [render_label, KEY_NAVIGATOR_SCOPE],
             value: [render_scalar, frame_settings.scope],
          },
          {
-            name: KEY_NAVIGATOR_FOCAL_POINT,
+            name: [render_label, KEY_NAVIGATOR_FOCAL_POINT],
             value: [this.render_focal_point, frame_settings.focal_point],
          },
          {
-            name: KEY_NAVIGATOR_CURSOR_LOCATION,
+            name: [render_label, KEY_NAVIGATOR_CURSOR_LOCATION],
             value: [render_coordinates, hover_point],
          },
          {
-            name: KEY_NAVIGATOR_SEND_TO,
+            name: [render_label, KEY_NAVIGATOR_SEND_TO],
             value: [render_send_to, frame_settings],
          },
          {
-            name: KEY_NAVIGATOR_STRATEGY,
+            name: [render_label, KEY_NAVIGATOR_STRATEGY],
             value: [this.render_strategy, AppSettings.get(KEY_NAVIGATOR_STRATEGY_SETTING)],
          },
       ]

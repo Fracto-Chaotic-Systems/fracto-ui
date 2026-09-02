@@ -43,8 +43,8 @@ import CoolMediaTransport, {
 } from "../../utils/ui/CoolMediaTransport.jsx";
 import {
    CELL_ALIGN_LEFT,
+   CELL_ALIGN_RIGHT,
    CELL_TYPE_CALLBACK,
-   CELL_TYPE_TEXT_KEY,
    TABLE_NO_BORDER,
    TABLE_NO_HEADER,
    CELL_LABEL_STYLE,
@@ -67,8 +67,9 @@ const FRAME_RATE_OPTIONS_FPS = [40, 30, 25, 20, 15, 12, 10]
 const IMAGE_SIZE_OPTIONS_PX = [256, 384, 512, 640, 768, 896, 1024]
 const FRAME_COUNT_OPTIONS = [100, 150, 200, 250, 300, 350, 400, 450, 500]
 const CUSTOM_OPTION = 'custom'
+const render_stat_label = label_key => <span>{AppText.get(label_key)}:</span>
 const ANIMATION_STATS_COLUMNS = [
-   {id: 'name', label: 'name', type: CELL_TYPE_TEXT_KEY, align: CELL_ALIGN_LEFT, style: CELL_LABEL_STYLE},
+   {id: 'name', label: 'name', type: CELL_TYPE_CALLBACK, align: CELL_ALIGN_RIGHT, style: CELL_LABEL_STYLE},
    {id: 'value', label: 'value', type: CELL_TYPE_CALLBACK, align: CELL_ALIGN_LEFT},
 ]
 const format_frame_rate = frames_per_second => {
@@ -386,15 +387,15 @@ export class TilesTest extends Component {
          ? CUSTOM_OPTION : String(animation_frame_count)
       const animation_image_column_width = Math.max(rendered_width / 2, animation_image_size_px + SCROLLBAR_WIDTH_PX)
       const animation_stats = [
-         {name: KEY_TILES_TEST_ANIMATION_FRAME_INDEX, value: 0},
+         {name: [render_stat_label, KEY_TILES_TEST_ANIMATION_FRAME_INDEX], value: 0},
          ...(animation_frame_settings ? [
-            {name: KEY_NAVIGATOR_FOCAL_POINT, value: [render_coordinates, animation_frame_settings.focal_point]},
-            {name: KEY_NAVIGATOR_SCOPE, value: [render_scalar, animation_frame_settings.scope]},
+            {name: [render_stat_label, KEY_NAVIGATOR_FOCAL_POINT], value: [render_coordinates, animation_frame_settings.focal_point]},
+            {name: [render_stat_label, KEY_NAVIGATOR_SCOPE], value: [render_scalar, animation_frame_settings.scope]},
          ] : []),
       ]
       const animation_content = <CoolStyles.Block style={{height: `${tab_content_height}px`, position: 'relative', overflow: 'hidden'}}>
-         <div style={{height: '2rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '1rem', paddingLeft: '0.5rem'}}>
-            <label>
+         <div style={{height: '2.5rem', display: 'flex', alignItems: 'center', gap: '1rem', paddingLeft: '0.5rem'}}>
+            <label style={{display: 'flex', alignItems: 'center'}}>
                <span style={CELL_LABEL_STYLE}>{AppText.get(KEY_TILES_TEST_ANIMATION_FRAME_RATE)}</span>
                <select
                   value={frame_rate_value}
@@ -409,7 +410,7 @@ export class TilesTest extends Component {
                   style={{marginLeft: '0.35rem', width: '5rem'}}
                />}
             </label>
-            <label>
+            <label style={{display: 'flex', alignItems: 'center'}}>
                <span style={CELL_LABEL_STYLE}>{AppText.get(KEY_TILES_TEST_ANIMATION_IMAGE_SIZE)}</span>
                <select
                   value={image_size_value}
@@ -424,7 +425,7 @@ export class TilesTest extends Component {
                   style={{marginLeft: '0.35rem', width: '5rem'}}
                />}
             </label>
-            <label>
+            <label style={{display: 'flex', alignItems: 'center'}}>
                <span style={CELL_LABEL_STYLE}>{AppText.get(KEY_TILES_TEST_ANIMATION_FRAME_COUNT)}</span>
                <select
                   value={frame_count_value}
@@ -439,13 +440,13 @@ export class TilesTest extends Component {
                   style={{marginLeft: '0.35rem', width: '5rem'}}
                />}
             </label>
-            <styles.BlueButton onClick={this.load_test}>
+            <styles.BlueButton onClick={this.load_test} style={{marginTop: '0.5rem', marginBottom: '0.5rem'}}>
                {AppText.get(KEY_TILES_TEST_ANIMATION_LOAD)}
             </styles.BlueButton>
          </div>
-         <div style={{height: 'calc(100% - 3rem)', display: 'flex', minWidth: 0}}>
+         <div style={{height: 'calc(100% - 2.5rem)', display: 'flex', minWidth: 0, background: BACKGROUND_FIELD_GRADIENT}}>
             <div style={{flex: `0 0 ${animation_image_column_width}px`, minWidth: 0, display: 'flex', justifyContent: 'flex-start', alignItems: 'flex-start', overflow: 'auto', background: BACKGROUND_FIELD_GRADIENT}}>
-               {animation_frame_settings ? <div style={{marginLeft: 'auto', flex: '0 0 auto'}}><FractoRasterImage
+               {animation_frame_settings ? <div style={{marginLeft: 'auto', marginRight: '1rem', marginTop: '1rem', flex: '0 0 auto'}}><FractoRasterImage
                   width_px={animation_image_size_px}
                   focal_point={animation_frame_settings.focal_point}
                   scope={animation_frame_settings.scope}
@@ -453,11 +454,11 @@ export class TilesTest extends Component {
                /></div> : <canvas
                   width={animation_image_size_px}
                   height={animation_image_size_px}
-                  style={{width: `${animation_image_size_px}px`, height: `${animation_image_size_px}px`, marginLeft: 'auto', flex: '0 0 auto', aspectRatio: '1 / 1', backgroundColor: '#d3d3d3'}}
+                  style={{width: `${animation_image_size_px}px`, height: `${animation_image_size_px}px`, marginLeft: 'auto', marginRight: '1rem', marginTop: '1rem', flex: '0 0 auto', aspectRatio: '1 / 1', backgroundColor: '#d3d3d3'}}
                />}
             </div>
-            <div style={{width: '1px', flex: '0 0 1px', margin: '0 1rem', backgroundColor: '#aaaaaa'}} />
-            <div style={{flex: '1 1 0', minWidth: 0, overflow: 'auto'}}>
+            <div style={{width: '1px', flex: '0 0 1px', margin: '0 1rem 0 0', backgroundColor: '#aaaaaa'}} />
+            <div style={{flex: '1 1 0', minWidth: 0, overflow: 'auto', backgroundColor: 'white'}}>
                <div style={{marginBottom: '1rem'}}>
                   <CoolMediaTransport
                      width_px={120}
