@@ -12,6 +12,8 @@ import {
    KEY_TILES_TEST_ANIMATION,
    KEY_TILES_TEST_ANIMATION_FRAME_RATE,
    KEY_TILES_TEST_ANIMATION_IMAGE_SIZE,
+   KEY_TILES_TEST_ANIMATION_FRAME_COUNT,
+   KEY_TILES_TEST_ANIMATION_FRAME_INDEX,
    KEY_TILES_TEST_ANIMATION_CUSTOM,
    KEY_TILES_TEST_HARNESS,
    KEY_TILES_TEST_LEGACY_MAX,
@@ -25,12 +27,22 @@ import {
 import TilesBackend from "../../backend/TilesBackend.jsx";
 import CoolStyles from "../../utils/ui/styles/CoolStyles.jsx";
 import CoolTabs from "../../utils/ui/CoolTabs.jsx";
+import CoolTable from "../../utils/ui/CoolTable.jsx";
+import {
+   CELL_ALIGN_LEFT,
+   CELL_TYPE_NUMBER,
+   CELL_TYPE_TEXT_KEY,
+   TABLE_NO_BORDER,
+   TABLE_NO_HEADER,
+} from "../../utils/ui/styles/CoolTableStyles.jsx";
 import {update_dimensions} from "../PageUtils.jsx";
 import {
    KEY_TILES_SPLITTER_POS_PX,
    KEY_TILES_TEST_COMBINE_RESULTS as KEY_TILES_TEST_COMBINE_RESULTS_SETTING,
    KEY_TILES_TEST_ANIMATION_FRAME_RATE_FPS,
    KEY_TILES_TEST_ANIMATION_IMAGE_SIZE_PX,
+   KEY_TILES_TEST_ANIMATION_FRAME_COUNT as KEY_TILES_TEST_ANIMATION_FRAME_COUNT_SETTING,
+   KEY_TILES_TEST_TAB,
 } from "../../settings/TilesSettings.jsx";
 
 ChartJS.register(...registerables)
@@ -38,7 +50,12 @@ ChartJS.register(...registerables)
 const TAB_HEADER_HEIGHT_PX = 32
 const FRAME_RATE_OPTIONS_FPS = [40, 30, 25, 20, 15, 12, 10]
 const IMAGE_SIZE_OPTIONS_PX = [256, 384, 512, 640, 768, 896, 1024]
+const FRAME_COUNT_OPTIONS = [100, 150, 200, 250, 300, 350, 400, 450, 500]
 const CUSTOM_OPTION = 'custom'
+const ANIMATION_STATS_COLUMNS = [
+   {id: 'name', label: 'name', type: CELL_TYPE_TEXT_KEY, align: CELL_ALIGN_LEFT, style: {fontWeight: 'bold', color: '#666666', fontStyle: 'italic'}},
+   {id: 'value', label: 'value', type: CELL_TYPE_NUMBER, align: CELL_ALIGN_LEFT},
+]
 const format_frame_rate = frames_per_second => {
    const milliseconds_per_frame = (1000 / frames_per_second).toFixed(1).replace(/\.0$/, '')
    return `${frames_per_second} fps (${milliseconds_per_frame} ms/frame)`
@@ -179,6 +196,8 @@ export class TilesTest extends Component {
       tab_index: 0,
       animation_frame_rate_fps: AppSettings.get(KEY_TILES_TEST_ANIMATION_FRAME_RATE_FPS),
       animation_image_size_px: AppSettings.get(KEY_TILES_TEST_ANIMATION_IMAGE_SIZE_PX),
+      animation_frame_count: AppSettings.get(KEY_TILES_TEST_ANIMATION_FRAME_COUNT_SETTING),
+      animation_frame_count_custom: false,
       animation_frame_rate_custom: false,
       animation_image_size_custom: false,
       combine_results: AppSettings.get(KEY_TILES_TEST_COMBINE_RESULTS_SETTING),
@@ -190,6 +209,9 @@ export class TilesTest extends Component {
    }
 
    componentDidMount() {
+      const saved_tab = AppSettings.get(KEY_TILES_TEST_TAB)
+      const tab_index = Number.isInteger(saved_tab) && saved_tab >= 0 && saved_tab <= 1 ? saved_tab : 0
+      this.setState({tab_index})
       this.update_dimensions()
       this.setState({dimensions_interval: setInterval(this.update_dimensions, 1000)})
       TilesBackend.benchmark_results()
@@ -219,12 +241,15 @@ export class TilesTest extends Component {
       }))
    }
 
-   on_tab_select = tab_index => this.setState({tab_index})
+   on_tab_select = tab_index => {
+      this.setState({tab_index})
+      AppSettings.on_settings_changed({[KEY_TILES_TEST_TAB]: tab_index})
+   }
 
    render() {
       const {
-         benchmark_results, rendered_height, container_ref, combine_results, hidden_legend_keys, tab_index,
-         animation_frame_rate_fps, animation_image_size_px,
+         benchmark_results, rendered_width, rendered_height, container_ref, combine_results, hidden_legend_keys, tab_index,
+         animation_frame_rate_fps, animation_image_size_px, animation_frame_count, animation_frame_count_custom,
          animation_frame_rate_custom, animation_image_size_custom,
       } = this.state
       const chart_data = benchmark_results && build_chart_data(benchmark_results, combine_results, hidden_legend_keys)
@@ -280,8 +305,11 @@ export class TilesTest extends Component {
          ? CUSTOM_OPTION : String(animation_frame_rate_fps)
       const image_size_value = animation_image_size_custom || !IMAGE_SIZE_OPTIONS_PX.includes(animation_image_size_px)
          ? CUSTOM_OPTION : String(animation_image_size_px)
-      const animation_content = <CoolStyles.Block style={{height: `${tab_content_height}px`}}>
-         <div style={{height: '2rem', display: 'flex', alignItems: 'center', gap: '1rem', paddingLeft: '0.5rem'}}>
+      const frame_count_value = animation_frame_count_custom || !FRAME_COUNT_OPTIONS.includes(animation_frame_count)
+         ? CUSTOM_OPTION : String(animation_frame_count)
+      const animation_image_column_width = Math.max(rendered_width / 2, animation_image_size_px)
+      const animation_content = <CoolStyles.Block style={{height: `${tab_content_height}px`, position: 'relative', overflow: 'hidden'}}>
+         <div style={{height: '2rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '1rem', paddingLeft: '0.5rem'}}>
             <label>
                {AppText.get(KEY_TILES_TEST_ANIMATION_FRAME_RATE)}
                <select
@@ -312,6 +340,38 @@ export class TilesTest extends Component {
                   style={{marginLeft: '0.35rem', width: '5rem'}}
                />}
             </label>
+            <label>
+               {AppText.get(KEY_TILES_TEST_ANIMATION_FRAME_COUNT)}
+               <select
+                  value={frame_count_value}
+                  onChange={select_animation_setting(KEY_TILES_TEST_ANIMATION_FRAME_COUNT_SETTING, 'animation_frame_count', 'animation_frame_count_custom')}
+                  style={{marginLeft: '0.35rem'}}>
+                  {FRAME_COUNT_OPTIONS.map(value => <option key={value} value={value}>{value}</option>)}
+                  <option value={CUSTOM_OPTION}>{AppText.get(KEY_TILES_TEST_ANIMATION_CUSTOM)}</option>
+               </select>
+               {frame_count_value === CUSTOM_OPTION && <input
+                  type={'number'} min={'1'} step={'1'} value={animation_frame_count}
+                  onChange={update_animation_setting(KEY_TILES_TEST_ANIMATION_FRAME_COUNT_SETTING, 'animation_frame_count')}
+                  style={{marginLeft: '0.35rem', width: '5rem'}}
+               />}
+            </label>
+         </div>
+         <div style={{height: 'calc(100% - 3rem)', display: 'flex', minWidth: 0}}>
+            <div style={{flex: `0 1 ${animation_image_column_width}px`, minWidth: 0, display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-start', overflow: 'hidden'}}>
+               <canvas
+                  width={animation_image_size_px}
+                  height={animation_image_size_px}
+                  style={{maxWidth: '100%', maxHeight: '100%', aspectRatio: '1 / 1', backgroundColor: '#d3d3d3'}}
+               />
+            </div>
+            <div style={{width: '1px', flex: '0 0 1px', margin: '0 1rem', backgroundColor: '#aaaaaa'}} />
+            <div style={{flex: '1 1 0', minWidth: 0, overflow: 'auto'}}>
+               <CoolTable
+                  columns={ANIMATION_STATS_COLUMNS}
+                  data={[{name: KEY_TILES_TEST_ANIMATION_FRAME_INDEX, value: 0}]}
+                  options={[TABLE_NO_HEADER, TABLE_NO_BORDER]}
+               />
+            </div>
          </div>
       </CoolStyles.Block>
       return [

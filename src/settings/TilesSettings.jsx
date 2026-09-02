@@ -9,6 +9,8 @@ export const KEY_TILES_LOGS_SHOW_TIMESTAMPS = `${TILES_FOLDER}/logs_show_timesta
 export const KEY_TILES_TEST_COMBINE_RESULTS = `${TILES_FOLDER}/test_combine_results`
 export const KEY_TILES_TEST_ANIMATION_FRAME_RATE_FPS = `${TILES_FOLDER}/test_animation_frame_rate_fps`
 export const KEY_TILES_TEST_ANIMATION_IMAGE_SIZE_PX = `${TILES_FOLDER}/test_animation_image_size_px`
+export const KEY_TILES_TEST_ANIMATION_FRAME_COUNT = `${TILES_FOLDER}/test_animation_frame_count`
+export const KEY_TILES_TEST_TAB = `${TILES_FOLDER}/test_tab`
 export const KEY_TILES_GENERATOR_FRAME_SETTINGS = `${TILES_GENERATOR_FOLDER}/frame_settings`
 export const KEY_TILES_GENERATOR_SPLITTER_POS = `${TILES_GENERATOR_FOLDER}/splitter_pos`
 export const KEY_TILES_GENERATOR_LEGEND_SPLITTER_POS = `${TILES_GENERATOR_FOLDER}/legend_splitter_pos`
@@ -63,6 +65,18 @@ export const APP_TILES_SETTINGS = {
       data_type: TYPE_NUMBER,
       default_value: 800,
       description: 'animation image width and height in pixels',
+      persist: true,
+   },
+   [KEY_TILES_TEST_ANIMATION_FRAME_COUNT]: {
+      data_type: TYPE_NUMBER,
+      default_value: 100,
+      description: 'number of frames in the animation test',
+      persist: true,
+   },
+   [KEY_TILES_TEST_TAB]: {
+      data_type: TYPE_NUMBER,
+      default_value: 0,
+      description: 'selected test harness tab index',
       persist: true,
    },
    [KEY_TILES_GENERATOR_FRAME_SETTINGS]: {
