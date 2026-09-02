@@ -48,6 +48,7 @@ import {
 ChartJS.register(...registerables)
 
 const TAB_HEADER_HEIGHT_PX = 32
+const SCROLLBAR_WIDTH_PX = 22
 const FRAME_RATE_OPTIONS_FPS = [40, 30, 25, 20, 15, 12, 10]
 const IMAGE_SIZE_OPTIONS_PX = [256, 384, 512, 640, 768, 896, 1024]
 const FRAME_COUNT_OPTIONS = [100, 150, 200, 250, 300, 350, 400, 450, 500]
@@ -307,7 +308,7 @@ export class TilesTest extends Component {
          ? CUSTOM_OPTION : String(animation_image_size_px)
       const frame_count_value = animation_frame_count_custom || !FRAME_COUNT_OPTIONS.includes(animation_frame_count)
          ? CUSTOM_OPTION : String(animation_frame_count)
-      const animation_image_column_width = Math.max(rendered_width / 2, animation_image_size_px)
+      const animation_image_column_width = Math.max(rendered_width / 2, animation_image_size_px + SCROLLBAR_WIDTH_PX)
       const animation_content = <CoolStyles.Block style={{height: `${tab_content_height}px`, position: 'relative', overflow: 'hidden'}}>
          <div style={{height: '2rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '1rem', paddingLeft: '0.5rem'}}>
             <label>
@@ -357,11 +358,11 @@ export class TilesTest extends Component {
             </label>
          </div>
          <div style={{height: 'calc(100% - 3rem)', display: 'flex', minWidth: 0}}>
-            <div style={{flex: `0 1 ${animation_image_column_width}px`, minWidth: 0, display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-start', overflow: 'hidden'}}>
+            <div style={{flex: `0 0 ${animation_image_column_width}px`, minWidth: 0, display: 'flex', justifyContent: 'flex-start', alignItems: 'flex-start', overflow: 'auto'}}>
                <canvas
                   width={animation_image_size_px}
                   height={animation_image_size_px}
-                  style={{maxWidth: '100%', maxHeight: '100%', aspectRatio: '1 / 1', backgroundColor: '#d3d3d3'}}
+                  style={{width: `${animation_image_size_px}px`, height: `${animation_image_size_px}px`, marginLeft: 'auto', flex: '0 0 auto', aspectRatio: '1 / 1', backgroundColor: '#d3d3d3'}}
                />
             </div>
             <div style={{width: '1px', flex: '0 0 1px', margin: '0 1rem', backgroundColor: '#aaaaaa'}} />
