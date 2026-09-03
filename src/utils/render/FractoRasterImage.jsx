@@ -188,6 +188,7 @@ export class FractoRasterImage extends Component {
       const {canvas_ref, loading_tiles} = this.state;
       const {width_px, disabled, aspect_ratio} = this.props;
       const canvas_style = {
+         display: 'block',
          cursor: loading_tiles || disabled ? "wait" : "crosshair"
       }
       return <canvas

@@ -69,6 +69,12 @@ ChartJS.register(...registerables)
 
 const TAB_HEADER_HEIGHT_PX = 32
 const SCROLLBAR_WIDTH_PX = 22
+const IMAGE_FRAME_STYLE = {
+   border: '1.5px solid #444444',
+   borderRadius: '4px',
+   boxShadow: '0.25rem 0.25rem 0.5rem rgba(0, 0, 0, 0.2)',
+   overflow: 'hidden',
+}
 const FRAME_RATE_OPTIONS_FPS = [40, 30, 25, 20, 15, 12, 10]
 const IMAGE_SIZE_OPTIONS_PX = [256, 384, 512, 640, 768, 896, 1024]
 const FRAME_COUNT_OPTIONS = [100, 150, 200, 250, 300, 350, 400, 450, 500]
@@ -493,16 +499,16 @@ export class TilesTest extends Component {
          </div>
          <div style={{height: 'calc(100% - 2.5rem)', display: 'flex', minWidth: 0, background: BACKGROUND_FIELD_GRADIENT}}>
             <div style={{flex: `0 0 ${animation_image_column_width}px`, minWidth: 0, display: 'flex', justifyContent: 'flex-start', alignItems: 'flex-start', overflow: 'auto', background: BACKGROUND_FIELD_GRADIENT}}>
-               {animation_frame_settings ? <div style={{marginLeft: 'auto', marginRight: '1rem', marginTop: '1rem', flex: '0 0 auto'}}><FractoRasterImage
+               {animation_frame_settings ? <div style={{...IMAGE_FRAME_STYLE, marginLeft: 'auto', marginRight: '1rem', marginTop: '1rem', flex: '0 0 auto'}}><FractoRasterImage
                   width_px={animation_image_size_px}
                   focal_point={animation_frame_settings.focal_point}
                   scope={animation_frame_settings.scope}
                   aspect_ratio={1.0}
-               /></div> : <canvas
+               /></div> : <div style={{...IMAGE_FRAME_STYLE, marginLeft: 'auto', marginRight: '1rem', marginTop: '1rem', flex: '0 0 auto'}}><canvas
                   width={animation_image_size_px}
                   height={animation_image_size_px}
-                  style={{width: `${animation_image_size_px}px`, height: `${animation_image_size_px}px`, marginLeft: 'auto', marginRight: '1rem', marginTop: '1rem', flex: '0 0 auto', aspectRatio: '1 / 1', backgroundColor: '#d3d3d3'}}
-               />}
+                  style={{display: 'block', width: `${animation_image_size_px}px`, height: `${animation_image_size_px}px`, flex: '0 0 auto', aspectRatio: '1 / 1', backgroundColor: '#d3d3d3'}}
+               /></div>}
             </div>
             <div style={{width: '1px', flex: '0 0 1px', margin: '0 1rem 0 0', backgroundColor: '#aaaaaa'}} />
             <div style={{flex: '1 1 0', minWidth: 0, overflow: 'auto', backgroundColor: 'white'}}>
