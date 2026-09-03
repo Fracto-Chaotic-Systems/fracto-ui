@@ -18,6 +18,7 @@ export const KEY_TILES_TEST_ANIMATION_IMAGE_SIZE = `${TILES_FOLDER}/test_animati
 export const KEY_TILES_TEST_ANIMATION_FRAME_COUNT = `${TILES_FOLDER}/test_animation_frame_count`
 export const KEY_TILES_TEST_ANIMATION_FRAME_INDEX = `${TILES_FOLDER}/test_animation_frame_index`
 export const KEY_TILES_TEST_ANIMATION_LOAD = `${TILES_FOLDER}/test_animation_load`
+export const KEY_TILES_TEST_ANIMATION_LOADING = `${TILES_FOLDER}/test_animation_loading`
 export const KEY_TILES_TEST_ANIMATION_CUSTOM = `${TILES_FOLDER}/test_animation_custom`
 export const KEY_TILES_TEST_STEP_INDEX = `${TILES_FOLDER}/test_step_index`
 export const KEY_TILES_TEST_DURATION_MS = `${TILES_FOLDER}/test_duration_ms`
@@ -58,6 +59,7 @@ export const APP_TILES_TEXT = {
    [KEY_TILES_TEST_ANIMATION_FRAME_COUNT]: 'frame count',
    [KEY_TILES_TEST_ANIMATION_FRAME_INDEX]: 'frame index',
    [KEY_TILES_TEST_ANIMATION_LOAD]: 'load test',
+   [KEY_TILES_TEST_ANIMATION_LOADING]: 'loading...',
    [KEY_TILES_TEST_ANIMATION_CUSTOM]: 'custom',
    [KEY_TILES_TEST_STEP_INDEX]: 'step index',
    [KEY_TILES_TEST_DURATION_MS]: 'duration (ms)',

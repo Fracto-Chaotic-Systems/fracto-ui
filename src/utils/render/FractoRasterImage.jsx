@@ -69,7 +69,8 @@ export class FractoRasterImage extends Component {
       disabled: PropTypes.bool,
       color_handler: PropTypes.func,
       resolution_factor: PropTypes.number,
-      data_endpoint: PropTypes.string
+      data_endpoint: PropTypes.string,
+      on_loading: PropTypes.func,
    }
 
    static defaultProps = {
@@ -167,6 +168,7 @@ export class FractoRasterImage extends Component {
          data_endpoint,
       } = this.props
       this.setState({loading_tiles: true})
+      if (this.props.on_loading) this.props.on_loading(ctx, width_px, Math.round(width_px * aspect_ratio))
       try {
          await fill_canvas(
             ctx,

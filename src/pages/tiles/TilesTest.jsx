@@ -22,6 +22,7 @@ import {
    KEY_TILES_TEST_ANIMATION_FRAME_COUNT,
    KEY_TILES_TEST_ANIMATION_FRAME_INDEX,
    KEY_TILES_TEST_ANIMATION_LOAD,
+   KEY_TILES_TEST_ANIMATION_LOADING,
    KEY_TILES_TEST_ANIMATION_CUSTOM,
    KEY_TILES_TEST_HARNESS,
    KEY_TILES_TEST_LEGACY_MAX,
@@ -38,6 +39,7 @@ import CoolTabs from "../../utils/ui/CoolTabs.jsx";
 import CoolTable from "../../utils/ui/CoolTable.jsx";
 import CoolSelect from "../../utils/ui/CoolSelect.jsx";
 import FractoRasterImage from "../../utils/render/FractoRasterImage.jsx";
+import {draw_loading_canvas} from "../../utils/render/CanvasUtils.jsx";
 import DataBackend from "../../backend/DataBackend.jsx";
 import CoolMediaTransport, {
    TRANSPORT_BEGIN,
@@ -255,7 +257,6 @@ export class TilesTest extends Component {
       animation_frame_count_custom: false,
       animation_playing: false,
       animation_frame_settings: null,
-      animation_loading: false,
       animation_frame_rate_custom: false,
       animation_image_size_custom: false,
       combine_results: AppSettings.get(KEY_TILES_TEST_COMBINE_RESULTS_SETTING),
@@ -323,7 +324,6 @@ export class TilesTest extends Component {
    // Match the benchmark sampler: merge the three bailiwick categories,
    // sort by descending magnitude, then choose one random record in 500-1000.
    load_test = () => {
-      this.setState({animation_loading: true})
       const categories = [
          {is_node: 0, is_inline: 0},
          {is_node: 0, is_inline: 1},
@@ -355,12 +355,14 @@ export class TilesTest extends Component {
                focal_point: {x: Number(focal_point.x), y: Number(focal_point.y)},
                scope,
             },
-            animation_loading: false,
          })
       }).catch(error => {
          console.error('animation test load error', error)
-         if (!this.unmounted) this.setState({animation_loading: false})
       })
+   }
+
+   on_animation_loading = (ctx, width_px, height_px) => {
+      draw_loading_canvas(ctx, width_px, height_px, AppText.get(KEY_TILES_TEST_ANIMATION_LOADING))
    }
 
    render() {
@@ -499,11 +501,12 @@ export class TilesTest extends Component {
          </div>
          <div style={{height: 'calc(100% - 2.5rem)', display: 'flex', minWidth: 0, background: BACKGROUND_FIELD_GRADIENT}}>
             <div style={{flex: `0 0 ${animation_image_column_width}px`, minWidth: 0, display: 'flex', justifyContent: 'flex-start', alignItems: 'flex-start', overflow: 'auto', background: BACKGROUND_FIELD_GRADIENT}}>
-               {animation_frame_settings ? <div style={{...IMAGE_FRAME_STYLE, marginLeft: 'auto', marginRight: '1rem', marginTop: '1rem', flex: '0 0 auto'}}><FractoRasterImage
+               {animation_frame_settings ? <div style={{...IMAGE_FRAME_STYLE, position: 'relative', marginLeft: 'auto', marginRight: '1rem', marginTop: '1rem', flex: '0 0 auto'}}><FractoRasterImage
                   width_px={animation_image_size_px}
                   focal_point={animation_frame_settings.focal_point}
                   scope={animation_frame_settings.scope}
                   aspect_ratio={1.0}
+                  on_loading={this.on_animation_loading}
                /></div> : <div style={{...IMAGE_FRAME_STYLE, marginLeft: 'auto', marginRight: '1rem', marginTop: '1rem', flex: '0 0 auto'}}><canvas
                   width={animation_image_size_px}
                   height={animation_image_size_px}
