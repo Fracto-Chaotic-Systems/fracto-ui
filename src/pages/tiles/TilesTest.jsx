@@ -256,6 +256,9 @@ export class TilesTest extends Component {
       animation_frame_count: AppSettings.get(KEY_TILES_TEST_ANIMATION_FRAME_COUNT_SETTING),
       animation_frame_count_custom: false,
       animation_playing: false,
+      animation_direction: 1,
+      animation_frame_index: 0,
+      animation_timer: null,
       animation_frame_settings: null,
       animation_frame_rate_custom: false,
       animation_image_size_custom: false,
@@ -285,6 +288,7 @@ export class TilesTest extends Component {
 
    componentWillUnmount() {
       if (this.state.dimensions_interval) clearInterval(this.state.dimensions_interval)
+      if (this.state.animation_timer) clearInterval(this.state.animation_timer)
       this.unmounted = true
    }
 
@@ -307,10 +311,49 @@ export class TilesTest extends Component {
       AppSettings.on_settings_changed({[KEY_TILES_TEST_TAB]: tab_index})
    }
 
-   on_animation_play = () => this.setState({animation_playing: true})
-   on_animation_reverse = () => this.setState({animation_playing: true})
-   on_animation_pause = () => this.setState({animation_playing: false})
-   on_animation_stop = () => this.setState({animation_playing: false})
+   clear_animation_timer = () => {
+      if (this.state.animation_timer) clearInterval(this.state.animation_timer)
+      this.setState({animation_timer: null})
+   }
+
+   get_animation_scope = frame_index => {
+      const {animation_frame_settings, animation_frame_count} = this.state
+      if (!animation_frame_settings) return 0
+      const intervals = Math.max(1, animation_frame_count - 1)
+      const final_scope = Math.max(2.5, animation_frame_settings.scope)
+      const factor = (final_scope / animation_frame_settings.scope) ** (1 / intervals)
+      return animation_frame_settings.scope * factor ** frame_index
+   }
+
+   advance_animation = () => {
+      const {animation_direction, animation_frame_count, animation_frame_index} = this.state
+      const next_index = animation_frame_index + animation_direction
+      if (next_index < 0 || next_index >= animation_frame_count) {
+         this.clear_animation_timer()
+         this.setState({animation_playing: false})
+         return
+      }
+      this.setState({animation_frame_index: next_index})
+   }
+
+   start_animation = direction => {
+      if (!this.state.animation_frame_settings) return
+      this.clear_animation_timer()
+      const frame_rate_fps = Math.max(1, this.state.animation_frame_rate_fps)
+      const animation_timer = setInterval(this.advance_animation, 1000 / frame_rate_fps)
+      this.setState({animation_direction: direction, animation_playing: true, animation_timer})
+   }
+
+   on_animation_play = () => this.start_animation(1)
+   on_animation_reverse = () => this.start_animation(-1)
+   on_animation_pause = () => {
+      this.clear_animation_timer()
+      this.setState({animation_playing: false})
+   }
+   on_animation_stop = () => {
+      this.clear_animation_timer()
+      this.setState({animation_playing: false, animation_frame_index: 0})
+   }
 
    // The transport is intentionally state-only for now; frame generation will
    // consume these operations once the animation pipeline is connected.
@@ -324,6 +367,8 @@ export class TilesTest extends Component {
    // Match the benchmark sampler: merge the three bailiwick categories,
    // sort by descending magnitude, then choose one random record in 500-1000.
    load_test = () => {
+      this.clear_animation_timer()
+      this.setState({animation_playing: false})
       const categories = [
          {is_node: 0, is_inline: 0},
          {is_node: 0, is_inline: 1},
@@ -355,6 +400,7 @@ export class TilesTest extends Component {
                focal_point: {x: Number(focal_point.x), y: Number(focal_point.y)},
                scope,
             },
+            animation_frame_index: 0,
          })
       }).catch(error => {
          console.error('animation test load error', error)
@@ -362,6 +408,9 @@ export class TilesTest extends Component {
    }
 
    on_animation_loading = (ctx, width_px, height_px) => {
+      // During playback, preserve the last completed frame instead of flashing
+      // a loading state between frames.
+      if (this.state.animation_playing) return
       draw_loading_canvas(ctx, width_px, height_px, AppText.get(KEY_TILES_TEST_ANIMATION_LOADING))
    }
 
@@ -370,7 +419,7 @@ export class TilesTest extends Component {
          benchmark_results, rendered_width, rendered_height, container_ref, combine_results, combination_method, hidden_legend_keys, tab_index,
          animation_frame_rate_fps, animation_image_size_px, animation_frame_count, animation_frame_count_custom,
          animation_frame_rate_custom, animation_image_size_custom,
-         animation_frame_settings,
+         animation_frame_settings, animation_frame_index,
       } = this.state
       const chart_data = benchmark_results && build_chart_data(benchmark_results, combine_results, hidden_legend_keys, combination_method)
       const top = container_ref.current?.getBoundingClientRect().top || TITLE_BAR_HEIGHT_PX
@@ -442,7 +491,7 @@ export class TilesTest extends Component {
          ? CUSTOM_OPTION : String(animation_frame_count)
       const animation_image_column_width = Math.max(rendered_width / 2, animation_image_size_px + SCROLLBAR_WIDTH_PX)
       const animation_stats = [
-         {name: [render_stat_label, KEY_TILES_TEST_ANIMATION_FRAME_INDEX], value: 0},
+         {name: [render_stat_label, KEY_TILES_TEST_ANIMATION_FRAME_INDEX], value: animation_frame_index},
          ...(animation_frame_settings ? [
             {name: [render_stat_label, KEY_NAVIGATOR_FOCAL_POINT], value: [render_coordinates, animation_frame_settings.focal_point]},
             {name: [render_stat_label, KEY_NAVIGATOR_SCOPE], value: [render_scalar, animation_frame_settings.scope]},
@@ -504,7 +553,7 @@ export class TilesTest extends Component {
                {animation_frame_settings ? <div style={{...IMAGE_FRAME_STYLE, position: 'relative', marginLeft: 'auto', marginRight: '1rem', marginTop: '1rem', flex: '0 0 auto'}}><FractoRasterImage
                   width_px={animation_image_size_px}
                   focal_point={animation_frame_settings.focal_point}
-                  scope={animation_frame_settings.scope}
+                  scope={this.get_animation_scope(animation_frame_index)}
                   aspect_ratio={1.0}
                   on_loading={this.on_animation_loading}
                /></div> : <div style={{...IMAGE_FRAME_STYLE, marginLeft: 'auto', marginRight: '1rem', marginTop: '1rem', flex: '0 0 auto'}}><canvas
