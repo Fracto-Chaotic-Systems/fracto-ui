@@ -10,7 +10,7 @@ import {
    ADMIN_LOGS,
    ADMIN_OVERVIEW,
    ADMIN_SETTINGS,
-   ADMIN_STATUS, ADMIN_VERSIONS,
+   ADMIN_STATUS, ADMIN_COMMITS,
    KEY_ADMIN_SECTION,
    KEY_ADMIN_SPLITTER_POS_PX
 } from "../settings/AdminSettings.jsx";
@@ -18,7 +18,7 @@ import {
 import AppText from "../AppText.jsx";
 import {
    KEY_IDENTIFY_TITLE,
-   KEY_VERSIONS_TITLE
+   KEY_COMMITS_TITLE
 } from "../text/AdminText.jsx";
 import {
    KEY_SIDEBAR_LOGS,
@@ -32,19 +32,20 @@ import AdminSettings from "./admin/AdminSettings.jsx";
 import AdminStatus from "./admin/AdminStatus.jsx";
 import AdminIdentify from "./admin/AdminIdentify.jsx";
 import AdminLogs from "./admin/AdminLogs.jsx";
-import AdminVersions from "./admin/AdminVersions.jsx";
+import AdminCommits from "./admin/AdminCommits.jsx";
 import {KEY_VIEWPORT_DIMENSIONS} from "../settings/RootSettings.jsx";
 
 const SIDEBAR_LIST = [
    {title_key: KEY_SIDEBAR_OVERVIEW, section_code: ADMIN_OVERVIEW, right_pane: <AdminOverview/>},
    {section_code: SIDEBAR_BREAKER},
    {title_key: KEY_IDENTIFY_TITLE, section_code: ADMIN_IDENTIFY, right_pane: <AdminIdentify/>},
-   {title_key: KEY_VERSIONS_TITLE, section_code: ADMIN_VERSIONS, right_pane: <AdminVersions/>},
+   {title_key: KEY_COMMITS_TITLE, section_code: ADMIN_COMMITS, right_pane: <AdminCommits/>},
    {section_code: SIDEBAR_BREAKER},
    {title_key: KEY_SIDEBAR_SETTINGS, section_code: ADMIN_SETTINGS, right_pane: <AdminSettings/>},
    {title_key: KEY_SIDEBAR_STATUS, section_code: ADMIN_STATUS, right_pane: <AdminStatus/>},
    {title_key: KEY_SIDEBAR_LOGS, section_code: ADMIN_LOGS, right_pane: <AdminLogs/>}
 ]
+const LEGACY_ADMIN_VERSIONS = 'admin_versions'
 
 export class Admin extends Component {
    state = {section_code: ADMIN_OVERVIEW}
@@ -57,7 +58,10 @@ export class Admin extends Component {
    }
 
    componentDidMount() {
-      const section_code = AppSettings.get(KEY_ADMIN_SECTION)
+      const saved_section_code = AppSettings.get(KEY_ADMIN_SECTION)
+      const section_code = saved_section_code === LEGACY_ADMIN_VERSIONS
+         ? ADMIN_COMMITS
+         : saved_section_code
       this.setState({section_code})
    }
 

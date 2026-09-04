@@ -4,7 +4,7 @@ This directory contains the routed application areas and the feature components 
 
 ## Routed areas
 
-- `Admin.jsx` (`/admin`) - service identification, overview, status, versions, logs, and administrative settings.
+- `Admin.jsx` (`/admin`) - service identification, overview, commits, status, logs, and administrative settings.
 - `Data.jsx` (`/data`) - data-service overview, queries, status, logs, and connection/settings forms.
 - `Assets.jsx` (`/assets`) - asset overview/status, image generation and gallery tools, lore content, video generation, logs, and settings.
 - `Tiles.jsx` (`/tiles`) - tile overview/status, inspection, test harness, generation, logs, and settings.

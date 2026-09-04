@@ -18,7 +18,7 @@ export const KEY_ID_OPERATOR_CONSENT = `${IDENTITY_FOLDER}/id_operator_consent`
 
 export const ADMIN_OVERVIEW = 'admin_overview'
 export const ADMIN_IDENTIFY = 'admin_identify'
-export const ADMIN_VERSIONS = 'admin_versions'
+export const ADMIN_COMMITS = 'admin_commits'
 export const ADMIN_SETTINGS = 'admin_settings'
 export const ADMIN_STATUS = 'admin_status'
 export const ADMIN_LOGS = 'admin_logs'
