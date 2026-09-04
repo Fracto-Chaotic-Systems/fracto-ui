@@ -1,7 +1,8 @@
 import {
    TYPE_BOOLEAN,
    TYPE_NUMBER,
-   TYPE_STRING
+   TYPE_STRING,
+   TYPE_OBJECT,
 } from "../AppSettings.jsx";
 import {DEFAULT_SIDEBAR_WIDTH} from "../constants.jsx";
 
@@ -11,6 +12,7 @@ const IDENTITY_FOLDER = `${ADMIN_FOLDER}/identity`
 export const KEY_ADMIN_SPLITTER_POS_PX = `${ADMIN_FOLDER}/splitter_pos_px`
 export const KEY_ADMIN_SECTION = `${ADMIN_FOLDER}/admin_section`
 export const KEY_ADMIN_LOGS_SHOW_TIMESTAMPS = `${ADMIN_FOLDER}/logs_show_timestamps`
+export const KEY_ADMIN_COMMITS_REPOSITORY_VISIBILITY = `${ADMIN_FOLDER}/commits_repository_visibility`
 
 export const KEY_ID_OPERATOR_NAME = `${IDENTITY_FOLDER}/id_operator_name`
 export const KEY_ID_OPERATOR_EMAIL = `${IDENTITY_FOLDER}/id_operator_email`
@@ -40,6 +42,12 @@ export const APP_ADMIN_SETTINGS = {
       data_type: TYPE_BOOLEAN,
       default_value: true,
       description: 'show timestamps in admin logs',
+      persist: true,
+   },
+   [KEY_ADMIN_COMMITS_REPOSITORY_VISIBILITY]: {
+      data_type: TYPE_OBJECT,
+      default_value: {},
+      description: 'visible repositories on the admin commits page',
       persist: true,
    },
    [KEY_ID_OPERATOR_NAME]: {
