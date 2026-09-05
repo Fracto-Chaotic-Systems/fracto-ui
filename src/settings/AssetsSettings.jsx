@@ -49,6 +49,7 @@ const DEFAULT_FRAME_SETTINGS = {
 }
 
 export const KEY_ASSETS_LORE_SELECTED_CATEGORY_ID = `${ASSETS_LORE_FOLDER}/selected_category_id`
+export const KEY_ASSETS_LORE_STYLES_OUTERMOST_SPLITTER_POS_PX = `${ASSETS_LORE_FOLDER}/styles_splitter_pos_px`
 
 
 export const APP_ASSETS_SETTINGS = {
@@ -171,6 +172,12 @@ export const APP_ASSETS_SETTINGS = {
       data_type: TYPE_NUMBER,
       default_value: 0,
       description: 'The id of the most recently selected category for lore viewing and editing',
+      persist: true,
+   },
+   [KEY_ASSETS_LORE_STYLES_OUTERMOST_SPLITTER_POS_PX]: {
+      data_type: TYPE_NUMBER,
+      default_value: 0,
+      description: 'outermost horizontal splitter position for lore styles',
       persist: true,
    },
 }
