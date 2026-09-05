@@ -57,6 +57,7 @@ import {
    CELL_LABEL_STYLE,
 } from "../../utils/ui/styles/CoolTableStyles.jsx";
 import {update_dimensions} from "../PageUtils.jsx";
+import {SETTING_LABEL_STYLE} from "../../utils/ui/styles/CoolStyles.jsx";
 import {
    KEY_TILES_SPLITTER_POS_PX,
    KEY_TILES_TEST_COMBINE_RESULTS as KEY_TILES_TEST_COMBINE_RESULTS_SETTING,
@@ -427,7 +428,7 @@ export class TilesTest extends Component {
       const tab_content_height = Math.max(0, available_height - TAB_HEADER_HEIGHT_PX)
       const benchmark_content = <CoolStyles.Block style={{height: `${tab_content_height}px`, position: 'relative', overflow: 'hidden'}}>
          <div style={{height: '2rem', display: 'flex', alignItems: 'center', paddingLeft: '0.5rem'}}>
-            <label>
+            <label style={SETTING_LABEL_STYLE}>
                <input
                   type={'checkbox'}
                   checked={combine_results}
@@ -499,7 +500,7 @@ export class TilesTest extends Component {
       ]
       const animation_content = <CoolStyles.Block style={{height: `${tab_content_height}px`, position: 'relative', overflow: 'hidden'}}>
          <div style={{height: '2.5rem', display: 'flex', alignItems: 'center', gap: '1rem', paddingLeft: '0.5rem'}}>
-            <label style={{display: 'flex', alignItems: 'center'}}>
+            <label style={SETTING_LABEL_STYLE}>
                <span style={CELL_LABEL_STYLE}>{AppText.get(KEY_TILES_TEST_ANIMATION_FRAME_RATE)}</span>
                <select
                   value={frame_rate_value}
@@ -514,7 +515,7 @@ export class TilesTest extends Component {
                   style={{marginLeft: '0.35rem', width: '5rem'}}
                />}
             </label>
-            <label style={{display: 'flex', alignItems: 'center'}}>
+            <label style={SETTING_LABEL_STYLE}>
                <span style={CELL_LABEL_STYLE}>{AppText.get(KEY_TILES_TEST_ANIMATION_IMAGE_SIZE)}</span>
                <select
                   value={image_size_value}
@@ -529,7 +530,7 @@ export class TilesTest extends Component {
                   style={{marginLeft: '0.35rem', width: '5rem'}}
                />}
             </label>
-            <label style={{display: 'flex', alignItems: 'center'}}>
+            <label style={SETTING_LABEL_STYLE}>
                <span style={CELL_LABEL_STYLE}>{AppText.get(KEY_TILES_TEST_ANIMATION_FRAME_COUNT)}</span>
                <select
                   value={frame_count_value}

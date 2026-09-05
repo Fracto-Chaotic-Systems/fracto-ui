@@ -36,6 +36,10 @@ export const KEY_ADMIN_REPOSITORY_DATA = `${ADMIN_FOLDER}/repository_data`
 export const KEY_ADMIN_REPOSITORY_TILES = `${ADMIN_FOLDER}/repository_tiles`
 export const KEY_ADMIN_REPOSITORY_ASSETS = `${ADMIN_FOLDER}/repository_assets`
 export const KEY_ADMIN_REPOSITORY_UI = `${ADMIN_FOLDER}/repository_ui`
+export const KEY_ADMIN_REPOSITORY_ALL = `${ADMIN_FOLDER}/repository_all`
+export const KEY_ADMIN_REPOSITORY_NONE = `${ADMIN_FOLDER}/repository_none`
+export const KEY_ADMIN_COPY_HASH = `${ADMIN_FOLDER}/copy_full_hash`
+export const KEY_ADMIN_VIEW_GITHUB = `${ADMIN_FOLDER}/view_github`
 export const KEY_ADMIN_IDENTITY_FORM_TITLE = `${ADMIN_FOLDER}/identity_form_title`
 export const KEY_ADMIN_IDENTITY_FORM_SAVE = `${ADMIN_FOLDER}/identity_form_save`
 export const KEY_ADMIN_IDENTITY_FORM_SUBTITLE =`${ADMIN_FOLDER}/identity_form_subtitle`
@@ -54,7 +58,7 @@ export const APP_ADMIN_TEXT = {
    [KEY_ADMIN_SETTINGS]: 'admin settings',
    [KEY_ADMIN_STATUS]: 'admin status',
    [KEY_ADMIN_STATUS_REFRESH]: 'refresh status',
-   [KEY_ADMIN_COMMITS_TITLE]: 'commits',
+   [KEY_ADMIN_COMMITS_TITLE]: 'version control',
    [KEY_ADMIN_LOGS]: 'admin logs',
    [KEY_ADMIN_COMMITS_LOADING]: 'loading commits...',
    [KEY_ADMIN_COMMITS_ERROR]: 'unable to load commits:',
@@ -75,6 +79,10 @@ export const APP_ADMIN_TEXT = {
    [KEY_ADMIN_REPOSITORY_TILES]: 'tiles',
    [KEY_ADMIN_REPOSITORY_ASSETS]: 'assets',
    [KEY_ADMIN_REPOSITORY_UI]: 'UI',
+   [KEY_ADMIN_REPOSITORY_ALL]: 'all',
+   [KEY_ADMIN_REPOSITORY_NONE]: 'none',
+   [KEY_ADMIN_COPY_HASH]: 'copy full hash to clipboard',
+   [KEY_ADMIN_VIEW_GITHUB]: 'view in GitHub',
    [KEY_ADMIN_IDENTITY_FORM_TITLE]: 'Operator Identification System',
    [KEY_ADMIN_IDENTITY_FORM_SUBTITLE]: 'Enter this basic information to begin using Fracto',
    [KEY_ADMIN_IDENTITY_FORM_SAVE]: 'Save Operator Details',

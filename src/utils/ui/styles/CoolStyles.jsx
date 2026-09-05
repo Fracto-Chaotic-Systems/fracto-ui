@@ -2,6 +2,13 @@ import styled, {css} from "styled-components";
 
 import {CoolColors} from "../CoolImports.jsx";
 
+// Shared layout for compact option controls and their descriptive labels.
+// This applies equally to checkboxes, radio buttons, selects, and inputs.
+export const SETTING_LABEL_STYLE = {
+   display: 'flex',
+   alignItems: 'center',
+}
+
 export class CoolStyles {
 
    static pointer = css`
