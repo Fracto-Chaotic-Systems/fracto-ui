@@ -31,7 +31,7 @@ export class TilesTest extends Component {
    
    componentDidMount() {
       const saved_tab = AppSettings.get(KEY_TILES_TEST_TAB)
-      const tab_index = Number.isInteger(saved_tab) && saved_tab >= 0 && saved_tab <= 2 ? saved_tab : 0
+      const tab_index = Number.isInteger(saved_tab) && saved_tab >= 0 && saved_tab <= 1 ? saved_tab : 0
       this.setState({tab_index})
       this.update_dimensions()
       this.setState({dimensions_interval: setInterval(this.update_dimensions, 1000)})
