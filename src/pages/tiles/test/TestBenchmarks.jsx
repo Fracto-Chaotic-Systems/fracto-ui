@@ -43,6 +43,7 @@ export class TestBenchmarks extends Component {
       hidden_legend_keys: [],
    }
    
+   /** Loads the latest benchmark report when the tab mounts. */
    componentDidMount() {
       TilesBackend.benchmark_results()
          .then(benchmark_results => this.setState({benchmark_results}))
@@ -52,6 +53,7 @@ export class TestBenchmarks extends Component {
          })
    }
    
+   /** Toggles visibility for all datasets represented by a legend key. */
    toggle_legend = legend_key => {
       this.setState(previous => ({
          hidden_legend_keys: previous.hidden_legend_keys.includes(legend_key)
@@ -60,6 +62,7 @@ export class TestBenchmarks extends Component {
       }))
    }
    
+   /** Renders benchmark controls and the timing chart. */
    render() {
       const {benchmark_results, combine_results, combination_method, hidden_legend_keys} = this.state
       const {height_px} = this.props

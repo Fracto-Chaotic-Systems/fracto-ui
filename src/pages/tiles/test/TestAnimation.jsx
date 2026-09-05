@@ -58,10 +58,12 @@ const ANIMATION_STATS_COLUMNS = [
    {id: 'name', label: 'name', type: CELL_TYPE_CALLBACK, align: CELL_ALIGN_RIGHT, style: CELL_LABEL_STYLE},
    {id: 'value', label: 'value', type: CELL_TYPE_CALLBACK, align: CELL_ALIGN_LEFT},
 ]
+/** Formats a frame rate as FPS and milliseconds per frame. */
 const format_frame_rate = frames_per_second => {
    const milliseconds_per_frame = (1000 / frames_per_second).toFixed(1).replace(/\.0$/, '')
    return `${frames_per_second} fps (${milliseconds_per_frame} ms/frame)`
 }
+/** Formats the square image pixel count using K/M notation. */
 const format_pixel_count = image_size_px => {
    const pixel_count = image_size_px * image_size_px
    if (pixel_count >= 1000000) return `${(pixel_count / 1000000).toFixed(2).replace(/\.00$/, '')}M px`
@@ -93,10 +95,12 @@ export class TestAnimation extends Component {
       animation_image_size_custom: false,
    }
    
+   /** Loads the initial animation starting point after mounting. */
    componentDidMount() {
       this.load_test()
    }
    
+   /** Releases the playback interval when leaving the tab. */
    componentWillUnmount() {
       if (this.state.animation_timer) clearInterval(this.state.animation_timer)
       this.unmounted = true
@@ -104,6 +108,7 @@ export class TestAnimation extends Component {
    
    // Match the benchmark sampler: merge the three bailiwick categories,
    // sort by descending magnitude, then choose one random record in 500-1000.
+   /** Selects a random benchmark-compatible starting point. */
    load_test = () => {
       this.clear_animation_timer()
       this.setState({animation_playing: false})
@@ -145,6 +150,7 @@ export class TestAnimation extends Component {
       })
    }
    
+   /** Calculates the harmonic zoom scope for a frame index. */
    get_animation_scope = frame_index => {
       const {animation_frame_settings, animation_frame_count} = this.state
       if (!animation_frame_settings) return 0
@@ -154,6 +160,7 @@ export class TestAnimation extends Component {
       return animation_frame_settings.scope * factor ** frame_index
    }
    
+   /** Advances one frame and stops at either animation boundary. */
    advance_animation = () => {
       const {animation_direction, animation_frame_count, animation_frame_index} = this.state
       const next_index = animation_frame_index + animation_direction
@@ -167,6 +174,7 @@ export class TestAnimation extends Component {
    
    // The transport is intentionally state-only for now; frame generation will
    // consume these operations once the animation pipeline is connected.
+   /** Dispatches a transport operation to the corresponding animation action. */
    on_animation_operation = operation => {
       if (operation === TRANSPORT_PLAY) this.on_animation_play()
       if (operation === TRANSPORT_REVERSE) this.on_animation_reverse()
@@ -174,6 +182,7 @@ export class TestAnimation extends Component {
       if (operation === TRANSPORT_BEGIN || operation === TRANSPORT_END) this.on_animation_stop()
    }
    
+   /** Starts periodic frame advancement in the requested direction. */
    start_animation = direction => {
       if (!this.state.animation_frame_settings) return
       this.clear_animation_timer()
@@ -182,25 +191,31 @@ export class TestAnimation extends Component {
       this.setState({animation_direction: direction, animation_playing: true, animation_timer})
    }
    
+   /** Starts forward playback. */
    on_animation_play = () => this.start_animation(1)
    
+   /** Starts reverse playback. */
    on_animation_reverse = () => this.start_animation(-1)
    
+   /** Pauses playback while preserving the current frame. */
    on_animation_pause = () => {
       this.clear_animation_timer()
       this.setState({animation_playing: false})
    }
    
+   /** Stops playback and returns to frame zero. */
    on_animation_stop = () => {
       this.clear_animation_timer()
       this.setState({animation_playing: false, animation_frame_index: 0})
    }
    
+   /** Clears the active playback interval. */
    clear_animation_timer = () => {
       if (this.state.animation_timer) clearInterval(this.state.animation_timer)
       this.setState({animation_timer: null})
    }
    
+   /** Draws the loading state unless playback is already underway. */
    on_animation_loading = (ctx, width_px, height_px) => {
       // During playback, preserve the last completed frame instead of flashing
       // a loading state between frames.
@@ -208,6 +223,7 @@ export class TestAnimation extends Component {
       draw_loading_canvas(ctx, width_px, height_px, AppText.get(KEY_TILES_TEST_ANIMATION_LOADING))
    }
    
+   /** Renders controls, canvas, transport, and frame statistics. */
    render() {
       const {
          animation_frame_rate_fps,
@@ -220,12 +236,14 @@ export class TestAnimation extends Component {
          animation_image_size_custom,
       } = this.state
       const {width_px, height_px} = this.props
+      /** Creates a handler for a custom numeric animation setting. */
       const update_animation_setting = (key, state_key) => event => {
          const value = Number(event.target.value)
          if (!Number.isFinite(value) || value <= 0) return
          this.setState({[state_key]: value})
          AppSettings.on_settings_changed({[key]: value})
       }
+      /** Creates a handler for a standard or custom animation selector. */
       const select_animation_setting = (key, state_key, custom_state_key) => event => {
          if (event.target.value === CUSTOM_OPTION) {
             this.setState({[custom_state_key]: true})

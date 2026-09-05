@@ -32,11 +32,13 @@ const LEGEND_ENTRIES = [
    {key: 'turbo_max_ms', text_key: KEY_TILES_TEST_TURBO_MAX, color: STRATEGY_COLORS.turbo[2]},
 ]
 
+/** Returns the stable source identifier for a benchmark fixture. */
 const get_source_key = fixture => {
    const source = fixture.source || {}
    return `${source.category || 'unknown'}-${source.id || 'unknown'}`
 }
 
+/** Extracts a fixture step from parameters or its name. */
 const get_step = fixture => {
    if (Number.isFinite(fixture.parameters?.step)) return fixture.parameters.step
    const parts = `${fixture.name || ''}`.split('-')
@@ -49,6 +51,7 @@ const get_step = fixture => {
  * Percentile bounds, trimming, winsorization, and log-space averaging are
  * intentionally kept here so interpolated mode remains stepwise and jagged.
  */
+/** Aggregates a step while reducing the effect of timing outliers. */
 const robust_step_value = (values, metric_index) => {
    const sorted = [...values].sort((left, right) => left - right)
    if (!sorted.length) return 0.1
@@ -65,6 +68,7 @@ const robust_step_value = (values, metric_index) => {
    return Math.max(0.1, (arithmetic_mean + log_mean + percentile_target) / 3)
 }
 
+/** Builds Chart.js datasets from legacy and turbo benchmark fixtures. */
 export const build_chart_data = (benchmark_results, combine_results = false, hidden_legend_keys = [], combination_method = 'interpolated') => {
    const datasets = []
    for (const strategy of ['legacy', 'turbo']) {
@@ -119,6 +123,7 @@ export const build_chart_data = (benchmark_results, combine_results = false, hid
    return {datasets}
 }
 
+/** Computes a positive logarithmic-axis minimum from chart datasets. */
 export const get_chart_minimum = chart_data => {
    const values = chart_data.datasets
       .flatMap(dataset => dataset.data.map(point => point.y))
@@ -127,6 +132,7 @@ export const get_chart_minimum = chart_data => {
    return Math.max(0.1, Math.floor(Math.min(...values)) - 1)
 }
 
+/** Creates Chart.js options including the custom six-series legend. */
 export const chart_options = (step_label, duration_label, minimum, on_toggle_legend) => ({
    responsive: true,
    maintainAspectRatio: false,
