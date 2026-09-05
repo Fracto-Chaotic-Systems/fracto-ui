@@ -13,9 +13,10 @@ export const KEY_TILES_TEST = `${TILES_FOLDER}/tiles_test`
 export const KEY_TILES_TEST_HARNESS = `${TILES_FOLDER}/test_harness`
 export const KEY_TILES_TEST_BENCHMARKS = `${TILES_FOLDER}/test_benchmarks`
 export const KEY_TILES_TEST_ANIMATION = `${TILES_FOLDER}/test_animation`
+export const KEY_TILES_TEST_REFACTOR = `${TILES_FOLDER}/test_refactor`
 export const KEY_TILES_TEST_ANIMATION_FRAME_RATE = `${TILES_FOLDER}/test_animation_frame_rate`
 export const KEY_TILES_TEST_ANIMATION_IMAGE_SIZE = `${TILES_FOLDER}/test_animation_image_size`
-export const KEY_TILES_TEST_ANIMATION_FRAME_COUNT = `${TILES_FOLDER}/test_animation_frame_count`
+export const KEY_TILES_TEST_ANIMATION_FRAME_COUNTER = `${TILES_FOLDER}/test_animation_frame_counter`
 export const KEY_TILES_TEST_ANIMATION_FRAME_INDEX = `${TILES_FOLDER}/test_animation_frame_index`
 export const KEY_TILES_TEST_ANIMATION_LOAD = `${TILES_FOLDER}/test_animation_load`
 export const KEY_TILES_TEST_ANIMATION_LOADING = `${TILES_FOLDER}/test_animation_loading`
@@ -54,9 +55,10 @@ export const APP_TILES_TEXT = {
    [KEY_TILES_TEST_HARNESS]: 'test harness',
    [KEY_TILES_TEST_BENCHMARKS]: 'benchmarks',
    [KEY_TILES_TEST_ANIMATION]: 'animation',
+   [KEY_TILES_TEST_REFACTOR]: 'refactor',
    [KEY_TILES_TEST_ANIMATION_FRAME_RATE]: 'frame rate',
    [KEY_TILES_TEST_ANIMATION_IMAGE_SIZE]: 'image size',
-   [KEY_TILES_TEST_ANIMATION_FRAME_COUNT]: 'frame count',
+   [KEY_TILES_TEST_ANIMATION_FRAME_COUNTER]: 'frame count',
    [KEY_TILES_TEST_ANIMATION_FRAME_INDEX]: 'frame index',
    [KEY_TILES_TEST_ANIMATION_LOAD]: 'load test',
    [KEY_TILES_TEST_ANIMATION_LOADING]: 'loading...',
