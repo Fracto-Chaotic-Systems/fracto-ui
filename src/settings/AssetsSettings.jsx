@@ -20,6 +20,7 @@ export const ASSETS_GENERATOR = 'assets_generator'
 export const VIDEO_GENERATOR = 'video_generator'
 export const ASSETS_GALLERY = 'assets_gallery'
 export const ASSETS_LORE = 'assets_lore'
+export const ASSETS_LORE_STYLES = 'assets_lore_styles'
 export const ASSETS_DETECTOR = 'assets_detector'
 
 export const KEY_ASSETS_GENERATOR_FRAME_SETTINGS = `${ASSETS_GENERATOR_FOLDER}/frame_settings`
