@@ -8,6 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
+    "format:test": "prettier --write \"src/pages/tiles/test/**/*.{js,jsx}\"",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -40,6 +41,7 @@
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
+    "prettier": "^3.6.2",
     "globals": "^16.5.0",
     "vite": "^7.2.4"
   }
