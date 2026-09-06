@@ -56,6 +56,8 @@ const DEFAULT_FRAME_SETTINGS = {
 export const KEY_ASSETS_LORE_SELECTED_CATEGORY_ID = `${ASSETS_LORE_FOLDER}/selected_category_id`;
 export const KEY_ASSETS_LORE_STYLES_OUTERMOST_SPLITTER_POS_PX = `${ASSETS_LORE_FOLDER}/styles_splitter_pos_px`;
 export const KEY_ASSETS_LORE_STYLES_LOWER_SPLITTER_POS_PX = `${ASSETS_LORE_FOLDER}/styles_lower_splitter_pos_px`;
+export const KEY_ASSETS_LORE_STYLES_UPPER_SPLITTER_POS_PX = `${ASSETS_LORE_FOLDER}/styles_upper_splitter_pos_px`;
+export const KEY_ASSETS_LORE_STYLES_UPPER_RIGHT_SPLITTER_POS_PX = `${ASSETS_LORE_FOLDER}/styles_upper_right_splitter_pos_px`;
 
 export const APP_ASSETS_SETTINGS = {
   [KEY_ASSETS_SPLITTER_POS_PX]: {
@@ -194,6 +196,18 @@ export const APP_ASSETS_SETTINGS = {
     data_type: TYPE_NUMBER,
     default_value: 0,
     description: "lower vertical splitter position for lore styles",
+    persist: true,
+  },
+  [KEY_ASSETS_LORE_STYLES_UPPER_SPLITTER_POS_PX]: {
+    data_type: TYPE_NUMBER,
+    default_value: 0,
+    description: "upper vertical splitter position for lore styles",
+    persist: true,
+  },
+  [KEY_ASSETS_LORE_STYLES_UPPER_RIGHT_SPLITTER_POS_PX]: {
+    data_type: TYPE_NUMBER,
+    default_value: 0,
+    description: "upper right horizontal splitter position for lore styles",
     persist: true,
   },
 };

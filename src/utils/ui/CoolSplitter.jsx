@@ -24,6 +24,8 @@ export class CoolSplitter extends Component {
     container_bounds: PropTypes.object.isRequired,
     position: PropTypes.number.isRequired,
     on_change: PropTypes.func.isRequired,
+    min_position: PropTypes.number,
+    max_position: PropTypes.number,
   };
 
   state = {
@@ -31,6 +33,36 @@ export class CoolSplitter extends Component {
     in_drag: false,
     drag_start_pos: 0,
   };
+
+  get_bounded_position = (position = this.props.position) => {
+    const { min_position, max_position } = this.props;
+    return Math.min(
+      max_position ?? position,
+      Math.max(min_position ?? position, position),
+    );
+  };
+
+  normalize_position = () => {
+    const { position, on_change } = this.props;
+    const bounded_position = this.get_bounded_position(position);
+    if (bounded_position !== position) {
+      on_change(bounded_position);
+    }
+  };
+
+  componentDidMount() {
+    this.normalize_position();
+  }
+
+  componentDidUpdate(prevProps) {
+    if (
+      prevProps.position !== this.props.position ||
+      prevProps.min_position !== this.props.min_position ||
+      prevProps.max_position !== this.props.max_position
+    ) {
+      this.normalize_position();
+    }
+  }
 
   start_drag = (e) => {
     const { type, position } = this.props;
@@ -53,7 +85,7 @@ export class CoolSplitter extends Component {
 
   on_mouse_move = (e) => {
     const { in_drag, drag_start_pos, splitter_ref } = this.state;
-    const { type, position, on_change } = this.props;
+    const { type, position, on_change, min_position, max_position } = this.props;
     if (!in_drag) {
       return;
     }
@@ -69,13 +101,19 @@ export class CoolSplitter extends Component {
       const new_drag_start_pos =
         type === SPLITTER_TYPE_HORIZONTAL ? e.clientY : e.clientX;
       this.setState({ drag_start_pos: new_drag_start_pos });
-      on_change(position - delta);
+      const next_position = position - delta;
+      const bounded_position = Math.min(
+        max_position ?? next_position,
+        Math.max(min_position ?? next_position, next_position),
+      );
+      on_change(bounded_position);
     }
   };
 
   render() {
     const { in_drag, splitter_ref } = this.state;
-    const { type, bar_width_px, container_bounds, position } = this.props;
+    const { type, bar_width_px, container_bounds } = this.props;
+    const position = this.get_bounded_position();
     let bar_style =
       type === SPLITTER_TYPE_HORIZONTAL
         ? {
