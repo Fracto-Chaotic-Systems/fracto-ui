@@ -119,7 +119,7 @@ export class AssetsLoreStyles extends Component {
     });
   };
 
-  render() {
+  get_layout = () => {
     const {
       rendered_width,
       rendered_height,
@@ -127,8 +127,6 @@ export class AssetsLoreStyles extends Component {
       lower_splitter_position,
       upper_splitter_position,
       upper_right_splitter_position,
-      container_ref,
-      container_bounds,
     } = this.state;
     const outer_splitter_min = rendered_height * 0.6;
     const outer_splitter_max = rendered_height * 0.9;
@@ -175,13 +173,208 @@ export class AssetsLoreStyles extends Component {
         lower_splitter_position || rendered_width / 2,
       ),
     );
-    // The vertical splitter is positioned relative to the lower region itself.
+    return {
+      rendered_width,
+      rendered_height,
+      bounded_outer_position,
+      top_height,
+      bottom_height,
+      outer_splitter_min,
+      outer_splitter_max,
+      upper_position,
+      upper_splitter_min,
+      upper_splitter_max,
+      upper_right_height,
+      upper_right_position,
+      upper_right_splitter_min,
+      upper_right_splitter_max,
+      lower_position,
+      lower_splitter_min,
+      lower_splitter_max,
+    };
+  };
+
+  render_upper_left = (layout) => {
+    const { upper_position, top_height } = layout;
+    return (
+      <CoolStyles.Block
+        style={{ width: `${upper_position}px`, height: "100%", flexShrink: 0 }}
+      >
+        <LoreStylesEdit width_px={upper_position} height_px={top_height} />
+      </CoolStyles.Block>
+    );
+  };
+
+  render_upper_right = (layout) => {
+    const {
+      rendered_width,
+      top_height,
+      upper_position,
+      upper_right_position,
+      upper_right_splitter_min,
+      upper_right_splitter_max,
+    } = layout;
+    const upper_right_width = Math.max(0, rendered_width - upper_position);
+    return (
+      <CoolStyles.Block
+        style={{
+          width: `${upper_right_width}px`,
+          height: "100%",
+          flexShrink: 0,
+          position: "relative",
+        }}
+      >
+        <CoolStyles.Block
+          style={{ height: `${upper_right_position}px`, overflow: "hidden" }}
+        />
+        <CoolStyles.Block
+          style={{
+            height: `${Math.max(0, top_height - upper_right_position)}px`,
+            overflow: "hidden",
+          }}
+        />
+        <CoolSplitter
+          type={SPLITTER_TYPE_HORIZONTAL}
+          name={KEY_ASSETS_LORE_STYLES_UPPER_RIGHT_SPLITTER_POS_PX}
+          bar_width_px={SPLITTER_WIDTH_PX}
+          container_bounds={{
+            left: 0,
+            top: 0,
+            width: upper_right_width,
+            height: top_height,
+          }}
+          position={upper_right_position}
+          min_position={upper_right_splitter_min}
+          max_position={upper_right_splitter_max}
+          on_change={this.on_upper_right_splitter_change}
+        />
+      </CoolStyles.Block>
+    );
+  };
+
+  render_upper_section = (layout) => {
+    const {
+      rendered_width,
+      top_height,
+      upper_position,
+      upper_splitter_min,
+      upper_splitter_max,
+    } = layout;
+    return (
+      <CoolStyles.Block
+        style={{
+          height: `${top_height}px`,
+          overflow: "hidden",
+          position: "relative",
+          display: "flex",
+        }}
+      >
+        {this.render_upper_left(layout)}
+        {this.render_upper_right(layout)}
+        <CoolSplitter
+          type={SPLITTER_TYPE_VERTICAL}
+          name={KEY_ASSETS_LORE_STYLES_UPPER_SPLITTER_POS_PX}
+          bar_width_px={SPLITTER_WIDTH_PX}
+          container_bounds={{
+            left: 0,
+            top: 0,
+            width: rendered_width,
+            height: top_height,
+          }}
+          position={upper_position}
+          min_position={upper_splitter_min}
+          max_position={upper_splitter_max}
+          on_change={this.on_upper_splitter_change}
+        />
+      </CoolStyles.Block>
+    );
+  };
+
+  render_lower_left = (layout) => {
+    const { bottom_height, lower_position } = layout;
+    return (
+      <CoolStyles.Block
+        style={{
+          width: `${lower_position}px`,
+          height: "100%",
+          flexShrink: 0,
+          padding: "5px",
+          boxSizing: "border-box",
+        }}
+      >
+        <LoreStylesEntry
+          width_px={Math.max(0, lower_position)}
+          height_px={bottom_height}
+        />
+      </CoolStyles.Block>
+    );
+  };
+
+  render_lower_right = (layout) => {
+    const { rendered_width, bottom_height, lower_position } = layout;
+    const lower_right_width = Math.max(0, rendered_width - lower_position);
+    return (
+      <CoolStyles.Block
+        style={{
+          width: `${lower_right_width}px`,
+          height: "100%",
+          flexShrink: 0,
+          marginLeft: "5px",
+          padding: "5px",
+          boxSizing: "border-box",
+        }}
+      >
+        <LoreStylesView
+          width_px={Math.max(0, lower_right_width - 10)}
+          height_px={bottom_height}
+        />
+      </CoolStyles.Block>
+    );
+  };
+
+  render_lower_section = (layout) => {
+    const {
+      rendered_width,
+      bottom_height,
+      lower_position,
+      lower_splitter_min,
+      lower_splitter_max,
+    } = layout;
     const lower_bounds = {
       left: 0,
       top: 0,
       width: rendered_width,
       height: bottom_height,
     };
+    return (
+      <CoolStyles.Block
+        style={{
+          height: `${bottom_height}px`,
+          overflow: "hidden",
+          position: "relative",
+          display: "flex",
+        }}
+      >
+        {this.render_lower_left(layout)}
+        {this.render_lower_right(layout)}
+        <CoolSplitter
+          type={SPLITTER_TYPE_VERTICAL}
+          name={KEY_ASSETS_LORE_STYLES_LOWER_SPLITTER_POS_PX}
+          bar_width_px={SPLITTER_WIDTH_PX}
+          container_bounds={lower_bounds}
+          position={lower_position}
+          min_position={lower_splitter_min}
+          max_position={lower_splitter_max}
+          on_change={this.on_lower_splitter_change}
+        />
+      </CoolStyles.Block>
+    );
+  };
+
+  render() {
+    const { rendered_width, rendered_height, container_ref, container_bounds } =
+      this.state;
+    const layout = this.get_layout();
     return [
       <styles.SectionTitle key={"assets-lore-styles-title"}>
         {AppText.get(KEY_ASSETS_LORE_STYLES)}
@@ -195,129 +388,18 @@ export class AssetsLoreStyles extends Component {
           height: `${rendered_height}px`,
         }}
       >
-        <CoolStyles.Block
-          style={{
-            height: `${top_height}px`,
-            overflow: "hidden",
-            position: "relative",
-            display: "flex",
-          }}
-        >
-          <CoolStyles.Block
-            style={{ width: `${upper_position}px`, height: "100%", flexShrink: 0 }}
-          >
-            <LoreStylesEdit
-              width_px={upper_position}
-              height_px={top_height}
-            />
-          </CoolStyles.Block>
-          <CoolStyles.Block
-            style={{
-              width: `${Math.max(0, rendered_width - upper_position)}px`,
-              height: "100%",
-              flexShrink: 0,
-              position: "relative",
-            }}
-          >
-            <CoolStyles.Block
-              style={{ height: `${upper_right_position}px`, overflow: "hidden" }}
-            />
-            <CoolStyles.Block
-              style={{
-                height: `${Math.max(0, upper_right_height - upper_right_position)}px`,
-                overflow: "hidden",
-              }}
-            />
-            <CoolSplitter
-              type={SPLITTER_TYPE_HORIZONTAL}
-              name={KEY_ASSETS_LORE_STYLES_UPPER_RIGHT_SPLITTER_POS_PX}
-              bar_width_px={SPLITTER_WIDTH_PX}
-              container_bounds={{
-                left: 0,
-                top: 0,
-                width: Math.max(0, rendered_width - upper_position),
-                height: upper_right_height,
-              }}
-              position={upper_right_position}
-              min_position={upper_right_splitter_min}
-              max_position={upper_right_splitter_max}
-              on_change={this.on_upper_right_splitter_change}
-            />
-          </CoolStyles.Block>
-          <CoolSplitter
-            type={SPLITTER_TYPE_VERTICAL}
-            name={KEY_ASSETS_LORE_STYLES_UPPER_SPLITTER_POS_PX}
-            bar_width_px={SPLITTER_WIDTH_PX}
-            container_bounds={{
-              left: 0,
-              top: 0,
-              width: rendered_width,
-              height: top_height,
-            }}
-            position={upper_position}
-            min_position={upper_splitter_min}
-            max_position={upper_splitter_max}
-            on_change={this.on_upper_splitter_change}
-          />
-        </CoolStyles.Block>
-        <CoolStyles.Block
-          style={{
-            height: `${bottom_height}px`,
-            overflow: "hidden",
-            position: "relative",
-            display: "flex",
-          }}
-        >
-          <CoolStyles.Block
-            style={{
-              width: `${lower_position}px`,
-              height: "100%",
-              flexShrink: 0,
-              padding: "5px",
-              boxSizing: "border-box",
-            }}
-          >
-            <LoreStylesEntry
-              width_px={Math.max(0, lower_position)}
-              height_px={bottom_height}
-            />
-          </CoolStyles.Block>
-          <CoolStyles.Block
-            style={{
-              width: `${Math.max(0, rendered_width - lower_position)}px`,
-              height: "100%",
-              flexShrink: 0,
-              marginLeft: '5px',
-              padding: "5px",
-              boxSizing: "border-box",
-            }}
-          >
-            <LoreStylesView
-              width_px={Math.max(0, rendered_width - lower_position - 10)}
-              height_px={bottom_height}
-            />
-          </CoolStyles.Block>
-          <CoolSplitter
-            type={SPLITTER_TYPE_VERTICAL}
-            name={KEY_ASSETS_LORE_STYLES_LOWER_SPLITTER_POS_PX}
-            bar_width_px={SPLITTER_WIDTH_PX}
-            container_bounds={lower_bounds}
-            position={lower_position}
-            min_position={lower_splitter_min}
-            max_position={lower_splitter_max}
-            on_change={this.on_lower_splitter_change}
-          />
-        </CoolStyles.Block>
+        {this.render_upper_section(layout)}
         <CoolSplitter
           type={SPLITTER_TYPE_HORIZONTAL}
           name={KEY_ASSETS_LORE_STYLES_OUTERMOST_SPLITTER_POS_PX}
           bar_width_px={SPLITTER_WIDTH_PX}
           container_bounds={container_bounds}
-          position={bounded_outer_position}
-          min_position={outer_splitter_min}
-          max_position={outer_splitter_max}
+          position={layout.bounded_outer_position}
+          min_position={layout.outer_splitter_min}
+          max_position={layout.outer_splitter_max}
           on_change={this.on_splitter_change}
         />
+        {this.render_lower_section(layout)}
       </styles.BodyWrapper>,
     ];
   }
