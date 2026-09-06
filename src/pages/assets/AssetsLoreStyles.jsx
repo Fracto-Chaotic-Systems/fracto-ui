@@ -1,5 +1,8 @@
 import React, { Component } from "react";
-import { MainStyles as styles } from "../../styles/MainStyles.jsx";
+import {
+  MainStyles as styles,
+  TITLE_BAR_HEIGHT_PX,
+} from "../../styles/MainStyles.jsx";
 import AppText from "../../AppText.jsx";
 import AppSettings from "../../AppSettings.jsx";
 import {
@@ -214,6 +217,7 @@ export class AssetsLoreStyles extends Component {
         fontSize: `${AREA_TITLE_HEIGHT_PX - 4}px`,
         textTransform: "uppercase",
         letterSpacing: "2px",
+        verticalAlign: "middle",
         paddingLeft: "5px",
         textShadow: "1px 1px 2px rgba(0,0,0,0.75)",
       }}
@@ -230,6 +234,8 @@ export class AssetsLoreStyles extends Component {
           width: `${upper_position}px`,
           height: "100%",
           flexShrink: 0,
+          position: "relative",
+          top: "30px",
         }}
       >
         {this.render_area_title(AppText.get(KEY_ASSETS_LORE_STYLES_EDIT))}
@@ -258,14 +264,14 @@ export class AssetsLoreStyles extends Component {
           height: "100%",
           flexShrink: 0,
           position: "relative",
-          top: "4px",
+          top: "25px",
         }}
       >
         <CoolStyles.Block
           style={{
             height: `${upper_right_position}px`,
             overflow: "hidden",
-            marginLeft: "5px",
+            margin: "5px 0 0 5px",
           }}
         >
           {this.render_area_title(AppText.get(KEY_ASSETS_LORE_STYLES_CATALOG))}
@@ -278,7 +284,7 @@ export class AssetsLoreStyles extends Component {
           style={{
             height: `${Math.max(0, top_height - upper_right_position)}px`,
             overflow: "hidden",
-            margin: "5px 0 0 5px",
+            paddingLeft: "15px",
           }}
         >
           {this.render_area_title(
@@ -336,7 +342,7 @@ export class AssetsLoreStyles extends Component {
           bar_width_px={SPLITTER_WIDTH_PX}
           container_bounds={{
             left: 0,
-            top: 0,
+            top: `${TITLE_BAR_HEIGHT_PX}px`,
             width: rendered_width,
             height: top_height,
           }}
