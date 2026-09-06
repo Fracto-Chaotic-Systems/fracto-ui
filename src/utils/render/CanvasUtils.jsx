@@ -1,4 +1,4 @@
-const GOLDEN_RATIO = 1.618
+const GOLDEN_RATIO = 1.618;
 
 /**
  * Clears a canvas and renders a neutral delayed-operation message.
@@ -10,12 +10,12 @@ const GOLDEN_RATIO = 1.618
  * @returns {void}
  */
 export const draw_loading_canvas = (ctx, width_px, height_px, message) => {
-   ctx.fillStyle = '#888888'
-   ctx.fillRect(0, 0, width_px, height_px)
-   ctx.fillStyle = 'white'
-   ctx.font = 'bold italic 16px sans-serif'
-   ctx.letterSpacing = '3px'
-   ctx.textAlign = 'center'
-   ctx.textBaseline = 'middle'
-   ctx.fillText(message, width_px / 2, height_px - height_px / GOLDEN_RATIO)
-}
+  ctx.fillStyle = "#888888";
+  ctx.fillRect(0, 0, width_px, height_px);
+  ctx.fillStyle = "white";
+  ctx.font = "bold italic 16px sans-serif";
+  ctx.letterSpacing = "3px";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(message, width_px / 2, height_px - height_px / GOLDEN_RATIO);
+};

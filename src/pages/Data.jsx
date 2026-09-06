@@ -1,27 +1,27 @@
-import React, {Component} from 'react'
+import React, { Component } from "react";
 
 import SplitterLayout from "./utils/SplitterLayout.jsx";
-import Sidebar, {SIDEBAR_BREAKER} from "./utils/Sidebar.jsx";
+import Sidebar, { SIDEBAR_BREAKER } from "./utils/Sidebar.jsx";
 
-import {MainStyles as styles} from '../styles/MainStyles.jsx'
+import { MainStyles as styles } from "../styles/MainStyles.jsx";
 import AppSettings from "../AppSettings.jsx";
 import {
-   DATA_BACKUPS,
-   DATA_LOGS,
-   DATA_OVERVIEW,
-   DATA_QUERIES,
-   DATA_SETTINGS,
-   DATA_STATUS,
-   KEY_DATA_SECTION,
-   KEY_DATA_SPLITTER_POS_PX
+  DATA_BACKUPS,
+  DATA_LOGS,
+  DATA_OVERVIEW,
+  DATA_QUERIES,
+  DATA_SETTINGS,
+  DATA_STATUS,
+  KEY_DATA_SECTION,
+  KEY_DATA_SPLITTER_POS_PX,
 } from "../settings/DataSettings.jsx";
 
 import AppText from "../AppText.jsx";
 import {
-   KEY_SIDEBAR_LOGS,
-   KEY_SIDEBAR_OVERVIEW,
-   KEY_SIDEBAR_SETTINGS,
-   KEY_SIDEBAR_STATUS
+  KEY_SIDEBAR_LOGS,
+  KEY_SIDEBAR_OVERVIEW,
+  KEY_SIDEBAR_SETTINGS,
+  KEY_SIDEBAR_STATUS,
 } from "../text/RootText.jsx";
 
 import DataOverview from "./data/DataOverview.jsx";
@@ -29,70 +29,97 @@ import DataSettings from "./data/DataSettings.jsx";
 import DataStatus from "./data/DataStatus.jsx";
 import DataLogs from "./data/DataLogs.jsx";
 import AdminQueries from "./admin/AdminQueries.jsx";
-import {KEY_DATA_QUERIES_SECTION_TITLE} from "../text/DataText.jsx";
+import { KEY_DATA_QUERIES_SECTION_TITLE } from "../text/DataText.jsx";
 
 const SIDEBAR_LIST = [
-   {title_key: KEY_SIDEBAR_OVERVIEW, section_code: DATA_OVERVIEW, right_pane: <DataOverview/>},
-   {section_code: SIDEBAR_BREAKER},
-   {title_key: KEY_DATA_QUERIES_SECTION_TITLE, section_code: DATA_QUERIES, right_pane: <AdminQueries/>},
-   {section_code: SIDEBAR_BREAKER},
-   {title_key: KEY_SIDEBAR_SETTINGS, section_code: DATA_SETTINGS, right_pane: <DataSettings/>},
-   {title_key: KEY_SIDEBAR_STATUS, section_code: DATA_STATUS, right_pane: <DataStatus/>},
-   {title_key: KEY_SIDEBAR_LOGS, section_code: DATA_LOGS, right_pane: <DataLogs/>},
-]
+  {
+    title_key: KEY_SIDEBAR_OVERVIEW,
+    section_code: DATA_OVERVIEW,
+    right_pane: <DataOverview />,
+  },
+  { section_code: SIDEBAR_BREAKER },
+  {
+    title_key: KEY_DATA_QUERIES_SECTION_TITLE,
+    section_code: DATA_QUERIES,
+    right_pane: <AdminQueries />,
+  },
+  { section_code: SIDEBAR_BREAKER },
+  {
+    title_key: KEY_SIDEBAR_SETTINGS,
+    section_code: DATA_SETTINGS,
+    right_pane: <DataSettings />,
+  },
+  {
+    title_key: KEY_SIDEBAR_STATUS,
+    section_code: DATA_STATUS,
+    right_pane: <DataStatus />,
+  },
+  {
+    title_key: KEY_SIDEBAR_LOGS,
+    section_code: DATA_LOGS,
+    right_pane: <DataLogs />,
+  },
+];
 
 export class Data extends Component {
-   state = {section_code: DATA_OVERVIEW}
+  state = { section_code: DATA_OVERVIEW };
 
-   sidebar_select = (section_code) => {
-      AppSettings.on_settings_changed({
-         [KEY_DATA_SECTION]: section_code
-      })
-      this.setState({section_code})
-   }
+  sidebar_select = (section_code) => {
+    AppSettings.on_settings_changed({
+      [KEY_DATA_SECTION]: section_code,
+    });
+    this.setState({ section_code });
+  };
 
-   componentDidMount() {
-      const saved_section_code = AppSettings.get(KEY_DATA_SECTION)
-      const section_code = saved_section_code === DATA_BACKUPS ? DATA_QUERIES : saved_section_code
-      this.setState({section_code})
-   }
+  componentDidMount() {
+    const saved_section_code = AppSettings.get(KEY_DATA_SECTION);
+    const section_code =
+      saved_section_code === DATA_BACKUPS ? DATA_QUERIES : saved_section_code;
+    this.setState({ section_code });
+  }
 
-   render_left_pane = () => {
-      const {section_code} = this.state
-      const sidebar_list = SIDEBAR_LIST.map(entry => {
-         if (entry.title_key) {
-            entry.title = AppText.get(entry.title_key)
-         }
-         return entry
-      })
-      const sidebar = <Sidebar
-         sidebar_list={sidebar_list}
-         section_code={section_code}
-         on_change={this.sidebar_select}
+  render_left_pane = () => {
+    const { section_code } = this.state;
+    const sidebar_list = SIDEBAR_LIST.map((entry) => {
+      if (entry.title_key) {
+        entry.title = AppText.get(entry.title_key);
+      }
+      return entry;
+    });
+    const sidebar = (
+      <Sidebar
+        sidebar_list={sidebar_list}
+        section_code={section_code}
+        on_change={this.sidebar_select}
       />
-      return <styles.PaneWrapper>
-         {sidebar}
-      </styles.PaneWrapper>
-   }
+    );
+    return <styles.PaneWrapper>{sidebar}</styles.PaneWrapper>;
+  };
 
-   render_right_pane = () => {
-      const {section_code} = this.state
-      const section = SIDEBAR_LIST.find((item) => item.section_code === section_code)
-      return <styles.PaneWrapper>
-         {section ? section.right_pane : ''}
+  render_right_pane = () => {
+    const { section_code } = this.state;
+    const section = SIDEBAR_LIST.find(
+      (item) => item.section_code === section_code,
+    );
+    return (
+      <styles.PaneWrapper>
+        {section ? section.right_pane : ""}
       </styles.PaneWrapper>
-   }
+    );
+  };
 
-   render() {
-      const left_pane = this.render_left_pane();
-      const right_pane = this.render_right_pane();
-      return <SplitterLayout
-         key={'Data-splitter'}
-         left_content={left_pane}
-         right_content={right_pane}
-         splitter_pos_key={KEY_DATA_SPLITTER_POS_PX}
+  render() {
+    const left_pane = this.render_left_pane();
+    const right_pane = this.render_right_pane();
+    return (
+      <SplitterLayout
+        key={"Data-splitter"}
+        left_content={left_pane}
+        right_content={right_pane}
+        splitter_pos_key={KEY_DATA_SPLITTER_POS_PX}
       />
-   }
+    );
+  }
 }
 
-export default Data
+export default Data;

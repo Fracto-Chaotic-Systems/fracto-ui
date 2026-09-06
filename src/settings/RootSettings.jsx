@@ -1,57 +1,57 @@
-import AppSettings, {TYPE_OBJECT, TYPE_STRING} from "../AppSettings.jsx";
-import {copy_json, getViewportDimensions} from "../utils/Dom.jsx";
+import AppSettings, { TYPE_OBJECT, TYPE_STRING } from "../AppSettings.jsx";
+import { copy_json, getViewportDimensions } from "../utils/Dom.jsx";
 
-const ROOT_FOLDER = 'root'
-export const KEY_SELECTED_PAGE = `${ROOT_FOLDER}/selected_page`
-export const KEY_VIEWPORT_DIMENSIONS = `${ROOT_FOLDER}/viewport_dimensions`
-export const KEY_SERVER_ROOT = `${ROOT_FOLDER}/server_root`
-export const KEY_CLIPBOARD_DATA = `${ROOT_FOLDER}/clipboard_data`
+const ROOT_FOLDER = "root";
+export const KEY_SELECTED_PAGE = `${ROOT_FOLDER}/selected_page`;
+export const KEY_VIEWPORT_DIMENSIONS = `${ROOT_FOLDER}/viewport_dimensions`;
+export const KEY_SERVER_ROOT = `${ROOT_FOLDER}/server_root`;
+export const KEY_CLIPBOARD_DATA = `${ROOT_FOLDER}/clipboard_data`;
 
 export const APP_ROOT_SETTINGS = {
-   [KEY_SELECTED_PAGE]: {
-      data_type: TYPE_STRING,
-      default_value: 'admin',
-      description: 'status of every server attached to the current instance',
-      persist: true,
-   },
-   [KEY_VIEWPORT_DIMENSIONS]: {
-      data_type: TYPE_OBJECT,
-      default_value: {width: 0, height: 0},
-      description: 'width and height of the browser client area',
-      persist: false,
-   },
-   [KEY_SERVER_ROOT]: {
-      data_type: TYPE_STRING,
-      default_value: "",
-      description: 'root filepath of the main server',
-      persist: true,
-   },
-   [KEY_CLIPBOARD_DATA]: {
-      data_type: TYPE_OBJECT,
-      default_value: {},
-      description: 'object data of the current clipboard',
-      persist: false,
-   },
-}
+  [KEY_SELECTED_PAGE]: {
+    data_type: TYPE_STRING,
+    default_value: "admin",
+    description: "status of every server attached to the current instance",
+    persist: true,
+  },
+  [KEY_VIEWPORT_DIMENSIONS]: {
+    data_type: TYPE_OBJECT,
+    default_value: { width: 0, height: 0 },
+    description: "width and height of the browser client area",
+    persist: false,
+  },
+  [KEY_SERVER_ROOT]: {
+    data_type: TYPE_STRING,
+    default_value: "",
+    description: "root filepath of the main server",
+    persist: true,
+  },
+  [KEY_CLIPBOARD_DATA]: {
+    data_type: TYPE_OBJECT,
+    default_value: {},
+    description: "object data of the current clipboard",
+    persist: false,
+  },
+};
 
 export const poll_viewport_dimensions = (cb = null) => {
-   if (cb) {
-      const new_viewport = getViewportDimensions()
-      cb(copy_json(new_viewport))
-   }
-   return setInterval(() => {
-      const current_viewport = AppSettings.get(KEY_VIEWPORT_DIMENSIONS)
-      const new_viewport = getViewportDimensions()
-      const width_changed = current_viewport?.width !== new_viewport.width
-      const height_changed = current_viewport?.height !== new_viewport.height
-      if (width_changed || height_changed) {
-         // console.log('viewport changed', new_viewport)
-         AppSettings.on_settings_changed({
-            [KEY_VIEWPORT_DIMENSIONS]: new_viewport
-         })
-         if (cb) {
-            cb(copy_json(new_viewport))
-         }
+  if (cb) {
+    const new_viewport = getViewportDimensions();
+    cb(copy_json(new_viewport));
+  }
+  return setInterval(() => {
+    const current_viewport = AppSettings.get(KEY_VIEWPORT_DIMENSIONS);
+    const new_viewport = getViewportDimensions();
+    const width_changed = current_viewport?.width !== new_viewport.width;
+    const height_changed = current_viewport?.height !== new_viewport.height;
+    if (width_changed || height_changed) {
+      // console.log('viewport changed', new_viewport)
+      AppSettings.on_settings_changed({
+        [KEY_VIEWPORT_DIMENSIONS]: new_viewport,
+      });
+      if (cb) {
+        cb(copy_json(new_viewport));
       }
-   }, 1000)
-}
+    }
+  }, 1000);
+};

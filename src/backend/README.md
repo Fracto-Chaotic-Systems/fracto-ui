@@ -5,11 +5,11 @@ The modules in this directory are thin browser-side clients for Fracto's backend
 All modules use named exports and a default class export. Import them with the `.jsx` extension:
 
 ```js
-import DataBackend from '../backend/DataBackend.jsx'
+import DataBackend from "../backend/DataBackend.jsx";
 
-DataBackend.get_orbitals({x: -0.75, y: 0.1}, 200, (data) => {
-   // update component state with the service response
-})
+DataBackend.get_orbitals({ x: -0.75, y: 0.1 }, 200, (data) => {
+  // update component state with the service response
+});
 ```
 
 ## Clients
