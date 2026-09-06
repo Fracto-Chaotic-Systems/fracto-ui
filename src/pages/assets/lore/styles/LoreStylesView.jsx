@@ -15,7 +15,18 @@ export class LoreStylesView extends Component {
 
   render() {
     const { width_px, height_px } = this.props;
-    return `LoreStylesView ${width_px}x${height_px}`;
+    return (
+      <div
+        style={{
+          width: `${width_px}px`,
+          height: `${height_px}px`,
+          backgroundColor: "#cde7ff",
+          padding: "3px",
+        }}
+      >
+        {`LoreStylesView ${width_px}x${height_px}`}
+      </div>
+    );
   }
 }
 

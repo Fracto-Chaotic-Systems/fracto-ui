@@ -12,7 +12,18 @@ export class LoreStylesCatalog extends Component {
 
   render() {
     const { width_px, height_px } = this.props;
-    return `LoreStylesCatalog ${width_px}x${height_px}`;
+    return (
+      <div
+        style={{
+          width: `${width_px}px`,
+          height: `${height_px}px`,
+          backgroundColor: "#fff1b8",
+          padding: "3px",
+        }}
+      >
+        {`LoreStylesCatalog ${width_px}x${height_px}`}
+      </div>
+    );
   }
 }
 

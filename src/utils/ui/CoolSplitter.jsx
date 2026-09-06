@@ -85,7 +85,8 @@ export class CoolSplitter extends Component {
 
   on_mouse_move = (e) => {
     const { in_drag, drag_start_pos, splitter_ref } = this.state;
-    const { type, position, on_change, min_position, max_position } = this.props;
+    const { type, position, on_change, min_position, max_position } =
+      this.props;
     if (!in_drag) {
       return;
     }

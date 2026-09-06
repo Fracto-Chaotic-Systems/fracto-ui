@@ -12,7 +12,18 @@ export class LoreStylesEdit extends Component {
 
   render() {
     const { width_px, height_px } = this.props;
-    return `LoreStylesEdit ${width_px}x${height_px}`;
+    return (
+      <div
+        style={{
+          width: `${width_px}px`,
+          height: `${height_px}px`,
+          backgroundColor: "#d9f7be",
+          padding: "3px",
+        }}
+      >
+        {`LoreStylesEdit ${width_px}x${height_px}`}
+      </div>
+    );
   }
 }
 
