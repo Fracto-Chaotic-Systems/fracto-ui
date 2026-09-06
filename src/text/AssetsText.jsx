@@ -7,6 +7,11 @@ export const KEY_ASSETS_SETTINGS = `${ASSETS_FOLDER}/assets_settings`;
 export const KEY_ASSETS_STATUS = `${ASSETS_FOLDER}/assets_status`;
 export const KEY_ASSETS_LORE = `${ASSETS_FOLDER}/assets_lore`;
 export const KEY_ASSETS_LORE_STYLES = `${ASSETS_FOLDER}/assets_lore_styles`;
+export const KEY_ASSETS_LORE_STYLES_EDIT = `${ASSETS_FOLDER}/assets_lore_styles_edit`;
+export const KEY_ASSETS_LORE_STYLES_CATALOG = `${ASSETS_FOLDER}/assets_lore_styles_catalog`;
+export const KEY_ASSETS_LORE_STYLES_INVENTORY = `${ASSETS_FOLDER}/assets_lore_styles_inventory`;
+export const KEY_ASSETS_LORE_STYLES_ENTRY = `${ASSETS_FOLDER}/assets_lore_styles_entry`;
+export const KEY_ASSETS_LORE_STYLES_VIEW = `${ASSETS_FOLDER}/assets_lore_styles_view`;
 export const KEY_ASSETS_DETECTOR = `${ASSETS_FOLDER}/assets_detector`;
 export const KEY_ASSETS_LOGS = `${ASSETS_FOLDER}/assets_logs`;
 export const KEY_IMAGE_ASSETS_GENERATOR = `${ASSETS_FOLDER}/assets_generator`;
@@ -48,6 +53,11 @@ export const APP_ASSETS_TEXT = {
   [KEY_ASSETS_STATUS]: "assets status",
   [KEY_ASSETS_LORE]: "fracto lore",
   [KEY_ASSETS_LORE_STYLES]: "lore styles",
+  [KEY_ASSETS_LORE_STYLES_EDIT]: "edit",
+  [KEY_ASSETS_LORE_STYLES_CATALOG]: "catalog",
+  [KEY_ASSETS_LORE_STYLES_INVENTORY]: "inventory",
+  [KEY_ASSETS_LORE_STYLES_ENTRY]: "entry",
+  [KEY_ASSETS_LORE_STYLES_VIEW]: "view",
   [KEY_ASSETS_DETECTOR]: "artifact detector",
   [KEY_ASSETS_LOGS]: "assets logs",
   [KEY_IMAGE_ASSETS_GENERATOR]: "images",

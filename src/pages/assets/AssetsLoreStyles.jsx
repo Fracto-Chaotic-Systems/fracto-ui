@@ -2,7 +2,14 @@ import React, { Component } from "react";
 import { MainStyles as styles } from "../../styles/MainStyles.jsx";
 import AppText from "../../AppText.jsx";
 import AppSettings from "../../AppSettings.jsx";
-import { KEY_ASSETS_LORE_STYLES } from "../../text/AssetsText.jsx";
+import {
+  KEY_ASSETS_LORE_STYLES,
+  KEY_ASSETS_LORE_STYLES_CATALOG,
+  KEY_ASSETS_LORE_STYLES_EDIT,
+  KEY_ASSETS_LORE_STYLES_ENTRY,
+  KEY_ASSETS_LORE_STYLES_INVENTORY,
+  KEY_ASSETS_LORE_STYLES_VIEW,
+} from "../../text/AssetsText.jsx";
 import { KEY_STUDY_SPLITTER_POS_PX } from "../../settings/StudySettings.jsx";
 import { update_dimensions } from "../PageUtils.jsx";
 import CoolSplitter, {
@@ -26,6 +33,7 @@ import LoreStylesInventory from "./lore/styles/LoreStylesInventory.jsx";
 const UPDATE_INTERVAL_MS = 1000;
 const PHI = (1 + Math.sqrt(5)) / 2;
 const MIN_SPLITTER_REGION_PX = 100;
+const AREA_TITLE_HEIGHT_PX = 16;
 
 /** Initial scaffold for shared styling controls used by the lore section. */
 export class AssetsLoreStyles extends Component {
@@ -196,6 +204,24 @@ export class AssetsLoreStyles extends Component {
     };
   };
 
+  render_area_title = (title = "") => (
+    <div
+      style={{
+        height: `${AREA_TITLE_HEIGHT_PX}px`,
+        lineHeight: `${AREA_TITLE_HEIGHT_PX}px`,
+        backgroundColor: "#888888",
+        color: "#ffffff",
+        fontSize: `${AREA_TITLE_HEIGHT_PX - 4}px`,
+        textTransform: "uppercase",
+        letterSpacing: "2px",
+        paddingLeft: "5px",
+        textShadow: "1px 1px 2px rgba(0,0,0,0.75)",
+      }}
+    >
+      {title}
+    </div>
+  );
+
   render_upper_left = (layout) => {
     const { upper_position, top_height } = layout;
     return (
@@ -206,7 +232,11 @@ export class AssetsLoreStyles extends Component {
           flexShrink: 0,
         }}
       >
-        <LoreStylesEdit width_px={upper_position} height_px={top_height} />
+        {this.render_area_title(AppText.get(KEY_ASSETS_LORE_STYLES_EDIT))}
+        <LoreStylesEdit
+          width_px={upper_position}
+          height_px={Math.max(0, top_height - AREA_TITLE_HEIGHT_PX)}
+        />
       </CoolStyles.Block>
     );
   };
@@ -228,6 +258,7 @@ export class AssetsLoreStyles extends Component {
           height: "100%",
           flexShrink: 0,
           position: "relative",
+          top: "4px",
         }}
       >
         <CoolStyles.Block
@@ -237,21 +268,28 @@ export class AssetsLoreStyles extends Component {
             marginLeft: "5px",
           }}
         >
+          {this.render_area_title(AppText.get(KEY_ASSETS_LORE_STYLES_CATALOG))}
           <LoreStylesCatalog
             width_px={upper_right_width}
-            height_px={upper_right_position}
+            height_px={Math.max(0, upper_right_position - AREA_TITLE_HEIGHT_PX)}
           />
         </CoolStyles.Block>
         <CoolStyles.Block
           style={{
             height: `${Math.max(0, top_height - upper_right_position)}px`,
             overflow: "hidden",
-            marginLeft: "5px",
+            margin: "5px 0 0 5px",
           }}
         >
+          {this.render_area_title(
+            AppText.get(KEY_ASSETS_LORE_STYLES_INVENTORY),
+          )}
           <LoreStylesInventory
             width_px={upper_right_width}
-            height_px={Math.max(0, top_height - upper_right_position)}
+            height_px={Math.max(
+              0,
+              top_height - upper_right_position - AREA_TITLE_HEIGHT_PX,
+            )}
           />
         </CoolStyles.Block>
         <CoolSplitter
@@ -322,9 +360,10 @@ export class AssetsLoreStyles extends Component {
           boxSizing: "border-box",
         }}
       >
+        {this.render_area_title(AppText.get(KEY_ASSETS_LORE_STYLES_ENTRY))}
         <LoreStylesEntry
           width_px={Math.max(0, lower_position)}
-          height_px={bottom_height}
+          height_px={Math.max(0, bottom_height - AREA_TITLE_HEIGHT_PX)}
         />
       </CoolStyles.Block>
     );
@@ -343,9 +382,10 @@ export class AssetsLoreStyles extends Component {
           marginLeft: "5px",
         }}
       >
+        {this.render_area_title(AppText.get(KEY_ASSETS_LORE_STYLES_VIEW))}
         <LoreStylesView
           width_px={Math.max(0, lower_right_width - 10)}
-          height_px={bottom_height}
+          height_px={Math.max(0, bottom_height - AREA_TITLE_HEIGHT_PX)}
         />
       </CoolStyles.Block>
     );
@@ -361,7 +401,6 @@ export class AssetsLoreStyles extends Component {
     } = layout;
     const lower_bounds = {
       left: 0,
-      top: 0,
       width: rendered_width,
       height: bottom_height,
     };
@@ -372,6 +411,7 @@ export class AssetsLoreStyles extends Component {
           overflow: "hidden",
           position: "relative",
           display: "flex",
+          top: "4px",
         }}
       >
         {this.render_lower_left(layout)}
