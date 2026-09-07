@@ -235,7 +235,7 @@ export class AssetsLoreStyles extends Component {
           height: "100%",
           flexShrink: 0,
           position: "relative",
-          top: "30px",
+          top: "35px",
         }}
       >
         {this.render_area_title(AppText.get(KEY_ASSETS_LORE_STYLES_EDIT))}
@@ -271,30 +271,16 @@ export class AssetsLoreStyles extends Component {
           style={{
             height: `${upper_right_position}px`,
             overflow: "hidden",
-            margin: "5px 0 0 5px",
+            paddingLeft: "16px",
+            paddingTop: "12px",
           }}
         >
           {this.render_area_title(AppText.get(KEY_ASSETS_LORE_STYLES_CATALOG))}
           <LoreStylesCatalog
             width_px={upper_right_width}
-            height_px={Math.max(0, upper_right_position - AREA_TITLE_HEIGHT_PX)}
-          />
-        </CoolStyles.Block>
-        <CoolStyles.Block
-          style={{
-            height: `${Math.max(0, top_height - upper_right_position)}px`,
-            overflow: "hidden",
-            paddingLeft: "15px",
-          }}
-        >
-          {this.render_area_title(
-            AppText.get(KEY_ASSETS_LORE_STYLES_INVENTORY),
-          )}
-          <LoreStylesInventory
-            width_px={upper_right_width}
             height_px={Math.max(
               0,
-              top_height - upper_right_position - AREA_TITLE_HEIGHT_PX,
+              upper_right_position - AREA_TITLE_HEIGHT_PX - 10,
             )}
           />
         </CoolStyles.Block>
@@ -313,6 +299,24 @@ export class AssetsLoreStyles extends Component {
           max_position={upper_right_splitter_max}
           on_change={this.on_upper_right_splitter_change}
         />
+        <CoolStyles.Block
+          style={{
+            height: `${Math.max(0, top_height - upper_right_position)}px`,
+            overflow: "hidden",
+            paddingLeft: "15px",
+          }}
+        >
+          {this.render_area_title(
+            AppText.get(KEY_ASSETS_LORE_STYLES_INVENTORY),
+          )}
+          <LoreStylesInventory
+            width_px={upper_right_width}
+            height_px={Math.max(
+              0,
+              top_height - upper_right_position - AREA_TITLE_HEIGHT_PX,
+            )}
+          />
+        </CoolStyles.Block>
       </CoolStyles.Block>
     );
   };
@@ -342,7 +346,7 @@ export class AssetsLoreStyles extends Component {
           bar_width_px={SPLITTER_WIDTH_PX}
           container_bounds={{
             left: 0,
-            top: `${TITLE_BAR_HEIGHT_PX}px`,
+            top: `${TITLE_BAR_HEIGHT_PX + 10}px`,
             width: rendered_width,
             height: top_height,
           }}
