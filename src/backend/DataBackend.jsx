@@ -119,15 +119,19 @@ export class DataBackend {
    * Requests sampled smooth circuitry for a Mandelbrot focal point.
    * @param {{x:number,y:number}} focal_point Complex-plane focal point used as c.
    * @param {Function} cb Called with the data-server response or an error object.
+   * @param {boolean} optimize_polarity Whether to request exhaustive polarity optimization.
    * @returns {void} The request is deferred by 250ms.
    * @calledBy CircuitryChart
    */
-  static get_circuitry = (focal_point, cb) => {
+  static get_circuitry = (focal_point, cb, optimize_polarity = false) => {
     setTimeout(async () => {
       const params = new URLSearchParams({
         re: `${focal_point.x}`,
         im: `${focal_point.y}`,
       });
+      if (optimize_polarity) {
+        params.set("optimize_polarity", "true");
+      }
       try {
         const response = await fetch(
           `${DATA_ORIGIN}/circuitry?${params}`,

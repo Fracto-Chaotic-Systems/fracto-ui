@@ -21,6 +21,7 @@ export const click_point_chart = (
   point_background_color = null,
   other_sets_show_line = true,
   other_sets_point_radius = null,
+  radial_origin = null,
 ) => {
   if (!set1) {
     return [];
@@ -34,8 +35,31 @@ export const click_point_chart = (
           (item) => item.x === other_sets[1].x && item.y === other_sets[1].y,
         )
       : false;
+  const radial_datasets = radial_origin
+    ? other_sets.map((point, index) => ({
+        Id: `radial-${index}`,
+        data: [radial_origin, point],
+        backgroundColor: "#888888",
+        borderColor: "#888888",
+        pointRadius: 0,
+        showLine: true,
+      }))
+    : [];
+  const origin_dataset = radial_origin
+    ? [
+        {
+          Id: "radial-origin",
+          data: [radial_origin],
+          backgroundColor: "#555555",
+          pointRadius: 5,
+          showLine: false,
+        },
+      ]
+    : [];
   const data_dataset = {
     datasets: [
+      ...radial_datasets,
+      ...origin_dataset,
       {
         Id: 2,
         // label: in_cardioid ? 'Q' : 'Q',
@@ -60,7 +84,10 @@ export const click_point_chart = (
     ],
   };
   try {
-    const bounds = find_bounds(set1, other_sets, in_cardioid, escaper);
+    const bounds_other_sets = radial_origin
+      ? [...other_sets, radial_origin]
+      : other_sets;
+    const bounds = find_bounds(set1, bounds_other_sets, in_cardioid, escaper);
     const options = get_scatter_options(bounds);
     return (
       <Scatter
