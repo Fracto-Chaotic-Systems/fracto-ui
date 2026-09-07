@@ -18,6 +18,9 @@ export const click_point_chart = (
   in_cardioid = false,
   escaper = false,
   backgroundImagePlugin = null,
+  point_background_color = null,
+  other_sets_show_line = true,
+  other_sets_point_radius = null,
 ) => {
   if (!set1) {
     return [];
@@ -38,16 +41,19 @@ export const click_point_chart = (
         // label: in_cardioid ? 'Q' : 'Q',
         data: JSON.parse(JSON.stringify(other_sets)),
         backgroundColor: "black",
-        pointRadius: in_animation ? 3 : 2,
+        pointRadius: other_sets_point_radius || (in_animation ? 3 : 2),
         borderColor: in_animation ? ANIMATION_COLOR : "#888888",
         borderDash: in_animation ? [1, 0] : [5, 5], // 5px dash, 5px gap
-        showLine: true,
+        showLine: other_sets_show_line,
       },
       {
         Id: 1,
         // label: set1_label,
         data: JSON.parse(JSON.stringify(set1)),
         backgroundColor: FractoUtil.fracto_pattern_color(cardinality || 0),
+        pointBackgroundColor:
+          point_background_color ||
+          FractoUtil.fracto_pattern_color(cardinality || 0),
         pointRadius: in_animation ? 2 : 3,
         showLine: true,
       },

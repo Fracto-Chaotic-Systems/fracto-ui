@@ -135,7 +135,10 @@ export class DataBackend {
         );
         const data = await response.json();
         if (!response.ok) {
-          cb({ error: data.error || `Circuitry request failed (${response.status})` });
+          cb({
+            error:
+              data.error || `Circuitry request failed (${response.status})`,
+          });
           return;
         }
         cb(data);

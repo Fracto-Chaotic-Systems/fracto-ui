@@ -15,7 +15,6 @@ import { KEY_STUDY_CIRCUITRY } from "../../text/StudyText.jsx";
 
 import NavigatorSplitterLayout from "../../navigator/NavigatorSplitterLayout.jsx";
 import CircuitryChart from "./circuitry/CircuitryChart.jsx";
-import CoolStyles from "../../utils/ui/styles/CoolStyles.jsx";
 
 const UPDATE_INTERVAL_MS = 1000;
 
@@ -89,8 +88,10 @@ export class StudyCircuitry extends Component {
       steps_key: KEY_STUDY_CIRCUITRY_STEPS_SPLITTER_POS,
       section_key: KEY_STUDY_SPLITTER_POS_PX,
     };
-    const wrapper_style = {
-      textAlign: "left",
+    const splitter_pos = AppSettings.get(splitter_keys.main_key);
+    const chart_style = {
+      left: `${splitter_pos}px`,
+      top: `${top}px`,
     };
     return [
       <styles.SectionTitle key={"study-overview-title"}>
@@ -103,14 +104,14 @@ export class StudyCircuitry extends Component {
           frame_settings_key={KEY_STUDY_CIRCUITRY_FRAME_SETTINGS}
           splitter_keys={splitter_keys}
         />
-        <CoolStyles.InlineBlock style={wrapper_style}>
-          <CircuitryChart
-            focal_point={frame_settings.focal_point}
-            height_px={rendered_height}
-            width_px={rendered_width}
-          />
-        </CoolStyles.InlineBlock>
       </styles.TightCenteredBlock>,
+      <styles.FixedInlineBlock key="circuitry-chart" style={chart_style}>
+        <CircuitryChart
+          focal_point={frame_settings.focal_point}
+          height_px={rendered_height}
+          width_px={rendered_width}
+        />
+      </styles.FixedInlineBlock>,
     ];
   }
 }
