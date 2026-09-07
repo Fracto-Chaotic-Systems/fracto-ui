@@ -18,10 +18,11 @@ export class LoreStylesEdit extends Component {
           width: `${width_px}px`,
           height: `${height_px}px`,
           backgroundColor: "#d9f7be",
-          padding: "3px",
         }}
       >
-        {`LoreStylesEdit ${width_px}x${height_px}`}
+        <div style={{ paddingLeft: "5px" }}>
+          {`LoreStylesEdit ${width_px}x${height_px}`}
+        </div>
       </div>
     );
   }

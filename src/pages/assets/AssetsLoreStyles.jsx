@@ -1,8 +1,5 @@
 import React, { Component } from "react";
-import {
-  MainStyles as styles,
-  TITLE_BAR_HEIGHT_PX,
-} from "../../styles/MainStyles.jsx";
+import { MainStyles as styles } from "../../styles/MainStyles.jsx";
 import AppText from "../../AppText.jsx";
 import AppSettings from "../../AppSettings.jsx";
 import {
@@ -147,8 +144,13 @@ export class AssetsLoreStyles extends Component {
       outer_splitter_max,
       Math.max(outer_splitter_min, splitter_position),
     );
-    const top_height = bounded_outer_position;
-    const bottom_height = Math.max(0, rendered_height - top_height);
+    const splitter_half_width = SPLITTER_WIDTH_PX / 2;
+    const top_height = Math.max(
+      0,
+      bounded_outer_position - splitter_half_width,
+    );
+    const bottom_top = bounded_outer_position + splitter_half_width;
+    const bottom_height = Math.max(0, rendered_height - bottom_top);
     const upper_splitter_min = rendered_width * 0.7;
     const upper_splitter_max = rendered_width * 0.9;
     const upper_position = Math.min(
@@ -158,6 +160,9 @@ export class AssetsLoreStyles extends Component {
         upper_splitter_position || rendered_width * 0.8,
       ),
     );
+    const upper_left_width = Math.max(0, upper_position - splitter_half_width);
+    const upper_right_left = upper_position + splitter_half_width;
+    const upper_right_width = Math.max(0, rendered_width - upper_right_left);
     const upper_right_height = top_height;
     const upper_right_splitter_min = upper_right_height * 0.2;
     const upper_right_splitter_max = upper_right_height * 0.8;
@@ -167,6 +172,15 @@ export class AssetsLoreStyles extends Component {
         upper_right_splitter_min,
         upper_right_splitter_position || upper_right_height / 2,
       ),
+    );
+    const upper_right_top_height = Math.max(
+      0,
+      upper_right_position - splitter_half_width,
+    );
+    const upper_right_bottom_top = upper_right_position + splitter_half_width;
+    const upper_right_bottom_height = Math.max(
+      0,
+      upper_right_height - upper_right_bottom_top,
     );
     const lower_splitter_min = Math.min(
       rendered_width,
@@ -186,22 +200,36 @@ export class AssetsLoreStyles extends Component {
         lower_splitter_position || rendered_width / 2,
       ),
     );
+    const lower_left_width = Math.max(0, lower_position - splitter_half_width);
+    const lower_right_left = lower_position + SPLITTER_WIDTH_PX;
+    const lower_right_width = Math.max(0, rendered_width - lower_right_left);
     return {
       rendered_width,
       rendered_height,
       bounded_outer_position,
+      splitter_half_width,
       top_height,
+      bottom_top,
       bottom_height,
       outer_splitter_min,
       outer_splitter_max,
       upper_position,
+      upper_left_width,
+      upper_right_left,
+      upper_right_width,
       upper_splitter_min,
       upper_splitter_max,
       upper_right_height,
       upper_right_position,
+      upper_right_top_height,
+      upper_right_bottom_top,
+      upper_right_bottom_height,
       upper_right_splitter_min,
       upper_right_splitter_max,
       lower_position,
+      lower_left_width,
+      lower_right_left,
+      lower_right_width,
       lower_splitter_min,
       lower_splitter_max,
     };
@@ -227,20 +255,20 @@ export class AssetsLoreStyles extends Component {
   );
 
   render_upper_left = (layout) => {
-    const { upper_position, top_height } = layout;
+    const { upper_left_width, top_height } = layout;
     return (
       <CoolStyles.Block
         style={{
-          width: `${upper_position}px`,
-          height: "100%",
-          flexShrink: 0,
-          position: "relative",
-          top: "35px",
+          position: "absolute",
+          left: 0,
+          top: 0,
+          width: `${upper_left_width}px`,
+          height: `${top_height}px`,
         }}
       >
         {this.render_area_title(AppText.get(KEY_ASSETS_LORE_STYLES_EDIT))}
         <LoreStylesEdit
-          width_px={upper_position}
+          width_px={upper_left_width}
           height_px={Math.max(0, top_height - AREA_TITLE_HEIGHT_PX)}
         />
       </CoolStyles.Block>
@@ -249,30 +277,34 @@ export class AssetsLoreStyles extends Component {
 
   render_upper_right = (layout) => {
     const {
-      rendered_width,
       top_height,
-      upper_position,
+      upper_right_left,
+      upper_right_width,
       upper_right_position,
+      upper_right_top_height,
+      upper_right_bottom_top,
+      upper_right_bottom_height,
       upper_right_splitter_min,
       upper_right_splitter_max,
     } = layout;
-    const upper_right_width = Math.max(0, rendered_width - upper_position);
     return (
       <CoolStyles.Block
         style={{
+          position: "absolute",
+          left: `${upper_right_left}px`,
+          top: 0,
           width: `${upper_right_width}px`,
-          height: "100%",
-          flexShrink: 0,
-          position: "relative",
-          top: "25px",
+          height: `${top_height}px`,
         }}
       >
         <CoolStyles.Block
           style={{
-            height: `${upper_right_position}px`,
+            position: "absolute",
+            left: 0,
+            top: 0,
+            width: "100%",
+            height: `${upper_right_top_height}px`,
             overflow: "hidden",
-            paddingLeft: "16px",
-            paddingTop: "12px",
           }}
         >
           {this.render_area_title(AppText.get(KEY_ASSETS_LORE_STYLES_CATALOG))}
@@ -280,7 +312,7 @@ export class AssetsLoreStyles extends Component {
             width_px={upper_right_width}
             height_px={Math.max(
               0,
-              upper_right_position - AREA_TITLE_HEIGHT_PX - 10,
+              upper_right_top_height - AREA_TITLE_HEIGHT_PX,
             )}
           />
         </CoolStyles.Block>
@@ -301,9 +333,12 @@ export class AssetsLoreStyles extends Component {
         />
         <CoolStyles.Block
           style={{
-            height: `${Math.max(0, top_height - upper_right_position)}px`,
+            position: "absolute",
+            left: 0,
+            top: `${upper_right_bottom_top}px`,
+            width: "100%",
+            height: `${upper_right_bottom_height}px`,
             overflow: "hidden",
-            paddingLeft: "15px",
           }}
         >
           {this.render_area_title(
@@ -313,7 +348,7 @@ export class AssetsLoreStyles extends Component {
             width_px={upper_right_width}
             height_px={Math.max(
               0,
-              top_height - upper_right_position - AREA_TITLE_HEIGHT_PX,
+              upper_right_bottom_height - AREA_TITLE_HEIGHT_PX,
             )}
           />
         </CoolStyles.Block>
@@ -332,10 +367,12 @@ export class AssetsLoreStyles extends Component {
     return (
       <CoolStyles.Block
         style={{
+          position: "absolute",
+          left: 0,
+          top: 0,
+          width: `${rendered_width}px`,
           height: `${top_height}px`,
           overflow: "hidden",
-          position: "relative",
-          display: "flex",
         }}
       >
         {this.render_upper_left(layout)}
@@ -346,7 +383,7 @@ export class AssetsLoreStyles extends Component {
           bar_width_px={SPLITTER_WIDTH_PX}
           container_bounds={{
             left: 0,
-            top: `${TITLE_BAR_HEIGHT_PX + 10}px`,
+            top: 0,
             width: rendered_width,
             height: top_height,
           }}
@@ -360,19 +397,21 @@ export class AssetsLoreStyles extends Component {
   };
 
   render_lower_left = (layout) => {
-    const { bottom_height, lower_position } = layout;
+    const { bottom_height, lower_left_width } = layout;
     return (
       <CoolStyles.Block
         style={{
-          width: `${lower_position}px`,
-          height: "100%",
-          flexShrink: 0,
+          position: "absolute",
+          left: 0,
+          top: 0,
+          width: `${lower_left_width}px`,
+          height: `${bottom_height}px`,
           boxSizing: "border-box",
         }}
       >
         {this.render_area_title(AppText.get(KEY_ASSETS_LORE_STYLES_ENTRY))}
         <LoreStylesEntry
-          width_px={Math.max(0, lower_position)}
+          width_px={lower_left_width}
           height_px={Math.max(0, bottom_height - AREA_TITLE_HEIGHT_PX)}
         />
       </CoolStyles.Block>
@@ -380,16 +419,16 @@ export class AssetsLoreStyles extends Component {
   };
 
   render_lower_right = (layout) => {
-    const { rendered_width, bottom_height, lower_position } = layout;
-    const lower_right_width = Math.max(0, rendered_width - lower_position);
+    const { bottom_height, lower_right_left, lower_right_width } = layout;
     return (
       <CoolStyles.Block
         style={{
+          position: "absolute",
+          left: `${lower_right_left}px`,
+          top: 0,
           width: `${lower_right_width}px`,
-          height: "100%",
-          flexShrink: 0,
+          height: `${bottom_height}px`,
           boxSizing: "border-box",
-          marginLeft: "5px",
         }}
       >
         {this.render_area_title(AppText.get(KEY_ASSETS_LORE_STYLES_VIEW))}
@@ -404,6 +443,7 @@ export class AssetsLoreStyles extends Component {
   render_lower_section = (layout) => {
     const {
       rendered_width,
+      bottom_top,
       bottom_height,
       lower_position,
       lower_splitter_min,
@@ -417,11 +457,12 @@ export class AssetsLoreStyles extends Component {
     return (
       <CoolStyles.Block
         style={{
+          position: "absolute",
+          left: 0,
+          top: `${bottom_top}px`,
+          width: `${rendered_width}px`,
           height: `${bottom_height}px`,
           overflow: "hidden",
-          position: "relative",
-          display: "flex",
-          top: "4px",
         }}
       >
         {this.render_lower_left(layout)}

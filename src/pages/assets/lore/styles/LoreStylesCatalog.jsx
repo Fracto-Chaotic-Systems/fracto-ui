@@ -19,7 +19,6 @@ export class LoreStylesCatalog extends Component {
           width: `${width_px}px`,
           height: `${height_px}px`,
           backgroundColor: "#fff1b8",
-          paddingLeft: "3px",
         }}
       >
         <CoolInputText
@@ -32,7 +31,9 @@ export class LoreStylesCatalog extends Component {
             boxSizing: "border-box",
           }}
         />
-        {`LoreStylesCatalog ${width_px}x${height_px}`}
+        <div style={{ paddingLeft: "5px" }}>
+          {`LoreStylesCatalog ${width_px}x${height_px}`}
+        </div>
       </div>
     );
   }
