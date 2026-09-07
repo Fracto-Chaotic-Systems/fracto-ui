@@ -106,8 +106,8 @@ export class StudyCircuitry extends Component {
         <CoolStyles.InlineBlock style={wrapper_style}>
           <CircuitryChart
             focal_point={frame_settings.focal_point}
-            rendered_height={rendered_height}
-            rendered_width={rendered_width}
+            height_px={rendered_height}
+            width_px={rendered_width}
           />
         </CoolStyles.InlineBlock>
       </styles.TightCenteredBlock>,

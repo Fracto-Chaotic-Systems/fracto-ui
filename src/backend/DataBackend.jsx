@@ -116,6 +116,36 @@ export class DataBackend {
   };
 
   /**
+   * Requests sampled smooth circuitry for a Mandelbrot focal point.
+   * @param {{x:number,y:number}} focal_point Complex-plane focal point used as c.
+   * @param {Function} cb Called with the data-server response or an error object.
+   * @returns {void} The request is deferred by 250ms.
+   * @calledBy CircuitryChart
+   */
+  static get_circuitry = (focal_point, cb) => {
+    setTimeout(async () => {
+      const params = new URLSearchParams({
+        re: `${focal_point.x}`,
+        im: `${focal_point.y}`,
+      });
+      try {
+        const response = await fetch(
+          `${DATA_ORIGIN}/circuitry?${params}`,
+          FETCH_JSON_HEADERS,
+        );
+        const data = await response.json();
+        if (!response.ok) {
+          cb({ error: data.error || `Circuitry request failed (${response.status})` });
+          return;
+        }
+        cb(data);
+      } catch (error) {
+        cb({ error: error.message });
+      }
+    }, 250);
+  };
+
+  /**
    * Lists lore content for a category.
    * @param {number|string} category_id Lore category identifier.
    * @param {Function} cb Called with the service response.
