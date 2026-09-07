@@ -12,6 +12,7 @@ export const KEY_STUDY_INLINES = `${STUDY_FOLDER}/study_inlines`;
 export const KEY_STUDY_FIELDS = `${STUDY_FOLDER}/study_fields`;
 export const KEY_STUDY_CIRCUITRY = `${STUDY_FOLDER}/study_circuitry`;
 export const KEY_STUDY_CIRCUITRY_OPTIMIZED = `${STUDY_FOLDER}/circuitry_optimized`;
+export const KEY_STUDY_CIRCUITRY_RADIAL_SWEEP = `${STUDY_FOLDER}/circuitry_radial_sweep`;
 export const KEY_STUDY_MINIBROTS = `${STUDY_FOLDER}/study_minibrots`;
 export const KEY_MAGNITUDES_TITLE = `${STUDY_FOLDER}/magnitudes_title`;
 export const KEY_POINTS_TITLE = `${STUDY_FOLDER}/points_title`;
@@ -47,6 +48,7 @@ export const APP_STUDY_TEXT = {
   [KEY_STUDY_FIELDS]: "orbital fields",
   [KEY_STUDY_CIRCUITRY]: "orbital circuitry",
   [KEY_STUDY_CIRCUITRY_OPTIMIZED]: "optimized",
+  [KEY_STUDY_CIRCUITRY_RADIAL_SWEEP]: "radial sweep",
   [KEY_MAGNITUDES_TITLE]: "magnitudes",
   [KEY_POINTS_TITLE]: "orbitals",
   [KEY_MERIDIANS_TITLE]: "meridians",

@@ -120,10 +120,16 @@ export class DataBackend {
    * @param {{x:number,y:number}} focal_point Complex-plane focal point used as c.
    * @param {Function} cb Called with the data-server response or an error object.
    * @param {boolean} optimize_polarity Whether to request exhaustive polarity optimization.
+   * @param {string} interpolation Interpolation mode, such as `hermite` or `radial_sweep`.
    * @returns {void} The request is deferred by 250ms.
    * @calledBy CircuitryChart
    */
-  static get_circuitry = (focal_point, cb, optimize_polarity = false) => {
+  static get_circuitry = (
+    focal_point,
+    cb,
+    optimize_polarity = false,
+    interpolation = "hermite",
+  ) => {
     setTimeout(async () => {
       const params = new URLSearchParams({
         re: `${focal_point.x}`,
@@ -131,6 +137,9 @@ export class DataBackend {
       });
       if (optimize_polarity) {
         params.set("optimize_polarity", "true");
+      }
+      if (interpolation !== "hermite") {
+        params.set("interpolation", interpolation);
       }
       try {
         const response = await fetch(

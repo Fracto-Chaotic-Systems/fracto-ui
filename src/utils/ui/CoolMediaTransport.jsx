@@ -53,6 +53,7 @@ export class CoolMediaTransport extends Component {
     on_operation: PropTypes.func.isRequired,
     operations: PropTypes.arrayOf(PropTypes.string),
     disabled: PropTypes.bool,
+    button_size_px: PropTypes.number,
     on_goto_begin: PropTypes.func,
     on_goto_end: PropTypes.func,
   };
@@ -66,11 +67,13 @@ export class CoolMediaTransport extends Component {
   };
 
   render() {
-    const { width_px, on_operation, operations, disabled } = this.props;
+    const { width_px, on_operation, operations, disabled, button_size_px } =
+      this.props;
     return operations.map((operation, i) => {
       const button = OPERATION_BUTTONS[operation];
       if (!button) return null;
       const button_size =
+        button_size_px ||
         Math.round(width_px / Math.max(operations.length, 1)) + 4;
       const button_style = {
         width: `${button_size}px`,

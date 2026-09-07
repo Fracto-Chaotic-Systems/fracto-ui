@@ -22,6 +22,7 @@ export const click_point_chart = (
   other_sets_show_line = true,
   other_sets_point_radius = null,
   radial_origin = null,
+  highlighted_point = null,
 ) => {
   if (!set1) {
     return [];
@@ -56,10 +57,23 @@ export const click_point_chart = (
         },
       ]
     : [];
+  const highlighted_dataset = highlighted_point
+    ? [
+        {
+          Id: "highlighted-point",
+          data: [highlighted_point],
+          backgroundColor: "#ffcc33",
+          borderColor: "#333333",
+          pointRadius: 6,
+          showLine: false,
+        },
+      ]
+    : [];
   const data_dataset = {
     datasets: [
       ...radial_datasets,
       ...origin_dataset,
+      ...highlighted_dataset,
       {
         Id: 2,
         // label: in_cardioid ? 'Q' : 'Q',
