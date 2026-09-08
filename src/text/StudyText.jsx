@@ -15,6 +15,10 @@ export const KEY_STUDY_CIRCUITRY_OPTIMIZED = `${STUDY_FOLDER}/circuitry_optimize
 export const KEY_STUDY_CIRCUITRY_RADIAL_SWEEP = `${STUDY_FOLDER}/circuitry_radial_sweep`;
 export const KEY_STUDY_CIRCUITRY_NO_ORBITAL = `${STUDY_FOLDER}/circuitry_no_orbital`;
 export const KEY_STUDY_CIRCUITRY_ORBITAL_COORDINATES = `${STUDY_FOLDER}/circuitry_orbital_coordinates`;
+export const KEY_STUDY_CIRCUITRY_ORBITAL_DESCRIPTION = `${STUDY_FOLDER}/circuitry_orbital_description`;
+export const KEY_STUDY_CIRCUITRY_ORBITAL_PROGRESS = `${STUDY_FOLDER}/circuitry_orbital_progress`;
+export const KEY_STUDY_CIRCUITRY_CLOCKWISE = `${STUDY_FOLDER}/circuitry_clockwise`;
+export const KEY_STUDY_CIRCUITRY_COUNTER_CLOCKWISE = `${STUDY_FOLDER}/circuitry_counter_clockwise`;
 export const KEY_STUDY_MINIBROTS = `${STUDY_FOLDER}/study_minibrots`;
 export const KEY_MAGNITUDES_TITLE = `${STUDY_FOLDER}/magnitudes_title`;
 export const KEY_POINTS_TITLE = `${STUDY_FOLDER}/points_title`;
@@ -53,6 +57,12 @@ export const APP_STUDY_TEXT = {
   [KEY_STUDY_CIRCUITRY_RADIAL_SWEEP]: "radial sweep",
   [KEY_STUDY_CIRCUITRY_NO_ORBITAL]: "point has no orbital",
   [KEY_STUDY_CIRCUITRY_ORBITAL_COORDINATES]: "coordinates",
+  [KEY_STUDY_CIRCUITRY_ORBITAL_DESCRIPTION]:
+    "a {cycles}-cycle, {points}-point orbital",
+  [KEY_STUDY_CIRCUITRY_ORBITAL_PROGRESS]:
+    "progressing in the {direction} direction",
+  [KEY_STUDY_CIRCUITRY_CLOCKWISE]: "clockwise",
+  [KEY_STUDY_CIRCUITRY_COUNTER_CLOCKWISE]: "counter-clockwise",
   [KEY_MAGNITUDES_TITLE]: "magnitudes",
   [KEY_POINTS_TITLE]: "orbitals",
   [KEY_MERIDIANS_TITLE]: "meridians",

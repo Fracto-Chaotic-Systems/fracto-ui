@@ -7,10 +7,15 @@ ChartJS.register(...registerables);
 import { MainStyles as styles } from "../../../styles/MainStyles.jsx";
 import DataBackend from "../../../backend/DataBackend.jsx";
 import AppText from "../../../AppText.jsx";
+import { render_pattern_block } from "../StudyUtils.jsx";
 import {
   KEY_STUDY_CIRCUITRY_NO_ORBITAL,
   KEY_STUDY_CIRCUITRY_RADIAL_SWEEP,
   KEY_STUDY_CIRCUITRY_ORBITAL_COORDINATES,
+  KEY_STUDY_CIRCUITRY_ORBITAL_DESCRIPTION,
+  KEY_STUDY_CIRCUITRY_ORBITAL_PROGRESS,
+  KEY_STUDY_CIRCUITRY_CLOCKWISE,
+  KEY_STUDY_CIRCUITRY_COUNTER_CLOCKWISE,
 } from "../../../text/StudyText.jsx";
 import { render_coordinates } from "../../../utils/Dom.jsx";
 import { click_point_chart } from "../../../utils/render/PatternsUtils.jsx";
@@ -249,6 +254,44 @@ export class CircuitryChart extends Component {
       : null;
     const highlighted_point =
       selected_orbital_point || points[animation_index] || null;
+    const orbital_cycle_count = radial_sweep
+      ? Math.max(
+          1,
+          Math.round(
+            Math.abs(
+              (circuitry_data?.result?.at(-2)?.t || 0) -
+                (circuitry_data?.result?.[0]?.t || 0),
+            ) /
+              (2 * Math.PI),
+          ),
+        )
+      : 1;
+    const angular_delta =
+      (circuitry_data?.result?.[1]?.t || 0) -
+      (circuitry_data?.result?.[0]?.t || 0);
+    const orbital_direction = AppText.get(
+      angular_delta < 0
+        ? KEY_STUDY_CIRCUITRY_CLOCKWISE
+        : KEY_STUDY_CIRCUITRY_COUNTER_CLOCKWISE,
+    );
+    const orbital_description_template =
+      AppText.get(KEY_STUDY_CIRCUITRY_ORBITAL_DESCRIPTION) || "";
+    const [description_prefix, description_after_cycles = ""] =
+      orbital_description_template.split("{cycles}");
+    const [description_middle, description_suffix = ""] =
+      description_after_cycles.split("{points}");
+    const orbital_number_style = {
+      color: "black",
+      fontFamily: "monospace",
+      fontWeight: "bold",
+    };
+    const orbital_text_style = {
+      color: "#666666",
+      fontStyle: "italic",
+    };
+    const orbital_progress = AppText.get(
+      KEY_STUDY_CIRCUITRY_ORBITAL_PROGRESS,
+    )?.replace("{direction}", orbital_direction);
     const chart_style = {
       ...IMAGE_FRAME_STYLE,
       width: `${chart_size}px`,
@@ -302,13 +345,49 @@ export class CircuitryChart extends Component {
           ) : null}
         </styles.ContentWrapper>
         <styles.ContentWrapper style={options_style}>
-          <CoolMediaTransport
-            width_px={Math.max(options_width, 100)}
-            button_size_px={35}
-            operations={TRANSPORT_OPERATIONS}
-            on_operation={this.on_transport_operation}
-            disabled={points.length === 0}
-          />
+          {circuitry_data?.cardinality ? (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                marginTop: "0.5rem",
+              }}
+            >
+              {render_pattern_block(circuitry_data.cardinality, 28)}
+              <span style={{ display: "flex", flexDirection: "column" }}>
+                <span style={{ lineHeight: "1rem" }}>
+                  <span style={orbital_text_style}>{description_prefix}</span>
+                  <span style={orbital_number_style}>
+                    {orbital_cycle_count}
+                  </span>
+                  <span style={orbital_text_style}>{description_middle}</span>
+                  <span style={orbital_number_style}>
+                    {circuitry_data?.cardinality || 0}
+                  </span>
+                  <span style={orbital_text_style}>{description_suffix}</span>
+                </span>
+                <span
+                  style={{
+                    fontSize: "0.75rem",
+                    lineHeight: "0.75rem",
+                    paddingLeft: "0.5rem",
+                  }}
+                >
+                  {orbital_progress}
+                </span>
+              </span>
+            </div>
+          ) : null}
+          <div style={{ marginTop: "0.5rem" }}>
+            <CoolMediaTransport
+              width_px={Math.max(options_width, 100)}
+              button_size_px={35}
+              operations={TRANSPORT_OPERATIONS}
+              on_operation={this.on_transport_operation}
+              disabled={points.length === 0}
+            />
+          </div>
           <div style={{ marginTop: "0.5rem" }}>
             <CoolTable
               columns={ORBITAL_POINT_COLUMNS}
