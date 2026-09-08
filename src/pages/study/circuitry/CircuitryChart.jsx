@@ -8,7 +8,7 @@ import { MainStyles as styles } from "../../../styles/MainStyles.jsx";
 import DataBackend from "../../../backend/DataBackend.jsx";
 import AppText from "../../../AppText.jsx";
 import {
-  KEY_STUDY_CIRCUITRY_OPTIMIZED,
+  KEY_STUDY_CIRCUITRY_NO_ORBITAL,
   KEY_STUDY_CIRCUITRY_RADIAL_SWEEP,
 } from "../../../text/StudyText.jsx";
 import { click_point_chart } from "../../../utils/render/PatternsUtils.jsx";
@@ -28,6 +28,7 @@ const TRANSPORT_OPERATIONS = [
   TRANSPORT_END,
 ];
 const PATH_ANIMATION_RATE_FPS = 20;
+const GOLDEN_RATIO = 1.618;
 
 export class CircuitryChart extends Component {
   static propTypes = {
@@ -39,7 +40,6 @@ export class CircuitryChart extends Component {
   state = {
     circuitry_data: null,
     error: null,
-    optimized: false,
     radial_sweep: false,
     animation_index: 0,
     animation_playing: false,
@@ -66,10 +66,7 @@ export class CircuitryChart extends Component {
       this.load_circuitry(focal_point);
       return;
     }
-    if (
-      prevState.optimized !== this.state.optimized ||
-      prevState.radial_sweep !== this.state.radial_sweep
-    ) {
+    if (prevState.radial_sweep !== this.state.radial_sweep) {
       this.load_circuitry(focal_point);
     }
   }
@@ -99,13 +96,9 @@ export class CircuitryChart extends Component {
           animation_index: 0,
         });
       },
-      this.state.optimized,
+      true,
       this.state.radial_sweep ? "radial_sweep" : "hermite",
     );
-  };
-
-  on_optimized_changed = (event) => {
-    this.setState({ optimized: event.target.checked });
   };
 
   on_radial_sweep_changed = (event) => {
@@ -167,8 +160,7 @@ export class CircuitryChart extends Component {
 
   render() {
     const { width_px, height_px } = this.props;
-    const { circuitry_data, error, optimized, radial_sweep, animation_index } =
-      this.state;
+    const { circuitry_data, error, radial_sweep, animation_index } = this.state;
     const chart_size = Math.floor(
       Math.max(0, Math.min(width_px, height_px)) * 0.85,
     );
@@ -176,6 +168,8 @@ export class CircuitryChart extends Component {
       x: C.re,
       y: C.im,
     }));
+    const no_orbital =
+      circuitry_data?.orbit_status === "outside_mandelbrot_set";
     const orbital_points = (circuitry_data?.result || [])
       .filter(({ t }, index) =>
         radial_sweep ? index % 50 === 0 : Math.abs(t - Math.round(t)) < 1e-9,
@@ -191,6 +185,20 @@ export class CircuitryChart extends Component {
     const chart_style = {
       width: `${chart_size}px`,
       height: `${chart_size}px`,
+      display: "inline-block",
+      backgroundColor: no_orbital ? "#eeeeee" : undefined,
+      position: no_orbital ? "relative" : undefined,
+    };
+    const no_orbital_message_style = {
+      position: "absolute",
+      top: `${(1 - 1 / GOLDEN_RATIO) * 100}%`,
+      left: "0",
+      width: "100%",
+      transform: "translateY(-50%)",
+      color: "#999999",
+      fontStyle: "italic",
+      fontSize: "1.125rem",
+      textAlign: "center",
     };
     const options_width = Math.max(0, width_px - chart_size);
     const options_style = {
@@ -203,22 +211,26 @@ export class CircuitryChart extends Component {
     return (
       <>
         <styles.ContentWrapper style={chart_style}>
-          {error
-            ? error
-            : points.length > 0
-              ? click_point_chart(
-                  points,
-                  orbital_points,
-                  false,
-                  false,
-                  null,
-                  "#888888",
-                  false,
-                  4,
-                  radial_origin,
-                  highlighted_point,
-                )
-              : null}
+          {error ? (
+            error
+          ) : no_orbital ? (
+            <span style={no_orbital_message_style}>
+              {AppText.get(KEY_STUDY_CIRCUITRY_NO_ORBITAL)}
+            </span>
+          ) : points.length > 0 ? (
+            click_point_chart(
+              points,
+              orbital_points,
+              false,
+              false,
+              null,
+              "#888888",
+              false,
+              4,
+              radial_origin,
+              highlighted_point,
+            )
+          ) : null}
         </styles.ContentWrapper>
         <styles.ContentWrapper style={options_style}>
           <CoolMediaTransport
@@ -228,16 +240,6 @@ export class CircuitryChart extends Component {
             on_operation={this.on_transport_operation}
             disabled={points.length === 0}
           />
-          <label>
-            <input
-              type="checkbox"
-              checked={optimized}
-              onChange={this.on_optimized_changed}
-            />
-            <span style={{ marginLeft: "0.35rem" }}>
-              {AppText.get(KEY_STUDY_CIRCUITRY_OPTIMIZED)}
-            </span>
-          </label>
           <label style={{ marginLeft: "0.75rem" }}>
             <input
               type="checkbox"
