@@ -92,6 +92,11 @@ export class StudyCircuitry extends Component {
     const chart_style = {
       left: `${splitter_pos}px`,
       top: `${top}px`,
+      width: `${rendered_width}px`,
+      height: `${rendered_height}px`,
+      overflowX: "auto",
+      overflowY: "hidden",
+      whiteSpace: "nowrap",
     };
     return [
       <styles.SectionTitle key={"study-overview-title"}>
