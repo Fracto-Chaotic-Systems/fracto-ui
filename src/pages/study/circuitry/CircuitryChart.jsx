@@ -12,6 +12,8 @@ import {
   KEY_STUDY_CIRCUITRY_RADIAL_SWEEP,
 } from "../../../text/StudyText.jsx";
 import { click_point_chart } from "../../../utils/render/PatternsUtils.jsx";
+import { CELL_LABEL_STYLE } from "../../../utils/ui/styles/CoolTableStyles.jsx";
+import { IMAGE_FRAME_STYLE } from "../../../utils/ui/styles/CoolStyles.jsx";
 import CoolMediaTransport, {
   TRANSPORT_BEGIN,
   TRANSPORT_END,
@@ -40,7 +42,7 @@ export class CircuitryChart extends Component {
   state = {
     circuitry_data: null,
     error: null,
-    radial_sweep: false,
+    radial_sweep: true,
     animation_index: 0,
     animation_playing: false,
     animation_timer: null,
@@ -115,12 +117,9 @@ export class CircuitryChart extends Component {
   advance_animation = (direction) => {
     const point_count = this.state.circuitry_data?.result?.length || 0;
     if (point_count === 0) return;
-    const next_index = this.state.animation_index + direction;
-    if (next_index < 0 || next_index >= point_count) {
-      this.clear_animation_timer();
-      this.setState({ animation_playing: false });
-      return;
-    }
+    let next_index = this.state.animation_index + direction;
+    if (next_index >= point_count) next_index = 0;
+    if (next_index < 0) next_index = point_count - 1;
     this.setState({ animation_index: next_index });
   };
 
@@ -183,9 +182,11 @@ export class CircuitryChart extends Component {
       : null;
     const highlighted_point = points[animation_index] || null;
     const chart_style = {
+      ...IMAGE_FRAME_STYLE,
       width: `${chart_size}px`,
       height: `${chart_size}px`,
       display: "inline-block",
+      margin: "0.5rem",
       backgroundColor: no_orbital ? "#eeeeee" : undefined,
       position: no_orbital ? "relative" : undefined,
     };
@@ -240,16 +241,18 @@ export class CircuitryChart extends Component {
             on_operation={this.on_transport_operation}
             disabled={points.length === 0}
           />
-          <label style={{ marginLeft: "0.75rem" }}>
-            <input
-              type="checkbox"
-              checked={radial_sweep}
-              onChange={this.on_radial_sweep_changed}
-            />
-            <span style={{ marginLeft: "0.35rem" }}>
-              {AppText.get(KEY_STUDY_CIRCUITRY_RADIAL_SWEEP)}
-            </span>
-          </label>
+          <div style={{ display: "block", marginTop: "0.5rem" }}>
+            <label>
+              <input
+                type="checkbox"
+                checked={radial_sweep}
+                onChange={this.on_radial_sweep_changed}
+              />
+              <span style={{ ...CELL_LABEL_STYLE, marginLeft: "0.35rem" }}>
+                {AppText.get(KEY_STUDY_CIRCUITRY_RADIAL_SWEEP)}
+              </span>
+            </label>
+          </div>
         </styles.ContentWrapper>
       </>
     );

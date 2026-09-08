@@ -19,7 +19,9 @@ import {
   KEY_TILES_TEST_ANIMATION_LOADING,
   KEY_TILES_TEST_ANIMATION_CUSTOM,
 } from "../../../text/TilesText.jsx";
-import CoolStyles from "../../../utils/ui/styles/CoolStyles.jsx";
+import CoolStyles, {
+  IMAGE_FRAME_STYLE,
+} from "../../../utils/ui/styles/CoolStyles.jsx";
 import CoolTable from "../../../utils/ui/CoolTable.jsx";
 import FractoRasterImage from "../../../utils/render/FractoRasterImage.jsx";
 import { draw_loading_canvas } from "../../../utils/render/CanvasUtils.jsx";
@@ -51,12 +53,6 @@ const FRAME_RATE_OPTIONS_FPS = [40, 30, 25, 20, 15, 12, 10];
 const IMAGE_SIZE_OPTIONS_PX = [256, 384, 512, 640, 768, 896, 1024];
 const FRAME_COUNT_OPTIONS = [100, 150, 200, 250, 300, 350, 400, 450, 500];
 const SCROLLBAR_WIDTH_PX = 22;
-const IMAGE_FRAME_STYLE = {
-  border: "1.5px solid #444444",
-  borderRadius: "4px",
-  boxShadow: "0.25rem 0.25rem 0.5rem rgba(0, 0, 0, 0.2)",
-  overflow: "hidden",
-};
 const ANIMATION_STATS_COLUMNS = [
   {
     id: "name",
