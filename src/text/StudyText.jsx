@@ -14,6 +14,7 @@ export const KEY_STUDY_CIRCUITRY = `${STUDY_FOLDER}/study_circuitry`;
 export const KEY_STUDY_CIRCUITRY_OPTIMIZED = `${STUDY_FOLDER}/circuitry_optimized`;
 export const KEY_STUDY_CIRCUITRY_RADIAL_SWEEP = `${STUDY_FOLDER}/circuitry_radial_sweep`;
 export const KEY_STUDY_CIRCUITRY_NO_ORBITAL = `${STUDY_FOLDER}/circuitry_no_orbital`;
+export const KEY_STUDY_CIRCUITRY_ORBITAL_COORDINATES = `${STUDY_FOLDER}/circuitry_orbital_coordinates`;
 export const KEY_STUDY_MINIBROTS = `${STUDY_FOLDER}/study_minibrots`;
 export const KEY_MAGNITUDES_TITLE = `${STUDY_FOLDER}/magnitudes_title`;
 export const KEY_POINTS_TITLE = `${STUDY_FOLDER}/points_title`;
@@ -51,6 +52,7 @@ export const APP_STUDY_TEXT = {
   [KEY_STUDY_CIRCUITRY_OPTIMIZED]: "optimized",
   [KEY_STUDY_CIRCUITRY_RADIAL_SWEEP]: "radial sweep",
   [KEY_STUDY_CIRCUITRY_NO_ORBITAL]: "point has no orbital",
+  [KEY_STUDY_CIRCUITRY_ORBITAL_COORDINATES]: "coordinates",
   [KEY_MAGNITUDES_TITLE]: "magnitudes",
   [KEY_POINTS_TITLE]: "orbitals",
   [KEY_MERIDIANS_TITLE]: "meridians",
