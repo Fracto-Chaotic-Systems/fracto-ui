@@ -94,9 +94,10 @@ export class StudyCircuitry extends Component {
       top: `${top}px`,
       width: `${rendered_width}px`,
       height: `${rendered_height}px`,
+      display: "block",
+      boxSizing: "border-box",
       overflowX: "auto",
-      overflowY: "hidden",
-      whiteSpace: "nowrap",
+      overflowY: "auto",
     };
     return [
       <styles.SectionTitle key={"study-overview-title"}>
@@ -111,11 +112,21 @@ export class StudyCircuitry extends Component {
         />
       </styles.TightCenteredBlock>,
       <styles.FixedInlineBlock key="circuitry-chart" style={chart_style}>
-        <CircuitryChart
-          focal_point={frame_settings.focal_point}
-          height_px={rendered_height}
-          width_px={rendered_width}
-        />
+        <div
+          style={{
+            display: "inline-block",
+            width: "max-content",
+            minWidth: "100%",
+            minHeight: "100%",
+            verticalAlign: "top",
+          }}
+        >
+          <CircuitryChart
+            focal_point={frame_settings.focal_point}
+            height_px={rendered_height}
+            width_px={rendered_width}
+          />
+        </div>
       </styles.FixedInlineBlock>,
     ];
   }

@@ -14,6 +14,7 @@ import {
   STUDY_INLINE,
   STUDY_MERIDIANS,
   STUDY_CIRCUITRY,
+  STUDY_DETECTION,
 } from "../settings/StudySettings.jsx";
 import AppText from "../AppText.jsx";
 import {
@@ -24,6 +25,7 @@ import {
 } from "../text/RootText.jsx";
 import {
   KEY_CIRCUITRY_TITLE,
+  KEY_STUDY_DETECTION_SIDEBAR,
   KEY_INLINE_TITLE,
   KEY_MERIDIANS_TITLE,
   KEY_MINIBROTS_TITLE,
@@ -43,6 +45,7 @@ import StudyNodes from "./study/StudyNodes.jsx";
 import StudyInline from "./study/StudyInline.jsx";
 import StudyMeridians from "./study/StudyMeridians.jsx";
 import StudyCircuitry from "./study/StudyCircuitry.jsx";
+import StudyOrbitalDetector from "./study/StudyOrbitalDetector.jsx";
 
 export const BAILIWICK_TYPE_FREEFORM = "bailiwick_type_freeform";
 export const BAILIWICK_TYPE_INLINE = "bailiwick_type_inline";
@@ -59,6 +62,11 @@ const SIDEBAR_LIST = [
     title_key: KEY_CIRCUITRY_TITLE,
     section_code: STUDY_CIRCUITRY,
     right_pane: <StudyCircuitry />,
+  },
+  {
+    title_key: KEY_STUDY_DETECTION_SIDEBAR,
+    section_code: STUDY_DETECTION,
+    right_pane: <StudyOrbitalDetector />,
   },
   {
     title_key: KEY_POINTS_TITLE,

@@ -12,6 +12,7 @@ const POINTS_FOLDER = "study/points";
 const MERIDIANS_FOLDER = "study/meridians";
 const FIELDS_FOLDER = "study/fields";
 const CIRCUITRY_FOLDER = "study/circuitry";
+const DETECTION_FOLDER = "study/detection";
 const MINBROTS_FOLDER = "study/minibrots";
 const NODES_FOLDER = "study/nodes";
 const HYPERPLANE_FOLDER = "study/hyperplane";
@@ -46,6 +47,11 @@ export const KEY_STUDY_CIRCUITRY_SPLITTER_POS = `${CIRCUITRY_FOLDER}/splitter_po
 export const KEY_STUDY_CIRCUITRY_LEGEND_SPLITTER_POS = `${CIRCUITRY_FOLDER}/legend_splitter_pos`;
 export const KEY_STUDY_CIRCUITRY_STEPS_SPLITTER_POS = `${CIRCUITRY_FOLDER}/steps_splitter_pos`;
 
+export const KEY_STUDY_DETECTION_FRAME_SETTINGS = `${DETECTION_FOLDER}/frame_settings`;
+export const KEY_STUDY_DETECTION_SPLITTER_POS = `${DETECTION_FOLDER}/splitter_pos`;
+export const KEY_STUDY_DETECTION_LEGEND_SPLITTER_POS = `${DETECTION_FOLDER}/legend_splitter_pos`;
+export const KEY_STUDY_DETECTION_STEPS_SPLITTER_POS = `${DETECTION_FOLDER}/steps_splitter_pos`;
+
 export const KEY_STUDY_MINIBROTS_FRAME_SETTINGS = `${MINBROTS_FOLDER}/frame_settings`;
 export const KEY_STUDY_MINIBROTS_SPLITTER_POS = `${MINBROTS_FOLDER}/splitter_pos`;
 export const KEY_STUDY_MINIBROTS_LEGEND_SPLITTER_POS = `${MINBROTS_FOLDER}/legend_splitter_pos`;
@@ -71,6 +77,7 @@ export const STUDY_INLINE = "study_inline";
 export const STUDY_POINTS = "study_points";
 export const STUDY_FIELDS = "study_fields";
 export const STUDY_CIRCUITRY = "study_circuitry";
+export const STUDY_DETECTION = "study_detection";
 export const STUDY_MINIBROTS = "study_minibrots";
 export const STUDY_MERIDIANS = "study_meridians";
 
@@ -328,6 +335,32 @@ export const APP_STUDY_SETTINGS = {
     default_value: 200,
     description:
       "Current position for the study circuitry vertical steps splitter",
+    persist: true,
+  },
+  [KEY_STUDY_DETECTION_FRAME_SETTINGS]: {
+    data_type: TYPE_OBJECT,
+    default_value: DEFAULT_FRAME_SETTINGS,
+    description: "Frame settings of the study orbital detector page",
+    persist: true,
+  },
+  [KEY_STUDY_DETECTION_SPLITTER_POS]: {
+    data_type: TYPE_NUMBER,
+    default_value: 500,
+    description: "Current position for the study orbital detector splitter",
+    persist: true,
+  },
+  [KEY_STUDY_DETECTION_LEGEND_SPLITTER_POS]: {
+    data_type: TYPE_NUMBER,
+    default_value: 500,
+    description:
+      "Current position for the study orbital detector horizontal legend splitter",
+    persist: true,
+  },
+  [KEY_STUDY_DETECTION_STEPS_SPLITTER_POS]: {
+    data_type: TYPE_NUMBER,
+    default_value: 200,
+    description:
+      "Current position for the study orbital detector vertical steps splitter",
     persist: true,
   },
 };

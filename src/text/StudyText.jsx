@@ -11,6 +11,8 @@ export const KEY_STUDY_NODES = `${STUDY_FOLDER}/study_nodes`;
 export const KEY_STUDY_INLINES = `${STUDY_FOLDER}/study_inlines`;
 export const KEY_STUDY_FIELDS = `${STUDY_FOLDER}/study_fields`;
 export const KEY_STUDY_CIRCUITRY = `${STUDY_FOLDER}/study_circuitry`;
+export const KEY_STUDY_DETECTION = `${STUDY_FOLDER}/study_detection`;
+export const KEY_STUDY_DETECTION_SIDEBAR = `${STUDY_FOLDER}/study_detection_sidebar`;
 export const KEY_STUDY_CIRCUITRY_OPTIMIZED = `${STUDY_FOLDER}/circuitry_optimized`;
 export const KEY_STUDY_CIRCUITRY_RADIAL_SWEEP = `${STUDY_FOLDER}/circuitry_radial_sweep`;
 export const KEY_STUDY_CIRCUITRY_NO_ORBITAL = `${STUDY_FOLDER}/circuitry_no_orbital`;
@@ -19,6 +21,10 @@ export const KEY_STUDY_CIRCUITRY_ORBITAL_DESCRIPTION = `${STUDY_FOLDER}/circuitr
 export const KEY_STUDY_CIRCUITRY_ORBITAL_PROGRESS = `${STUDY_FOLDER}/circuitry_orbital_progress`;
 export const KEY_STUDY_CIRCUITRY_CLOCKWISE = `${STUDY_FOLDER}/circuitry_clockwise`;
 export const KEY_STUDY_CIRCUITRY_COUNTER_CLOCKWISE = `${STUDY_FOLDER}/circuitry_counter_clockwise`;
+export const KEY_STUDY_CIRCUITRY_SPECTRAL_POWER = `${STUDY_FOLDER}/circuitry_spectral_power`;
+export const KEY_STUDY_CIRCUITRY_CYCLES_PER_ITERATION = `${STUDY_FOLDER}/circuitry_cycles_per_iteration`;
+export const KEY_STUDY_CIRCUITRY_POWER = `${STUDY_FOLDER}/circuitry_power`;
+export const KEY_STUDY_CIRCUITRY_CARDINALITY_AXIS = `${STUDY_FOLDER}/circuitry_cardinality_axis`;
 export const KEY_STUDY_MINIBROTS = `${STUDY_FOLDER}/study_minibrots`;
 export const KEY_MAGNITUDES_TITLE = `${STUDY_FOLDER}/magnitudes_title`;
 export const KEY_POINTS_TITLE = `${STUDY_FOLDER}/points_title`;
@@ -53,6 +59,8 @@ export const APP_STUDY_TEXT = {
   [KEY_STUDY_INLINES]: "inline bailiwicks",
   [KEY_STUDY_FIELDS]: "orbital fields",
   [KEY_STUDY_CIRCUITRY]: "orbital circuitry",
+  [KEY_STUDY_DETECTION]: "orbital detector",
+  [KEY_STUDY_DETECTION_SIDEBAR]: "detection",
   [KEY_STUDY_CIRCUITRY_OPTIMIZED]: "optimized",
   [KEY_STUDY_CIRCUITRY_RADIAL_SWEEP]: "radial sweep",
   [KEY_STUDY_CIRCUITRY_NO_ORBITAL]: "point has no orbital",
@@ -63,6 +71,10 @@ export const APP_STUDY_TEXT = {
     "progressing in the {direction} direction",
   [KEY_STUDY_CIRCUITRY_CLOCKWISE]: "clockwise",
   [KEY_STUDY_CIRCUITRY_COUNTER_CLOCKWISE]: "counter-clockwise",
+  [KEY_STUDY_CIRCUITRY_SPECTRAL_POWER]: "spectral power",
+  [KEY_STUDY_CIRCUITRY_CYCLES_PER_ITERATION]: "cycles / iteration",
+  [KEY_STUDY_CIRCUITRY_POWER]: "power",
+  [KEY_STUDY_CIRCUITRY_CARDINALITY_AXIS]: "cardinality",
   [KEY_MAGNITUDES_TITLE]: "magnitudes",
   [KEY_POINTS_TITLE]: "orbitals",
   [KEY_MERIDIANS_TITLE]: "meridians",

@@ -162,6 +162,36 @@ export class DataBackend {
   };
 
   /**
+   * Requests the complete polar power spectrum used by cardinality discovery.
+   * @param {{x:number,y:number}} focal_point Complex-plane focal point.
+   * @param {Function} cb Called with the spectral response or an error object.
+   * @returns {void} The request is deferred by 250ms.
+   * @calledBy CircuitryChart
+   */
+  static get_orbital_spectrum = (focal_point, cb) => {
+    setTimeout(async () => {
+      const params = new URLSearchParams({
+        re: `${focal_point.x}`,
+        im: `${focal_point.y}`,
+      });
+      try {
+        const response = await fetch(
+          `${DATA_ORIGIN}/orbital_spectrum?${params}`,
+          FETCH_JSON_HEADERS,
+        );
+        const data = await response.json();
+        cb(
+          response.ok
+            ? data
+            : { error: data.error || `Spectrum request failed (${response.status})` },
+        );
+      } catch (error) {
+        cb({ error: error.message });
+      }
+    }, 250);
+  };
+
+  /**
    * Lists lore content for a category.
    * @param {number|string} category_id Lore category identifier.
    * @param {Function} cb Called with the service response.
