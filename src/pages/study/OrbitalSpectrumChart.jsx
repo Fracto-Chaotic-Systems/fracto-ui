@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { Line } from "react-chartjs-2";
+import { Bar } from "react-chartjs-2";
 import { Chart as ChartJS, registerables } from "chart.js";
+import FractoUtil from "../../../../../sdk/FractoUtil.js";
 
 import AppText from "../../AppText.jsx";
 import DataBackend from "../../backend/DataBackend.jsx";
@@ -24,16 +25,32 @@ import {
 
 ChartJS.register(...registerables);
 
-// DFT leakage leaves tiny non-zero values across the tail. Treat values below
-// this fraction of the strongest response as numerical background when
-// choosing the visible cardinality span.
-const SPECTRUM_DISPLAY_POWER_FLOOR_RATIO = 0.001;
-
 const format_selected_value = (value) => {
   if (value !== null && typeof value === "object") {
     return JSON.stringify(value, null, 2);
   }
   return String(value);
+};
+
+const peak_fraction_labels_plugin = {
+  id: "peak-fraction-labels",
+  afterDraw: (chart) => {
+    const dataset = chart.data.datasets[0];
+    const labels = dataset?.fraction_labels || [];
+    const bars = chart.getDatasetMeta(0).data;
+    const { ctx, chartArea } = chart;
+    ctx.save();
+    ctx.fillStyle = "#444444";
+    ctx.font = "10px monospace";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    bars.forEach((bar, index) => {
+      const label = labels[index];
+      if (!label) return;
+      ctx.fillText(label, bar.x, chartArea.bottom + 8);
+    });
+    ctx.restore();
+  },
 };
 
 /** Render the complete spectral power series for one detector focal point. */
@@ -272,59 +289,50 @@ export class OrbitalSpectrumChart extends Component {
 
   render() {
     const { height_px, width_px, editable } = this.props;
-    const raw_spectrum_points =
-      this.state.spectrum_data?.spectrum?.power_spectrum
-        ?.map((point) => ({
-          x:
-            point.frequency_cycles_per_iteration > 0
-              ? 1 / point.frequency_cycles_per_iteration
-              : null,
-          y: point.power,
+    const peak_points =
+      this.state.spectrum_data?.spectrum?.peaks
+        ?.map((peak) => ({
+          x: peak.cardinality,
+          y: peak.power,
+          cycles: peak.cycles,
         }))
-        .filter((point) => Number.isFinite(point.x))
         .filter(
-          (point) =>
-            point.x <=
-            (this.state.spectrum_data?.spectrum
-              ?.maximum_trustworthy_cardinality || Number.POSITIVE_INFINITY),
+          (point) => Number.isInteger(point.x) && Number.isFinite(point.y),
         )
         .sort((left, right) => left.x - right.x) || [];
-    const maximum_power = raw_spectrum_points.reduce(
-      (maximum, point) => Math.max(maximum, point.y),
-      0,
-    );
-    const display_power_floor =
-      maximum_power * SPECTRUM_DISPLAY_POWER_FLOOR_RATIO;
-    const meaningful_points = raw_spectrum_points.filter(
-      (point) => point.y > display_power_floor,
-    );
-    const highest_meaningful_cardinality = meaningful_points.reduce(
-      (maximum, point) => Math.max(maximum, point.x),
-      0,
-    );
-    const display_max_cardinality = highest_meaningful_cardinality * 1.1;
-    const spectrum_points = raw_spectrum_points.filter(
-      (point) => point.x <= display_max_cardinality,
-    );
-    if (spectrum_points.length === 0) return null;
+    if (peak_points.length === 0) return null;
     const json_height_px = Math.max(120, height_px - 8);
     const tree_data = normalize_tree_data(this.state.spectrum_data);
     const selection_details = this.render_selection_details();
+    const minimum_cardinality = Math.max(1, peak_points[0].x);
+    const maximum_cardinality = Math.max(
+      minimum_cardinality,
+      peak_points.at(-1).x,
+    );
+    const cardinality_power = peak_points.map((point) => ({
+      x: point.x,
+      y: point.y,
+    }));
     return (
       <div style={{ width: `${width_px}px` }}>
         <div style={{ height: `${height_px}px` }}>
-          <Line
+          <Bar
             data={{
               datasets: [
                 {
                   label: AppText.get(KEY_STUDY_CIRCUITRY_SPECTRAL_POWER),
-                  data: spectrum_points,
-                  borderColor: "#5588aa",
-                  backgroundColor: "rgba(85, 136, 170, 0.15)",
-                  pointRadius: 0,
-                  borderWidth: 1.5,
-                  tension: 0.1,
-                  fill: true,
+                  data: cardinality_power,
+                  fraction_labels: peak_points.map(
+                    (point) => `${point.cycles ?? "?"}/${point.x}`,
+                  ),
+                  borderColor: peak_points.map((point) =>
+                    FractoUtil.fracto_pattern_color(point.x),
+                  ),
+                  backgroundColor: peak_points.map((point) =>
+                    FractoUtil.fracto_pattern_color(point.x),
+                  ),
+                  borderWidth: 1,
+                  barThickness: 25,
                 },
               ],
             }}
@@ -333,18 +341,20 @@ export class OrbitalSpectrumChart extends Component {
               maintainAspectRatio: false,
               animation: false,
               parsing: false,
+              layout: { padding: { bottom: 28 } },
               scales: {
                 x: {
                   type: "logarithmic",
-                  min: spectrum_points[0]?.x || 1,
-                  max: display_max_cardinality || undefined,
+                  min: minimum_cardinality * 0.9,
+                  max: maximum_cardinality * 1.1,
+                  ticks: { display: false },
                   title: {
                     display: true,
                     text: AppText.get(KEY_STUDY_CIRCUITRY_CARDINALITY_AXIS),
                   },
                 },
                 y: {
-                  beginAtZero: true,
+                  type: "logarithmic",
                   title: {
                     display: true,
                     text: AppText.get(KEY_STUDY_CIRCUITRY_POWER),
@@ -353,6 +363,7 @@ export class OrbitalSpectrumChart extends Component {
               },
               plugins: { legend: { display: false } },
             }}
+            plugins={[peak_fraction_labels_plugin]}
           />
         </div>
         <div
