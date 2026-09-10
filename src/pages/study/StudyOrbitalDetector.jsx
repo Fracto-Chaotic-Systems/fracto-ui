@@ -89,7 +89,7 @@ export class StudyOrbitalDetector extends Component {
       0,
       rendered_width - detector_splitter_pos,
     );
-    const detector_content_height = Math.max(0, Math.floor(rendered_height / 2));
+    const detector_content_height = Math.max(0, rendered_height);
     const detector_content_style = {
       position: "fixed",
       left: `${detector_splitter_pos}px`,
@@ -127,7 +127,7 @@ export class StudyOrbitalDetector extends Component {
         <OrbitalSpectrumChart
           focal_point={frame_settings.focal_point}
           width_px={Math.max(0, detector_content_width - 16)}
-          height_px={Math.max(0, detector_content_height - 16)}
+          height_px={Math.max(0, Math.floor(rendered_height / 2) - 16)}
         />
       </styles.FixedInlineBlock>,
     ];
