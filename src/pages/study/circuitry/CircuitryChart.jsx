@@ -30,7 +30,7 @@ import {
   TABLE_NO_BORDER,
   TABLE_NO_HEADER,
 } from "../../../utils/ui/styles/CoolTableStyles.jsx";
-import { IMAGE_FRAME_STYLE } from "../../../utils/ui/styles/CoolStyles.jsx";
+import { IMAGE_FRAME_STYLE } from "../../../utils/render/ImageFrameStyle.jsx";
 import CoolTable from "../../../utils/ui/CoolTable.jsx";
 import CoolMediaTransport, {
   TRANSPORT_BEGIN,

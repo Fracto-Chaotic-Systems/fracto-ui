@@ -33,6 +33,9 @@ export const KEY_STUDY_DETECTION_COPY_VALUE = `${STUDY_FOLDER}/detection_copy_va
 export const KEY_STUDY_DETECTION_COPY_JSON = `${STUDY_FOLDER}/detection_copy_json`;
 export const KEY_STUDY_DETECTION_COPIED = `${STUDY_FOLDER}/detection_copied`;
 export const KEY_STUDY_DETECTION_COPY_FAILED = `${STUDY_FOLDER}/detection_copy_failed`;
+export const KEY_STUDY_DETECTION_MULTI_ANALYSIS = `${STUDY_FOLDER}/detection_multi_analysis`;
+export const KEY_STUDY_DETECTION_CONSENSUS = `${STUDY_FOLDER}/detection_consensus`;
+export const KEY_STUDY_DETECTION_CONFIGURATION = `${STUDY_FOLDER}/detection_configuration`;
 export const KEY_STUDY_MINIBROTS = `${STUDY_FOLDER}/study_minibrots`;
 export const KEY_MAGNITUDES_TITLE = `${STUDY_FOLDER}/magnitudes_title`;
 export const KEY_POINTS_TITLE = `${STUDY_FOLDER}/points_title`;
@@ -91,6 +94,9 @@ export const APP_STUDY_TEXT = {
   [KEY_STUDY_DETECTION_COPY_JSON]: "copy JSON",
   [KEY_STUDY_DETECTION_COPIED]: "copied",
   [KEY_STUDY_DETECTION_COPY_FAILED]: "copy failed",
+  [KEY_STUDY_DETECTION_MULTI_ANALYSIS]: "multi-analysis",
+  [KEY_STUDY_DETECTION_CONSENSUS]: "consensus candidates",
+  [KEY_STUDY_DETECTION_CONFIGURATION]: "configuration",
   [KEY_MAGNITUDES_TITLE]: "magnitudes",
   [KEY_POINTS_TITLE]: "orbitals",
   [KEY_MERIDIANS_TITLE]: "meridians",

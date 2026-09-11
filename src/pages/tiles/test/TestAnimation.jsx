@@ -19,9 +19,8 @@ import {
   KEY_TILES_TEST_ANIMATION_LOADING,
   KEY_TILES_TEST_ANIMATION_CUSTOM,
 } from "../../../text/TilesText.jsx";
-import CoolStyles, {
-  IMAGE_FRAME_STYLE,
-} from "../../../utils/ui/styles/CoolStyles.jsx";
+import CoolStyles from "../../../utils/ui/styles/CoolStyles.jsx";
+import { IMAGE_FRAME_STYLE } from "../../../utils/render/ImageFrameStyle.jsx";
 import CoolTable from "../../../utils/ui/CoolTable.jsx";
 import FractoRasterImage from "../../../utils/render/FractoRasterImage.jsx";
 import { draw_loading_canvas } from "../../../utils/render/CanvasUtils.jsx";

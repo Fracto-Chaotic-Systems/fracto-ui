@@ -165,14 +165,19 @@ export class DataBackend {
    * Requests the complete polar power spectrum used by cardinality discovery.
    * @param {{x:number,y:number}} focal_point Complex-plane focal point.
    * @param {Function} cb Called with the spectral response or an error object.
+   * @param {Object} [options] Optional query flags, such as
+   *   `warmup_stability` for detector diagnostics.
    * @returns {void} The request is deferred by 250ms.
    * @calledBy CircuitryChart
    */
-  static get_orbital_spectrum = (focal_point, cb) => {
+  static get_orbital_spectrum = (focal_point, cb, options = {}) => {
     setTimeout(async () => {
       const params = new URLSearchParams({
         re: `${focal_point.x}`,
         im: `${focal_point.y}`,
+      });
+      Object.entries(options).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) params.set(key, `${value}`);
       });
       try {
         const response = await fetch(

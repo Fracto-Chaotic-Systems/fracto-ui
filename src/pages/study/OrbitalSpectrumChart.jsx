@@ -21,6 +21,9 @@ import {
   KEY_STUDY_DETECTION_COPY_JSON,
   KEY_STUDY_DETECTION_COPIED,
   KEY_STUDY_DETECTION_COPY_FAILED,
+  KEY_STUDY_DETECTION_MULTI_ANALYSIS,
+  KEY_STUDY_DETECTION_CONSENSUS,
+  KEY_STUDY_DETECTION_CONFIGURATION,
 } from "../../text/StudyText.jsx";
 
 ChartJS.register(...registerables);
@@ -30,6 +33,42 @@ const format_selected_value = (value) => {
     return JSON.stringify(value, null, 2);
   }
   return String(value);
+};
+
+const most_common_integer = (values = []) => {
+  const counts = new Map();
+  values.filter((value) => Number.isInteger(value)).forEach((value) => {
+    counts.set(value, (counts.get(value) || 0) + 1);
+  });
+  return [...counts.entries()].sort((left, right) => right[1] - left[1])[0]
+    ?.at(0);
+};
+
+const consensus_peak_points = (candidates = []) => {
+  const by_cardinality = new Map();
+  candidates.forEach((candidate) => {
+    const cardinalities = candidate.cardinalities || [];
+    const powers = candidate.powers || [];
+    cardinalities.forEach((cardinality, index) => {
+      if (!Number.isInteger(cardinality)) return;
+      const existing = by_cardinality.get(cardinality) || {
+        x: cardinality,
+        y: 0,
+        cycles: [],
+      };
+      existing.y += Number.isFinite(powers[index])
+        ? powers[index]
+        : Math.max(...powers, 0);
+      if (Number.isInteger(candidate.cycles?.[index])) {
+        existing.cycles.push(candidate.cycles[index]);
+      }
+      by_cardinality.set(cardinality, existing);
+    });
+  });
+  return [...by_cardinality.values()].map((point) => ({
+    ...point,
+    cycles: most_common_integer(point.cycles),
+  }));
 };
 
 const peak_fraction_labels_plugin = {
@@ -102,7 +141,75 @@ export class OrbitalSpectrumChart extends Component {
         selected_tree_node: null,
         copy_status: null,
       });
-    });
+    }, { multi_analysis: true, adaptive_analysis: true });
+  };
+
+  render_multi_analysis_summary = () => {
+    const spectrum = this.state.spectrum_data?.spectrum;
+    const runs = spectrum?.multi_analysis || [];
+    const candidates = spectrum?.consensus_candidates || [];
+    if (runs.length === 0 && candidates.length === 0) return null;
+    const cell_style = {
+      padding: "0.25rem 0.5rem",
+      textAlign: "left",
+      fontFamily: "monospace",
+      fontSize: "0.8rem",
+    };
+    return (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          margin: 0,
+          padding: "0.5rem",
+          boxSizing: "border-box",
+          overflow: "auto",
+          textAlign: "left",
+        }}
+      >
+        {candidates.length > 0 ? (
+          <div>
+            <div style={{ fontWeight: "bold" }}>
+              {AppText.get(KEY_STUDY_DETECTION_CONSENSUS)}
+            </div>
+            <table style={{ borderCollapse: "collapse", width: "100%" }}>
+              <tbody>
+                {candidates.slice(0, 8).map((candidate, index) => (
+                  <tr key={`consensus-${index}`}>
+                    <td style={cell_style}>{candidate.cardinalities?.join(", ") || "?"}</td>
+                    <td style={cell_style}>{candidate.occurrence_count}</td>
+                    <td style={cell_style}>{candidate.confidence.toFixed(3)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : null}
+        {runs.length > 0 ? (
+          <div style={{ marginTop: "0.5rem" }}>
+            <div style={{ fontWeight: "bold" }}>
+              {AppText.get(KEY_STUDY_DETECTION_MULTI_ANALYSIS)}
+            </div>
+            <table style={{ borderCollapse: "collapse", width: "100%" }}>
+              <tbody>
+                {runs.map((run, index) => (
+                  <tr key={`analysis-${index}`}>
+                    <td style={cell_style}>
+                      {AppText.get(KEY_STUDY_DETECTION_CONFIGURATION)} {index + 1}
+                    </td>
+                    <td style={cell_style}>
+                      {run.sample_stride} / {run.window_length}
+                    </td>
+                    <td style={cell_style}>{run.sample_count}</td>
+                    <td style={cell_style}>{run.spectrum?.peaks?.length || 0}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : null}
+      </div>
+    );
   };
 
   on_tree_select = (selected_keys, selection) => {
@@ -289,18 +396,22 @@ export class OrbitalSpectrumChart extends Component {
 
   render() {
     const { height_px, width_px, editable } = this.props;
-    const peak_points =
-      this.state.spectrum_data?.spectrum?.peaks
-        ?.map((peak) => ({
+    const spectrum = this.state.spectrum_data?.spectrum;
+    const consensus_candidates = spectrum?.consensus_candidates || [];
+    const peak_points = (consensus_candidates.length > 0
+      ? consensus_peak_points(consensus_candidates)
+      : spectrum?.peaks?.map((peak) => ({
           x: peak.cardinality,
           y: peak.power,
           cycles: peak.cycles,
-        }))
+        })) || []
+    )
         .filter(
           (point) => Number.isInteger(point.x) && Number.isFinite(point.y),
         )
         .sort((left, right) => left.x - right.x) || [];
-    if (peak_points.length === 0) return null;
+    if (!this.state.spectrum_data) return null;
+    const multi_analysis_summary = this.render_multi_analysis_summary();
     const json_height_px = Math.max(120, height_px - 8);
     const tree_data = normalize_tree_data(this.state.spectrum_data);
     const selection_details = this.render_selection_details();
@@ -315,56 +426,70 @@ export class OrbitalSpectrumChart extends Component {
     }));
     return (
       <div style={{ width: `${width_px}px` }}>
-        <div style={{ height: `${height_px}px` }}>
-          <Bar
-            data={{
-              datasets: [
-                {
-                  label: AppText.get(KEY_STUDY_CIRCUITRY_SPECTRAL_POWER),
-                  data: cardinality_power,
-                  fraction_labels: peak_points.map(
-                    (point) => `${point.cycles ?? "?"}/${point.x}`,
-                  ),
-                  borderColor: peak_points.map((point) =>
-                    FractoUtil.fracto_pattern_color(point.x),
-                  ),
-                  backgroundColor: peak_points.map((point) =>
-                    FractoUtil.fracto_pattern_color(point.x),
-                  ),
-                  borderWidth: 1,
-                  barThickness: 25,
-                },
-              ],
-            }}
-            options={{
-              responsive: true,
-              maintainAspectRatio: false,
-              animation: false,
-              parsing: false,
-              layout: { padding: { bottom: 28 } },
-              scales: {
-                x: {
-                  type: "logarithmic",
-                  min: minimum_cardinality * 0.9,
-                  max: maximum_cardinality * 1.1,
-                  ticks: { display: false },
-                  title: {
-                    display: true,
-                    text: AppText.get(KEY_STUDY_CIRCUITRY_CARDINALITY_AXIS),
+        <div
+          style={{
+            display: "flex",
+            width: "100%",
+            height: `${height_px}px`,
+            borderBottom: "1px solid #cccccc",
+          }}
+        >
+          <div style={{ width: "50%", height: "100%", minWidth: 0 }}>
+            {peak_points.length === 0 ? null : (
+              <Bar
+                data={{
+                  datasets: [
+                    {
+                      label: AppText.get(KEY_STUDY_CIRCUITRY_SPECTRAL_POWER),
+                      data: cardinality_power,
+                      fraction_labels: peak_points.map(
+                        (point) => `${point.cycles ?? "?"}/${point.x}`,
+                      ),
+                      borderColor: peak_points.map((point) =>
+                        FractoUtil.fracto_pattern_color(point.x),
+                      ),
+                      backgroundColor: peak_points.map((point) =>
+                        FractoUtil.fracto_pattern_color(point.x),
+                      ),
+                      borderWidth: 1,
+                      barThickness: 25,
+                    },
+                  ],
+                }}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  animation: false,
+                  parsing: false,
+                  layout: { padding: { bottom: 28 } },
+                  scales: {
+                    x: {
+                      type: "logarithmic",
+                      min: minimum_cardinality * 0.9,
+                      max: maximum_cardinality * 1.1,
+                      ticks: { display: false },
+                      title: {
+                        display: true,
+                        text: AppText.get(KEY_STUDY_CIRCUITRY_CARDINALITY_AXIS),
+                      },
+                    },
+                    y: {
+                      type: "linear",
+                      title: {
+                        display: true,
+                        text: AppText.get(KEY_STUDY_CIRCUITRY_POWER),
+                      },
+                    },
                   },
-                },
-                y: {
-                  type: "logarithmic",
-                  title: {
-                    display: true,
-                    text: AppText.get(KEY_STUDY_CIRCUITRY_POWER),
-                  },
-                },
-              },
-              plugins: { legend: { display: false } },
-            }}
-            plugins={[peak_fraction_labels_plugin]}
-          />
+                  plugins: { legend: { display: false } },
+                }}
+                plugins={[peak_fraction_labels_plugin]}
+              />
+            )}
+          </div>
+          <div style={{ width: "50%", minWidth: 0, height: "100%" }}>
+            {multi_analysis_summary}
+          </div>
         </div>
         <div
           style={{

@@ -1,20 +1,14 @@
 import styled, { css } from "styled-components";
 
-import { CoolColors } from "../CoolImports.jsx";
+// Import the color definitions directly. Going through CoolImports would
+// create a circular dependency because CoolImports also re-exports CoolStyles.
+import CoolColors from "../CoolColors.jsx";
 
 // Shared layout for compact option controls and their descriptive labels.
 // This applies equally to checkboxes, radio buttons, selects, and inputs.
 export const SETTING_LABEL_STYLE = {
   display: "flex",
   alignItems: "center",
-};
-
-// Shared frame treatment for rendered image/canvas regions.
-export const IMAGE_FRAME_STYLE = {
-  border: "1.5px solid #444444",
-  borderRadius: "4px",
-  boxShadow: "0.25rem 0.25rem 0.5rem rgba(0, 0, 0, 0.2)",
-  overflow: "hidden",
 };
 
 export class CoolStyles {
