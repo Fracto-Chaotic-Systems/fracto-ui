@@ -1,9 +1,5 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { Line } from "react-chartjs-2";
-
-import { Chart as ChartJS, registerables } from "chart.js";
-ChartJS.register(...registerables);
 
 import { MainStyles as styles } from "../../../styles/MainStyles.jsx";
 import DataBackend from "../../../backend/DataBackend.jsx";
@@ -17,9 +13,7 @@ import {
   KEY_STUDY_CIRCUITRY_ORBITAL_PROGRESS,
   KEY_STUDY_CIRCUITRY_CLOCKWISE,
   KEY_STUDY_CIRCUITRY_COUNTER_CLOCKWISE,
-  KEY_STUDY_CIRCUITRY_SPECTRAL_POWER,
-  KEY_STUDY_CIRCUITRY_POWER,
-  KEY_STUDY_CIRCUITRY_CARDINALITY_AXIS,
+  KEY_STUDY_MAGNITUDE,
 } from "../../../text/StudyText.jsx";
 import { render_coordinates } from "../../../utils/Dom.jsx";
 import { click_point_chart } from "../../../utils/render/PatternsUtils.jsx";
@@ -66,7 +60,6 @@ export class CircuitryChart extends Component {
 
   state = {
     circuitry_data: null,
-    spectrum_data: null,
     error: null,
     radial_sweep: true,
     animation_index: 0,
@@ -131,9 +124,6 @@ export class CircuitryChart extends Component {
       true,
       this.state.radial_sweep ? "radial_sweep" : "hermite",
     );
-    DataBackend.get_orbital_spectrum(focal_point, (response) => {
-      this.setState({ spectrum_data: response.error ? null : response });
-    });
   };
 
   on_radial_sweep_changed = (event) => {
@@ -229,7 +219,6 @@ export class CircuitryChart extends Component {
     const { width_px, height_px } = this.props;
     const {
       circuitry_data,
-      spectrum_data,
       error,
       radial_sweep,
       animation_index,
@@ -261,6 +250,17 @@ export class CircuitryChart extends Component {
     const radial_origin = circuitry_data?.Q
       ? { x: circuitry_data.Q.re, y: circuitry_data.Q.im }
       : null;
+    const orbital_magnitude =
+      circuitry_data?.Q && circuitry_data?.orbital_points?.length
+        ? Math.max(
+            ...circuitry_data.orbital_points.map((point) =>
+              Math.hypot(
+                point.re - circuitry_data.Q.re,
+                point.im - circuitry_data.Q.im,
+              ),
+            ),
+          )
+        : null;
     const highlighted_point =
       selected_orbital_point || points[animation_index] || null;
     const orbital_cycle_count = radial_sweep
@@ -329,57 +329,7 @@ export class CircuitryChart extends Component {
       overflow: "visible",
       textAlign: "left",
     };
-    const spectrum_points =
-      spectrum_data?.spectrum?.power_spectrum
-        ?.map((point) => ({
-          x:
-            point.frequency_cycles_per_iteration > 0
-              ? 1 / point.frequency_cycles_per_iteration
-              : null,
-          y: point.power,
-        }))
-        .filter((point) => Number.isFinite(point.x))
-        .filter(
-          (point) =>
-            point.x <=
-            (spectrum_data?.spectrum?.maximum_trustworthy_cardinality ||
-              Number.POSITIVE_INFINITY),
-        )
-        .sort((left, right) => left.x - right.x) || [];
-    const spectrum_chart_data = {
-      datasets: [
-        {
-          label: AppText.get(KEY_STUDY_CIRCUITRY_SPECTRAL_POWER),
-          data: spectrum_points,
-          borderColor: "#5588aa",
-          backgroundColor: "rgba(85, 136, 170, 0.15)",
-          pointRadius: 0,
-          borderWidth: 1.5,
-          tension: 0.1,
-          fill: true,
-        },
-      ],
-    };
-    const spectrum_chart_options = {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: false,
-      parsing: false,
-      scales: {
-        x: {
-          type: "linear",
-          title: {
-            display: true,
-            text: AppText.get(KEY_STUDY_CIRCUITRY_CARDINALITY_AXIS),
-          },
-        },
-        y: {
-          beginAtZero: true,
-          title: { display: true, text: AppText.get(KEY_STUDY_CIRCUITRY_POWER) },
-        },
-      },
-      plugins: { legend: { display: false } },
-    };
+    /* spectral power chart removed; diagnostics now live on detector page */
     return (
       <>
         <styles.ContentWrapper style={chart_style}>
@@ -436,6 +386,16 @@ export class CircuitryChart extends Component {
                 >
                   {orbital_progress}
                 </span>
+                {orbital_magnitude !== null ? (
+                  <span style={{ lineHeight: "1rem" }}>
+                    <span style={orbital_text_style}>
+                      {AppText.get(KEY_STUDY_MAGNITUDE)}:
+                    </span>{" "}
+                    <span style={orbital_number_style}>
+                      {Math.round(orbital_magnitude * 1e9) / 1e9}
+                    </span>
+                  </span>
+                ) : null}
               </span>
             </div>
           ) : null}
@@ -469,16 +429,6 @@ export class CircuitryChart extends Component {
               </span>
             </label>
           </div>
-          {spectrum_points.length > 0 ? (
-            <div
-              style={{
-                height: "180px",
-                margin: "1rem 0.5rem 0.5rem",
-              }}
-            >
-              <Line data={spectrum_chart_data} options={spectrum_chart_options} />
-            </div>
-          ) : null}
         </styles.ContentWrapper>
       </>
     );
