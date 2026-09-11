@@ -7,11 +7,13 @@ import {
   MARGIN_PX,
 } from "../../../styles/MainStyles.jsx";
 import AppSettings from "../../../AppSettings.jsx";
+import AppText from "../../../AppText.jsx";
 import {
   KEY_STUDY_POINTS_FRAME_SETTINGS,
   KEY_STUDY_POINTS_SPLITTER_POS,
   KEY_STUDY_SPLITTER_POS_PX,
 } from "../../../settings/StudySettings.jsx";
+import { KEY_STUDY_POINTS_LEGACY_ITERATIVE } from "../../../text/StudyText.jsx";
 
 import { update_dimensions } from "./../../PageUtils.jsx";
 import DataBackend from "../../../backend/DataBackend.jsx";
@@ -30,11 +32,8 @@ export class PointsMainPanel extends Component {
     subscription: null,
     in_fetch: false,
     pro_chart_data: [],
-    retro_chart_data: [],
-    newton_chart_data: [],
     pro_derived: [],
-    retro_derived: [],
-    newton_derived: [],
+    newton_derived: { cardinality: 0, point_list: [] },
     set2: [],
   };
 
@@ -130,6 +129,30 @@ export class PointsMainPanel extends Component {
       });
   };
 
+  /**
+   * Adapt the detector/Newton response to the point-series chart contract.
+   * The chart predates `/orbital_newton` and expects `{step, point,
+   * scaled_point}` records, while the endpoint returns refined complex points.
+   * @param {object} response Detector/Newton endpoint response.
+   * @returns {{cardinality:number, point_list:Array<object>}} Chart data.
+   */
+  format_detected_newton = (response) => {
+    const result = response?.newton_big_complex || response?.newton_native;
+    const point_list = (result?.point_list || []).map((point, step) => {
+      const re = String(point.re);
+      const im = String(point.im);
+      return {
+        step,
+        point: { re, im },
+        scaled_point: { re, im },
+      };
+    });
+    return {
+      cardinality: Number(response?.detection?.candidate_cardinality || result?.cardinality || 0),
+      point_list,
+    };
+  };
+
   test_theory = (big_points, P_coords) => {
     const point_list = big_points.point_list.slice(
       -(big_points.cardinality + 1),
@@ -165,38 +188,39 @@ export class PointsMainPanel extends Component {
     DataBackend.get_orbitals(value.focal_point, 50000, (all_results) => {
       if (all_results.error) {
         console.log("get_orbitals error", all_results.error);
+        this.setState({ in_fetch: false });
         return;
       }
-      const { pro_derived, retro_derived, newton_derived } = all_results.result;
+      const { pro_derived } = all_results.result;
       const pro_chart_data = this.format_point_data(pro_derived);
-      const retro_chart_data = this.format_point_data(retro_derived);
-      const newton_chart_data = this.format_point_data(
-        newton_derived,
-        newton_derived.cardinality,
-      );
       // this.test_theory(pro_derived, value.focal_point)
-      // console.log('retro_chart_data', retro_chart_data)
       console.log("pro_derived, pro_chart_data", pro_derived, pro_chart_data);
-      console.log(
-        "retro_derived, retro_chart_data",
-        retro_derived,
-        retro_chart_data,
-      );
-      console.log(
-        "newton_derived, newton_chart_data",
-        newton_derived,
-        newton_chart_data,
-      );
       this.setState({
         pro_derived,
-        retro_derived,
-        newton_derived,
+        newton_derived: { cardinality: 0, point_list: [] },
         pro_chart_data,
-        retro_chart_data,
-        newton_chart_data,
-        in_fetch: false,
       });
+      this.load_detected_newton(value.focal_point);
     });
+  };
+
+  load_detected_newton = (focal_point) => {
+    DataBackend.get_orbital_newton(
+      focal_point,
+      (response) => {
+        if (response.error) {
+          console.log("get_orbital_newton error", response.error);
+          this.setState({
+            newton_derived: { cardinality: 0, point_list: [] },
+            in_fetch: false,
+          });
+          return;
+        }
+        const newton_derived = this.format_detected_newton(response);
+        this.setState({ newton_derived, in_fetch: false });
+      },
+      { newton_mode: "big_complex" },
+    );
   };
 
   get_table_data = (chart_data) => {
@@ -220,28 +244,18 @@ export class PointsMainPanel extends Component {
     const {
       in_fetch,
       pro_derived,
-      retro_derived,
       newton_derived,
       pro_chart_data,
-      retro_chart_data,
-      newton_chart_data,
     } = this.state;
     const chart_width = this.get_chart_width_px();
     const pro_table_data = this.get_table_data(pro_chart_data);
-    const retro_table_data = this.get_table_data(retro_chart_data);
     return (
       <styles.ScrollingBlock key={"orbitals-table"}>
-        <PointsSeriesChart
-          chart_data={retro_derived.point_list}
-          width_px={chart_width}
-          waiting={!in_fetch}
-          title={"retro-iterative"}
-        />
         <PointsSeriesChart
           chart_data={pro_derived.point_list}
           width_px={chart_width}
           waiting={!in_fetch}
-          title={"pro-iterative"}
+          title={AppText.get(KEY_STUDY_POINTS_LEGACY_ITERATIVE)}
         />
         <PointsSeriesChart
           chart_data={newton_derived.point_list}
@@ -250,9 +264,6 @@ export class PointsMainPanel extends Component {
           title={"Newton derived"}
         />
         <styles.ScrollingBlock>
-          <styles.ScrollingInlineBlock>
-            <PointsSeriesTable table_data={retro_table_data} />
-          </styles.ScrollingInlineBlock>
           <styles.ScrollingInlineBlock>
             <PointsSeriesTable table_data={pro_table_data} />
           </styles.ScrollingInlineBlock>

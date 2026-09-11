@@ -25,6 +25,7 @@ export const KEY_STUDY_CIRCUITRY_SPECTRAL_POWER = `${STUDY_FOLDER}/circuitry_spe
 export const KEY_STUDY_CIRCUITRY_CYCLES_PER_ITERATION = `${STUDY_FOLDER}/circuitry_cycles_per_iteration`;
 export const KEY_STUDY_CIRCUITRY_POWER = `${STUDY_FOLDER}/circuitry_power`;
 export const KEY_STUDY_CIRCUITRY_CARDINALITY_AXIS = `${STUDY_FOLDER}/circuitry_cardinality_axis`;
+export const KEY_STUDY_POINTS_LEGACY_ITERATIVE = `${STUDY_FOLDER}/points_legacy_iterative`;
 export const KEY_STUDY_DETECTION_SELECTED_PATH = `${STUDY_FOLDER}/detection_selected_path`;
 export const KEY_STUDY_DETECTION_SELECTED_TYPE = `${STUDY_FOLDER}/detection_selected_type`;
 export const KEY_STUDY_DETECTION_SELECTED_VALUE = `${STUDY_FOLDER}/detection_selected_value`;
@@ -86,6 +87,7 @@ export const APP_STUDY_TEXT = {
   [KEY_STUDY_CIRCUITRY_CYCLES_PER_ITERATION]: "cycles / iteration",
   [KEY_STUDY_CIRCUITRY_POWER]: "power",
   [KEY_STUDY_CIRCUITRY_CARDINALITY_AXIS]: "cardinality",
+  [KEY_STUDY_POINTS_LEGACY_ITERATIVE]: "legacy iterative",
   [KEY_STUDY_DETECTION_SELECTED_PATH]: "path",
   [KEY_STUDY_DETECTION_SELECTED_TYPE]: "type",
   [KEY_STUDY_DETECTION_SELECTED_VALUE]: "value",

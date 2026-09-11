@@ -116,6 +116,40 @@ export class DataBackend {
   };
 
   /**
+   * Requests detector-derived orbital points refined by the Newton solver.
+   * @param {{x:number,y:number}} focal_point Complex-plane focal point.
+   * @param {Function} cb Called with the endpoint response or an error object.
+   * @param {Object} [options] Optional detector/Newton query parameters.
+   * @returns {void} The request is deferred by 250ms.
+   * @calledBy PointsMainPanel
+   */
+  static get_orbital_newton = (focal_point, cb, options = {}) => {
+    setTimeout(async () => {
+      const params = new URLSearchParams({
+        re: `${focal_point.x}`,
+        im: `${focal_point.y}`,
+      });
+      Object.entries(options).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) params.set(key, `${value}`);
+      });
+      try {
+        const response = await fetch(
+          `${DATA_ORIGIN}/orbital_newton?${params}`,
+          FETCH_JSON_HEADERS,
+        );
+        const data = await response.json();
+        cb(
+          response.ok
+            ? data
+            : { error: data.error || `Orbital Newton request failed (${response.status})` },
+        );
+      } catch (error) {
+        cb({ error: error.message });
+      }
+    }, 250);
+  };
+
+  /**
    * Requests sampled smooth circuitry for a Mandelbrot focal point.
    * @param {{x:number,y:number}} focal_point Complex-plane focal point used as c.
    * @param {Function} cb Called with the data-server response or an error object.
