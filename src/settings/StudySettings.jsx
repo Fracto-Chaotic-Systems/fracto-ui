@@ -46,6 +46,7 @@ export const KEY_STUDY_CIRCUITRY_FRAME_SETTINGS = `${CIRCUITRY_FOLDER}/frame_set
 export const KEY_STUDY_CIRCUITRY_SPLITTER_POS = `${CIRCUITRY_FOLDER}/splitter_pos`;
 export const KEY_STUDY_CIRCUITRY_LEGEND_SPLITTER_POS = `${CIRCUITRY_FOLDER}/legend_splitter_pos`;
 export const KEY_STUDY_CIRCUITRY_STEPS_SPLITTER_POS = `${CIRCUITRY_FOLDER}/steps_splitter_pos`;
+export const KEY_STUDY_CIRCUITRY_ANIMATION_SPEED = `${CIRCUITRY_FOLDER}/animation_speed`;
 
 export const KEY_STUDY_DETECTION_FRAME_SETTINGS = `${DETECTION_FOLDER}/frame_settings`;
 export const KEY_STUDY_DETECTION_SPLITTER_POS = `${DETECTION_FOLDER}/splitter_pos`;
@@ -335,6 +336,12 @@ export const APP_STUDY_SETTINGS = {
     default_value: 200,
     description:
       "Current position for the study circuitry vertical steps splitter",
+    persist: true,
+  },
+  [KEY_STUDY_CIRCUITRY_ANIMATION_SPEED]: {
+    data_type: TYPE_NUMBER,
+    default_value: 1,
+    description: "Animation playback speed multiplier for orbital circuitry",
     persist: true,
   },
   [KEY_STUDY_DETECTION_FRAME_SETTINGS]: {

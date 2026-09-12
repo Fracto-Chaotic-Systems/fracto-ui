@@ -60,6 +60,7 @@ export const KEY_STUDY_INCREMENT = `${STUDY_FOLDER}/study_increment`;
 export const KEY_STUDY_RUN_NOW = `${STUDY_FOLDER}/study_run_now`;
 export const KEY_STUDY_PRECISION = `${STUDY_FOLDER}/study_precision`;
 export const KEY_STUDY_MAGNITUDE = `${STUDY_FOLDER}/study_magnitude`;
+export const KEY_STUDY_CIRCUITRY_DETECTED_IN = `${STUDY_FOLDER}/circuitry_detected_in`;
 export const KEY_STUDY_CARDINAL = `${STUDY_FOLDER}/study_cardinal`;
 export const KEY_STUDY_COLUMN_LABEL_MAGNITUDE = `${STUDY_FOLDER}/label_magnitude`;
 export const KEY_STUDY_COLUMN_LABEL_CORE_POINT = `${STUDY_FOLDER}/label_Core_point`;
@@ -127,6 +128,7 @@ export const APP_STUDY_TEXT = {
   [KEY_STUDY_RUN_NOW]: "run now",
   [KEY_STUDY_PRECISION]: "precision",
   [KEY_STUDY_MAGNITUDE]: "magnitude",
+  [KEY_STUDY_CIRCUITRY_DETECTED_IN]: "detected in",
   [KEY_STUDY_CARDINAL]: "cardinal",
   [KEY_STUDY_COLUMN_LABEL_MAGNITUDE]: "magnitude:",
   [KEY_STUDY_COLUMN_LABEL_CORE_POINT]: "core point:",

@@ -23,13 +23,23 @@ export const click_point_chart = (
   other_sets_point_radius = null,
   radial_origin = null,
   highlighted_point = null,
+  set1_point_radius = null,
+  highlighted_other_set_index = -1,
+  cardinality_override = null,
+  highlighted_t = null,
+  other_set_t_values = null,
 ) => {
   if (!set1) {
     return [];
   }
   console.log(`click_point_chart ${set1.length} points`);
 
-  const cardinality = set1?.length - 1 || 0;
+  const cardinality =
+    Number.isFinite(cardinality_override)
+      ? cardinality_override
+      : set1?.length - 1 || 0;
+  const pattern_color = FractoUtil.fracto_pattern_color(cardinality || 0);
+  const pattern_point_mode = Boolean(radial_origin);
   const in_animation =
     other_sets.length > 1
       ? set1?.find(
@@ -42,6 +52,7 @@ export const click_point_chart = (
         data: [radial_origin, point],
         backgroundColor: "#888888",
         borderColor: "#888888",
+        borderWidth: 1,
         pointRadius: 0,
         showLine: true,
       }))
@@ -66,6 +77,39 @@ export const click_point_chart = (
           borderColor: "#333333",
           pointRadius: 6,
           showLine: false,
+          // Chart.js uses lower order values for later draw priority.
+          order: -1000,
+        },
+      ]
+    : [];
+  // The animation cursor and orbital points are sampled on different grids.
+  // The caller therefore supplies the orbital index derived from the cursor's
+  // t value; coordinate proximity is deliberately not used here because it
+  // can enlarge the wrong point on tightly clustered orbits.
+  const animated_point_radii = highlighted_point
+    ? other_sets.map((_, index) =>
+        index === highlighted_other_set_index ||
+        (Number.isFinite(highlighted_t) &&
+          Number.isFinite(other_set_t_values?.[index]) &&
+          Math.abs(highlighted_t - other_set_t_values[index]) <= 0.25)
+          ? 6
+          : other_sets_point_radius || (in_animation ? 3 : 2),
+      )
+    : null;
+  const inner_point_radii = animated_point_radii
+    ? animated_point_radii.map((radius) => Math.max(1, radius - 2))
+    : null;
+  const inner_points_dataset = pattern_point_mode
+    ? [
+        {
+          Id: "orbital-point-centers",
+          data: JSON.parse(JSON.stringify(other_sets)),
+          backgroundColor: "#000000",
+          borderColor: "#000000",
+          pointRadius:
+            inner_point_radii ||
+            Math.max(1, (other_sets_point_radius || (in_animation ? 3 : 2)) - 2),
+          showLine: false,
         },
       ]
     : [];
@@ -73,13 +117,17 @@ export const click_point_chart = (
     datasets: [
       ...radial_datasets,
       ...origin_dataset,
-      ...highlighted_dataset,
       {
         Id: 2,
         // label: in_cardioid ? 'Q' : 'Q',
         data: JSON.parse(JSON.stringify(other_sets)),
-        backgroundColor: "black",
-        pointRadius: other_sets_point_radius || (in_animation ? 3 : 2),
+        backgroundColor: pattern_point_mode ? pattern_color : "black",
+        pointBackgroundColor: pattern_point_mode ? pattern_color : "black",
+        pointBorderColor: pattern_point_mode ? pattern_color : undefined,
+        pointRadius:
+          animated_point_radii ||
+          other_sets_point_radius ||
+          (in_animation ? 3 : 2),
         borderColor: in_animation ? ANIMATION_COLOR : "#888888",
         borderDash: in_animation ? [1, 0] : [5, 5], // 5px dash, 5px gap
         showLine: other_sets_show_line,
@@ -88,13 +136,21 @@ export const click_point_chart = (
         Id: 1,
         // label: set1_label,
         data: JSON.parse(JSON.stringify(set1)),
-        backgroundColor: FractoUtil.fracto_pattern_color(cardinality || 0),
+        backgroundColor: pattern_color,
         pointBackgroundColor:
           point_background_color ||
-          FractoUtil.fracto_pattern_color(cardinality || 0),
-        pointRadius: in_animation ? 2 : 3,
+          pattern_color,
+        pointRadius:
+          set1_point_radius ??
+          (in_animation ? 2 : 3),
         showLine: true,
       },
+      // Paint the smaller black centers above the interpolated path so the
+      // orbital-point markers remain visible even when a segment crosses one.
+      ...inner_points_dataset,
+      // Keep the animation marker last so Chart.js paints it above every
+      // curve, radial guide, and orbital data point.
+      ...highlighted_dataset,
     ],
   };
   try {

@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import { MainStyles as styles } from "../../../styles/MainStyles.jsx";
 import DataBackend from "../../../backend/DataBackend.jsx";
 import AppText from "../../../AppText.jsx";
+import AppSettings from "../../../AppSettings.jsx";
 import { render_pattern_block } from "../StudyUtils.jsx";
 import {
   KEY_STUDY_CIRCUITRY_NO_ORBITAL,
@@ -14,7 +15,9 @@ import {
   KEY_STUDY_CIRCUITRY_CLOCKWISE,
   KEY_STUDY_CIRCUITRY_COUNTER_CLOCKWISE,
   KEY_STUDY_MAGNITUDE,
+  KEY_STUDY_CIRCUITRY_DETECTED_IN,
 } from "../../../text/StudyText.jsx";
+import { KEY_STUDY_CIRCUITRY_ANIMATION_SPEED } from "../../../settings/StudySettings.jsx";
 import { render_coordinates } from "../../../utils/Dom.jsx";
 import { click_point_chart } from "../../../utils/render/PatternsUtils.jsx";
 import {
@@ -33,6 +36,7 @@ import CoolMediaTransport, {
   TRANSPORT_PLAY,
   TRANSPORT_REVERSE,
 } from "../../../utils/ui/CoolMediaTransport.jsx";
+import CoolSlider from "../../../utils/ui/CoolSlider.jsx";
 
 const TRANSPORT_OPERATIONS = [
   TRANSPORT_BEGIN,
@@ -41,6 +45,8 @@ const TRANSPORT_OPERATIONS = [
   TRANSPORT_PLAY,
   TRANSPORT_END,
 ];
+const TRANSPORT_BUTTON_SIZE_PX = 35;
+const SPEED_SLIDER_WIDTH_PX = TRANSPORT_BUTTON_SIZE_PX * 5;
 const PATH_ANIMATION_RATE_FPS = 20;
 const GOLDEN_RATIO = 1.618;
 const ORBITAL_POINT_COLUMNS = [
@@ -67,6 +73,8 @@ export class CircuitryChart extends Component {
     selected_orbital_point: null,
     animation_playing: false,
     animation_timer: null,
+    animation_speed:
+      Number(AppSettings.get(KEY_STUDY_CIRCUITRY_ANIMATION_SPEED)) || 1,
   };
 
   componentDidMount() {
@@ -166,26 +174,89 @@ export class CircuitryChart extends Component {
     this.setState({ animation_timer: null });
   };
 
+  get_animation_orbital_row = (t) => {
+    const orbital_points = this.state.circuitry_data?.orbital_points || [];
+    const samples = this.state.circuitry_data?.result || [];
+    if (
+      !Number.isFinite(t) ||
+      orbital_points.length === 0 ||
+      samples.length === 0
+    ) {
+      return -1;
+    }
+    const radial = this.state.radial_sweep;
+    // Radial-sweep samples include both endpoints, so the number of samples
+    // per orbital interval is based on the number of intervals (one fewer
+    // than the point count). This keeps the t mapping exact at every point,
+    // including the closing point.
+    const interval_width =
+      radial && orbital_points.length > 1
+        ? (samples.length - 1) / (orbital_points.length - 1)
+        : 1;
+    const orbital_t = orbital_points.map((_, row) =>
+      radial ? samples[Math.round(row * interval_width)]?.t : row,
+    );
+    if (orbital_t.some((value) => !Number.isFinite(value))) return -1;
+    let nearest_row = -1;
+    let nearest_delta = Number.POSITIVE_INFINITY;
+    orbital_t.forEach((target_t, row) => {
+      const delta = Math.abs(t - target_t);
+      if (delta < nearest_delta) {
+        nearest_delta = delta;
+        nearest_row = row;
+      }
+    });
+    const previous_gap =
+      nearest_row > 0
+        ? Math.abs(orbital_t[nearest_row] - orbital_t[nearest_row - 1])
+        : Number.POSITIVE_INFINITY;
+    const next_gap =
+      nearest_row < orbital_t.length - 1
+        ? Math.abs(orbital_t[nearest_row + 1] - orbital_t[nearest_row])
+        : Number.POSITIVE_INFINITY;
+    const threshold = Math.min(previous_gap, next_gap) / 2;
+    return nearest_delta <= threshold ? nearest_row : -1;
+  };
+
   advance_animation = (direction) => {
     const point_count = this.state.circuitry_data?.result?.length || 0;
     if (point_count === 0) return;
     let next_index = this.state.animation_index + direction;
     if (next_index >= point_count) next_index = 0;
     if (next_index < 0) next_index = point_count - 1;
-    this.setState({ animation_index: next_index });
+    const frame_t = this.state.circuitry_data?.result?.[next_index]?.t;
+    const selected_orbital_row = this.get_animation_orbital_row(frame_t);
+    this.setState({
+      animation_index: next_index,
+      selected_orbital_row,
+      selected_orbital_point: null,
+    });
   };
 
   start_animation = (direction) => {
     this.clear_animation_timer();
     const animation_timer = setInterval(
       () => this.advance_animation(direction),
-      1000 / PATH_ANIMATION_RATE_FPS,
+      1000 / (PATH_ANIMATION_RATE_FPS * this.state.animation_speed),
     );
     this.setState({
       animation_direction: direction,
       animation_playing: true,
       animation_timer,
       selected_orbital_point: null,
+    });
+  };
+
+  on_animation_speed_changed = (event, value) => {
+    const animation_speed = Number(value ?? event.target.value);
+    if (!Number.isFinite(animation_speed)) return;
+    this.setState({ animation_speed }, () => {
+      if (this.state.animation_playing) {
+        this.start_animation(this.state.animation_direction || 1);
+      }
+    });
+    AppSettings.on_settings_changed({
+      [KEY_STUDY_CIRCUITRY_ANIMATION_SPEED]: animation_speed,
     });
   };
 
@@ -224,6 +295,7 @@ export class CircuitryChart extends Component {
       animation_index,
       selected_orbital_row,
       selected_orbital_point,
+      animation_speed,
     } = this.state;
     const chart_size = Math.floor(
       Math.max(0, Math.min(width_px, height_px)) * 0.85,
@@ -263,6 +335,16 @@ export class CircuitryChart extends Component {
         : null;
     const highlighted_point =
       selected_orbital_point || points[animation_index] || null;
+    const interval_width =
+      radial_sweep && orbital_points.length > 1
+        ? (points.length - 1) / (orbital_points.length - 1)
+        : 1;
+    const orbital_t_values = circuitry_data?.orbital_points?.map((_, row) =>
+      radial_sweep
+        ? circuitry_data?.result?.[Math.round(row * interval_width)]?.t
+        : row,
+    );
+    const highlighted_t = circuitry_data?.result?.[animation_index]?.t;
     const orbital_cycle_count = radial_sweep
       ? Math.max(
           1,
@@ -322,6 +404,7 @@ export class CircuitryChart extends Component {
       textAlign: "center",
     };
     const options_width = Math.max(0, width_px - chart_size);
+    const controls_width = Math.max(options_width, 100);
     const options_style = {
       width: `${options_width}px`,
       height: `${chart_size}px`,
@@ -351,6 +434,11 @@ export class CircuitryChart extends Component {
               4,
               radial_origin,
               highlighted_point,
+              0,
+              selected_orbital_row,
+              circuitry_data.cardinality,
+              highlighted_t,
+              orbital_t_values,
             )
           ) : null}
         </styles.ContentWrapper>
@@ -364,7 +452,7 @@ export class CircuitryChart extends Component {
                 marginTop: "0.5rem",
               }}
             >
-              {render_pattern_block(circuitry_data.cardinality, 28)}
+              {render_pattern_block(circuitry_data.cardinality, 48)}
               <span style={{ display: "flex", flexDirection: "column" }}>
                 <span style={{ lineHeight: "1rem" }}>
                   <span style={orbital_text_style}>{description_prefix}</span>
@@ -377,6 +465,23 @@ export class CircuitryChart extends Component {
                   </span>
                   <span style={orbital_text_style}>{description_suffix}</span>
                 </span>
+                {orbital_magnitude !== null ? (
+                  <span
+                    style={{
+                      fontSize: "0.75rem",
+                      lineHeight: "0.75rem",
+                      paddingLeft: "0.5rem",
+                    }}
+                  >
+                    <span style={orbital_text_style}>of </span>
+                    <span style={orbital_text_style}>
+                      {AppText.get(KEY_STUDY_MAGNITUDE)}
+                    </span>{" "}
+                    <span style={orbital_number_style}>
+                      {Math.round(orbital_magnitude * 1e9) / 1e9}
+                    </span>
+                  </span>
+                ) : null}
                 <span
                   style={{
                     fontSize: "0.75rem",
@@ -386,14 +491,21 @@ export class CircuitryChart extends Component {
                 >
                   {orbital_progress}
                 </span>
-                {orbital_magnitude !== null ? (
-                  <span style={{ lineHeight: "1rem" }}>
+                {Number.isFinite(circuitry_data?.detector_elapsed_ms) ? (
+                  <span
+                    style={{
+                      fontSize: "0.75rem",
+                      lineHeight: "0.75rem",
+                      paddingLeft: "0.5rem",
+                    }}
+                  >
                     <span style={orbital_text_style}>
-                      {AppText.get(KEY_STUDY_MAGNITUDE)}:
-                    </span>{" "}
-                    <span style={orbital_number_style}>
-                      {Math.round(orbital_magnitude * 1e9) / 1e9}
+                      {AppText.get(KEY_STUDY_CIRCUITRY_DETECTED_IN)}{" "}
                     </span>
+                    <span style={orbital_number_style}>
+                      {Math.round(circuitry_data.detector_elapsed_ms * 10) / 10}
+                    </span>{" "}
+                    <span style={orbital_text_style}>ms</span>
                   </span>
                 ) : null}
               </span>
@@ -401,11 +513,23 @@ export class CircuitryChart extends Component {
           ) : null}
           <div style={{ marginTop: "0.5rem" }}>
             <CoolMediaTransport
-              width_px={Math.max(options_width, 100)}
-              button_size_px={35}
+              width_px={controls_width}
+              button_size_px={TRANSPORT_BUTTON_SIZE_PX}
               operations={TRANSPORT_OPERATIONS}
               on_operation={this.on_transport_operation}
               disabled={points.length === 0}
+            />
+          </div>
+          <div
+            style={{ width: `${SPEED_SLIDER_WIDTH_PX}px`, marginTop: "0.5rem" }}
+          >
+            <CoolSlider
+              min={1}
+              max={10}
+              value={animation_speed}
+              step_count={90}
+              is_vertical={false}
+              on_change={this.on_animation_speed_changed}
             />
           </div>
           <div style={{ marginTop: "0.5rem" }}>
