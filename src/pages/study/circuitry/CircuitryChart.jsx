@@ -1,5 +1,10 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
+import { Line } from "react-chartjs-2";
+import { Chart as ChartJS, registerables } from "chart.js";
+import FractoUtil from "../../../../../../sdk/FractoUtil.js";
+
+ChartJS.register(...registerables);
 
 import { MainStyles as styles } from "../../../styles/MainStyles.jsx";
 import DataBackend from "../../../backend/DataBackend.jsx";
@@ -47,6 +52,7 @@ const TRANSPORT_BUTTON_SIZE_PX = 35;
 const SPEED_SLIDER_WIDTH_PX = TRANSPORT_BUTTON_SIZE_PX * 5;
 const PATH_ANIMATION_RATE_FPS = 20;
 const GOLDEN_RATIO = 1.618;
+const DISTANCE_CHART_SAMPLE_COUNT = 10;
 const ORBITAL_POINT_COLUMNS = [
   {
     id: "coordinates",
@@ -119,8 +125,9 @@ export class CircuitryChart extends Component {
           this.setState({ error: response.error });
           return;
         }
+        const rotated_response = this.rotate_circuitry_to_origin(response);
         this.setState({
-          circuitry_data: response,
+          circuitry_data: rotated_response,
           error: null,
           animation_index: 0,
           selected_orbital_row: -1,
@@ -130,6 +137,53 @@ export class CircuitryChart extends Component {
       true,
       this.state.radial_sweep ? "radial_sweep" : "hermite",
     );
+  };
+
+  /**
+   * Rotate the orbit so its point nearest the origin is first. The
+   * interpolated radial-sweep samples are rotated by the same whole-interval
+   * offset, keeping the chart, distance chart, and point table synchronized.
+   *
+   * @param {object} response Circuitry response from the data server.
+   * @returns {object} Response with consistently rotated point arrays.
+   */
+  rotate_circuitry_to_origin = (response) => {
+    const orbital_points = response?.orbital_points || [];
+    const samples = response?.result || [];
+    if (orbital_points.length < 2 || samples.length < 2) {
+      return response;
+    }
+    let nearest_index = 0;
+    let nearest_distance = Number.POSITIVE_INFINITY;
+    orbital_points.forEach((point, index) => {
+      const distance = point.re ** 2 + point.im ** 2;
+      if (distance < nearest_distance) {
+        nearest_distance = distance;
+        nearest_index = index;
+      }
+    });
+    if (nearest_index === 0) {
+      return response;
+    }
+    const samples_per_interval =
+      (samples.length - 1) / orbital_points.length;
+    if (!Number.isInteger(samples_per_interval) || samples_per_interval < 1) {
+      return response;
+    }
+    const rotate = (values, offset) =>
+      values.slice(offset).concat(values.slice(0, offset));
+    const rotated_orbital_points = rotate(orbital_points, nearest_index);
+    const sample_cycle = samples.slice(0, -1);
+    const sample_offset = nearest_index * samples_per_interval;
+    const rotated_sample_cycle = rotate(sample_cycle, sample_offset);
+    return {
+      ...response,
+      orbital_points: rotated_orbital_points,
+      result: [
+        ...rotated_sample_cycle,
+        { ...rotated_sample_cycle[0] },
+      ],
+    };
   };
 
   on_orbital_point_selected = (row) => {
@@ -328,6 +382,73 @@ export class CircuitryChart extends Component {
             ),
           )
         : null;
+    const interpolated_points = circuitry_data?.result || [];
+    const interval_count = circuitry_data?.orbital_points?.length || 0;
+    const source_samples_per_interval =
+      interval_count > 0 && interpolated_points.length > 1
+        ? (interpolated_points.length - 1) / interval_count
+        : 0;
+    const distance_sample_count =
+      interval_count > 0 && source_samples_per_interval > 0
+        ? interval_count * DISTANCE_CHART_SAMPLE_COUNT + 1
+        : 0;
+    const distance_chart_data =
+      circuitry_data?.Q && distance_sample_count > 0
+        ? Array.from({ length: distance_sample_count }, (_, sample_index) => {
+            const is_closing_sample = sample_index === distance_sample_count - 1;
+            const result_index = is_closing_sample
+              ? interpolated_points.length - 1
+              : Math.round(
+                  Math.floor(sample_index / DISTANCE_CHART_SAMPLE_COUNT) *
+                    source_samples_per_interval +
+                    (sample_index % DISTANCE_CHART_SAMPLE_COUNT) *
+                      (source_samples_per_interval /
+                        DISTANCE_CHART_SAMPLE_COUNT),
+                );
+            const point = interpolated_points[result_index]?.C;
+            return {
+              x: sample_index / DISTANCE_CHART_SAMPLE_COUNT,
+              y: point
+                ? Math.hypot(
+                    point.re - circuitry_data.Q.re,
+                    point.im - circuitry_data.Q.im,
+                  )
+                : 0,
+            };
+          })
+        : [];
+    const distance_chart_point_radii = distance_chart_data.map(
+      (_, sample_index) =>
+        sample_index % DISTANCE_CHART_SAMPLE_COUNT === 0 ||
+        sample_index === distance_chart_data.length - 1
+          ? 3
+          : 0,
+    );
+    const distance_chart_point_colors = distance_chart_data.map(
+      (_, sample_index) =>
+        sample_index % DISTANCE_CHART_SAMPLE_COUNT === 0 ||
+        sample_index === distance_chart_data.length - 1
+          ? FractoUtil.fracto_pattern_color(circuitry_data?.cardinality || 0)
+          : "transparent",
+    );
+    const distance_chart_actual_points = distance_chart_data.filter(
+      (_, sample_index) =>
+        sample_index % DISTANCE_CHART_SAMPLE_COUNT === 0 ||
+        sample_index === distance_chart_data.length - 1,
+    );
+    const animation_result_point = interpolated_points[animation_index]?.C;
+    const distance_animation_point =
+      circuitry_data?.Q && animation_result_point && source_samples_per_interval
+        ? [
+            {
+              x: animation_index / source_samples_per_interval,
+              y: Math.hypot(
+                animation_result_point.re - circuitry_data.Q.re,
+                animation_result_point.im - circuitry_data.Q.im,
+              ),
+            },
+          ]
+        : [];
     const highlighted_point =
       selected_orbital_point || points[animation_index] || null;
     const interval_width =
@@ -406,6 +527,45 @@ export class CircuitryChart extends Component {
       verticalAlign: "top",
       overflow: "visible",
       textAlign: "left",
+    };
+    const distance_chart_width = Math.max(0, controls_width);
+    const distance_chart_height = Math.max(
+      1,
+      Math.floor(distance_chart_width / GOLDEN_RATIO),
+    );
+    const distance_values = distance_chart_data.map(({ y }) => y);
+    const distance_min = distance_values.length
+      ? Math.min(...distance_values)
+      : 0;
+    const distance_max = distance_values.length
+      ? Math.max(...distance_values)
+      : 1;
+    const distance_range = distance_max - distance_min;
+    const distance_padding = Math.max(
+      distance_range * 0.05,
+      Math.abs(distance_max) * 0.01,
+      1e-12,
+    );
+    const distance_chart_options = {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      plugins: {
+        legend: { display: false },
+      },
+      scales: {
+        x: {
+          type: "linear",
+          title: { display: false },
+          ticks: { display: false },
+        },
+        y: {
+          title: { display: false },
+          ticks: { display: false },
+          min: Math.max(0, distance_min - distance_padding),
+          max: distance_max + distance_padding,
+        },
+      },
     };
     /* spectral power chart removed; diagnostics now live on detector page */
     return (
@@ -504,6 +664,50 @@ export class CircuitryChart extends Component {
                   </span>
                 ) : null}
               </span>
+            </div>
+          ) : null}
+          {distance_chart_data.length > 0 ? (
+            <div
+              style={{
+                width: `${distance_chart_width}px`,
+                height: `${distance_chart_height}px`,
+                marginTop: "0.5rem",
+              }}
+            >
+              <Line
+                data={{
+                  datasets: [
+                    {
+                      data: distance_chart_data,
+                      borderColor: "#888888",
+                      backgroundColor: "#888888",
+                      pointBackgroundColor: distance_chart_point_colors,
+                      pointBorderColor: distance_chart_point_colors,
+                      borderWidth: 1,
+                      pointRadius: distance_chart_point_radii,
+                      pointHoverRadius: 0,
+                      tension: 0,
+                    },
+                    {
+                      data: distance_chart_actual_points,
+                      backgroundColor: "#000000",
+                      borderColor: "#000000",
+                      pointRadius: 1,
+                      showLine: false,
+                    },
+                    {
+                      data: distance_animation_point,
+                      backgroundColor: "#ffcc33",
+                      borderColor: "#333333",
+                      borderWidth: 1,
+                      pointRadius: 5,
+                      showLine: false,
+                      order: -1000,
+                    },
+                  ],
+                }}
+                options={distance_chart_options}
+              />
             </div>
           ) : null}
           <div style={{ marginTop: "0.5rem" }}>
