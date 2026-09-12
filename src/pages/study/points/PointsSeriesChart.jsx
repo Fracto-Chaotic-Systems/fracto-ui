@@ -12,6 +12,7 @@ import {
 import AppText from "../../../AppText.jsx";
 import {
   KEY_STUDY_CARDINALITY,
+  KEY_STUDY_DETECTOR_HORIZON,
   KEY_STUDY_DETECTOR_ITERATIONS,
   KEY_STUDY_ELAPSED_TIME,
   KEY_STUDY_ITERATIONS,
@@ -54,6 +55,7 @@ export class PointsSeriesChart extends Component {
     elapsed_ms: PropTypes.number.isRequired,
     iterations: PropTypes.number,
     detector_iterations: PropTypes.number,
+    detector_horizon_iterations: PropTypes.number,
     newton_cycles: PropTypes.number,
     newton_effort: PropTypes.number,
     width_px: PropTypes.number.isRequired,
@@ -122,6 +124,7 @@ export class PointsSeriesChart extends Component {
     const {
       cardinality,
       detector_iterations,
+      detector_horizon_iterations,
       elapsed_ms,
       iterations,
       newton_cycles,
@@ -180,6 +183,17 @@ export class PointsSeriesChart extends Component {
                 {AppText.get(KEY_STUDY_DETECTOR_ITERATIONS)}:
               </span>{" "}
               <span style={numeric_value_style}>{detector_iterations}</span>
+            </>
+          ) : null}
+          {detector_horizon_iterations !== undefined ? (
+            <>
+              <br />
+              <span style={CELL_LABEL_STYLE}>
+                {AppText.get(KEY_STUDY_DETECTOR_HORIZON)}:
+              </span>{" "}
+              <span style={numeric_value_style}>
+                {detector_horizon_iterations}
+              </span>
             </>
           ) : null}
           {newton_cycles !== undefined ? (

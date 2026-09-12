@@ -138,6 +138,8 @@ export class PointsMainPanel extends Component {
       point_list,
       elapsed_ms: Number(response?.elapsed_ms) || 0,
       detector_iterations: Number(response?.iterations) || 0,
+      detector_horizon_iterations:
+        Number(response?.detector_horizon_iterations) || 0,
       newton_cycles: Number(result?.cycles) || 0,
       newton_effort:
         (Number(response?.iterations) || 0) +
@@ -214,7 +216,7 @@ export class PointsMainPanel extends Component {
         );
         this.setState({ newton_derived, in_fetch: false });
       },
-      { newton_mode: "big_complex" },
+      { newton_mode: "big_complex", adaptive_detection: true },
     );
   };
 
@@ -257,6 +259,9 @@ export class PointsMainPanel extends Component {
           cardinality={newton_derived.cardinality}
           elapsed_ms={newton_derived.elapsed_ms}
           detector_iterations={newton_derived.detector_iterations}
+          detector_horizon_iterations={
+            newton_derived.detector_horizon_iterations
+          }
           newton_cycles={newton_derived.newton_cycles}
           newton_effort={newton_derived.newton_effort}
           width_px={chart_width}
