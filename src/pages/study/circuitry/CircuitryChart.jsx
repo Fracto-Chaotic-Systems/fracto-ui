@@ -8,7 +8,6 @@ import AppSettings from "../../../AppSettings.jsx";
 import { render_pattern_block } from "../StudyUtils.jsx";
 import {
   KEY_STUDY_CIRCUITRY_NO_ORBITAL,
-  KEY_STUDY_CIRCUITRY_RADIAL_SWEEP,
   KEY_STUDY_CIRCUITRY_ORBITAL_COORDINATES,
   KEY_STUDY_CIRCUITRY_ORBITAL_DESCRIPTION,
   KEY_STUDY_CIRCUITRY_ORBITAL_PROGRESS,
@@ -21,7 +20,6 @@ import { KEY_STUDY_CIRCUITRY_ANIMATION_SPEED } from "../../../settings/StudySett
 import { render_coordinates } from "../../../utils/Dom.jsx";
 import { click_point_chart } from "../../../utils/render/PatternsUtils.jsx";
 import {
-  CELL_LABEL_STYLE,
   CELL_TYPE_CALLBACK,
   TABLE_CAN_SELECT,
   TABLE_NO_BORDER,
@@ -132,10 +130,6 @@ export class CircuitryChart extends Component {
       true,
       this.state.radial_sweep ? "radial_sweep" : "hermite",
     );
-  };
-
-  on_radial_sweep_changed = (event) => {
-    this.setState({ radial_sweep: event.target.checked });
   };
 
   on_orbital_point_selected = (row) => {
@@ -300,6 +294,7 @@ export class CircuitryChart extends Component {
     const chart_size = Math.floor(
       Math.max(0, Math.min(width_px, height_px)) * 0.85,
     );
+    const points_list_height = Math.floor(Math.max(0, height_px) / 3);
     const points = (circuitry_data?.result || []).map(({ C }) => ({
       x: C.re,
       y: C.im,
@@ -532,26 +527,22 @@ export class CircuitryChart extends Component {
               on_change={this.on_animation_speed_changed}
             />
           </div>
-          <div style={{ marginTop: "0.5rem" }}>
+          <div
+            style={{
+              height: `${points_list_height}px`,
+              marginTop: "0.5rem",
+              overflowY: "auto",
+              overflowX: "hidden",
+            }}
+          >
             <CoolTable
               columns={ORBITAL_POINT_COLUMNS}
               data={orbital_table_data}
               on_select_row={this.on_orbital_point_selected}
               options={[TABLE_CAN_SELECT, TABLE_NO_BORDER, TABLE_NO_HEADER]}
               selected_row={selected_orbital_row}
+              scroll_selected_row
             />
-          </div>
-          <div style={{ display: "block", marginTop: "0.5rem" }}>
-            <label>
-              <input
-                type="checkbox"
-                checked={radial_sweep}
-                onChange={this.on_radial_sweep_changed}
-              />
-              <span style={{ ...CELL_LABEL_STYLE, marginLeft: "0.35rem" }}>
-                {AppText.get(KEY_STUDY_CIRCUITRY_RADIAL_SWEEP)}
-              </span>
-            </label>
           </div>
         </styles.ContentWrapper>
       </>

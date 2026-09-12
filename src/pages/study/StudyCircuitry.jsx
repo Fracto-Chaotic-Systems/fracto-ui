@@ -17,6 +17,7 @@ import NavigatorSplitterLayout from "../../navigator/NavigatorSplitterLayout.jsx
 import CircuitryChart from "./circuitry/CircuitryChart.jsx";
 
 const UPDATE_INTERVAL_MS = 1000;
+const SCROLLBAR_WIDTH_PX = 15;
 
 export class StudyCircuitry extends Component {
   state = {
@@ -89,10 +90,17 @@ export class StudyCircuitry extends Component {
       section_key: KEY_STUDY_SPLITTER_POS_PX,
     };
     const splitter_pos = AppSettings.get(splitter_keys.main_key);
+    const page_splitter_pos = AppSettings.get(KEY_STUDY_SPLITTER_POS_PX);
+    const right_pane_width = Math.max(
+      0,
+      rendered_width -
+        Math.max(0, splitter_pos - page_splitter_pos) -
+        SCROLLBAR_WIDTH_PX,
+    );
     const chart_style = {
       left: `${splitter_pos}px`,
       top: `${top}px`,
-      width: `${rendered_width}px`,
+      width: `${right_pane_width}px`,
       height: `${rendered_height}px`,
       display: "block",
       boxSizing: "border-box",
@@ -124,7 +132,7 @@ export class StudyCircuitry extends Component {
           <CircuitryChart
             focal_point={frame_settings.focal_point}
             height_px={rendered_height}
-            width_px={rendered_width}
+            width_px={right_pane_width}
           />
         </div>
       </styles.FixedInlineBlock>,

@@ -46,6 +46,7 @@ export class CoolTable extends Component {
     options: PropTypes.array,
     selected_row: PropTypes.number,
     selected_rows: PropTypes.array,
+    scroll_selected_row: PropTypes.bool,
     table_style: PropTypes.object,
   };
 
@@ -53,6 +54,7 @@ export class CoolTable extends Component {
     options: [],
     selected_row: -1,
     selected_rows: [],
+    scroll_selected_row: false,
     table_style: {},
   };
 
@@ -65,12 +67,22 @@ export class CoolTable extends Component {
     setTimeout(this.scroll_selection, 500);
   }
 
+  componentDidUpdate(prevProps) {
+    const { selected_row, scroll_selected_row } = this.props;
+    if (
+      scroll_selected_row &&
+      prevProps.selected_row !== selected_row
+    ) {
+      this.scroll_selection();
+    }
+  }
+
   componentWillUnmount() {
     window.removeEventListener("keydown", this.handleKeyDown);
   }
 
   scroll_selection = async () => {
-    const { selected_row, options } = this.props;
+    const { selected_row, options, scroll_selected_row } = this.props;
     const { scroller_ref } = this.state;
     if (!options.includes(TABLE_CAN_SELECT)) {
       // console.log('scroll_selection: table is not selectable')
@@ -85,7 +97,11 @@ export class CoolTable extends Component {
       return;
     }
     console.log("scrolling to", selected_row);
-    scroller_ref.current.scrollIntoView({ behavior: "smooth" });
+    scroller_ref.current.scrollIntoView(
+      scroll_selected_row
+        ? { behavior: "auto", block: "center" }
+        : { behavior: "smooth" },
+    );
   };
 
   handleKeyDown = (event) => {
