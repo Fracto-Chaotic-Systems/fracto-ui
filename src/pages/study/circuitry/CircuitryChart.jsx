@@ -148,11 +148,37 @@ export class CircuitryChart extends Component {
    * @returns {object} Response with consistently rotated point arrays.
    */
   rotate_circuitry_to_origin = (response) => {
-    const orbital_points = response?.orbital_points || [];
+    let orbital_points = response?.orbital_points || [];
     const samples = response?.result || [];
-    if (orbital_points.length < 2 || samples.length < 2) {
+    if (samples.length < 2) {
       return response;
     }
+    const reported_cardinality = Number(response?.cardinality);
+    const reported_samples_per_interval =
+      reported_cardinality > 1
+        ? (samples.length - 1) / reported_cardinality
+        : 0;
+    if (
+      Number.isInteger(reported_cardinality) &&
+      reported_cardinality > 1 &&
+      Number.isInteger(reported_samples_per_interval) &&
+      reported_samples_per_interval > 0 &&
+      orbital_points.length !== reported_cardinality
+    ) {
+      orbital_points = Array.from(
+        { length: reported_cardinality },
+        (_, index) => samples[index * reported_samples_per_interval]?.C,
+      )
+        .filter(Boolean)
+        .map((point) => ({ re: point.re, im: point.im }));
+    }
+    if (orbital_points.length < 2) {
+      return response;
+    }
+    const normalized_response = {
+      ...response,
+      orbital_points,
+    };
     let nearest_index = 0;
     let nearest_distance = Number.POSITIVE_INFINITY;
     orbital_points.forEach((point, index) => {
@@ -163,12 +189,12 @@ export class CircuitryChart extends Component {
       }
     });
     if (nearest_index === 0) {
-      return response;
+      return normalized_response;
     }
     const samples_per_interval =
       (samples.length - 1) / orbital_points.length;
     if (!Number.isInteger(samples_per_interval) || samples_per_interval < 1) {
-      return response;
+      return normalized_response;
     }
     const rotate = (values, offset) =>
       values.slice(offset).concat(values.slice(0, offset));
@@ -177,7 +203,7 @@ export class CircuitryChart extends Component {
     const sample_offset = nearest_index * samples_per_interval;
     const rotated_sample_cycle = rotate(sample_cycle, sample_offset);
     return {
-      ...response,
+      ...normalized_response,
       orbital_points: rotated_orbital_points,
       result: [
         ...rotated_sample_cycle,
@@ -358,11 +384,18 @@ export class CircuitryChart extends Component {
         coordinates: [render_coordinates, { x: point.re, y: point.im }],
       }),
     );
+    const radial_samples_per_interval =
+      circuitry_data?.cardinality > 0
+        ? (points.length - 1) / circuitry_data.cardinality
+        : 0;
     const no_orbital =
       circuitry_data?.orbit_status === "outside_mandelbrot_set";
     const orbital_points = (circuitry_data?.result || [])
       .filter(({ t }, index) =>
-        radial_sweep ? index % 50 === 0 : Math.abs(t - Math.round(t)) < 1e-9,
+        radial_sweep
+          ? radial_samples_per_interval > 0 &&
+            index % radial_samples_per_interval === 0
+          : Math.abs(t - Math.round(t)) < 1e-9,
       )
       .map(({ C }) => ({
         x: C.re,
