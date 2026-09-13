@@ -8,6 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
+    "test:audio": "node --test test/circuitry_audio.test.js",
     "preview": "vite preview"
   },
   "dependencies": {

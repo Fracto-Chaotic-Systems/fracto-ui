@@ -12,6 +12,15 @@ import AppText from "../../../AppText.jsx";
 import AppSettings from "../../../AppSettings.jsx";
 import { render_pattern_block } from "../StudyUtils.jsx";
 import {
+  build_waveform_profile,
+  create_mono_audio_buffer,
+  create_phase_accumulator,
+  normalize_waveform_profile,
+  render_waveform_samples,
+  validate_waveform_continuity,
+  unwrap_waveform_profile,
+} from "./CircuitryAudioUtils.js";
+import {
   KEY_STUDY_CIRCUITRY_NO_ORBITAL,
   KEY_STUDY_CIRCUITRY_ORBITAL_COORDINATES,
   KEY_STUDY_CIRCUITRY_ORBITAL_DESCRIPTION,
@@ -20,10 +29,13 @@ import {
   KEY_STUDY_CIRCUITRY_COUNTER_CLOCKWISE,
   KEY_STUDY_MAGNITUDE,
   KEY_STUDY_CIRCUITRY_DETECTED_IN,
+  KEY_STUDY_CIRCUITRY_PLAY,
+  KEY_STUDY_CIRCUITRY_STOP,
 } from "../../../text/StudyText.jsx";
 import { KEY_STUDY_CIRCUITRY_ANIMATION_SPEED } from "../../../settings/StudySettings.jsx";
 import { render_coordinates } from "../../../utils/Dom.jsx";
 import { click_point_chart } from "../../../utils/render/PatternsUtils.jsx";
+import { CoolButton } from "../../../utils/ui/CoolImports.jsx";
 import {
   CELL_TYPE_CALLBACK,
   TABLE_CAN_SELECT,
@@ -53,6 +65,8 @@ const SPEED_SLIDER_WIDTH_PX = TRANSPORT_BUTTON_SIZE_PX * 5;
 const PATH_ANIMATION_RATE_FPS = 20;
 const GOLDEN_RATIO = 1.618;
 const DISTANCE_CHART_SAMPLE_COUNT = 10;
+const AUDIO_FREQUENCY_HZ = 440;
+const AUDIO_DURATION_SECONDS = 10;
 const ORBITAL_POINT_COLUMNS = [
   {
     id: "coordinates",
@@ -77,9 +91,14 @@ export class CircuitryChart extends Component {
     selected_orbital_point: null,
     animation_playing: false,
     animation_timer: null,
+    audio_playing: false,
     animation_speed:
       Number(AppSettings.get(KEY_STUDY_CIRCUITRY_ANIMATION_SPEED)) || 1,
   };
+
+  audio_context = null;
+  audio_source = null;
+  is_unmounted = false;
 
   componentDidMount() {
     if (this.has_focal_point(this.props.focal_point)) {
@@ -107,9 +126,11 @@ export class CircuitryChart extends Component {
   }
 
   componentWillUnmount() {
+    this.is_unmounted = true;
     if (this.state.animation_timer) {
       clearInterval(this.state.animation_timer);
     }
+    this.stop_audio();
   }
 
   has_focal_point = (focal_point) =>
@@ -117,7 +138,87 @@ export class CircuitryChart extends Component {
     Number.isFinite(Number(focal_point.x)) &&
     Number.isFinite(Number(focal_point.y));
 
+  stop_audio = () => {
+    if (this.audio_source) {
+      this.audio_source.onended = null;
+      try {
+        this.audio_source.stop();
+      } catch (error) {
+        // The source may already have ended naturally.
+      }
+      this.audio_source.disconnect();
+      this.audio_source = null;
+    }
+    if (this.audio_context) {
+      this.audio_context.close();
+      this.audio_context = null;
+    }
+    if (this.state.audio_playing && !this.is_unmounted) {
+      this.setState({ audio_playing: false });
+    }
+  };
+
+  play_audio = async () => {
+    const profile = this.state.circuitry_data?.waveform_profile || [];
+    if (profile.length < 2) {
+      return;
+    }
+    const AudioContextClass =
+      typeof window !== "undefined" &&
+      (window.AudioContext || window.webkitAudioContext);
+    if (!AudioContextClass) {
+      return;
+    }
+    this.stop_audio();
+    const audio_context = new AudioContextClass();
+    this.audio_context = audio_context;
+    await audio_context.resume();
+    if (this.is_unmounted) {
+      audio_context.close();
+      return;
+    }
+    const phase_accumulator = create_phase_accumulator(
+      AUDIO_FREQUENCY_HZ,
+      audio_context.sampleRate,
+    );
+    const samples = render_waveform_samples(
+      profile,
+      phase_accumulator,
+      Math.floor(audio_context.sampleRate * AUDIO_DURATION_SECONDS),
+    );
+    const audio_buffer = create_mono_audio_buffer(audio_context, samples);
+    if (!audio_buffer || this.audio_context !== audio_context) {
+      audio_context.close();
+      return;
+    }
+    const audio_source = audio_context.createBufferSource();
+    audio_source.buffer = audio_buffer;
+    audio_source.connect(audio_context.destination);
+    audio_source.onended = () => {
+      if (this.audio_source !== audio_source) {
+        return;
+      }
+      audio_source.disconnect();
+      this.audio_source = null;
+      this.audio_context = null;
+      audio_context.close();
+      this.setState({ audio_playing: false });
+    };
+    this.audio_source = audio_source;
+    audio_source.start();
+    this.setState({ audio_playing: true });
+  };
+
+  on_audio_toggle = () => {
+    if (this.state.audio_playing) {
+      this.stop_audio();
+    } else {
+      this.play_audio();
+    }
+  };
+
   load_circuitry = (focal_point) => {
+    this.stop_audio();
     DataBackend.get_circuitry(
       focal_point,
       (response) => {
@@ -126,8 +227,17 @@ export class CircuitryChart extends Component {
           return;
         }
         const rotated_response = this.rotate_circuitry_to_origin(response);
+        const waveform_profile = normalize_waveform_profile(
+          unwrap_waveform_profile(build_waveform_profile(rotated_response)),
+        );
+        const waveform_continuity =
+          validate_waveform_continuity(waveform_profile);
         this.setState({
-          circuitry_data: rotated_response,
+          circuitry_data: {
+            ...rotated_response,
+            waveform_profile,
+            waveform_continuity,
+          },
           error: null,
           animation_index: 0,
           selected_orbital_row: -1,
@@ -370,6 +480,7 @@ export class CircuitryChart extends Component {
       selected_orbital_row,
       selected_orbital_point,
       animation_speed,
+      audio_playing,
     } = this.state;
     const chart_size = Math.floor(
       Math.max(0, Math.min(width_px, height_px)) * 0.85,
@@ -415,7 +526,9 @@ export class CircuitryChart extends Component {
             ),
           )
         : null;
-    const interpolated_points = circuitry_data?.result || [];
+    const waveform_profile =
+      circuitry_data?.waveform_profile || build_waveform_profile(circuitry_data);
+    const interpolated_points = waveform_profile;
     const interval_count = circuitry_data?.orbital_points?.length || 0;
     const source_samples_per_interval =
       interval_count > 0 && interpolated_points.length > 1
@@ -743,7 +856,13 @@ export class CircuitryChart extends Component {
               />
             </div>
           ) : null}
-          <div style={{ marginTop: "0.5rem" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              marginTop: "0.5rem",
+            }}
+          >
             <CoolMediaTransport
               width_px={controls_width}
               button_size_px={TRANSPORT_BUTTON_SIZE_PX}
@@ -751,6 +870,18 @@ export class CircuitryChart extends Component {
               on_operation={this.on_transport_operation}
               disabled={points.length === 0}
             />
+            <div style={{ marginLeft: "1rem" }}>
+              <CoolButton
+                content={
+                  audio_playing
+                    ? AppText.get(KEY_STUDY_CIRCUITRY_STOP)
+                    : AppText.get(KEY_STUDY_CIRCUITRY_PLAY)
+                }
+                on_click={this.on_audio_toggle}
+                primary={true}
+                disabled={waveform_profile.length < 2}
+              />
+            </div>
           </div>
           <div
             style={{ width: `${SPEED_SLIDER_WIDTH_PX}px`, marginTop: "0.5rem" }}
