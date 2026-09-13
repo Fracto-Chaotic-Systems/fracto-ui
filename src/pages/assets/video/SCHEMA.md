@@ -13,10 +13,15 @@ its version migration and fixtures.
 | `title` | string | User-visible project title. |
 | `created_at` | timestamp | Record creation time. |
 | `updated_at` | timestamp | Most recent persisted update. |
+| `archived` | boolean | Soft-delete marker; `false` by default. |
 | `meta` | JSON object | Technical rendering and output configuration. |
 | `script` | JSON object | Ordered motion and frame instructions. |
 | `meta_version` | integer | Version of the `meta` document, when independently versioned. |
 | `script_version` | integer | Version of the `script` document, when independently versioned. |
+
+The existing `assets` table is also checked during asset-server startup. Its
+schema is owned by the asset server and is initialized through the data server
+in the same idempotent manner.
 
 If the implementation uses one record-wide version instead, document that
 choice here as `schema_version` and remove the unused version columns from the
