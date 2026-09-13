@@ -6,6 +6,7 @@ import VideoControlBlock from "./video/VideoControlBlock.jsx";
 
 import {
   MainStyles as styles,
+  MARGIN_PX,
   SECTION_BAR_HEIGHT_PX,
 } from "../../styles/MainStyles.jsx";
 import { BACKGROUND_FIELD_GRADIENT } from "../../styles/BackgroundStyles.jsx";
@@ -24,21 +25,43 @@ import { get_visible_coverage_levels } from "./AssetsUtils.jsx";
 
 const DEFAULT_VIDEO_RESOLUTION = 1024;
 const DEFAULT_VIDEO_FPS = 30;
+const VIDEO_OPERATIONS_HEIGHT_REDUCTION_PX = 50;
+const VIDEO_OPERATIONS_WIDTH_REDUCTION_PX = 10;
 
 export class AssetsVideoGenerator extends Component {
   state = {
+    rendered_width: 0,
+    rendered_height: 0,
     frame_settings: {},
     coverage_data: null,
     heat_map_buffer: null,
     video_script: null,
     selected_coverage_levels: [],
+    frame_settings_subscription: null,
   };
 
   componentDidMount() {
     this.setState({
       frame_settings: AppSettings.get(KEY_VIDEO_GENERATOR_FRAME_SETTINGS),
+      frame_settings_subscription: AppSettings.subscribe(
+        KEY_VIDEO_GENERATOR_FRAME_SETTINGS,
+        this.on_frame_settings_changed,
+      ),
     });
   }
+
+  componentWillUnmount() {
+    const { frame_settings_subscription } = this.state;
+    if (frame_settings_subscription) {
+      AppSettings.unsubscribe(frame_settings_subscription);
+    }
+  }
+
+  on_frame_settings_changed = (key, frame_settings) => {
+    if (frame_settings) {
+      this.setState({ frame_settings });
+    }
+  };
   on_coverage_data = (coverage_data, heat_map_buffer) => {
     this.setState({
       coverage_data,
@@ -48,6 +71,10 @@ export class AssetsVideoGenerator extends Component {
         heat_map_buffer,
       ),
     });
+  };
+
+  on_resize = (rendered_width, rendered_height) => {
+    this.setState({ rendered_width, rendered_height });
   };
 
   on_coverage_levels_changed = (selected_coverage_levels) => {
@@ -115,7 +142,34 @@ export class AssetsVideoGenerator extends Component {
       heat_map_buffer,
       video_script,
       selected_coverage_levels,
+      rendered_width,
+      rendered_height,
     } = this.state;
+    const navigation_splitter_pos = Number(
+      AppSettings.get(VIDEO_GENERATOR_SPLITTER_KEYS.main_key),
+    );
+    const assets_splitter_pos = Number(
+      AppSettings.get(VIDEO_GENERATOR_SPLITTER_KEYS.section_key),
+    );
+    const heat_map_size_px = Number(this.state.frame_settings?.width_px) || 0;
+    // rendered_width already excludes the outer assets splitter. Convert the
+    // inner navigator splitter from viewport coordinates to that content-area
+    // coordinate system before sizing the operations panel.
+    const operations_width = Math.max(
+      0,
+      rendered_width -
+        (navigation_splitter_pos - assets_splitter_pos) -
+        MARGIN_PX -
+        VIDEO_OPERATIONS_WIDTH_REDUCTION_PX,
+    );
+    const operations_height = Math.max(
+      0,
+      rendered_height -
+        SECTION_BAR_HEIGHT_PX -
+        heat_map_size_px -
+        2 * MARGIN_PX -
+        VIDEO_OPERATIONS_HEIGHT_REDUCTION_PX,
+    );
     const control_block = (
       <VideoControlBlock
         video_script={video_script}
@@ -128,6 +182,8 @@ export class AssetsVideoGenerator extends Component {
     );
     const operations_block = (
       <VideoOperationsBlock
+        width_px={operations_width}
+        height_px={operations_height}
         video_script={video_script}
         on_update_script={this.on_update_script}
       />
@@ -149,6 +205,7 @@ export class AssetsVideoGenerator extends Component {
           control_block={[control_block]}
           results_block={[operations_block]}
           on_coverage_data={this.on_coverage_data}
+          on_resize={this.on_resize}
           selected_levels={selected_coverage_levels}
         />
       </CoolStyles.Block>,
