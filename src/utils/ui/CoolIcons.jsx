@@ -112,6 +112,28 @@ export const transport_end_icon = (
     <path d="M16 5h2v14h-2zM14 12L5 5v14z" />
   </svg>
 );
+export const sound_on_icon = (
+  <svg
+    viewBox="0 0 24 24"
+    width="20"
+    height="20"
+    fill="currentColor"
+    aria-hidden="true"
+  >
+    <path d="M3 9v6h4l5 4V5L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4.03v8.06A4.5 4.5 0 0 0 16.5 12zm0-8.5v2.07A7 7 0 0 1 20 12a7 7 0 0 1-3.5 6.43v2.07A9 9 0 0 0 22 12a9 9 0 0 0-5.5-8.5z" />
+  </svg>
+);
+export const sound_off_icon = (
+  <svg
+    viewBox="0 0 24 24"
+    width="20"
+    height="20"
+    fill="currentColor"
+    aria-hidden="true"
+  >
+    <path d="M3 9v6h4l5 4V5L7 9H3zm14.59 3 2.12-2.12-1.41-1.41L16.17 10.6l-2.12-2.13-1.42 1.42 2.13 2.12-2.13 2.12 1.42 1.42 2.12-2.13 2.13 2.13 1.41-1.42L17.59 12z" />
+  </svg>
+);
 export const checkmark_icon = (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
     <path d="M530.8 134.1C545.1 144.5 548.3 164.5 537.9 178.8L281.9 530.8C276.4 538.4 267.9 543.1 258.5 543.9C249.1 544.7 240 541.2 233.4 534.6L105.4 406.6C92.9 394.1 92.9 373.8 105.4 361.3C117.9 348.8 138.2 348.8 150.7 361.3L252.2 462.8L486.2 141.1C496.6 126.8 516.6 123.6 530.9 134z" />

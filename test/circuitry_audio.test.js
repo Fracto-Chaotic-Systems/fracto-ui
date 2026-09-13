@@ -15,16 +15,16 @@ import {
 const make_profile = () =>
   normalize_waveform_profile(
     unwrap_waveform_profile(
-      build_waveform_profile({
-        Q: { re: 0, im: 0 },
-        result: [
+      build_waveform_profile(
+        [
           { t: 2.8, C: { re: 1, im: 0 } },
           { t: 3.4, C: { re: 0, im: 1 } },
           { t: 4.2, C: { re: -1, im: 0 } },
           { t: 5.0, C: { re: 0, im: -1 } },
           { t: 2.8, C: { re: 1, im: 0 } },
         ],
-      }),
+        { re: 0, im: 0 },
+      ),
     ),
   );
 

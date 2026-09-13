@@ -13,13 +13,11 @@ import AppSettings from "../../../AppSettings.jsx";
 import { render_pattern_block } from "../StudyUtils.jsx";
 import {
   build_waveform_profile,
-  create_mono_audio_buffer,
-  create_phase_accumulator,
   normalize_waveform_profile,
-  render_waveform_samples,
   validate_waveform_continuity,
   unwrap_waveform_profile,
 } from "./CircuitryAudioUtils.js";
+import { CircuitryAudioController } from "./CircuitryAudioController.js";
 import {
   KEY_STUDY_CIRCUITRY_NO_ORBITAL,
   KEY_STUDY_CIRCUITRY_ORBITAL_COORDINATES,
@@ -35,13 +33,14 @@ import {
 import { KEY_STUDY_CIRCUITRY_ANIMATION_SPEED } from "../../../settings/StudySettings.jsx";
 import { render_coordinates } from "../../../utils/Dom.jsx";
 import { click_point_chart } from "../../../utils/render/PatternsUtils.jsx";
-import { CoolButton } from "../../../utils/ui/CoolImports.jsx";
 import {
   CELL_TYPE_CALLBACK,
   TABLE_CAN_SELECT,
   TABLE_NO_BORDER,
   TABLE_NO_HEADER,
 } from "../../../utils/ui/styles/CoolTableStyles.jsx";
+import { CoolTransportStyles as transport_styles } from "../../../utils/ui/styles/CoolTransportStyles.jsx";
+import { sound_off_icon, sound_on_icon } from "../../../utils/ui/CoolIcons.jsx";
 import { IMAGE_FRAME_STYLE } from "../../../utils/render/ImageFrameStyle.jsx";
 import CoolTable from "../../../utils/ui/CoolTable.jsx";
 import CoolMediaTransport, {
@@ -65,8 +64,6 @@ const SPEED_SLIDER_WIDTH_PX = TRANSPORT_BUTTON_SIZE_PX * 5;
 const PATH_ANIMATION_RATE_FPS = 20;
 const GOLDEN_RATIO = 1.618;
 const DISTANCE_CHART_SAMPLE_COUNT = 10;
-const AUDIO_FREQUENCY_HZ = 440;
-const AUDIO_DURATION_SECONDS = 10;
 const ORBITAL_POINT_COLUMNS = [
   {
     id: "coordinates",
@@ -96,8 +93,13 @@ export class CircuitryChart extends Component {
       Number(AppSettings.get(KEY_STUDY_CIRCUITRY_ANIMATION_SPEED)) || 1,
   };
 
-  audio_context = null;
-  audio_source = null;
+  audio_controller = new CircuitryAudioController({
+    on_playing_changed: (audio_playing) => {
+      if (!this.is_unmounted) {
+        this.setState({ audio_playing });
+      }
+    },
+  });
   is_unmounted = false;
 
   componentDidMount() {
@@ -130,7 +132,7 @@ export class CircuitryChart extends Component {
     if (this.state.animation_timer) {
       clearInterval(this.state.animation_timer);
     }
-    this.stop_audio();
+    this.audio_controller.dispose();
   }
 
   has_focal_point = (focal_point) =>
@@ -138,75 +140,13 @@ export class CircuitryChart extends Component {
     Number.isFinite(Number(focal_point.x)) &&
     Number.isFinite(Number(focal_point.y));
 
-  stop_audio = () => {
-    if (this.audio_source) {
-      this.audio_source.onended = null;
-      try {
-        this.audio_source.stop();
-      } catch (error) {
-        // The source may already have ended naturally.
-      }
-      this.audio_source.disconnect();
-      this.audio_source = null;
-    }
-    if (this.audio_context) {
-      this.audio_context.close();
-      this.audio_context = null;
-    }
-    if (this.state.audio_playing && !this.is_unmounted) {
-      this.setState({ audio_playing: false });
-    }
+  stop_audio = (immediate = false) => {
+    this.audio_controller.stop(immediate);
   };
 
   play_audio = async () => {
     const profile = this.state.circuitry_data?.waveform_profile || [];
-    if (profile.length < 2) {
-      return;
-    }
-    const AudioContextClass =
-      typeof window !== "undefined" &&
-      (window.AudioContext || window.webkitAudioContext);
-    if (!AudioContextClass) {
-      return;
-    }
-    this.stop_audio();
-    const audio_context = new AudioContextClass();
-    this.audio_context = audio_context;
-    await audio_context.resume();
-    if (this.is_unmounted) {
-      audio_context.close();
-      return;
-    }
-    const phase_accumulator = create_phase_accumulator(
-      AUDIO_FREQUENCY_HZ,
-      audio_context.sampleRate,
-    );
-    const samples = render_waveform_samples(
-      profile,
-      phase_accumulator,
-      Math.floor(audio_context.sampleRate * AUDIO_DURATION_SECONDS),
-    );
-    const audio_buffer = create_mono_audio_buffer(audio_context, samples);
-    if (!audio_buffer || this.audio_context !== audio_context) {
-      audio_context.close();
-      return;
-    }
-    const audio_source = audio_context.createBufferSource();
-    audio_source.buffer = audio_buffer;
-    audio_source.connect(audio_context.destination);
-    audio_source.onended = () => {
-      if (this.audio_source !== audio_source) {
-        return;
-      }
-      audio_source.disconnect();
-      this.audio_source = null;
-      this.audio_context = null;
-      audio_context.close();
-      this.setState({ audio_playing: false });
-    };
-    this.audio_source = audio_source;
-    audio_source.start();
-    this.setState({ audio_playing: true });
+    await this.audio_controller.play(profile);
   };
 
   on_audio_toggle = () => {
@@ -228,7 +168,9 @@ export class CircuitryChart extends Component {
         }
         const rotated_response = this.rotate_circuitry_to_origin(response);
         const waveform_profile = normalize_waveform_profile(
-          unwrap_waveform_profile(build_waveform_profile(rotated_response)),
+          unwrap_waveform_profile(
+            build_waveform_profile(rotated_response.result, rotated_response.Q),
+          ),
         );
         const waveform_continuity =
           validate_waveform_continuity(waveform_profile);
@@ -527,7 +469,8 @@ export class CircuitryChart extends Component {
           )
         : null;
     const waveform_profile =
-      circuitry_data?.waveform_profile || build_waveform_profile(circuitry_data);
+      circuitry_data?.waveform_profile ||
+      build_waveform_profile(circuitry_data?.result, circuitry_data?.Q);
     const interpolated_points = waveform_profile;
     const interval_count = circuitry_data?.orbital_points?.length || 0;
     const source_samples_per_interval =
@@ -871,16 +814,24 @@ export class CircuitryChart extends Component {
               disabled={points.length === 0}
             />
             <div style={{ marginLeft: "1rem" }}>
-              <CoolButton
-                content={
+              <transport_styles.GenericButton
+                title={
                   audio_playing
                     ? AppText.get(KEY_STUDY_CIRCUITRY_STOP)
                     : AppText.get(KEY_STUDY_CIRCUITRY_PLAY)
                 }
-                on_click={this.on_audio_toggle}
-                primary={true}
+                onClick={this.on_audio_toggle}
                 disabled={waveform_profile.length < 2}
-              />
+                style={{
+                  width: `${TRANSPORT_BUTTON_SIZE_PX}px`,
+                  height: `${TRANSPORT_BUTTON_SIZE_PX}px`,
+                  padding: 0,
+                  margin: "0 2px",
+                  boxSizing: "border-box",
+                }}
+              >
+                {audio_playing ? sound_off_icon : sound_on_icon}
+              </transport_styles.GenericButton>
             </div>
           </div>
           <div

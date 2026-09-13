@@ -5,14 +5,22 @@ const FULL_TURN = 2 * Math.PI;
  * This is intentionally separate from the reduced ten-sample visualization
  * profile used by the metadata chart.
  *
- * @param {object|null} circuitry_data Circuitry response containing `Q` and
- *   the full interpolated `result` array.
+ * @param {Array<{t:number,C:{re:number,im:number}}>|object|null} curve_samples
+ *   Full interpolated curve samples, or a legacy circuitry response object.
+ * @param {{re:number,im:number}|undefined} Q Radial origin used for distances.
+ *   The legacy response form supplies this as `curve_samples.Q`.
  * @returns {Array<{t:number,C:{re:number,im:number},value:number}>} Every
  *   interpolated sample with its distance-from-Q waveform value.
  */
-export const build_waveform_profile = (circuitry_data) => {
-  const origin = circuitry_data?.Q;
-  const samples = circuitry_data?.result || [];
+export const build_waveform_profile = (curve_samples, Q) => {
+  // Compatibility: callers using the original response-shaped argument can
+  // continue during the pipeline refactor. New callers should pass samples
+  // and Q separately so waveform construction has no page or HTTP coupling.
+  const legacy_response = !Array.isArray(curve_samples) ? curve_samples : null;
+  const origin = Q || legacy_response?.Q;
+  const samples = Array.isArray(curve_samples)
+    ? curve_samples
+    : legacy_response?.result || [];
   if (!origin || samples.length === 0) {
     return [];
   }
