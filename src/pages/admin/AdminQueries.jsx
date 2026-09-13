@@ -13,6 +13,7 @@ import {
   KEY_DATA_QUERY_TABLE_LORE_CATEGORY,
   KEY_DATA_QUERY_TABLE_LORE_FILES,
   KEY_DATA_QUERY_TABLE_TILES,
+  KEY_DATA_QUERY_TABLE_VIDEOS,
 } from "../../text/DataText.jsx";
 import AppSettings from "../../AppSettings.jsx";
 import {
@@ -35,6 +36,7 @@ const TABLE_TABS = [
   KEY_DATA_QUERY_TABLE_LORE_CATEGORY,
   KEY_DATA_QUERY_TABLE_LORE_FILES,
   KEY_DATA_QUERY_TABLE_TILES,
+  KEY_DATA_QUERY_TABLE_VIDEOS,
 ];
 
 const TABLE_NAMES = [
@@ -43,6 +45,7 @@ const TABLE_NAMES = [
   "lore_category",
   "lore_files",
   "tiles",
+  "videos",
 ];
 const TABLE_LIMIT = 1000;
 const TABLE_HEADER_SPACE_PX = 40;
