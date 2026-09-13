@@ -20,7 +20,7 @@ import {
   KEY_DATA_QUERIES_TAB,
   KEY_DATA_SPLITTER_POS_PX,
 } from "../../settings/DataSettings.jsx";
-import { BACKGROUND_FIELD_GRADIENT } from "../../constants.jsx";
+import { BACKGROUND_FIELD_GRADIENT } from "../../styles/BackgroundStyles.jsx";
 import { update_dimensions } from "../PageUtils.jsx";
 import DataBackend from "../../backend/DataBackend.jsx";
 import CoolTable from "../../utils/ui/CoolTable.jsx";

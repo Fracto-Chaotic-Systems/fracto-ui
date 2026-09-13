@@ -12,7 +12,7 @@ import { GALLERY_TABLE_WIDTH_PX } from "./GalleryList.jsx";
 import { SPLITTER_WIDTH_PX } from "../../../constants.jsx";
 import FractoRasterImage from "../../../utils/render/FractoRasterImage.jsx";
 import FieldsColorWheel from "../../../utils/render/FieldsColorWheel.jsx";
-import { BACKGROUND_FIELD_GRADIENT } from "../../../constants.jsx";
+import { BACKGROUND_FIELD_GRADIENT } from "../../../styles/BackgroundStyles.jsx";
 
 const IMAGE_SIZE_DELTA = 50;
 

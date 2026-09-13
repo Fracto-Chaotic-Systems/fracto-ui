@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 
-import { CoolTransportStyles as styles } from "./styles/CoolTransportStyles.jsx";
+import { CoolIconButton } from "./CoolButton.jsx";
 import {
   transport_begin_icon,
   transport_end_icon,
@@ -82,15 +82,15 @@ export class CoolMediaTransport extends Component {
         boxSizing: "border-box",
       };
       return (
-        <styles.GenericButton
+        <CoolIconButton
           key={`transit-button-${i}`}
           style={button_style}
           title={button.tooltip}
-          onClick={() => on_operation(operation)}
+          aria_label={button.tooltip}
+          content={button.icon}
+          on_click={() => on_operation(operation)}
           disabled={disabled}
-        >
-          {button.icon}
-        </styles.GenericButton>
+        />
       );
     });
   }

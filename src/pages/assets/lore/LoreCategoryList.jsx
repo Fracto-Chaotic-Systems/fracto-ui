@@ -16,7 +16,7 @@ import {
   get_categories,
   get_category,
 } from "./LoreUtils.jsx";
-import { BACKGROUND_FIELD_GRADIENT } from "../../../constants.jsx";
+import { BACKGROUND_FIELD_GRADIENT } from "../../../styles/BackgroundStyles.jsx";
 import AppSettings from "../../../AppSettings.jsx";
 import { KEY_ASSETS_LORE_SELECTED_CATEGORY_ID } from "../../../settings/AssetsSettings.jsx";
 

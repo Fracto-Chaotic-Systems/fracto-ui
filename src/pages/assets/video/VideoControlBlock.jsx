@@ -9,9 +9,9 @@ import VideoControlButtons from "./VideoControlButtons.jsx";
 
 export class VideoControlBlock extends Component {
   static propTypes = {
-    video_script: PropTypes.object.isRequired,
-    coverage_data: PropTypes.object.isRequired,
-    heat_map_buffer: PropTypes.object.isRequired,
+    video_script: PropTypes.object,
+    coverage_data: PropTypes.object,
+    heat_map_buffer: PropTypes.object,
     on_control_action: PropTypes.func.isRequired,
   };
 
@@ -28,16 +28,21 @@ export class VideoControlBlock extends Component {
     const { on_control_action, video_script, coverage_data, heat_map_buffer } =
       this.props;
     const coverage_table = this.render_coverage_table();
-    return [
-      coverage_table,
-      coverage_data ? <styles.HalfRemSpacer /> : "",
+    const control_buttons = (
       <VideoControlButtons
         video_script={video_script}
         coverage_data={coverage_data}
         heat_map_buffer={heat_map_buffer}
         on_control_action={on_control_action}
-      />,
-    ];
+      />
+    );
+    return (
+      <CoolStyles.InlineBlock>
+        {control_buttons}
+        {coverage_data ? <styles.HalfRemSpacer /> : ""}
+        {coverage_table}
+      </CoolStyles.InlineBlock>
+    );
   }
 }
 

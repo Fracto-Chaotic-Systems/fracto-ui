@@ -4,13 +4,6 @@ import styled, { css } from "styled-components";
 // create a circular dependency because CoolImports also re-exports CoolStyles.
 import CoolColors from "../CoolColors.jsx";
 
-// Shared layout for compact option controls and their descriptive labels.
-// This applies equally to checkboxes, radio buttons, selects, and inputs.
-export const SETTING_LABEL_STYLE = {
-  display: "flex",
-  alignItems: "center",
-};
-
 export class CoolStyles {
   static pointer = css`
     cursor: pointer;
@@ -112,7 +105,7 @@ export class CoolStyles {
   `;
 
   static wide_text_shadow = css`
-        text-shadow: 1rem 1rem 2rem rgba(0,0,0,0.5;
+    text-shadow: 1rem 1rem 2rem rgba(0, 0, 0, 0.5);
     `;
 
   static narrow_border_radius = css`
@@ -211,7 +204,7 @@ export class CoolStyles {
     min-width: 15rem;
     outline: none;
     padding: 0.125rem 0.25rem;
-    :: placeholder {
+    ::placeholder {
       color: #bbbbbb;
     }
   `;

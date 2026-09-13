@@ -13,7 +13,7 @@ import {
   process_orbital_sets,
 } from "./PointUtils";
 import { iteration_chart } from "./PatternsUtils";
-import { CoolSlider } from "../ui/CoolImports";
+import CoolSlider from "../ui/CoolSlider.jsx";
 
 const HEIGHT_FACTOR = 1.025;
 const HEIGHT_OFFSET_PX = 60;

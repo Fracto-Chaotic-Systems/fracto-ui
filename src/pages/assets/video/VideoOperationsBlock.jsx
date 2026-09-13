@@ -1,9 +1,12 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 
+import AppText from "../../../AppText.jsx";
+import { KEY_VIDEO_ASSETS_OPERATIONS } from "../../../text/AssetsText.jsx";
+
 export class VideoOperationsBlock extends Component {
   static propTypes = {
-    video_script: PropTypes.object.isRequired,
+    video_script: PropTypes.object,
     on_update_script: PropTypes.func.isRequired,
   };
 
@@ -12,7 +15,7 @@ export class VideoOperationsBlock extends Component {
     if (!video_script) {
       return [];
     }
-    return "VideoOperationsBlock";
+    return AppText.get(KEY_VIDEO_ASSETS_OPERATIONS);
   }
 }
 

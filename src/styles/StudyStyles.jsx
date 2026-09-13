@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { CoolStyles } from "../utils/ui/CoolImports.jsx";
+import CoolStyles from "../utils/ui/styles/CoolStyles.jsx";
 
 export class StudyStyles {
   static DenominatorCell = styled(CoolStyles.InlineBlock)`

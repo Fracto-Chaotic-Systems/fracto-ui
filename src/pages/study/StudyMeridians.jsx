@@ -18,7 +18,7 @@ import { KEY_STUDY_MERIDIANS } from "../../text/StudyText.jsx";
 import DataBackend from "../../backend/DataBackend.jsx";
 import MeridianBlock from "./meridians/MeridianBlock.jsx";
 import CoolStyles from "../../utils/ui/styles/CoolStyles.jsx";
-import { BACKGROUND_FIELD_GRADIENT } from "../../constants.jsx";
+import { BACKGROUND_FIELD_GRADIENT } from "../../styles/BackgroundStyles.jsx";
 
 const UPDATE_INTERVAL_MS = 1000;
 const MAX_CARDINALITY = 128;

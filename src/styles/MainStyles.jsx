@@ -1,9 +1,8 @@
 import styled from "styled-components";
-import { CoolColors, CoolStyles } from "../utils/ui/CoolImports.jsx";
-import {
-  BACKGROUND_FIELD_GRADIENT,
-  HEADER_BAR_HEIGHT_PX,
-} from "../constants.jsx";
+import CoolColors from "../utils/ui/CoolColors.jsx";
+import CoolStyles from "../utils/ui/styles/CoolStyles.jsx";
+import { HEADER_BAR_HEIGHT_PX } from "../constants.jsx";
+import { BACKGROUND_FIELD_GRADIENT } from "./BackgroundStyles.jsx";
 
 export const MARGIN_PX = 10;
 export const TITLE_BAR_HEIGHT_PX = 25;
@@ -135,7 +134,7 @@ export class MainStyles {
   `;
   static MenuWrapper = styled(CoolStyles.InlineBlock)`
     ${CoolStyles.fixed}
-    left: 60px,
+    left: 60px;
   `;
   static FormTitle = styled(CoolStyles.InlineBlock)`
     ${CoolStyles.bold}

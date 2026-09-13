@@ -35,4 +35,28 @@ export default defineConfig([
       "react-refresh/only-export-components": "off",
     },
   },
+  {
+    // Keep foundational modules independent of the UI barrel.  CoolImports is
+    // intentionally reserved for page-level composition, while utility and
+    // style modules import their leaf dependencies directly to avoid cycles.
+    files: [
+      "src/utils/**/*.{js,jsx}",
+      "src/styles/**/*.{js,jsx}",
+      "src/chart/**/*.{js,jsx}",
+    ],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["**/utils/ui/CoolImports", "**/utils/ui/CoolImports.jsx"],
+              message:
+                "Foundational modules must import UI dependencies directly; use CoolImports only at page-level composition.",
+            },
+          ],
+        },
+      ],
+    },
+  },
 ]);

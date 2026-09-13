@@ -7,7 +7,7 @@ import {
 } from "react-complex-tree";
 
 import "react-complex-tree/lib/style-modern.css";
-import { CoolStyles } from "./CoolImports.jsx";
+import CoolStyles from "./styles/CoolStyles.jsx";
 
 /**
  * A node accepted by CoolTree. `key` must be stable for the lifetime of the

@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { CoolStyles } from "../../../utils/ui/CoolImports";
+import CoolStyles from "../../../utils/ui/styles/CoolStyles.jsx";
 
 export class MeridiansStyles {
   static CardinalityWrapper = styled(CoolStyles.InlineBlock)`

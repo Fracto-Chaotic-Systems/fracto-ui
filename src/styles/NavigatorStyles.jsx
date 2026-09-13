@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { CoolStyles } from "../utils/ui/CoolImports";
+import CoolStyles from "../utils/ui/styles/CoolStyles.jsx";
 
 export const WIDTH_CROSSHAIR_LINE_PX = 2;
 export const OPACITY_LINE_PCT = 45;

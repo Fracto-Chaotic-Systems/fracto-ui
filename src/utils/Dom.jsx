@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { CoolStyles } from "./ui/CoolImports.jsx";
+import CoolStyles from "./ui/styles/CoolStyles.jsx";
 import { copy } from "./ui/CoolIcons.jsx";
 import { MainStyles as styles } from "../styles/MainStyles.jsx";
 import CoolColors from "./ui/CoolColors.jsx";

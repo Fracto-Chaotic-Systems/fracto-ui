@@ -33,6 +33,7 @@ export const KEY_VIDEO_ASSETS_GENERATOR = `${VIDEO_FOLDER}/video_generator`;
 export const KEY_VIDEO_ASSETS_NEW_VIDEO = `${VIDEO_FOLDER}/new_video`;
 export const KEY_VIDEO_ASSETS_SAVE_VIDEO = `${VIDEO_FOLDER}/save_video`;
 export const KEY_VIDEO_ASSETS_OPEN_VIDEO = `${VIDEO_FOLDER}/open_video`;
+export const KEY_VIDEO_ASSETS_OPERATIONS = `${VIDEO_FOLDER}/operations`;
 
 export const KEY_LORE_CONTENT_TITLE = `${LORE_FOLDER}/content_title`;
 export const KEY_LORE_CONTENT_MODIFIED = `${LORE_FOLDER}/content_modified`;
@@ -65,6 +66,7 @@ export const APP_ASSETS_TEXT = {
   [KEY_VIDEO_ASSETS_NEW_VIDEO]: "new video",
   [KEY_VIDEO_ASSETS_SAVE_VIDEO]: "save video",
   [KEY_VIDEO_ASSETS_OPEN_VIDEO]: "open video",
+  [KEY_VIDEO_ASSETS_OPERATIONS]: "video operations",
   [KEY_IMAGE_ASSETS_GENERATE]: "image generator",
   [KEY_IMAGE_ASSETS_DETECT]: "artifact detector",
   [KEY_ASSETS_GALLERY]: "gallery of artifacts",

@@ -1,5 +1,6 @@
 import styled from "styled-components";
-import { CoolColors, CoolStyles } from "../utils/ui/CoolImports.jsx";
+import CoolColors from "../utils/ui/CoolColors.jsx";
+import CoolStyles from "../utils/ui/styles/CoolStyles.jsx";
 import { MARGIN_PX } from "../styles/MainStyles.jsx";
 
 export class ChartStyles {

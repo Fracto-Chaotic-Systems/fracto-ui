@@ -1,7 +1,9 @@
 import { Component } from "react";
 import { refresh_icon } from "./CoolIcons.jsx";
 
-import { CoolStyles as styles } from "./CoolImports.jsx";
+import CoolStyles from "./styles/CoolStyles.jsx";
+
+const styles = CoolStyles;
 import PropTypes from "prop-types";
 import { getViewportDimensions } from "../Dom.jsx";
 

@@ -1,6 +1,6 @@
 const MAX_PATTERN = 20000;
-const GREY_BASE = 50;
-const GREY_RANGE = 255 - GREY_BASE;
+export const GREY_BASE = 50;
+export const GREY_RANGE = 255 - GREY_BASE;
 const COLOR_LUM_BASE_PCT = 15;
 const COLOR_LUM_BASE_RANGE_PCT = 40;
 
@@ -140,11 +140,45 @@ export class FractoColors {
     return greys_map;
   };
 
+  /**
+   * Assigns clearly separated grey shades to the levels represented in a
+   * heat-map buffer. Unlike ordinary iteration greys, this scale is based on
+   * the distinct levels rather than pixel frequency so sparse levels remain
+   * visible. A single level receives a neutral grey.
+   */
+  static get_heat_map_greys_map = (canvas_buffer) => {
+    const levels = new Set();
+    for (const column of canvas_buffer || []) {
+      for (const point of column || []) {
+        if (point) {
+          levels.add(Math.abs(point[1] || 0));
+        }
+      }
+    }
+    const sorted_levels = Array.from(levels).sort((left, right) => left - right);
+    if (!sorted_levels.length) {
+      return {};
+    }
+    if (sorted_levels.length === 1) {
+      return { [`_${sorted_levels[0]}`]: 145 };
+    }
+    const min_grey = 240;
+    const max_grey = 80;
+    const step = (max_grey - min_grey) / (sorted_levels.length - 1);
+    return Object.fromEntries(
+      sorted_levels.map((level, index) => [
+        `_${level}`,
+        Math.round(min_grey + step * index),
+      ]),
+    );
+  };
+
   static buffer_to_canvas = (
     canvas_buffer,
     ctx,
     scale_factor = 1,
     opacity = 1.0,
+    heat_map = false,
   ) => {
     if (!canvas_buffer || !ctx) {
       console.log("!canvas_buffer || !ctx", ctx);
@@ -196,12 +230,14 @@ export class FractoColors {
       }
     }
 
-    const not_pattern_greys_map = FractoColors.get_greys_map(
-      all_not_pattern_pixels,
-      all_not_pattern_sets,
-      GREY_BASE,
-      GREY_RANGE,
-    );
+    const not_pattern_greys_map = heat_map
+      ? FractoColors.get_heat_map_greys_map(canvas_buffer)
+      : FractoColors.get_greys_map(
+          all_not_pattern_pixels,
+          all_not_pattern_sets,
+          GREY_BASE,
+          GREY_RANGE,
+        );
     const inner_pattern_greys_map = FractoColors.get_greys_map(
       all_inner_pattern_pixels,
       all_inner_pattern_sets,

@@ -5,10 +5,7 @@ import CoolStyles from "../ui/styles/CoolStyles.jsx";
 import AppSettings from "../../AppSettings.jsx";
 import { KEY_NAVIGATOR_DISABLED } from "../../settings/NavigatorSettings.jsx";
 import AppText from "../../AppText.jsx";
-import {
-  KEY_HEAT_MAP_CLICK_TO_TEST,
-  KEY_HEAT_MAP_FETCHING,
-} from "../../text/NavigatorText.jsx";
+import { KEY_HEAT_MAP_FETCHING } from "../../text/NavigatorText.jsx";
 
 import FractoColors from "./FractoColors.jsx";
 import TilesBackend from "../../backend/TilesBackend.jsx";
@@ -36,6 +33,19 @@ export class FractoTileCoverage extends Component {
     coverage_data: [],
   };
 
+  subscribed_settings_signature = null;
+  last_requested_settings_signature = null;
+
+  get_settings_signature = (frame_settings) => {
+    const focal_point = frame_settings?.focal_point || {};
+    return [
+      frame_settings?.width_px,
+      frame_settings?.scope,
+      focal_point.x,
+      focal_point.y,
+    ].join("|");
+  };
+
   componentDidMount() {
     const { canvas_ref } = this.state;
     const { frame_settings, frame_settings_key } = this.props;
@@ -43,11 +53,6 @@ export class FractoTileCoverage extends Component {
     let ctx = null;
     if (canvas) {
       ctx = canvas.getContext("2d");
-      this.clear_canvas(
-        ctx,
-        frame_settings,
-        AppText.get(KEY_HEAT_MAP_CLICK_TO_TEST),
-      );
     } else {
       console.log("FractoHeatMap no canvas");
     }
@@ -61,37 +66,46 @@ export class FractoTileCoverage extends Component {
         frame_settings_key,
         this.on_frame_settings_changed,
       ),
-    });
+    }, this.generate_heat_map);
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     const { ctx } = this.state;
     const { frame_settings } = this.props;
+    const previous_frame_settings = prevProps.frame_settings || {};
+    const focal_point = frame_settings.focal_point || {};
+    const previous_focal_point = previous_frame_settings.focal_point || {};
     const width_changed =
-      this.state.stored_width_px !== frame_settings.width_px;
+      this.state.stored_width_px !== frame_settings.width_px ||
+      previous_frame_settings.width_px !== frame_settings.width_px;
     const scope_changed = this.state.stored_scope !== frame_settings.scope;
     const focal_point_x_changed =
-      this.state.stored_focal_point_x !== frame_settings.focal_point.x;
+      this.state.stored_focal_point_x !== focal_point.x ||
+      previous_focal_point.x !== focal_point.x;
     const focal_point_y_changed =
-      this.state.stored_focal_point_y !== frame_settings.focal_point.y;
+      this.state.stored_focal_point_y !== focal_point.y ||
+      previous_focal_point.y !== focal_point.y;
+    const scope_prop_changed =
+      previous_frame_settings.scope !== frame_settings.scope;
+    const settings_signature = this.get_settings_signature(frame_settings);
+    if (this.subscribed_settings_signature === settings_signature) {
+      this.subscribed_settings_signature = null;
+      return;
+    }
     if (
       width_changed ||
       scope_changed ||
+      scope_prop_changed ||
       focal_point_x_changed ||
       focal_point_y_changed
     ) {
       this.setState({
         stored_scope: frame_settings.scope,
-        stored_focal_point_x: frame_settings.focal_point.x,
-        stored_focal_point_y: frame_settings.focal_point.y,
+        stored_focal_point_x: focal_point.x,
+        stored_focal_point_y: focal_point.y,
         stored_width_px: frame_settings.width_px,
       });
-      this.clear_canvas(
-        ctx,
-        frame_settings,
-        AppText.get(KEY_HEAT_MAP_CLICK_TO_TEST),
-      );
-      // setTimeout(this.generate_heat_map, 1000)
+      this.generate_heat_map();
     }
   }
 
@@ -125,22 +139,37 @@ export class FractoTileCoverage extends Component {
   };
 
   on_frame_settings_changed = (key, value) => {
-    const { ctx } = this.state;
-    this.clear_canvas(ctx, value, AppText.get(KEY_HEAT_MAP_CLICK_TO_TEST));
-  };
-
-  generate_heat_map = async () => {
-    const { ctx } = this.state;
-    const { frame_settings, options, on_coverage_data } = this.props;
-    const disabled = AppSettings.get(KEY_NAVIGATOR_DISABLED);
-    if (disabled || !frame_settings) {
+    if (!value) {
       return;
     }
+    this.subscribed_settings_signature = this.get_settings_signature(value);
+    this.generate_heat_map(value);
+  };
+
+  generate_heat_map = async (frame_settings_override = null) => {
+    const { ctx } = this.state;
+    const { frame_settings: prop_frame_settings, on_coverage_data } =
+      this.props;
+    const frame_settings = frame_settings_override || prop_frame_settings;
+    const disabled = AppSettings.get(KEY_NAVIGATOR_DISABLED);
+    if (
+      disabled ||
+      !frame_settings?.width_px ||
+      !frame_settings?.scope ||
+      !frame_settings?.focal_point
+    ) {
+      return;
+    }
+    const settings_signature = this.get_settings_signature(frame_settings);
+    if (this.last_requested_settings_signature === settings_signature) {
+      return;
+    }
+    this.last_requested_settings_signature = settings_signature;
     this.clear_canvas(ctx, frame_settings, AppText.get(KEY_HEAT_MAP_FETCHING));
     this.setState({ in_fetch: true });
     const result = await TilesBackend.get_heat_map(frame_settings);
     console.log("TilesBackend.get_heat_map result", result);
-    FractoColors.buffer_to_canvas(result.heat_map_buffer, ctx);
+    FractoColors.buffer_to_canvas(result.heat_map_buffer, ctx, 1, 1, true);
     this.setState({
       heat_map_buffer: result.heat_map_buffer,
       coverage_data: result.coverage,
@@ -157,17 +186,17 @@ export class FractoTileCoverage extends Component {
     const canvas_block_style = {
       height: `${frame_settings.width_px}px`,
       width: `${frame_settings.width_px}px`,
-      cursor: in_fetch ? "wait" : "pointer",
+      cursor: in_fetch ? "wait" : "default",
       border: "1px solid #666666",
       borderRadius: "0.25rem",
+      boxShadow: "0.5rem 0.5rem 1rem rgba(0, 0, 0, 0.2)",
     };
     return (
       <CoolStyles.InlineBlock
         key={"heat-map"}
-        title={in_fetch ? "please be patient" : "click for heat map"}
+        title={in_fetch ? "please be patient" : "heat map"}
       >
         <CoolStyles.InlineBlock
-          onClick={this.generate_heat_map}
           style={canvas_block_style}
         >
           <canvas

@@ -3,6 +3,7 @@ import React from "react";
 import CoolTable from "../../utils/ui/CoolTable.jsx";
 import {
   CELL_ALIGN_CENTER,
+  CELL_TYPE_CALLBACK,
   CELL_TYPE_NUMBER,
   CELL_TYPE_TEXT,
 } from "../../utils/ui/styles/CoolTableStyles.jsx";
@@ -10,6 +11,7 @@ import AppSettings from "../../AppSettings.jsx";
 import { KEY_VIEWPORT_DIMENSIONS } from "../../settings/RootSettings.jsx";
 import { KEY_ASSETS_SPLITTER_POS_PX } from "../../settings/AssetsSettings.jsx";
 import MinibrotBackend from "../../backend/MinibrotBackend.jsx";
+import FractoColors from "../../utils/render/FractoColors.jsx";
 
 export const RESOLUTIONS = [
   { label: "150", value: 150, help: "thumbnail" },
@@ -25,10 +27,17 @@ export const RESOLUTIONS = [
 
 const TABLE_COLUMNS = [
   {
+    id: "color",
+    label: "shade",
+    type: CELL_TYPE_CALLBACK,
+    width_px: 60,
+    align: CELL_ALIGN_CENTER,
+  },
+  {
     id: "level",
     label: "level",
     type: CELL_TYPE_NUMBER,
-    width_px: 35,
+    width_px: 60,
     align: CELL_ALIGN_CENTER,
   },
   {
@@ -46,6 +55,24 @@ const TABLE_COLUMNS = [
     align: CELL_ALIGN_CENTER,
   },
 ];
+
+const render_level_color = (color) => {
+  if (!color) {
+    return "";
+  }
+  return (
+    <div
+      style={{
+        width: "14px",
+        height: "14px",
+        margin: "1px auto",
+        backgroundColor: color,
+        border: "1px solid #666666",
+        borderRadius: "3px",
+      }}
+    />
+  );
+};
 
 const get_proportions = (heat_map_buffer) => {
   const result = new Array(50).fill(0);
@@ -66,23 +93,50 @@ const get_proportions = (heat_map_buffer) => {
     .filter((item) => item.percent > 0);
 };
 
+const get_level_colors = (heat_map_buffer) => {
+  if (!heat_map_buffer?.length) {
+    return {};
+  }
+  const greys_map = FractoColors.get_heat_map_greys_map(heat_map_buffer);
+  return Object.fromEntries(
+    Object.entries(greys_map).map(([key, grey]) => [
+      Number(key.slice(1)),
+      `rgb(${grey},${grey},${grey})`,
+    ]),
+  );
+};
+
 export const render_coverage_table = (coverage_data, heat_map_buffer) => {
   if (!coverage_data) {
     return [];
   }
   const proportions = get_proportions(heat_map_buffer);
+  const level_colors = get_level_colors(heat_map_buffer);
   // console.log('proportions', proportions)
   const table_data = coverage_data
-    .filter((item) => item.tiles?.length > 1)
+    .filter(
+      (item) =>
+        item.tiles?.length > 1 && level_colors[item.level] !== undefined,
+    )
     .map((item, index) => {
       const pro = proportions.find((pro) => item.level === pro.level);
       return {
         level: item.level,
+        color: [render_level_color, level_colors[item.level] || ""],
         tile_count: item.tiles.length,
         percent: pro ? `${pro.percent}%` : "-",
       };
     });
-  return <CoolTable columns={TABLE_COLUMNS} data={table_data} />;
+  return (
+    <CoolTable
+      columns={TABLE_COLUMNS}
+      data={table_data}
+      table_style={{
+        backgroundColor: "white",
+        boxShadow: "0.25rem 0.25rem 0.5rem rgba(0, 0, 0, 0.2)",
+      }}
+    />
+  );
 };
 
 const find_octave_point = (core_point, candidates, scope) => {

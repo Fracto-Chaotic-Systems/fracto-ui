@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCaretRight } from "@fortawesome/free-solid-svg-icons";
 
-import { CoolStyles } from "./CoolImports.jsx";
+import CoolStyles from "./styles/CoolStyles.jsx";
 
 const ITEM_COLOR = "#888888";
 const ITEM_HILIGHT_COLOR = "#333333";
@@ -27,7 +27,7 @@ const DropdownElement = styled.div`
   padding: 0.125rem 0.5rem;
   font-size: 0.85rem;
   color: ${ITEM_COLOR};
-  &: hover {
+  &:hover {
     color: ${ITEM_HILIGHT_COLOR};
     font-weight: bold;
     background-color: #dddddd;

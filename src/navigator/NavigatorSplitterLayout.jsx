@@ -9,12 +9,12 @@ import CoolSplitter, {
 
 import { NavigatorStyles as styles } from "../styles/NavigatorStyles.jsx";
 import {
-  BACKGROUND_FIELD_GRADIENT,
   DEFAULT_SIDEBAR_WIDTH,
   SPLITTER_WIDTH_PX,
   STEPS_WIDTH_MAX_PX,
   STEPS_WIDTH_MIN_PX,
 } from "../constants.jsx";
+import { BACKGROUND_FIELD_GRADIENT } from "../styles/BackgroundStyles.jsx";
 import AppSettings from "../AppSettings.jsx";
 
 import NavigatorSteps from "./NavigatorSteps.jsx";

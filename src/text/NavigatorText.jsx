@@ -11,7 +11,6 @@ export const KEY_NAVIGATOR_STRATEGY_LEGACY = `${NAVIGATOR_FOLDER}/strategy_legac
 export const KEY_NAVIGATOR_STRATEGY_TURBO_HELP = `${NAVIGATOR_FOLDER}/strategy_turbo_help`;
 export const KEY_NAVIGATOR_STRATEGY_LEGACY_HELP = `${NAVIGATOR_FOLDER}/strategy_legacy_help`;
 export const KEY_NAVIGATOR_COVERAGE = `${NAVIGATOR_FOLDER}/coverage`;
-export const KEY_HEAT_MAP_CLICK_TO_TEST = `${HEAT_MAP_FOLDER}/click_to_test`;
 export const KEY_HEAT_MAP_FETCHING = `${HEAT_MAP_FOLDER}/fetching`;
 
 export const APP_NAVIGATOR_TEXT = {
@@ -25,6 +24,5 @@ export const APP_NAVIGATOR_TEXT = {
   [KEY_NAVIGATOR_STRATEGY_TURBO_HELP]: "experimental",
   [KEY_NAVIGATOR_STRATEGY_LEGACY_HELP]: "well-known",
   [KEY_NAVIGATOR_COVERAGE]: "coverage:",
-  [KEY_HEAT_MAP_CLICK_TO_TEST]: "click to test coverage",
   [KEY_HEAT_MAP_FETCHING]: "testing tile coverage...",
 };

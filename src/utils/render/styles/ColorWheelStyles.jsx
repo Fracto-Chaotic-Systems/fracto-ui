@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { CoolStyles } from "../../ui/CoolImports";
+import CoolStyles from "../../ui/styles/CoolStyles.jsx";
 
 export class ColorWheelStyles {
   static ColorWheelCanvas = styled.canvas`

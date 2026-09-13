@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 
 import { MainStyles as styles } from "../../../styles/MainStyles.jsx";
-import { BACKGROUND_FIELD_GRADIENT } from "../../../constants.jsx";
+import { BACKGROUND_FIELD_GRADIENT } from "../../../styles/BackgroundStyles.jsx";
 import AppText from "../../../AppText.jsx";
 import AppSettings from "../../../AppSettings.jsx";
 import { render_coordinates, render_scalar } from "../../../utils/Dom.jsx";
@@ -40,7 +40,7 @@ import {
   TABLE_NO_HEADER,
   CELL_LABEL_STYLE,
 } from "../../../utils/ui/styles/CoolTableStyles.jsx";
-import { SETTING_LABEL_STYLE } from "../../../utils/ui/styles/CoolStyles.jsx";
+import { SETTING_LABEL_STYLE } from "../../../utils/ui/styles/SettingStyles.jsx";
 import {
   KEY_TILES_TEST_ANIMATION_FRAME_RATE_FPS,
   KEY_TILES_TEST_ANIMATION_IMAGE_SIZE_PX,

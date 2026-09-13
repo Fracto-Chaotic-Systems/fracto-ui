@@ -1,7 +1,7 @@
 export { default as CoolColors } from "./CoolColors.jsx";
 export { default as CoolStyles } from "./styles/CoolStyles.jsx";
 
-export { default as CoolButton } from "./CoolButton.jsx";
+export { default as CoolButton, CoolIconButton } from "./CoolButton.jsx";
 export { default as CoolModal } from "./CoolModal.jsx";
 export { default as CoolSelect } from "./CoolSelect.jsx";
 export { default as CoolInputText } from "./CoolInputText.jsx";

@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { CoolStyles } from "../CoolImports.jsx";
+import CoolStyles from "./CoolStyles.jsx";
 
 export const CELL_TYPE_OBJECT = "cell_type_oject";
 export const CELL_TYPE_NUMBER = "cell_type_number";
@@ -30,7 +30,7 @@ export class CoolTableStyles {
     padding: 0 0.125rem;
     //background-color: white;
 
-    &: hover {
+    &:hover {
       ${CoolStyles.pointer}
       background-color: #eeeeee;
     }
