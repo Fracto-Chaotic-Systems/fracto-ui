@@ -23,17 +23,26 @@ export const GRID_CONFIG = {
   },
 };
 
-export const get_scatter_options = (bounds) => {
+export const get_scatter_options = (bounds, prominent_axes = false) => {
+  const grid_config = prominent_axes
+    ? {
+        ...GRID_CONFIG,
+        color: (context) =>
+          context.tick.value === 0 ? "#555555" : GRID_CONFIG.color(context),
+        lineWidth: (context) =>
+          context.tick.value === 0 ? 2 : GRID_CONFIG.lineWidth(context),
+      }
+    : GRID_CONFIG;
   return {
     scales: {
       x: {
-        grid: GRID_CONFIG,
+        grid: grid_config,
         ticks: { display: false },
         min: bounds.min_x,
         max: bounds.max_x,
       },
       y: {
-        grid: GRID_CONFIG,
+        grid: grid_config,
         ticks: { display: false },
         min: bounds.min_y,
         max: bounds.max_y,

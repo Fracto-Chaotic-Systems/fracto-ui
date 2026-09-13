@@ -17,7 +17,10 @@ import {
   validate_waveform_continuity,
   unwrap_waveform_profile,
 } from "./CircuitryAudioUtils.js";
-import { CircuitryAudioController } from "./CircuitryAudioController.js";
+import {
+  CircuitryAudioController,
+  AUDIO_TRANSITION_CROSSFADE,
+} from "./CircuitryAudioController.js";
 import {
   KEY_STUDY_CIRCUITRY_NO_ORBITAL,
   KEY_STUDY_CIRCUITRY_ORBITAL_COORDINATES,
@@ -89,8 +92,13 @@ export class CircuitryChart extends Component {
     animation_playing: false,
     animation_timer: null,
     audio_playing: false,
-    animation_speed:
-      Number(AppSettings.get(KEY_STUDY_CIRCUITRY_ANIMATION_SPEED)) || 1,
+    animation_speed: Math.min(
+      5,
+      Math.max(
+        1,
+        Number(AppSettings.get(KEY_STUDY_CIRCUITRY_ANIMATION_SPEED)) || 1,
+      ),
+    ),
   };
 
   audio_controller = new CircuitryAudioController({
@@ -100,6 +108,11 @@ export class CircuitryChart extends Component {
       }
     },
   });
+  // The live timer is owned by the component instance. React state mirrors
+  // its presence for rendering, but is asynchronous and must not be used as
+  // the cancellation source for transport commands.
+  animation_timer_handle = null;
+  audio_resume_generation = 0;
   is_unmounted = false;
 
   componentDidMount() {
@@ -129,9 +142,7 @@ export class CircuitryChart extends Component {
 
   componentWillUnmount() {
     this.is_unmounted = true;
-    if (this.state.animation_timer) {
-      clearInterval(this.state.animation_timer);
-    }
+    this.clear_animation_timer();
     this.audio_controller.dispose();
   }
 
@@ -144,12 +155,13 @@ export class CircuitryChart extends Component {
     this.audio_controller.stop(immediate);
   };
 
-  play_audio = async () => {
+  play_audio = async (transition) => {
     const profile = this.state.circuitry_data?.waveform_profile || [];
-    await this.audio_controller.play(profile);
+    await this.audio_controller.play(profile, { transition });
   };
 
   on_audio_toggle = () => {
+    this.audio_resume_generation += 1;
     if (this.state.audio_playing) {
       this.stop_audio();
     } else {
@@ -158,7 +170,13 @@ export class CircuitryChart extends Component {
   };
 
   load_circuitry = (focal_point) => {
-    this.stop_audio();
+    const resume_audio = this.state.audio_playing;
+    const resume_generation = ++this.audio_resume_generation;
+    // Keep the current waveform audible while the replacement is fetched.
+    // When no sample is playing, this is still a harmless cleanup call.
+    if (!resume_audio) {
+      this.stop_audio();
+    }
     DataBackend.get_circuitry(
       focal_point,
       (response) => {
@@ -184,6 +202,15 @@ export class CircuitryChart extends Component {
           animation_index: 0,
           selected_orbital_row: -1,
           selected_orbital_point: null,
+        },
+        () => {
+          if (
+            resume_audio &&
+            resume_generation === this.audio_resume_generation &&
+            !this.is_unmounted
+          ) {
+            this.play_audio(AUDIO_TRANSITION_CROSSFADE);
+          }
         });
       },
       true,
@@ -294,10 +321,13 @@ export class CircuitryChart extends Component {
   };
 
   clear_animation_timer = () => {
-    if (this.state.animation_timer) {
-      clearInterval(this.state.animation_timer);
+    if (this.animation_timer_handle) {
+      clearInterval(this.animation_timer_handle);
+      this.animation_timer_handle = null;
     }
-    this.setState({ animation_timer: null });
+    if (!this.is_unmounted) {
+      this.setState({ animation_timer: null });
+    }
   };
 
   get_animation_orbital_row = (t) => {
@@ -361,21 +391,22 @@ export class CircuitryChart extends Component {
 
   start_animation = (direction) => {
     this.clear_animation_timer();
-    const animation_timer = setInterval(
+    this.animation_timer_handle = setInterval(
       () => this.advance_animation(direction),
       1000 / (PATH_ANIMATION_RATE_FPS * this.state.animation_speed),
     );
     this.setState({
       animation_direction: direction,
       animation_playing: true,
-      animation_timer,
+      animation_timer: this.animation_timer_handle,
       selected_orbital_point: null,
     });
   };
 
   on_animation_speed_changed = (event, value) => {
-    const animation_speed = Number(value ?? event.target.value);
-    if (!Number.isFinite(animation_speed)) return;
+    const requested_speed = Number(value ?? event.target.value);
+    if (!Number.isFinite(requested_speed)) return;
+    const animation_speed = Math.min(5, Math.max(1, requested_speed));
     this.setState({ animation_speed }, () => {
       if (this.state.animation_playing) {
         this.start_animation(this.state.animation_direction || 1);
@@ -550,15 +581,19 @@ export class CircuitryChart extends Component {
         : row,
     );
     const highlighted_t = circuitry_data?.result?.[animation_index]?.t;
+    const sampled_cycle_count =
+      circuitry_data?.result?.length > 1
+        ? Math.abs(
+            (circuitry_data.result.at(-2)?.t || 0) -
+              (circuitry_data.result[0]?.t || 0),
+          ) /
+            (2 * Math.PI)
+        : 0;
     const orbital_cycle_count = radial_sweep
       ? Math.max(
           1,
           Math.round(
-            Math.abs(
-              (circuitry_data?.result?.at(-2)?.t || 0) -
-                (circuitry_data?.result?.[0]?.t || 0),
-            ) /
-              (2 * Math.PI),
+            Number(circuitry_data?.cycles) || sampled_cycle_count || 1,
           ),
         )
       : 1;
@@ -635,6 +670,47 @@ export class CircuitryChart extends Component {
       Math.abs(distance_max) * 0.01,
       1e-12,
     );
+    const distance_chart_max_x = distance_chart_data.at(-1)?.x || 0;
+    const revolution_count = Math.max(
+      1,
+      Math.round(Number(circuitry_data?.cycles) || 1),
+    );
+    const distance_revolution_markers = Array.from(
+      // Mark the shared start and each internal revolution boundary. The
+      // closing endpoint is intentionally omitted because it is the same
+      // location as the start and would draw a duplicate boundary.
+      { length: revolution_count },
+      (_, index) => {
+        const x = (distance_chart_max_x * index) / revolution_count;
+        return {
+          data: [
+            { x, y: distance_min - distance_padding },
+            { x, y: distance_max + distance_padding },
+          ],
+          borderColor: "#666666",
+          borderWidth: 1,
+          borderDash: [6, 4],
+          pointRadius: 0,
+          pointHoverRadius: 0,
+          showLine: true,
+          tension: 0,
+          order: 10,
+        };
+      },
+    );
+    const distance_point_stems = distance_chart_actual_points.map((point) => ({
+      data: [
+        { x: point.x, y: distance_min - distance_padding },
+        { x: point.x, y: point.y },
+      ],
+      borderColor: "#888888",
+      borderWidth: 1,
+      pointRadius: 0,
+      pointHoverRadius: 0,
+      showLine: true,
+      tension: 0,
+      order: 5,
+    }));
     const distance_chart_options = {
       responsive: true,
       maintainAspectRatio: false,
@@ -683,6 +759,7 @@ export class CircuitryChart extends Component {
               circuitry_data.cardinality,
               highlighted_t,
               orbital_t_values,
+              true,
             )
           ) : null}
         </styles.ContentWrapper>
@@ -766,6 +843,8 @@ export class CircuitryChart extends Component {
               <Line
                 data={{
                   datasets: [
+                    ...distance_revolution_markers,
+                    ...distance_point_stems,
                     {
                       data: distance_chart_data,
                       borderColor: "#888888",
@@ -806,14 +885,41 @@ export class CircuitryChart extends Component {
               marginTop: "0.5rem",
             }}
           >
-            <CoolMediaTransport
-              width_px={controls_width}
-              button_size_px={TRANSPORT_BUTTON_SIZE_PX}
-              operations={TRANSPORT_OPERATIONS}
-              on_operation={this.on_transport_operation}
-              disabled={points.length === 0}
-            />
-            <div style={{ marginLeft: "1rem" }}>
+            <div
+              style={{
+                display: "inline-block",
+                verticalAlign: "top",
+              }}
+            >
+              <CoolMediaTransport
+                width_px={controls_width}
+                button_size_px={TRANSPORT_BUTTON_SIZE_PX}
+                operations={TRANSPORT_OPERATIONS}
+                on_operation={this.on_transport_operation}
+                disabled={points.length === 0}
+              />
+              <div
+                style={{
+                  width: `${SPEED_SLIDER_WIDTH_PX}px`,
+                  margin: "0.25rem auto 0",
+                }}
+              >
+                <CoolSlider
+                  min={1}
+                  max={5}
+                  value={animation_speed}
+                  step_count={40}
+                  is_vertical={false}
+                  on_change={this.on_animation_speed_changed}
+                />
+              </div>
+            </div>
+            <div
+              style={{
+                marginLeft: "1rem",
+                alignSelf: "flex-start",
+              }}
+            >
               <transport_styles.GenericButton
                 title={
                   audio_playing
@@ -833,18 +939,6 @@ export class CircuitryChart extends Component {
                 {audio_playing ? sound_off_icon : sound_on_icon}
               </transport_styles.GenericButton>
             </div>
-          </div>
-          <div
-            style={{ width: `${SPEED_SLIDER_WIDTH_PX}px`, marginTop: "0.5rem" }}
-          >
-            <CoolSlider
-              min={1}
-              max={10}
-              value={animation_speed}
-              step_count={90}
-              is_vertical={false}
-              on_change={this.on_animation_speed_changed}
-            />
           </div>
           <div
             style={{
