@@ -7,6 +7,8 @@ import CoolColors from "./CoolColors.jsx";
 
 export const SPLITTER_TYPE_HORIZONTAL = "horizontal";
 export const SPLITTER_TYPE_VERTICAL = "vertical";
+export const SPLITTER_LAYOUT_ABSOLUTE = "absolute";
+export const SPLITTER_LAYOUT_FLOW = "flow";
 const SPLITTER_BORDER_COLOR = "#aaaaaa";
 
 const SplitterBar = styled(CoolStyles.InlineBlock)`
@@ -25,8 +27,16 @@ export class CoolSplitter extends Component {
     container_bounds: PropTypes.object.isRequired,
     position: PropTypes.number.isRequired,
     on_change: PropTypes.func.isRequired,
+    layout: PropTypes.oneOf([
+      SPLITTER_LAYOUT_ABSOLUTE,
+      SPLITTER_LAYOUT_FLOW,
+    ]),
     min_position: PropTypes.number,
     max_position: PropTypes.number,
+  };
+
+  static defaultProps = {
+    layout: SPLITTER_LAYOUT_ABSOLUTE,
   };
 
   state = {
@@ -114,8 +124,39 @@ export class CoolSplitter extends Component {
 
   render() {
     const { in_drag, splitter_ref } = this.state;
-    const { type, bar_width_px, container_bounds } = this.props;
+    const { type, bar_width_px, container_bounds, layout } = this.props;
     const position = this.get_bounded_position();
+    if (layout === SPLITTER_LAYOUT_FLOW) {
+      const flow_style =
+        type === SPLITTER_TYPE_HORIZONTAL
+          ? {
+              position: "static",
+              display: "block",
+              width: `${container_bounds.width}px`,
+              height: `${bar_width_px}px`,
+              cursor: "ns-resize",
+            }
+          : {
+              position: "static",
+              display: "inline-block",
+              width: `${bar_width_px}px`,
+              height: `${container_bounds.height}px`,
+              cursor: "ew-resize",
+              verticalAlign: "top",
+            };
+      flow_style.backgroundColor = in_drag
+        ? CoolColors.cool_blue
+        : "#eeeeee";
+      return (
+        <SplitterBar
+          ref={splitter_ref}
+          style={flow_style}
+          onMouseDown={(e) => this.start_drag(e)}
+          onMouseUp={(e) => this.end_drag(e)}
+          onMouseMove={(e) => this.on_mouse_move(e)}
+        />
+      );
+    }
     let bar_style =
       type === SPLITTER_TYPE_HORIZONTAL
         ? {
