@@ -17,7 +17,7 @@ export class NavigatorStyles {
     overflow: hidden;
   `;
   static VerticalCrossHair = styled(CoolStyles.InlineBlock)`
-    position: fixed;
+    position: absolute;
     width: ${WIDTH_CROSSHAIR_LINE_PX}px;
     top: 0;
     bottom: 0;
@@ -26,7 +26,7 @@ export class NavigatorStyles {
     cursor: crosshair;
   `;
   static HorizontalCrossHair = styled(CoolStyles.InlineBlock)`
-    position: fixed;
+    position: absolute;
     height: ${WIDTH_CROSSHAIR_LINE_PX}px;
     left: 0;
     right: 0;
@@ -35,7 +35,7 @@ export class NavigatorStyles {
     cursor: crosshair;
   `;
   static CenterBox = styled(CoolStyles.InlineBlock)`
-    position: fixed;
+    position: absolute;
     border: ${WIDTH_CROSSHAIR_LINE_PX}px solid
       rgba(255, 255, 255, ${2 * OPACITY_LINE_PCT}%);
     cursor: crosshair;
@@ -43,14 +43,14 @@ export class NavigatorStyles {
     border-radius: 3px;
   `;
   static BoxTopBottom = styled(CoolStyles.InlineBlock)`
-    position: fixed;
+    position: absolute;
     height: ${WIDTH_CROSSHAIR_LINE_PX}px;
     background-color: white;
     opacity: 0 ${OPACITY_LINE_PCT};
     cursor: crosshair;
   `;
   static BoxLeftRight = styled(CoolStyles.InlineBlock)`
-    position: fixed;
+    position: absolute;
     width: ${WIDTH_CROSSHAIR_LINE_PX}px;
     background-color: white;
     opacity: 0 ${OPACITY_LINE_PCT};

@@ -33,6 +33,9 @@ export class NavigatorField extends Component {
     show_crosshairs: false,
   };
 
+  pending_mouse_location = null;
+  mouse_move_frame = null;
+
   componentDidMount() {
     this.adjust_canvas_size();
   }
@@ -44,6 +47,13 @@ export class NavigatorField extends Component {
       prevState.saved_bounding_rect.height !== this.props.bounding_rect.height;
     if (width_changed || height_changed) {
       this.adjust_canvas_size();
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.mouse_move_frame !== null) {
+      cancelAnimationFrame(this.mouse_move_frame);
+      this.mouse_move_frame = null;
     }
   }
 
@@ -96,8 +106,13 @@ export class NavigatorField extends Component {
     };
   };
 
-  on_mousemove = (e) => {
-    const location = this.get_mouse_pos(e);
+  flush_mousemove = () => {
+    this.mouse_move_frame = null;
+    const location = this.pending_mouse_location;
+    this.pending_mouse_location = null;
+    if (!location) {
+      return;
+    }
     AppSettings.on_settings_changed({
       [KEY_NAVIGATOR_HOVER_POINT]: {
         x: location.x,
@@ -112,7 +127,19 @@ export class NavigatorField extends Component {
     this.setState({ show_crosshairs: true });
   };
 
+  on_mousemove = (e) => {
+    this.pending_mouse_location = this.get_mouse_pos(e);
+    if (this.mouse_move_frame === null) {
+      this.mouse_move_frame = requestAnimationFrame(this.flush_mousemove);
+    }
+  };
+
   on_mouseleave = (e) => {
+    this.pending_mouse_location = null;
+    if (this.mouse_move_frame !== null) {
+      cancelAnimationFrame(this.mouse_move_frame);
+      this.mouse_move_frame = null;
+    }
     AppSettings.on_settings_changed({
       [KEY_NAVIGATOR_HOVER_POINT]: { x: 0, y: 0 },
       [KEY_NAVIGATOR_CLIENT_POINT]: { x: 0, y: 0 },

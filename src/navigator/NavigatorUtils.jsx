@@ -22,66 +22,68 @@ export class NavigatorUtils {
       ? 1.25 * WIDTH_CROSSHAIR_LINE_PX
       : WIDTH_CROSSHAIR_LINE_PX;
     const opacity = in_bold ? 0.85 : 0.5;
+    const relative_x = client_point.x - image_bounds.left;
+    const relative_y = client_point.y - image_bounds.top;
     const horizontal_left_style = {
-      top: `${client_point.y || -1}px`,
-      left: `${image_bounds.left - 4}px`,
-      width: `${client_point.x - image_bounds.left - 3}px`,
+      top: `${relative_y || -1}px`,
+      left: "-4px",
+      width: `${relative_x - 3}px`,
       transform: `rotate(${angle}deg)`,
       transformOrigin: `105% 105%`,
       height: `${thickness_px}px`,
       opacity: opacity,
     };
     const horizontal_right_style = {
-      top: `${client_point.y || -1}px`,
-      left: `${client_point.x + 10}px`,
-      width: `${image_bounds.right - client_point.x - 6}px`,
+      top: `${relative_y || -1}px`,
+      left: `${relative_x + 10}px`,
+      width: `${image_bounds.width - relative_x - 6}px`,
       transform: `rotate(${angle}deg)`,
       transformOrigin: `-5% -5%`,
       height: `${thickness_px}px`,
       opacity: opacity,
     };
     const vertical_top_style = {
-      left: `${client_point.x || -1}px`,
-      top: `${image_bounds.top - 3}px`,
-      height: `${client_point.y - image_bounds.top - 4}px`,
+      left: `${relative_x || -1}px`,
+      top: "-3px",
+      height: `${relative_y - 4}px`,
       transform: `rotate(${angle}deg)`,
       transformOrigin: `105% 105%`,
       width: `${thickness_px}px`,
       opacity: opacity,
     };
     const vertical_bottom_style = {
-      left: `${client_point.x || -1}px`,
-      top: `${client_point.y + 10}px`,
-      height: `${image_bounds.bottom - client_point.y - 10}px`,
+      left: `${relative_x || -1}px`,
+      top: `${relative_y + 10}px`,
+      height: `${image_bounds.height - relative_y - 10}px`,
       transform: `rotate(${angle}deg)`,
       transformOrigin: `-5% -5%`,
       width: `${thickness_px}px`,
       opacity: opacity,
     };
     const box_top_style = {
-      left: `${client_point.x - CENTER_BOX_HALF_PX}px`,
+      left: `${relative_x - CENTER_BOX_HALF_PX}px`,
       width: `${2 * CENTER_BOX_HALF_PX + 2}px`,
-      top: `${client_point.y - CENTER_BOX_HALF_PX - 1}px`,
+      top: `${relative_y - CENTER_BOX_HALF_PX - 1}px`,
       height: `${thickness_px}px`,
       opacity: opacity,
     };
     const box_bottom_style = {
-      left: `${client_point.x - CENTER_BOX_HALF_PX}px`,
+      left: `${relative_x - CENTER_BOX_HALF_PX}px`,
       width: `${2 * CENTER_BOX_HALF_PX + 2}px`,
-      top: `${client_point.y + CENTER_BOX_HALF_PX + 1}px`,
+      top: `${relative_y + CENTER_BOX_HALF_PX + 1}px`,
       height: `${thickness_px}px`,
       opacity: opacity,
     };
     const box_left_style = {
-      top: `${client_point.y - CENTER_BOX_HALF_PX}px`,
-      left: `${client_point.x - CENTER_BOX_HALF_PX - 1}px`,
+      top: `${relative_y - CENTER_BOX_HALF_PX}px`,
+      left: `${relative_x - CENTER_BOX_HALF_PX - 1}px`,
       height: `${2 * CENTER_BOX_HALF_PX + 2}px`,
       width: `${thickness_px}px`,
       opacity: opacity,
     };
     const box_right_style = {
-      top: `${client_point.y - CENTER_BOX_HALF_PX}px`,
-      left: `${client_point.x + CENTER_BOX_HALF_PX + 1}px`,
+      top: `${relative_y - CENTER_BOX_HALF_PX}px`,
+      left: `${relative_x + CENTER_BOX_HALF_PX + 1}px`,
       height: `${2 * CENTER_BOX_HALF_PX + 2}px`,
       width: `${thickness_px}px`,
       opacity: opacity,
