@@ -1,13 +1,16 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
-import { wait_icon, wait_icon_2 } from "../utils/ui/CoolIcons.jsx";
 
 import { CoolStyles } from "../utils/ui/styles/CoolStyles.jsx";
+import {
+  get_next_wait_icon,
+  WaitIconWrapper,
+  WAIT_ICON_SIZE_PX,
+} from "../utils/ui/WaitIcon.jsx";
 
 const TRANSIT_PADDING_PX = 5;
 const CURVED_CORNERS_FACTOR = 25;
-const WAIT_ICON_SIZE_PX = 35;
 
 const CanvasSubstrate = styled.canvas`
   ${CoolStyles.narrow_box_shadow}
@@ -18,14 +21,6 @@ const CanvasWrapper = styled(CoolStyles.InlineBlock)`
   margin: 0;
 `;
 
-const WaitIconWrapper = styled(CoolStyles.InlineBlock)`
-  position: absolute;
-  left: 0;
-  fill: white;
-  height: ${WAIT_ICON_SIZE_PX}px;
-  width: ${WAIT_ICON_SIZE_PX}px;
-  opacity: 0.75;
-`;
 
 const ARROW_UP_ONE = "arrow_up_one";
 const ARROW_RIGHT_ONE = "arrow_right_one";
@@ -79,7 +74,6 @@ export class NavigatorTransit extends Component {
     canvas_measure_px: 0,
     in_hover: null,
     in_click: null,
-    wait_icon: wait_icon,
   };
 
   componentDidMount() {
@@ -118,7 +112,6 @@ export class NavigatorTransit extends Component {
   };
 
   static all_regions = [];
-  static is_wait_icon_2 = false;
 
   make_regions = () => {
     const { canvas_measure_px } = this.state;
@@ -813,10 +806,9 @@ export class NavigatorTransit extends Component {
       };
       icon = (
         <WaitIconWrapper style={icon_style}>
-          {NavigatorTransit.is_wait_icon_2 ? wait_icon : wait_icon_2}
+          {get_next_wait_icon()}
         </WaitIconWrapper>
       );
-      NavigatorTransit.is_wait_icon_2 = !NavigatorTransit.is_wait_icon_2;
     }
     return (
       <CanvasWrapper
