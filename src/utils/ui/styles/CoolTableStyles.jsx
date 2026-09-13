@@ -15,6 +15,8 @@ export const CELL_ALIGN_RIGHT = "cell_align_right";
 export const CELL_ALIGN_CENTER = "cell_align_center";
 
 export const TABLE_CAN_SELECT = "table_can_select";
+// Adds a checkbox selector to every row. Use instead of TABLE_CAN_SELECT.
+export const TABLE_MULTI_SELECT = "table_multi_select";
 export const TABLE_NO_HEADER = "table_no_header";
 export const TABLE_NO_BORDER = "table_no_border";
 

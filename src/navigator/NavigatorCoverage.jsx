@@ -23,10 +23,12 @@ export class NavigatorCoverage extends Component {
     on_coverage_data: PropTypes.func.isRequired,
     on_resize: PropTypes.func,
     options: PropTypes.array,
+    selected_levels: PropTypes.array,
   };
 
   static defaultProps = {
     options: [],
+    selected_levels: [],
   };
 
   state = {
@@ -94,6 +96,7 @@ export class NavigatorCoverage extends Component {
       results_block,
       on_coverage_data,
       options,
+      selected_levels,
     } = this.props;
     let top = 0;
     let left = 0;
@@ -141,6 +144,7 @@ export class NavigatorCoverage extends Component {
               on_level_select={this.on_level_select}
               on_coverage_data={on_coverage_data}
               options={options}
+              selected_levels={selected_levels}
             />
             <styles.HalfRemSpacer />
             {control_block}

@@ -20,6 +20,7 @@ import {
   CONTROL_ACTION_SAVE_VIDEO,
 } from "./video/VideoControlButtons.jsx";
 import VideoOperationsBlock from "./video/VideoOperationsBlock.jsx";
+import { get_visible_coverage_levels } from "./AssetsUtils.jsx";
 
 const DEFAULT_VIDEO_RESOLUTION = 1024;
 const DEFAULT_VIDEO_FPS = 30;
@@ -30,6 +31,7 @@ export class AssetsVideoGenerator extends Component {
     coverage_data: null,
     heat_map_buffer: null,
     video_script: null,
+    selected_coverage_levels: [],
   };
 
   componentDidMount() {
@@ -41,7 +43,15 @@ export class AssetsVideoGenerator extends Component {
     this.setState({
       coverage_data,
       heat_map_buffer,
+      selected_coverage_levels: get_visible_coverage_levels(
+        coverage_data,
+        heat_map_buffer,
+      ),
     });
+  };
+
+  on_coverage_levels_changed = (selected_coverage_levels) => {
+    this.setState({ selected_coverage_levels });
   };
 
   first_step = () => {
@@ -100,12 +110,19 @@ export class AssetsVideoGenerator extends Component {
   };
 
   render() {
-    const { coverage_data, heat_map_buffer, video_script } = this.state;
+    const {
+      coverage_data,
+      heat_map_buffer,
+      video_script,
+      selected_coverage_levels,
+    } = this.state;
     const control_block = (
       <VideoControlBlock
         video_script={video_script}
         coverage_data={coverage_data}
         heat_map_buffer={heat_map_buffer}
+        selected_levels={selected_coverage_levels}
+        on_coverage_levels_changed={this.on_coverage_levels_changed}
         on_control_action={this.on_control_action}
       />
     );
@@ -132,6 +149,7 @@ export class AssetsVideoGenerator extends Component {
           control_block={[control_block]}
           results_block={[operations_block]}
           on_coverage_data={this.on_coverage_data}
+          selected_levels={selected_coverage_levels}
         />
       </CoolStyles.Block>,
     ];

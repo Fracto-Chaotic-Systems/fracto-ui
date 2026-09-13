@@ -179,6 +179,7 @@ export class FractoColors {
     scale_factor = 1,
     opacity = 1.0,
     heat_map = false,
+    selected_levels = null,
   ) => {
     if (!canvas_buffer || !ctx) {
       console.log("!canvas_buffer || !ctx", ctx);
@@ -255,6 +256,20 @@ export class FractoColors {
     // Use for loop for better performance
     for (let i = 0; i < all_not_pattern_pixels.length; i++) {
       const pixel = all_not_pattern_pixels[i];
+      if (
+        heat_map &&
+        Array.isArray(selected_levels) &&
+        !selected_levels.includes(Math.abs(pixel.iteration))
+      ) {
+        ctx.fillStyle = "#d9ffff";
+        ctx.fillRect(
+          scale_factor * pixel.canvas_x,
+          scale_factor * pixel.canvas_y,
+          pixel_size,
+          pixel_size,
+        );
+        continue;
+      }
       const key = `_${pixel.iteration}`;
       let grey_value = not_pattern_greys_map[key];
       if (opacity < 1) {

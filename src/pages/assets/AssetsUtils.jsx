@@ -106,7 +106,27 @@ const get_level_colors = (heat_map_buffer) => {
   );
 };
 
-export const render_coverage_table = (coverage_data, heat_map_buffer) => {
+export const get_visible_coverage_levels = (coverage_data, heat_map_buffer) => {
+  if (!coverage_data) {
+    return [];
+  }
+  const level_colors = get_level_colors(heat_map_buffer);
+  return coverage_data
+    .filter(
+      (item) =>
+        item.tiles?.length > 1 && level_colors[item.level] !== undefined,
+    )
+    .map((item) => item.level);
+};
+
+export const render_coverage_table = (
+  coverage_data,
+  heat_map_buffer,
+  options = [],
+  selected_rows = [],
+  on_select_row,
+  on_select_all,
+) => {
   if (!coverage_data) {
     return [];
   }
@@ -131,6 +151,10 @@ export const render_coverage_table = (coverage_data, heat_map_buffer) => {
     <CoolTable
       columns={TABLE_COLUMNS}
       data={table_data}
+      options={options}
+      selected_rows={selected_rows}
+      on_select_row={on_select_row}
+      on_select_all={on_select_all}
       table_style={{
         backgroundColor: "white",
         boxShadow: "0.25rem 0.25rem 0.5rem rgba(0, 0, 0, 0.2)",

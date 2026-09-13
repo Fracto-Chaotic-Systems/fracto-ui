@@ -15,6 +15,7 @@ import {
   CELL_TYPE_TEXT_KEY,
   CELL_TYPE_TIME_AGO,
   TABLE_CAN_SELECT,
+  TABLE_MULTI_SELECT,
   TABLE_NO_BORDER,
   TABLE_NO_HEADER,
 } from "./styles/CoolTableStyles.jsx";
@@ -42,6 +43,7 @@ export class CoolTable extends Component {
     columns: PropTypes.array.isRequired,
     data: PropTypes.array.isRequired,
     on_select_row: PropTypes.func,
+    on_select_all: PropTypes.func,
     on_click_column: PropTypes.func,
     options: PropTypes.array,
     selected_row: PropTypes.number,
@@ -182,8 +184,40 @@ export class CoolTable extends Component {
     );
   };
 
-  render_cell = (row, col, column, data, id) => {
-    const { selected_row } = this.props;
+  render_multi_select_header = (column) => {
+    const { data, selected_rows, on_select_all } = this.props;
+    const selected_count = new Set(selected_rows.filter(
+      (row) => row >= 0 && row < data.length,
+    )).size;
+    const all_selected = data.length > 0 && selected_count === data.length;
+    const partially_selected = selected_count > 0 && !all_selected;
+    const cell_style = column.width_px
+      ? { minWidth: `${column.width_px}px`, backgroundColor: "#888888" }
+      : { backgroundColor: "#888888" };
+    return (
+      <styles.SelectorCell style={cell_style} key={`header-selector`}>
+        <input
+          type={"checkbox"}
+          checked={all_selected}
+          ref={(element) => {
+            if (element) {
+              element.indeterminate = partially_selected;
+            }
+          }}
+          onChange={(e) => {
+            e.stopPropagation();
+            if (on_select_all) {
+              on_select_all(e.target.checked, data.map((_, row) => row));
+            }
+          }}
+          onClick={(e) => e.stopPropagation()}
+        />
+      </styles.SelectorCell>
+    );
+  };
+
+  render_cell = (row, col, column, data, id, is_multi_select = false) => {
+    const { selected_row, selected_rows } = this.props;
     // console.log("render_cell = (row, col, column, data, id)", row, col, column, data, id)
     let object_data = data;
     switch (column.type) {
@@ -247,13 +281,19 @@ export class CoolTable extends Component {
         ...cell_style,
       };
     }
-    if (selected_row === row) {
-      cell_style.backgroundColor = "#cccccc";
+    const row_is_selected =
+      selected_row === row ||
+      (is_multi_select && selected_rows.indexOf(row) >= 0);
+    if (row_is_selected) {
+      cell_style.backgroundColor = is_multi_select ? "white" : "#cccccc";
       return (
         <styles.TableCell style={cell_style} key={`cell-${row}-${col}`}>
           {object_data}
         </styles.TableCell>
       );
+    }
+    if (is_multi_select) {
+      cell_style.backgroundColor = "#dddddd";
     }
     return (
       <styles.TableCell style={cell_style} key={`cell-${row}-${col}`}>
@@ -262,8 +302,9 @@ export class CoolTable extends Component {
     );
   };
 
-  render_empty_cell = (row, col) => {
-    return <styles.TableCell key={`cell-${row}-${col}`} />;
+  render_empty_cell = (row, col, is_multi_select = false) => {
+    const cell_style = is_multi_select ? { backgroundColor: "#dddddd" } : {};
+    return <styles.TableCell style={cell_style} key={`cell-${row}-${col}`} />;
   };
 
   // required by the input control but unused
@@ -273,7 +314,7 @@ export class CoolTable extends Component {
     );
   };
 
-  render_selector = (row, column) => {
+  render_selector = (row, column, is_multi_select = false) => {
     const { selected_row, selected_rows } = this.props;
     const cell_style = column.width_px
       ? { minWidth: `${column.width_px}px` }
@@ -287,12 +328,27 @@ export class CoolTable extends Component {
     if (!row_in_array && selected_row === row) {
       is_checked = true;
     }
+    if (is_multi_select) {
+      cell_style.backgroundColor = is_checked ? "white" : "#dddddd";
+    }
     return (
       <styles.SelectorCell style={cell_style} key={`selector-${row}`}>
         <input
-          type={"radio"}
+          type={is_multi_select ? "checkbox" : "radio"}
           checked={is_checked}
-          onChange={(e) => this.on_selector_changed(e, row)}
+          onChange={(e) => {
+            if (is_multi_select) {
+              e.stopPropagation();
+              this.on_select_row(row);
+            } else {
+              this.on_selector_changed(e, row);
+            }
+          }}
+          onClick={(e) => {
+            if (is_multi_select) {
+              e.stopPropagation();
+            }
+          }}
         />
       </styles.SelectorCell>
     );
@@ -309,18 +365,32 @@ export class CoolTable extends Component {
     const { scroller_ref } = this.state;
     const { columns, data, options, table_style, selected_row, selected_rows } =
       this.props;
+    const has_single_select = options.includes(TABLE_CAN_SELECT);
+    const has_multi_select = options.includes(TABLE_MULTI_SELECT);
+    if (has_single_select && has_multi_select) {
+      console.error(
+        "CoolTable selection options are mutually exclusive; using multi-select.",
+      );
+    }
     let columns_clone = columns.slice();
-    if (options.includes(TABLE_CAN_SELECT)) {
+    if (has_single_select || has_multi_select) {
       columns_clone.unshift(HEADER_COLUMN_SELECT);
     }
     const table_rows = data.map((obj, row) => {
       const row_cells = columns_clone.map((column, col) => {
         if (column.id === COLUMN_ID_SELECT) {
-          return this.render_selector(row, column);
+          return this.render_selector(row, column, has_multi_select);
         } else if (obj[column.id] !== undefined) {
-          return this.render_cell(row, col, column, obj[column.id], obj["id"]);
+          return this.render_cell(
+            row,
+            col,
+            column,
+            obj[column.id],
+            obj["id"],
+            has_multi_select,
+          );
         } else {
-          return this.render_empty_cell(row, col);
+          return this.render_empty_cell(row, col, has_multi_select);
         }
       });
       const row_is_selected = selected_row === row;
@@ -344,6 +414,9 @@ export class CoolTable extends Component {
     let table_header = "";
     if (!options.includes(TABLE_NO_HEADER)) {
       const header_cells = columns_clone.map((column, i) => {
+        if (column.id === COLUMN_ID_SELECT && has_multi_select) {
+          return this.render_multi_select_header(column);
+        }
         return this.render_header_cell(column);
       });
       table_header = <styles.TableHeader>{header_cells}</styles.TableHeader>;

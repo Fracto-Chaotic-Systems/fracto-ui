@@ -19,6 +19,7 @@ export class FractoTileCoverage extends Component {
     frame_settings_key: PropTypes.string.isRequired,
     on_coverage_data: PropTypes.func.isRequired,
     options: PropTypes.array,
+    selected_levels: PropTypes.array,
   };
 
   state = {
@@ -71,6 +72,9 @@ export class FractoTileCoverage extends Component {
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     const { ctx } = this.state;
+    if (this.props.selected_levels !== prevProps.selected_levels) {
+      this.render_heat_map();
+    }
     const { frame_settings } = this.props;
     const previous_frame_settings = prevProps.frame_settings || {};
     const focal_point = frame_settings.focal_point || {};
@@ -169,7 +173,7 @@ export class FractoTileCoverage extends Component {
     this.setState({ in_fetch: true });
     const result = await TilesBackend.get_heat_map(frame_settings);
     console.log("TilesBackend.get_heat_map result", result);
-    FractoColors.buffer_to_canvas(result.heat_map_buffer, ctx, 1, 1, true);
+    this.render_heat_map(result.heat_map_buffer);
     this.setState({
       heat_map_buffer: result.heat_map_buffer,
       coverage_data: result.coverage,
@@ -179,6 +183,20 @@ export class FractoTileCoverage extends Component {
     }
     this.setState({ in_fetch: false });
   };
+
+  render_heat_map = (heat_map_buffer = this.state.heat_map_buffer) => {
+    const { ctx } = this.state;
+    const { selected_levels } = this.props;
+    FractoColors.buffer_to_canvas(
+      heat_map_buffer,
+      ctx,
+      1,
+      1,
+      true,
+      selected_levels,
+    );
+  };
+
 
   render() {
     const { canvas_ref, in_fetch, coverage_data } = this.state;
