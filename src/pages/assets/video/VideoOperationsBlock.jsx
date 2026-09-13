@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 
 import AppSettings from "../../../AppSettings.jsx";
-import AppText from "../../../AppText.jsx";
 import { SPLITTER_WIDTH_PX } from "../../../constants.jsx";
 import CoolSplitter, {
   SPLITTER_LAYOUT_FLOW,
@@ -10,7 +9,8 @@ import CoolSplitter, {
 } from "../../../utils/ui/CoolSplitter.jsx";
 import CoolStyles from "../../../utils/ui/styles/CoolStyles.jsx";
 import { KEY_VIDEO_OPERATIONS_SPLITTER_POS } from "../../../settings/AssetsSettings.jsx";
-import { KEY_VIDEO_ASSETS_OPERATIONS } from "../../../text/AssetsText.jsx";
+import VideoMetaOperations from "./VideoMetaOperations.jsx";
+import VideoScriptOperations from "./VideoScriptOperations.jsx";
 
 export class VideoOperationsBlock extends Component {
   static propTypes = {
@@ -99,7 +99,10 @@ export class VideoOperationsBlock extends Component {
           }}
         >
           <CoolStyles.Block style={pane_style(left_width)}>
-            {AppText.get(KEY_VIDEO_ASSETS_OPERATIONS)}
+            <VideoScriptOperations
+              width_px={left_width}
+              height_px={height_px}
+            />
           </CoolStyles.Block>
           <CoolSplitter
             type={SPLITTER_TYPE_VERTICAL}
@@ -117,7 +120,12 @@ export class VideoOperationsBlock extends Component {
             min_position={min_position}
             max_position={max_position}
           />
-          <CoolStyles.Block style={pane_style(right_width)} />
+          <CoolStyles.Block style={pane_style(right_width)}>
+            <VideoMetaOperations
+              width_px={right_width}
+              height_px={height_px}
+            />
+          </CoolStyles.Block>
         </CoolStyles.Block>
       </>
     );
