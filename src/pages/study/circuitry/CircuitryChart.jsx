@@ -67,6 +67,7 @@ const SPEED_SLIDER_WIDTH_PX = TRANSPORT_BUTTON_SIZE_PX * 5;
 const PATH_ANIMATION_RATE_FPS = 20;
 const GOLDEN_RATIO = 1.618;
 const DISTANCE_CHART_SAMPLE_COUNT = 10;
+const FREQUENCY_PER_CARDINALITY_HZ = 27.5;
 const ORBITAL_POINT_COLUMNS = [
   {
     id: "coordinates",
@@ -156,8 +157,14 @@ export class CircuitryChart extends Component {
   };
 
   play_audio = async (transition) => {
-    const profile = this.state.circuitry_data?.waveform_profile || [];
-    await this.audio_controller.play(profile, { transition });
+    const { circuitry_data } = this.state;
+    const profile = circuitry_data?.waveform_profile || [];
+    const cardinality = Number(circuitry_data?.cardinality);
+    const frequency_hz =
+      Number.isFinite(cardinality) && cardinality > 0
+        ? cardinality * FREQUENCY_PER_CARDINALITY_HZ
+        : undefined;
+    await this.audio_controller.play(profile, { transition, frequency_hz });
   };
 
   on_audio_toggle = () => {
