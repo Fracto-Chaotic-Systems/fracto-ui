@@ -143,7 +143,7 @@ export class FractoColors {
   /**
    * Creates an ordered heat-map palette containing the requested number of
    * grey shades. The spectrum is divided into `shade_count + 1` equal spaces,
-   * within the middle 15%–85% of the grayscale range, so the shades remain
+   * within the 25%–95% portion of the grayscale range, so the shades remain
    * visible without approaching pure black or pure white. Levels are ordered
    * from light to dark to preserve the heat-map convention that lower levels
    * are lighter. A single shade is centered at mid-grey.
@@ -153,8 +153,8 @@ export class FractoColors {
     if (!count) {
       return [];
     }
-    const min_grey = 255 * 0.15;
-    const max_grey = 255 * 0.85;
+    const min_grey = 255 * 0.25;
+    const max_grey = 255 * 0.95;
     const step = (max_grey - min_grey) / (count + 1);
     return Array.from({ length: count }, (_, index) =>
       Math.round(max_grey - step * (index + 1)),
