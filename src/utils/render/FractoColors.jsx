@@ -141,10 +141,30 @@ export class FractoColors {
   };
 
   /**
+   * Creates an ordered heat-map palette containing the requested number of
+   * grey shades. The spectrum is divided into `shade_count + 1` equal spaces,
+   * within the middle 15%–85% of the grayscale range, so the shades remain
+   * visible without approaching pure black or pure white. Levels are ordered
+   * from light to dark to preserve the heat-map convention that lower levels
+   * are lighter. A single shade is centered at mid-grey.
+   */
+  static get_heat_map_greys_palette = (shade_count) => {
+    const count = Math.max(0, Math.floor(Number(shade_count) || 0));
+    if (!count) {
+      return [];
+    }
+    const min_grey = 255 * 0.15;
+    const max_grey = 255 * 0.85;
+    const step = (max_grey - min_grey) / (count + 1);
+    return Array.from({ length: count }, (_, index) =>
+      Math.round(max_grey - step * (index + 1)),
+    );
+  };
+
+  /**
    * Assigns clearly separated grey shades to the levels represented in a
-   * heat-map buffer. Unlike ordinary iteration greys, this scale is based on
-   * the distinct levels rather than pixel frequency so sparse levels remain
-   * visible. A single level receives a neutral grey.
+   * heat-map buffer. The palette depends only on the number of distinct
+   * levels, while the buffer determines which level receives each shade.
    */
   static get_heat_map_greys_map = (canvas_buffer) => {
     const levels = new Set();
@@ -159,16 +179,13 @@ export class FractoColors {
     if (!sorted_levels.length) {
       return {};
     }
-    if (sorted_levels.length === 1) {
-      return { [`_${sorted_levels[0]}`]: 145 };
-    }
-    const min_grey = 240;
-    const max_grey = 80;
-    const step = (max_grey - min_grey) / (sorted_levels.length - 1);
+    const palette = FractoColors.get_heat_map_greys_palette(
+      sorted_levels.length,
+    );
     return Object.fromEntries(
       sorted_levels.map((level, index) => [
         `_${level}`,
-        Math.round(min_grey + step * index),
+        palette[index],
       ]),
     );
   };

@@ -56,7 +56,7 @@ const TABLE_COLUMNS = [
   },
 ];
 
-const render_level_color = (color) => {
+export const render_level_color = (color) => {
   if (!color) {
     return "";
   }
@@ -93,7 +93,7 @@ const get_proportions = (heat_map_buffer) => {
     .filter((item) => item.percent > 0);
 };
 
-const get_level_colors = (heat_map_buffer) => {
+export const get_level_colors = (heat_map_buffer) => {
   if (!heat_map_buffer?.length) {
     return {};
   }

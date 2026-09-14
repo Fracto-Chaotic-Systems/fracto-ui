@@ -60,6 +60,7 @@ export class TilesGenerator extends Component {
     return (
       <GeneratorControl
         coverage_data={coverage_data}
+        heat_map_buffer={this.state.heat_map_buffer}
         selected_levels={selected_coverage_levels}
         on_coverage_levels_changed={this.on_coverage_levels_changed}
         on_generate={this.on_generate}

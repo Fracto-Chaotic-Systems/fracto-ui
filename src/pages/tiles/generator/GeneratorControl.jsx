@@ -6,17 +6,29 @@ import CoolTable from "../../../utils/ui/CoolTable.jsx";
 import CoolStyles from "../../../utils/ui/styles/CoolStyles.jsx";
 import {
   CELL_ALIGN_CENTER,
+  CELL_TYPE_CALLBACK,
   CELL_TYPE_NUMBER,
   TABLE_MULTI_SELECT,
 } from "../../../utils/ui/styles/CoolTableStyles.jsx";
 import { forEach } from "mathjs";
 import { bounds_from_short_code } from "../TilesUtils.jsx";
+import {
+  get_level_colors,
+  render_level_color,
+} from "../../assets/AssetsUtils.jsx";
 
 const LinkedCell = styled(CoolStyles.InlineBlock)`
   margin: 0;
 `;
 
 const COVERAGE_TABLE_COLUMNS = [
+  {
+    id: "color",
+    label: "shade",
+    type: CELL_TYPE_CALLBACK,
+    width_px: 60,
+    align: CELL_ALIGN_CENTER,
+  },
   {
     id: "level",
     label: "level",
@@ -62,6 +74,7 @@ export const GENERATOR_CODE_INTERIOR = "tiles_interior";
 export class GeneratorControl extends Component {
   static propTypes = {
     coverage_data: PropTypes.array.isRequired,
+    heat_map_buffer: PropTypes.array,
     selected_levels: PropTypes.array,
     on_coverage_levels_changed: PropTypes.func,
     on_generate: PropTypes.func.isRequired,
@@ -70,6 +83,7 @@ export class GeneratorControl extends Component {
   state = {};
 
   static defaultProps = {
+    heat_map_buffer: [],
     selected_levels: [],
     on_coverage_levels_changed: () => {},
   };
@@ -101,6 +115,7 @@ export class GeneratorControl extends Component {
   render() {
     const {
       coverage_data,
+      heat_map_buffer,
       selected_levels,
       on_coverage_levels_changed,
     } = this.props;
@@ -108,6 +123,7 @@ export class GeneratorControl extends Component {
       // console.log('coverage_data is not an array', coverage_data)
       return [];
     }
+    const level_colors = get_level_colors(heat_map_buffer);
     const coverage_rows = coverage_data
       .filter((data, i) => {
         return (
@@ -202,6 +218,7 @@ export class GeneratorControl extends Component {
       });
       coverage_rows.push({
         level: level,
+        color: [render_level_color, ""],
         tile_count: "-",
         can_do: (
           <LinkedCell onClick={(e) => this.generate_can_do(extra_tiles, level)}>
@@ -214,6 +231,12 @@ export class GeneratorControl extends Component {
         interior_tiles: "-",
       });
     }
+
+    coverage_rows.forEach((row) => {
+      if (row.color === undefined) {
+        row.color = [render_level_color, level_colors[row.level] || ""];
+      }
+    });
 
     const selected_rows = coverage_rows.reduce(
       (rows, row, index) =>
