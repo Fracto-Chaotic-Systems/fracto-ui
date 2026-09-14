@@ -16,8 +16,7 @@ export class VideoOperationsBlock extends Component {
   static propTypes = {
     width_px: PropTypes.number.isRequired,
     height_px: PropTypes.number.isRequired,
-    video_script: PropTypes.object,
-    on_update_script: PropTypes.func.isRequired,
+    selected_video: PropTypes.object,
   };
 
   state = {
@@ -66,7 +65,7 @@ export class VideoOperationsBlock extends Component {
   };
 
   render_content = () => {
-    const { width_px, height_px } = this.props;
+    const { width_px, height_px, selected_video } = this.props;
     const { splitter_position } = this.state;
     if (width_px <= SPLITTER_WIDTH_PX * 2 || height_px <= 0) {
       return null;
@@ -102,6 +101,7 @@ export class VideoOperationsBlock extends Component {
             <VideoScriptOperations
               width_px={left_width}
               height_px={height_px}
+              selected_video_title={selected_video?.title}
             />
           </CoolStyles.Block>
           <CoolSplitter
@@ -132,8 +132,8 @@ export class VideoOperationsBlock extends Component {
   };
 
   render() {
-    const { video_script, width_px, height_px } = this.props;
-    if (!video_script) {
+    const { selected_video, width_px, height_px } = this.props;
+    if (!selected_video) {
       return [];
     }
     const panel_style = {

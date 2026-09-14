@@ -425,6 +425,7 @@ export class CoolTable extends Component {
     const extra_style = {
       ...table_style,
       border: !no_border ? "0.1rem solid #aaaaaa" : 0,
+      borderRadius: !no_border ? "5px" : 0,
     };
     // if (selected_rows.length) {
     //    console.log('selected_rows', selected_rows)

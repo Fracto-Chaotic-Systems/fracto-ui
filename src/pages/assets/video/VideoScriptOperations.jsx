@@ -13,10 +13,11 @@ export class VideoScriptOperations extends Component {
   static propTypes = {
     width_px: PropTypes.number.isRequired,
     height_px: PropTypes.number.isRequired,
+    selected_video_title: PropTypes.string,
   };
 
   render() {
-    const { width_px, height_px } = this.props;
+    const { width_px, height_px, selected_video_title } = this.props;
     return (
       <CoolStyles.Block
         style={{
@@ -24,7 +25,7 @@ export class VideoScriptOperations extends Component {
           height: `${height_px}px`,
         }}
       >
-        {`VideoScriptOperations ${width_px}x${height_px}`}
+        {selected_video_title || `VideoScriptOperations ${width_px}x${height_px}`}
       </CoolStyles.Block>
     );
   }

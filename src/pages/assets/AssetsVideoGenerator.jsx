@@ -12,7 +12,10 @@ import {
 import { BACKGROUND_FIELD_GRADIENT } from "../../styles/BackgroundStyles.jsx";
 import CoolStyles from "../../utils/ui/styles/CoolStyles.jsx";
 import AppSettings from "../../AppSettings.jsx";
-import { KEY_VIDEO_GENERATOR_FRAME_SETTINGS } from "../../settings/AssetsSettings.jsx";
+import {
+  KEY_VIDEO_GENERATOR_CURRENT_VIDEO,
+  KEY_VIDEO_GENERATOR_FRAME_SETTINGS,
+} from "../../settings/AssetsSettings.jsx";
 import AppText from "../../AppText.jsx";
 import { KEY_ASSETS_VIDEO } from "../../text/AssetsText.jsx";
 import {
@@ -23,6 +26,7 @@ import {
 import VideoOperationsBlock from "./video/VideoOperationsBlock.jsx";
 import { get_visible_coverage_levels } from "./AssetsUtils.jsx";
 import { AssetsBackend } from "../../backend/AssetsBackend.jsx";
+import DataBackend from "../../backend/DataBackend.jsx";
 
 const DEFAULT_VIDEO_RESOLUTION = 1024;
 const DEFAULT_VIDEO_FPS = 30;
@@ -38,12 +42,19 @@ export class AssetsVideoGenerator extends Component {
     heat_map_buffer: null,
     video_script: null,
     selected_coverage_levels: [],
+    video_records: null,
+    selected_video: null,
+    coverage_before_open: null,
+    heat_map_before_open: null,
     frame_settings_subscription: null,
   };
 
   componentDidMount() {
+    const current_video = AppSettings.get(KEY_VIDEO_GENERATOR_CURRENT_VIDEO);
     this.setState({
       frame_settings: AppSettings.get(KEY_VIDEO_GENERATOR_FRAME_SETTINGS),
+      video_script: current_video?.id ? current_video : null,
+      selected_video: current_video?.id ? current_video : null,
       frame_settings_subscription: AppSettings.subscribe(
         KEY_VIDEO_GENERATOR_FRAME_SETTINGS,
         this.on_frame_settings_changed,
@@ -93,10 +104,60 @@ export class AssetsVideoGenerator extends Component {
 
   open_video = (data) => {
     console.log("opening video...", data);
+    const { coverage_data, heat_map_buffer } = this.state;
+    this.setState({
+      coverage_data: null,
+      heat_map_buffer: null,
+      video_records: [],
+      coverage_before_open: coverage_data,
+      heat_map_before_open: heat_map_buffer,
+    });
+    DataBackend.query_table("videos", 1000)
+      .then((payload) => {
+        this.setState({ video_records: payload.result || [] });
+      })
+      .catch((error) => {
+        console.error("error loading videos", error.message);
+        this.setState({ video_records: [] });
+      });
   };
 
   save_video = (data) => {
     console.log("saving video...", data);
+  };
+
+  on_video_select = (video) => {
+    if (!video) {
+      return;
+    }
+    const video_script = {
+      ...video,
+      asset_id: video.title,
+      resolution: video.meta?.frame_size || DEFAULT_VIDEO_RESOLUTION,
+      fps: video.meta?.frame_rate || DEFAULT_VIDEO_FPS,
+      steps: video.script?.steps || [],
+    };
+    AppSettings.on_settings_changed({
+      [KEY_VIDEO_GENERATOR_CURRENT_VIDEO]: video_script,
+    });
+    this.setState({
+      selected_video: video || null,
+      video_script,
+      video_records: null,
+      coverage_before_open: null,
+      heat_map_before_open: null,
+    });
+  };
+
+  on_close_video_list = () => {
+    const { coverage_before_open, heat_map_before_open } = this.state;
+    this.setState({
+      video_records: null,
+      coverage_data: coverage_before_open,
+      heat_map_buffer: heat_map_before_open,
+      coverage_before_open: null,
+      heat_map_before_open: null,
+    });
   };
 
   new_video = async () => {
@@ -119,7 +180,16 @@ export class AssetsVideoGenerator extends Component {
         fps: created_video.meta?.frame_rate || DEFAULT_VIDEO_FPS,
         steps: [first_step],
       };
-      this.setState({ video_script: new_video_script });
+      this.setState({
+        video_script: new_video_script,
+        video_records: null,
+        selected_video: new_video_script,
+        coverage_before_open: null,
+        heat_map_before_open: null,
+      });
+      AppSettings.on_settings_changed({
+        [KEY_VIDEO_GENERATOR_CURRENT_VIDEO]: new_video_script,
+      });
     } catch (error) {
       console.error("error creating new video", error.message);
     }
@@ -143,16 +213,14 @@ export class AssetsVideoGenerator extends Component {
     }
   };
 
-  on_update_script = (video_script) => {
-    this.setState({ video_script });
-  };
-
   render() {
     const {
       coverage_data,
       heat_map_buffer,
       video_script,
       selected_coverage_levels,
+      video_records,
+      selected_video,
       rendered_width,
       rendered_height,
     } = this.state;
@@ -186,6 +254,10 @@ export class AssetsVideoGenerator extends Component {
         video_script={video_script}
         coverage_data={coverage_data}
         heat_map_buffer={heat_map_buffer}
+        video_records={video_records}
+        open_table_height_px={heat_map_size_px * (2 / 3)}
+        on_video_select={this.on_video_select}
+        on_close_video_list={this.on_close_video_list}
         selected_levels={selected_coverage_levels}
         on_coverage_levels_changed={this.on_coverage_levels_changed}
         on_control_action={this.on_control_action}
@@ -195,8 +267,7 @@ export class AssetsVideoGenerator extends Component {
       <VideoOperationsBlock
         width_px={operations_width}
         height_px={operations_height}
-        video_script={video_script}
-        on_update_script={this.on_update_script}
+        selected_video={selected_video}
       />
     );
     return [

@@ -5,10 +5,21 @@ import {
   get_visible_coverage_levels,
   render_coverage_table,
 } from "../AssetsUtils.jsx";
-import { TABLE_MULTI_SELECT } from "../../../utils/ui/styles/CoolTableStyles.jsx";
+import {
+  TABLE_CAN_SELECT,
+  TABLE_MULTI_SELECT,
+} from "../../../utils/ui/styles/CoolTableStyles.jsx";
 
 import { CoolStyles } from "../../../utils/ui/styles/CoolStyles.jsx";
 import { MainStyles as styles } from "../../../styles/MainStyles.jsx";
+import CoolTable from "../../../utils/ui/CoolTable.jsx";
+import { close_icon } from "../../../utils/ui/CoolIcons.jsx";
+import {
+  CELL_ALIGN_CENTER,
+  CELL_ALIGN_LEFT,
+  CELL_TYPE_TEXT,
+  CELL_TYPE_TIME_AGO,
+} from "../../../utils/ui/styles/CoolTableStyles.jsx";
 import VideoControlButtons from "./VideoControlButtons.jsx";
 
 export class VideoControlBlock extends Component {
@@ -16,15 +27,37 @@ export class VideoControlBlock extends Component {
     video_script: PropTypes.object,
     coverage_data: PropTypes.object,
     heat_map_buffer: PropTypes.object,
+    video_records: PropTypes.array,
     selected_levels: PropTypes.array,
     on_coverage_levels_changed: PropTypes.func,
     on_control_action: PropTypes.func.isRequired,
+    on_video_select: PropTypes.func,
+    on_close_video_list: PropTypes.func,
+    open_table_height_px: PropTypes.number,
   };
 
   static defaultProps = {
     selected_levels: [],
     on_coverage_levels_changed: () => {},
+    video_records: null,
+    on_video_select: () => {},
+    on_close_video_list: () => {},
+    open_table_height_px: 0,
   };
+
+  state = {
+    selected_video_row: -1,
+  };
+
+  componentDidUpdate(prevProps) {
+    if (
+      prevProps.video_records === null &&
+      this.props.video_records !== null &&
+      this.state.selected_video_row !== -1
+    ) {
+      this.setState({ selected_video_row: -1 });
+    }
+  }
 
   render_coverage_table = () => {
     const {
@@ -56,10 +89,107 @@ export class VideoControlBlock extends Component {
     return <CoolStyles.InlineBlock>{coverage_table}</CoolStyles.InlineBlock>;
   };
 
+  render_video_table = () => {
+    const {
+      video_records,
+      on_video_select,
+      on_close_video_list,
+      open_table_height_px,
+    } = this.props;
+    const sorted_video_records = [...video_records].sort(
+      (first, second) =>
+        new Date(second.updated_at || 0) - new Date(first.updated_at || 0),
+    );
+    const records = sorted_video_records
+      .map((record) => ({
+        updated: record.updated_at,
+        description: this.get_video_description(record.meta),
+      }));
+    return (
+      <CoolStyles.InlineBlock
+        style={{
+          display: "flex",
+          alignItems: "flex-start",
+          marginLeft: "0.5rem",
+          maxHeight: open_table_height_px
+            ? `${open_table_height_px}px`
+            : undefined,
+          overflowY: open_table_height_px ? "auto" : undefined,
+        }}
+      >
+        <CoolTable
+          columns={[
+          {
+            id: "updated",
+            label: "updated",
+            type: CELL_TYPE_TIME_AGO,
+            width_px: 120,
+            max_width_px: 120,
+            align: CELL_ALIGN_CENTER,
+            style: { fontStyle: "italic" },
+          },
+          {
+            id: "description",
+            label: "description",
+            type: CELL_TYPE_TEXT,
+            width_px: 240,
+            max_width_px: 240,
+            align: CELL_ALIGN_LEFT,
+          },
+          ]}
+          data={records}
+          options={[TABLE_CAN_SELECT]}
+          selected_row={this.state.selected_video_row}
+          on_select_row={(row) => {
+            this.setState({ selected_video_row: row });
+            on_video_select(sorted_video_records[row]);
+          }}
+          table_style={{ backgroundColor: "white" }}
+        />
+        <CoolStyles.InlineBlock
+          onClick={on_close_video_list}
+          title="close"
+          role="button"
+          aria-label="close"
+          style={{
+            cursor: "pointer",
+            marginLeft: "0.25rem",
+            lineHeight: 0,
+          }}
+        >
+          {close_icon}
+        </CoolStyles.InlineBlock>
+      </CoolStyles.InlineBlock>
+    );
+  };
+
+  get_video_description = (meta) => {
+    if (meta && typeof meta === "object") {
+      return meta.description || "";
+    }
+    if (typeof meta !== "string") {
+      return "";
+    }
+    try {
+      return JSON.parse(meta)?.description || "";
+    } catch (error) {
+      console.error("invalid video metadata", error.message);
+      return "";
+    }
+  };
+
   render() {
-    const { on_control_action, video_script, coverage_data, heat_map_buffer } =
-      this.props;
-    const coverage_table = this.render_coverage_table();
+    const {
+      on_control_action,
+      video_script,
+      coverage_data,
+      heat_map_buffer,
+      video_records,
+    } = this.props;
+    const coverage_table =
+      video_records === null
+        ? this.render_coverage_table()
+        : this.render_video_table();
     const control_buttons = (
       <VideoControlButtons
         video_script={video_script}

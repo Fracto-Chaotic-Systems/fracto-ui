@@ -39,6 +39,7 @@ export const KEY_VIDEO_GENERATOR_SPLITTER_POS = `${VIDEO_GENERATOR_FOLDER}/split
 export const KEY_VIDEO_GENERATOR_LEGEND_SPLITTER_POS = `${VIDEO_GENERATOR_FOLDER}/legend_splitter_pos`;
 export const KEY_VIDEO_GENERATOR_STEPS_SPLITTER_POS = `${VIDEO_GENERATOR_FOLDER}/steps_splitter_pos`;
 export const KEY_VIDEO_OPERATIONS_SPLITTER_POS = `${VIDEO_GENERATOR_FOLDER}/operations_splitter_pos`;
+export const KEY_VIDEO_GENERATOR_CURRENT_VIDEO = `${VIDEO_GENERATOR_FOLDER}/current_video`;
 
 export const KEY_ASSETS_DETECTOR_FRAME_SETTINGS = `${ASSETS_DETECTOR_FOLDER}/frame_settings`;
 export const KEY_ASSETS_DETECTOR_SPLITTER_POS = `${ASSETS_DETECTOR_FOLDER}/splitter_pos`;
@@ -151,6 +152,12 @@ export const APP_ASSETS_SETTINGS = {
     data_type: TYPE_NUMBER,
     default_value: 0,
     description: "Current position for the video operations splitter",
+    persist: true,
+  },
+  [KEY_VIDEO_GENERATOR_CURRENT_VIDEO]: {
+    data_type: TYPE_OBJECT,
+    default_value: {},
+    description: "Current video project for the video generator",
     persist: true,
   },
   [KEY_ASSETS_DETECTOR_FRAME_SETTINGS]: {
