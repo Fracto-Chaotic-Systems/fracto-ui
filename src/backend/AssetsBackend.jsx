@@ -7,6 +7,16 @@ const ASSETS_ORIGIN = service_origin(FRACTO_ASSET_PORT);
 const DATA_ORIGIN = service_origin(FRACTO_DATA_PORT);
 
 export class AssetsBackend {
+  /** Creates a new video project through the asset service.
+   * @returns {Promise<Object>} The created video record, including its id.
+   * @calledBy AssetsVideoGenerator
+   */
+  static new_video = () =>
+    request_json(`${ASSETS_ORIGIN}/new_video`, {
+      method: "POST",
+      headers: FETCH_JSON_HEADERS,
+    });
+
   /** Loads the UI style-property catalog used by the lore editor.
    * @returns {Promise<Object>} The JSON property definitions.
    * @calledBy ContentStyleGrid

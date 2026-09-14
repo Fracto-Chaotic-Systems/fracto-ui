@@ -22,6 +22,7 @@ import {
 } from "./video/VideoControlButtons.jsx";
 import VideoOperationsBlock from "./video/VideoOperationsBlock.jsx";
 import { get_visible_coverage_levels } from "./AssetsUtils.jsx";
+import { AssetsBackend } from "../../backend/AssetsBackend.jsx";
 
 const DEFAULT_VIDEO_RESOLUTION = 1024;
 const DEFAULT_VIDEO_FPS = 30;
@@ -98,20 +99,30 @@ export class AssetsVideoGenerator extends Component {
     console.log("saving video...", data);
   };
 
-  new_video = () => {
+  new_video = async () => {
     const { video_script } = this.state;
     if (video_script) {
       this.save_video(video_script);
     }
-    const random_name = `vid_${Math.round(Math.random() * 100000000)}`;
-    const first_step = this.first_step();
-    const new_video_script = {
-      asset_id: random_name,
-      resolution: DEFAULT_VIDEO_RESOLUTION,
-      fps: DEFAULT_VIDEO_FPS,
-      steps: [first_step],
-    };
-    this.setState({ video_script: new_video_script });
+    try {
+      const created_video = await AssetsBackend.new_video();
+      if (!created_video?.id) {
+        console.error("new video response did not include an id");
+        return;
+      }
+      const first_step = this.first_step();
+      const new_video_script = {
+        ...created_video,
+        asset_id: created_video.title,
+        resolution:
+          created_video.meta?.frame_size || DEFAULT_VIDEO_RESOLUTION,
+        fps: created_video.meta?.frame_rate || DEFAULT_VIDEO_FPS,
+        steps: [first_step],
+      };
+      this.setState({ video_script: new_video_script });
+    } catch (error) {
+      console.error("error creating new video", error.message);
+    }
   };
 
   on_control_action = (code, data) => {

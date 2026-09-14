@@ -31,14 +31,86 @@ database design.
 
 Current version: **not yet defined**
 
-The `meta` object will contain technical settings such as:
+The initial `meta` object contains the project description and basic output
+dimensions and timing. These are JSON properties, not additional columns in
+the `videos` table.
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `description` | string | User-authored description of the video project. |
+| `frame_size` | integer | Width and height of the square output frame, in pixels. |
+| `frame_rate` | number | Output frame rate, in frames per second. |
+| `format` | enum string | Container format: `mp4`, `webm`, `mov`, or `mkv`. |
+| `codec` | enum string | Video codec: `h264`, `hevc`, `vp9`, or `av1`. |
+| `pixel_format` | enum string | Pixel encoding, such as `yuv420p`, `yuv444p`, or `rgba`. |
+| `bitrate` | integer or null | Target video bitrate in bits per second. |
+| `quality` | number or null | Codec-specific quality value, such as CRF. |
+| `aspect_ratio` | number | Display width-to-height ratio. |
+| `duration` | number or null | Expected runtime in seconds; null when derived from the script. |
+| `audio` | object | Audio output configuration; see the nested shape below. |
+| `color_space` | object | Color interpretation metadata; see the nested shape below. |
+| `keyframe_interval` | integer or null | Maximum number of frames between keyframes. |
+| `output_extension` | enum string or null | Preferred output suffix: `mp4`, `webm`, `mov`, or `mkv`. |
+| `output_uri` | string or null | Destination URI or path for generated output. |
+| `thumbnail` | object | Poster-frame or preview configuration. |
+| `render_engine` | string or null | Renderer identifier, such as `fracto-raster`. |
+| `capability_version` | string or null | Version of the renderer capability set used. |
+| `created_by` | string or null | User or process that created the project. |
+| `updated_by` | string or null | User or process that most recently changed the project. |
+
+The initial shape is:
 
 ```json
-{}
+{
+  "description": "",
+  "frame_size": 1024,
+  "frame_rate": 30,
+  "format": null,
+  "codec": null,
+  "pixel_format": null,
+  "bitrate": null,
+  "quality": null,
+  "aspect_ratio": 1,
+  "duration": null,
+  "audio": {
+    "enabled": false,
+    "codec": null,
+    "sample_rate": null,
+    "channels": null,
+    "frequency": null
+  },
+  "color_space": {
+    "primaries": null,
+    "transfer": null,
+    "matrix": null,
+    "range": null
+  },
+  "keyframe_interval": null,
+  "output_extension": null,
+  "output_uri": null,
+  "thumbnail": {
+    "enabled": false,
+    "frame_index": null,
+    "output_uri": null
+  },
+  "render_engine": null,
+  "capability_version": null,
+  "created_by": null,
+  "updated_by": null
+}
 ```
 
-Fields, units, defaults, and supported values should be added here when the
-first video configuration is implemented.
+The `audio.codec` value is an enum such as `pcm_s16le`, `aac`, `opus`, or
+`flac`; `audio.sample_rate` is an integer in hertz; `audio.channels` is an
+integer count; and `audio.frequency` is the source tone in hertz when a test
+waveform is included. The `color_space` members are enum strings (for
+example, `bt709`, `srgb`, `gamma22`, or `full`), and `color_space.range` is
+either `full` or `limited`. `thumbnail` contains a boolean `enabled`, an
+integer `frame_index`, and an optional destination URI.
+
+The defaults above are the initial application defaults. Future properties
+must remain optional for older records and be supplied through normalization
+when absent.
 
 ## `script`
 

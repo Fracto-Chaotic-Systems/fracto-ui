@@ -52,18 +52,30 @@ const TABLE_HEADER_SPACE_PX = 40;
 const MONOSPACE_CHARACTER_WIDTH_PX = 8;
 const COLUMN_HORIZONTAL_PADDING_PX = 16;
 const MIN_COLUMN_WIDTH_PX = 64;
+const MAX_COLUMN_WIDTH_PX = 300;
 const cell_text = (value) => {
   if (value === null || value === undefined) return "";
   if (typeof value === "object") return JSON.stringify(value);
   return String(value);
 };
+const display_records = (records) =>
+  records.map((record) =>
+    Object.fromEntries(
+      Object.entries(record).map(([field, value]) => [
+        field,
+        typeof value === "object" && value !== null
+          ? JSON.stringify(value)
+          : value,
+      ]),
+    ),
+  );
 const table_columns = (records) => {
   const fields = [...new Set(records.flatMap((record) => Object.keys(record)))];
   return fields.map((field) => {
     const sample = records.find(
       (record) => record[field] !== null && record[field] !== undefined,
     )?.[field];
-    const width_px = Math.ceil(
+    const measured_width_px = Math.ceil(
       Math.max(
         MIN_COLUMN_WIDTH_PX,
         Math.max(
@@ -74,6 +86,7 @@ const table_columns = (records) => {
           COLUMN_HORIZONTAL_PADDING_PX,
       ) * 1.1,
     );
+    const width_px = Math.min(MAX_COLUMN_WIDTH_PX, measured_width_px);
     return {
       id: field,
       label: field,
@@ -81,7 +94,13 @@ const table_columns = (records) => {
       width_px,
       max_width_px: width_px,
       align: CELL_ALIGN_LEFT,
-      style: { backgroundColor: "white", fontFamily: "monospace" },
+      style: {
+        backgroundColor: "white",
+        fontFamily: "monospace",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+      },
     };
   });
 };
@@ -175,7 +194,7 @@ export class AdminQueries extends Component {
     const { tab_index, rendered_height, field_ref, records, loading, errors } =
       this.state;
     const labels = TABLE_TABS.map((key) => AppText.get(key));
-    const table_records = records[tab_index] || [];
+    const table_records = display_records(records[tab_index] || []);
     const table_error = errors[tab_index];
     const selected_content = (
       <CoolStyles.Block
