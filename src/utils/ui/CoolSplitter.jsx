@@ -55,8 +55,11 @@ export class CoolSplitter extends Component {
 
   normalize_position = () => {
     const { position, on_change } = this.props;
+    if (!Number.isFinite(position)) {
+      return;
+    }
     const bounded_position = this.get_bounded_position(position);
-    if (bounded_position !== position) {
+    if (Number.isFinite(bounded_position) && bounded_position !== position) {
       on_change(bounded_position);
     }
   };
