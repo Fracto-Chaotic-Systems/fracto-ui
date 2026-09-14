@@ -7,6 +7,7 @@ import CoolStyles from "../../../utils/ui/styles/CoolStyles.jsx";
 import {
   CELL_ALIGN_CENTER,
   CELL_TYPE_NUMBER,
+  TABLE_MULTI_SELECT,
 } from "../../../utils/ui/styles/CoolTableStyles.jsx";
 import { forEach } from "mathjs";
 import { bounds_from_short_code } from "../TilesUtils.jsx";
@@ -61,10 +62,17 @@ export const GENERATOR_CODE_INTERIOR = "tiles_interior";
 export class GeneratorControl extends Component {
   static propTypes = {
     coverage_data: PropTypes.array.isRequired,
+    selected_levels: PropTypes.array,
+    on_coverage_levels_changed: PropTypes.func,
     on_generate: PropTypes.func.isRequired,
   };
 
   state = {};
+
+  static defaultProps = {
+    selected_levels: [],
+    on_coverage_levels_changed: () => {},
+  };
 
   componentDidMount() {}
 
@@ -91,7 +99,11 @@ export class GeneratorControl extends Component {
   };
 
   render() {
-    const { coverage_data } = this.props;
+    const {
+      coverage_data,
+      selected_levels,
+      on_coverage_levels_changed,
+    } = this.props;
     if (!Array.isArray(coverage_data)) {
       // console.log('coverage_data is not an array', coverage_data)
       return [];
@@ -203,9 +215,30 @@ export class GeneratorControl extends Component {
       });
     }
 
+    const selected_rows = coverage_rows.reduce(
+      (rows, row, index) =>
+        selected_levels.includes(row.level) ? [...rows, index] : rows,
+      [],
+    );
+    const levels = coverage_rows.map((row) => row.level);
     return (
       <CoolStyles.InlineBlock>
-        <CoolTable data={coverage_rows} columns={COVERAGE_TABLE_COLUMNS} />
+        <CoolTable
+          data={coverage_rows}
+          columns={COVERAGE_TABLE_COLUMNS}
+          options={[TABLE_MULTI_SELECT]}
+          selected_rows={selected_rows}
+          on_select_row={(row) => {
+            const level = levels[row];
+            const next_levels = selected_levels.includes(level)
+              ? selected_levels.filter((item) => item !== level)
+              : [...selected_levels, level];
+            on_coverage_levels_changed(next_levels);
+          }}
+          on_select_all={(checked) =>
+            on_coverage_levels_changed(checked ? levels : [])
+          }
+        />
       </CoolStyles.InlineBlock>
     );
   }

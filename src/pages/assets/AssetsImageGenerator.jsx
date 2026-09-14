@@ -3,12 +3,17 @@ import React, { Component } from "react";
 import { AssetsBackend } from "../../backend/AssetsBackend.jsx";
 import NavigatorCoverage from "../../navigator/NavigatorCoverage.jsx";
 import { ASSETS_GENERATOR_SPLITTER_KEYS } from "../../navigator/NavigatorKeys.jsx";
-import { render_coverage_table, RESOLUTIONS } from "./AssetsUtils.jsx";
+import {
+  get_visible_coverage_levels,
+  render_coverage_table,
+  RESOLUTIONS,
+} from "./AssetsUtils.jsx";
 import { update_dimensions } from "./../PageUtils.jsx";
 
 import { MainStyles as styles, MARGIN_PX } from "../../styles/MainStyles.jsx";
 import CoolStyles from "../../utils/ui/styles/CoolStyles.jsx";
 import CoolSelect from "../../utils/ui/CoolSelect.jsx";
+import { TABLE_MULTI_SELECT } from "../../utils/ui/styles/CoolTableStyles.jsx";
 
 import AppSettings from "../../AppSettings.jsx";
 import {
@@ -36,6 +41,7 @@ export class AssetsImageGenerator extends Component {
     insert_outcome: null,
     coverage_data: null,
     heat_map_buffer: null,
+    selected_coverage_levels: [],
   };
 
   componentDidMount() {
@@ -106,6 +112,7 @@ export class AssetsImageGenerator extends Component {
       resolution,
       coverage_data,
       heat_map_buffer,
+      selected_coverage_levels,
     } = this.state;
     if (!coverage_data) {
       return [];
@@ -139,6 +146,29 @@ export class AssetsImageGenerator extends Component {
     const coverage_table = render_coverage_table(
       coverage_data,
       heat_map_buffer,
+      [TABLE_MULTI_SELECT],
+      selected_coverage_levels.map((level) =>
+        get_visible_coverage_levels(coverage_data, heat_map_buffer).indexOf(
+          level,
+        ),
+      ),
+      (row) => {
+        const levels = get_visible_coverage_levels(
+          coverage_data,
+          heat_map_buffer,
+        );
+        const level = levels[row];
+        const next_levels = selected_coverage_levels.includes(level)
+          ? selected_coverage_levels.filter((item) => item !== level)
+          : [...selected_coverage_levels, level];
+        this.on_coverage_levels_changed(next_levels);
+      },
+      (checked) =>
+        this.on_coverage_levels_changed(
+          checked
+            ? get_visible_coverage_levels(coverage_data, heat_map_buffer)
+            : [],
+        ),
     );
     return (
       <CoolStyles.InlineBlock>
@@ -157,8 +187,16 @@ export class AssetsImageGenerator extends Component {
     this.setState({
       coverage_data,
       heat_map_buffer,
+      selected_coverage_levels: get_visible_coverage_levels(
+        coverage_data,
+        heat_map_buffer,
+      ),
       image_outcome: null,
     });
+  };
+
+  on_coverage_levels_changed = (selected_coverage_levels) => {
+    this.setState({ selected_coverage_levels });
   };
 
   render() {
@@ -199,6 +237,7 @@ export class AssetsImageGenerator extends Component {
         control_block={this.render_button_block()}
         results_block={image}
         on_coverage_data={this.on_coverage_data}
+        selected_levels={this.state.selected_coverage_levels}
       />,
     ];
   }

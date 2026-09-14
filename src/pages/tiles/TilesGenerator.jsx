@@ -10,10 +10,13 @@ import { TILE_GENERATOR_SPLITTER_KEYS } from "../../navigator/NavigatorKeys.jsx"
 import NavigatorCoverage from "../../navigator/NavigatorCoverage.jsx";
 import GeneratorControl from "./generator/GeneratorControl.jsx";
 import GeneratorOperations from "./generator/GeneratorOperations.jsx";
+import { get_visible_coverage_levels } from "../assets/AssetsUtils.jsx";
 
 export class TilesGenerator extends Component {
   state = {
     coverage_data: [],
+    heat_map_buffer: [],
+    selected_coverage_levels: [],
     short_codes: [],
     width_px: 0,
     height_px: 0,
@@ -21,9 +24,20 @@ export class TilesGenerator extends Component {
     generate_code: "",
   };
 
-  on_coverage_data = (coverage_data) => {
+  on_coverage_data = (coverage_data, heat_map_buffer) => {
     // console.log('on_coverage_data', coverage_data)
-    this.setState({ coverage_data });
+    this.setState({
+      coverage_data,
+      heat_map_buffer,
+      selected_coverage_levels: get_visible_coverage_levels(
+        coverage_data,
+        heat_map_buffer,
+      ),
+    });
+  };
+
+  on_coverage_levels_changed = (selected_coverage_levels) => {
+    this.setState({ selected_coverage_levels });
   };
 
   on_generate = (tiles, level, generate_code) => {
@@ -42,10 +56,12 @@ export class TilesGenerator extends Component {
   };
 
   control_block = () => {
-    const { coverage_data } = this.state;
+    const { coverage_data, selected_coverage_levels } = this.state;
     return (
       <GeneratorControl
         coverage_data={coverage_data}
+        selected_levels={selected_coverage_levels}
+        on_coverage_levels_changed={this.on_coverage_levels_changed}
         on_generate={this.on_generate}
       />
     );
@@ -88,6 +104,7 @@ export class TilesGenerator extends Component {
         on_coverage_data={this.on_coverage_data}
         on_resize={this.on_resize}
         options={[INCLUDE_CAN_DO]}
+        selected_levels={this.state.selected_coverage_levels}
       />,
     ];
   }
