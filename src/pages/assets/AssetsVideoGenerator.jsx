@@ -94,16 +94,19 @@ export class AssetsVideoGenerator extends Component {
   };
 
   first_step = () => {
-    const { frame_settings } = this.state;
+    const frame_settings =
+      this.state.frame_settings?.focal_point &&
+      this.state.frame_settings.scope !== undefined
+        ? this.state.frame_settings
+        : AppSettings.get(KEY_VIDEO_GENERATOR_FRAME_SETTINGS);
     return {
       focal_point: frame_settings.focal_point,
       scope: frame_settings.scope,
-      frame_count: 1,
     };
   };
 
-  open_video = (data) => {
-    console.log("opening video...", data);
+  open_video = () => {
+    console.log("opening video...");
     const { coverage_data, heat_map_buffer } = this.state;
     this.setState({
       coverage_data: null,
@@ -122,26 +125,49 @@ export class AssetsVideoGenerator extends Component {
       });
   };
 
-  save_video = (data) => {
-    console.log("saving video...", data);
+  save_video = async (data) => {
+    if (!data?.id) {
+      console.error("cannot save video without an id");
+      return;
+    }
+    try {
+      await AssetsBackend.update_video(data);
+      console.log("video saved", data.id);
+    } catch (error) {
+      console.error("error saving video", error.message);
+    }
   };
 
   on_video_select = (video) => {
     if (!video) {
       return;
     }
+    let script = video.script;
+    if (typeof script === "string") {
+      try {
+        script = JSON.parse(script);
+      } catch (error) {
+        script = {};
+      }
+    }
+    script = script && typeof script === "object" ? script : {};
+    const steps = Array.isArray(script.steps) ? script.steps : [];
+    if (!steps.length) {
+      script = { ...script, steps: [this.first_step()] };
+    }
+    const selected_video = { ...video, script };
     const video_script = {
-      ...video,
-      asset_id: video.title,
-      resolution: video.meta?.frame_size || DEFAULT_VIDEO_RESOLUTION,
-      fps: video.meta?.frame_rate || DEFAULT_VIDEO_FPS,
-      steps: video.script?.steps || [],
+      ...selected_video,
+      asset_id: selected_video.title,
+      resolution: selected_video.meta?.frame_size || DEFAULT_VIDEO_RESOLUTION,
+      fps: selected_video.meta?.frame_rate || DEFAULT_VIDEO_FPS,
+      steps: script.steps,
     };
     AppSettings.on_settings_changed({
       [KEY_VIDEO_GENERATOR_CURRENT_VIDEO]: video_script,
     });
     this.setState({
-      selected_video: video || null,
+      selected_video,
       video_script,
       video_records: null,
       coverage_before_open: null,
@@ -183,6 +209,7 @@ export class AssetsVideoGenerator extends Component {
     AppSettings.on_settings_changed({
       [KEY_VIDEO_GENERATOR_CURRENT_VIDEO]: next_video_script,
     });
+    this.save_video(next_video_script);
   };
 
   on_close_video_list = () => {

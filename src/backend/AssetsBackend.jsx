@@ -17,6 +17,22 @@ export class AssetsBackend {
       headers: FETCH_JSON_HEADERS,
     });
 
+  /** Updates an existing video project through the asset service.
+   * @param {Object} video Complete video record, including its numeric id.
+   * @returns {Promise<Object>} Data-server update response.
+   * @calledBy AssetsVideoGenerator
+   */
+  static update_video = (video) => {
+    if (!video?.id) {
+      return Promise.reject(new Error("A video id is required to update a video"));
+    }
+    return request_json(`${ASSETS_ORIGIN}/video/${video.id}`, {
+      method: "PUT",
+      headers: FETCH_JSON_HEADERS,
+      body: JSON.stringify(video),
+    });
+  };
+
   /** Loads the UI style-property catalog used by the lore editor.
    * @returns {Promise<Object>} The JSON property definitions.
    * @calledBy ContentStyleGrid
