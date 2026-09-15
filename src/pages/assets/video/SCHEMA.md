@@ -116,16 +116,30 @@ when absent.
 
 Current version: **not yet defined**
 
-The `script` object will contain the ordered path and frame-specific motion
-instructions, such as focal points, scope changes, interpolation settings, and
-future directives.
+The `script` object contains an ordered `steps` array. At the current minimal
+schema, each step identifies a focal point and scope for that portion of the
+video path:
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `steps` | array | Ordered video path steps; defaults to an empty array. |
+| `steps[].focal_point` | object | Complex-plane location with numeric `x` and `y` coordinates. |
+| `steps[].scope` | number | Width of the rendered complex-plane region for the step. |
 
 ```json
-{}
+{
+  "steps": [
+    {
+      "focal_point": { "x": -0.75, "y": 0.0001 },
+      "scope": 2.5
+    }
+  ]
+}
 ```
 
-The exact timeline representation remains intentionally open. New fields must
-be optional until their defaults and migration behavior are documented.
+Additional frame-specific properties may be added later. They must remain
+optional until their defaults and migration behavior are documented, so this
+minimal shape remains readable by older consumers.
 
 ## Version history
 

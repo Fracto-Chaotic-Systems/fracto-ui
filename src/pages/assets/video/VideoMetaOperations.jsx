@@ -19,6 +19,8 @@ export class VideoMetaOperations extends Component {
   static propTypes = {
     width_px: PropTypes.number.isRequired,
     height_px: PropTypes.number.isRequired,
+    selected_video: PropTypes.object,
+    on_video_change: PropTypes.func,
   };
 
   state = {
@@ -30,7 +32,7 @@ export class VideoMetaOperations extends Component {
   };
 
   render_tab = (tab_index) => {
-    const { width_px, height_px } = this.props;
+    const { width_px, height_px, selected_video, on_video_change } = this.props;
     const content_width = Math.max(0, width_px - 3);
     const content_height = Math.max(
       0,
@@ -39,17 +41,29 @@ export class VideoMetaOperations extends Component {
     switch (tab_index) {
       case 0:
         return (
-          <VideoMetaData width_px={content_width} height_px={content_height} />
+          <VideoMetaData
+            width_px={content_width}
+            height_px={content_height}
+            selected_video={selected_video}
+            on_video_change={on_video_change}
+          />
         );
       case 1:
         return (
-          <VideoMetaPath width_px={content_width} height_px={content_height} />
+          <VideoMetaPath
+            width_px={content_width}
+            height_px={content_height}
+            selected_video={selected_video}
+            on_video_change={on_video_change}
+          />
         );
       case 2:
         return (
           <VideoMetaPreview
             width_px={content_width}
             height_px={content_height}
+            selected_video={selected_video}
+            on_video_change={on_video_change}
           />
         );
       default:

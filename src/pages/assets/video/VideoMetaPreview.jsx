@@ -8,6 +8,8 @@ export class VideoMetaPreview extends Component {
   static propTypes = {
     width_px: PropTypes.number.isRequired,
     height_px: PropTypes.number.isRequired,
+    selected_video: PropTypes.object,
+    on_video_change: PropTypes.func,
   };
 
   render() {

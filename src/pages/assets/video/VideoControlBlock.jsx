@@ -17,6 +17,7 @@ import { close_icon } from "../../../utils/ui/CoolIcons.jsx";
 import {
   CELL_ALIGN_CENTER,
   CELL_ALIGN_LEFT,
+  CELL_TYPE_NUMBER,
   CELL_TYPE_TEXT,
   CELL_TYPE_TIME_AGO,
 } from "../../../utils/ui/styles/CoolTableStyles.jsx";
@@ -98,11 +99,13 @@ export class VideoControlBlock extends Component {
     } = this.props;
     const sorted_video_records = [...video_records].sort(
       (first, second) =>
-        new Date(second.updated_at || 0) - new Date(first.updated_at || 0),
+        this.get_video_timestamp(second.updated_at) -
+        this.get_video_timestamp(first.updated_at),
     );
     const records = sorted_video_records
       .map((record) => ({
-        updated: record.updated_at,
+        updated: this.get_video_timestamp(record.updated_at),
+        steps: this.get_video_step_count(record.script),
         description: this.get_video_description(record.meta),
       }));
     return (
@@ -119,23 +122,31 @@ export class VideoControlBlock extends Component {
       >
         <CoolTable
           columns={[
-          {
-            id: "updated",
-            label: "updated",
-            type: CELL_TYPE_TIME_AGO,
-            width_px: 120,
-            max_width_px: 120,
-            align: CELL_ALIGN_CENTER,
-            style: { fontStyle: "italic" },
-          },
-          {
-            id: "description",
-            label: "description",
-            type: CELL_TYPE_TEXT,
-            width_px: 240,
-            max_width_px: 240,
-            align: CELL_ALIGN_LEFT,
-          },
+            {
+              id: "updated",
+              label: "updated",
+              type: CELL_TYPE_TIME_AGO,
+              width_px: 120,
+              max_width_px: 120,
+              align: CELL_ALIGN_CENTER,
+              style: { fontStyle: "italic" },
+            },
+            {
+              id: "steps",
+              label: "steps",
+              type: CELL_TYPE_NUMBER,
+              width_px: 60,
+              max_width_px: 60,
+              align: CELL_ALIGN_CENTER,
+            },
+            {
+              id: "description",
+              label: "description",
+              type: CELL_TYPE_TEXT,
+              width_px: 240,
+              max_width_px: 240,
+              align: CELL_ALIGN_LEFT,
+            },
           ]}
           data={records}
           options={[TABLE_CAN_SELECT]}
@@ -176,6 +187,36 @@ export class VideoControlBlock extends Component {
       console.error("invalid video metadata", error.message);
       return "";
     }
+  };
+
+  get_video_timestamp = (timestamp) => {
+    if (!timestamp) {
+      return 0;
+    }
+    if (timestamp instanceof Date) {
+      return timestamp;
+    }
+    if (
+      typeof timestamp === "string" &&
+      !/[zZ]|[+-]\d{2}:?\d{2}$/.test(timestamp)
+    ) {
+      return new Date(`${timestamp.replace(" ", "T")}Z`);
+    }
+    return new Date(timestamp);
+  };
+
+  get_video_step_count = (script) => {
+    if (Array.isArray(script)) {
+      return script.length;
+    }
+    if (typeof script === "string") {
+      try {
+        return this.get_video_step_count(JSON.parse(script));
+      } catch (error) {
+        return 0;
+      }
+    }
+    return Array.isArray(script?.steps) ? script.steps.length : 0;
   };
 
   render() {

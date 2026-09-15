@@ -149,6 +149,42 @@ export class AssetsVideoGenerator extends Component {
     });
   };
 
+  /**
+   * Applies a partial update from any video operation pane to the canonical
+   * page-level video record, then refreshes the normalized script view and
+   * persisted current-video setting used by the rest of the page.
+   */
+  on_video_change = (changes = {}) => {
+    const { selected_video } = this.state;
+    if (!selected_video || !changes || typeof changes !== "object") {
+      return;
+    }
+    const next_video = {
+      ...selected_video,
+      ...changes,
+      ...(changes.meta
+        ? { meta: { ...(selected_video.meta || {}), ...changes.meta } }
+        : {}),
+      ...(changes.script
+        ? { script: { ...(selected_video.script || {}), ...changes.script } }
+        : {}),
+    };
+    const next_video_script = {
+      ...next_video,
+      asset_id: next_video.title,
+      resolution: next_video.meta?.frame_size || DEFAULT_VIDEO_RESOLUTION,
+      fps: next_video.meta?.frame_rate || DEFAULT_VIDEO_FPS,
+      steps: next_video.script?.steps || [],
+    };
+    this.setState({
+      selected_video: next_video,
+      video_script: next_video_script,
+    });
+    AppSettings.on_settings_changed({
+      [KEY_VIDEO_GENERATOR_CURRENT_VIDEO]: next_video_script,
+    });
+  };
+
   on_close_video_list = () => {
     const { coverage_before_open, heat_map_before_open } = this.state;
     this.setState({
@@ -268,6 +304,7 @@ export class AssetsVideoGenerator extends Component {
         width_px={operations_width}
         height_px={operations_height}
         selected_video={selected_video}
+        on_video_change={this.on_video_change}
       />
     );
     return [

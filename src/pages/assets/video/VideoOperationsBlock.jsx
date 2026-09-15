@@ -17,6 +17,7 @@ export class VideoOperationsBlock extends Component {
     width_px: PropTypes.number.isRequired,
     height_px: PropTypes.number.isRequired,
     selected_video: PropTypes.object,
+    on_video_change: PropTypes.func,
   };
 
   state = {
@@ -101,7 +102,8 @@ export class VideoOperationsBlock extends Component {
             <VideoScriptOperations
               width_px={left_width}
               height_px={height_px}
-              selected_video_title={selected_video?.title}
+              selected_video={selected_video}
+              on_video_change={this.props.on_video_change}
             />
           </CoolStyles.Block>
           <CoolSplitter
@@ -124,6 +126,8 @@ export class VideoOperationsBlock extends Component {
             <VideoMetaOperations
               width_px={right_width}
               height_px={height_px}
+              selected_video={selected_video}
+              on_video_change={this.props.on_video_change}
             />
           </CoolStyles.Block>
         </CoolStyles.Block>
