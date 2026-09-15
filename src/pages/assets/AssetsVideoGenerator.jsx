@@ -21,9 +21,12 @@ import { KEY_ASSETS_VIDEO } from "../../text/AssetsText.jsx";
 import {
   CONTROL_ACTION_NEW_VIDEO,
   CONTROL_ACTION_OPEN_VIDEO,
+  CONTROL_ACTION_REDO,
   CONTROL_ACTION_SAVE_VIDEO,
+  CONTROL_ACTION_UNDO,
 } from "./video/VideoControlButtons.jsx";
 import VideoOperationsBlock from "./video/VideoOperationsBlock.jsx";
+import VideoEditHistory from "./video/VideoEditHistory.jsx";
 import { get_visible_coverage_levels } from "./AssetsUtils.jsx";
 import { AssetsBackend } from "../../backend/AssetsBackend.jsx";
 import DataBackend from "../../backend/DataBackend.jsx";
@@ -48,6 +51,8 @@ export class AssetsVideoGenerator extends Component {
     heat_map_before_open: null,
     frame_settings_subscription: null,
   };
+
+  video_history_ref = React.createRef();
 
   componentDidMount() {
     const current_video = AppSettings.get(KEY_VIDEO_GENERATOR_CURRENT_VIDEO);
@@ -202,14 +207,30 @@ export class AssetsVideoGenerator extends Component {
       fps: next_video.meta?.frame_rate || DEFAULT_VIDEO_FPS,
       steps: next_video.script?.steps || [],
     };
+    const video_history = this.video_history_ref.current;
+    if (video_history) {
+      video_history.record_edit(next_video);
+      return;
+    }
+    this.apply_video_snapshot(next_video_script);
+  };
+
+  apply_video_snapshot = (video) => {
+    const video_script = {
+      ...video,
+      asset_id: video.title,
+      resolution: video.meta?.frame_size || DEFAULT_VIDEO_RESOLUTION,
+      fps: video.meta?.frame_rate || DEFAULT_VIDEO_FPS,
+      steps: video.script?.steps || video.steps || [],
+    };
     this.setState({
-      selected_video: next_video,
-      video_script: next_video_script,
+      selected_video: video,
+      video_script,
     });
     AppSettings.on_settings_changed({
-      [KEY_VIDEO_GENERATOR_CURRENT_VIDEO]: next_video_script,
+      [KEY_VIDEO_GENERATOR_CURRENT_VIDEO]: video_script,
     });
-    this.save_video(next_video_script);
+    return this.save_video(video_script);
   };
 
   on_close_video_list = () => {
@@ -267,6 +288,12 @@ export class AssetsVideoGenerator extends Component {
       case CONTROL_ACTION_SAVE_VIDEO:
         this.save_video(data);
         break;
+      case CONTROL_ACTION_UNDO:
+        this.video_history_ref.current?.undo();
+        break;
+      case CONTROL_ACTION_REDO:
+        this.video_history_ref.current?.redo();
+        break;
       case CONTROL_ACTION_OPEN_VIDEO:
         this.open_video(data);
         break;
@@ -287,6 +314,7 @@ export class AssetsVideoGenerator extends Component {
       rendered_width,
       rendered_height,
     } = this.state;
+    const video_history = this.video_history_ref.current;
     const navigation_splitter_pos = Number(
       AppSettings.get(VIDEO_GENERATOR_SPLITTER_KEYS.main_key),
     );
@@ -324,6 +352,8 @@ export class AssetsVideoGenerator extends Component {
         selected_levels={selected_coverage_levels}
         on_coverage_levels_changed={this.on_coverage_levels_changed}
         on_control_action={this.on_control_action}
+        can_undo={video_history?.can_undo() || false}
+        can_redo={video_history?.can_redo() || false}
       />
     );
     const operations_block = (
@@ -335,6 +365,12 @@ export class AssetsVideoGenerator extends Component {
       />
     );
     return [
+      <VideoEditHistory
+        key="video-edit-history"
+        ref={this.video_history_ref}
+        video={selected_video}
+        on_change={this.apply_video_snapshot}
+      />,
       <styles.SectionTitle key={"assets-video-title"}>
         {AppText.get(KEY_ASSETS_VIDEO)}
       </styles.SectionTitle>,
