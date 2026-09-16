@@ -57,6 +57,45 @@ export const copy = (
          d="M480 400L288 400C279.2 400 272 392.8 272 384L272 128C272 119.2 279.2 112 288 112L421.5 112C425.7 112 429.8 113.7 432.8 116.7L491.3 175.2C494.3 178.2 496 182.3 496 186.5L496 384C496 392.8 488.8 400 480 400zM288 448L480 448C515.3 448 544 419.3 544 384L544 186.5C544 169.5 537.3 153.2 525.3 141.2L466.7 82.7C454.7 70.7 438.5 64 421.5 64L288 64C252.7 64 224 92.7 224 128L224 384C224 419.3 252.7 448 288 448zM160 192C124.7 192 96 220.7 96 256L96 512C96 547.3 124.7 576 160 576L352 576C387.3 576 416 547.3 416 512L416 496L368 496L368 512C368 520.8 360.8 528 352 528L160 528C151.2 528 144 520.8 144 512L144 256C144 247.2 151.2 240 160 240L176 240L176 192L160 192z"/>
    </svg>
 );
+
+// Compact icons used by CoolTree for folders and normalized JSON values.
+const tree_icon = (path, view_box = "0 0 24 24") => (
+  <svg
+    viewBox={view_box}
+    width="14"
+    height="14"
+    fill="currentColor"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path d={path} />
+  </svg>
+);
+
+export const tree_folder_icon = tree_icon(
+  "M3 5h7l2 2h9v12H3V5zm2 2v10h14V9h-8l-2-2H5z",
+);
+export const tree_object_icon = tree_icon(
+  "M6 3h12v3h3v12h-3v3H6v-3H3V6h3V3zm2 2v2H5v10h3v2h8v-2h3V7h-3V5H8z",
+);
+export const tree_array_icon = tree_icon(
+  "M7 3H4v18h3v-2H6V5h1V3zm10 0v2h1v14h-1v2h3V3h-3zM9 7h2v2H9V7zm4 0h2v2h-2V7zm-4 4h2v2H9v-2zm4 0h2v2h-2v-2zm-4 4h2v2H9v-2zm4 0h2v2h-2v-2z",
+);
+export const tree_string_icon = tree_icon(
+  "M7 5c-1.1 0-2 .9-2 2v2h2V7h3v4H8c-1.7 0-3 1.3-3 3v3c0 1.1.9 2 2 2h5v-2H7v-3h2c1.7 0 3-1.3 3-3V7c0-1.1-.9-2-2-2H7zm7 0v2h3v3h-2c-1.7 0-3 1.3-3 3v3c0 1.7 1.3 3 3 3h2v-2h-2v-3h2c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2h-3z",
+);
+export const tree_number_icon = tree_icon(
+  "M9 3H7l-1 7H4v2h2l-1 7h2l1-7h3l-1 7h2l1-7h2v-2h-2l1-7h-2l-1 7H8l1-7zm2 9h3l-1 7h-3l1-7z",
+);
+export const tree_boolean_icon = tree_icon(
+  "M7 5a5 5 0 0 0 0 10h10a5 5 0 0 0 0-10H7zm0 2h10a3 3 0 0 1 0 6H7a3 3 0 0 1 0-6zm10 1a2 2 0 1 0 0 4 2 2 0 0 0 0-4z",
+);
+export const tree_null_icon = tree_icon(
+  "M4 11h16v2H4v-2z",
+);
+export const tree_undefined_icon = tree_icon(
+  "M4 5h16v2H4V5zm0 6h10v2H4v-2zm0 6h16v2H4v-2z",
+);
 export const paste = (
    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
       <path

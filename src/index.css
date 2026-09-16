@@ -20,3 +20,9 @@ h1 {
   font-size: 3.2em;
   line-height: 1.1;
 }
+
+/* Keep React Complex Tree arrows on the same line as icons and labels. */
+.rct-tree-item-arrow {
+  display: inline;
+  margin-right: 5px !important;
+}

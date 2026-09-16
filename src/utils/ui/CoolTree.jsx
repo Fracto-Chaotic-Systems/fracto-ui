@@ -8,6 +8,16 @@ import {
 
 import "react-complex-tree/lib/style-modern.css";
 import CoolStyles from "./styles/CoolStyles.jsx";
+import {
+  tree_array_icon,
+  tree_boolean_icon,
+  tree_folder_icon,
+  tree_null_icon,
+  tree_number_icon,
+  tree_object_icon,
+  tree_string_icon,
+  tree_undefined_icon,
+} from "./CoolIcons.jsx";
 
 /**
  * A node accepted by CoolTree. `key` must be stable for the lifetime of the
@@ -37,6 +47,7 @@ const measure_parent = (tree_element) => {
 };
 
 const SYNTHETIC_ROOT_ID = "__cool_tree_root__";
+const TREE_ITEM_HEIGHT_PX = 20;
 let tree_instance_count = 0;
 
 const create_tree_id = () => {
@@ -72,6 +83,16 @@ const JSON_TYPE_COLORS = {
   object: "#245c78",
   array: "#245c78",
   undefined: "#777777",
+};
+
+const JSON_TYPE_ICONS = {
+  array: tree_array_icon,
+  boolean: tree_boolean_icon,
+  null: tree_null_icon,
+  number: tree_number_icon,
+  object: tree_object_icon,
+  string: tree_string_icon,
+  undefined: tree_undefined_icon,
 };
 
 const does_search_match_item = (search, item, item_title) => {
@@ -192,10 +213,39 @@ export const normalize_tree_data = (value, root_label = "root") => {
  */
 const render_tree_item_title = ({ item, title }) => {
   const node = item.data;
-  if (!node || !node.type || !node.label) return title;
-  const label_color = node.metadata?.array_index !== undefined
-    ? JSON_TYPE_COLORS.array_index
-    : JSON_TYPE_COLORS.key;
+  const icon =
+    (node?.type && JSON_TYPE_ICONS[node.type]) ||
+    (item.isFolder ? tree_folder_icon : null);
+  const icon_color = node?.type
+    ? JSON_TYPE_COLORS[node.type] || JSON_TYPE_COLORS.key
+    : item.isFolder
+      ? JSON_TYPE_COLORS.object
+      : JSON_TYPE_COLORS.key;
+  const icon_element = icon ? (
+    <span
+      style={{
+        display: "inline-flex",
+        width: "16px",
+        marginRight: "3px",
+        verticalAlign: "-2px",
+        color: icon_color,
+      }}
+    >
+      {icon}
+    </span>
+  ) : null;
+  if (!node || !node.type || !node.label) {
+    return (
+      <span>
+        {icon_element}
+        {title}
+      </span>
+    );
+  }
+  const label_color =
+    node.metadata?.array_index !== undefined
+      ? JSON_TYPE_COLORS.array_index
+      : JSON_TYPE_COLORS.key;
   const label_style = {
     color: label_color,
     fontWeight: "bold",
@@ -203,6 +253,7 @@ const render_tree_item_title = ({ item, title }) => {
   if (!node.isLeaf) {
     return (
       <span>
+        {icon_element}
         <span style={label_style}>{node.label}</span>
         <span style={{ color: JSON_TYPE_COLORS[node.type] }}>
           {` (${node.type}, ${node.children.length})`}
@@ -212,6 +263,7 @@ const render_tree_item_title = ({ item, title }) => {
   }
   return (
     <span>
+      {icon_element}
       <span style={label_style}>{node.label}</span>
       <span style={{ color: "#777777" }}>{": "}</span>
       <span
@@ -459,6 +511,69 @@ export class CoolTree extends Component {
     />
   );
 
+  render_tree_item_with_hierarchy = ({
+    depth,
+    children,
+    title,
+    arrow,
+    context,
+  }) => {
+    const item_container_props = children
+      ? context.itemContainerWithChildrenProps
+      : context.itemContainerWithoutChildrenProps;
+    const guide_lines = Array.from({ length: depth }, (_, index) => {
+      const left = `${index * 16 + 8}px`;
+      return (
+        <React.Fragment key={`hierarchy-line-${index}`}>
+          <span
+            style={{
+              position: "absolute",
+              left,
+              top: 0,
+              bottom: 0,
+              borderLeft: "1px solid #bbbbbb",
+              pointerEvents: "none",
+            }}
+          />
+          {index === depth - 1 ? (
+            <span
+              style={{
+                position: "absolute",
+                left,
+                top: "50%",
+                width: "12px",
+                borderTop: "1px solid #bbbbbb",
+                pointerEvents: "none",
+              }}
+            />
+          ) : null}
+        </React.Fragment>
+      );
+    });
+    return (
+      <li
+        {...item_container_props}
+        style={{
+          ...item_container_props.style,
+          position: "relative",
+        }}
+      >
+        <div
+          {...context.interactiveElementProps}
+          style={{
+            ...context.interactiveElementProps.style,
+            position: "relative",
+          }}
+        >
+          {guide_lines}
+          {arrow}
+          {title}
+        </div>
+        {children}
+      </li>
+    );
+  };
+
   render() {
     const { tree_ref, parent_bounds } = this.state;
     const {
@@ -503,6 +618,7 @@ export class CoolTree extends Component {
       height: `${parent_bounds?.height || 0}px`,
       overflow: "auto",
       boxSizing: "border-box",
+      "--rct-item-height": `${TREE_ITEM_HEIGHT_PX}px`,
     };
     const tree_element = (
       <Tree
@@ -532,6 +648,7 @@ export class CoolTree extends Component {
       canRename: can_rename,
       autoFocus: auto_focus,
       showLiveDescription: show_live_description,
+      renderItem: this.render_tree_item_with_hierarchy,
     };
     const tree_environment = data_provider ? (
       <UncontrolledTreeEnvironment

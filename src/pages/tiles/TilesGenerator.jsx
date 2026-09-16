@@ -3,6 +3,7 @@ import React, { Component } from "react";
 import { MainStyles as styles } from "../../styles/MainStyles.jsx";
 import AppText from "../../AppText.jsx";
 import { KEY_TILES_GENERATE } from "../../text/TilesText.jsx";
+import PageAutomation from "../utils/PageAutomation.jsx";
 
 import { INCLUDE_CAN_DO } from "../../utils/render/FractoTileCoverage.jsx";
 import { TILE_GENERATOR_SPLITTER_KEYS } from "../../navigator/NavigatorKeys.jsx";
@@ -95,8 +96,12 @@ export class TilesGenerator extends Component {
 
   render() {
     return [
-      <styles.SectionTitle key={"tiles-overview-title"}>
+      <styles.SectionTitle
+        key={"tiles-overview-title"}
+        style={{ position: "relative" }}
+      >
         {AppText.get(KEY_TILES_GENERATE)}
+        <PageAutomation automation_type="tiles_generator" />
       </styles.SectionTitle>,
       <NavigatorCoverage
         splitter_keys={TILE_GENERATOR_SPLITTER_KEYS}
