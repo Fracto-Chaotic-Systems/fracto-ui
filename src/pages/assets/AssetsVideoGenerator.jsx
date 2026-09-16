@@ -157,7 +157,8 @@ export class AssetsVideoGenerator extends Component {
     }
     script = script && typeof script === "object" ? script : {};
     const steps = Array.isArray(script.steps) ? script.steps : [];
-    if (!steps.length) {
+    const initialized_first_step = !steps.length;
+    if (initialized_first_step) {
       script = { ...script, steps: [this.first_step()] };
     }
     const selected_video = { ...video, script };
@@ -178,6 +179,9 @@ export class AssetsVideoGenerator extends Component {
       coverage_before_open: null,
       heat_map_before_open: null,
     });
+    if (initialized_first_step) {
+      this.save_video(video_script);
+    }
   };
 
   /**
