@@ -1,4 +1,4 @@
-import { Component } from "react";
+import React, { Component } from "react";
 import PropTypes from "prop-types";
 import AppSettings, { TYPE_STRING } from "../../AppSettings.jsx";
 import CoolStyles from "../../utils/ui/styles/CoolStyles.jsx";
@@ -15,7 +15,15 @@ const PAGE_MODES = [
   PAGE_MODE_MANAGER,
 ];
 
+const MODE_COLORS = {
+  [PAGE_MODE_OPERATOR]: "green",
+  [PAGE_MODE_AUTOMATION]: "orange",
+  [PAGE_MODE_MANAGER]: "mediumpurple",
+};
+
 const MODE_OPTIONS = PAGE_MODES.map((mode) => ({ label: mode, code: mode }));
+const MODE_DROPDOWN_WIDTH_PX = 128;
+const TITLE_BAR_HEIGHT_PX = 50;
 
 /** Build the isolated persisted setting key for a page's automation mode. */
 export const get_page_automation_mode_key = (automation_type) => {
@@ -101,8 +109,8 @@ export class PageAutomation extends Component {
     this.setState({
       editing: true,
       dropdown_rect: {
-        top: bounds.bottom,
-        left: bounds.left,
+        top: bounds.bottom - TITLE_BAR_HEIGHT_PX,
+        left: Math.max(0, bounds.right - MODE_DROPDOWN_WIDTH_PX),
       },
     });
   };
@@ -112,6 +120,31 @@ export class PageAutomation extends Component {
     this.setState({ editing: false, dropdown_rect: null });
   };
 
+  render_mode_option = (item) => (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        fontStyle: "italic",
+        textTransform: "uppercase",
+        letterSpacing: "1px",
+      }}
+    >
+      <span
+        aria-hidden="true"
+        style={{
+          display: "inline-block",
+          width: "10px",
+          height: "10px",
+          marginRight: "0.35rem",
+          borderRadius: "50%",
+          backgroundColor: MODE_COLORS[item.code],
+        }}
+      />
+      {item.label}
+    </span>
+  );
+
   render() {
     const { mode, editing, dropdown_rect } = this.state;
     const position_style = {
@@ -120,8 +153,10 @@ export class PageAutomation extends Component {
       top: 0,
       height: "100%",
       display: "inline-flex",
-      alignItems: "center",
+      alignItems: "flex-start",
       boxSizing: "border-box",
+      lineHeight: "24px",
+      letterSpacing: "1px",
     };
     if (editing && dropdown_rect) {
       return (
@@ -129,6 +164,7 @@ export class PageAutomation extends Component {
           items={MODE_OPTIONS}
           reference_rect={dropdown_rect}
           callback={this.on_mode_select}
+          render_item={this.render_mode_option}
         />
       );
     }
@@ -141,9 +177,22 @@ export class PageAutomation extends Component {
           fontSize: "0.75rem",
           fontStyle: "italic",
           textTransform: "uppercase",
+          lineHeight: "10px",
           cursor: "pointer",
         }}
       >
+        <span
+          aria-hidden="true"
+          style={{
+            display: "inline-block",
+            width: "10px",
+            height: "10px",
+            marginRight: "0.35rem",
+            borderRadius: "50%",
+            backgroundColor: MODE_COLORS[mode],
+            verticalAlign: "middle",
+          }}
+        />
         {mode}
       </CoolStyles.InlineBlock>
     );

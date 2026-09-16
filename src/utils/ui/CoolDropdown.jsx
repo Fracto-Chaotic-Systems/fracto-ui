@@ -26,7 +26,9 @@ const DropdownElement = styled.div`
   ${CoolStyles.pointer}
   padding: 0.125rem 0.5rem;
   font-size: 0.85rem;
+  line-height: 24px;
   color: ${ITEM_COLOR};
+  text-align: left;
   &:hover {
     color: ${ITEM_HILIGHT_COLOR};
     font-weight: bold;
@@ -53,6 +55,12 @@ export class CoolDropdown extends Component {
     items: PropTypes.array.isRequired,
     reference_rect: PropTypes.object.isRequired,
     callback: PropTypes.func.isRequired,
+    /** Optional renderer for an item's content, preserving dropdown layout. */
+    render_item: PropTypes.func,
+  };
+
+  static defaultProps = {
+    render_item: null,
   };
 
   state = {
@@ -119,7 +127,7 @@ export class CoolDropdown extends Component {
 
   render() {
     const { dropdown_ref, submenu_popup } = this.state;
-    const { items, callback, reference_rect } = this.props;
+    const { items, callback, reference_rect, render_item } = this.props;
     const all_items = items.map((item, index) => {
       const key = `dropdown_${index}`;
       const caret_ref = React.createRef();
@@ -150,7 +158,11 @@ export class CoolDropdown extends Component {
             }
           }}
         >
-          <DropdownLabel>{item.label}</DropdownLabel>
+          {render_item ? (
+            render_item(item, index)
+          ) : (
+            <DropdownLabel>{item.label}</DropdownLabel>
+          )}
           {submenu_arrow}
         </DropdownElement>
       );
