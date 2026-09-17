@@ -4,6 +4,7 @@ import { MainStyles as styles } from "../../styles/MainStyles.jsx";
 import AppText from "../../AppText.jsx";
 import { KEY_TILES_GENERATE } from "../../text/TilesText.jsx";
 import PageAutomation, {
+  PAGE_MODE_AUTOMATION,
   PAGE_MODE_MANAGER,
   PAGE_MODE_OPERATOR,
 } from "../utils/PageAutomation.jsx";
@@ -70,7 +71,26 @@ export class TilesGenerator extends Component {
     // Manager tasks remain visible and editable in memory until an explicit
     // save/submit action is added; changing modes must not discard them.
     automation_tasks: [],
+    automation_jobs: [],
     automation_mode: PAGE_MODE_OPERATOR,
+  };
+
+  componentDidMount() {
+    if (this.state.automation_mode === PAGE_MODE_AUTOMATION) {
+      this.refresh_automation_jobs();
+    }
+  }
+
+  refresh_automation_jobs = async () => {
+    try {
+      const response = await TilesBackend.automation_jobs();
+      const ready_jobs = (response.result || [])
+        .filter((job) => job.state === "ready")
+        .slice(0, 10);
+      this.setState({ automation_jobs: ready_jobs });
+    } catch (error) {
+      console.error("tiles automation jobs load failed", error);
+    }
   };
 
   on_coverage_data = (coverage_data, heat_map_buffer) => {
@@ -117,7 +137,7 @@ export class TilesGenerator extends Component {
     }));
   };
 
-  /** Persist the completed manager task list as a draft automation job. */
+  /** Persist the completed manager task list as a ready automation job. */
   save_automation_tasks = async () => {
     const { automation_tasks } = this.state;
     if (!automation_tasks.length) {
@@ -127,7 +147,7 @@ export class TilesGenerator extends Component {
       const result = await TilesBackend.create_automation({
         title: `tiles_${Date.now()}`,
         automation_type: "tiles",
-        state: "draft",
+        state: "ready",
         tasks: automation_tasks,
       });
       console.log("tiles automation saved", result.id);
@@ -169,6 +189,7 @@ export class TilesGenerator extends Component {
     return (
       <GeneratorControl
         automation_mode={this.state.automation_mode}
+        automation_jobs={this.state.automation_jobs}
         automation_tasks={this.state.automation_tasks}
         coverage_data={coverage_data}
         heat_map_buffer={this.state.heat_map_buffer}
@@ -211,7 +232,11 @@ export class TilesGenerator extends Component {
   };
 
   on_automation_mode_change = (automation_mode) => {
-    this.setState({ automation_mode });
+    this.setState({ automation_mode }, () => {
+      if (automation_mode === PAGE_MODE_AUTOMATION) {
+        this.refresh_automation_jobs();
+      }
+    });
   };
 
   render() {

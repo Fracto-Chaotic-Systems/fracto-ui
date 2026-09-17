@@ -7,10 +7,12 @@ import CoolButton from "../../../utils/ui/CoolButton.jsx";
 import CoolStyles from "../../../utils/ui/styles/CoolStyles.jsx";
 import {
   CELL_ALIGN_CENTER,
+  CELL_ALIGN_LEFT,
   CELL_ALIGN_RIGHT,
   CELL_TYPE_CALLBACK,
   CELL_TYPE_NUMBER,
   CELL_TYPE_TEXT,
+  CELL_TYPE_TIME_AGO,
   TABLE_MULTI_SELECT,
   TABLE_NO_BORDER,
 } from "../../../utils/ui/styles/CoolTableStyles.jsx";
@@ -24,6 +26,9 @@ import {
 import {
   KEY_TILES_GENERATOR_AUTOMATION_ADD,
   KEY_TILES_GENERATOR_AUTOMATION_LEVEL,
+  KEY_TILES_GENERATOR_AUTOMATION_JOB_CREATED,
+  KEY_TILES_GENERATOR_AUTOMATION_JOB_TASKS,
+  KEY_TILES_GENERATOR_AUTOMATION_JOB_TITLE,
   KEY_TILES_GENERATOR_AUTOMATION_OPERATION,
   KEY_TILES_GENERATOR_AUTOMATION_RUN,
   KEY_TILES_GENERATOR_AUTOMATION_SAVE,
@@ -37,6 +42,22 @@ import {
 const LinkedCell = styled(CoolStyles.InlineBlock)`
   margin: 0;
 `;
+
+const parse_database_timestamp = (timestamp) => {
+  if (!timestamp) {
+    return 0;
+  }
+  if (timestamp instanceof Date) {
+    return timestamp;
+  }
+  if (
+    typeof timestamp === "string" &&
+    !/[zZ]|[+-]\d{2}:?\d{2}$/.test(timestamp)
+  ) {
+    return new Date(`${timestamp.replace(" ", "T")}Z`);
+  }
+  return new Date(timestamp);
+};
 
 const COVERAGE_TABLE_COLUMNS = [
   {
@@ -111,6 +132,30 @@ const AUTOMATION_TASK_COLUMNS = [
   },
 ];
 
+const AUTOMATION_JOB_COLUMNS = [
+  {
+    id: "title",
+    label_key: KEY_TILES_GENERATOR_AUTOMATION_JOB_TITLE,
+    type: CELL_TYPE_TEXT,
+    width_px: 140,
+    align: CELL_ALIGN_LEFT,
+  },
+  {
+    id: "task_count",
+    label_key: KEY_TILES_GENERATOR_AUTOMATION_JOB_TASKS,
+    type: CELL_TYPE_NUMBER,
+    width_px: 80,
+    align: CELL_ALIGN_CENTER,
+  },
+  {
+    id: "created_at",
+    label_key: KEY_TILES_GENERATOR_AUTOMATION_JOB_CREATED,
+    type: CELL_TYPE_TIME_AGO,
+    width_px: 100,
+    align: CELL_ALIGN_CENTER,
+  },
+];
+
 export const GENERATOR_CODE_REDO = "tiles_redo";
 export const GENERATOR_CODE_CAN_DO = "tiles_can_do";
 export const GENERATOR_CODE_BLANK = "tiles_blank";
@@ -119,6 +164,7 @@ export const GENERATOR_CODE_INTERIOR = "tiles_interior";
 export class GeneratorControl extends Component {
   static propTypes = {
     automation_mode: PropTypes.string.isRequired,
+    automation_jobs: PropTypes.array,
     automation_tasks: PropTypes.array,
     coverage_data: PropTypes.array.isRequired,
     heat_map_buffer: PropTypes.array,
@@ -133,6 +179,7 @@ export class GeneratorControl extends Component {
   static defaultProps = {
     heat_map_buffer: [],
     automation_tasks: [],
+    automation_jobs: [],
     selected_levels: [],
     on_coverage_levels_changed: () => {},
     on_save_automation_tasks: () => {},
@@ -165,6 +212,7 @@ export class GeneratorControl extends Component {
   render() {
     const {
       automation_mode,
+      automation_jobs,
       automation_tasks,
       coverage_data,
       heat_map_buffer,
@@ -302,6 +350,11 @@ export class GeneratorControl extends Component {
       level: task.level,
       short_code_count: task.short_codes.length,
     }));
+    const job_rows = automation_jobs.map((job) => ({
+      title: job.title,
+      task_count: Array.isArray(job.tasks) ? job.tasks.length : 0,
+      created_at: parse_database_timestamp(job.created_at),
+    }));
     const automation_action_key =
       automation_mode === PAGE_MODE_MANAGER
         ? KEY_TILES_GENERATOR_AUTOMATION_ADD
@@ -344,6 +397,15 @@ export class GeneratorControl extends Component {
               primary={true}
             />
           </>
+        ) : null}
+        {automation_mode === PAGE_MODE_AUTOMATION ? (
+          <CoolStyles.Block style={{ marginTop: "0.5rem" }}>
+            <CoolTable
+              columns={AUTOMATION_JOB_COLUMNS}
+              data={job_rows}
+              options={[TABLE_NO_BORDER]}
+            />
+          </CoolStyles.Block>
         ) : null}
       </CoolStyles.InlineBlock>
     ) : null;
