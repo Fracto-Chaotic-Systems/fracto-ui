@@ -6,8 +6,12 @@
  */
 export const request_json = async (url, options = {}) => {
   const response = await fetch(url, options);
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  return response.json();
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const detail = result?.error ? `: ${result.error}` : "";
+    throw new Error(`HTTP ${response.status}${detail}`);
+  }
+  return result;
 };
 
 /** Encodes an object as a URL query string.

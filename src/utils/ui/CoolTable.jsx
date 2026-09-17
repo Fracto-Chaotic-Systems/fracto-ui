@@ -287,7 +287,11 @@ export class CoolTable extends Component {
     if (row_is_selected) {
       cell_style.backgroundColor = is_multi_select ? "white" : "#cccccc";
       return (
-        <styles.TableCell style={cell_style} key={`cell-${row}-${col}`}>
+        <styles.TableCell
+          style={cell_style}
+          key={`cell-${row}-${col}`}
+          onClick={column.stop_row_select ? (e) => e.stopPropagation() : null}
+        >
           {object_data}
         </styles.TableCell>
       );
@@ -296,7 +300,11 @@ export class CoolTable extends Component {
       cell_style.backgroundColor = "#dddddd";
     }
     return (
-      <styles.TableCell style={cell_style} key={`cell-${row}-${col}`}>
+      <styles.TableCell
+        style={cell_style}
+        key={`cell-${row}-${col}`}
+        onClick={column.stop_row_select ? (e) => e.stopPropagation() : null}
+      >
         {object_data}
       </styles.TableCell>
     );

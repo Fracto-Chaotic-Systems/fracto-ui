@@ -3,12 +3,16 @@ import PropTypes from "prop-types";
 import styled from "styled-components";
 
 import CoolTable from "../../../utils/ui/CoolTable.jsx";
+import CoolButton from "../../../utils/ui/CoolButton.jsx";
 import CoolStyles from "../../../utils/ui/styles/CoolStyles.jsx";
 import {
   CELL_ALIGN_CENTER,
+  CELL_ALIGN_RIGHT,
   CELL_TYPE_CALLBACK,
   CELL_TYPE_NUMBER,
+  CELL_TYPE_TEXT,
   TABLE_MULTI_SELECT,
+  TABLE_NO_BORDER,
 } from "../../../utils/ui/styles/CoolTableStyles.jsx";
 import { forEach } from "mathjs";
 import { bounds_from_short_code } from "../TilesUtils.jsx";
@@ -19,7 +23,11 @@ import {
 } from "../../utils/PageAutomation.jsx";
 import {
   KEY_TILES_GENERATOR_AUTOMATION_ADD,
+  KEY_TILES_GENERATOR_AUTOMATION_LEVEL,
+  KEY_TILES_GENERATOR_AUTOMATION_OPERATION,
   KEY_TILES_GENERATOR_AUTOMATION_RUN,
+  KEY_TILES_GENERATOR_AUTOMATION_SAVE,
+  KEY_TILES_GENERATOR_AUTOMATION_SHORTCODES,
 } from "../../../text/TilesText.jsx";
 import {
   get_level_colors,
@@ -51,6 +59,7 @@ const COVERAGE_TABLE_COLUMNS = [
     type: CELL_TYPE_NUMBER,
     width_px: 80,
     align: CELL_ALIGN_CENTER,
+    stop_row_select: true,
   },
   {
     id: "can_do",
@@ -58,6 +67,7 @@ const COVERAGE_TABLE_COLUMNS = [
     type: CELL_TYPE_NUMBER,
     width_px: 80,
     align: CELL_ALIGN_CENTER,
+    stop_row_select: true,
   },
   {
     id: "blank_tiles",
@@ -65,12 +75,38 @@ const COVERAGE_TABLE_COLUMNS = [
     type: CELL_TYPE_NUMBER,
     width_px: 80,
     align: CELL_ALIGN_CENTER,
+    stop_row_select: true,
   },
   {
     id: "interior_tiles",
     label: "interior",
     type: CELL_TYPE_NUMBER,
     width_px: 80,
+    align: CELL_ALIGN_CENTER,
+    stop_row_select: true,
+  },
+];
+
+const AUTOMATION_TASK_COLUMNS = [
+  {
+    id: "level",
+    label_key: KEY_TILES_GENERATOR_AUTOMATION_LEVEL,
+    type: CELL_TYPE_NUMBER,
+    width_px: 60,
+    align: CELL_ALIGN_CENTER,
+  },
+  {
+    id: "short_code_count",
+    label_key: KEY_TILES_GENERATOR_AUTOMATION_SHORTCODES,
+    type: CELL_TYPE_NUMBER,
+    width_px: 100,
+    align: CELL_ALIGN_RIGHT,
+  },
+  {
+    id: "generate_code",
+    label_key: KEY_TILES_GENERATOR_AUTOMATION_OPERATION,
+    type: CELL_TYPE_TEXT,
+    width_px: 120,
     align: CELL_ALIGN_CENTER,
   },
 ];
@@ -83,19 +119,23 @@ export const GENERATOR_CODE_INTERIOR = "tiles_interior";
 export class GeneratorControl extends Component {
   static propTypes = {
     automation_mode: PropTypes.string.isRequired,
+    automation_tasks: PropTypes.array,
     coverage_data: PropTypes.array.isRequired,
     heat_map_buffer: PropTypes.array,
     selected_levels: PropTypes.array,
     on_coverage_levels_changed: PropTypes.func,
     on_generate: PropTypes.func.isRequired,
+    on_save_automation_tasks: PropTypes.func,
   };
 
   state = {};
 
   static defaultProps = {
     heat_map_buffer: [],
+    automation_tasks: [],
     selected_levels: [],
     on_coverage_levels_changed: () => {},
+    on_save_automation_tasks: () => {},
   };
 
   componentDidMount() {}
@@ -125,10 +165,12 @@ export class GeneratorControl extends Component {
   render() {
     const {
       automation_mode,
+      automation_tasks,
       coverage_data,
       heat_map_buffer,
       selected_levels,
       on_coverage_levels_changed,
+      on_save_automation_tasks,
     } = this.props;
     if (!Array.isArray(coverage_data)) {
       // console.log('coverage_data is not an array', coverage_data)
@@ -255,6 +297,11 @@ export class GeneratorControl extends Component {
       [],
     );
     const levels = coverage_rows.map((row) => row.level);
+    const task_rows = automation_tasks.map((task) => ({
+      generate_code: task.generate_code,
+      level: task.level,
+      short_code_count: task.short_codes.length,
+    }));
     const automation_action_key =
       automation_mode === PAGE_MODE_MANAGER
         ? KEY_TILES_GENERATOR_AUTOMATION_ADD
@@ -268,38 +315,61 @@ export class GeneratorControl extends Component {
           width: "12rem",
           verticalAlign: "top",
           textAlign: "left",
-          fontSize: "1rem",
-          lineHeight: "1.5rem",
-          fontWeight: "normal",
-          color: "#888888",
-          letterSpacing: "3px",
-          textTransform: "uppercase",
         }}
       >
-        {AppText.get(automation_action_key)}
+        <CoolStyles.Block
+          style={{
+            fontSize: "1rem",
+            lineHeight: "1.5rem",
+            fontWeight: "normal",
+            color: "#888888",
+            letterSpacing: "3px",
+            textTransform: "uppercase",
+          }}
+        >
+          {AppText.get(automation_action_key)}
+        </CoolStyles.Block>
+        {automation_mode === PAGE_MODE_MANAGER && automation_tasks.length ? (
+          <>
+            <CoolStyles.Block style={{ marginBottom: "0.5rem" }}>
+              <CoolTable
+                columns={AUTOMATION_TASK_COLUMNS}
+                data={task_rows}
+                options={[TABLE_NO_BORDER]}
+              />
+            </CoolStyles.Block>
+            <CoolButton
+              content={AppText.get(KEY_TILES_GENERATOR_AUTOMATION_SAVE)}
+              on_click={on_save_automation_tasks}
+              primary={true}
+            />
+          </>
+        ) : null}
       </CoolStyles.InlineBlock>
     ) : null;
     return (
       <CoolStyles.InlineBlock>
         <CoolStyles.InlineBlock>
-          <CoolTable
-            data={coverage_rows}
-            columns={COVERAGE_TABLE_COLUMNS}
-            options={[TABLE_MULTI_SELECT]}
-            selected_rows={selected_rows}
-            on_select_row={(row) => {
-              const level = levels[row];
-              const next_levels = selected_levels.includes(level)
-                ? selected_levels.filter((item) => item !== level)
-                : [...selected_levels, level];
-              on_coverage_levels_changed(next_levels);
-            }}
-            on_select_all={(checked) =>
-              on_coverage_levels_changed(checked ? levels : [])
-            }
-          />
+          <CoolStyles.InlineBlock>
+            <CoolTable
+              data={coverage_rows}
+              columns={COVERAGE_TABLE_COLUMNS}
+              options={[TABLE_MULTI_SELECT]}
+              selected_rows={selected_rows}
+              on_select_row={(row) => {
+                const level = levels[row];
+                const next_levels = selected_levels.includes(level)
+                  ? selected_levels.filter((item) => item !== level)
+                  : [...selected_levels, level];
+                on_coverage_levels_changed(next_levels);
+              }}
+              on_select_all={(checked) =>
+                on_coverage_levels_changed(checked ? levels : [])
+              }
+            />
+          </CoolStyles.InlineBlock>
+          {automation_action}
         </CoolStyles.InlineBlock>
-        {automation_action}
       </CoolStyles.InlineBlock>
     );
   }

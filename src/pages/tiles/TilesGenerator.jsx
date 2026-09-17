@@ -4,6 +4,7 @@ import { MainStyles as styles } from "../../styles/MainStyles.jsx";
 import AppText from "../../AppText.jsx";
 import { KEY_TILES_GENERATE } from "../../text/TilesText.jsx";
 import PageAutomation, {
+  PAGE_MODE_MANAGER,
   PAGE_MODE_OPERATOR,
 } from "../utils/PageAutomation.jsx";
 
@@ -11,9 +12,50 @@ import { INCLUDE_CAN_DO } from "../../utils/render/FractoTileCoverage.jsx";
 import { TILE_GENERATOR_SPLITTER_KEYS } from "../../navigator/NavigatorKeys.jsx";
 
 import NavigatorCoverage from "../../navigator/NavigatorCoverage.jsx";
-import GeneratorControl from "./generator/GeneratorControl.jsx";
+import GeneratorControl, {
+  GENERATOR_CODE_BLANK,
+  GENERATOR_CODE_CAN_DO,
+  GENERATOR_CODE_INTERIOR,
+  GENERATOR_CODE_REDO,
+} from "./generator/GeneratorControl.jsx";
 import GeneratorOperations from "./generator/GeneratorOperations.jsx";
 import { get_visible_coverage_levels } from "../assets/AssetsUtils.jsx";
+import TilesBackend from "../../backend/TilesBackend.jsx";
+
+/**
+ * The operation names persisted in a manager task are intentionally aligned
+ * with the coverage table identifiers. The tile-count action is represented
+ * as `redo` because it reprocesses existing tiles.
+ */
+export const AUTOMATION_TASK_CODES = {
+  [GENERATOR_CODE_REDO]: "redo",
+  [GENERATOR_CODE_CAN_DO]: "can_do",
+  [GENERATOR_CODE_BLANK]: "blank",
+  [GENERATOR_CODE_INTERIOR]: "interior",
+};
+const AUTOMATION_TASK_WARNING_INTERVAL = 10000;
+
+/**
+ * @typedef {Object} AutomationTask
+ * @property {string} generate_code Coverage operation: redo, can_do, blank,
+ * or interior.
+ * @property {number} level Tile level targeted by the operation.
+ * @property {string[]} short_codes Ordered shortcodes included in the task.
+ */
+
+/**
+ * Creates the normalized task shape used by manager mode.
+ *
+ * @param {string} generate_code Internal coverage operation code.
+ * @param {number} level Tile level targeted by the operation.
+ * @param {string[]} short_codes Shortcodes included in the task.
+ * @returns {AutomationTask} Normalized manager task.
+ */
+export const create_automation_task = (generate_code, level, short_codes) => ({
+  generate_code: AUTOMATION_TASK_CODES[generate_code] || generate_code,
+  level,
+  short_codes: [...short_codes],
+});
 
 export class TilesGenerator extends Component {
   state = {
@@ -25,6 +67,9 @@ export class TilesGenerator extends Component {
     height_px: 0,
     generate_level: 0,
     generate_code: "",
+    // Manager tasks remain visible and editable in memory until an explicit
+    // save/submit action is added; changing modes must not discard them.
+    automation_tasks: [],
     automation_mode: PAGE_MODE_OPERATOR,
   };
 
@@ -44,10 +89,70 @@ export class TilesGenerator extends Component {
     this.setState({ selected_coverage_levels });
   };
 
+  /**
+   * Appends one task to the manager-owned list while preserving insertion
+   * order. Task persistence is intentionally deferred until a manager save
+   * action is introduced.
+   *
+   * @param {AutomationTask} task Normalized task to append.
+   */
+  add_automation_task = (task) => {
+    const current_short_code_count = this.state.automation_tasks.reduce(
+      (count, existing_task) => count + existing_task.short_codes.length,
+      0,
+    );
+    const next_short_code_count =
+      current_short_code_count + task.short_codes.length;
+    if (
+      Math.floor(next_short_code_count / AUTOMATION_TASK_WARNING_INTERVAL) >
+      Math.floor(current_short_code_count / AUTOMATION_TASK_WARNING_INTERVAL)
+    ) {
+      console.warn(
+        `manager task list contains ${next_short_code_count} shortcodes; ` +
+          "large task lists may increase persistence and processing time",
+      );
+    }
+    this.setState((state) => ({
+      automation_tasks: [...state.automation_tasks, task],
+    }));
+  };
+
+  /** Persist the completed manager task list as a draft automation job. */
+  save_automation_tasks = async () => {
+    const { automation_tasks } = this.state;
+    if (!automation_tasks.length) {
+      return;
+    }
+    try {
+      const result = await TilesBackend.create_automation({
+        title: `tiles_${Date.now()}`,
+        automation_type: "tiles",
+        state: "draft",
+        tasks: automation_tasks,
+      });
+      console.log("tiles automation saved", result.id);
+      this.setState({ automation_tasks: [] });
+    } catch (error) {
+      console.error("tiles automation save failed", error);
+    }
+  };
+
   on_generate = (tiles, level, generate_code) => {
     const short_codes = tiles.map((tile, i) => {
       return tile.short_code;
     });
+    if (this.state.automation_mode === PAGE_MODE_MANAGER) {
+      this.add_automation_task(
+        create_automation_task(generate_code, level, short_codes),
+      );
+      return;
+    }
+    if (this.state.automation_mode !== PAGE_MODE_OPERATOR) {
+      console.warn(
+        `ignoring ${generate_code} tile operation while in ${this.state.automation_mode} mode`,
+      );
+      return;
+    }
     console.log(
       `on_generate ${generate_code}`,
       short_codes ? short_codes.length : 0,
@@ -64,18 +169,24 @@ export class TilesGenerator extends Component {
     return (
       <GeneratorControl
         automation_mode={this.state.automation_mode}
+        automation_tasks={this.state.automation_tasks}
         coverage_data={coverage_data}
         heat_map_buffer={this.state.heat_map_buffer}
         selected_levels={selected_coverage_levels}
         on_coverage_levels_changed={this.on_coverage_levels_changed}
         on_generate={this.on_generate}
+        on_save_automation_tasks={this.save_automation_tasks}
       />
     );
   };
 
   operations_block = () => {
-    const { coverage_data, short_codes, generate_code } = this.state;
+    const { automation_mode, coverage_data, short_codes, generate_code } =
+      this.state;
     if (!coverage_data) {
+      return [];
+    }
+    if (automation_mode !== PAGE_MODE_OPERATOR) {
       return [];
     }
     return (
