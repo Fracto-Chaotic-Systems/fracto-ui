@@ -16,6 +16,7 @@ const NEXT_TILE_DELAY_MS = 150;
 
 export class GeneratorOperations extends Component {
   static propTypes = {
+    automation_mode: PropTypes.string.isRequired,
     short_codes: PropTypes.array.isRequired,
     generate_code: PropTypes.string.isRequired,
   };

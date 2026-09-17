@@ -3,7 +3,9 @@ import React, { Component } from "react";
 import { MainStyles as styles } from "../../styles/MainStyles.jsx";
 import AppText from "../../AppText.jsx";
 import { KEY_TILES_GENERATE } from "../../text/TilesText.jsx";
-import PageAutomation from "../utils/PageAutomation.jsx";
+import PageAutomation, {
+  PAGE_MODE_OPERATOR,
+} from "../utils/PageAutomation.jsx";
 
 import { INCLUDE_CAN_DO } from "../../utils/render/FractoTileCoverage.jsx";
 import { TILE_GENERATOR_SPLITTER_KEYS } from "../../navigator/NavigatorKeys.jsx";
@@ -23,6 +25,7 @@ export class TilesGenerator extends Component {
     height_px: 0,
     generate_level: 0,
     generate_code: "",
+    automation_mode: PAGE_MODE_OPERATOR,
   };
 
   on_coverage_data = (coverage_data, heat_map_buffer) => {
@@ -60,6 +63,7 @@ export class TilesGenerator extends Component {
     const { coverage_data, selected_coverage_levels } = this.state;
     return (
       <GeneratorControl
+        automation_mode={this.state.automation_mode}
         coverage_data={coverage_data}
         heat_map_buffer={this.state.heat_map_buffer}
         selected_levels={selected_coverage_levels}
@@ -76,6 +80,7 @@ export class TilesGenerator extends Component {
     }
     return (
       <GeneratorOperations
+        automation_mode={this.state.automation_mode}
         short_codes={short_codes}
         generate_code={generate_code}
       />
@@ -94,6 +99,10 @@ export class TilesGenerator extends Component {
     console.log(`size is ${new_width_px}x${new_height_px}`);
   };
 
+  on_automation_mode_change = (automation_mode) => {
+    this.setState({ automation_mode });
+  };
+
   render() {
     return [
       <styles.SectionTitle
@@ -101,7 +110,10 @@ export class TilesGenerator extends Component {
         style={{ position: "relative" }}
       >
         {AppText.get(KEY_TILES_GENERATE)}
-        <PageAutomation automation_type="tiles_generator" />
+        <PageAutomation
+          automation_type="tiles_generator"
+          on_mode_change={this.on_automation_mode_change}
+        />
       </styles.SectionTitle>,
       <NavigatorCoverage
         splitter_keys={TILE_GENERATOR_SPLITTER_KEYS}

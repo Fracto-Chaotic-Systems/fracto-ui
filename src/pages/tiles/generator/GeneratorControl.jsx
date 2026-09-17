@@ -12,6 +12,15 @@ import {
 } from "../../../utils/ui/styles/CoolTableStyles.jsx";
 import { forEach } from "mathjs";
 import { bounds_from_short_code } from "../TilesUtils.jsx";
+import AppText from "../../../AppText.jsx";
+import {
+  PAGE_MODE_AUTOMATION,
+  PAGE_MODE_MANAGER,
+} from "../../utils/PageAutomation.jsx";
+import {
+  KEY_TILES_GENERATOR_AUTOMATION_ADD,
+  KEY_TILES_GENERATOR_AUTOMATION_RUN,
+} from "../../../text/TilesText.jsx";
 import {
   get_level_colors,
   render_level_color,
@@ -73,6 +82,7 @@ export const GENERATOR_CODE_INTERIOR = "tiles_interior";
 
 export class GeneratorControl extends Component {
   static propTypes = {
+    automation_mode: PropTypes.string.isRequired,
     coverage_data: PropTypes.array.isRequired,
     heat_map_buffer: PropTypes.array,
     selected_levels: PropTypes.array,
@@ -114,6 +124,7 @@ export class GeneratorControl extends Component {
 
   render() {
     const {
+      automation_mode,
       coverage_data,
       heat_map_buffer,
       selected_levels,
@@ -244,24 +255,51 @@ export class GeneratorControl extends Component {
       [],
     );
     const levels = coverage_rows.map((row) => row.level);
+    const automation_action_key =
+      automation_mode === PAGE_MODE_MANAGER
+        ? KEY_TILES_GENERATOR_AUTOMATION_ADD
+        : automation_mode === PAGE_MODE_AUTOMATION
+          ? KEY_TILES_GENERATOR_AUTOMATION_RUN
+          : null;
+    const automation_action = automation_action_key ? (
+      <CoolStyles.InlineBlock
+        style={{
+          marginLeft: "1rem",
+          width: "12rem",
+          verticalAlign: "top",
+          textAlign: "left",
+          fontSize: "1rem",
+          lineHeight: "1.5rem",
+          fontWeight: "normal",
+          color: "#888888",
+          letterSpacing: "3px",
+          textTransform: "uppercase",
+        }}
+      >
+        {AppText.get(automation_action_key)}
+      </CoolStyles.InlineBlock>
+    ) : null;
     return (
       <CoolStyles.InlineBlock>
-        <CoolTable
-          data={coverage_rows}
-          columns={COVERAGE_TABLE_COLUMNS}
-          options={[TABLE_MULTI_SELECT]}
-          selected_rows={selected_rows}
-          on_select_row={(row) => {
-            const level = levels[row];
-            const next_levels = selected_levels.includes(level)
-              ? selected_levels.filter((item) => item !== level)
-              : [...selected_levels, level];
-            on_coverage_levels_changed(next_levels);
-          }}
-          on_select_all={(checked) =>
-            on_coverage_levels_changed(checked ? levels : [])
-          }
-        />
+        <CoolStyles.InlineBlock>
+          <CoolTable
+            data={coverage_rows}
+            columns={COVERAGE_TABLE_COLUMNS}
+            options={[TABLE_MULTI_SELECT]}
+            selected_rows={selected_rows}
+            on_select_row={(row) => {
+              const level = levels[row];
+              const next_levels = selected_levels.includes(level)
+                ? selected_levels.filter((item) => item !== level)
+                : [...selected_levels, level];
+              on_coverage_levels_changed(next_levels);
+            }}
+            on_select_all={(checked) =>
+              on_coverage_levels_changed(checked ? levels : [])
+            }
+          />
+        </CoolStyles.InlineBlock>
+        {automation_action}
       </CoolStyles.InlineBlock>
     );
   }

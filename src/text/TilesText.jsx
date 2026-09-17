@@ -41,6 +41,8 @@ export const KEY_TILES_GENERATOR_DONE_AT = `${GENERATOR_FOLDER}/tile_done_at`;
 export const KEY_TILES_GENERATOR_IS_BLANK = `${GENERATOR_FOLDER}/tile_is_blank`;
 export const KEY_TILES_GENERATOR_IS_INTERIOR = `${GENERATOR_FOLDER}/tile_is_interior`;
 export const KEY_TILES_GENERATOR_SHORT_CODE = `${GENERATOR_FOLDER}/tile_short_code`;
+export const KEY_TILES_GENERATOR_AUTOMATION_ADD = `${GENERATOR_FOLDER}/automation_add`;
+export const KEY_TILES_GENERATOR_AUTOMATION_RUN = `${GENERATOR_FOLDER}/automation_run`;
 
 export const APP_TILES_TEXT = {
   [KEY_TILES_OVERVIEW]: "tiles overview",
@@ -83,4 +85,6 @@ export const APP_TILES_TEXT = {
   [KEY_TILES_GENERATOR_IS_BLANK]: "blank",
   [KEY_TILES_GENERATOR_IS_INTERIOR]: "inter",
   [KEY_TILES_GENERATOR_SHORT_CODE]: "short code",
+  [KEY_TILES_GENERATOR_AUTOMATION_ADD]: "click to add",
+  [KEY_TILES_GENERATOR_AUTOMATION_RUN]: "run jobs now",
 };

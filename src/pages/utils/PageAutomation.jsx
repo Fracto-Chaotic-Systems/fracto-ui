@@ -50,6 +50,8 @@ export class PageAutomation extends Component {
   static propTypes = {
     /** Stable caller/job type used to namespace automation settings. */
     automation_type: PropTypes.string.isRequired,
+    /** Notifies the page when its persisted mode is initialized or changed. */
+    on_mode_change: PropTypes.func.isRequired,
   };
 
   state = {
@@ -60,6 +62,12 @@ export class PageAutomation extends Component {
 
   mode_setting_key = null;
   mode_subscription_key = null;
+
+  notify_mode_change = (mode) => {
+    if (!PAGE_MODES.includes(mode)) return;
+    const { on_mode_change } = this.props;
+    on_mode_change(mode);
+  };
 
   componentDidMount() {
     const { automation_type } = this.props;
@@ -85,11 +93,16 @@ export class PageAutomation extends Component {
     this.mode_subscription_key = AppSettings.subscribe(
       setting_key,
       (_key, mode) => {
-        if (PAGE_MODES.includes(mode)) this.setState({ mode });
+        if (!PAGE_MODES.includes(mode)) return;
+        this.setState({ mode }, () => this.notify_mode_change(mode));
       },
     );
-    const mode = AppSettings.get(setting_key);
-    if (PAGE_MODES.includes(mode)) this.setState({ mode });
+    const stored_mode = AppSettings.get(setting_key);
+    const mode = PAGE_MODES.includes(stored_mode)
+      ? stored_mode
+      : PAGE_MODE_OPERATOR;
+    this.setState({ mode });
+    this.notify_mode_change(mode);
   }
 
   componentWillUnmount() {
