@@ -72,6 +72,8 @@ export class TilesGenerator extends Component {
     // save/submit action is added; changing modes must not discard them.
     automation_tasks: [],
     automation_jobs: [],
+    active_automation_job: null,
+    automation_running: false,
     automation_mode: PAGE_MODE_OPERATOR,
   };
 
@@ -90,6 +92,16 @@ export class TilesGenerator extends Component {
       this.setState({ automation_jobs: ready_jobs });
     } catch (error) {
       console.error("tiles automation jobs load failed", error);
+    }
+  };
+
+  claim_automation_job = async () => {
+    try {
+      const response = await TilesBackend.claim_automation_job();
+      this.setState({ active_automation_job: response.job || null });
+      await this.refresh_automation_jobs();
+    } catch (error) {
+      console.error("tiles automation job claim failed", error);
     }
   };
 
@@ -190,6 +202,7 @@ export class TilesGenerator extends Component {
       <GeneratorControl
         automation_mode={this.state.automation_mode}
         automation_jobs={this.state.automation_jobs}
+        automation_running={this.state.automation_running}
         automation_tasks={this.state.automation_tasks}
         coverage_data={coverage_data}
         heat_map_buffer={this.state.heat_map_buffer}
@@ -197,6 +210,7 @@ export class TilesGenerator extends Component {
         on_coverage_levels_changed={this.on_coverage_levels_changed}
         on_generate={this.on_generate}
         on_save_automation_tasks={this.save_automation_tasks}
+        on_automation_running_change={this.on_automation_running_change}
       />
     );
   };
@@ -232,11 +246,24 @@ export class TilesGenerator extends Component {
   };
 
   on_automation_mode_change = (automation_mode) => {
-    this.setState({ automation_mode }, () => {
-      if (automation_mode === PAGE_MODE_AUTOMATION) {
-        this.refresh_automation_jobs();
-      }
-    });
+    this.setState(
+      {
+        automation_mode,
+        automation_running:
+          automation_mode === PAGE_MODE_AUTOMATION
+            ? this.state.automation_running
+            : false,
+      },
+      () => {
+        if (automation_mode === PAGE_MODE_AUTOMATION) {
+          this.refresh_automation_jobs();
+        }
+      },
+    );
+  };
+
+  on_automation_running_change = (automation_running) => {
+    this.setState({ automation_running });
   };
 
   render() {

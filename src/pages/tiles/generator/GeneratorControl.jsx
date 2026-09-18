@@ -33,6 +33,8 @@ import {
   KEY_TILES_GENERATOR_AUTOMATION_RUN,
   KEY_TILES_GENERATOR_AUTOMATION_SAVE,
   KEY_TILES_GENERATOR_AUTOMATION_SHORTCODES,
+  KEY_TILES_GENERATOR_AUTOMATION_GO,
+  KEY_TILES_GENERATOR_AUTOMATION_STOP,
 } from "../../../text/TilesText.jsx";
 import {
   get_level_colors,
@@ -172,6 +174,8 @@ export class GeneratorControl extends Component {
     on_coverage_levels_changed: PropTypes.func,
     on_generate: PropTypes.func.isRequired,
     on_save_automation_tasks: PropTypes.func,
+    automation_running: PropTypes.bool,
+    on_automation_running_change: PropTypes.func,
   };
 
   state = {};
@@ -183,6 +187,8 @@ export class GeneratorControl extends Component {
     selected_levels: [],
     on_coverage_levels_changed: () => {},
     on_save_automation_tasks: () => {},
+    automation_running: false,
+    on_automation_running_change: () => {},
   };
 
   componentDidMount() {}
@@ -219,6 +225,8 @@ export class GeneratorControl extends Component {
       selected_levels,
       on_coverage_levels_changed,
       on_save_automation_tasks,
+      automation_running,
+      on_automation_running_change,
     } = this.props;
     if (!Array.isArray(coverage_data)) {
       // console.log('coverage_data is not an array', coverage_data)
@@ -404,6 +412,17 @@ export class GeneratorControl extends Component {
               columns={AUTOMATION_JOB_COLUMNS}
               data={job_rows}
               options={[TABLE_NO_BORDER]}
+            />
+            <CoolButton
+              content={AppText.get(
+                automation_running
+                  ? KEY_TILES_GENERATOR_AUTOMATION_STOP
+                  : KEY_TILES_GENERATOR_AUTOMATION_GO,
+              )}
+              on_click={() =>
+                on_automation_running_change(!automation_running)
+              }
+              primary={true}
             />
           </CoolStyles.Block>
         ) : null}

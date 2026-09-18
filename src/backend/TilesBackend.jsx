@@ -8,6 +8,17 @@ const FRACTO_PROD_URL =
   import.meta.env.VITE_FRACTO_PROD_URL || "https://fracto.mikehallstudio.com";
 
 export class TilesBackend {
+  /** Claims the oldest ready Tiles automation job atomically.
+   * @returns {Promise<Object>} Response containing the claimed job or null.
+   * @calledBy TilesGenerator
+   */
+  static claim_automation_job = () =>
+    request_json(`${service_origin(FRACTO_TILES_PORT)}/automation/claim`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ automation_type: "tiles" }),
+    });
+
   /** Fetches Tiles automation jobs oldest-first for automation mode.
    * @returns {Promise<Object>} Response containing the ordered job records.
    * @calledBy TilesGenerator
