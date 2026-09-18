@@ -18,8 +18,8 @@ import {
   CELL_TYPE_CALLBACK,
   TABLE_NO_BORDER,
   TABLE_NO_HEADER,
-  CELL_LABEL_STYLE,
 } from "../../../utils/ui/styles/CoolTableStyles.jsx";
+import { CELL_LABEL_STYLE } from "../../../utils/ui/styles/CoolStyles.jsx";
 import CoolTable from "../../../utils/ui/CoolTable.jsx";
 import {
   KEY_STUDY_COLUMN_LABEL_CORE_POINT,

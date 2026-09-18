@@ -4,7 +4,9 @@ import styled from "styled-components";
 
 import CoolTable from "../../../utils/ui/CoolTable.jsx";
 import CoolButton from "../../../utils/ui/CoolButton.jsx";
-import CoolStyles from "../../../utils/ui/styles/CoolStyles.jsx";
+import CoolStyles, {
+  CELL_LABEL_STYLE,
+} from "../../../utils/ui/styles/CoolStyles.jsx";
 import {
   CELL_ALIGN_CENTER,
   CELL_ALIGN_LEFT,
@@ -35,6 +37,7 @@ import {
   KEY_TILES_GENERATOR_AUTOMATION_SHORTCODES,
   KEY_TILES_GENERATOR_AUTOMATION_GO,
   KEY_TILES_GENERATOR_AUTOMATION_STOP,
+  KEY_TILES_GENERATOR_AUTOMATION_STOP_AFTER_JOB,
 } from "../../../text/TilesText.jsx";
 import {
   get_level_colors,
@@ -176,6 +179,8 @@ export class GeneratorControl extends Component {
     on_save_automation_tasks: PropTypes.func,
     automation_running: PropTypes.bool,
     on_automation_running_change: PropTypes.func,
+    stop_after_current_job: PropTypes.bool,
+    on_stop_after_current_job_change: PropTypes.func,
   };
 
   state = {};
@@ -189,6 +194,8 @@ export class GeneratorControl extends Component {
     on_save_automation_tasks: () => {},
     automation_running: false,
     on_automation_running_change: () => {},
+    stop_after_current_job: false,
+    on_stop_after_current_job_change: () => {},
   };
 
   componentDidMount() {}
@@ -227,6 +234,8 @@ export class GeneratorControl extends Component {
       on_save_automation_tasks,
       automation_running,
       on_automation_running_change,
+      stop_after_current_job,
+      on_stop_after_current_job_change,
     } = this.props;
     if (!Array.isArray(coverage_data)) {
       // console.log('coverage_data is not an array', coverage_data)
@@ -373,7 +382,7 @@ export class GeneratorControl extends Component {
       <CoolStyles.InlineBlock
         style={{
           marginLeft: "1rem",
-          width: "12rem",
+          width: "20rem",
           verticalAlign: "top",
           textAlign: "left",
         }}
@@ -407,7 +416,9 @@ export class GeneratorControl extends Component {
           </>
         ) : null}
         {automation_mode === PAGE_MODE_AUTOMATION ? (
-          <CoolStyles.Block style={{ marginTop: "0.5rem" }}>
+          <CoolStyles.Block
+            style={{ marginTop: "0.5rem", marginBottom: "0.5rem" }}
+          >
             <CoolTable
               columns={AUTOMATION_JOB_COLUMNS}
               data={job_rows}
@@ -424,6 +435,21 @@ export class GeneratorControl extends Component {
               }
               primary={true}
             />
+            <label
+              style={{
+                ...CELL_LABEL_STYLE,
+                marginLeft: "0.5rem",
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={stop_after_current_job}
+                onChange={(event) =>
+                  on_stop_after_current_job_change(event.target.checked)
+                }
+              />
+              {AppText.get(KEY_TILES_GENERATOR_AUTOMATION_STOP_AFTER_JOB)}
+            </label>
           </CoolStyles.Block>
         ) : null}
       </CoolStyles.InlineBlock>

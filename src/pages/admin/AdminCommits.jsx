@@ -8,13 +8,13 @@ import AppSettings from "../../AppSettings.jsx";
 import { KEY_ADMIN_COMMITS_REPOSITORY_VISIBILITY } from "../../settings/AdminSettings.jsx";
 import CoolTable from "../../utils/ui/CoolTable.jsx";
 import { CoolStyles } from "../../utils/ui/CoolImports.jsx";
+import { CELL_LABEL_STYLE } from "../../utils/ui/styles/CoolStyles.jsx";
 import { SETTING_LABEL_STYLE } from "../../utils/ui/styles/SettingStyles.jsx";
 import ReactTimeAgo from "react-time-ago";
 import {
   CELL_ALIGN_CENTER,
   CELL_ALIGN_LEFT,
   CELL_ALIGN_RIGHT,
-  CELL_LABEL_STYLE,
   CELL_TYPE_CALLBACK,
   CELL_TYPE_NUMBER,
   CELL_TYPE_TEXT,

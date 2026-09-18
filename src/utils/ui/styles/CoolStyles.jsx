@@ -4,6 +4,14 @@ import styled, { css } from "styled-components";
 // create a circular dependency because CoolImports also re-exports CoolStyles.
 import CoolColors from "../CoolColors.jsx";
 
+// Shared styling for descriptive labels beside values in compact tables and
+// controls. This belongs with the general UI styles rather than table styles.
+export const CELL_LABEL_STYLE = {
+  fontWeight: "bold",
+  color: "#666666",
+  fontStyle: "italic",
+};
+
 export class CoolStyles {
   static pointer = css`
     cursor: pointer;

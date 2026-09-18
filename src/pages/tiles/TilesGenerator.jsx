@@ -74,6 +74,7 @@ export class TilesGenerator extends Component {
     automation_jobs: [],
     active_automation_job: null,
     automation_running: false,
+    stop_after_current_job: false,
     automation_mode: PAGE_MODE_OPERATOR,
   };
 
@@ -203,6 +204,7 @@ export class TilesGenerator extends Component {
         automation_mode={this.state.automation_mode}
         automation_jobs={this.state.automation_jobs}
         automation_running={this.state.automation_running}
+        stop_after_current_job={this.state.stop_after_current_job}
         automation_tasks={this.state.automation_tasks}
         coverage_data={coverage_data}
         heat_map_buffer={this.state.heat_map_buffer}
@@ -211,6 +213,9 @@ export class TilesGenerator extends Component {
         on_generate={this.on_generate}
         on_save_automation_tasks={this.save_automation_tasks}
         on_automation_running_change={this.on_automation_running_change}
+        on_stop_after_current_job_change={
+          this.on_stop_after_current_job_change
+        }
       />
     );
   };
@@ -264,6 +269,10 @@ export class TilesGenerator extends Component {
 
   on_automation_running_change = (automation_running) => {
     this.setState({ automation_running });
+  };
+
+  on_stop_after_current_job_change = (stop_after_current_job) => {
+    this.setState({ stop_after_current_job });
   };
 
   render() {

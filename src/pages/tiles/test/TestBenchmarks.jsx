@@ -17,7 +17,7 @@ import {
 import TilesBackend from "../../../backend/TilesBackend.jsx";
 import CoolStyles from "../../../utils/ui/styles/CoolStyles.jsx";
 import CoolSelect from "../../../utils/ui/CoolSelect.jsx";
-import { CELL_LABEL_STYLE } from "../../../utils/ui/styles/CoolTableStyles.jsx";
+import { CELL_LABEL_STYLE } from "../../../utils/ui/styles/CoolStyles.jsx";
 import { SETTING_LABEL_STYLE } from "../../../utils/ui/styles/SettingStyles.jsx";
 import {
   KEY_TILES_TEST_COMBINE_RESULTS as KEY_TILES_TEST_COMBINE_RESULTS_SETTING,

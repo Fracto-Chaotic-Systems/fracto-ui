@@ -23,7 +23,7 @@ import {
 import { click_point_chart } from "../../../utils/render/PatternsUtils.jsx";
 import { copy_json } from "../../../utils/Dom.jsx";
 import { CoolStyles } from "../../../utils/ui/CoolImports.jsx";
-import { CELL_LABEL_STYLE } from "../../../utils/ui/styles/CoolTableStyles.jsx";
+import { CELL_LABEL_STYLE } from "../../../utils/ui/styles/CoolStyles.jsx";
 import * as Math from "mathjs";
 
 const ChartWrapper = styled(CoolStyles.InlineBlock)`
