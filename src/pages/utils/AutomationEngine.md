@@ -19,10 +19,39 @@ registering operation definitions with `AutomationOperationRegistry`.
    itself has no logging or rendering dependency.
 
 An operation receives the current task, its indexes, the shared runtime, an
-`AbortSignal`, and `report_progress(progress)`. It must resolve only when its
-work is complete. A task must never be marked complete merely because work was
-queued; the operation should await the actual completion signal from its
-worker or server before resolving.
+`AbortSignal`, and `report_progress(progress, detail)`. It must resolve only
+when its work is complete. A task must never be marked complete merely because
+work was queued; the operation should await the actual completion signal from
+its worker or server before resolving. `detail` is optional, operation-specific
+display data and is exposed by the engine as `operation_detail`.
+
+## Shared operation library
+
+Reusable operations belong in `AutomationOperationLibrary.jsx`, rather than in
+a page-specific adapter. Each operation is exposed by a factory such as
+`create_countdown_operation(options)`, which returns an unnamespaced operation
+definition. Register it into the caller's registry with
+`AutomationOperationLibrary.register(registry, definition)`. Registration adds
+the `common_` namespace, preventing a common operation from colliding with a
+page operation. Use `common_automation_operation_name()` when a task needs the
+qualified identifier; do not concatenate the prefix in a page adapter. The
+task's operation list must use the resulting namespaced identifier (for
+example, `common_countdown`).
+
+Shared operations must remain independent of React and page state. They may
+use the operation context, report progress or detail, and honor the supplied
+`AbortSignal`, but ownership of lifecycle state remains with
+`AutomationEngine`. A new common operation should include a factory, JSDoc
+describing its options and completion contract, and direct tests covering
+normal completion and cancellation where applicable.
+
+The countdown operation is the first shared implementation. It reports the
+remaining whole seconds as operation detail, waits between each count, and
+clears its detail when complete. Non-finite duration values are treated as a
+zero-length countdown, and a missing signal is supported for simple callers;
+engine-managed executions still receive cancellation through `AbortSignal`.
+Tiles uses it as `common_countdown`; other pages can register and sequence the
+same operation without importing Tiles code.
 
 ## Tiles integration boundary
 

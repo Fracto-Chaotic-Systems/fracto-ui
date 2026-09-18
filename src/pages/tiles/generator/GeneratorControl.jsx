@@ -170,6 +170,8 @@ export class GeneratorControl extends Component {
   static propTypes = {
     automation_mode: PropTypes.string.isRequired,
     automation_jobs: PropTypes.array,
+    automation_engine_state: PropTypes.object,
+    on_automation_engine_action: PropTypes.func,
     automation_tasks: PropTypes.array,
     coverage_data: PropTypes.array.isRequired,
     heat_map_buffer: PropTypes.array,
@@ -189,6 +191,8 @@ export class GeneratorControl extends Component {
     heat_map_buffer: [],
     automation_tasks: [],
     automation_jobs: [],
+    automation_engine_state: null,
+    on_automation_engine_action: () => {},
     selected_levels: [],
     on_coverage_levels_changed: () => {},
     on_save_automation_tasks: () => {},
@@ -226,6 +230,8 @@ export class GeneratorControl extends Component {
     const {
       automation_mode,
       automation_jobs,
+      automation_engine_state,
+      on_automation_engine_action,
       automation_tasks,
       coverage_data,
       heat_map_buffer,
@@ -378,6 +384,13 @@ export class GeneratorControl extends Component {
         : automation_mode === PAGE_MODE_AUTOMATION
           ? KEY_TILES_GENERATOR_AUTOMATION_RUN
           : null;
+    const on_automation_toggle = () => {
+      if (automation_engine_state) {
+        on_automation_engine_action(automation_running ? "stop" : "start");
+        return;
+      }
+      on_automation_running_change(!automation_running);
+    };
     const automation_action = automation_action_key ? (
       <CoolStyles.InlineBlock
         style={{
@@ -430,9 +443,7 @@ export class GeneratorControl extends Component {
                   ? KEY_TILES_GENERATOR_AUTOMATION_STOP
                   : KEY_TILES_GENERATOR_AUTOMATION_GO,
               )}
-              on_click={() =>
-                on_automation_running_change(!automation_running)
-              }
+              on_click={on_automation_toggle}
               primary={true}
             />
             <label

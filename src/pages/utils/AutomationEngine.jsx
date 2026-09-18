@@ -95,8 +95,8 @@ export class AutomationOperationRegistry {
  * @property {number} operation_attempt One-based attempt number.
  * @property {Object} runtime Mutable caller-owned runtime context.
  * @property {AbortSignal} [signal] Optional cancellation signal.
- * @property {(progress: number) => AutomationEngineState} report_progress
- * Report progress for the current operation, between 0 and 1.
+ * @property {(progress: number, detail?: *) => AutomationEngineState} report_progress
+ * Report progress and optional operation detail for the current operation.
  */
 
 /**
@@ -130,6 +130,7 @@ export class AutomationOperationRegistry {
  * @property {*} error Last execution error, if the engine failed.
  * @property {*} result Last completion result, if available.
  * @property {number} operation_progress Progress of the current operation, 0-1.
+ * @property {*} operation_detail Optional operation-specific display detail.
  * @property {number} operations_completed Number of completed operations.
  * @property {number} operations_total Total operations in the job.
  * @property {number} progress Overall job progress, 0-1.
@@ -209,6 +210,7 @@ export class AutomationEngine {
       error: null,
       result: null,
       operation_progress: 0,
+      operation_detail: null,
       operations_completed: 0,
       operations_total: this.operations_total,
       progress: this.operations_total ? 0 : 1,
@@ -288,6 +290,7 @@ export class AutomationEngine {
             operation_index: 0,
             operation_attempt: 0,
             current_operation: null,
+            operation_detail: null,
           });
           continue;
         }
@@ -378,6 +381,7 @@ export class AutomationEngine {
         current_operation: operation_name,
         operation_attempt: retry_count + 1,
         operation_progress: 0,
+        operation_detail: null,
       });
       const context = this.get_context();
       this.callbacks.on_operation_started?.(context);
@@ -388,6 +392,7 @@ export class AutomationEngine {
           this.set_state({
             result,
             current_operation: null,
+            operation_detail: null,
           });
           return;
         }
@@ -398,6 +403,7 @@ export class AutomationEngine {
           operation_attempt: 0,
           current_operation: null,
           operation_progress: 0,
+          operation_detail: null,
           operations_completed: this.state.operations_completed + 1,
           progress: this.get_progress_for_completed_operation(
             0,
@@ -478,9 +484,10 @@ export class AutomationEngine {
    * Report progress for the currently running operation.
    *
    * @param {number} progress Operation progress between 0 and 1.
+   * @param {*} [detail] Optional operation-specific display detail.
    * @returns {AutomationEngineState} Updated engine state.
    */
-  report_operation_progress = (progress) => {
+  report_operation_progress = (progress, detail = null) => {
     if (
       this.state.state !== AUTOMATION_ENGINE_RUNNING ||
       !this.state.current_operation
@@ -490,6 +497,7 @@ export class AutomationEngine {
     const operation_progress = Math.max(0, Math.min(1, Number(progress) || 0));
     this.set_state({
       operation_progress,
+      operation_detail: detail,
       progress: this.get_progress_for_completed_operation(operation_progress),
     });
     this.callbacks.on_progress?.(this.get_state(), this.get_context());
@@ -645,6 +653,7 @@ export class AutomationEngine {
       state: AUTOMATION_ENGINE_COMPLETE,
       current_operation: null,
       operation_progress: 0,
+      operation_detail: null,
       operations_completed: this.operations_total,
       progress: 1,
     });

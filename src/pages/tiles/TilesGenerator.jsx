@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, createRef } from "react";
 
 import { MainStyles as styles } from "../../styles/MainStyles.jsx";
 import AppText from "../../AppText.jsx";
@@ -24,6 +24,16 @@ import { get_visible_coverage_levels } from "../assets/AssetsUtils.jsx";
 import TilesBackend from "../../backend/TilesBackend.jsx";
 import AppSettings from "../../AppSettings.jsx";
 import { KEY_TILES_GENERATOR_FRAME_SETTINGS } from "../../settings/TilesSettings.jsx";
+import {
+  AutomationEngine,
+  AUTOMATION_ENGINE_IDLE,
+  AUTOMATION_ENGINE_PAUSED,
+  AUTOMATION_ENGINE_RUNNING,
+} from "../utils/AutomationEngine.jsx";
+import {
+  create_tiles_operation_registry,
+  normalize_tiles_automation_job,
+} from "./generator/TilesAutomationOperations.jsx";
 
 /**
  * The operation names persisted in a manager task are intentionally aligned
@@ -61,6 +71,11 @@ export const create_automation_task = (generate_code, level, short_codes) => ({
 });
 
 export class TilesGenerator extends Component {
+  /** Engine instance is created once the automation operation registry exists. */
+  automation_engine = null;
+  operations_ref = createRef();
+  automation_persistence_chain = Promise.resolve();
+
   state = {
     coverage_data: [],
     heat_map_buffer: [],
@@ -78,6 +93,178 @@ export class TilesGenerator extends Component {
     automation_running: false,
     stop_after_current_job: false,
     automation_mode: PAGE_MODE_OPERATOR,
+    automation_engine_state: null,
+  };
+
+  /**
+   * Attach the page-owned automation engine and mirror its read-only state.
+   *
+   * The engine remains an imperative coordinator owned by this page. Child
+   * components will receive only the mirrored state and explicit callbacks.
+   *
+   * @param {Object|null} engine AutomationEngine instance, when available.
+   */
+  set_automation_engine = (engine) => {
+    this.automation_engine = engine;
+    this.setState({
+      automation_engine_state: engine ? engine.get_state() : null,
+    });
+  };
+
+  /**
+   * Mirror an engine state callback for presentation components.
+   *
+   * @param {Object} automation_engine_state Latest engine state snapshot.
+   */
+  on_automation_engine_state = (automation_engine_state) => {
+    this.setState({
+      automation_engine_state,
+      automation_running:
+        automation_engine_state?.state === AUTOMATION_ENGINE_RUNNING,
+    });
+  };
+
+  /** Queue a database update so checkpoint writes remain ordered. */
+  persist_automation_update = (updates) => {
+    const job_id = this.state.active_automation_job?.id;
+    if (!job_id) {
+      return this.automation_persistence_chain;
+    }
+    this.automation_persistence_chain = this.automation_persistence_chain
+      .then(() => TilesBackend.update_automation(job_id, updates))
+      .catch((error) => {
+        console.error("tiles automation state persistence failed", error);
+      });
+    return this.automation_persistence_chain;
+  };
+
+  /** Persist the latest operation-boundary checkpoint. */
+  persist_automation_checkpoint = (checkpoint) => {
+    return this.persist_automation_update({
+      state: "running",
+      checkpoint,
+    });
+  };
+
+  /** Persist a terminal or paused engine state in the shared job record. */
+  persist_automation_state = (automation_engine_state, state) => {
+    this.on_automation_engine_state(automation_engine_state);
+    return this.persist_automation_update({
+      state,
+      run_stop: state === "running" ? null : new Date().toISOString(),
+    });
+  };
+
+  /** Handle a completed job and decide whether the next ready job may run. */
+  on_automation_engine_complete = (automation_engine_state) => {
+    const persist = this.persist_automation_state(
+      automation_engine_state,
+      "complete",
+    );
+    persist.then(() => {
+      const continue_automation =
+        !this.state.stop_after_current_job &&
+        this.state.automation_mode === PAGE_MODE_AUTOMATION;
+      this.automation_engine = null;
+      this.setState(
+        {
+          active_automation_job: null,
+          automation_engine_state: null,
+          automation_running: false,
+        },
+        () => {
+          if (continue_automation) {
+            this.on_automation_running_change(true);
+          }
+        },
+      );
+    });
+  };
+
+  /** Create an engine for a claimed Tiles job and attach its task executor. */
+  create_automation_engine = (job) => {
+    const normalized_job = normalize_tiles_automation_job(job);
+    const registry = create_tiles_operation_registry(
+      (context) => {
+        const operations = this.operations_ref.current;
+        if (!operations) {
+          return Promise.reject(
+            new Error("Tiles operations are not mounted for automation"),
+          );
+        }
+        return operations.execute_automation_task(context.task);
+      },
+      { prepare_frame: this.prepare_automation_frame },
+    );
+    const engine = new AutomationEngine(
+      normalized_job,
+      registry,
+      {
+        on_state_change: this.on_automation_engine_state,
+        on_progress: this.on_automation_engine_state,
+        on_checkpoint: this.persist_automation_checkpoint,
+        on_paused: (state) => this.persist_automation_state(state, "paused"),
+        on_resumed: (state) => this.persist_automation_state(state, "running"),
+        on_complete: this.on_automation_engine_complete,
+        on_failed: (state) => this.persist_automation_state(state, "failed"),
+        on_cancelled: (state) => this.persist_automation_state(state, "paused"),
+      },
+      { page: "tiles_generator" },
+    );
+    this.set_automation_engine(engine);
+    return engine;
+  };
+
+  /** Apply a task's saved frame settings before its countdown begins. */
+  prepare_automation_frame = (context) => {
+    const task_data = context.task?.data || context.task || {};
+    const current_settings = AppSettings.get(KEY_TILES_GENERATOR_FRAME_SETTINGS);
+    const next_settings = {
+      ...current_settings,
+      ...(task_data.focal_point
+        ? { focal_point: { ...task_data.focal_point } }
+        : {}),
+      ...(task_data.scope !== undefined ? { scope: task_data.scope } : {}),
+    };
+    AppSettings.on_settings_changed({
+      [KEY_TILES_GENERATOR_FRAME_SETTINGS]: next_settings,
+    });
+    return { focal_point: next_settings.focal_point, scope: next_settings.scope };
+  };
+
+  /**
+   * Central action boundary for automation controls.
+   *
+   * The engine-specific actions are threaded through now; step 7 will route
+   * the controls to the actual engine methods once the instance is created.
+   *
+   * @param {string} action Requested engine action.
+   */
+  on_automation_engine_action = (action) => {
+    const state = this.automation_engine?.get_state();
+    if (action === "stop") {
+      if (state?.state === AUTOMATION_ENGINE_RUNNING) {
+        this.automation_engine.pause();
+      } else {
+        this.on_automation_running_change(false);
+      }
+      return;
+    }
+    if (action !== "start") {
+      if (action === "cancel") {
+        this.automation_engine?.cancel();
+      }
+      return;
+    }
+    if (state?.state === AUTOMATION_ENGINE_PAUSED) {
+      this.automation_engine.resume();
+      return;
+    }
+    if (state?.state === AUTOMATION_ENGINE_IDLE) {
+      this.automation_engine.start();
+      return;
+    }
+    this.on_automation_running_change(true);
   };
 
   componentDidMount() {
@@ -103,8 +290,10 @@ export class TilesGenerator extends Component {
       const response = await TilesBackend.claim_automation_job();
       this.setState({ active_automation_job: response.job || null });
       await this.refresh_automation_jobs();
+      return response.job || null;
     } catch (error) {
       console.error("tiles automation job claim failed", error);
+      return null;
     }
   };
 
@@ -211,6 +400,8 @@ export class TilesGenerator extends Component {
       <GeneratorControl
         automation_mode={this.state.automation_mode}
         automation_jobs={this.state.automation_jobs}
+        automation_engine_state={this.state.automation_engine_state}
+        on_automation_engine_action={this.on_automation_engine_action}
         automation_running={this.state.automation_running}
         stop_after_current_job={this.state.stop_after_current_job}
         automation_tasks={this.state.automation_tasks}
@@ -234,14 +425,16 @@ export class TilesGenerator extends Component {
     if (!coverage_data) {
       return [];
     }
-    if (automation_mode !== PAGE_MODE_OPERATOR) {
+    if (automation_mode === PAGE_MODE_MANAGER) {
       return [];
     }
     return (
       <GeneratorOperations
+        ref={this.operations_ref}
         automation_mode={this.state.automation_mode}
-        short_codes={short_codes}
-        generate_code={generate_code}
+        short_codes={automation_mode === PAGE_MODE_OPERATOR ? short_codes : []}
+        generate_code={automation_mode === PAGE_MODE_OPERATOR ? generate_code : ""}
+        automation_engine_state={this.state.automation_engine_state}
       />
     );
   };
@@ -259,6 +452,12 @@ export class TilesGenerator extends Component {
   };
 
   on_automation_mode_change = (automation_mode) => {
+    if (
+      automation_mode !== PAGE_MODE_AUTOMATION &&
+      this.automation_engine?.get_state().state === AUTOMATION_ENGINE_RUNNING
+    ) {
+      this.automation_engine.pause();
+    }
     this.setState(
       {
         automation_mode,
@@ -277,26 +476,25 @@ export class TilesGenerator extends Component {
 
   on_automation_running_change = async (automation_running) => {
     if (!automation_running) {
+      if (
+        this.automation_engine?.get_state().state === AUTOMATION_ENGINE_RUNNING
+      ) {
+        this.automation_engine.pause();
+      }
       this.setState({ automation_running: false });
       return;
     }
-    if (this.state.active_automation_job) {
-      this.setState({ automation_running: true });
-      return;
-    }
-    try {
-      const response = await TilesBackend.claim_automation_job();
-      if (!response.job) {
+    if (!this.automation_engine) {
+      const job =
+        this.state.active_automation_job || (await this.claim_automation_job());
+      if (!job) {
         console.warn("no ready Tiles automation job is available");
         return;
       }
-      this.setState({
-        active_automation_job: response.job,
-        automation_running: true,
-      });
-      await this.refresh_automation_jobs();
-    } catch (error) {
-      console.error("tiles automation job claim failed", error);
+      this.create_automation_engine(job);
+    }
+    if (this.automation_engine.get_state().state === AUTOMATION_ENGINE_IDLE) {
+      await this.automation_engine.start();
     }
   };
 

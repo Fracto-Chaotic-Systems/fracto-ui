@@ -19,6 +19,19 @@ export class TilesBackend {
       body: JSON.stringify({ automation_type: "tiles" }),
     });
 
+  /** Updates state, checkpoint, or task data for a claimed Tiles job.
+   * @param {number|string} id Automation record id.
+   * @param {Object} updates Allowed automation update fields.
+   * @returns {Promise<Object>} Update response.
+   * @calledBy TilesGenerator
+   */
+  static update_automation = (id, updates) =>
+    request_json(`${service_origin(FRACTO_TILES_PORT)}/automation/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updates),
+    });
+
   /** Fetches Tiles automation jobs oldest-first for automation mode.
    * @returns {Promise<Object>} Response containing the ordered job records.
    * @calledBy TilesGenerator
