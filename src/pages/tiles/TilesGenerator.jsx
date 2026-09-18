@@ -22,6 +22,8 @@ import GeneratorControl, {
 import GeneratorOperations from "./generator/GeneratorOperations.jsx";
 import { get_visible_coverage_levels } from "../assets/AssetsUtils.jsx";
 import TilesBackend from "../../backend/TilesBackend.jsx";
+import AppSettings from "../../AppSettings.jsx";
+import { KEY_TILES_GENERATOR_FRAME_SETTINGS } from "../../settings/TilesSettings.jsx";
 
 /**
  * The operation names persisted in a manager task are intentionally aligned
@@ -156,12 +158,18 @@ export class TilesGenerator extends Component {
     if (!automation_tasks.length) {
       return;
     }
+    const frame_settings = AppSettings.get(KEY_TILES_GENERATOR_FRAME_SETTINGS);
+    const tasks = automation_tasks.map((task) => ({
+      ...task,
+      focal_point: { ...frame_settings.focal_point },
+      scope: frame_settings.scope,
+    }));
     try {
       const result = await TilesBackend.create_automation({
         title: `tiles_${Date.now()}`,
         automation_type: "tiles",
         state: "ready",
-        tasks: automation_tasks,
+        tasks,
       });
       console.log("tiles automation saved", result.id);
       this.setState({ automation_tasks: [] });
@@ -267,8 +275,29 @@ export class TilesGenerator extends Component {
     );
   };
 
-  on_automation_running_change = (automation_running) => {
-    this.setState({ automation_running });
+  on_automation_running_change = async (automation_running) => {
+    if (!automation_running) {
+      this.setState({ automation_running: false });
+      return;
+    }
+    if (this.state.active_automation_job) {
+      this.setState({ automation_running: true });
+      return;
+    }
+    try {
+      const response = await TilesBackend.claim_automation_job();
+      if (!response.job) {
+        console.warn("no ready Tiles automation job is available");
+        return;
+      }
+      this.setState({
+        active_automation_job: response.job,
+        automation_running: true,
+      });
+      await this.refresh_automation_jobs();
+    } catch (error) {
+      console.error("tiles automation job claim failed", error);
+    }
   };
 
   on_stop_after_current_job_change = (stop_after_current_job) => {
