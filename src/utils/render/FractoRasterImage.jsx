@@ -10,6 +10,8 @@ import {
 import FractoColors from "./FractoColors";
 import TilesBackend from "../../backend/TilesBackend.jsx";
 
+let render_request_sequence = 0;
+
 export const fill_canvas = async (
   ctx,
   width_px,
@@ -21,6 +23,7 @@ export const fill_canvas = async (
   opacity = 1.0,
   data_endpoint = "canvas_buffer",
 ) => {
+  const request_id = ++render_request_sequence;
   // console.log('fill_canvas', {
   //    ctx,
   //    width_px,
@@ -49,7 +52,12 @@ export const fill_canvas = async (
     );
     FractoColors.buffer_to_canvas(result.canvas_buffer, ctx, 1, opacity);
     if (on_plan_complete) {
-      on_plan_complete(result.canvas_buffer, ctx);
+      on_plan_complete(result.canvas_buffer, ctx, {
+        request_id,
+        width_px,
+        focal_point: copy_json(focal_point),
+        scope,
+      });
     }
     AppSettings.on_settings_changed({
       [KEY_NAVIGATOR_DISABLED]: false,

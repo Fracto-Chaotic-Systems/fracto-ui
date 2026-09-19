@@ -83,9 +83,19 @@ export class AppSettings {
             break;
           case TYPE_OBJECT:
           case TYPE_ARRAY: {
-            const object_str = JSON.stringify(new_settings[key]);
+            const persist_value =
+              Array.isArray(key_settings.persist_fields) &&
+              new_settings[key] &&
+              typeof new_settings[key] === "object"
+                ? Object.fromEntries(
+                    key_settings.persist_fields
+                      .filter((field) => field in new_settings[key])
+                      .map((field) => [field, new_settings[key][field]]),
+                  )
+                : new_settings[key];
+            const object_str = JSON.stringify(persist_value);
             if (object_str.length < 1000) {
-              localStorage.setItem(key, JSON.stringify(new_settings[key]));
+              localStorage.setItem(key, object_str);
             }
             break;
           }

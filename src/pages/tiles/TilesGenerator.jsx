@@ -47,6 +47,11 @@ export const AUTOMATION_TASK_CODES = {
   [GENERATOR_CODE_INTERIOR]: "interior",
 };
 const AUTOMATION_TASK_WARNING_INTERVAL = 10000;
+const AUTOMATION_FRAME_SETTINGS_TIMEOUT_MS = 30000;
+
+/** Return a UTC timestamp in the format accepted by MySQL DATETIME. */
+const mysql_datetime_now = () =>
+  new Date().toISOString().slice(0, 19).replace("T", " ");
 
 /**
  * @typedef {Object} AutomationTask
@@ -54,6 +59,9 @@ const AUTOMATION_TASK_WARNING_INTERVAL = 10000;
  * or interior.
  * @property {number} level Tile level targeted by the operation.
  * @property {string[]} short_codes Ordered shortcodes included in the task.
+ * @property {{x: number, y: number}} focal_point Frame location captured
+ * when the task was created.
+ * @property {number} scope Frame scope captured when the task was created.
  */
 
 /**
@@ -62,12 +70,24 @@ const AUTOMATION_TASK_WARNING_INTERVAL = 10000;
  * @param {string} generate_code Internal coverage operation code.
  * @param {number} level Tile level targeted by the operation.
  * @param {string[]} short_codes Shortcodes included in the task.
+ * @param {Object} [frame_settings] Frame settings to capture for this task.
  * @returns {AutomationTask} Normalized manager task.
  */
-export const create_automation_task = (generate_code, level, short_codes) => ({
+export const create_automation_task = (
+  generate_code,
+  level,
+  short_codes,
+  frame_settings = {},
+) => ({
   generate_code: AUTOMATION_TASK_CODES[generate_code] || generate_code,
   level,
   short_codes: [...short_codes],
+  ...(frame_settings.focal_point
+    ? { focal_point: { ...frame_settings.focal_point } }
+    : {}),
+  ...(frame_settings.scope !== undefined
+    ? { scope: frame_settings.scope }
+    : {}),
 });
 
 export class TilesGenerator extends Component {
@@ -151,7 +171,7 @@ export class TilesGenerator extends Component {
     this.on_automation_engine_state(automation_engine_state);
     return this.persist_automation_update({
       state,
-      run_stop: state === "running" ? null : new Date().toISOString(),
+      run_stop: state === "running" ? null : mysql_datetime_now(),
     });
   };
 
@@ -215,21 +235,81 @@ export class TilesGenerator extends Component {
     return engine;
   };
 
+  /**
+   * Wait for the Navigator's subscribed frame-settings value to match a task.
+   *
+   * @param {string} settings_key Navigator frame-settings AppSettings key.
+   * @param {Object} expected_settings Focal point and scope to verify.
+   * @returns {Promise<Object>} Published Navigator frame settings.
+   */
+  wait_for_navigator_frame_settings = (settings_key, expected_settings) => {
+    const expected_focal_point = expected_settings.focal_point || {};
+    const is_matching_render = (value) => {
+      const focal_point = value?.focal_point || {};
+      const render_complete = value?.render_complete;
+      return (
+        focal_point.x === expected_focal_point.x &&
+        focal_point.y === expected_focal_point.y &&
+        value?.scope === expected_settings.scope &&
+        render_complete?.focal_point?.x === expected_focal_point.x &&
+        render_complete?.focal_point?.y === expected_focal_point.y &&
+        render_complete.scope === expected_settings.scope
+      );
+    };
+    const current_settings = AppSettings.get(settings_key);
+    if (is_matching_render(current_settings)) {
+      return Promise.resolve(current_settings);
+    }
+    return new Promise((resolve, reject) => {
+      let subscription_key;
+      const timeout = setTimeout(() => {
+        if (subscription_key) {
+          AppSettings.unsubscribe(subscription_key);
+        }
+        reject(new Error("Navigator frame settings update timed out"));
+      }, AUTOMATION_FRAME_SETTINGS_TIMEOUT_MS);
+      const on_settings_changed = (key, value) => {
+        if (key === settings_key && is_matching_render(value)) {
+          clearTimeout(timeout);
+          AppSettings.unsubscribe(subscription_key);
+          resolve(value);
+        }
+      };
+      subscription_key = AppSettings.subscribe(
+        settings_key,
+        on_settings_changed,
+      );
+      AppSettings.on_settings_changed({
+        [settings_key]: expected_settings,
+      });
+    });
+  };
+
   /** Apply a task's saved frame settings before its countdown begins. */
-  prepare_automation_frame = (context) => {
+  prepare_automation_frame = async (context) => {
     const task_data = context.task?.data || context.task || {};
-    const current_settings = AppSettings.get(KEY_TILES_GENERATOR_FRAME_SETTINGS);
+    // NavigatorCoverage subscribes to this exact key through its splitter
+    // configuration. Updating it here moves the Navigator to the task's frame
+    // before the shared countdown and tile operation begin.
+    const navigator_frame_settings_key =
+      TILE_GENERATOR_SPLITTER_KEYS.frame_settings_key;
+    const current_settings = AppSettings.get(navigator_frame_settings_key);
     const next_settings = {
       ...current_settings,
+      render_complete: null,
       ...(task_data.focal_point
         ? { focal_point: { ...task_data.focal_point } }
         : {}),
       ...(task_data.scope !== undefined ? { scope: task_data.scope } : {}),
     };
-    AppSettings.on_settings_changed({
-      [KEY_TILES_GENERATOR_FRAME_SETTINGS]: next_settings,
-    });
-    return { focal_point: next_settings.focal_point, scope: next_settings.scope };
+    const published_settings = await this.wait_for_navigator_frame_settings(
+      navigator_frame_settings_key,
+      next_settings,
+    );
+    return {
+      focal_point: published_settings.focal_point,
+      scope: published_settings.scope,
+    };
   };
 
   /**
@@ -350,8 +430,12 @@ export class TilesGenerator extends Component {
     const frame_settings = AppSettings.get(KEY_TILES_GENERATOR_FRAME_SETTINGS);
     const tasks = automation_tasks.map((task) => ({
       ...task,
-      focal_point: { ...frame_settings.focal_point },
-      scope: frame_settings.scope,
+      // Preserve the frame captured when the manager selected this task.
+      // The fallback keeps older in-memory tasks valid during this transition.
+      focal_point: {
+        ...(task.focal_point || frame_settings.focal_point),
+      },
+      scope: task.scope ?? frame_settings.scope,
     }));
     try {
       const result = await TilesBackend.create_automation({
@@ -372,8 +456,16 @@ export class TilesGenerator extends Component {
       return tile.short_code;
     });
     if (this.state.automation_mode === PAGE_MODE_MANAGER) {
+      const frame_settings = AppSettings.get(
+        KEY_TILES_GENERATOR_FRAME_SETTINGS,
+      );
       this.add_automation_task(
-        create_automation_task(generate_code, level, short_codes),
+        create_automation_task(
+          generate_code,
+          level,
+          short_codes,
+          frame_settings,
+        ),
       );
       return;
     }
@@ -420,14 +512,13 @@ export class TilesGenerator extends Component {
   };
 
   operations_block = () => {
-    const { automation_mode, coverage_data, short_codes, generate_code } =
-      this.state;
-    if (!coverage_data) {
-      return [];
-    }
+    const { automation_mode, short_codes, generate_code } = this.state;
     if (automation_mode === PAGE_MODE_MANAGER) {
       return [];
     }
+    // FractoTileCoverage clears coverage_data while a new heat map is being
+    // fetched. Keep this component mounted during that transient state so an
+    // active automation task does not reject as "unmounted".
     return (
       <GeneratorOperations
         ref={this.operations_ref}

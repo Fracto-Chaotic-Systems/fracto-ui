@@ -96,6 +96,7 @@ export const APP_TILES_SETTINGS = {
     default_value: DEFAULT_FRAME_SETTINGS,
     description: "Frame settings of the tiles generator page",
     persist: true,
+    persist_fields: ["focal_point", "scope", "aspect_ratio"],
   },
   [KEY_TILES_GENERATOR_SPLITTER_POS]: {
     data_type: TYPE_NUMBER,

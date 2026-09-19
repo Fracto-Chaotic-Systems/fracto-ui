@@ -66,8 +66,18 @@ export class NavigatorField extends Component {
       bounding_rect.width,
       bounding_rect.height,
     );
+    // The layout is measured once before the Navigator container has a real
+    // size. Do not publish a negative/zero canvas width during that pass;
+    // doing so can overwrite the frame settings and start an invalid raster
+    // request before the first valid dimensions arrive.
+    if (!Number.isFinite(largest_width_px) || largest_width_px <= 0) {
+      return;
+    }
     const width_px =
       Math.floor(largest_width_px / IMAGE_SIZE_DELTA) * IMAGE_SIZE_DELTA;
+    if (width_px <= 0) {
+      return;
+    }
     if (frame_settings.focal_point) {
       let copy_frame_settings = copy_json(frame_settings);
       copy_frame_settings.width_px = width_px;
@@ -198,16 +208,29 @@ export class NavigatorField extends Component {
     });
   };
 
-  on_plan_complete = (canvas_buffer, ctx) => {
+  on_plan_complete = (canvas_buffer, ctx, request_frame_settings = {}) => {
     const { frame_settings, frame_settings_key } = this.props;
     const { width_px } = this.state;
+    // A previous raster plan may finish after automation has already moved
+    // the Navigator to its next task. Preserve the latest AppSettings frame
+    // coordinates instead of allowing that stale plan to move the Navigator
+    // backwards.
+    const latest_frame_settings =
+      AppSettings.get(frame_settings_key) || frame_settings;
     AppSettings.on_settings_changed({
       [frame_settings_key]: {
-        focal_point: frame_settings.focal_point,
-        scope: frame_settings.scope,
+        focal_point:
+          latest_frame_settings.focal_point || frame_settings.focal_point,
+        scope: latest_frame_settings.scope ?? frame_settings.scope,
         canvas_buffer,
         width_px,
         ctx,
+        render_complete: {
+          request_id: request_frame_settings.request_id,
+          width_px: request_frame_settings.width_px ?? width_px,
+          focal_point: request_frame_settings.focal_point,
+          scope: request_frame_settings.scope,
+        },
       },
     });
   };
