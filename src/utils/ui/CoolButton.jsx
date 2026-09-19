@@ -56,6 +56,7 @@ export class CoolButton extends Component {
     disabled: PropTypes.bool,
     title: PropTypes.string,
     aria_label: PropTypes.string,
+    icon_style: PropTypes.object,
   };
 
   static defaultProps = {
@@ -68,10 +69,24 @@ export class CoolButton extends Component {
   get_button_component = () => BasicButton;
 
   render() {
-    const { content, on_click, style, primary, disabled, title, aria_label } =
-      this.props;
+    const {
+      content,
+      on_click,
+      style,
+      primary,
+      disabled,
+      title,
+      aria_label,
+      icon_style,
+    } = this.props;
     const ButtonComponent = this.get_button_component();
     const is_icon_button = ButtonComponent === IconButton;
+    const rendered_content =
+      is_icon_button && React.isValidElement(content) && icon_style
+        ? React.cloneElement(content, {
+            style: { ...content.props.style, ...icon_style },
+          })
+        : content;
     let new_style = JSON.parse(JSON.stringify(style)) || {};
     if (primary) {
       new_style.color = "white";
@@ -89,7 +104,7 @@ export class CoolButton extends Component {
           title={title}
           aria-label={aria_label}
         >
-          {content}
+          {rendered_content}
         </ButtonComponent>
       );
     } else {
@@ -103,7 +118,7 @@ export class CoolButton extends Component {
         title={title}
         aria-label={aria_label}
       >
-        {content}
+        {rendered_content}
       </ButtonComponent>
     );
   }

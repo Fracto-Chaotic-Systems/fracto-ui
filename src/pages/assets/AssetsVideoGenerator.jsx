@@ -194,6 +194,14 @@ export class AssetsVideoGenerator extends Component {
     if (!selected_video || !changes || typeof changes !== "object") {
       return;
     }
+    const current_meta =
+      selected_video.meta && typeof selected_video.meta === "object"
+        ? selected_video.meta
+        : {};
+    const title_updates_description =
+      typeof changes.title === "string" &&
+      (current_meta.description === selected_video.title ||
+        !current_meta.description);
     const next_video = {
       ...selected_video,
       ...changes,
@@ -204,6 +212,13 @@ export class AssetsVideoGenerator extends Component {
         ? { script: { ...(selected_video.script || {}), ...changes.script } }
         : {}),
     };
+    if (title_updates_description && !changes.meta?.description) {
+      next_video.meta = {
+        ...current_meta,
+        ...(changes.meta || {}),
+        description: changes.title,
+      };
+    }
     const next_video_script = {
       ...next_video,
       asset_id: next_video.title,
@@ -220,6 +235,7 @@ export class AssetsVideoGenerator extends Component {
   };
 
   apply_video_snapshot = (video) => {
+    const { video_records } = this.state;
     const video_script = {
       ...video,
       asset_id: video.title,
@@ -227,9 +243,15 @@ export class AssetsVideoGenerator extends Component {
       fps: video.meta?.frame_rate || DEFAULT_VIDEO_FPS,
       steps: video.script?.steps || video.steps || [],
     };
+    const refreshed_video_records = Array.isArray(video_records)
+      ? video_records.map((record) =>
+          record.id === video.id ? { ...record, ...video } : record,
+        )
+      : video_records;
     this.setState({
       selected_video: video,
       video_script,
+      video_records: refreshed_video_records,
     });
     AppSettings.on_settings_changed({
       [KEY_VIDEO_GENERATOR_CURRENT_VIDEO]: video_script,
