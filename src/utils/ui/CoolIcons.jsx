@@ -59,11 +59,11 @@ export const copy = (
 );
 
 // Compact icons used by CoolTree for folders and normalized JSON values.
-const tree_icon = (path, view_box = "0 0 24 24") => (
+const tree_icon = (path, view_box = "0 0 24 24", size = 14) => (
   <svg
     viewBox={view_box}
-    width="14"
-    height="14"
+    width={size}
+    height={size}
     fill="currentColor"
     aria-hidden="true"
     focusable="false"
@@ -74,6 +74,18 @@ const tree_icon = (path, view_box = "0 0 24 24") => (
 
 export const tree_folder_icon = tree_icon(
   "M3 5h7l2 2h9v12H3V5zm2 2v10h14V9h-8l-2-2H5z",
+  "0 0 24 24",
+  20,
+);
+export const tree_folder_closed_icon = tree_icon(
+  "M3 5h7l2 2h9v12H3V5z",
+  "0 0 24 24",
+  20,
+);
+export const tree_folder_open_icon = tree_icon(
+  "M3 6h7l2 2h9l-2 11H3V6zm2 2v9h12.3l1.3-7H11l-2-2H5z",
+  "0 0 24 24",
+  20,
 );
 export const tree_object_icon = tree_icon(
   "M6 3h12v3h3v12h-3v3H6v-3H3V6h3V3zm2 2v2H5v10h3v2h8v-2h3V7h-3V5H8z",
