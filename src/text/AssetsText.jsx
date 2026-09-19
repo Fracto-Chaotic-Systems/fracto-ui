@@ -39,6 +39,7 @@ export const KEY_VIDEO_ASSETS_OPERATIONS = `${VIDEO_FOLDER}/operations`;
 export const KEY_VIDEO_ASSETS_ADD_STEP = `${VIDEO_FOLDER}/add_step`;
 export const KEY_VIDEO_ASSETS_CONFIRM = `${VIDEO_FOLDER}/confirm`;
 export const KEY_VIDEO_ASSETS_CANCEL = `${VIDEO_FOLDER}/cancel`;
+export const KEY_VIDEO_ASSETS_STEP = `${VIDEO_FOLDER}/step`;
 
 export const KEY_LORE_CONTENT_TITLE = `${LORE_FOLDER}/content_title`;
 export const KEY_LORE_CONTENT_MODIFIED = `${LORE_FOLDER}/content_modified`;
@@ -77,6 +78,7 @@ export const APP_ASSETS_TEXT = {
   [KEY_VIDEO_ASSETS_ADD_STEP]: "add step",
   [KEY_VIDEO_ASSETS_CONFIRM]: "confirm",
   [KEY_VIDEO_ASSETS_CANCEL]: "cancel",
+  [KEY_VIDEO_ASSETS_STEP]: "step",
   [KEY_IMAGE_ASSETS_GENERATE]: "image generator",
   [KEY_IMAGE_ASSETS_DETECT]: "artifact detector",
   [KEY_ASSETS_GALLERY]: "gallery of artifacts",

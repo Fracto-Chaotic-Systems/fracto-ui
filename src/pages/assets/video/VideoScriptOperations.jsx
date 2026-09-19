@@ -5,12 +5,15 @@ import AppText from "../../../AppText.jsx";
 import CoolStyles from "../../../utils/ui/styles/CoolStyles.jsx";
 import CoolButton from "../../../utils/ui/CoolButton.jsx";
 import CoolInputText from "../../../utils/ui/CoolInputText.jsx";
+import { BACKGROUND_FIELD_GRADIENT } from "../../../styles/BackgroundStyles.jsx";
+import FractoRasterImage from "../../../utils/render/FractoRasterImage.jsx";
 import AppSettings from "../../../AppSettings.jsx";
 import { KEY_VIDEO_GENERATOR_FRAME_SETTINGS } from "../../../settings/AssetsSettings.jsx";
 import {
   KEY_VIDEO_ASSETS_ADD_STEP,
   KEY_VIDEO_ASSETS_CANCEL,
   KEY_VIDEO_ASSETS_CONFIRM,
+  KEY_VIDEO_ASSETS_STEP,
 } from "../../../text/AssetsText.jsx";
 
 const SCRIPT_HEADER_HEIGHT_PX = 35;
@@ -36,6 +39,8 @@ export class VideoScriptOperations extends Component {
     title_draft: this.props.selected_video?.title || "",
   };
 
+  steps_scroll_ref = React.createRef();
+
   componentDidMount() {
     this.setState({
       frame_settings_subscription: AppSettings.subscribe(
@@ -56,6 +61,19 @@ export class VideoScriptOperations extends Component {
   componentDidUpdate(prevProps) {
     if (prevProps.selected_video !== this.props.selected_video) {
       this.initialize_first_step();
+      const previous_step_count = this.get_script_for_video(
+        prevProps.selected_video,
+      ).steps?.length || 0;
+      const current_step_count = this.get_script_steps().length;
+      if (current_step_count > previous_step_count) {
+        requestAnimationFrame(() => {
+          const scroll_element = this.steps_scroll_ref.current;
+          if (scroll_element) {
+            scroll_element.scrollLeft =
+              scroll_element.scrollWidth - scroll_element.clientWidth;
+          }
+        });
+      }
       if (!this.state.editing_title) {
         const next_title = this.props.selected_video?.title || "";
         if (next_title !== this.state.title_draft) {
@@ -99,8 +117,7 @@ export class VideoScriptOperations extends Component {
     this.setState({ frame_settings });
   };
 
-  get_script = () => {
-    const { selected_video } = this.props;
+  get_script_for_video = (selected_video) => {
     let script = selected_video?.script;
     if (typeof script === "string") {
       try {
@@ -111,6 +128,9 @@ export class VideoScriptOperations extends Component {
     }
     return script && typeof script === "object" ? script : {};
   };
+
+  get_script = () =>
+    this.get_script_for_video(this.props.selected_video);
 
   get_script_steps = () => {
     const script = this.get_script();
@@ -185,6 +205,81 @@ export class VideoScriptOperations extends Component {
     });
   };
 
+  render_step = (step, step_index, content_height_px) => {
+    return (
+      <CoolStyles.Block
+        key={`video-script-step-${step_index}`}
+        style={{
+          boxSizing: "border-box",
+          flex: "0 0 120px",
+          width: "120px",
+          height: `${Math.max(0, content_height_px - 6)}px`,
+          border: "1.5px solid #888888",
+          borderRadius: "10px",
+          backgroundColor: "white",
+          boxShadow: "0.25rem 0.25rem 0.5rem rgba(0, 0, 0, 0.2)",
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "space-between",
+          paddingBottom: "0.5rem",
+          margin: "3px 0 3px 3px",
+          marginRight: "0.25rem",
+        }}
+      >
+        <FractoRasterImage
+          width_px={120}
+          focal_point={step.focal_point}
+          scope={step.scope}
+          aspect_ratio={1.0}
+        />
+        <CoolStyles.InlineBlock
+          style={{
+            fontSize: "1.5rem",
+            fontWeight: "bold",
+          }}
+        >
+          {`${AppText.get(KEY_VIDEO_ASSETS_STEP)} ${step_index + 1}`}
+        </CoolStyles.InlineBlock>
+      </CoolStyles.Block>
+    );
+  };
+
+  render_steps = () => {
+    const { width_px, height_px } = this.props;
+    const steps = this.get_script_steps();
+    const content_height_px = Math.max(
+      0,
+      height_px - SCRIPT_HEADER_HEIGHT_PX,
+    );
+    return (
+      <CoolStyles.Block
+        ref={this.steps_scroll_ref}
+        style={{
+          width: `${width_px}px`,
+          height: `${content_height_px}px`,
+          overflowX: "auto",
+          overflowY: "hidden",
+          background: BACKGROUND_FIELD_GRADIENT,
+        }}
+      >
+        <CoolStyles.Block
+          style={{
+            display: "flex",
+            width: "max-content",
+            minWidth: "100%",
+            height: `${content_height_px}px`,
+          }}
+        >
+          {steps.map((step, step_index) =>
+            this.render_step(step, step_index, content_height_px),
+          )}
+        </CoolStyles.Block>
+      </CoolStyles.Block>
+    );
+  };
+
   render() {
     const { width_px, height_px, selected_video } = this.props;
     const { editing_title, title_draft } = this.state;
@@ -241,6 +336,7 @@ export class VideoScriptOperations extends Component {
           />
           {title}
         </CoolStyles.Block>
+        {this.render_steps()}
       </CoolStyles.Block>
     );
   }
