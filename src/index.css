@@ -23,6 +23,6 @@ h1 {
 
 /* Keep React Complex Tree arrows on the same line as icons and labels. */
 .rct-tree-item-arrow {
-  display: inline;
+  display: inline-block !important;
   margin-right: 5px !important;
 }
