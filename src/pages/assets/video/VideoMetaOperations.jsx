@@ -1,11 +1,13 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 
+import AppText from "../../../AppText.jsx";
 import CoolStyles from "../../../utils/ui/styles/CoolStyles.jsx";
 import CoolTabs from "../../../utils/ui/CoolTabs.jsx";
 import VideoMetaData from "./VideoMetaData.jsx";
 import VideoMetaPath from "./VideoMetaPath.jsx";
 import VideoMetaPreview from "./VideoMetaPreview.jsx";
+import { KEY_VIDEO_ASSETS_PATHS } from "../../../text/AssetsText.jsx";
 
 const TAB_HEADER_HEIGHT_PX = 32;
 
@@ -84,7 +86,7 @@ export class VideoMetaOperations extends Component {
         }}
       >
         <CoolTabs
-          labels={["meta", "path", "preview"]}
+          labels={["meta", AppText.get(KEY_VIDEO_ASSETS_PATHS), "preview"]}
           tab_index={tab_index}
           on_tab_select={this.on_tab_select}
           selected_content={selected_content}

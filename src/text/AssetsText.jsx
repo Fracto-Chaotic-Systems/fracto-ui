@@ -36,10 +36,14 @@ export const KEY_VIDEO_ASSETS_OPEN_VIDEO = `${VIDEO_FOLDER}/open_video`;
 export const KEY_VIDEO_ASSETS_UNDO = `${VIDEO_FOLDER}/undo`;
 export const KEY_VIDEO_ASSETS_REDO = `${VIDEO_FOLDER}/redo`;
 export const KEY_VIDEO_ASSETS_OPERATIONS = `${VIDEO_FOLDER}/operations`;
+export const KEY_VIDEO_ASSETS_PATHS = `${VIDEO_FOLDER}/paths`;
 export const KEY_VIDEO_ASSETS_ADD_STEP = `${VIDEO_FOLDER}/add_step`;
 export const KEY_VIDEO_ASSETS_CONFIRM = `${VIDEO_FOLDER}/confirm`;
 export const KEY_VIDEO_ASSETS_CANCEL = `${VIDEO_FOLDER}/cancel`;
 export const KEY_VIDEO_ASSETS_STEP = `${VIDEO_FOLDER}/step`;
+export const KEY_VIDEO_ASSETS_PATH_RE = `${VIDEO_FOLDER}/path_re`;
+export const KEY_VIDEO_ASSETS_PATH_IM = `${VIDEO_FOLDER}/path_im`;
+export const KEY_VIDEO_ASSETS_PATH_SCOPE = `${VIDEO_FOLDER}/path_scope`;
 
 export const KEY_LORE_CONTENT_TITLE = `${LORE_FOLDER}/content_title`;
 export const KEY_LORE_CONTENT_MODIFIED = `${LORE_FOLDER}/content_modified`;
@@ -75,10 +79,14 @@ export const APP_ASSETS_TEXT = {
   [KEY_VIDEO_ASSETS_UNDO]: "undo",
   [KEY_VIDEO_ASSETS_REDO]: "redo",
   [KEY_VIDEO_ASSETS_OPERATIONS]: "video operations",
+  [KEY_VIDEO_ASSETS_PATHS]: "paths",
   [KEY_VIDEO_ASSETS_ADD_STEP]: "add step",
   [KEY_VIDEO_ASSETS_CONFIRM]: "confirm",
   [KEY_VIDEO_ASSETS_CANCEL]: "cancel",
   [KEY_VIDEO_ASSETS_STEP]: "step",
+  [KEY_VIDEO_ASSETS_PATH_RE]: "re",
+  [KEY_VIDEO_ASSETS_PATH_IM]: "im",
+  [KEY_VIDEO_ASSETS_PATH_SCOPE]: "scope",
   [KEY_IMAGE_ASSETS_GENERATE]: "image generator",
   [KEY_IMAGE_ASSETS_DETECT]: "artifact detector",
   [KEY_ASSETS_GALLERY]: "gallery of artifacts",
