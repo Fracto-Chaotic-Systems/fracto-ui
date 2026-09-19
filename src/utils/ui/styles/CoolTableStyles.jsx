@@ -59,18 +59,20 @@ export class CoolTableStyles {
   static TableHeader = styled(CoolStyles.TableHeader)`
     background-color: #dddddd;
     padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 1;
   `;
   static HeaderCell = styled(CoolStyles.TableCell)`
     ${CoolStyles.noselect}
   `;
 
   static TableBody = styled(CoolStyles.TableBody)`
-    overflow: auto;
     padding-top: 27px;
   `;
 
   static TableBodyNoHeader = styled(CoolStyles.TableBody)`
-    overflow: auto;
+    overflow: visible;
   `;
 
   static TableScrollable = styled(CoolStyles.Block)`

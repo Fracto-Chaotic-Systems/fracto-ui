@@ -118,49 +118,58 @@ export class VideoControlBlock extends Component {
           display: "flex",
           alignItems: "flex-start",
           marginLeft: "0.5rem",
-          maxHeight: open_table_height_px
-            ? `${open_table_height_px}px`
-            : undefined,
-          overflowY: open_table_height_px ? "auto" : undefined,
         }}
       >
-        <CoolTable
-          columns={[
-            {
-              id: "updated",
-              label: "updated",
-              type: CELL_TYPE_TIME_AGO,
-              width_px: 120,
-              max_width_px: 120,
-              align: CELL_ALIGN_CENTER,
-              style: { fontStyle: "italic" },
-            },
-            {
-              id: "steps",
-              label: "steps",
-              type: CELL_TYPE_NUMBER,
-              width_px: 60,
-              max_width_px: 60,
-              align: CELL_ALIGN_CENTER,
-            },
-            {
-              id: "description",
-              label: "description",
-              type: CELL_TYPE_TEXT,
-              width_px: 240,
-              max_width_px: 240,
-              align: CELL_ALIGN_LEFT,
-            },
-          ]}
-          data={records}
-          options={[TABLE_CAN_SELECT]}
-          selected_row={this.state.selected_video_row}
-          on_select_row={(row) => {
-            this.setState({ selected_video_row: row });
-            on_video_select(sorted_video_records[row]);
+        <CoolStyles.InlineBlock
+          style={{
+            maxHeight: open_table_height_px
+              ? `${open_table_height_px}px`
+              : undefined,
           }}
-          table_style={{ backgroundColor: "white" }}
-        />
+        >
+          <CoolTable
+            columns={[
+              {
+                id: "updated",
+                label: "updated",
+                type: CELL_TYPE_TIME_AGO,
+                width_px: 120,
+                max_width_px: 120,
+                align: CELL_ALIGN_CENTER,
+                style: { fontStyle: "italic" },
+              },
+              {
+                id: "steps",
+                label: "steps",
+                type: CELL_TYPE_NUMBER,
+                width_px: 60,
+                max_width_px: 60,
+                align: CELL_ALIGN_CENTER,
+              },
+              {
+                id: "description",
+                label: "description",
+                type: CELL_TYPE_TEXT,
+                width_px: 240,
+                max_width_px: 240,
+                align: CELL_ALIGN_LEFT,
+              },
+            ]}
+            data={records}
+            options={[TABLE_CAN_SELECT]}
+            selected_row={this.state.selected_video_row}
+            on_select_row={(row) => {
+              this.setState({ selected_video_row: row });
+              on_video_select(sorted_video_records[row]);
+            }}
+            table_style={{
+              backgroundColor: "white",
+              maxHeight: open_table_height_px
+                ? `${open_table_height_px}px`
+                : undefined,
+            }}
+          />
+        </CoolStyles.InlineBlock>
         <CoolStyles.InlineBlock
           onClick={on_close_video_list}
           title="close"
