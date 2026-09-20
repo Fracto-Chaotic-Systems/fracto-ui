@@ -31,8 +31,10 @@
     "react-complex-tree": "^2.6.4",
     "react-dom": "^19.2.0",
     "react-magnifier": "^3.0.4",
+    "react-markdown": "^10.1.0",
     "react-router-dom": "^7.18.2",
     "react-time-ago": "^7.3.5",
+    "remark-gfm": "^4.0.1",
     "styled-components": "^6.3.11"
   },
   "devDependencies": {

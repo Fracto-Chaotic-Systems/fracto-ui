@@ -22,6 +22,12 @@ export class AdminBackend {
     request_json(
       `${ADMIN_ORIGIN}/version?service_name=${encodeURIComponent(service_name)}`,
     );
+
+  /** Fetches the allowlisted social communication documents.
+   * @returns {Promise<{documents: Array}>} Root social Markdown documents.
+   * @calledBy AdminSocial componentDidMount.
+   */
+  static social = () => request_json(`${ADMIN_ORIGIN}/social`);
 }
 
 export default AdminBackend;

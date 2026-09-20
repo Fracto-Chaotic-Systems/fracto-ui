@@ -12,12 +12,17 @@ import {
   ADMIN_SETTINGS,
   ADMIN_STATUS,
   ADMIN_COMMITS,
+  ADMIN_SOCIAL,
   KEY_ADMIN_SECTION,
   KEY_ADMIN_SPLITTER_POS_PX,
 } from "../settings/AdminSettings.jsx";
 
 import AppText from "../AppText.jsx";
-import { KEY_IDENTIFY_TITLE, KEY_COMMITS_TITLE } from "../text/AdminText.jsx";
+import {
+  KEY_IDENTIFY_TITLE,
+  KEY_COMMITS_TITLE,
+  KEY_ADMIN_SOCIAL_TITLE,
+} from "../text/AdminText.jsx";
 import {
   KEY_SIDEBAR_LOGS,
   KEY_SIDEBAR_OVERVIEW,
@@ -31,6 +36,7 @@ import AdminStatus from "./admin/AdminStatus.jsx";
 import AdminIdentify from "./admin/AdminIdentify.jsx";
 import AdminLogs from "./admin/AdminLogs.jsx";
 import AdminCommits from "./admin/AdminCommits.jsx";
+import AdminSocial from "./admin/AdminSocial.jsx";
 import { KEY_VIEWPORT_DIMENSIONS } from "../settings/RootSettings.jsx";
 
 const SIDEBAR_LIST = [
@@ -49,6 +55,11 @@ const SIDEBAR_LIST = [
     title_key: KEY_COMMITS_TITLE,
     section_code: ADMIN_COMMITS,
     right_pane: <AdminCommits />,
+  },
+  {
+    title_key: KEY_ADMIN_SOCIAL_TITLE,
+    section_code: ADMIN_SOCIAL,
+    right_pane: <AdminSocial />,
   },
   { section_code: SIDEBAR_BREAKER },
   {

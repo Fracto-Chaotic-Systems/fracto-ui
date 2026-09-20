@@ -11,6 +11,10 @@ export const KEY_SERVER_ROOT_PROMPT = `${ADMIN_FOLDER}/server_root_prompt`;
 export const KEY_OPERATOR_CONSENT_LABEL = `${ADMIN_FOLDER}/operator_consent`;
 export const KEY_IDENTIFY_TITLE = `${ADMIN_FOLDER}/identify`;
 export const KEY_COMMITS_TITLE = `${ADMIN_FOLDER}/commits`;
+export const KEY_ADMIN_SOCIAL_TITLE = `${ADMIN_FOLDER}/social`;
+export const KEY_ADMIN_SOCIAL_PAGE_TITLE = `${ADMIN_FOLDER}/social_page_title`;
+export const KEY_ADMIN_SOCIAL_LOADING = `${ADMIN_FOLDER}/social_loading`;
+export const KEY_ADMIN_SOCIAL_ERROR = `${ADMIN_FOLDER}/social_error`;
 export const KEY_ADMIN_OVERVIEW = `${ADMIN_FOLDER}/admin_overview`;
 export const KEY_ADMIN_SETTINGS = `${ADMIN_FOLDER}/admin_settings`;
 export const KEY_ADMIN_STATUS = `${ADMIN_FOLDER}/admin_status`;
@@ -47,6 +51,10 @@ export const KEY_ADMIN_IDENTITY_FORM_SUBTITLE = `${ADMIN_FOLDER}/identity_form_s
 export const APP_ADMIN_TEXT = {
   [KEY_IDENTIFY_TITLE]: "Identify",
   [KEY_COMMITS_TITLE]: "Commits",
+  [KEY_ADMIN_SOCIAL_TITLE]: "social",
+  [KEY_ADMIN_SOCIAL_PAGE_TITLE]: "social media",
+  [KEY_ADMIN_SOCIAL_LOADING]: "loading social documents...",
+  [KEY_ADMIN_SOCIAL_ERROR]: "unable to load social documents:",
   [KEY_OPERATOR_NAME_LABEL]: "Operator Name",
   [KEY_OPERATOR_NAME_PROMPT]: "may be phony",
   [KEY_OPERATOR_EMAIL_LABEL]: "Operator Email",
