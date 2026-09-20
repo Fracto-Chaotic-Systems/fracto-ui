@@ -37,7 +37,6 @@ import AdminIdentify from "./admin/AdminIdentify.jsx";
 import AdminLogs from "./admin/AdminLogs.jsx";
 import AdminCommits from "./admin/AdminCommits.jsx";
 import AdminSocial from "./admin/AdminSocial.jsx";
-import { KEY_VIEWPORT_DIMENSIONS } from "../settings/RootSettings.jsx";
 
 const SIDEBAR_LIST = [
   {
@@ -122,12 +121,8 @@ export class Admin extends Component {
     const section = SIDEBAR_LIST.find(
       (item) => item.section_code === section_code,
     );
-    const dimensions = AppSettings.get(KEY_VIEWPORT_DIMENSIONS);
-    const pane_style = {
-      height: `${dimensions.height}px`,
-    };
     return (
-      <styles.PaneWrapper style={pane_style}>
+      <styles.PaneWrapper style={{ height: "100%" }}>
         {section ? section.right_pane : ""}
       </styles.PaneWrapper>
     );

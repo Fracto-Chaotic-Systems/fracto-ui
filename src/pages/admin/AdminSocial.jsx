@@ -30,6 +30,11 @@ const build_document_tree = (documents) => {
       const is_document = segment_index === segments.length - 1;
       const node_key = `${parent_key}/${segment}`;
       if (is_document) {
+        if (segment.toLowerCase() === "readme.md" && segments.length > 1) {
+          const folder = folder_nodes.get(parent_key);
+          if (folder) folder.document_id = document.id;
+          return;
+        }
         parent_nodes.push({
           key: document.id,
           title: document.title,
@@ -56,9 +61,19 @@ const build_document_tree = (documents) => {
   return root_nodes;
 };
 
+const find_document_tree_key = (nodes, document_id) => {
+  for (const node of nodes) {
+    if (node.document_id === document_id) return node.key;
+    const child_key = find_document_tree_key(node.children || [], document_id);
+    if (child_key) return child_key;
+  }
+  return null;
+};
+
 const styles_social = {
   content: {
     display: "flex",
+    width: "100%",
     height: "calc(100vh - 75px)",
     minHeight: 0,
     overflow: "hidden",
@@ -195,7 +210,7 @@ export class AdminSocial extends Component {
     );
   };
 
-  render_document_link = ({ href, children, ...link_props }) => {
+  render_document_link = ({ href, children, node, ...link_props }) => {
     const document_id = this.resolve_document_link(href);
     const is_external_link = /^(?:https?:)?\/\//i.test(href || "");
     return (
@@ -236,6 +251,10 @@ export class AdminSocial extends Component {
     const selected_document =
       documents.find((document) => document.id === selected_document_id) ||
       documents[0];
+    const selected_tree_key = find_document_tree_key(
+      document_tree,
+      selected_document?.id,
+    );
     return (
       <CoolStyles.Block style={{ height: "100%", overflow: "hidden" }}>
         <styles.SectionTitle>
@@ -258,7 +277,7 @@ export class AdminSocial extends Component {
                 <CoolTree
                   tree_data={document_tree}
                   default_selected_keys={
-                    selected_document?.id ? [selected_document.id] : []
+                    selected_tree_key ? [selected_tree_key] : []
                   }
                   default_expanded_keys={["social/Bluesky"]}
                   on_select={this.on_tree_select}

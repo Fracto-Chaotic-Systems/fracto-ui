@@ -34,7 +34,7 @@ export class MarkdownStyles {
     color: #333333;
     font-size: 1.35rem;
     line-height: 1.25;
-    margin: 2rem 0 0.75rem;
+    margin: 1rem 0 0.5rem;
     letter-spacing: 0.25px;
   `;
 
@@ -42,11 +42,12 @@ export class MarkdownStyles {
     color: #444444;
     font-size: 1.1rem;
     line-height: 1.3;
-    margin: 1.5rem 0 0.5rem;
+    margin: 0.75rem 0 0.25rem;
   `;
 
   static Paragraph = styled.p`
-    margin: 0 0 1rem;
+    margin: 0 0 0.25rem;
+    line-height: 1.25;
   `;
 
   static UnorderedList = styled.ul`
@@ -60,11 +61,10 @@ export class MarkdownStyles {
   `;
 
   static ListItem = styled.li`
-    margin: 0.25rem 0;
   `;
 
   static Blockquote = styled.blockquote`
-    margin: 1rem 0;
+    margin: 0.5rem;
     padding: 0.5rem 1rem;
     border-left: 4px solid #bbbbbb;
     color: #555555;
@@ -91,14 +91,23 @@ export class MarkdownStyles {
 
   static CodeBlock = styled.pre`
     overflow-x: auto;
-    margin: 1rem 0;
+    margin: 0.5rem;
     padding: 0.75rem 1rem;
     border-radius: 4px;
     background-color: #eeeeee;
     color: #333333;
     font-family: monospace;
     font-size: 0.85rem;
-    line-height: 1.4;
+    line-height: 1.2;
+
+    & > code {
+      display: block;
+      padding: 0;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      line-height: inherit;
+    }
   `;
 
   static Table = styled.table`

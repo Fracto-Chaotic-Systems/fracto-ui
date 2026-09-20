@@ -263,6 +263,14 @@ const render_tree_item_title = ({ item, title, context }) => {
       : JSON_TYPE_COLORS.key;
   const icon_element = icon ? (
     <CoolTreeStyles.IconWrapper
+      onClick={
+        item.isFolder && context?.arrowProps?.onClick
+          ? (event) => {
+              event.stopPropagation();
+              context.arrowProps.onClick(event);
+            }
+          : undefined
+      }
       style={{
         color: icon_color,
         width: item.isFolder ? "20px" : "16px",
@@ -500,9 +508,16 @@ export class CoolTree extends Component {
   };
 
   resize_observer = null;
+  measurement_frame = null;
 
   componentDidMount() {
     this.update_parent_bounds();
+    if (typeof requestAnimationFrame === "function") {
+      this.measurement_frame = requestAnimationFrame(() => {
+        this.measurement_frame = null;
+        this.update_parent_bounds();
+      });
+    }
     const parent_element = this.state.tree_ref.current?.parentElement;
     if (typeof ResizeObserver !== "undefined" && parent_element) {
       this.resize_observer = new ResizeObserver(this.update_parent_bounds);
@@ -513,6 +528,10 @@ export class CoolTree extends Component {
   }
 
   componentWillUnmount() {
+    if (this.measurement_frame !== null) {
+      cancelAnimationFrame(this.measurement_frame);
+      this.measurement_frame = null;
+    }
     if (this.resize_observer) {
       this.resize_observer.disconnect();
     } else {
