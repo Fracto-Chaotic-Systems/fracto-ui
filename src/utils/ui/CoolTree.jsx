@@ -249,6 +249,7 @@ const render_tree_item_title = ({ item, title, context }) => {
     node_depth > 0 ? { marginLeft: leaf_margin_left } : undefined;
   const folder_style =
     node_depth > 0 ? { marginLeft: `${node_depth * 16}px` } : undefined;
+  const label_style = context?.isSelected ? { fontWeight: "bold" } : undefined;
   const is_expanded = context?.isExpanded ?? item?.isExpanded;
   const icon = item.isFolder
     ? is_expanded
@@ -284,9 +285,9 @@ const render_tree_item_title = ({ item, title, context }) => {
       <span style={item.isFolder ? folder_style : undefined}>
         {icon_element}
         {item.isFolder ? (
-          <CoolTreeStyles.Label>{title}</CoolTreeStyles.Label>
+          <CoolTreeStyles.Label style={label_style}>{title}</CoolTreeStyles.Label>
         ) : (
-          <CoolTreeStyles.LeafLabel style={leaf_style}>
+          <CoolTreeStyles.LeafLabel style={{ ...leaf_style, ...label_style }}>
             {title}
           </CoolTreeStyles.LeafLabel>
         )}
@@ -297,14 +298,16 @@ const render_tree_item_title = ({ item, title, context }) => {
     return (
       <span style={folder_style}>
         {icon_element}
-        <CoolTreeStyles.Label>{node.label}</CoolTreeStyles.Label>
+        <CoolTreeStyles.Label style={label_style}>{node.label}</CoolTreeStyles.Label>
       </span>
     );
   }
   return (
     <span>
       {icon_element}
-      <CoolTreeStyles.LeafLabel style={{ marginLeft: leaf_margin_left }}>
+      <CoolTreeStyles.LeafLabel
+        style={{ marginLeft: leaf_margin_left, ...label_style }}
+      >
         {node.label}
       </CoolTreeStyles.LeafLabel>
       <CoolTreeStyles.ValueSeparator style={{ color: "#777777" }}>
@@ -634,6 +637,10 @@ export class CoolTree extends Component {
     const item_container_props = children
       ? context.itemContainerWithChildrenProps
       : context.itemContainerWithoutChildrenProps;
+    const interactive_style = {
+      ...(context.interactiveElementProps.style || {}),
+      ...(item.isFolder ? { cursor: "pointer" } : {}),
+    };
     const guide_lines = Array.from({ length: depth }, (_, index) => {
       const left = `${index * 16 + 8}px`;
       return (
@@ -657,7 +664,7 @@ export class CoolTree extends Component {
       >
         <CoolTreeStyles.InteractiveItem
           {...context.interactiveElementProps}
-          style={context.interactiveElementProps.style}
+          style={interactive_style}
         >
           {guide_lines}
           {title}

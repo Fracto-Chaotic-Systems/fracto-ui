@@ -10,9 +10,14 @@ export class CoolTreeStyles {
   `;
 
   static Label = styled.span`
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     color: black;
     font-weight: normal;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     font-style: italic;
     vertical-align: top;
   `;
@@ -40,6 +45,10 @@ export class CoolTreeStyles {
   static InteractiveItem = styled.div`
     position: relative;
     line-height: 20px;
+
+    &:hover {
+      background-color: #f2f2f2;
+    }
   `;
 
   static HierarchyGuide = styled.span`

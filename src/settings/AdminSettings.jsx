@@ -13,6 +13,7 @@ export const KEY_ADMIN_SPLITTER_POS_PX = `${ADMIN_FOLDER}/splitter_pos_px`;
 export const KEY_ADMIN_SECTION = `${ADMIN_FOLDER}/admin_section`;
 export const KEY_ADMIN_LOGS_SHOW_TIMESTAMPS = `${ADMIN_FOLDER}/logs_show_timestamps`;
 export const KEY_ADMIN_COMMITS_REPOSITORY_VISIBILITY = `${ADMIN_FOLDER}/commits_repository_visibility`;
+export const KEY_ADMIN_SOCIAL_DOCUMENT = `${ADMIN_FOLDER}/social_document`;
 
 export const KEY_ID_OPERATOR_NAME = `${IDENTITY_FOLDER}/id_operator_name`;
 export const KEY_ID_OPERATOR_EMAIL = `${IDENTITY_FOLDER}/id_operator_email`;
@@ -49,6 +50,12 @@ export const APP_ADMIN_SETTINGS = {
     data_type: TYPE_OBJECT,
     default_value: {},
     description: "visible repositories on the admin commits page",
+    persist: true,
+  },
+  [KEY_ADMIN_SOCIAL_DOCUMENT]: {
+    data_type: TYPE_STRING,
+    default_value: "",
+    description: "selected document on the admin social page",
     persist: true,
   },
   [KEY_ID_OPERATOR_NAME]: {

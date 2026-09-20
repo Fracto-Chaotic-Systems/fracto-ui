@@ -2,10 +2,13 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import styled from "styled-components";
 
 import { MainStyles as styles } from "../../styles/MainStyles.jsx";
 import AppText from "../../AppText.jsx";
 import AdminBackend from "../../backend/AdminBackend.jsx";
+import AppSettings from "../../AppSettings.jsx";
+import { KEY_ADMIN_SOCIAL_DOCUMENT } from "../../settings/AdminSettings.jsx";
 import {
   KEY_ADMIN_SOCIAL_ERROR,
   KEY_ADMIN_SOCIAL_LOADING,
@@ -81,6 +84,16 @@ const styles_social = {
   },
 };
 
+const SocialTreeWrapper = styled(CoolStyles.Block)`
+  height: 100%;
+  min-height: 0;
+
+  .rct-tree-item-button,
+  [data-rct-item-interactive="true"] {
+    cursor: pointer;
+  }
+`;
+
 const markdown_components = {
   h1: MarkdownStyles.Heading1,
   h2: MarkdownStyles.Heading2,
@@ -130,9 +143,15 @@ export class AdminSocial extends Component {
       const documents = Array.isArray(result?.documents)
         ? result.documents
         : [];
+      const saved_document_id = AppSettings.get(KEY_ADMIN_SOCIAL_DOCUMENT);
+      const selected_document_id = documents.some(
+        (document) => document.id === saved_document_id,
+      )
+        ? saved_document_id
+        : documents[0]?.id || null;
       this.setState({
         documents,
-        selected_document_id: documents[0]?.id || null,
+        selected_document_id,
         loading: false,
         error: null,
       });
@@ -143,6 +162,60 @@ export class AdminSocial extends Component {
 
   select_document = (selected_document_id) => {
     this.setState({ selected_document_id });
+    AppSettings.on_settings_changed({
+      [KEY_ADMIN_SOCIAL_DOCUMENT]: selected_document_id,
+    });
+  };
+
+  resolve_document_link = (href) => {
+    const { documents, selected_document_id } = this.state;
+    if (!href || /^(?:[a-z]+:|\/\/|#)/i.test(href)) return null;
+    const selected_document = documents.find(
+      (document) => document.id === selected_document_id,
+    );
+    const current_segments = (selected_document?.path || "")
+      .split("/")
+      .filter(Boolean);
+    current_segments.pop();
+    const target_segments = href.split("#")[0].split("/");
+    const resolved_segments = [...current_segments];
+    target_segments.forEach((segment) => {
+      if (!segment || segment === ".") return;
+      if (segment === "..") {
+        resolved_segments.pop();
+      } else {
+        resolved_segments.push(segment);
+      }
+    });
+    const resolved_path = resolved_segments.join("/").toLowerCase();
+    return (
+      documents.find(
+        (document) => document.path.toLowerCase() === resolved_path,
+      )?.id || null
+    );
+  };
+
+  render_document_link = ({ href, children, ...link_props }) => {
+    const document_id = this.resolve_document_link(href);
+    const is_external_link = /^(?:https?:)?\/\//i.test(href || "");
+    return (
+      <MarkdownStyles.Link
+        {...link_props}
+        href={href}
+        target={is_external_link ? "_blank" : link_props.target}
+        rel={is_external_link ? "noopener noreferrer" : link_props.rel}
+        onClick={
+          document_id
+            ? (event) => {
+                event.preventDefault();
+                this.select_document(document_id);
+              }
+            : link_props.onClick
+        }
+      >
+        {children}
+      </MarkdownStyles.Link>
+    );
   };
 
   on_tree_select = (selected_keys, context) => {
@@ -179,23 +252,30 @@ export class AdminSocial extends Component {
           </styles.CenteredBlock>
         )}
         {!loading && !error && (
-          <styles.ContentWrapper style={styles_social.content}>
+            <styles.ContentWrapper style={styles_social.content}>
             <styles.ContentWrapper style={styles_social.list}>
-              <CoolTree
-                tree_data={document_tree}
-                default_selected_keys={selected_document?.id ? [selected_document.id] : []}
-                default_expanded_keys={["social/Bluesky"]}
-                on_select={this.on_tree_select}
-                selectable
-                searchable={false}
-                show_live_description={false}
-                tree_label="social documents"
-              />
+              <SocialTreeWrapper>
+                <CoolTree
+                  tree_data={document_tree}
+                  default_selected_keys={
+                    selected_document?.id ? [selected_document.id] : []
+                  }
+                  default_expanded_keys={["social/Bluesky"]}
+                  on_select={this.on_tree_select}
+                  selectable
+                  searchable={false}
+                  show_live_description={false}
+                  tree_label="social documents"
+                />
+              </SocialTreeWrapper>
             </styles.ContentWrapper>
             <styles.ContentWrapper style={styles_social.document}>
               <MarkdownStyles.Document style={styles_social.document_text}>
                 <ReactMarkdown
-                  components={markdown_components}
+                  components={{
+                    ...markdown_components,
+                    a: this.render_document_link,
+                  }}
                   remarkPlugins={[remarkGfm]}
                 >
                   {selected_document?.content || ""}
