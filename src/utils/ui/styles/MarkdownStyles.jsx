@@ -94,8 +94,8 @@ export class MarkdownStyles {
     margin: 1rem 0;
     padding: 0.75rem 1rem;
     border-radius: 4px;
-    background-color: #222222;
-    color: #eeeeee;
+    background-color: #eeeeee;
+    color: #333333;
     font-family: monospace;
     font-size: 0.85rem;
     line-height: 1.4;

@@ -13,6 +13,45 @@ import {
 } from "../../text/AdminText.jsx";
 import CoolStyles from "../../utils/ui/styles/CoolStyles.jsx";
 import MarkdownStyles from "../../utils/ui/styles/MarkdownStyles.jsx";
+import CoolTree from "../../utils/ui/CoolTree.jsx";
+
+const build_document_tree = (documents) => {
+  const root_nodes = [];
+  const folder_nodes = new Map();
+  documents.forEach((document) => {
+    const document_path = document.path || document.filename || document.id;
+    const segments = document_path.split("/").filter(Boolean);
+    let parent_nodes = root_nodes;
+    let parent_key = "social";
+    segments.forEach((segment, segment_index) => {
+      const is_document = segment_index === segments.length - 1;
+      const node_key = `${parent_key}/${segment}`;
+      if (is_document) {
+        parent_nodes.push({
+          key: document.id,
+          title: document.title,
+          isLeaf: true,
+          document_id: document.id,
+        });
+        return;
+      }
+      let folder = folder_nodes.get(node_key);
+      if (!folder) {
+        folder = {
+          key: node_key,
+          title: segment,
+          isLeaf: false,
+          children: [],
+        };
+        folder_nodes.set(node_key, folder);
+        parent_nodes.push(folder);
+      }
+      parent_nodes = folder.children;
+      parent_key = node_key;
+    });
+  });
+  return root_nodes;
+};
 
 const styles_social = {
   content: {
@@ -24,21 +63,10 @@ const styles_social = {
   list: {
     width: "240px",
     flex: "0 0 240px",
-    overflowY: "auto",
+    overflow: "hidden",
     padding: "0.5rem",
     backgroundColor: "#eeeeee",
     borderRight: "1px solid #cccccc",
-  },
-  list_item: {
-    display: "block",
-    width: "100%",
-    padding: "0.6rem 0.5rem",
-    border: 0,
-    textAlign: "left",
-    fontSize: "0.9rem",
-    letterSpacing: "0.5px",
-    cursor: "pointer",
-    backgroundColor: "transparent",
   },
   document: {
     flex: "1 1 auto",
@@ -117,8 +145,21 @@ export class AdminSocial extends Component {
     this.setState({ selected_document_id });
   };
 
+  on_tree_select = (selected_keys, context) => {
+    if (!selected_keys.length) {
+      return;
+    }
+    const selected_document = (context.items || [])
+      .map((item) => item.document_id)
+      .find(Boolean);
+    if (selected_document) {
+      this.select_document(selected_document);
+    }
+  };
+
   render() {
     const { documents, selected_document_id, loading, error } = this.state;
+    const document_tree = build_document_tree(documents);
     const selected_document =
       documents.find((document) => document.id === selected_document_id) ||
       documents[0];
@@ -140,24 +181,16 @@ export class AdminSocial extends Component {
         {!loading && !error && (
           <styles.ContentWrapper style={styles_social.content}>
             <styles.ContentWrapper style={styles_social.list}>
-              {documents.map((document) => {
-                const selected = document.id === selected_document?.id;
-                return (
-                  <button
-                    key={document.id}
-                    type="button"
-                    onClick={() => this.select_document(document.id)}
-                    style={{
-                      ...styles_social.list_item,
-                      fontWeight: selected ? "bold" : "normal",
-                      color: selected ? "#000000" : "#555555",
-                      backgroundColor: selected ? "#ffffff" : "transparent",
-                    }}
-                  >
-                    {document.title}
-                  </button>
-                );
-              })}
+              <CoolTree
+                tree_data={document_tree}
+                default_selected_keys={selected_document?.id ? [selected_document.id] : []}
+                default_expanded_keys={["social/Bluesky"]}
+                on_select={this.on_tree_select}
+                selectable
+                searchable={false}
+                show_live_description={false}
+                tree_label="social documents"
+              />
             </styles.ContentWrapper>
             <styles.ContentWrapper style={styles_social.document}>
               <MarkdownStyles.Document style={styles_social.document_text}>

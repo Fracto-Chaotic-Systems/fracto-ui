@@ -46,6 +46,7 @@ const measure_parent = (tree_element) => {
 const SYNTHETIC_ROOT_ID = "__cool_tree_root__";
 const DYNAMIC_PLACEHOLDER_SUFFIX = "__cool_tree_building__";
 const TREE_ITEM_HEIGHT_PX = 20;
+const BRANCH_LEAF_EXTRA_MARGIN_LEFT_PX = 8;
 let tree_instance_count = 0;
 
 const create_tree_id = () => {
@@ -122,9 +123,15 @@ const find_tree_path = (items, item_key) => {
  *
  * @param {*} value JSON-compatible value to normalize.
  * @param {string} [root_label="root"] Label for the root node.
- * @returns {CoolTreeNode[]} A single normalized root node.
+ * @param {boolean} [include_root=true] Whether to include the synthetic root
+ * node in the returned data.
+ * @returns {CoolTreeNode[]} Normalized tree nodes, optionally without a root.
  */
-export const normalize_tree_data = (value, root_label = "root") => {
+export const normalize_tree_data = (
+  value,
+  root_label = "root",
+  include_root = true,
+) => {
   const visit = ({
     current_value,
     key,
@@ -197,16 +204,28 @@ export const normalize_tree_data = (value, root_label = "root") => {
     };
   };
 
-  return [
-      visit({
-      current_value: value,
-      key: "root",
-      path: "$",
-      label: root_label,
-      metadata: {},
-      path_segments: [],
-    }),
-  ];
+  const root_node = visit({
+    current_value: value,
+    key: "root",
+    path: "$",
+    label: root_label,
+    metadata: {},
+    path_segments: [],
+  });
+  if (include_root) return [root_node];
+  const rebase_root = (node, is_root = false) => {
+    const metadata = { ...(node.metadata || {}) };
+    if (Array.isArray(metadata.path_segments)) {
+      metadata.path_segments = metadata.path_segments.slice(1);
+    }
+    if (is_root) delete metadata.parent_key;
+    return {
+      ...node,
+      metadata,
+      children: (node.children || []).map((child) => rebase_root(child)),
+    };
+  };
+  return (root_node.children || []).map((child) => rebase_root(child, true));
 };
 
 /**
@@ -221,7 +240,15 @@ const render_tree_item_title = ({ item, title, context }) => {
       ? 1
       : 0;
   const leaf_margin_left =
-    node_depth > 0 ? `${-8 + node_depth * 16}px` : "-20px";
+    node_depth > 0
+      ? `${-8 + node_depth * 16 + BRANCH_LEAF_EXTRA_MARGIN_LEFT_PX}px`
+      : `${Number.isFinite(node?.metadata?.root_leaf_margin_left_px)
+          ? node.metadata.root_leaf_margin_left_px
+          : -20}px`;
+  const leaf_style =
+    node_depth > 0 ? { marginLeft: leaf_margin_left } : undefined;
+  const folder_style =
+    node_depth > 0 ? { marginLeft: `${node_depth * 16}px` } : undefined;
   const is_expanded = context?.isExpanded ?? item?.isExpanded;
   const icon = item.isFolder
     ? is_expanded
@@ -254,15 +281,21 @@ const render_tree_item_title = ({ item, title, context }) => {
   }
   if (!node || !node.type || !node.label) {
     return (
-      <span>
+      <span style={item.isFolder ? folder_style : undefined}>
         {icon_element}
-        {title}
+        {item.isFolder ? (
+          <CoolTreeStyles.Label>{title}</CoolTreeStyles.Label>
+        ) : (
+          <CoolTreeStyles.LeafLabel style={leaf_style}>
+            {title}
+          </CoolTreeStyles.LeafLabel>
+        )}
       </span>
     );
   }
   if (!node.isLeaf) {
     return (
-      <span>
+      <span style={folder_style}>
         {icon_element}
         <CoolTreeStyles.Label>{node.label}</CoolTreeStyles.Label>
       </span>
@@ -292,10 +325,28 @@ const build_tree_items = (
   editable,
   dynamic = false,
   dynamic_placeholder_label = "building...",
+  root_leaf_margin_left_px,
 ) => {
+  const sort_nodes = (nodes) =>
+    [...nodes].sort((left, right) => {
+      const left_is_folder =
+        (left.children || []).length > 0 || left.isLeaf === false;
+      const right_is_folder =
+        (right.children || []).length > 0 || right.isLeaf === false;
+      if (left_is_folder !== right_is_folder) {
+        return Number(right_is_folder) - Number(left_is_folder);
+      }
+      const left_label = String(left.label ?? left.title ?? left.key ?? "");
+      const right_label = String(
+        right.label ?? right.title ?? right.key ?? "",
+      );
+      return left_label.localeCompare(right_label);
+    });
   const items = {};
-  const visit = (node) => {
-    const child_ids = (node.children || []).map((child) => visit(child));
+  const visit = (node, parent_key = null, path_segments = []) => {
+    const child_ids = sort_nodes(node.children || []).map((child) =>
+      visit(child, node.key, [...path_segments, node.key]),
+    );
     const item_is_folder = child_ids.length > 0 || node.isLeaf === false;
     if (dynamic && item_is_folder) {
       const placeholder_key = `${node.key}/${DYNAMIC_PLACEHOLDER_SUFFIX}`;
@@ -321,16 +372,23 @@ const build_tree_items = (
         canRename: false,
       };
     }
+    const metadata = {
+      ...(node.metadata || {}),
+      parent_key: node.metadata?.parent_key ?? parent_key,
+      path_segments: node.metadata?.path_segments ?? path_segments,
+      root_leaf_margin_left_px:
+        node.metadata?.root_leaf_margin_left_px ?? root_leaf_margin_left_px,
+    };
     items[node.key] = {
       index: node.key,
-      data: node,
+      data: { ...node, metadata },
       isFolder: item_is_folder,
       children: child_ids,
       canRename: editable === true && node.canRename === true,
     };
     return node.key;
   };
-  const root_ids = tree_data.map((node) => visit(node));
+  const root_ids = sort_nodes(tree_data).map((node) => visit(node));
   if (root_ids.length === 1) {
     return { items, root_item: root_ids[0] };
   }
@@ -388,6 +446,9 @@ export class CoolTree extends Component {
     dynamic: PropTypes.bool,
     /** Append a terminal loading placeholder to locally supplied folders. */
     dynamic_placeholder_label: PropTypes.string,
+    /** Optional left margin for root-level leaf labels in this tree. */
+    root_leaf_margin_left_px: PropTypes.number,
+    /** Optional fixed left margin for nested leaf labels in this tree. */
     interaction_mode: PropTypes.oneOf([
       "double-click-item-to-expand",
       "click-item-to-expand",
@@ -419,6 +480,7 @@ export class CoolTree extends Component {
     search_on_typing: true,
     dynamic: false,
     dynamic_placeholder_label: "building...",
+    root_leaf_margin_left_px: undefined,
     interaction_mode: "click-item-to-expand",
   };
 
@@ -625,6 +687,7 @@ export class CoolTree extends Component {
       search_on_typing,
       dynamic,
       dynamic_placeholder_label,
+      root_leaf_margin_left_px,
       interaction_mode,
     } = this.props;
     const resolved_expanded_keys =
@@ -638,6 +701,7 @@ export class CoolTree extends Component {
       can_rename,
       dynamic,
       dynamic_placeholder_label,
+      root_leaf_margin_left_px,
     );
     const items = built_tree.items;
     const resolved_root_item = data_provider

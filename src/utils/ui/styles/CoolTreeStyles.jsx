@@ -53,7 +53,7 @@ export class CoolTreeStyles {
   static HierarchyBranch = styled.span`
     position: absolute;
     top: 50%;
-    width: 12px;
+    width: 6px;
     border-top: 1px solid #bbbbbb;
     pointer-events: none;
   `;

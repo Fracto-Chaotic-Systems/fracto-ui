@@ -28,20 +28,26 @@ export class VideoMetaData extends Component {
 
   render() {
     const { width_px, height_px } = this.props;
-    const tree_data = normalize_tree_data(this.get_meta(), "meta");
+    const tree_data = normalize_tree_data(this.get_meta(), "meta", false);
+    const default_expanded_keys = tree_data
+      .filter((node) => !node.isLeaf)
+      .map((node) => node.key);
     return (
       <CoolStyles.Block
         style={{
           width: `${width_px}px`,
           height: `${height_px}px`,
           overflow: "hidden",
+          padding: "0.5rem",
+          boxSizing: "border-box",
         }}
       >
         <CoolTree
           tree_data={tree_data}
-          default_expanded_keys={["root"]}
+          default_expanded_keys={default_expanded_keys}
           searchable={false}
           editable={false}
+          root_leaf_margin_left_px={8}
           tree_label="video metadata"
         />
       </CoolStyles.Block>
