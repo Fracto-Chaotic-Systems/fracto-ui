@@ -62,6 +62,30 @@ export class MarkdownStyles {
       font-style: italic;
     }
 
+    .media-ledger-index {
+      max-height: 12rem;
+      margin: 0 0 1rem;
+      padding: 0.5rem 0.75rem;
+      overflow-y: auto;
+      border: 1px solid #dddddd;
+      border-radius: 4px;
+      background: #f7f7f7;
+    }
+
+    .media-ledger-index strong {
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    .media-ledger-index ul {
+      margin: 0;
+      padding-left: 1.25rem;
+    }
+
+    .media-ledger-index li {
+      margin: 0;
+    }
+
     .media-copy-alt {
       display: inline-flex;
       align-items: center;
