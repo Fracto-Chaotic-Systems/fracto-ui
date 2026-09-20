@@ -48,6 +48,7 @@ export class VideoMetaPath extends Component {
       im: true,
       scope: true,
     },
+    show_all_paths: false,
     animation_index: 0,
     animation_playing: false,
   };
@@ -69,11 +70,27 @@ export class VideoMetaPath extends Component {
 
   on_path_visibility_changed = (path_id, visible) => {
     this.setState((previous_state) => ({
+      show_all_paths: false,
       visible_paths: {
         ...previous_state.visible_paths,
         [path_id]: visible,
       },
     }));
+  };
+
+  on_all_paths_changed = (checked) => {
+    this.setState({
+      show_all_paths: checked,
+      ...(checked
+        ? {
+            visible_paths: {
+              re: false,
+              im: false,
+              scope: false,
+            },
+          }
+        : {}),
+    });
   };
 
   componentDidUpdate(prevProps) {
@@ -227,9 +244,77 @@ export class VideoMetaPath extends Component {
     return samples;
   };
 
+  get_animation_scope_dataset = (steps, animation_point) => {
+    if (!this.state.animation_playing || !animation_point) {
+      return null;
+    }
+    const scoped_steps = steps.filter(
+      (step) =>
+        Number.isFinite(step.focal_point?.x) &&
+        Number.isFinite(step.focal_point?.y) &&
+        Number.isFinite(step.scope) &&
+        step.scope > 0,
+    );
+    if (!scoped_steps.length) {
+      return null;
+    }
+    if (scoped_steps.length === 1) {
+      return {
+        label: "animated scope",
+        data: this.get_scope_square(animation_point, scoped_steps[0].scope),
+        borderColor: "#888888",
+        backgroundColor: "transparent",
+        borderWidth: 1,
+        pointRadius: 0,
+        showLine: true,
+        tension: 0,
+        parsing: false,
+      };
+    }
+    const samples_per_segment = 50;
+    const segment_index = Math.min(
+      scoped_steps.length - 2,
+      Math.floor(this.state.animation_index / samples_per_segment),
+    );
+    const local_t = Math.min(
+      1,
+      (this.state.animation_index % samples_per_segment) /
+        samples_per_segment,
+    );
+    const current_scope = scoped_steps[segment_index].scope;
+    const next_scope = scoped_steps[segment_index + 1].scope;
+    const scope = current_scope + (next_scope - current_scope) * local_t;
+    return {
+      label: "animated scope",
+      data: this.get_scope_square(animation_point, scope),
+      borderColor: "#888888",
+      backgroundColor: "transparent",
+      borderWidth: 1,
+      pointRadius: 0,
+      showLine: true,
+      tension: 0,
+      parsing: false,
+    };
+  };
+
+  get_scope_square = (center, scope) => {
+    const half_scope = scope / 2;
+    return [
+      { x: center.x - half_scope, y: center.y - half_scope },
+      { x: center.x - half_scope, y: center.y + half_scope },
+      { x: center.x + half_scope, y: center.y + half_scope },
+      { x: center.x + half_scope, y: center.y - half_scope },
+      { x: center.x - half_scope, y: center.y - half_scope },
+    ];
+  };
+
   render_complex_chart = (steps, chart_height_px) => {
     const path_points = this.sample_complex_path(steps);
     const animation_point = path_points[this.state.animation_index];
+    const animation_scope_dataset = this.get_animation_scope_dataset(
+      steps,
+      animation_point,
+    );
     const focal_points = steps
       .map((step) => step.focal_point)
       .filter((point) => Number.isFinite(point?.x) && Number.isFinite(point?.y))
@@ -299,6 +384,11 @@ export class VideoMetaPath extends Component {
           parsing: false,
         };
       });
+    const displayed_scope_datasets = this.state.animation_playing
+      ? animation_scope_dataset
+        ? [animation_scope_dataset]
+        : []
+      : scope_datasets;
     return (
       <CoolStyles.Block
         style={{
@@ -334,7 +424,7 @@ export class VideoMetaPath extends Component {
           <Line
             data={{
               datasets: [
-                ...scope_datasets,
+                ...displayed_scope_datasets,
               {
                 label: "complex path",
                 data: path_points,
@@ -440,11 +530,11 @@ export class VideoMetaPath extends Component {
 
   render() {
     const { width_px, height_px } = this.props;
-    const { visible_paths } = this.state;
+    const { visible_paths, show_all_paths } = this.state;
     const steps = this.get_steps();
-    const visible_options = PATH_OPTIONS.filter(
-      (path_option) => visible_paths[path_option.id],
-    );
+    const visible_options = show_all_paths
+      ? []
+      : PATH_OPTIONS.filter((path_option) => visible_paths[path_option.id]);
     const control_height_px = 32;
     const chart_area_height_px = Math.max(0, height_px - control_height_px);
     const chart_gap_px = 8;
@@ -466,30 +556,20 @@ export class VideoMetaPath extends Component {
           style={{
             display: "flex",
             alignItems: "center",
+            justifyContent: "space-between",
             height: `${control_height_px}px`,
             paddingLeft: "0.5rem",
-            gap: "1rem",
           }}
         >
-          <CoolMediaTransport
-            width_px={140}
-            button_size_px={28}
-            on_operation={this.on_transport_operation}
-            disabled={steps.length === 0}
-          />
-          {PATH_OPTIONS.map((path_option) => (
-            <label
-              key={`video-path-option-${path_option.id}`}
-              style={SETTING_LABEL_STYLE}
-            >
+          <CoolStyles.InlineBlock
+            style={{ display: "flex", alignItems: "center", gap: "1rem" }}
+          >
+            <label style={SETTING_LABEL_STYLE}>
               <input
                 type="checkbox"
-                checked={visible_paths[path_option.id]}
+                checked={show_all_paths}
                 onChange={(event) =>
-                  this.on_path_visibility_changed(
-                    path_option.id,
-                    event.target.checked,
-                  )
+                  this.on_all_paths_changed(event.target.checked)
                 }
               />
               <CoolStyles.InlineBlock
@@ -499,10 +579,51 @@ export class VideoMetaPath extends Component {
                   fontStyle: "italic",
                 }}
               >
-                {AppText.get(path_option.text_key)}
+                all
               </CoolStyles.InlineBlock>
             </label>
-          ))}
+            {PATH_OPTIONS.map((path_option) => (
+              <label
+                key={`video-path-option-${path_option.id}`}
+                style={SETTING_LABEL_STYLE}
+              >
+                <input
+                  type="checkbox"
+                  checked={visible_paths[path_option.id]}
+                  onChange={(event) =>
+                    this.on_path_visibility_changed(
+                      path_option.id,
+                      event.target.checked,
+                    )
+                  }
+                />
+                <CoolStyles.InlineBlock
+                  style={{
+                    marginLeft: "0.35rem",
+                    fontWeight: "bold",
+                    fontStyle: "italic",
+                  }}
+                >
+                  {AppText.get(path_option.text_key)}
+                </CoolStyles.InlineBlock>
+              </label>
+            ))}
+          </CoolStyles.InlineBlock>
+          <CoolStyles.InlineBlock
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "2px",
+              marginLeft: "auto",
+            }}
+          >
+            <CoolMediaTransport
+              width_px={140}
+              button_size_px={28}
+              on_operation={this.on_transport_operation}
+              disabled={steps.length === 0}
+            />
+          </CoolStyles.InlineBlock>
         </CoolStyles.Block>
         <CoolStyles.Block
           style={{
