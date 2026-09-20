@@ -12,6 +12,7 @@ import {
   KEY_ADMIN_SOCIAL_PAGE_TITLE,
 } from "../../text/AdminText.jsx";
 import CoolStyles from "../../utils/ui/styles/CoolStyles.jsx";
+import MarkdownStyles from "../../utils/ui/styles/MarkdownStyles.jsx";
 
 const styles_social = {
   content: {
@@ -48,13 +49,28 @@ const styles_social = {
   },
   document_text: {
     margin: 0,
-    whiteSpace: "pre-wrap",
     overflowWrap: "anywhere",
-    fontFamily: "sans-serif",
-    fontSize: "0.95rem",
-    lineHeight: 1.5,
-    color: "#333333",
   },
+};
+
+const markdown_components = {
+  h1: MarkdownStyles.Heading1,
+  h2: MarkdownStyles.Heading2,
+  h3: MarkdownStyles.Heading3,
+  p: MarkdownStyles.Paragraph,
+  ul: MarkdownStyles.UnorderedList,
+  ol: MarkdownStyles.OrderedList,
+  li: MarkdownStyles.ListItem,
+  blockquote: MarkdownStyles.Blockquote,
+  a: MarkdownStyles.Link,
+  code: MarkdownStyles.InlineCode,
+  pre: MarkdownStyles.CodeBlock,
+  table: MarkdownStyles.Table,
+  thead: MarkdownStyles.TableHead,
+  th: MarkdownStyles.TableHeader,
+  tr: MarkdownStyles.TableRow,
+  td: MarkdownStyles.TableCell,
+  hr: MarkdownStyles.HorizontalRule,
 };
 
 /**
@@ -144,11 +160,14 @@ export class AdminSocial extends Component {
               })}
             </styles.ContentWrapper>
             <styles.ContentWrapper style={styles_social.document}>
-              <div style={styles_social.document_text}>
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              <MarkdownStyles.Document style={styles_social.document_text}>
+                <ReactMarkdown
+                  components={markdown_components}
+                  remarkPlugins={[remarkGfm]}
+                >
                   {selected_document?.content || ""}
                 </ReactMarkdown>
-              </div>
+              </MarkdownStyles.Document>
             </styles.ContentWrapper>
           </styles.ContentWrapper>
         )}
