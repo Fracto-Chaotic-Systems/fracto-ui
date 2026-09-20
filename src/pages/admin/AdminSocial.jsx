@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 import styled from "styled-components";
 
@@ -87,15 +88,20 @@ const styles_social = {
     borderRight: "1px solid #cccccc",
   },
   document: {
-    flex: "1 1 auto",
+    flex: "1 1 0",
+    width: 0,
     minWidth: 0,
     overflow: "auto",
     padding: "1rem 1.5rem 3rem",
     backgroundColor: "#ffffff",
   },
   document_text: {
+    width: "100%",
+    maxWidth: "100%",
     margin: 0,
+    whiteSpace: "normal",
     overflowWrap: "anywhere",
+    wordBreak: "break-word",
   },
 };
 
@@ -106,6 +112,12 @@ const SocialTreeWrapper = styled(CoolStyles.Block)`
   .rct-tree-item-button,
   [data-rct-item-interactive="true"] {
     cursor: pointer;
+  }
+`;
+
+const SocialMarkdownDocument = styled(MarkdownStyles.Document)`
+  &.media-document h2:not(:first-child) {
+    text-decoration: underline;
   }
 `;
 
@@ -233,6 +245,14 @@ export class AdminSocial extends Component {
     );
   };
 
+  on_markdown_click = (event) => {
+    const copy_button = event.target.closest("[data-copy-alt-text]");
+    if (!copy_button) return;
+    event.preventDefault();
+    const alt_text = copy_button.getAttribute("data-copy-alt-text") || "";
+    navigator.clipboard?.writeText(alt_text).catch(() => {});
+  };
+
   on_tree_select = (selected_keys, context) => {
     if (!selected_keys.length) {
       return;
@@ -289,17 +309,26 @@ export class AdminSocial extends Component {
               </SocialTreeWrapper>
             </styles.ContentWrapper>
             <styles.ContentWrapper style={styles_social.document}>
-              <MarkdownStyles.Document style={styles_social.document_text}>
+              <SocialMarkdownDocument
+                style={styles_social.document_text}
+                className={
+                  selected_document?.path?.includes("/media/")
+                    ? "media-document"
+                    : undefined
+                }
+                onClick={this.on_markdown_click}
+              >
                 <ReactMarkdown
                   components={{
                     ...markdown_components,
                     a: this.render_document_link,
                   }}
                   remarkPlugins={[remarkGfm]}
+                  rehypePlugins={[rehypeRaw]}
                 >
                   {selected_document?.content || ""}
                 </ReactMarkdown>
-              </MarkdownStyles.Document>
+              </SocialMarkdownDocument>
             </styles.ContentWrapper>
           </styles.ContentWrapper>
         )}
