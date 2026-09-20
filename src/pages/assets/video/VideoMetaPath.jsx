@@ -6,6 +6,14 @@ import { Line } from "react-chartjs-2";
 import AppText from "../../../AppText.jsx";
 import CoolStyles from "../../../utils/ui/styles/CoolStyles.jsx";
 import { SETTING_LABEL_STYLE } from "../../../utils/ui/styles/SettingStyles.jsx";
+import FractoRasterImage from "../../../utils/render/FractoRasterImage.jsx";
+import CoolMediaTransport, {
+  TRANSPORT_BEGIN,
+  TRANSPORT_END,
+  TRANSPORT_PAUSE,
+  TRANSPORT_PLAY,
+  TRANSPORT_REVERSE,
+} from "../../../utils/ui/CoolMediaTransport.jsx";
 import {
   KEY_VIDEO_ASSETS_PATH_IM,
   KEY_VIDEO_ASSETS_PATH_RE,
@@ -40,7 +48,11 @@ export class VideoMetaPath extends Component {
       im: true,
       scope: true,
     },
+    animation_index: 0,
+    animation_playing: false,
   };
+
+  animation_timer_handle = null;
 
   get_steps = () => {
     const { selected_video } = this.props;
@@ -62,6 +74,74 @@ export class VideoMetaPath extends Component {
         [path_id]: visible,
       },
     }));
+  };
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.selected_video !== this.props.selected_video) {
+      this.clear_animation_timer();
+      this.setState({ animation_index: 0, animation_playing: false });
+    }
+  }
+
+  componentWillUnmount() {
+    this.clear_animation_timer();
+  }
+
+  clear_animation_timer = () => {
+    if (this.animation_timer_handle) {
+      clearInterval(this.animation_timer_handle);
+      this.animation_timer_handle = null;
+    }
+  };
+
+  advance_animation = (direction) => {
+    const steps = this.get_steps();
+    const path_points = this.sample_complex_path(steps);
+    if (!path_points.length) {
+      return;
+    }
+    let next_index = this.state.animation_index + direction;
+    if (next_index >= path_points.length) {
+      next_index = 0;
+    }
+    if (next_index < 0) {
+      next_index = path_points.length - 1;
+    }
+    this.setState({ animation_index: next_index });
+  };
+
+  start_animation = (direction) => {
+    const path_points = this.sample_complex_path(this.get_steps());
+    if (!path_points.length) {
+      return;
+    }
+    this.clear_animation_timer();
+    this.animation_timer_handle = setInterval(
+      () => this.advance_animation(direction),
+      50,
+    );
+    this.setState({
+      animation_playing: true,
+    });
+  };
+
+  on_transport_operation = (operation) => {
+    const path_points = this.sample_complex_path(this.get_steps());
+    const last_index = Math.max(0, path_points.length - 1);
+    if (operation === TRANSPORT_BEGIN) {
+      this.clear_animation_timer();
+      this.setState({ animation_index: 0, animation_playing: false });
+    } else if (operation === TRANSPORT_END) {
+      this.clear_animation_timer();
+      this.setState({ animation_index: last_index, animation_playing: false });
+    } else if (operation === TRANSPORT_PLAY) {
+      this.start_animation(1);
+    } else if (operation === TRANSPORT_REVERSE) {
+      this.start_animation(-1);
+    } else if (operation === TRANSPORT_PAUSE) {
+      this.clear_animation_timer();
+      this.setState({ animation_playing: false });
+    }
   };
 
   get_chart_data = (path_option, steps) => ({
@@ -149,10 +229,76 @@ export class VideoMetaPath extends Component {
 
   render_complex_chart = (steps, chart_height_px) => {
     const path_points = this.sample_complex_path(steps);
+    const animation_point = path_points[this.state.animation_index];
     const focal_points = steps
       .map((step) => step.focal_point)
       .filter((point) => Number.isFinite(point?.x) && Number.isFinite(point?.y))
       .map((point) => ({ x: point.x, y: point.y }));
+    const all_points = [...focal_points, ...path_points];
+    steps.forEach((step) => {
+      const focal_point = step.focal_point;
+      const scope = step.scope;
+      if (
+        Number.isFinite(focal_point?.x) &&
+        Number.isFinite(focal_point?.y) &&
+        Number.isFinite(scope) &&
+        scope > 0
+      ) {
+        all_points.push(
+          { x: focal_point.x - scope / 2, y: focal_point.y - scope / 2 },
+          { x: focal_point.x - scope / 2, y: focal_point.y + scope / 2 },
+          { x: focal_point.x + scope / 2, y: focal_point.y - scope / 2 },
+          { x: focal_point.x + scope / 2, y: focal_point.y + scope / 2 },
+        );
+      }
+    });
+    const x_values = all_points.map((point) => point.x);
+    const y_values = all_points.map((point) => point.y);
+    const min_x = x_values.length ? Math.min(...x_values) : -2;
+    const max_x = x_values.length ? Math.max(...x_values) : 1;
+    const min_y = y_values.length ? Math.min(...y_values) : -1.5;
+    const max_y = y_values.length ? Math.max(...y_values) : 1.5;
+    const center_x = (min_x + max_x) / 2;
+    const center_y = (min_y + max_y) / 2;
+    const plot_aspect_ratio = Math.max(
+      0.001,
+      chart_height_px / Math.max(1, this.props.width_px),
+    );
+    const x_range = Math.max(max_x - min_x, 0.001);
+    const y_range = Math.max(max_y - min_y, 0.001);
+    // Keep one world unit the same size on both axes, even when the display
+    // area is rectangular. The raster underlay uses this same aspect ratio.
+    const extent = Math.max(x_range, y_range / plot_aspect_ratio) * 1.1;
+    const y_extent = extent * plot_aspect_ratio;
+    const scope_datasets = steps
+      .filter(
+        (step) =>
+          Number.isFinite(step.focal_point?.x) &&
+          Number.isFinite(step.focal_point?.y) &&
+          Number.isFinite(step.scope) &&
+          step.scope > 0,
+      )
+      .map((step, step_index) => {
+        const { x, y } = step.focal_point;
+        const half_scope = step.scope / 2;
+        return {
+          label: `scope ${step_index + 1}`,
+          data: [
+            { x: x - half_scope, y: y - half_scope },
+            { x: x - half_scope, y: y + half_scope },
+            { x: x + half_scope, y: y + half_scope },
+            { x: x + half_scope, y: y - half_scope },
+            { x: x - half_scope, y: y - half_scope },
+          ],
+          borderColor: "#888888",
+          backgroundColor: "transparent",
+          borderWidth: 1,
+          pointRadius: 0,
+          showLine: true,
+          tension: 0,
+          parsing: false,
+        };
+      });
     return (
       <CoolStyles.Block
         style={{
@@ -162,9 +308,33 @@ export class VideoMetaPath extends Component {
           position: "relative",
         }}
       >
-        <Line
-          data={{
-            datasets: [
+        <CoolStyles.Block
+          style={{
+            position: "absolute",
+            inset: 0,
+            opacity: 0.25,
+            pointerEvents: "none",
+          }}
+        >
+          <FractoRasterImage
+            width_px={Math.max(1, Math.round(this.props.width_px))}
+            focal_point={{ x: center_x, y: center_y }}
+            scope={extent}
+            aspect_ratio={plot_aspect_ratio}
+          />
+        </CoolStyles.Block>
+        <CoolStyles.Block
+          style={{
+            position: "relative",
+            zIndex: 1,
+            width: "100%",
+            height: "100%",
+          }}
+        >
+          <Line
+            data={{
+              datasets: [
+                ...scope_datasets,
               {
                 label: "complex path",
                 data: path_points,
@@ -185,25 +355,51 @@ export class VideoMetaPath extends Component {
                 showLine: false,
                 parsing: false,
               },
-            ],
-          }}
-          options={{
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { display: false },
-            },
-            scales: {
-              x: {
-                type: "linear",
-                title: { display: true, text: AppText.get(KEY_VIDEO_ASSETS_PATH_RE) },
+              ...(animation_point
+                ? [
+                    {
+                      label: "animation",
+                      data: [animation_point],
+                      borderColor: "#000000",
+                      backgroundColor: "#000000",
+                      pointRadius: 6,
+                      pointHoverRadius: 7,
+                      showLine: false,
+                      parsing: false,
+                    },
+                  ]
+                : []),
+              ],
+            }}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { display: false },
               },
-              y: {
-                title: { display: true, text: AppText.get(KEY_VIDEO_ASSETS_PATH_IM) },
+              scales: {
+                x: {
+                  type: "linear",
+                  min: center_x - extent / 2,
+                  max: center_x + extent / 2,
+                  ticks: { display: false },
+                  title: { display: false },
+                  border: { display: false },
+                  grid: { display: false },
+                },
+                y: {
+                  min: center_y - y_extent / 2,
+                  max: center_y + y_extent / 2,
+                  ticks: { display: false },
+                  title: { display: false },
+                  border: { display: false },
+                  grid: { display: false },
+                },
               },
-            },
-          }}
-        />
+              layout: { padding: 0 },
+            }}
+          />
+        </CoolStyles.Block>
       </CoolStyles.Block>
     );
   };
@@ -275,6 +471,12 @@ export class VideoMetaPath extends Component {
             gap: "1rem",
           }}
         >
+          <CoolMediaTransport
+            width_px={140}
+            button_size_px={28}
+            on_operation={this.on_transport_operation}
+            disabled={steps.length === 0}
+          />
           {PATH_OPTIONS.map((path_option) => (
             <label
               key={`video-path-option-${path_option.id}`}
