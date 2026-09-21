@@ -86,7 +86,8 @@ export class MarkdownStyles {
       margin: 0;
     }
 
-    .media-copy-alt {
+    .media-copy-alt,
+    .post-copy-content {
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -102,11 +103,13 @@ export class MarkdownStyles {
       vertical-align: middle;
     }
 
-    .media-copy-alt:hover {
+    .media-copy-alt:hover,
+    .post-copy-content:hover {
       background: #eeeeee;
     }
 
-    .media-copy-alt svg {
+    .media-copy-alt svg,
+    .post-copy-content svg {
       width: 1rem;
       height: 1rem;
       fill: currentColor;

@@ -246,11 +246,16 @@ export class AdminSocial extends Component {
   };
 
   on_markdown_click = (event) => {
-    const copy_button = event.target.closest("[data-copy-alt-text]");
+    const copy_button = event.target.closest(
+      "[data-copy-alt-text], [data-copy-post-content]",
+    );
     if (!copy_button) return;
     event.preventDefault();
-    const alt_text = copy_button.getAttribute("data-copy-alt-text") || "";
-    navigator.clipboard?.writeText(alt_text).catch(() => {});
+    const text =
+      copy_button.getAttribute("data-copy-alt-text") ||
+      copy_button.getAttribute("data-copy-post-content") ||
+      "";
+    navigator.clipboard?.writeText(text).catch(() => {});
   };
 
   on_tree_select = (selected_keys, context) => {
