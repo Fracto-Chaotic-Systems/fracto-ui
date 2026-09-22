@@ -7,7 +7,11 @@ import CoolTabs from "../../../utils/ui/CoolTabs.jsx";
 import VideoMetaData from "./VideoMetaData.jsx";
 import VideoMetaPath from "./VideoMetaPath.jsx";
 import VideoMetaPreview from "./VideoMetaPreview.jsx";
-import { KEY_VIDEO_ASSETS_PATHS } from "../../../text/AssetsText.jsx";
+import VideoMetaRender from "./VideoMetaRender.jsx";
+import {
+  KEY_VIDEO_ASSETS_PATHS,
+  KEY_VIDEO_ASSETS_RENDER,
+} from "../../../text/AssetsText.jsx";
 
 const TAB_HEADER_HEIGHT_PX = 32;
 
@@ -36,10 +40,7 @@ export class VideoMetaOperations extends Component {
   render_tab = (tab_index) => {
     const { width_px, height_px, selected_video, on_video_change } = this.props;
     const content_width = Math.max(0, width_px - 3);
-    const content_height = Math.max(
-      0,
-      height_px - TAB_HEADER_HEIGHT_PX + 1,
-    );
+    const content_height = Math.max(0, height_px - TAB_HEADER_HEIGHT_PX + 1);
     switch (tab_index) {
       case 0:
         return (
@@ -68,6 +69,15 @@ export class VideoMetaOperations extends Component {
             on_video_change={on_video_change}
           />
         );
+      case 3:
+        return (
+          <VideoMetaRender
+            width_px={content_width}
+            height_px={content_height}
+            selected_video={selected_video}
+            on_video_change={on_video_change}
+          />
+        );
       default:
         console.error("VideoMetaOperations: unknown tab index", tab_index);
         return null;
@@ -86,7 +96,12 @@ export class VideoMetaOperations extends Component {
         }}
       >
         <CoolTabs
-          labels={["meta", AppText.get(KEY_VIDEO_ASSETS_PATHS), "preview"]}
+          labels={[
+            "meta",
+            AppText.get(KEY_VIDEO_ASSETS_PATHS),
+            "preview",
+            AppText.get(KEY_VIDEO_ASSETS_RENDER),
+          ]}
           tab_index={tab_index}
           on_tab_select={this.on_tab_select}
           selected_content={selected_content}

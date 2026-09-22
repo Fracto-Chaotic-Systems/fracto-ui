@@ -37,6 +37,16 @@ export const KEY_VIDEO_ASSETS_UNDO = `${VIDEO_FOLDER}/undo`;
 export const KEY_VIDEO_ASSETS_REDO = `${VIDEO_FOLDER}/redo`;
 export const KEY_VIDEO_ASSETS_OPERATIONS = `${VIDEO_FOLDER}/operations`;
 export const KEY_VIDEO_ASSETS_PATHS = `${VIDEO_FOLDER}/paths`;
+export const KEY_VIDEO_ASSETS_RENDER = `${VIDEO_FOLDER}/render`;
+export const KEY_VIDEO_ASSETS_RENDER_START = `${VIDEO_FOLDER}/render_start`;
+export const KEY_VIDEO_ASSETS_RENDER_STOP = `${VIDEO_FOLDER}/render_stop`;
+export const KEY_VIDEO_ASSETS_RENDER_RETRY = `${VIDEO_FOLDER}/render_retry`;
+export const KEY_VIDEO_ASSETS_RENDER_ASSEMBLE = `${VIDEO_FOLDER}/render_assemble`;
+export const KEY_VIDEO_ASSETS_RENDER_STATUS = `${VIDEO_FOLDER}/render_status`;
+export const KEY_VIDEO_ASSETS_RENDER_PROGRESS = `${VIDEO_FOLDER}/render_progress`;
+export const KEY_VIDEO_ASSETS_RENDER_OUTPUT = `${VIDEO_FOLDER}/render_output`;
+export const KEY_VIDEO_ASSETS_RENDER_OPEN_OUTPUT = `${VIDEO_FOLDER}/render_open_output`;
+export const KEY_VIDEO_ASSETS_RENDER_NO_VIDEO = `${VIDEO_FOLDER}/render_no_video`;
 export const KEY_VIDEO_ASSETS_ADD_STEP = `${VIDEO_FOLDER}/add_step`;
 export const KEY_VIDEO_ASSETS_CONFIRM = `${VIDEO_FOLDER}/confirm`;
 export const KEY_VIDEO_ASSETS_CANCEL = `${VIDEO_FOLDER}/cancel`;
@@ -84,6 +94,16 @@ export const APP_ASSETS_TEXT = {
   [KEY_VIDEO_ASSETS_REDO]: "redo",
   [KEY_VIDEO_ASSETS_OPERATIONS]: "video operations",
   [KEY_VIDEO_ASSETS_PATHS]: "paths",
+  [KEY_VIDEO_ASSETS_RENDER]: "render",
+  [KEY_VIDEO_ASSETS_RENDER_START]: "start render",
+  [KEY_VIDEO_ASSETS_RENDER_STOP]: "stop render",
+  [KEY_VIDEO_ASSETS_RENDER_RETRY]: "retry render",
+  [KEY_VIDEO_ASSETS_RENDER_ASSEMBLE]: "assemble video",
+  [KEY_VIDEO_ASSETS_RENDER_STATUS]: "status",
+  [KEY_VIDEO_ASSETS_RENDER_PROGRESS]: "progress",
+  [KEY_VIDEO_ASSETS_RENDER_OUTPUT]: "output",
+  [KEY_VIDEO_ASSETS_RENDER_OPEN_OUTPUT]: "open output",
+  [KEY_VIDEO_ASSETS_RENDER_NO_VIDEO]: "no video selected",
   [KEY_VIDEO_ASSETS_ADD_STEP]: "add step",
   [KEY_VIDEO_ASSETS_CONFIRM]: "confirm",
   [KEY_VIDEO_ASSETS_CANCEL]: "cancel",

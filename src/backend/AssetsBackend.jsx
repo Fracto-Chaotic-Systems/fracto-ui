@@ -33,6 +33,66 @@ export class AssetsBackend {
     });
   };
 
+  /** Reads the persisted frame/video render lifecycle for a video.
+   * @param {number|string} video_id Video identifier.
+   * @returns {Promise<Object>} Render state and progress.
+   * @calledBy VideoMetaRender
+   */
+  static render_status = (video_id) =>
+    request_json(`${ASSETS_ORIGIN}/video/${video_id}/render`);
+
+  /** Returns the browser URL for a completed video output.
+   * @param {number|string} video_id Video identifier.
+   * @returns {string} Asset-server output URL.
+   * @calledBy VideoMetaRender
+   */
+  static video_render_output_url = (video_id) =>
+    `${ASSETS_ORIGIN}/video/${video_id}/render/output`;
+
+  /** Starts frame production followed by server-side video assembly.
+   * @param {number|string} video_id Video identifier.
+   * @returns {Promise<Object>} Accepted render state.
+   * @calledBy VideoMetaRender
+   */
+  static start_video_render = (video_id) =>
+    request_json(`${ASSETS_ORIGIN}/video/${video_id}/render`, {
+      method: "POST",
+      headers: FETCH_JSON_HEADERS,
+    });
+
+  /** Requests cancellation of frame production or ffmpeg assembly.
+   * @param {number|string} video_id Video identifier.
+   * @returns {Promise<Object>} Updated cancellation state.
+   * @calledBy VideoMetaRender
+   */
+  static cancel_video_render = (video_id) =>
+    request_json(`${ASSETS_ORIGIN}/video/${video_id}/render/cancel`, {
+      method: "POST",
+      headers: FETCH_JSON_HEADERS,
+    });
+
+  /** Retries a failed or cancelled video render.
+   * @param {number|string} video_id Video identifier.
+   * @returns {Promise<Object>} Accepted retry state.
+   * @calledBy VideoMetaRender
+   */
+  static retry_video_render = (video_id) =>
+    request_json(`${ASSETS_ORIGIN}/video/${video_id}/render/retry`, {
+      method: "POST",
+      headers: FETCH_JSON_HEADERS,
+    });
+
+  /** Re-assembles an existing numbered frame workspace after a restart.
+   * @param {number|string} video_id Video identifier.
+   * @returns {Promise<Object>} Accepted assembly state.
+   * @calledBy VideoMetaRender
+   */
+  static assemble_video_render = (video_id) =>
+    request_json(`${ASSETS_ORIGIN}/video/${video_id}/render/assemble`, {
+      method: "POST",
+      headers: FETCH_JSON_HEADERS,
+    });
+
   /** Loads the UI style-property catalog used by the lore editor.
    * @returns {Promise<Object>} The JSON property definitions.
    * @calledBy ContentStyleGrid
