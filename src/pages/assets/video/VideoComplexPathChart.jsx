@@ -143,6 +143,68 @@ export class VideoComplexPathChart extends Component {
     animation_running: PropTypes.bool,
   };
 
+  state = {
+    plot_area: null,
+  };
+
+  componentDidMount() {
+    this.schedule_plot_area_sync();
+  }
+
+  componentDidUpdate(previous_props) {
+    if (
+      previous_props.width_px !== this.props.width_px ||
+      previous_props.height_px !== this.props.height_px ||
+      previous_props.selected_video !== this.props.selected_video
+    ) {
+      this.schedule_plot_area_sync();
+    }
+  }
+
+  schedule_plot_area_sync = () => {
+    if (this.plot_area_sync_handle) {
+      cancelAnimationFrame(this.plot_area_sync_handle);
+    }
+    this.plot_area_sync_handle = requestAnimationFrame(this.sync_plot_area);
+  };
+
+  sync_plot_area = () => {
+    const chart_area = this.chart_instance?.chartArea;
+    if (!chart_area) {
+      return;
+    }
+    const plot_area = {
+      left: chart_area.left,
+      right: chart_area.right,
+      top: chart_area.top,
+      bottom: chart_area.bottom,
+      width: chart_area.right - chart_area.left,
+      height: chart_area.bottom - chart_area.top,
+    };
+    const previous_area = this.state.plot_area;
+    if (
+      previous_area &&
+      previous_area.left === plot_area.left &&
+      previous_area.right === plot_area.right &&
+      previous_area.top === plot_area.top &&
+      previous_area.bottom === plot_area.bottom
+    ) {
+      return;
+    }
+    this.setState({ plot_area });
+  };
+
+  set_chart_instance = (chart_instance) => {
+    this.chart_instance = chart_instance;
+  };
+
+  componentWillUnmount() {
+    if (this.plot_area_sync_handle) {
+      cancelAnimationFrame(this.plot_area_sync_handle);
+      this.plot_area_sync_handle = null;
+    }
+  }
+
   get_steps = () => {
     return get_video_steps(this.props.selected_video);
   };
@@ -193,6 +255,18 @@ export class VideoComplexPathChart extends Component {
       chart_width_px,
       chart_height_px,
     );
+    const plot_width_px = Math.max(
+      1,
+      this.state.plot_area?.width || chart_width_px,
+    );
+    const plot_height_px = Math.max(
+      1,
+      this.state.plot_area?.height || chart_height_px,
+    );
+    const raster_scope = bounds.extent * (chart_width_px / plot_width_px);
+    const raster_y_extent =
+      bounds.y_extent * (chart_height_px / plot_height_px);
+    const raster_aspect_ratio = raster_y_extent / raster_scope;
     return (
       <CoolStyles.Block
         style={{
@@ -215,8 +289,8 @@ export class VideoComplexPathChart extends Component {
             <FractoRasterImage
               width_px={chart_width_px}
               focal_point={{ x: bounds.center_x, y: bounds.center_y }}
-              scope={bounds.extent}
-              aspect_ratio={Math.max(0.001, chart_height_px / chart_width_px)}
+              scope={raster_scope}
+              aspect_ratio={Math.max(0.001, raster_aspect_ratio)}
             />
           </CoolStyles.Block>
         ) : null}
@@ -229,6 +303,7 @@ export class VideoComplexPathChart extends Component {
           }}
         >
           <Line
+            ref={this.set_chart_instance}
             data={{
               datasets: [
                 {
@@ -276,6 +351,7 @@ export class VideoComplexPathChart extends Component {
               plugins: { legend: { display: false } },
               scales: {
                 x: {
+                  display: false,
                   type: "linear",
                   min: bounds.center_x - bounds.extent / 2,
                   max: bounds.center_x + bounds.extent / 2,
@@ -285,6 +361,7 @@ export class VideoComplexPathChart extends Component {
                   grid: { display: false },
                 },
                 y: {
+                  display: false,
                   min: bounds.center_y - bounds.y_extent / 2,
                   max: bounds.center_y + bounds.y_extent / 2,
                   ticks: { display: false },
