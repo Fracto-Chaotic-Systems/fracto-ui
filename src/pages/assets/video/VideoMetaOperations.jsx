@@ -8,9 +8,11 @@ import VideoMetaData from "./VideoMetaData.jsx";
 import VideoMetaPath from "./VideoMetaPath.jsx";
 import VideoMetaPreview from "./VideoMetaPreview.jsx";
 import VideoMetaRender from "./VideoMetaRender.jsx";
+import VideoMetaProjects from "./VideoMetaProjects.jsx";
 import {
   KEY_VIDEO_ASSETS_PATHS,
   KEY_VIDEO_ASSETS_RENDER,
+  KEY_VIDEO_ASSETS_PROJECTS,
 } from "../../../text/AssetsText.jsx";
 
 const TAB_HEADER_HEIGHT_PX = 32;
@@ -27,6 +29,8 @@ export class VideoMetaOperations extends Component {
     height_px: PropTypes.number.isRequired,
     selected_video: PropTypes.object,
     on_video_change: PropTypes.func,
+    on_video_select: PropTypes.func,
+    on_new_video: PropTypes.func,
   };
 
   state = {
@@ -38,7 +42,14 @@ export class VideoMetaOperations extends Component {
   };
 
   render_tab = (tab_index) => {
-    const { width_px, height_px, selected_video, on_video_change } = this.props;
+    const {
+      width_px,
+      height_px,
+      selected_video,
+      on_video_change,
+      on_video_select,
+      on_new_video,
+    } = this.props;
     const content_width = Math.max(0, width_px - 3);
     const content_height = Math.max(0, height_px - TAB_HEADER_HEIGHT_PX + 1);
     switch (tab_index) {
@@ -78,6 +89,17 @@ export class VideoMetaOperations extends Component {
             on_video_change={on_video_change}
           />
         );
+      case 4:
+        return (
+          <VideoMetaProjects
+            width_px={content_width}
+            height_px={content_height}
+            selected_video={selected_video}
+            on_video_change={on_video_change}
+            on_video_select={on_video_select}
+            on_new_video={on_new_video}
+          />
+        );
       default:
         console.error("VideoMetaOperations: unknown tab index", tab_index);
         return null;
@@ -101,6 +123,7 @@ export class VideoMetaOperations extends Component {
             AppText.get(KEY_VIDEO_ASSETS_PATHS),
             "preview",
             AppText.get(KEY_VIDEO_ASSETS_RENDER),
+            AppText.get(KEY_VIDEO_ASSETS_PROJECTS),
           ]}
           tab_index={tab_index}
           on_tab_select={this.on_tab_select}

@@ -13,16 +13,13 @@ import { BACKGROUND_FIELD_GRADIENT } from "../../styles/BackgroundStyles.jsx";
 import CoolStyles from "../../utils/ui/styles/CoolStyles.jsx";
 import AppSettings from "../../AppSettings.jsx";
 import {
-  KEY_VIDEO_GENERATOR_CURRENT_VIDEO,
+  KEY_VIDEO_GENERATOR_CURRENT_VIDEO_ID,
   KEY_VIDEO_GENERATOR_FRAME_SETTINGS,
 } from "../../settings/AssetsSettings.jsx";
 import AppText from "../../AppText.jsx";
 import { KEY_ASSETS_VIDEO } from "../../text/AssetsText.jsx";
 import {
-  CONTROL_ACTION_NEW_VIDEO,
-  CONTROL_ACTION_OPEN_VIDEO,
   CONTROL_ACTION_REDO,
-  CONTROL_ACTION_SAVE_VIDEO,
   CONTROL_ACTION_UNDO,
 } from "./video/VideoControlButtons.jsx";
 import VideoOperationsBlock from "./video/VideoOperationsBlock.jsx";
@@ -55,17 +52,38 @@ export class AssetsVideoGenerator extends Component {
   video_history_ref = React.createRef();
 
   componentDidMount() {
-    const current_video = AppSettings.get(KEY_VIDEO_GENERATOR_CURRENT_VIDEO);
+    const current_video_id = Number(
+      AppSettings.get(KEY_VIDEO_GENERATOR_CURRENT_VIDEO_ID),
+    );
     this.setState({
       frame_settings: AppSettings.get(KEY_VIDEO_GENERATOR_FRAME_SETTINGS),
-      video_script: current_video?.id ? current_video : null,
-      selected_video: current_video?.id ? current_video : null,
       frame_settings_subscription: AppSettings.subscribe(
         KEY_VIDEO_GENERATOR_FRAME_SETTINGS,
         this.on_frame_settings_changed,
       ),
     });
+    if (current_video_id > 0) {
+      this.restore_current_video(current_video_id);
+    }
   }
+
+  restore_current_video = async (video_id) => {
+    let video = null;
+    try {
+      const response = await DataBackend.get_video(video_id);
+      video = response?.result || null;
+    } catch (error) {
+      console.warn("unable to refresh persisted video", error.message);
+    }
+    if (video?.id) this.on_video_select(video);
+  };
+
+  persist_current_video = (video) => {
+    if (!video?.id) return;
+    AppSettings.on_settings_changed({
+      [KEY_VIDEO_GENERATOR_CURRENT_VIDEO_ID]: Number(video.id),
+    });
+  };
 
   componentWillUnmount() {
     const { frame_settings_subscription } = this.state;
@@ -169,9 +187,7 @@ export class AssetsVideoGenerator extends Component {
       fps: selected_video.meta?.frame_rate || DEFAULT_VIDEO_FPS,
       steps: script.steps,
     };
-    AppSettings.on_settings_changed({
-      [KEY_VIDEO_GENERATOR_CURRENT_VIDEO]: video_script,
-    });
+    this.persist_current_video(selected_video);
     this.setState({
       selected_video,
       video_script,
@@ -253,9 +269,7 @@ export class AssetsVideoGenerator extends Component {
       video_script,
       video_records: refreshed_video_records,
     });
-    AppSettings.on_settings_changed({
-      [KEY_VIDEO_GENERATOR_CURRENT_VIDEO]: video_script,
-    });
+    this.persist_current_video(video);
     return this.save_video(video_script);
   };
 
@@ -279,7 +293,7 @@ export class AssetsVideoGenerator extends Component {
       const created_video = await AssetsBackend.new_video();
       if (!created_video?.id) {
         console.error("new video response did not include an id");
-        return;
+        return null;
       }
       const first_step = this.first_step();
       const new_video_script = {
@@ -297,31 +311,22 @@ export class AssetsVideoGenerator extends Component {
         coverage_before_open: null,
         heat_map_before_open: null,
       });
-      AppSettings.on_settings_changed({
-        [KEY_VIDEO_GENERATOR_CURRENT_VIDEO]: new_video_script,
-      });
+      this.persist_current_video(new_video_script);
+      return new_video_script;
     } catch (error) {
       console.error("error creating new video", error.message);
+      return null;
     }
   };
 
   on_control_action = (code, data) => {
     console.log("on_control_action", code);
     switch (code) {
-      case CONTROL_ACTION_NEW_VIDEO:
-        this.new_video();
-        break;
-      case CONTROL_ACTION_SAVE_VIDEO:
-        this.save_video(data);
-        break;
       case CONTROL_ACTION_UNDO:
         this.video_history_ref.current?.undo();
         break;
       case CONTROL_ACTION_REDO:
         this.video_history_ref.current?.redo();
-        break;
-      case CONTROL_ACTION_OPEN_VIDEO:
-        this.open_video(data);
         break;
       default:
         console.log("on_control_action unknown code", code);
@@ -388,6 +393,8 @@ export class AssetsVideoGenerator extends Component {
         height_px={operations_height}
         selected_video={selected_video}
         on_video_change={this.on_video_change}
+        on_video_select={this.on_video_select}
+        on_new_video={this.new_video}
       />
     );
     return [

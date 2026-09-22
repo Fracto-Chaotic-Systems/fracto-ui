@@ -20,6 +20,14 @@ export class DataBackend {
       `${DATA_ORIGIN}/query?${new URLSearchParams({ table, limit: `${limit}`, order: "id DESC" })}`,
     );
 
+  /** Fetches one video record by id for page-state restoration.
+   * @param {number|string} video_id Video identifier.
+   * @returns {Promise<Object>} The canonical video record.
+   * @calledBy AssetsVideoGenerator
+   */
+  static get_video = (video_id) =>
+    request_json(`${DATA_ORIGIN}/video/${video_id}`);
+
   /**
    * Requests the status of a table backup operation.
    * @param {string} table Table name to inspect.

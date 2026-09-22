@@ -31,13 +31,13 @@ export const KEY_COLUMN_LABEL_ASSET_SCOPE_COLON = `${ASSETS_FOLDER}/label_assets
 export const KEY_COLUMN_LABEL_ASSET_FOCAL_POINT_COLON = `${ASSETS_FOLDER}/label_assets_focal_point_colon`;
 export const KEY_VIDEO_ASSETS_GENERATOR = `${VIDEO_FOLDER}/video_generator`;
 export const KEY_VIDEO_ASSETS_NEW_VIDEO = `${VIDEO_FOLDER}/new_video`;
-export const KEY_VIDEO_ASSETS_SAVE_VIDEO = `${VIDEO_FOLDER}/save_video`;
 export const KEY_VIDEO_ASSETS_OPEN_VIDEO = `${VIDEO_FOLDER}/open_video`;
 export const KEY_VIDEO_ASSETS_UNDO = `${VIDEO_FOLDER}/undo`;
 export const KEY_VIDEO_ASSETS_REDO = `${VIDEO_FOLDER}/redo`;
 export const KEY_VIDEO_ASSETS_OPERATIONS = `${VIDEO_FOLDER}/operations`;
 export const KEY_VIDEO_ASSETS_PATHS = `${VIDEO_FOLDER}/paths`;
 export const KEY_VIDEO_ASSETS_RENDER = `${VIDEO_FOLDER}/render`;
+export const KEY_VIDEO_ASSETS_PROJECTS = `${VIDEO_FOLDER}/projects`;
 export const KEY_VIDEO_ASSETS_RENDER_START = `${VIDEO_FOLDER}/render_start`;
 export const KEY_VIDEO_ASSETS_RENDER_STOP = `${VIDEO_FOLDER}/render_stop`;
 export const KEY_VIDEO_ASSETS_RENDER_RETRY = `${VIDEO_FOLDER}/render_retry`;
@@ -88,13 +88,13 @@ export const APP_ASSETS_TEXT = {
   [KEY_IMAGE_ASSETS_GENERATOR]: "images",
   [KEY_VIDEO_ASSETS_GENERATOR]: "video",
   [KEY_VIDEO_ASSETS_NEW_VIDEO]: "new video",
-  [KEY_VIDEO_ASSETS_SAVE_VIDEO]: "save video",
   [KEY_VIDEO_ASSETS_OPEN_VIDEO]: "open video",
   [KEY_VIDEO_ASSETS_UNDO]: "undo",
   [KEY_VIDEO_ASSETS_REDO]: "redo",
   [KEY_VIDEO_ASSETS_OPERATIONS]: "video operations",
   [KEY_VIDEO_ASSETS_PATHS]: "paths",
   [KEY_VIDEO_ASSETS_RENDER]: "render",
+  [KEY_VIDEO_ASSETS_PROJECTS]: "projects",
   [KEY_VIDEO_ASSETS_RENDER_START]: "start render",
   [KEY_VIDEO_ASSETS_RENDER_STOP]: "stop render",
   [KEY_VIDEO_ASSETS_RENDER_RETRY]: "retry render",

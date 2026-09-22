@@ -18,6 +18,8 @@ export class VideoOperationsBlock extends Component {
     height_px: PropTypes.number.isRequired,
     selected_video: PropTypes.object,
     on_video_change: PropTypes.func,
+    on_video_select: PropTypes.func,
+    on_new_video: PropTypes.func,
   };
 
   state = {
@@ -128,6 +130,8 @@ export class VideoOperationsBlock extends Component {
               height_px={height_px}
               selected_video={selected_video}
               on_video_change={this.props.on_video_change}
+              on_video_select={this.props.on_video_select}
+              on_new_video={this.props.on_new_video}
             />
           </CoolStyles.Block>
         </CoolStyles.Block>
