@@ -40,6 +40,10 @@ export const KEY_VIDEO_ASSETS_PATHS = `${VIDEO_FOLDER}/paths`;
 export const KEY_VIDEO_ASSETS_ADD_STEP = `${VIDEO_FOLDER}/add_step`;
 export const KEY_VIDEO_ASSETS_CONFIRM = `${VIDEO_FOLDER}/confirm`;
 export const KEY_VIDEO_ASSETS_CANCEL = `${VIDEO_FOLDER}/cancel`;
+export const KEY_VIDEO_ASSETS_PREVIEW_START = `${VIDEO_FOLDER}/preview_start`;
+export const KEY_VIDEO_ASSETS_PREVIEW_STOP = `${VIDEO_FOLDER}/preview_stop`;
+export const KEY_VIDEO_ASSETS_PREVIEW_T = `${VIDEO_FOLDER}/preview_t`;
+export const KEY_VIDEO_ASSETS_PREVIEW_FRAME = `${VIDEO_FOLDER}/preview_frame`;
 export const KEY_VIDEO_ASSETS_STEP = `${VIDEO_FOLDER}/step`;
 export const KEY_VIDEO_ASSETS_PATH_RE = `${VIDEO_FOLDER}/path_re`;
 export const KEY_VIDEO_ASSETS_PATH_IM = `${VIDEO_FOLDER}/path_im`;
@@ -83,6 +87,10 @@ export const APP_ASSETS_TEXT = {
   [KEY_VIDEO_ASSETS_ADD_STEP]: "add step",
   [KEY_VIDEO_ASSETS_CONFIRM]: "confirm",
   [KEY_VIDEO_ASSETS_CANCEL]: "cancel",
+  [KEY_VIDEO_ASSETS_PREVIEW_START]: "start",
+  [KEY_VIDEO_ASSETS_PREVIEW_STOP]: "stop",
+  [KEY_VIDEO_ASSETS_PREVIEW_T]: "t",
+  [KEY_VIDEO_ASSETS_PREVIEW_FRAME]: "frame",
   [KEY_VIDEO_ASSETS_STEP]: "step",
   [KEY_VIDEO_ASSETS_PATH_RE]: "re",
   [KEY_VIDEO_ASSETS_PATH_IM]: "im",
