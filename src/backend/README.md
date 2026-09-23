@@ -33,7 +33,10 @@ Publishes minibrot/bailiwick records to the data service (normally port 3002). I
 ### `ServerBackend.jsx`, `AdminBackend.jsx`, and `LogsBackend.jsx`
 
 Contain requests for the main server health/readiness endpoints, admin-service
-version information, and log endpoints respectively. `BackendUtils.jsx` provides
+version information, commit summaries, normalized tag events, and log endpoints
+respectively. `AdminBackend.commits()` keeps `commits`, `tag_events`, and the
+raw `tag_records` as separate response collections so timeline consumers can
+choose the appropriate representation. `BackendUtils.jsx` provides
 the shared JSON request and query-string helpers used by these clients.
 
 ## Service origins

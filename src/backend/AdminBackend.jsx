@@ -7,7 +7,9 @@ const ADMIN_ORIGIN = service_origin(FRACTO_ADMIN_PORT);
 export class AdminBackend {
   /** Fetches recent commits from all allowlisted Fracto repositories.
    * @param {number} limit Maximum number of aggregate commits to return.
-   * @returns {Promise<{commits: Array}>} Date-descending normalized commit summaries.
+   * @returns {Promise<{commits: Array, tag_events: Array, tag_records: Array}>}
+   *   Date-descending commit summaries plus normalized tag events and their
+   *   raw repository-level records.
    * @calledBy AdminCommits componentDidMount.
    */
   static commits = (limit = 100) =>

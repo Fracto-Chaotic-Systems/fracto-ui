@@ -10,6 +10,7 @@ import CoolTable from "../../utils/ui/CoolTable.jsx";
 import { CoolStyles } from "../../utils/ui/CoolImports.jsx";
 import { CELL_LABEL_STYLE } from "../../utils/ui/styles/CoolStyles.jsx";
 import { SETTING_LABEL_STYLE } from "../../utils/ui/styles/SettingStyles.jsx";
+import { merge_commit_timeline } from "./AdminCommitTimeline.js";
 import ReactTimeAgo from "react-time-ago";
 import {
   CoolTableStyles as table_styles,
@@ -196,7 +197,7 @@ const render_commit_date = (date) => {
   );
 };
 const commit_columns = (commits, available_width) => {
-  const width_commits = commits.filter((commit) => commit?.row_type !== "tag");
+  const width_commits = commits;
   const intrinsic = COMMIT_FIELDS.map(([id, label_key]) => {
     const widest = Math.max(
       text_label(label_key).length,
@@ -262,12 +263,14 @@ const commit_columns = (commits, available_width) => {
         // color (the white cell background otherwise makes the rows
         // appear empty).
         color: "black",
-        whiteSpace: "normal",
-        overflowWrap: "anywhere",
-        wordBreak: "break-word",
-        overflow: "visible",
-        maxHeight: "none",
-        height: "auto",
+        whiteSpace: "nowrap",
+        overflowWrap: "normal",
+        wordBreak: "normal",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        lineHeight: "20px",
+        maxHeight: "20px",
+        height: "20px",
         verticalAlign: "top",
         ...(id === "message" || id === "date"
           ? {
@@ -299,18 +302,21 @@ const commit_columns = (commits, available_width) => {
 };
 
 const render_tag_marker = (row, row_index) => {
-  if (row?.row_type !== "tag") return null;
+  if (row?.row_type !== "tag_event" || !row.tag_event) return null;
+  const { name, created_at } = row.tag_event;
   return (
     <table_styles.TableRow
-      key={`tag-marker-${row.tag}-${row_index}`}
+      key={`tag-marker-${name}-${row_index}`}
       style={{ display: "block", width: "100%" }}
     >
       <table_styles.TableCell
         style={{
           display: "block",
           width: "100%",
-          height: "1.25rem",
-          padding: "0.125rem 0.5rem",
+          boxSizing: "border-box",
+          height: "20px",
+          padding: "0 0.5rem",
+          lineHeight: "20px",
           textAlign: "center",
           backgroundColor: "#eef7f3",
           borderTop: "1px solid #76a88f",
@@ -320,18 +326,32 @@ const render_tag_marker = (row, row_index) => {
           fontSize: "0.8rem",
           fontWeight: "bold",
           letterSpacing: "1px",
-          maxHeight: "none",
+          maxHeight: "20px",
         }}
       >
-        {row.tag}
+        <span title={created_at ? new Date(created_at).toLocaleString() : ""}>
+          {name}
+        </span>
       </table_styles.TableCell>
     </table_styles.TableRow>
   );
 };
 
+const build_commit_row = (commit) => ({
+  ...commit,
+  repository: [render_repository_link, commit.repository],
+  hash: [
+    render_commit_hash,
+    { hash: commit.hash, repository: commit.repository },
+  ],
+  date: [render_commit_date, commit.date],
+  change_summary: [render_change_summary, commit],
+});
+
 export class AdminCommits extends Component {
   state = {
     commits: [],
+    tag_events: [],
     commits_error: null,
     rendered_width: 0,
     repository_visibility: Object.fromEntries(
@@ -353,7 +373,10 @@ export class AdminCommits extends Component {
     AdminBackend.commits()
       .then((result) => {
         const commits = Array.isArray(result?.commits) ? result.commits : [];
-        this.setState({ commits }, this.update_width);
+        const tag_events = Array.isArray(result?.tag_events)
+          ? result.tag_events
+          : [];
+        this.setState({ commits, tag_events }, this.update_width);
       })
       .catch((commits_error) => {
         this.setState({ commits_error });
@@ -403,6 +426,7 @@ export class AdminCommits extends Component {
   render() {
     const {
       commits,
+      tag_events,
       commits_error,
       rendered_width,
       repository_visibility,
@@ -417,30 +441,11 @@ export class AdminCommits extends Component {
     const any_repository_hidden = REPOSITORY_NAMES.some(
       (repository) => repository_visibility[repository] === false,
     );
-    // A coordinated milestone tag exists in every repository. Track the last
-    // visible occurrence so the shared marker is rendered once, immediately
-    // after the oldest repository commit carrying that tag.
-    const tag_last_indices = new Map();
-    visible_commits.forEach((commit, commit_index) => {
-      (commit.tags || []).forEach((tag) => {
-        tag_last_indices.set(tag, commit_index);
-      });
-    });
-    const commit_rows = visible_commits.flatMap((commit, commit_index) => {
-      const commit_row = {
-        ...commit,
-        repository: [render_repository_link, commit.repository],
-        hash: [
-          render_commit_hash,
-          { hash: commit.hash, repository: commit.repository },
-        ],
-        date: [render_commit_date, commit.date],
-        change_summary: [render_change_summary, commit],
-      };
-      const tag_rows = [...tag_last_indices.entries()]
-        .filter(([, last_index]) => last_index === commit_index)
-        .map(([tag]) => ({ row_type: "tag", tag }));
-      return [commit_row, ...tag_rows];
+    const commit_rows = merge_commit_timeline({
+      commits: visible_commits,
+      tag_events,
+      repository_visibility,
+      create_commit_row: build_commit_row,
     });
     return (
       <>

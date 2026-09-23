@@ -8,6 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
+    "test:commits": "node --test test/admin_commit_timeline.test.js",
     "test:automation": "node --test test/automation_engine.test.js",
     "test:audio": "node --test test/circuitry_audio.test.js test/circuitry_audio_controller.test.js",
     "preview": "vite preview"
