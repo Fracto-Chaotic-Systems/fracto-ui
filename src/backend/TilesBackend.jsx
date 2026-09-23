@@ -79,7 +79,7 @@ export class TilesBackend {
    * @param {string} data_endpoint Endpoint name, normally canvas_buffer.
    * @param {Object} params Canvas dimensions and focal-point parameters.
    * @returns {Promise<Object>} Response containing canvas_buffer data.
-   * @calledBy FractoRasterImage
+   * @calledBy FractoCanvasClient.fill_canvas
    */
   static canvas_buffer = (data_endpoint, params) =>
     request_json(

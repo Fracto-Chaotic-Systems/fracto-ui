@@ -4,75 +4,10 @@ import PropTypes from "prop-types";
 import { copy_json } from "../Dom.jsx";
 import AppSettings from "../../AppSettings.jsx";
 import {
-  KEY_NAVIGATOR_DISABLED,
   KEY_NAVIGATOR_STRATEGY,
 } from "../../settings/NavigatorSettings.jsx";
-import FractoColors from "./FractoColors";
-import TilesBackend from "../../backend/TilesBackend.jsx";
-
-let render_request_sequence = 0;
-
-export const fill_canvas = async (
-  ctx,
-  width_px,
-  focal_point,
-  scope,
-  aspect_ratio,
-  on_plan_complete,
-  resolution_factor,
-  opacity = 1.0,
-  data_endpoint = "canvas_buffer",
-) => {
-  const request_id = ++render_request_sequence;
-  // console.log('fill_canvas', {
-  //    ctx,
-  //    width_px,
-  //    focal_point,
-  //    scope,
-  //    aspect_ratio,
-  //    on_plan_complete,
-  //    resolution_factor,
-  //    opacity})
-  AppSettings.on_settings_changed({
-    [KEY_NAVIGATOR_DISABLED]: true,
-  });
-  const all_params = [
-    `width_px=${width_px}`,
-    `focal_point_x=${focal_point.x}`,
-    `focal_point_y=${focal_point.y}`,
-    `scope=${scope}`,
-    `aspect_ratio=${aspect_ratio}`,
-    `resolution_factor=${resolution_factor}`,
-    `strategy=${AppSettings.get(KEY_NAVIGATOR_STRATEGY) || "turbo"}`,
-  ].join("&");
-  try {
-    const result = await TilesBackend.canvas_buffer(
-      data_endpoint,
-      Object.fromEntries(new URLSearchParams(all_params)),
-    );
-    FractoColors.buffer_to_canvas(result.canvas_buffer, ctx, 1, opacity);
-    if (on_plan_complete) {
-      on_plan_complete(result.canvas_buffer, ctx, {
-        request_id,
-        width_px,
-        focal_point: copy_json(focal_point),
-        scope,
-      });
-    }
-    AppSettings.on_settings_changed({
-      [KEY_NAVIGATOR_DISABLED]: false,
-    });
-  } catch (e) {
-    console.error(
-      "exception thrown in fill_canvas",
-      { data_endpoint, params: all_params },
-      e,
-    );
-    AppSettings.on_settings_changed({
-      [KEY_NAVIGATOR_DISABLED]: false,
-    });
-  }
-};
+import FractoColors from "./FractoColors.jsx";
+import FractoCanvasClient from "./FractoCanvasClient.jsx";
 
 export class FractoRasterImage extends Component {
   static propTypes = {
@@ -181,6 +116,13 @@ export class FractoRasterImage extends Component {
     }
   }
 
+  /**
+   * Requests and paints the current image through the UI canvas adapter.
+   *
+   * FractoRasterImage owns lifecycle state such as loading indicators and
+   * prop-change detection; backend access and buffer rendering remain inside
+   * FractoCanvasClient.
+   */
   fill_canvas = async (ctx) => {
     const {
       width_px,
@@ -195,7 +137,7 @@ export class FractoRasterImage extends Component {
     if (this.props.on_loading)
       this.props.on_loading(ctx, width_px, Math.round(width_px * aspect_ratio));
     try {
-      await fill_canvas(
+      await FractoCanvasClient.fill_canvas(
         ctx,
         width_px,
         focal_point,
@@ -203,7 +145,6 @@ export class FractoRasterImage extends Component {
         aspect_ratio,
         on_plan_complete,
         resolution_factor,
-        1.0,
         data_endpoint,
       );
     } catch (error) {

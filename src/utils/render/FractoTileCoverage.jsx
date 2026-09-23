@@ -7,7 +7,7 @@ import { KEY_NAVIGATOR_DISABLED } from "../../settings/NavigatorSettings.jsx";
 import AppText from "../../AppText.jsx";
 import { KEY_HEAT_MAP_FETCHING } from "../../text/NavigatorText.jsx";
 
-import FractoColors from "./FractoColors.jsx";
+import FractoCanvasBuffer from "./FractoCanvasBuffer.jsx";
 import TilesBackend from "../../backend/TilesBackend.jsx";
 
 export const INCLUDE_CAN_DO = "include_can_do";
@@ -187,10 +187,9 @@ export class FractoTileCoverage extends Component {
   render_heat_map = (heat_map_buffer = this.state.heat_map_buffer) => {
     const { ctx } = this.state;
     const { selected_levels } = this.props;
-    FractoColors.buffer_to_canvas(
+    FractoCanvasBuffer.buffer_to_canvas(
       heat_map_buffer,
       ctx,
-      1,
       1,
       true,
       selected_levels,

@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { click_point_chart } from "./PatternsUtils.jsx";
 import FractoFastCalc from "../../../../../sdk/FractoFastCalc.js";
-import { fill_canvas } from "./FractoRasterImage.jsx";
+import FractoCanvasClient from "./FractoCanvasClient.jsx";
 import { copy_json } from "../Dom.jsx";
 
 const ANIMATION_REFRESH_MS = 500;
@@ -24,17 +24,20 @@ export const backgroundImagePlugin = {
     } = chart;
     chart.ctx.clearRect(0, 0, width + left + right, height + top + bottom);
     chart.ctx.globalCompositeOperation = "destination-over"; // Draw behind
-    await fill_canvas(
-      chart.ctx,
-      width_px,
-      focal_point,
-      scope,
-      1.0,
-      null,
-      1.5,
-      0.15,
-    );
-    chart.ctx.restore();
+    chart.ctx.globalAlpha = 0.15;
+    try {
+      await FractoCanvasClient.fill_canvas(
+        chart.ctx,
+        width_px,
+        focal_point,
+        scope,
+        1.0,
+        null,
+        1.5,
+      );
+    } finally {
+      chart.ctx.restore();
+    }
   },
 };
 

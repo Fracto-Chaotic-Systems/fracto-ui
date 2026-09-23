@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import PropTypes, { bool } from "prop-types";
-import FractoColors from "../../../../../../sdk/FractoColors.js";
+import FractoCanvasBuffer from "../../../../../../sdk/FractoCanvasBuffer.js";
 
 export class GeneratorTile extends Component {
   static propTypes = {
@@ -27,7 +27,7 @@ export class GeneratorTile extends Component {
     const { canvas_ref } = this.state;
     const { width_px, canvas_buffer } = this.props;
     const ctx = canvas_ref.current.getContext("2d");
-    FractoColors.buffer_to_canvas(canvas_buffer, ctx, width_px / 255);
+    FractoCanvasBuffer.buffer_to_canvas(canvas_buffer, ctx, width_px / 255);
   };
 
   render() {
