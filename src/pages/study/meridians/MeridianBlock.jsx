@@ -6,7 +6,7 @@ import { render_aspect_badge, render_pattern_block } from "../StudyUtils.jsx";
 import CoolStyles from "../../../utils/ui/styles/CoolStyles.jsx";
 import { KEY_STUDY_MERIDIANS_FRAME_SETTINGS } from "../../../settings/StudySettings.jsx";
 import AppSettings from "../../../AppSettings.jsx";
-import FractoUtil from "../../../../../../sdk/FractoUtil.js";
+import FractoUtil from "@fracto/sdk/FractoUtil.js";
 
 export class StudyMeridians extends Component {
   static propTypes = {

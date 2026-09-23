@@ -2,7 +2,7 @@ import { Component } from "react";
 import PropTypes from "prop-types";
 
 import { CoolTable } from "../../../utils/ui/CoolImports.jsx";
-import FractoUtil from "../../../../../../sdk/FractoUtil.js";
+import FractoUtil from "@fracto/sdk/FractoUtil.js";
 import DataBackend from "../../../backend/DataBackend.jsx";
 
 import {

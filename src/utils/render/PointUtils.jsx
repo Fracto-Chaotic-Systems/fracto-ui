@@ -1,4 +1,4 @@
-import FractoFastCalc from "../../../../../sdk/FractoFastCalc";
+import FractoFastCalc from "@fracto/sdk/FractoFastCalc.js";
 
 const get_fracto_values = (click_point) => {
   if (click_point) {

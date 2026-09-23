@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { click_point_chart } from "./PatternsUtils.jsx";
-import FractoFastCalc from "../../../../../sdk/FractoFastCalc.js";
+import FractoFastCalc from "@fracto/sdk/FractoFastCalc.js";
 import FractoCanvasClient from "./FractoCanvasClient.jsx";
 import { copy_json } from "../Dom.jsx";
 

@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { Bar } from "react-chartjs-2";
 import { Chart as ChartJS, registerables } from "chart.js";
-import FractoUtil from "../../../../../sdk/FractoUtil.js";
+import FractoUtil from "@fracto/sdk/FractoUtil.js";
 
 import AppText from "../../AppText.jsx";
 import DataBackend from "../../backend/DataBackend.jsx";

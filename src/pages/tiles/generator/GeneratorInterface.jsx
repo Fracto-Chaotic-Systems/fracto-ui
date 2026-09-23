@@ -2,7 +2,7 @@ import {
   GENERATOR_CODE_CAN_DO,
   GENERATOR_CODE_INTERIOR,
 } from "./GeneratorControl.jsx";
-import FractoFastCalc from "../../../../../../sdk/FractoFastCalc.js";
+import FractoFastCalc from "@fracto/sdk/FractoFastCalc.js";
 import TilesBackend from "../../../backend/TilesBackend.jsx";
 
 const register_interior_tile = (tile) => {

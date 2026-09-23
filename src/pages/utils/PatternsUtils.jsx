@@ -4,9 +4,9 @@ ChartJS.register(...registerables);
 
 import { Scatter } from "react-chartjs-2";
 
-import Complex from "../../../../../sdk/math/Complex";
-import FractoUtil from "../../../../../sdk/FractoUtil";
-import FractoFastCalc from "../../../../../sdk/FractoFastCalc";
+import Complex from "@fracto/sdk/math/Complex.js";
+import FractoUtil from "@fracto/sdk/FractoUtil.js";
+import FractoFastCalc from "@fracto/sdk/FractoFastCalc.js";
 import { find_bounds } from "../../chart/ChartUtils.jsx";
 
 const EPSILON = 0.0001;

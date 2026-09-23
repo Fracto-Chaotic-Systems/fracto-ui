@@ -1,4 +1,4 @@
-import FractoUtil from "../../../../../../sdk/FractoUtil.js";
+import FractoUtil from "@fracto/sdk/FractoUtil.js";
 import {
   Chart as ChartJS,
   LinearScale,

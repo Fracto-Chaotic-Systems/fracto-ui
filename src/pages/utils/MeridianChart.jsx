@@ -11,7 +11,7 @@ import { Scatter } from "react-chartjs-2";
 
 // Register the necessary components
 ChartJS.register(LinearScale, LineElement, PointElement, Tooltip, Legend);
-import FractoUtil from "../../../../../sdk/FractoUtil.js";
+import FractoUtil from "@fracto/sdk/FractoUtil.js";
 import PropTypes from "prop-types";
 import { MainStyles as styles, MARGIN_PX } from "../../styles/MainStyles.jsx";
 

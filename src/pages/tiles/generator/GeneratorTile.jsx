@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import PropTypes, { bool } from "prop-types";
-import FractoCanvasBuffer from "../../../../../../sdk/FractoCanvasBuffer.js";
+import FractoCanvasBuffer from "@fracto/sdk/FractoCanvasBuffer.js";
 
 export class GeneratorTile extends Component {
   static propTypes = {

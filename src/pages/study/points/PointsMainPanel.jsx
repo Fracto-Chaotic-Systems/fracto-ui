@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 
-import FractoFastCalc from "../../../../../../sdk/FractoFastCalc.js";
+import FractoFastCalc from "@fracto/sdk/FractoFastCalc.js";
 
 import {
   MainStyles as styles,
@@ -19,7 +19,7 @@ import { KEY_STUDY_POINTS_LEGACY_ITERATIVE } from "../../../text/StudyText.jsx";
 import { update_dimensions } from "./../../PageUtils.jsx";
 import DataBackend from "../../../backend/DataBackend.jsx";
 import PointsSeriesChart from "./PointsSeriesChart.jsx";
-import Complex from "../../../../../../sdk/math/Complex.js";
+import Complex from "@fracto/sdk/math/Complex.js";
 
 const UPDATE_INTERVAL_MS = 1000;
 

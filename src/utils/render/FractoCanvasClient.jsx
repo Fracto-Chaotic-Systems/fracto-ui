@@ -5,7 +5,7 @@ import {
   KEY_NAVIGATOR_STRATEGY,
 } from "../../settings/NavigatorSettings.jsx";
 import TilesBackend from "../../backend/TilesBackend.jsx";
-import FractoCanvasBuffer from "../../../../../sdk/FractoCanvasBuffer.js";
+import FractoCanvasBuffer from "@fracto/sdk/FractoCanvasBuffer.js";
 
 let render_request_sequence = 0;
 
