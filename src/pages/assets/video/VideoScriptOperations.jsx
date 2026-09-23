@@ -37,6 +37,8 @@ export class VideoScriptOperations extends Component {
     frame_settings_subscription: null,
     editing_title: false,
     title_draft: this.props.selected_video?.title || "",
+    selected_step_index: 0,
+    scrollbar_height_px: 0,
   };
 
   steps_scroll_ref = React.createRef();
@@ -49,6 +51,7 @@ export class VideoScriptOperations extends Component {
       ),
     });
     this.initialize_first_step();
+    this.measure_steps_scrollbar();
   }
 
   componentWillUnmount() {
@@ -59,8 +62,16 @@ export class VideoScriptOperations extends Component {
   }
 
   componentDidUpdate(prevProps) {
+    this.measure_steps_scrollbar();
     if (prevProps.selected_video !== this.props.selected_video) {
       this.initialize_first_step();
+      this.setState({ selected_step_index: 0 });
+      // Opening a video is equivalent to selecting its first step. Apply the
+      // step's frame settings so Navigator follows the initial card too.
+      const current_steps = this.get_script_steps();
+      if (current_steps.length) {
+        this.select_step(0, current_steps[0]);
+      }
       const previous_step_count = this.get_script_for_video(
         prevProps.selected_video,
       ).steps?.length || 0;
@@ -82,6 +93,20 @@ export class VideoScriptOperations extends Component {
       }
     }
   }
+
+  measure_steps_scrollbar = () => {
+    requestAnimationFrame(() => {
+      const scroll_element = this.steps_scroll_ref.current;
+      if (!scroll_element) return;
+      const scrollbar_height_px = Math.max(
+        0,
+        scroll_element.offsetHeight - scroll_element.clientHeight,
+      );
+      if (scrollbar_height_px !== this.state.scrollbar_height_px) {
+        this.setState({ scrollbar_height_px });
+      }
+    });
+  };
 
   begin_title_edit = () => {
     this.setState({
@@ -205,18 +230,32 @@ export class VideoScriptOperations extends Component {
     });
   };
 
+  select_step = (step_index, step) => {
+    this.setState({ selected_step_index: step_index });
+    const current_frame_settings = this.get_current_frame_settings() || {};
+    AppSettings.on_settings_changed({
+      [KEY_VIDEO_GENERATOR_FRAME_SETTINGS]: {
+        ...current_frame_settings,
+        focal_point: { ...step.focal_point },
+        scope: step.scope,
+      },
+    });
+  };
+
   render_step = (step, step_index, content_height_px) => {
+    const is_selected = step_index === this.state.selected_step_index;
     return (
       <CoolStyles.Block
         key={`video-script-step-${step_index}`}
+        onClick={() => this.select_step(step_index, step)}
         style={{
           boxSizing: "border-box",
           flex: "0 0 120px",
           width: "120px",
           height: `${Math.max(0, content_height_px - 6)}px`,
-          border: "1.5px solid #888888",
+          border: is_selected ? "3px solid #555555" : "1.5px solid #888888",
           borderRadius: "10px",
-          backgroundColor: "white",
+          backgroundColor: is_selected ? "white" : "#eeeeee",
           boxShadow: "0.25rem 0.25rem 0.5rem rgba(0, 0, 0, 0.2)",
           overflow: "hidden",
           display: "flex",
@@ -226,6 +265,7 @@ export class VideoScriptOperations extends Component {
           paddingBottom: "0.5rem",
           margin: "3px 0 3px 3px",
           marginRight: "0.25rem",
+          cursor: "pointer",
         }}
       >
         <FractoRasterImage
@@ -253,6 +293,10 @@ export class VideoScriptOperations extends Component {
       0,
       height_px - SCRIPT_HEADER_HEIGHT_PX,
     );
+    const card_area_height_px = Math.max(
+      0,
+      content_height_px - this.state.scrollbar_height_px,
+    );
     return (
       <CoolStyles.Block
         ref={this.steps_scroll_ref}
@@ -269,11 +313,11 @@ export class VideoScriptOperations extends Component {
             display: "flex",
             width: "max-content",
             minWidth: "100%",
-            height: `${content_height_px}px`,
+            height: `${card_area_height_px}px`,
           }}
         >
           {steps.map((step, step_index) =>
-            this.render_step(step, step_index, content_height_px),
+            this.render_step(step, step_index, card_area_height_px),
           )}
         </CoolStyles.Block>
       </CoolStyles.Block>

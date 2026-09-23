@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import CoolStyles from "../../../utils/ui/styles/CoolStyles.jsx";
 import CoolTable from "../../../utils/ui/CoolTable.jsx";
 import { close_icon } from "../../../utils/ui/CoolIcons.jsx";
+import { parse_database_timestamp } from "../../../utils/DatabaseDate.js";
 import {
   TABLE_CAN_SELECT,
   CELL_ALIGN_CENTER,
@@ -41,18 +42,6 @@ export class VideoRecordsTable extends Component {
     }
   }
 
-  get_video_timestamp = (timestamp) => {
-    if (!timestamp) return 0;
-    if (timestamp instanceof Date) return timestamp;
-    if (
-      typeof timestamp === "string" &&
-      !/[zZ]|[+-]\d{2}:?\d{2}$/.test(timestamp)
-    ) {
-      return new Date(`${timestamp.replace(" ", "T")}Z`);
-    }
-    return new Date(timestamp);
-  };
-
   get_video_description = (meta) => {
     if (meta && typeof meta === "object") return meta.description || "";
     if (typeof meta !== "string") return "";
@@ -80,8 +69,8 @@ export class VideoRecordsTable extends Component {
     const { records } = this.props;
     return [...records].sort(
       (first, second) =>
-        this.get_video_timestamp(second.updated_at) -
-        this.get_video_timestamp(first.updated_at),
+        parse_database_timestamp(second.updated_at) -
+        parse_database_timestamp(first.updated_at),
     );
   };
 
@@ -89,7 +78,7 @@ export class VideoRecordsTable extends Component {
     const { records, height_px, on_select, on_close } = this.props;
     const sorted_records = this.get_sorted_records();
     const table_records = sorted_records.map((record) => ({
-      updated: this.get_video_timestamp(record.updated_at),
+      updated: parse_database_timestamp(record.updated_at),
       steps: this.get_video_step_count(record.script),
       description: this.get_video_description(record.meta),
     }));

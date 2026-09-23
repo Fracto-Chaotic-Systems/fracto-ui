@@ -20,6 +20,7 @@ import {
 } from "../../../utils/ui/styles/CoolTableStyles.jsx";
 import { forEach } from "mathjs";
 import { bounds_from_short_code } from "../TilesUtils.jsx";
+import { parse_database_timestamp } from "../../../utils/DatabaseDate.js";
 import AppText from "../../../AppText.jsx";
 import {
   PAGE_MODE_AUTOMATION,
@@ -47,22 +48,6 @@ import {
 const LinkedCell = styled(CoolStyles.InlineBlock)`
   margin: 0;
 `;
-
-const parse_database_timestamp = (timestamp) => {
-  if (!timestamp) {
-    return 0;
-  }
-  if (timestamp instanceof Date) {
-    return timestamp;
-  }
-  if (
-    typeof timestamp === "string" &&
-    !/[zZ]|[+-]\d{2}:?\d{2}$/.test(timestamp)
-  ) {
-    return new Date(`${timestamp.replace(" ", "T")}Z`);
-  }
-  return new Date(timestamp);
-};
 
 const COVERAGE_TABLE_COLUMNS = [
   {
