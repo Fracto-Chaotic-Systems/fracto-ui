@@ -50,6 +50,7 @@ export class CoolTable extends Component {
     selected_rows: PropTypes.array,
     scroll_selected_row: PropTypes.bool,
     table_style: PropTypes.object,
+    render_special_row: PropTypes.func,
   };
 
   static defaultProps = {
@@ -58,6 +59,7 @@ export class CoolTable extends Component {
     selected_rows: [],
     scroll_selected_row: false,
     table_style: {},
+    render_special_row: null,
   };
 
   state = {
@@ -371,8 +373,15 @@ export class CoolTable extends Component {
 
   render() {
     const { scroller_ref } = this.state;
-    const { columns, data, options, table_style, selected_row, selected_rows } =
-      this.props;
+    const {
+      columns,
+      data,
+      options,
+      table_style,
+      selected_row,
+      selected_rows,
+      render_special_row,
+    } = this.props;
     const has_single_select = options.includes(TABLE_CAN_SELECT);
     const has_multi_select = options.includes(TABLE_MULTI_SELECT);
     if (has_single_select && has_multi_select) {
@@ -385,6 +394,14 @@ export class CoolTable extends Component {
       columns_clone.unshift(HEADER_COLUMN_SELECT);
     }
     const table_rows = data.map((obj, row) => {
+      if (render_special_row) {
+        const special_row = render_special_row(
+          obj,
+          row,
+          columns_clone.length,
+        );
+        if (special_row) return special_row;
+      }
       const row_cells = columns_clone.map((column, col) => {
         if (column.id === COLUMN_ID_SELECT) {
           return this.render_selector(row, column, has_multi_select);

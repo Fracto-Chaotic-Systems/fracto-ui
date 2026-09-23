@@ -203,7 +203,7 @@ const commit_columns = (commits, available_width) => {
           return hash_label(commit[id]?.hash || commit[id]).length;
         if (id === "date") return "moments ago".length;
         if (id === "change_summary")
-          return change_summary_text(commit[id]?.[1] || commit[id]).length;
+          return change_summary_text(commit[id]?.[1] || commit).length;
         return text_value(commit[id]).length;
       }),
     );
@@ -275,6 +275,32 @@ const commit_columns = (commits, available_width) => {
       },
     };
   });
+};
+
+const render_tag_marker = (row, row_index, column_count) => {
+  if (row?.row_type !== "tag") return null;
+  return (
+    <tr key={`tag-marker-${row.tag}-${row_index}`}>
+      <td
+        colSpan={column_count}
+        style={{
+          height: "1.25rem",
+          padding: "0.125rem 0.5rem",
+          textAlign: "center",
+          backgroundColor: "#eef7f3",
+          borderTop: "1px solid #76a88f",
+          borderBottom: "1px solid #76a88f",
+          color: "#315c47",
+          fontFamily: "monospace",
+          fontSize: "0.8rem",
+          fontWeight: "bold",
+          letterSpacing: "1px",
+        }}
+      >
+        {row.tag}
+      </td>
+    </tr>
+  );
 };
 
 export class AdminCommits extends Component {
@@ -365,16 +391,31 @@ export class AdminCommits extends Component {
     const any_repository_hidden = REPOSITORY_NAMES.some(
       (repository) => repository_visibility[repository] === false,
     );
-    const commit_rows = visible_commits.map((commit) => ({
-      ...commit,
-      repository: [render_repository_link, commit.repository],
-      hash: [
-        render_commit_hash,
-        { hash: commit.hash, repository: commit.repository },
-      ],
-      date: [render_commit_date, commit.date],
-      change_summary: [render_change_summary, commit],
-    }));
+    // A coordinated milestone tag exists in every repository. Track the last
+    // visible occurrence so the shared marker is rendered once, immediately
+    // after the oldest repository commit carrying that tag.
+    const tag_last_indices = new Map();
+    visible_commits.forEach((commit, commit_index) => {
+      (commit.tags || []).forEach((tag) => {
+        tag_last_indices.set(tag, commit_index);
+      });
+    });
+    const commit_rows = visible_commits.flatMap((commit, commit_index) => {
+      const commit_row = {
+        ...commit,
+        repository: [render_repository_link, commit.repository],
+        hash: [
+          render_commit_hash,
+          { hash: commit.hash, repository: commit.repository },
+        ],
+        date: [render_commit_date, commit.date],
+        change_summary: [render_change_summary, commit],
+      };
+      const tag_rows = [...tag_last_indices.entries()]
+        .filter(([, last_index]) => last_index === commit_index)
+        .map(([tag]) => ({ row_type: "tag", tag }));
+      return [commit_row, ...tag_rows];
+    });
     return (
       <>
         <styles.SectionTitle
@@ -465,8 +506,9 @@ export class AdminCommits extends Component {
           )}
           {!!commits.length && (
             <CoolTable
-              columns={commit_columns(commit_rows, rendered_width)}
+              columns={commit_columns(visible_commits, rendered_width)}
               data={commit_rows}
+              render_special_row={render_tag_marker}
               table_style={{
                 width: "100%",
                 height: `calc(100% - ${TABLE_HEADER_SPACE_PX}px)`,
