@@ -7,7 +7,7 @@ import { KEY_NAVIGATOR_DISABLED } from "../../settings/NavigatorSettings.jsx";
 import AppText from "../../AppText.jsx";
 import { KEY_HEAT_MAP_FETCHING } from "../../text/NavigatorText.jsx";
 
-import FractoCanvasBuffer from "./FractoCanvasBuffer.jsx";
+import FractoCanvasBuffer from "@fracto/sdk/FractoCanvasBuffer.js";
 import TilesBackend from "../../backend/TilesBackend.jsx";
 
 export const INCLUDE_CAN_DO = "include_can_do";

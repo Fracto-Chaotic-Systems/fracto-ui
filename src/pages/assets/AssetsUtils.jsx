@@ -11,7 +11,7 @@ import AppSettings from "../../AppSettings.jsx";
 import { KEY_VIEWPORT_DIMENSIONS } from "../../settings/RootSettings.jsx";
 import { KEY_ASSETS_SPLITTER_POS_PX } from "../../settings/AssetsSettings.jsx";
 import MinibrotBackend from "../../backend/MinibrotBackend.jsx";
-import FractoColors from "../../utils/render/FractoColors.jsx";
+import FractoUIColors from "../../utils/render/FractoUIColors.jsx";
 
 export const RESOLUTIONS = [
   { label: "150", value: 150, help: "thumbnail" },
@@ -97,7 +97,7 @@ export const get_level_colors = (heat_map_buffer) => {
   if (!heat_map_buffer?.length) {
     return {};
   }
-  const greys_map = FractoColors.get_heat_map_greys_map(heat_map_buffer);
+  const greys_map = FractoUIColors.get_heat_map_greys_map(heat_map_buffer);
   return Object.fromEntries(
     Object.entries(greys_map).map(([key, grey]) => [
       Number(key.slice(1)),

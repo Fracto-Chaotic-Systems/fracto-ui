@@ -14,7 +14,7 @@ import {
 import { Bar } from "react-chartjs-2";
 
 import CoolStyles from "../../../utils/ui/styles/CoolStyles";
-import FractoColors from "../../../utils/render/FractoColors.jsx";
+import FractoUIColors from "../../../utils/render/FractoUIColors.jsx";
 import { collect_orbitals } from "./CanvasBufferUtils";
 import PropTypes from "prop-types";
 
@@ -117,7 +117,7 @@ export class FieldsColorChart extends Component {
           label: "orbitals",
           data: bin_keys.map((key) => orbital_bins[key].bin_count),
           backgroundColor: bin_keys.map((key) =>
-            FractoColors.pattern_color_hsl(orbital_bins[key].orbital),
+            FractoUIColors.pattern_color_hsl(orbital_bins[key].orbital),
           ),
           barThickness: "flex",
         },

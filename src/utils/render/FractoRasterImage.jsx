@@ -6,7 +6,7 @@ import AppSettings from "../../AppSettings.jsx";
 import {
   KEY_NAVIGATOR_STRATEGY,
 } from "../../settings/NavigatorSettings.jsx";
-import FractoColors from "./FractoColors.jsx";
+import FractoUIColors from "./FractoUIColors.jsx";
 import FractoCanvasClient from "./FractoCanvasClient.jsx";
 
 export class FractoRasterImage extends Component {
@@ -26,7 +26,7 @@ export class FractoRasterImage extends Component {
   static defaultProps = {
     aspect_ratio: 1.0,
     disabled: false,
-    color_handler: FractoColors.pattern_color_hsl,
+    color_handler: FractoUIColors.pattern_color_hsl,
     resolution_factor: 1.5,
     data_endpoint: "canvas_buffer",
   };

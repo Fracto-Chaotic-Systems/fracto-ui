@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { MainStyles as styles, MARGIN_PX } from "../../styles/MainStyles.jsx";
-import FractoColors from "../../utils/render/FractoColors.jsx";
+import FractoUIColors from "../../utils/render/FractoUIColors.jsx";
 import { CoolStyles } from "../../utils/ui/CoolImports.jsx";
 
 export const FETCH_JSON_HEADERS = {
@@ -131,7 +131,7 @@ export const render_magnitude = (magnitude, is_pico = false) => {
 };
 
 export const render_pattern_block = (pattern, font_size_px = 18) => {
-  const pattern_color = FractoColors.pattern_color(pattern);
+  const pattern_color = FractoUIColors.pattern_color(pattern);
   // console.log('pattern_color', pattern_color)
   const padding_top = Math.min(2 + font_size_px / 30, 4);
   const padding_side = 2 + font_size_px / 12;
@@ -149,7 +149,7 @@ export const render_pattern_block = (pattern, font_size_px = 18) => {
 };
 
 export const render_aspect_badge = (aspect, pattern, font_size_px = 18) => {
-  const pattern_color = FractoColors.pattern_color(pattern, 90, 30);
+  const pattern_color = FractoUIColors.pattern_color(pattern, 90, 30);
   // console.log('pattern_color', pattern_color)
   const block_style = {
     textShadow: "3px 3px 6px rgba(0,0,0,0.75)",

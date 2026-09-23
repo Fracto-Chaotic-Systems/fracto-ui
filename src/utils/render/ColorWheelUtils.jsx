@@ -1,4 +1,4 @@
-import FractoColors from "./FractoColors.jsx";
+import FractoUIColors from "./FractoUIColors.jsx";
 
 export const TWO_PI = 2 * Math.PI;
 const PI_BY_2 = Math.PI / 2;
@@ -15,7 +15,7 @@ const draw_region = (
   opacity = 1.0,
   outline = false,
 ) => {
-  const [h, s, l] = FractoColors.fracto_pattern_color_hsl(pattern, 500);
+  const [h, s, l] = FractoUIColors.fracto_pattern_color_hsl(pattern, 500);
   const color = `hsla(${h + color_phase}, ${s}%, ${l}%, ${opacity})`;
   ctx.fillStyle = color;
   ctx.strokeStyle = outline ? "black" : color;
@@ -139,7 +139,7 @@ export const color_wheel = (
     }
   }
 
-  let [h, s, l] = FractoColors.fracto_pattern_color_hsl(1, 500);
+  let [h, s, l] = FractoUIColors.fracto_pattern_color_hsl(1, 500);
   const opacity = get_opacity(orbital_bins, 1);
   draw_circle(
     ctx,

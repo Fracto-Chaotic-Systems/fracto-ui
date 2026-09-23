@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 
 import { ColorWheelStyles as styles } from "./styles/ColorWheelStyles";
 import { color_wheel, draw_circle, TWO_PI } from "./ColorWheelUtils";
-import FractoColors from "./FractoColors.jsx";
+import FractoUIColors from "./FractoUIColors.jsx";
 
 export class FractoColorWheel extends Component {
   static propTypes = {
@@ -45,7 +45,7 @@ export class FractoColorWheel extends Component {
 
     const size_by_two = width_px / 2;
     const angle = -Math.PI / 2 - (temp_color_phase * TWO_PI) / 360;
-    let [h, s, l] = FractoColors.fracto_pattern_color_hsl(1, 500);
+    let [h, s, l] = FractoUIColors.fracto_pattern_color_hsl(1, 500);
     const ball_color = `hsl(0, ${s}%, ${l}%)`;
     const radius_margin = width_px / 30;
     const indicator_x =
