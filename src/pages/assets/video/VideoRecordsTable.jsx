@@ -7,6 +7,7 @@ import { close_icon } from "../../../utils/ui/CoolIcons.jsx";
 import { parse_database_timestamp } from "../../../utils/DatabaseDate.js";
 import {
   TABLE_CAN_SELECT,
+  TABLE_NO_BORDER,
   CELL_ALIGN_CENTER,
   CELL_ALIGN_LEFT,
   CELL_TYPE_NUMBER,
@@ -124,7 +125,10 @@ export class VideoRecordsTable extends Component {
               },
             ]}
             data={table_records}
-            options={[TABLE_CAN_SELECT]}
+            options={[
+              TABLE_CAN_SELECT,
+              ...(on_close ? [TABLE_NO_BORDER] : []),
+            ]}
             selected_row={this.state.selected_row}
             on_select_row={(row) => {
               this.setState({ selected_row: row });

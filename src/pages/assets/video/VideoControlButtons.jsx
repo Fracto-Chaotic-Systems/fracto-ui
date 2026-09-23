@@ -16,7 +16,7 @@ import {
 export const CONTROL_ACTION_UNDO = "undo_video";
 export const CONTROL_ACTION_REDO = "redo_video";
 
-const BUTTON_SIZE_PX = 35;
+const BUTTON_SIZE_PX = 20;
 
 export class VideoControlButtons extends Component {
   static propTypes = {
@@ -46,8 +46,14 @@ export class VideoControlButtons extends Component {
         title={AppText.get(text_key)}
         aria_label={AppText.get(text_key)}
         content={is_undo ? video_undo_icon : video_redo_icon}
+        icon_style={{ width: "16px", height: "16px" }}
         disabled={is_undo ? !can_undo : !can_redo}
-        style={{ width: BUTTON_SIZE_PX, height: BUTTON_SIZE_PX, margin: "0 2px" }}
+        style={{
+          width: BUTTON_SIZE_PX,
+          height: BUTTON_SIZE_PX,
+          boxSizing: "border-box",
+          margin: "0 2px",
+        }}
       />
     );
   };
@@ -60,7 +66,6 @@ export class VideoControlButtons extends Component {
         style={{
           display: "flex",
           marginLeft: "0.5rem",
-          marginBottom: "0.5rem",
         }}
       >
         {undo_button}

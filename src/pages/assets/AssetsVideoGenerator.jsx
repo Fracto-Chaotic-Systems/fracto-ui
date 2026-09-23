@@ -338,7 +338,6 @@ export class AssetsVideoGenerator extends Component {
     const {
       coverage_data,
       heat_map_buffer,
-      video_script,
       selected_coverage_levels,
       video_records,
       selected_video,
@@ -373,7 +372,6 @@ export class AssetsVideoGenerator extends Component {
     );
     const control_block = (
       <VideoControlBlock
-        video_script={video_script}
         coverage_data={coverage_data}
         heat_map_buffer={heat_map_buffer}
         video_records={video_records}
@@ -382,9 +380,6 @@ export class AssetsVideoGenerator extends Component {
         on_close_video_list={this.on_close_video_list}
         selected_levels={selected_coverage_levels}
         on_coverage_levels_changed={this.on_coverage_levels_changed}
-        on_control_action={this.on_control_action}
-        can_undo={video_history?.can_undo() || false}
-        can_redo={video_history?.can_redo() || false}
       />
     );
     const operations_block = (
@@ -395,6 +390,9 @@ export class AssetsVideoGenerator extends Component {
         on_video_change={this.on_video_change}
         on_video_select={this.on_video_select}
         on_new_video={this.new_video}
+        on_control_action={this.on_control_action}
+        can_undo={video_history?.can_undo() || false}
+        can_redo={video_history?.can_redo() || false}
       />
     );
     return [

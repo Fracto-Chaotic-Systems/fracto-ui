@@ -18,6 +18,9 @@ export class VideoOperationsBlock extends Component {
     height_px: PropTypes.number.isRequired,
     selected_video: PropTypes.object,
     on_video_change: PropTypes.func,
+    on_control_action: PropTypes.func.isRequired,
+    can_undo: PropTypes.bool,
+    can_redo: PropTypes.bool,
     on_video_select: PropTypes.func,
     on_new_video: PropTypes.func,
   };
@@ -106,6 +109,9 @@ export class VideoOperationsBlock extends Component {
               height_px={height_px}
               selected_video={selected_video}
               on_video_change={this.props.on_video_change}
+              on_control_action={this.props.on_control_action}
+              can_undo={this.props.can_undo}
+              can_redo={this.props.can_redo}
             />
           </CoolStyles.Block>
           <CoolSplitter

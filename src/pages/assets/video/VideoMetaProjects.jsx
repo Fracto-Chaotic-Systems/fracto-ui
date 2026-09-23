@@ -85,7 +85,6 @@ export class VideoMetaProjects extends Component {
           style={{
             height: `${content_height_px}px`,
             width: `${width_px}px`,
-            overflow: "auto",
           }}
         >
           <VideoRecordsTable

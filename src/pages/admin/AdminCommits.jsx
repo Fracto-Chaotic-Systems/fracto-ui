@@ -12,6 +12,7 @@ import { CELL_LABEL_STYLE } from "../../utils/ui/styles/CoolStyles.jsx";
 import { SETTING_LABEL_STYLE } from "../../utils/ui/styles/SettingStyles.jsx";
 import ReactTimeAgo from "react-time-ago";
 import {
+  CoolTableStyles as table_styles,
   CELL_ALIGN_CENTER,
   CELL_ALIGN_LEFT,
   CELL_ALIGN_RIGHT,
@@ -48,6 +49,8 @@ const TABLE_HEADER_SPACE_PX = 40;
 const MONOSPACE_CHARACTER_WIDTH_PX = 8;
 const MESSAGE_CHARACTER_WIDTH_PX = 9.5;
 const COLUMN_HORIZONTAL_PADDING_PX = 16;
+const COMPACT_COLUMN_WIDTH_PX = 100;
+const HASH_COLUMN_SAFETY_PX = 12;
 const COMMIT_FIELDS = [
   [
     "repository",
@@ -193,10 +196,11 @@ const render_commit_date = (date) => {
   );
 };
 const commit_columns = (commits, available_width) => {
+  const width_commits = commits.filter((commit) => commit?.row_type !== "tag");
   const intrinsic = COMMIT_FIELDS.map(([id, label_key]) => {
     const widest = Math.max(
       text_label(label_key).length,
-      ...commits.map((commit) => {
+      ...width_commits.map((commit) => {
         if (id === "repository")
           return repository_label(commit[id]?.[1] || commit[id]).length;
         if (id === "hash")
@@ -211,20 +215,37 @@ const commit_columns = (commits, available_width) => {
       id === "message"
         ? MESSAGE_CHARACTER_WIDTH_PX
         : MONOSPACE_CHARACTER_WIDTH_PX;
-    return Math.max(
+    const width_px = Math.max(
       48,
-      widest * character_width + COLUMN_HORIZONTAL_PADDING_PX,
+      widest * character_width +
+        COLUMN_HORIZONTAL_PADDING_PX +
+        (id === "hash" ? HASH_COLUMN_SAFETY_PX : 0),
     );
+    return id === "repository"
+      ? COMPACT_COLUMN_WIDTH_PX
+      : width_px;
   });
   const intrinsic_total = intrinsic.reduce((sum, width) => sum + width, 0);
   const target_width = Math.max(
     intrinsic_total,
     available_width || intrinsic_total,
   );
+  const flexible_indices = COMMIT_FIELDS.map((field, index) =>
+    field[0] === "repository" ? null : index,
+  ).filter((index) => index !== null);
+  const flexible_total = flexible_indices.reduce(
+    (sum, index) => sum + intrinsic[index],
+    0,
+  );
+  const flexible_target = Math.max(
+    0,
+    target_width - COMPACT_COLUMN_WIDTH_PX,
+  );
   return COMMIT_FIELDS.map(([id, label_key, type, align], index) => {
-    const width_px = Math.round(
-      (target_width * intrinsic[index]) / intrinsic_total,
-    );
+    const width_px =
+      id === "repository"
+        ? COMPACT_COLUMN_WIDTH_PX
+        : Math.round((flexible_target * intrinsic[index]) / flexible_total);
     return {
       id,
       label_key,
@@ -277,13 +298,17 @@ const commit_columns = (commits, available_width) => {
   });
 };
 
-const render_tag_marker = (row, row_index, column_count) => {
+const render_tag_marker = (row, row_index) => {
   if (row?.row_type !== "tag") return null;
   return (
-    <tr key={`tag-marker-${row.tag}-${row_index}`}>
-      <td
-        colSpan={column_count}
+    <table_styles.TableRow
+      key={`tag-marker-${row.tag}-${row_index}`}
+      style={{ display: "block", width: "100%" }}
+    >
+      <table_styles.TableCell
         style={{
+          display: "block",
+          width: "100%",
           height: "1.25rem",
           padding: "0.125rem 0.5rem",
           textAlign: "center",
@@ -295,11 +320,12 @@ const render_tag_marker = (row, row_index, column_count) => {
           fontSize: "0.8rem",
           fontWeight: "bold",
           letterSpacing: "1px",
+          maxHeight: "none",
         }}
       >
         {row.tag}
-      </td>
-    </tr>
+      </table_styles.TableCell>
+    </table_styles.TableRow>
   );
 };
 

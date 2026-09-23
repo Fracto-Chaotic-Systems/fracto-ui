@@ -5,6 +5,7 @@ import AppText from "../../../AppText.jsx";
 import CoolStyles from "../../../utils/ui/styles/CoolStyles.jsx";
 import CoolButton from "../../../utils/ui/CoolButton.jsx";
 import CoolInputText from "../../../utils/ui/CoolInputText.jsx";
+import VideoControlButtons from "./VideoControlButtons.jsx";
 import { BACKGROUND_FIELD_GRADIENT } from "../../../styles/BackgroundStyles.jsx";
 import FractoRasterImage from "../../../utils/render/FractoRasterImage.jsx";
 import AppSettings from "../../../AppSettings.jsx";
@@ -30,6 +31,9 @@ export class VideoScriptOperations extends Component {
     height_px: PropTypes.number.isRequired,
     selected_video: PropTypes.object.isRequired,
     on_video_change: PropTypes.func.isRequired,
+    on_control_action: PropTypes.func.isRequired,
+    can_undo: PropTypes.bool,
+    can_redo: PropTypes.bool,
   };
 
   state = {
@@ -41,7 +45,14 @@ export class VideoScriptOperations extends Component {
     scrollbar_height_px: 0,
   };
 
+  static defaultProps = {
+    can_undo: false,
+    can_redo: false,
+  };
+
   steps_scroll_ref = React.createRef();
+  step_refs = new Map();
+  pending_step_index = null;
 
   componentDidMount() {
     this.setState({
@@ -51,6 +62,13 @@ export class VideoScriptOperations extends Component {
       ),
     });
     this.initialize_first_step();
+    // On the first page load this component mounts after the persisted video
+    // is restored, so there is no prop update to trigger componentDidUpdate.
+    // Treat the initial card exactly like a user-selected step.
+    const initial_steps = this.get_script_steps();
+    if (initial_steps.length) {
+      this.select_step(0, initial_steps[0]);
+    }
     this.measure_steps_scrollbar();
   }
 
@@ -65,12 +83,22 @@ export class VideoScriptOperations extends Component {
     this.measure_steps_scrollbar();
     if (prevProps.selected_video !== this.props.selected_video) {
       this.initialize_first_step();
-      this.setState({ selected_step_index: 0 });
       // Opening a video is equivalent to selecting its first step. Apply the
       // step's frame settings so Navigator follows the initial card too.
       const current_steps = this.get_script_steps();
       if (current_steps.length) {
-        this.select_step(0, current_steps[0]);
+        const selected_step_index = Math.min(
+          this.pending_step_index ?? 0,
+          current_steps.length - 1,
+        );
+        this.pending_step_index = null;
+        this.select_step(
+          selected_step_index,
+          current_steps[selected_step_index],
+        );
+      } else {
+        this.pending_step_index = null;
+        this.setState({ selected_step_index: 0 });
       }
       const previous_step_count = this.get_script_for_video(
         prevProps.selected_video,
@@ -190,6 +218,7 @@ export class VideoScriptOperations extends Component {
     const { selected_video, on_video_change } = this.props;
     const frame_settings = this.get_current_frame_settings();
     const steps = this.get_script_steps();
+    this.pending_step_index = steps.length;
     on_video_change({
       script: {
         ...this.get_script(),
@@ -231,7 +260,9 @@ export class VideoScriptOperations extends Component {
   };
 
   select_step = (step_index, step) => {
-    this.setState({ selected_step_index: step_index });
+    this.setState({ selected_step_index: step_index }, () => {
+      this.scroll_step_into_view(step_index);
+    });
     const current_frame_settings = this.get_current_frame_settings() || {};
     AppSettings.on_settings_changed({
       [KEY_VIDEO_GENERATOR_FRAME_SETTINGS]: {
@@ -242,11 +273,42 @@ export class VideoScriptOperations extends Component {
     });
   };
 
+  scroll_step_into_view = (step_index) => {
+    requestAnimationFrame(() => {
+      const scroll_element = this.steps_scroll_ref.current;
+      const step_element = this.step_refs.get(step_index);
+      if (!scroll_element || !step_element) return;
+      const visible_left = scroll_element.scrollLeft;
+      const visible_right = visible_left + scroll_element.clientWidth;
+      const step_left = step_element.offsetLeft;
+      const step_right = step_left + step_element.offsetWidth;
+      let next_scroll_left = visible_left;
+      if (step_left < visible_left) {
+        next_scroll_left = step_left;
+      } else if (step_right > visible_right) {
+        next_scroll_left = step_right - scroll_element.clientWidth;
+      }
+      if (next_scroll_left !== visible_left) {
+        scroll_element.scrollTo({
+          left: Math.max(0, next_scroll_left),
+          behavior: "smooth",
+        });
+      }
+    });
+  };
+
   render_step = (step, step_index, content_height_px) => {
     const is_selected = step_index === this.state.selected_step_index;
     return (
       <CoolStyles.Block
         key={`video-script-step-${step_index}`}
+        ref={(element) => {
+          if (element) {
+            this.step_refs.set(step_index, element);
+          } else {
+            this.step_refs.delete(step_index);
+          }
+        }}
         onClick={() => this.select_step(step_index, step)}
         style={{
           boxSizing: "border-box",
@@ -325,7 +387,14 @@ export class VideoScriptOperations extends Component {
   };
 
   render() {
-    const { width_px, height_px, selected_video } = this.props;
+    const {
+      width_px,
+      height_px,
+      selected_video,
+      on_control_action,
+      can_undo,
+      can_redo,
+    } = this.props;
     const { editing_title, title_draft } = this.state;
     const can_add_step = this.can_add_step();
     const title = editing_title ? (
@@ -368,7 +437,7 @@ export class VideoScriptOperations extends Component {
             boxSizing: "border-box",
             width: `${width_px}px`,
             height: `${SCRIPT_HEADER_HEIGHT_PX}px`,
-            padding: "0 0.5rem",
+            padding: "0 0.25rem",
             borderBottom: "1px solid #666666",
           }}
         >
@@ -378,7 +447,19 @@ export class VideoScriptOperations extends Component {
             primary
             disabled={!can_add_step}
           />
-          {title}
+          <CoolStyles.InlineBlock
+            style={{
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            {title}
+            <VideoControlButtons
+              can_undo={can_undo}
+              can_redo={can_redo}
+              on_control_action={on_control_action}
+            />
+          </CoolStyles.InlineBlock>
         </CoolStyles.Block>
         {this.render_steps()}
       </CoolStyles.Block>

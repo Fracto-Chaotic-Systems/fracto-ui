@@ -11,23 +11,18 @@ import {
 
 import { CoolStyles } from "../../../utils/ui/styles/CoolStyles.jsx";
 import { MainStyles as styles } from "../../../styles/MainStyles.jsx";
-import VideoControlButtons from "./VideoControlButtons.jsx";
 import VideoRecordsTable from "./VideoRecordsTable.jsx";
 
 export class VideoControlBlock extends Component {
   static propTypes = {
-    video_script: PropTypes.object,
     coverage_data: PropTypes.object,
     heat_map_buffer: PropTypes.object,
     video_records: PropTypes.array,
     selected_levels: PropTypes.array,
     on_coverage_levels_changed: PropTypes.func,
-    on_control_action: PropTypes.func.isRequired,
     on_video_select: PropTypes.func,
     on_close_video_list: PropTypes.func,
     open_table_height_px: PropTypes.number,
-    can_undo: PropTypes.bool,
-    can_redo: PropTypes.bool,
   };
 
   static defaultProps = {
@@ -37,8 +32,6 @@ export class VideoControlBlock extends Component {
     on_video_select: () => {},
     on_close_video_list: () => {},
     open_table_height_px: 0,
-    can_undo: false,
-    can_redo: false,
   };
 
   state = {
@@ -100,31 +93,16 @@ export class VideoControlBlock extends Component {
 
   render() {
     const {
-      on_control_action,
-      video_script,
       coverage_data,
       heat_map_buffer,
       video_records,
-      can_undo,
-      can_redo,
     } = this.props;
     const coverage_table =
       video_records === null
         ? this.render_coverage_table()
         : this.render_video_table();
-    const control_buttons = (
-      <VideoControlButtons
-        video_script={video_script}
-        coverage_data={coverage_data}
-        heat_map_buffer={heat_map_buffer}
-        can_undo={can_undo}
-        can_redo={can_redo}
-        on_control_action={on_control_action}
-      />
-    );
     return (
       <CoolStyles.InlineBlock>
-        {control_buttons}
         {coverage_data ? <styles.HalfRemSpacer /> : ""}
         {coverage_table}
       </CoolStyles.InlineBlock>
