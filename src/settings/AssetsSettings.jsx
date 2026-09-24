@@ -9,6 +9,7 @@ import { DEFAULT_SIDEBAR_WIDTH } from "../constants.jsx";
 const ASSETS_FOLDER = "assets";
 const ASSETS_GENERATOR_FOLDER = "assets/generator";
 const ASSETS_DETECTOR_FOLDER = "assets/detector";
+const ASSETS_SIMULATOR_FOLDER = "assets/simulator";
 const ASSETS_GALLERY_FOLDER = "assets/gallery";
 const VIDEO_GENERATOR_FOLDER = "assets/video";
 const ASSETS_LORE_FOLDER = "assets/lore";
@@ -27,6 +28,7 @@ export const ASSETS_GALLERY = "assets_gallery";
 export const ASSETS_LORE = "assets_lore";
 export const ASSETS_LORE_STYLES = "assets_lore_styles";
 export const ASSETS_DETECTOR = "assets_detector";
+export const ASSETS_SIMULATOR = "assets_simulator";
 
 export const KEY_ASSETS_GENERATOR_FRAME_SETTINGS = `${ASSETS_GENERATOR_FOLDER}/frame_settings`;
 export const KEY_ASSETS_GENERATOR_SPLITTER_POS = `${ASSETS_GENERATOR_FOLDER}/splitter_pos`;
@@ -46,6 +48,11 @@ export const KEY_ASSETS_DETECTOR_SPLITTER_POS = `${ASSETS_DETECTOR_FOLDER}/split
 export const KEY_ASSETS_DETECTOR_LEGEND_SPLITTER_POS = `${ASSETS_DETECTOR_FOLDER}/legend_splitter_pos`;
 export const KEY_ASSETS_DETECTOR_STEPS_SPLITTER_POS = `${ASSETS_DETECTOR_FOLDER}/steps_splitter_pos`;
 export const KEY_ASSETS_DETECTOR_RESOLUTION = `${ASSETS_DETECTOR_FOLDER}/generator_resolution`;
+
+export const KEY_ASSETS_SIMULATOR_FRAME_SETTINGS = `${ASSETS_SIMULATOR_FOLDER}/frame_settings`;
+export const KEY_ASSETS_SIMULATOR_SPLITTER_POS = `${ASSETS_SIMULATOR_FOLDER}/splitter_pos`;
+export const KEY_ASSETS_SIMULATOR_LEGEND_SPLITTER_POS = `${ASSETS_SIMULATOR_FOLDER}/legend_splitter_pos`;
+export const KEY_ASSETS_SIMULATOR_STEPS_SPLITTER_POS = `${ASSETS_SIMULATOR_FOLDER}/steps_splitter_pos`;
 
 export const KEY_ASSETS_LIST_SELECTED_ROW = `${ASSETS_GALLERY_FOLDER}/selected_row`;
 export const KEY_ASSETS_GALLERY_RENDER_SPLITTER_POS = `${ASSETS_GALLERY_FOLDER}/render_splitter_pos_px`;
@@ -166,6 +173,33 @@ export const APP_ASSETS_SETTINGS = {
     description: "Frame settings of the assets detector page",
     persist: true,
     no_copy: true,
+  },
+  [KEY_ASSETS_SIMULATOR_FRAME_SETTINGS]: {
+    data_type: TYPE_OBJECT,
+    default_value: DEFAULT_FRAME_SETTINGS,
+    description: "Frame settings of the assets flight simulator page",
+    persist: true,
+    no_copy: true,
+  },
+  [KEY_ASSETS_SIMULATOR_SPLITTER_POS]: {
+    data_type: TYPE_NUMBER,
+    default_value: 500,
+    description: "Current position for the assets flight simulator splitter",
+    persist: true,
+  },
+  [KEY_ASSETS_SIMULATOR_LEGEND_SPLITTER_POS]: {
+    data_type: TYPE_NUMBER,
+    default_value: 800,
+    description:
+      "Current position for the assets flight simulator horizontal legend splitter",
+    persist: true,
+  },
+  [KEY_ASSETS_SIMULATOR_STEPS_SPLITTER_POS]: {
+    data_type: TYPE_NUMBER,
+    default_value: 200,
+    description:
+      "Current position for the assets flight simulator vertical steps splitter",
+    persist: true,
   },
   [KEY_ASSETS_DETECTOR_SPLITTER_POS]: {
     data_type: TYPE_NUMBER,

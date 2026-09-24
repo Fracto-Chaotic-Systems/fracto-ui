@@ -34,6 +34,7 @@ export class VideoScriptOperations extends Component {
     on_control_action: PropTypes.func.isRequired,
     can_undo: PropTypes.bool,
     can_redo: PropTypes.bool,
+    on_step_select: PropTypes.func,
   };
 
   state = {
@@ -99,6 +100,7 @@ export class VideoScriptOperations extends Component {
       } else {
         this.pending_step_index = null;
         this.setState({ selected_step_index: 0 });
+        this.props.on_step_select?.(0);
       }
       const previous_step_count = this.get_script_for_video(
         prevProps.selected_video,
@@ -261,6 +263,7 @@ export class VideoScriptOperations extends Component {
 
   select_step = (step_index, step) => {
     this.setState({ selected_step_index: step_index }, () => {
+      this.props.on_step_select?.(step_index);
       this.scroll_step_into_view(step_index);
     });
     const current_frame_settings = this.get_current_frame_settings() || {};

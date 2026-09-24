@@ -9,7 +9,9 @@ import VideoMetaPath from "./VideoMetaPath.jsx";
 import VideoMetaPreview from "./VideoMetaPreview.jsx";
 import VideoMetaRender from "./VideoMetaRender.jsx";
 import VideoMetaProjects from "./VideoMetaProjects.jsx";
+import VideoMetaSettings from "./VideoMetaSettings.jsx";
 import {
+  KEY_VIDEO_ASSETS_SETTINGS,
   KEY_VIDEO_ASSETS_PATHS,
   KEY_VIDEO_ASSETS_RENDER,
   KEY_VIDEO_ASSETS_PROJECTS,
@@ -31,6 +33,7 @@ export class VideoMetaOperations extends Component {
     on_video_change: PropTypes.func,
     on_video_select: PropTypes.func,
     on_new_video: PropTypes.func,
+    selected_step_index: PropTypes.number,
   };
 
   state = {
@@ -49,17 +52,19 @@ export class VideoMetaOperations extends Component {
       on_video_change,
       on_video_select,
       on_new_video,
+      selected_step_index,
     } = this.props;
     const content_width = Math.max(0, width_px - 3);
     const content_height = Math.max(0, height_px - TAB_HEADER_HEIGHT_PX + 1);
     switch (tab_index) {
       case 0:
         return (
-          <VideoMetaData
+          <VideoMetaSettings
             width_px={content_width}
             height_px={content_height}
             selected_video={selected_video}
             on_video_change={on_video_change}
+            selected_step_index={selected_step_index}
           />
         );
       case 1:
@@ -91,6 +96,15 @@ export class VideoMetaOperations extends Component {
         );
       case 4:
         return (
+          <VideoMetaData
+            width_px={content_width}
+            height_px={content_height}
+            selected_video={selected_video}
+            on_video_change={on_video_change}
+          />
+        );
+      case 5:
+        return (
           <VideoMetaProjects
             width_px={content_width}
             height_px={content_height}
@@ -119,10 +133,11 @@ export class VideoMetaOperations extends Component {
       >
         <CoolTabs
           labels={[
-            "meta",
+            AppText.get(KEY_VIDEO_ASSETS_SETTINGS),
             AppText.get(KEY_VIDEO_ASSETS_PATHS),
             "preview",
             AppText.get(KEY_VIDEO_ASSETS_RENDER),
+            "meta",
             AppText.get(KEY_VIDEO_ASSETS_PROJECTS),
           ]}
           tab_index={tab_index}

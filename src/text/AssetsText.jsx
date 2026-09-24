@@ -13,6 +13,7 @@ export const KEY_ASSETS_LORE_STYLES_INVENTORY = `${ASSETS_FOLDER}/assets_lore_st
 export const KEY_ASSETS_LORE_STYLES_ENTRY = `${ASSETS_FOLDER}/assets_lore_styles_entry`;
 export const KEY_ASSETS_LORE_STYLES_VIEW = `${ASSETS_FOLDER}/assets_lore_styles_view`;
 export const KEY_ASSETS_DETECTOR = `${ASSETS_FOLDER}/assets_detector`;
+export const KEY_ASSETS_SIMULATOR = `${ASSETS_FOLDER}/assets_simulator`;
 export const KEY_ASSETS_LOGS = `${ASSETS_FOLDER}/assets_logs`;
 export const KEY_IMAGE_ASSETS_GENERATOR = `${ASSETS_FOLDER}/assets_generator`;
 export const KEY_IMAGE_ASSETS_GENERATE = `${ASSETS_FOLDER}/assets_generate`;
@@ -25,6 +26,7 @@ export const KEY_ASSETS_GALLERY_SIDEBAR = `${ASSETS_FOLDER}/assets_gallery_sideb
 export const KEY_ASSETS_LORE_SIDEBAR = `${ASSETS_FOLDER}/assets_lore_sidebar`;
 export const KEY_ASSETS_LORE_STYLES_SIDEBAR = `${ASSETS_FOLDER}/assets_lore_styles_sidebar`;
 export const KEY_ASSETS_DETECTOR_SIDEBAR = `${ASSETS_FOLDER}/assets_detector_sidebar`;
+export const KEY_ASSETS_SIMULATOR_SIDEBAR = `${ASSETS_FOLDER}/assets_simulator_sidebar`;
 export const KEY_COLUMN_LABEL_ASSET_ID = `${ASSETS_FOLDER}/label_asset_id`;
 export const KEY_COLUMN_LABEL_ASSET_SCOPE = `${ASSETS_FOLDER}/label_assets_scope`;
 export const KEY_COLUMN_LABEL_ASSET_SCOPE_COLON = `${ASSETS_FOLDER}/label_assets_scope_colon`;
@@ -35,6 +37,9 @@ export const KEY_VIDEO_ASSETS_OPEN_VIDEO = `${VIDEO_FOLDER}/open_video`;
 export const KEY_VIDEO_ASSETS_UNDO = `${VIDEO_FOLDER}/undo`;
 export const KEY_VIDEO_ASSETS_REDO = `${VIDEO_FOLDER}/redo`;
 export const KEY_VIDEO_ASSETS_OPERATIONS = `${VIDEO_FOLDER}/operations`;
+export const KEY_VIDEO_ASSETS_SETTINGS = `${VIDEO_FOLDER}/settings`;
+export const KEY_VIDEO_ASSETS_SETTINGS_FOR_PROJECT = `${VIDEO_FOLDER}/settings_for_project`;
+export const KEY_VIDEO_ASSETS_SETTINGS_FOR_STEP = `${VIDEO_FOLDER}/settings_for_step`;
 export const KEY_VIDEO_ASSETS_PATHS = `${VIDEO_FOLDER}/paths`;
 export const KEY_VIDEO_ASSETS_RENDER = `${VIDEO_FOLDER}/render`;
 export const KEY_VIDEO_ASSETS_PROJECTS = `${VIDEO_FOLDER}/projects`;
@@ -84,6 +89,7 @@ export const APP_ASSETS_TEXT = {
   [KEY_ASSETS_LORE_STYLES_ENTRY]: "entry",
   [KEY_ASSETS_LORE_STYLES_VIEW]: "view",
   [KEY_ASSETS_DETECTOR]: "artifact detector",
+  [KEY_ASSETS_SIMULATOR]: "flight simulator",
   [KEY_ASSETS_LOGS]: "assets logs",
   [KEY_IMAGE_ASSETS_GENERATOR]: "images",
   [KEY_VIDEO_ASSETS_GENERATOR]: "video",
@@ -92,6 +98,9 @@ export const APP_ASSETS_TEXT = {
   [KEY_VIDEO_ASSETS_UNDO]: "undo",
   [KEY_VIDEO_ASSETS_REDO]: "redo",
   [KEY_VIDEO_ASSETS_OPERATIONS]: "video operations",
+  [KEY_VIDEO_ASSETS_SETTINGS]: "Settings",
+  [KEY_VIDEO_ASSETS_SETTINGS_FOR_PROJECT]: "for the project",
+  [KEY_VIDEO_ASSETS_SETTINGS_FOR_STEP]: "for step",
   [KEY_VIDEO_ASSETS_PATHS]: "paths",
   [KEY_VIDEO_ASSETS_RENDER]: "render",
   [KEY_VIDEO_ASSETS_PROJECTS]: "projects",
@@ -122,6 +131,7 @@ export const APP_ASSETS_TEXT = {
   [KEY_ASSETS_LORE_SIDEBAR]: "lore",
   [KEY_ASSETS_LORE_STYLES_SIDEBAR]: "styles",
   [KEY_ASSETS_DETECTOR_SIDEBAR]: "detector",
+  [KEY_ASSETS_SIMULATOR_SIDEBAR]: "simulator",
   [KEY_IMAGE_ASSETS_RENDER_NOW]: "render now",
   [KEY_IMAGE_ASSETS_ADD_TO_GALLERY]: "add to gallery",
   [KEY_COLUMN_LABEL_ASSET_ID]: "asset id",

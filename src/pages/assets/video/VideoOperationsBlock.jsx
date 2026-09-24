@@ -28,6 +28,7 @@ export class VideoOperationsBlock extends Component {
   state = {
     splitter_position: null,
     panel_ref: React.createRef(),
+    selected_step_index: 0,
   };
 
   componentDidMount() {
@@ -68,6 +69,10 @@ export class VideoOperationsBlock extends Component {
     AppSettings.on_settings_changed({
       [KEY_VIDEO_OPERATIONS_SPLITTER_POS]: absolute_position,
     });
+  };
+
+  on_step_select = (selected_step_index) => {
+    this.setState({ selected_step_index });
   };
 
   render_content = () => {
@@ -112,6 +117,7 @@ export class VideoOperationsBlock extends Component {
               on_control_action={this.props.on_control_action}
               can_undo={this.props.can_undo}
               can_redo={this.props.can_redo}
+              on_step_select={this.on_step_select}
             />
           </CoolStyles.Block>
           <CoolSplitter
@@ -138,6 +144,7 @@ export class VideoOperationsBlock extends Component {
               on_video_change={this.props.on_video_change}
               on_video_select={this.props.on_video_select}
               on_new_video={this.props.on_new_video}
+              selected_step_index={this.state.selected_step_index}
             />
           </CoolStyles.Block>
         </CoolStyles.Block>
