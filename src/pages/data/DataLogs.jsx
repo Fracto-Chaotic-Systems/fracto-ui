@@ -12,7 +12,7 @@ import LogViewer from "../../utils/ui/LogViewer.jsx";
 export const DataLogs = () => {
   return (
     <LogViewer
-      port="data"
+      service_name="data"
       splitter_key={KEY_DATA_SPLITTER_POS_PX}
       timestamp_key={KEY_DATA_LOGS_SHOW_TIMESTAMPS}
       title={

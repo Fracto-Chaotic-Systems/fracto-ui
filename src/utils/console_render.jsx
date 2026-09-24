@@ -197,8 +197,8 @@ export const render_lines = (
   });
 };
 
-export const load_logs_data = async (port, splitter_key) => {
-  const data = await LogsBackend.load(port);
+export const load_logs_data = async (service_name, splitter_key) => {
+  const data = await LogsBackend.load(service_name);
   const viewport_dimensions = AppSettings.get(KEY_VIEWPORT_DIMENSIONS);
   const sidebar_position_px = AppSettings.get(splitter_key);
   return {

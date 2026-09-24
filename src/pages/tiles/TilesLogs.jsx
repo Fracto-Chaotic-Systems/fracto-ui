@@ -12,7 +12,7 @@ import LogViewer from "../../utils/ui/LogViewer.jsx";
 export const TilesLogs = () => {
   return (
     <LogViewer
-      port="tiles"
+      service_name="tiles"
       splitter_key={KEY_TILES_SPLITTER_POS_PX}
       timestamp_key={KEY_TILES_LOGS_SHOW_TIMESTAMPS}
       title={

@@ -27,7 +27,7 @@ const LOG_CONTROLS_HEIGHT_PX = 40;
 
 export class LogViewer extends Component {
   static propTypes = {
-    port: PropTypes.number.isRequired,
+    service_name: PropTypes.string.isRequired,
     splitter_key: PropTypes.string.isRequired,
     timestamp_key: PropTypes.string.isRequired,
     title: PropTypes.node,
@@ -67,7 +67,7 @@ export class LogViewer extends Component {
   refresh = async () => {
     try {
       const logs_data = await load_logs_data(
-        this.props.port,
+        this.props.service_name,
         this.props.splitter_key,
       );
       if (!this.unmounted)

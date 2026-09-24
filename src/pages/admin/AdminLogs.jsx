@@ -12,7 +12,7 @@ import LogViewer from "../../utils/ui/LogViewer.jsx";
 export const AdminLogs = () => {
   return (
     <LogViewer
-      port="admin"
+      service_name="admin"
       splitter_key={KEY_ADMIN_SPLITTER_POS_PX}
       timestamp_key={KEY_ADMIN_LOGS_SHOW_TIMESTAMPS}
       title={

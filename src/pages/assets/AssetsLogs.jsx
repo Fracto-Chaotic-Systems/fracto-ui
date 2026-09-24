@@ -12,7 +12,7 @@ import LogViewer from "../../utils/ui/LogViewer.jsx";
 export const AssetsLogs = () => {
   return (
     <LogViewer
-      port="asset"
+      service_name="asset"
       splitter_key={KEY_ASSETS_SPLITTER_POS_PX}
       timestamp_key={KEY_ASSETS_LOGS_SHOW_TIMESTAMPS}
       title={
