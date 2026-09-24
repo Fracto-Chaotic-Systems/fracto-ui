@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import { Link, Routes, Route } from "react-router-dom";
+import PropTypes from "prop-types";
+import { Link, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 
 import { MainStyles as styles } from "./styles/MainStyles.jsx";
 
@@ -35,6 +36,8 @@ import { APP_STUDY_TEXT } from "./text/StudyText.jsx";
 import { APP_TILES_TEXT } from "./text/TilesText.jsx";
 import { APP_NAVIGATOR_SETTINGS } from "./settings/NavigatorSettings.jsx";
 import { APP_NAVIGATOR_TEXT } from "./text/NavigatorText.jsx";
+import { APP_WELCOME_TEXT } from "./text/WelcomeText.jsx";
+import PageWelcome from "./pages/PageWelcome.jsx";
 
 const ROUTES = [
   { path: "/admin", element: <Admin />, title_key: KEY_MENU_ADMIN },
@@ -42,8 +45,56 @@ const ROUTES = [
   { path: "/assets", element: <Assets />, title_key: KEY_MENU_ASSETS },
   { path: "/tiles", element: <Tiles />, title_key: KEY_MENU_TILES },
   { path: "/study", element: <Study />, title_key: KEY_MENU_STUDY },
-  { path: "/", element: <h1>Fracto</h1>, title: "home" },
+  { path: "/", title: "home" },
 ];
+
+const WelcomeRoute = ({ on_start }) => {
+  const navigate = useNavigate();
+  return (
+    <PageWelcome
+      on_start={() => {
+        on_start();
+        navigate("/study");
+      }}
+    />
+  );
+};
+
+WelcomeRoute.propTypes = {
+  on_start: PropTypes.func.isRequired,
+};
+
+const AppMenu = ({ selected_page, on_select }) => {
+  const location = useLocation();
+  if (location.pathname === "/") {
+    return null;
+  }
+  const menu_items = ROUTES.filter((route) => route.path !== "/").map(
+    (route, i) => {
+      const route_title = AppText.get(route.title_key);
+      const item_style = {
+        color: selected_page === route_title ? "black" : "grey",
+      };
+      return (
+        <Link
+          to={route.path}
+          onClick={() => on_select(route_title)}
+          key={`route-${i}`}
+        >
+          <styles.MenuItem style={item_style}>
+            {route_title}
+          </styles.MenuItem>
+        </Link>
+      );
+    },
+  );
+  return <styles.MenuWrapper>{menu_items}</styles.MenuWrapper>;
+};
+
+AppMenu.propTypes = {
+  selected_page: PropTypes.string,
+  on_select: PropTypes.func.isRequired,
+};
 
 export class App extends Component {
   state = {
@@ -61,6 +112,7 @@ export class App extends Component {
       APP_TILES_TEXT,
       APP_ROOT_TEXT,
       APP_NAVIGATOR_TEXT,
+      APP_WELCOME_TEXT,
     );
     AppText.initialize(all_text);
 
@@ -104,44 +156,37 @@ export class App extends Component {
       return "...";
     }
     const all_routes = ROUTES.map((route) => {
+      const element =
+        route.path === "/" ? (
+          <WelcomeRoute on_start={this.enter_application} />
+        ) : (
+          route.element
+        );
       return (
         <Route
-          key={`route-${AppText.get(route.title_key)}`}
+          key={`route-${route.path}`}
           path={route.path}
-          element={route.element}
+          element={element}
         />
       );
     });
-    const menu_items = ROUTES.filter((route) => route.path !== "/").map(
-      (route, i) => {
-        const route_title = AppText.get(route.title_key);
-        const item_style = {
-          color: selected_page === route_title ? "black" : "grey",
-        };
-        return (
-          <Link
-            to={route.path}
-            onClick={() => this.set_selected_page(route_title)}
-            key={`route-${i}`}
-          >
-            <styles.MenuItem key={`menu-item-${i}`} style={item_style}>
-              {route_title}
-            </styles.MenuItem>
-          </Link>
-        );
-      },
-    );
-    const menu = <styles.MenuWrapper>{menu_items}</styles.MenuWrapper>;
     return [
       <styles.FixedBodyWrapper>
         <Routes key={"routes"}>{all_routes}</Routes>
       </styles.FixedBodyWrapper>,
       <styles.HeaderWrapper key={"header-wrapper"}>
-        {menu}
+        <AppMenu
+          selected_page={selected_page}
+          on_select={this.set_selected_page}
+        />
         <styles.AppTitle>fracto</styles.AppTitle>
       </styles.HeaderWrapper>,
     ];
   }
+
+  enter_application = () => {
+    this.set_selected_page(AppText.get(KEY_MENU_STUDY));
+  };
 }
 
 export default App;

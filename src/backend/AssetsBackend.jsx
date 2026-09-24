@@ -169,6 +169,39 @@ export class AssetsBackend {
     }
   };
 
+  /** Loads the 4800px image assets used by the welcome page. */
+  static load_welcome_images = async () => {
+    const params = new URLSearchParams({
+      asset_type: "image",
+      width: "4800",
+      height: "4800",
+    });
+    const url = `${DATA_ORIGIN()}/assets?${params}`;
+    try {
+      const fetched = await fetch(url, FETCH_JSON_HEADERS).then((res) =>
+        res.json(),
+      );
+      return (fetched.result || [])
+        .filter(
+          (asset) =>
+            asset?.asset_id &&
+            /^https?:\/\//i.test(asset.public_url || "") &&
+            Number(asset.width) === 4800 &&
+            Number(asset.height) === 4800 &&
+            asset.asset_type === "image",
+        )
+        .map(({ asset_id, public_url, width, height }) => ({
+          asset_id,
+          public_url,
+          width: Number(width),
+          height: Number(height),
+        }));
+    } catch (error) {
+      console.error(`error fetching ${url}`, error.message);
+      return [];
+    }
+  };
+
   /** Lists lore categories from the data service.
    * @returns {Promise<Object[]|Error>} Category rows or an error value.
    * @calledBy LoreUtils
