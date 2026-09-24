@@ -1,6 +1,6 @@
 import { defineConfig } from "vite";
 import plugin from "@vitejs/plugin-react";
-import { FRACTO_UI_PORT } from "../../constants.js";
+const FRACTO_UI_PORT = Number(process.env.VITE_FRACTO_UI_PORT || process.env.FRACTO_UI_PORT || 3006);
 
 // https://vitejs.dev/config/
 export default defineConfig({

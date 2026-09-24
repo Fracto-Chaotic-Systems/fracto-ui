@@ -1,6 +1,5 @@
 import axios from "axios";
 
-import { FRACTO_TILES_PORT } from "../../../../constants.js";
 import { service_origin } from "../utils/service_origin.jsx";
 import { request_json } from "./BackendUtils.jsx";
 
@@ -13,7 +12,7 @@ export class TilesBackend {
    * @calledBy TilesGenerator
    */
   static claim_automation_job = () =>
-    request_json(`${service_origin(FRACTO_TILES_PORT)}/automation/claim`, {
+    request_json(`${service_origin("tiles")}/automation/claim`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ automation_type: "tiles" }),
@@ -26,7 +25,7 @@ export class TilesBackend {
    * @calledBy TilesGenerator
    */
   static update_automation = (id, updates) =>
-    request_json(`${service_origin(FRACTO_TILES_PORT)}/automation/${id}`, {
+    request_json(`${service_origin("tiles")}/automation/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(updates),
@@ -37,7 +36,7 @@ export class TilesBackend {
    * @calledBy TilesGenerator
    */
   static automation_jobs = () =>
-    request_json(`${service_origin(FRACTO_TILES_PORT)}/automation`);
+    request_json(`${service_origin("tiles")}/automation`);
 
   /** Creates a Tiles automation job from a completed manager task list.
    * @param {Object} automation Automation record fields and task JSON.
@@ -45,7 +44,7 @@ export class TilesBackend {
    * @calledBy TilesGenerator
    */
   static create_automation = (automation) =>
-    request_json(`${service_origin(FRACTO_TILES_PORT)}/automation`, {
+    request_json(`${service_origin("tiles")}/automation`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(automation),
@@ -56,14 +55,14 @@ export class TilesBackend {
    * @calledBy TilesTest
    */
   static benchmark_results = () =>
-    request_json(`${service_origin(FRACTO_TILES_PORT)}/benchmark_results`);
+    request_json(`${service_origin("tiles")}/benchmark_results`);
 
   /** Fetches current tile-cache counters and recent history.
    * @returns {Promise<Object>} Cache status payload with metric fields and history.
    * @calledBy TilesStatus
    */
   static cache_status = () =>
-    request_json(`${service_origin(FRACTO_TILES_PORT)}/cache_status`);
+    request_json(`${service_origin("tiles")}/cache_status`);
 
   /** Fetches tile coverage for the supplied viewport parameters.
    * @param {Object} params Coverage query parameters.
@@ -72,7 +71,7 @@ export class TilesBackend {
    */
   static tile_coverage = (params) =>
     request_json(
-      `${service_origin(FRACTO_TILES_PORT)}/tile_coverage?${new URLSearchParams(params)}`,
+      `${service_origin("tiles")}/tile_coverage?${new URLSearchParams(params)}`,
     );
 
   /** Renders a canvas buffer for a tile-service endpoint.
@@ -83,7 +82,7 @@ export class TilesBackend {
    */
   static canvas_buffer = (data_endpoint, params) =>
     request_json(
-      `${service_origin(FRACTO_TILES_PORT)}/${data_endpoint}?${new URLSearchParams(params)}`,
+      `${service_origin("tiles")}/${data_endpoint}?${new URLSearchParams(params)}`,
     );
 
   /** Fetches a heat-map buffer for a rendered frame.
@@ -99,7 +98,7 @@ export class TilesBackend {
       `scope=${frame_settings.scope}`,
       `aspect_ratio=${1}`,
     ].join("&");
-    const origin = service_origin(FRACTO_TILES_PORT);
+    const origin = service_origin("tiles");
     const url = `${origin}/heat_map_buffer?${all_params}`;
     try {
       return await fetch(url, {}).then((res) => res.json());

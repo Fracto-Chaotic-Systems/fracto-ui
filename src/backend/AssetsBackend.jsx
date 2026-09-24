@@ -1,10 +1,9 @@
-import { FRACTO_ASSET_PORT, FRACTO_DATA_PORT } from "../../../../constants.js";
 import { FETCH_JSON_HEADERS } from "../pages/study/StudyUtils.jsx";
 import { service_origin } from "../utils/service_origin.jsx";
 import { request_json } from "./BackendUtils.jsx";
 
-const ASSETS_ORIGIN = service_origin(FRACTO_ASSET_PORT);
-const DATA_ORIGIN = service_origin(FRACTO_DATA_PORT);
+const ASSETS_ORIGIN = () => service_origin("asset");
+const DATA_ORIGIN = () => service_origin("data");
 
 export class AssetsBackend {
   /** Creates a new video project through the asset service.
@@ -12,7 +11,7 @@ export class AssetsBackend {
    * @calledBy AssetsVideoGenerator
    */
   static new_video = () =>
-    request_json(`${ASSETS_ORIGIN}/new_video`, {
+    request_json(`${ASSETS_ORIGIN()}/new_video`, {
       method: "POST",
       headers: FETCH_JSON_HEADERS,
     });
@@ -26,7 +25,7 @@ export class AssetsBackend {
     if (!video?.id) {
       return Promise.reject(new Error("A video id is required to update a video"));
     }
-    return request_json(`${ASSETS_ORIGIN}/video/${video.id}`, {
+    return request_json(`${ASSETS_ORIGIN()}/video/${video.id}`, {
       method: "PUT",
       headers: FETCH_JSON_HEADERS,
       body: JSON.stringify(video),
@@ -39,7 +38,7 @@ export class AssetsBackend {
    * @calledBy VideoMetaRender
    */
   static render_status = (video_id) =>
-    request_json(`${ASSETS_ORIGIN}/video/${video_id}/render`);
+    request_json(`${ASSETS_ORIGIN()}/video/${video_id}/render`);
 
   /** Returns the browser URL for a completed video output.
    * @param {number|string} video_id Video identifier.
@@ -47,7 +46,7 @@ export class AssetsBackend {
    * @calledBy VideoMetaRender
    */
   static video_render_output_url = (video_id) =>
-    `${ASSETS_ORIGIN}/video/${video_id}/render/output`;
+    `${ASSETS_ORIGIN()}/video/${video_id}/render/output`;
 
   /** Starts frame production followed by server-side video assembly.
    * @param {number|string} video_id Video identifier.
@@ -55,7 +54,7 @@ export class AssetsBackend {
    * @calledBy VideoMetaRender
    */
   static start_video_render = (video_id) =>
-    request_json(`${ASSETS_ORIGIN}/video/${video_id}/render`, {
+    request_json(`${ASSETS_ORIGIN()}/video/${video_id}/render`, {
       method: "POST",
       headers: FETCH_JSON_HEADERS,
     });
@@ -66,7 +65,7 @@ export class AssetsBackend {
    * @calledBy VideoMetaRender
    */
   static cancel_video_render = (video_id) =>
-    request_json(`${ASSETS_ORIGIN}/video/${video_id}/render/cancel`, {
+    request_json(`${ASSETS_ORIGIN()}/video/${video_id}/render/cancel`, {
       method: "POST",
       headers: FETCH_JSON_HEADERS,
     });
@@ -77,7 +76,7 @@ export class AssetsBackend {
    * @calledBy VideoMetaRender
    */
   static retry_video_render = (video_id) =>
-    request_json(`${ASSETS_ORIGIN}/video/${video_id}/render/retry`, {
+    request_json(`${ASSETS_ORIGIN()}/video/${video_id}/render/retry`, {
       method: "POST",
       headers: FETCH_JSON_HEADERS,
     });
@@ -88,7 +87,7 @@ export class AssetsBackend {
    * @calledBy VideoMetaRender
    */
   static assemble_video_render = (video_id) =>
-    request_json(`${ASSETS_ORIGIN}/video/${video_id}/render/assemble`, {
+    request_json(`${ASSETS_ORIGIN()}/video/${video_id}/render/assemble`, {
       method: "POST",
       headers: FETCH_JSON_HEADERS,
     });
@@ -114,7 +113,7 @@ export class AssetsBackend {
       `resolution_factor=${2.0}`,
       `aspect_ratio=${1}`,
     ].join("&");
-    const url = `${ASSETS_ORIGIN}/render_image?${all_params}`;
+    const url = `${ASSETS_ORIGIN()}/render_image?${all_params}`;
     try {
       const image_outcome = await fetch(url, {}).then((res) => res.json());
       console.log("image_outcome", image_outcome);
@@ -142,7 +141,7 @@ export class AssetsBackend {
       `public_url=${image_outcome.public_url}`,
       `asset_type=image`,
     ].join("&");
-    const url = `${DATA_ORIGIN}/asset?${all_params}`;
+    const url = `${DATA_ORIGIN()}/asset?${all_params}`;
     try {
       const insert_outcome = await fetch(url, {}).then((res) => res.json());
       console.log("insert_outcome", insert_outcome);
@@ -158,7 +157,7 @@ export class AssetsBackend {
    * @calledBy GalleryList
    */
   static load_assets = async () => {
-    const url = `${DATA_ORIGIN}/assets`;
+    const url = `${DATA_ORIGIN()}/assets`;
     try {
       const fetched = await fetch(url, FETCH_JSON_HEADERS).then((res) => {
         return res.json();
@@ -175,7 +174,7 @@ export class AssetsBackend {
    * @calledBy LoreUtils
    */
   static lore_categories = async () => {
-    const url = `${DATA_ORIGIN}/lore_categories`;
+    const url = `${DATA_ORIGIN()}/lore_categories`;
     try {
       const fetched = await fetch(url, FETCH_JSON_HEADERS).then((res) => {
         return res.json();
@@ -193,7 +192,7 @@ export class AssetsBackend {
    * @calledBy lore content renderer components
    */
   static get_lore_content = async (content_id) => {
-    const url = `${DATA_ORIGIN}/lore_content?id=${content_id}`;
+    const url = `${DATA_ORIGIN()}/lore_content?id=${content_id}`;
     try {
       const fetched = await fetch(url, FETCH_JSON_HEADERS);
       const json = await fetched.json();

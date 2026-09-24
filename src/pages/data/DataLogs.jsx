@@ -2,7 +2,6 @@ import {
   KEY_DATA_LOGS_SHOW_TIMESTAMPS,
   KEY_DATA_SPLITTER_POS_PX,
 } from "../../settings/DataSettings.jsx";
-import { FRACTO_DATA_PORT } from "../../../../../constants.js";
 import { MainStyles as styles } from "../../styles/MainStyles.jsx";
 
 import AppText from "../../AppText.jsx";
@@ -13,7 +12,7 @@ import LogViewer from "../../utils/ui/LogViewer.jsx";
 export const DataLogs = () => {
   return (
     <LogViewer
-      port={FRACTO_DATA_PORT}
+      port="data"
       splitter_key={KEY_DATA_SPLITTER_POS_PX}
       timestamp_key={KEY_DATA_LOGS_SHOW_TIMESTAMPS}
       title={

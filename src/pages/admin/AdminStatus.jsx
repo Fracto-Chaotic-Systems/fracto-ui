@@ -1,7 +1,6 @@
 import { Component } from "react";
 import ReactTimeAgo from "react-time-ago";
 
-import { ALL_SERVICES } from "../../../../../constants.js";
 import CoolTable from "../../utils/ui/CoolTable.jsx";
 import {
   CELL_ALIGN_LEFT,
@@ -19,6 +18,13 @@ import ServerBackend from "../../backend/ServerBackend.jsx";
 
 const REFRESH_INTERVAL_MS = 5000;
 const ERROR_REFRESH_INTERVAL_MS = 60000;
+const SERVICE_NAMES = [
+  "fracto-data-server",
+  "fracto-asset-server",
+  "fracto-admin-server",
+  "fracto-ui",
+  "fracto-tiles-server",
+];
 const STATUS_COLORS = {
   healthy: "#228b22",
   ready: "#228b22",
@@ -143,10 +149,10 @@ export class AdminStatus extends Component {
       )
         ? "current"
         : "attention required";
-    const rows = ALL_SERVICES.map((service) => ({
-      service: service.name,
-      status: [() => status_cell(services[service.name]), null],
-      detail: repositories[service.name]?.short_revision || "unavailable",
+    const rows = SERVICE_NAMES.map((service_name) => ({
+      service: service_name,
+      status: [() => status_cell(services[service_name]), null],
+      detail: repositories[service_name]?.short_revision || "unavailable",
     }));
     const overall_status = error
       ? "unavailable"
