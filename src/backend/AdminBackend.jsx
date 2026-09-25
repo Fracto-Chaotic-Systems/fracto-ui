@@ -27,6 +27,25 @@ export class AdminBackend {
    * @calledBy AdminSocial componentDidMount.
    */
   static social = () => request_json(`${service_origin("admin")}/social`);
+
+  /** Lists user allowlist records for the administrator workflow. */
+  static users = () => request_json(`${service_origin("admin")}/users`);
+
+  /** Enables or disables one user allowlist record. */
+  static update_user = (id, enabled) =>
+    request_json(`${service_origin("admin")}/users/${encodeURIComponent(id)}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ enabled }),
+    });
+
+  /** Loads recent authentication audit events. */
+  static login_events = (limit = 100) =>
+    request_json(
+      `${service_origin("admin")}/login_events?limit=${encodeURIComponent(limit)}`,
+      { credentials: "include" },
+    );
 }
 
 export default AdminBackend;

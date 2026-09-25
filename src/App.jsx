@@ -38,6 +38,8 @@ import { APP_NAVIGATOR_SETTINGS } from "./settings/NavigatorSettings.jsx";
 import { APP_NAVIGATOR_TEXT } from "./text/NavigatorText.jsx";
 import { APP_WELCOME_TEXT } from "./text/WelcomeText.jsx";
 import PageWelcome from "./pages/PageWelcome.jsx";
+import { KEY_WELCOME_SIGNED_IN_AS, KEY_WELCOME_SIGN_OUT } from "./text/WelcomeText.jsx";
+import AuthBackend from "./backend/AuthBackend.jsx";
 
 const ROUTES = [
   { path: "/admin", element: <Admin />, title_key: KEY_MENU_ADMIN },
@@ -48,10 +50,20 @@ const ROUTES = [
   { path: "/", title: "home" },
 ];
 
-const WelcomeRoute = ({ on_start }) => {
+const WelcomeRoute = ({
+  auth_status,
+  auth_user,
+  on_login,
+  on_logout,
+  on_start,
+}) => {
   const navigate = useNavigate();
   return (
     <PageWelcome
+      auth_status={auth_status}
+      auth_user={auth_user}
+      on_login={on_login}
+      on_logout={on_logout}
       on_start={() => {
         on_start();
         navigate("/study");
@@ -61,6 +73,10 @@ const WelcomeRoute = ({ on_start }) => {
 };
 
 WelcomeRoute.propTypes = {
+  auth_status: PropTypes.string,
+  auth_user: PropTypes.object,
+  on_login: PropTypes.func.isRequired,
+  on_logout: PropTypes.func.isRequired,
   on_start: PropTypes.func.isRequired,
 };
 
@@ -96,9 +112,41 @@ AppMenu.propTypes = {
   on_select: PropTypes.func.isRequired,
 };
 
+const AppHeader = ({ auth_status, auth_user, on_logout, selected_page, on_select }) => {
+  const location = useLocation();
+  if (location.pathname === "/") {
+    return null;
+  }
+  return (
+    <styles.HeaderWrapper>
+      <AppMenu selected_page={selected_page} on_select={on_select} />
+      {auth_status === "authenticated" && auth_user && (
+        <styles.HeaderAccount>
+          {AppText.get(KEY_WELCOME_SIGNED_IN_AS)} {auth_user.display_name || auth_user.email}
+          <styles.HeaderLogout onClick={on_logout}>
+            {AppText.get(KEY_WELCOME_SIGN_OUT)}
+          </styles.HeaderLogout>
+        </styles.HeaderAccount>
+      )}
+      <styles.AppTitle>fracto</styles.AppTitle>
+    </styles.HeaderWrapper>
+  );
+};
+
+AppHeader.propTypes = {
+  auth_status: PropTypes.string,
+  auth_user: PropTypes.object,
+  on_logout: PropTypes.func.isRequired,
+  selected_page: PropTypes.string,
+  on_select: PropTypes.func.isRequired,
+};
+
 export class App extends Component {
   state = {
     selected_page: 0,
+    auth_status: "checking",
+    auth_user: null,
+    auth_error: null,
   };
 
   componentDidMount() {
@@ -130,13 +178,17 @@ export class App extends Component {
     AppSettings.initialize(all_settings);
 
     const viewport_interval = poll_viewport_dimensions();
-    this.setState({
-      viewport_interval,
-      selected_page: AppSettings.get(KEY_SELECTED_PAGE),
-    });
+    this.setState(
+      {
+        viewport_interval,
+        selected_page: AppSettings.get(KEY_SELECTED_PAGE),
+      },
+      this.check_auth_session,
+    );
   }
 
   componentWillUnmount() {
+    this.unmounted = true;
     const { viewport_interval } = this.state;
     if (viewport_interval) {
       clearInterval(viewport_interval);
@@ -150,15 +202,43 @@ export class App extends Component {
     this.setState({ selected_page });
   };
 
+  check_auth_session = async () => {
+    try {
+      const result = await AuthBackend.load_auth_session();
+      if (!this.unmounted) {
+        this.setState({
+          auth_status:
+            result.auth_enabled === false
+              ? "bypass"
+              : result.authenticated
+                ? "authenticated"
+                : "anonymous",
+          auth_user: result.user || null,
+          auth_error: null,
+        });
+      }
+    } catch (error) {
+      if (!this.unmounted) {
+        this.setState({ auth_status: "error", auth_error: error.message });
+      }
+    }
+  };
+
   render() {
-    const { selected_page } = this.state;
+    const { auth_status, auth_user, selected_page } = this.state;
     if (!selected_page) {
       return "...";
     }
     const all_routes = ROUTES.map((route) => {
       const element =
         route.path === "/" ? (
-          <WelcomeRoute on_start={this.enter_application} />
+          <WelcomeRoute
+            auth_status={auth_status}
+            auth_user={auth_user}
+            on_login={this.start_auth_login}
+            on_logout={this.logout_auth_session}
+            on_start={this.enter_application}
+          />
         ) : (
           route.element
         );
@@ -174,18 +254,32 @@ export class App extends Component {
       <styles.FixedBodyWrapper>
         <Routes key={"routes"}>{all_routes}</Routes>
       </styles.FixedBodyWrapper>,
-      <styles.HeaderWrapper key={"header-wrapper"}>
-        <AppMenu
-          selected_page={selected_page}
-          on_select={this.set_selected_page}
-        />
-        <styles.AppTitle>fracto</styles.AppTitle>
-      </styles.HeaderWrapper>,
+      <AppHeader
+        key="header-wrapper"
+        auth_status={auth_status}
+        auth_user={auth_user}
+        on_logout={this.logout_auth_session}
+        selected_page={selected_page}
+        on_select={this.set_selected_page}
+      />,
     ];
   }
 
   enter_application = () => {
     this.set_selected_page(AppText.get(KEY_MENU_STUDY));
+  };
+
+  start_auth_login = () => {
+    AuthBackend.start_auth_login();
+  };
+
+  logout_auth_session = async () => {
+    try {
+      await AuthBackend.logout_auth_session();
+      await this.check_auth_session();
+    } catch (error) {
+      this.setState({ auth_status: "error", auth_error: error.message });
+    }
   };
 }
 

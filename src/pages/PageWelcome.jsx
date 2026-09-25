@@ -6,8 +6,11 @@ import { AssetsBackend } from "../backend/AssetsBackend.jsx";
 import { WelcomeStyles as styles } from "../styles/WelcomeStyles.jsx";
 import FractoUIColors from "../utils/render/FractoUIColors.jsx";
 import {
-  KEY_WELCOME_INTRO,
+  KEY_WELCOME_ACCESS_DENIED,
+  KEY_WELCOME_AUTH_ERROR,
+  KEY_WELCOME_CHECKING_ACCESS,
   KEY_WELCOME_NO_IMAGES,
+  KEY_WELCOME_SIGN_IN,
   KEY_WELCOME_START,
   KEY_WELCOME_TITLE,
 } from "../text/WelcomeText.jsx";
@@ -35,11 +38,22 @@ const shuffle = (values) => {
  */
 export class PageWelcome extends Component {
   static propTypes = {
+    auth_status: PropTypes.oneOf([
+      "checking",
+      "bypass",
+      "anonymous",
+      "authenticated",
+      "denied",
+      "error",
+    ]),
+    auth_user: PropTypes.object,
     on_start: PropTypes.func.isRequired,
+    on_login: PropTypes.func,
+    on_logout: PropTypes.func,
   };
 
   state = {
-    show_info: false,
+    login_open: false,
     welcome_images: [],
     shuffled_images: [],
     previous_image: null,
@@ -188,29 +202,77 @@ export class PageWelcome extends Component {
     });
   };
 
-  /** Preserve the legacy info-panel gesture and application-entry shortcut. */
+  /** Toggle the login surface without interrupting the background animation. */
+  toggle_login = () => {
+    this.setState(({ login_open }) => ({ login_open: !login_open }));
+  };
+
+  /** Open the login surface from the visible welcome action. */
   handle_start = (event) => {
-    const { on_start } = this.props;
-    if (event.altKey && event.ctrlKey && event.shiftKey) {
-      on_start();
+    event.stopPropagation();
+    this.setState({ login_open: true });
+  };
+
+  /** Perform the action appropriate for the current authentication state. */
+  handle_login_action = (event) => {
+    event.stopPropagation();
+    const { auth_status, on_login, on_start } = this.props;
+    if (auth_status === "anonymous" || auth_status === "error") {
+      on_login?.();
       return;
     }
-    this.setState(({ show_info }) => ({ show_info: !show_info }));
+    if (auth_status === "bypass" || auth_status === "authenticated") {
+      on_start?.();
+    }
+  };
+
+  /** Sign out without allowing the page-level click handler to reopen the panel. */
+  handle_logout = (event) => {
+    event.stopPropagation();
+    this.props.on_logout?.();
+  };
+
+  render_access_message = () => {
+    const { auth_status } = this.props;
+    if (auth_status === "checking") {
+      return AppText.get(KEY_WELCOME_CHECKING_ACCESS);
+    }
+    if (auth_status === "denied") {
+      return AppText.get(KEY_WELCOME_ACCESS_DENIED);
+    }
+    if (auth_status === "error") {
+      return AppText.get(KEY_WELCOME_AUTH_ERROR);
+    }
+    return null;
   };
 
   render() {
     const {
       image_index,
       image_load_complete,
+      login_open,
       letter_color,
       pan_x,
       pan_y,
-      show_info,
       shuffled_images,
     } = this.state;
+    const { auth_status } = this.props;
     const current_image = shuffled_images[image_index];
+    const access_message = this.render_access_message();
+    const button_text =
+      auth_status === "anonymous" || auth_status === "error"
+        ? AppText.get(KEY_WELCOME_SIGN_IN)
+        : AppText.get(KEY_WELCOME_START);
+    const can_show_button =
+      auth_status === "anonymous" ||
+      auth_status === "bypass" ||
+      auth_status === "authenticated" ||
+      auth_status === "error";
     return (
-      <styles.Wrapper ref={this.state.wrapper_ref}>
+      <styles.Wrapper
+        ref={this.state.wrapper_ref}
+        onClick={this.toggle_login}
+      >
         {this.state.previous_image && (
           <styles.PreviousImageLayer
             key={`previous-${this.state.previous_image.asset_id}`}
@@ -229,27 +291,35 @@ export class PageWelcome extends Component {
             }}
           />
         )}
+        <styles.TitleLayer
+          data-login-open={login_open ? "true" : "false"}
+          style={{ color: letter_color }}
+        >
+          {AppText.get(KEY_WELCOME_TITLE)}
+        </styles.TitleLayer>
         <styles.Content>
-          <styles.Title style={{ color: letter_color }}>
-            {AppText.get(KEY_WELCOME_TITLE)}
-          </styles.Title>
-          <styles.StartButton onClick={this.handle_start}>
-            {AppText.get(KEY_WELCOME_START)}
-          </styles.StartButton>
-          <styles.InfoBox
-            style={{
-              opacity: show_info || (image_load_complete && !current_image) ? 1 : 0,
-              pointerEvents:
-                show_info || (image_load_complete && !current_image)
-                  ? "auto"
-                  : "none",
-            }}
-          >
-            {image_load_complete && !current_image
-              ? AppText.get(KEY_WELCOME_NO_IMAGES)
-              : AppText.get(KEY_WELCOME_INTRO)}
-          </styles.InfoBox>
+          {!login_open && access_message && (
+            <styles.AccessMessage>{access_message}</styles.AccessMessage>
+          )}
+          {image_load_complete && !current_image && !login_open && (
+            <styles.InfoBox>
+              {AppText.get(KEY_WELCOME_NO_IMAGES)}
+            </styles.InfoBox>
+          )}
         </styles.Content>
+        {can_show_button && (
+          <styles.SubtitleLayer
+            data-login-open={login_open ? "true" : "false"}
+            onClick={login_open ? this.handle_login_action : this.handle_start}
+          >
+            {button_text}
+          </styles.SubtitleLayer>
+        )}
+        <styles.LoginPanel
+          data-login-open={login_open ? "true" : "false"}
+          aria-hidden={!login_open}
+          onClick={(event) => event.stopPropagation()}
+        />
       </styles.Wrapper>
     );
   }

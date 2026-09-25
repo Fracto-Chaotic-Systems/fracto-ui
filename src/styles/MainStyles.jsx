@@ -28,6 +28,26 @@ export class MainStyles {
     color: #999999;
     text-shadow: 0.125rem 0.125rem 0.5rem rgba(0, 0, 0, 0.25);
   `;
+  static HeaderAccount = styled(CoolStyles.InlineBlock)`
+    ${CoolStyles.align_middle}
+    float: right;
+    margin: 0.25rem 1rem 0 0;
+    color: #444444;
+    font-size: 0.75rem;
+    line-height: 1.25rem;
+  `;
+  static HeaderLogout = styled(CoolStyles.InlineBlock)`
+    ${CoolStyles.italic}
+    ${CoolStyles.pointer}
+    ${CoolStyles.noselect}
+    margin-left: 0.5rem;
+    color: #557799;
+    font-size: 0.75rem;
+
+    &:hover {
+      ${CoolStyles.underline}
+    }
+  `;
   static HeaderWrapper = styled(CoolStyles.Block)`
     ${CoolStyles.fixed}
     ${CoolStyles.noselect}
