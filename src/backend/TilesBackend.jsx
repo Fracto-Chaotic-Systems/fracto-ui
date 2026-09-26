@@ -101,7 +101,7 @@ export class TilesBackend {
     const origin = service_origin("tiles");
     const url = `${origin}/heat_map_buffer?${all_params}`;
     try {
-      return await fetch(url, {}).then((res) => res.json());
+      return await fetch(url, { credentials: "include" }).then((res) => res.json());
     } catch (error) {
       console.error(`error fetching ${url}`, error.message);
       return error;

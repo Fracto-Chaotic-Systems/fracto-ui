@@ -5,7 +5,7 @@
  * @calledBy all backend service clients
  */
 export const request_json = async (url, options = {}) => {
-  const response = await fetch(url, options);
+  const response = await fetch(url, { credentials: "include", ...options });
   const result = await response.json().catch(() => ({}));
   if (!response.ok) {
     const detail = result?.error ? `: ${result.error}` : "";

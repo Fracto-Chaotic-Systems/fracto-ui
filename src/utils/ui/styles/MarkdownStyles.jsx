@@ -110,8 +110,8 @@ export class MarkdownStyles {
 
     .media-copy-alt svg,
     .post-copy-content svg {
-      width: 1rem;
       height: 1rem;
+      width: auto;
       fill: currentColor;
     }
 

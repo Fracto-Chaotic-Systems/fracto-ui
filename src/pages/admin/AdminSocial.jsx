@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import ReactMarkdown from "react-markdown";
+import ReactTimeAgo from "react-time-ago";
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 import styled from "styled-components";
@@ -125,6 +126,26 @@ const SocialMarkdownDocument = styled(MarkdownStyles.Document)`
   &.media-document h2:not(:first-child) {
     text-decoration: underline;
   }
+
+  .copy-feedback {
+    display: inline-block;
+    margin-left: 0.35rem;
+    color: #2e7d32;
+    font-size: 0.75rem;
+    font-style: normal;
+    animation: copy-feedback-fade 1.4s ease forwards;
+  }
+
+  @keyframes copy-feedback-fade {
+    0%,
+    65% {
+      opacity: 1;
+    }
+
+    100% {
+      opacity: 0;
+    }
+  }
 `;
 
 const markdown_components = {
@@ -166,6 +187,7 @@ export class AdminSocial extends Component {
     error: null,
     refreshing: false,
     sync_status: null,
+    show_literal_refresh_time: false,
   };
 
   componentDidMount() {
@@ -199,6 +221,11 @@ export class AdminSocial extends Component {
   };
 
   refresh_documents = () => this.load_documents(true);
+
+  toggle_refresh_time = () =>
+    this.setState((state) => ({
+      show_literal_refresh_time: !state.show_literal_refresh_time,
+    }));
 
   select_document = (selected_document_id) => {
     this.setState({ selected_document_id });
@@ -268,7 +295,18 @@ export class AdminSocial extends Component {
       copy_button.getAttribute("data-copy-alt-text") ||
       copy_button.getAttribute("data-copy-post-content") ||
       "";
-    navigator.clipboard?.writeText(text).catch(() => {});
+    navigator.clipboard
+      ?.writeText(text)
+      .then(() => {
+        const feedback = document.createElement("span");
+        feedback.className = "copy-feedback";
+        feedback.setAttribute("role", "status");
+        feedback.setAttribute("aria-live", "polite");
+        feedback.textContent = "copied!";
+        copy_button.insertAdjacentElement("afterend", feedback);
+        window.setTimeout(() => feedback.remove(), 1500);
+      })
+      .catch(() => {});
   };
 
   on_tree_select = (selected_keys, context) => {
@@ -291,6 +329,7 @@ export class AdminSocial extends Component {
       error,
       refreshing,
       sync_status,
+      show_literal_refresh_time,
     } = this.state;
     const document_tree = build_document_tree(documents);
     const selected_document =
@@ -331,9 +370,28 @@ export class AdminSocial extends Component {
             ) : sync_status.stale ? (
               AppText.get(KEY_ADMIN_SOCIAL_STALE)
             ) : sync_status.updated_at ? (
-              `${AppText.get(KEY_ADMIN_SOCIAL_LAST_REFRESHED)}: ${new Date(
-                sync_status.updated_at,
-              ).toLocaleString()}`
+              <button
+                type="button"
+                onClick={this.toggle_refresh_time}
+                aria-pressed={show_literal_refresh_time}
+                title="click to toggle relative and exact refresh time"
+                style={{
+                  padding: 0,
+                  border: 0,
+                  background: "transparent",
+                  color: "inherit",
+                  font: "inherit",
+                  fontStyle: "inherit",
+                  cursor: "pointer",
+                }}
+              >
+                {AppText.get(KEY_ADMIN_SOCIAL_LAST_REFRESHED)}:{" "}
+                {show_literal_refresh_time ? (
+                  new Date(sync_status.updated_at).toLocaleString()
+                ) : (
+                  <ReactTimeAgo date={new Date(sync_status.updated_at)} />
+                )}
+              </button>
             ) : null}
           </CoolStyles.Block>
         )}

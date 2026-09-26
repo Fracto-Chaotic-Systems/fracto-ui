@@ -115,7 +115,7 @@ export class AssetsBackend {
     ].join("&");
     const url = `${ASSETS_ORIGIN()}/render_image?${all_params}`;
     try {
-      const image_outcome = await fetch(url, {}).then((res) => res.json());
+      const image_outcome = await fetch(url, { credentials: "include" }).then((res) => res.json());
       console.log("image_outcome", image_outcome);
       return image_outcome;
     } catch (error) {
@@ -143,7 +143,7 @@ export class AssetsBackend {
     ].join("&");
     const url = `${DATA_ORIGIN()}/asset?${all_params}`;
     try {
-      const insert_outcome = await fetch(url, {}).then((res) => res.json());
+      const insert_outcome = await fetch(url, { credentials: "include" }).then((res) => res.json());
       console.log("insert_outcome", insert_outcome);
       return insert_outcome;
     } catch (error) {
@@ -159,7 +159,7 @@ export class AssetsBackend {
   static load_assets = async () => {
     const url = `${DATA_ORIGIN()}/assets`;
     try {
-      const fetched = await fetch(url, FETCH_JSON_HEADERS).then((res) => {
+      const fetched = await fetch(url, { credentials: "include", headers: FETCH_JSON_HEADERS }).then((res) => {
         return res.json();
       });
       return fetched.result;
@@ -178,7 +178,7 @@ export class AssetsBackend {
     });
     const url = `${DATA_ORIGIN()}/assets?${params}`;
     try {
-      const fetched = await fetch(url, FETCH_JSON_HEADERS).then((res) =>
+      const fetched = await fetch(url, { credentials: "include", headers: FETCH_JSON_HEADERS }).then((res) =>
         res.json(),
       );
       return (fetched.result || [])
@@ -209,7 +209,7 @@ export class AssetsBackend {
   static lore_categories = async () => {
     const url = `${DATA_ORIGIN()}/lore_categories`;
     try {
-      const fetched = await fetch(url, FETCH_JSON_HEADERS).then((res) => {
+      const fetched = await fetch(url, { credentials: "include", headers: FETCH_JSON_HEADERS }).then((res) => {
         return res.json();
       });
       return fetched.result;
@@ -227,7 +227,7 @@ export class AssetsBackend {
   static get_lore_content = async (content_id) => {
     const url = `${DATA_ORIGIN()}/lore_content?id=${content_id}`;
     try {
-      const fetched = await fetch(url, FETCH_JSON_HEADERS);
+      const fetched = await fetch(url, { credentials: "include", headers: FETCH_JSON_HEADERS });
       const json = await fetched.json();
       return json.result[0];
     } catch (error) {

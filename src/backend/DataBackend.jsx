@@ -68,7 +68,7 @@ export class DataBackend {
         })
         .join("&");
       const url = `${DATA_ORIGIN()}/minibrots?${all_params}`;
-      const minibrots = await fetch(url, FETCH_JSON_HEADERS).then((response) =>
+      const minibrots = await fetch(url, { credentials: "include", headers: FETCH_JSON_HEADERS }).then((response) =>
         response.json(),
       );
       cb(minibrots.result);
@@ -91,7 +91,7 @@ export class DataBackend {
         `limit=${limit}`,
       ].join("&");
       const url = `${DATA_ORIGIN()}/orbital?${all_params}`;
-      const point_data = await fetch(url, FETCH_JSON_HEADERS).then((response) =>
+      const point_data = await fetch(url, { credentials: "include", headers: FETCH_JSON_HEADERS }).then((response) =>
         response.json(),
       );
       cb(point_data);
@@ -115,7 +115,7 @@ export class DataBackend {
       ].join("&");
       const url = `${DATA_ORIGIN()}/orbitals?${all_params}`;
       try {
-        const point_data = await fetch(url, FETCH_JSON_HEADERS).then(
+        const point_data = await fetch(url, { credentials: "include", headers: FETCH_JSON_HEADERS }).then(
           (response) => response.json(),
         );
         console.log("get_orbitals point_data", point_data);
@@ -146,7 +146,7 @@ export class DataBackend {
       try {
         const response = await fetch(
           `${DATA_ORIGIN()}/orbital_newton?${params}`,
-          FETCH_JSON_HEADERS,
+          { credentials: "include", headers: FETCH_JSON_HEADERS },
         );
         const data = await response.json();
         cb(
@@ -189,7 +189,7 @@ export class DataBackend {
       try {
         const response = await fetch(
           `${DATA_ORIGIN()}/circuitry?${params}`,
-          FETCH_JSON_HEADERS,
+          { credentials: "include", headers: FETCH_JSON_HEADERS },
         );
         const data = await response.json();
         if (!response.ok) {
@@ -227,7 +227,7 @@ export class DataBackend {
       try {
         const response = await fetch(
           `${DATA_ORIGIN()}/orbital_spectrum?${params}`,
-          FETCH_JSON_HEADERS,
+          { credentials: "include", headers: FETCH_JSON_HEADERS },
         );
         const data = await response.json();
         cb(
@@ -253,7 +253,7 @@ export class DataBackend {
     setTimeout(async () => {
       const all_params = [`category_id=${category_id}`].join("&");
       const url = `${DATA_ORIGIN()}/lore_content_list?${all_params}`;
-      const category_list = await fetch(url, FETCH_JSON_HEADERS).then(
+      const category_list = await fetch(url, { credentials: "include", headers: FETCH_JSON_HEADERS }).then(
         (response) => response.json(),
       );
       cb(category_list);
@@ -288,6 +288,7 @@ export class DataBackend {
       const body_str = JSON.stringify(body);
       console.log("lore_storage body_str", body_str);
       const response = await fetch(url, {
+        credentials: "include",
         method: "PUT",
         headers: {
           "Content-Type": "application/json", // Signals JSON data format
@@ -314,7 +315,7 @@ export class DataBackend {
       return DataBackend.FAREY_SEQUENCE;
     }
     const url = `${DATA_ORIGIN()}/utils/farey_sequence`;
-    const full_farey_sequence = await fetch(url, {}).then((res) => res.json());
+    const full_farey_sequence = await fetch(url, { credentials: "include" }).then((res) => res.json());
     const farey_sequence = full_farey_sequence
       .filter((f) => f.den <= MAX_DENOMINATOR)
       .filter((f) => f.num > 0 && f.den > 2);

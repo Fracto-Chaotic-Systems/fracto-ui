@@ -76,6 +76,7 @@ export class MinibrotBackend {
     const origin = service_origin("data");
     const url = `${origin}/minibrot`;
     fetch(url, {
+      credentials: "include",
       body: JSON.stringify(data), // data you send.
       headers: { "Content-Type": "application/json" },
       method: "PUT",
