@@ -20,5 +20,5 @@ export const APP_WELCOME_TEXT = {
   [KEY_WELCOME_SIGNED_IN_AS]: "signed in as",
   [KEY_WELCOME_ACCESS_DENIED]:
     "your account is recognized, but access has not been enabled",
-  [KEY_WELCOME_AUTH_ERROR]: "unable to verify access",
+  [KEY_WELCOME_AUTH_ERROR]: "unable to verify access. Please sign in again.",
 };

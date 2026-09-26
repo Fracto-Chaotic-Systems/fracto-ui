@@ -29,7 +29,7 @@ export class WelcomeOIDC extends Component {
     const { auth_status, on_login, on_start } = this.props;
     if (auth_status === "anonymous" || auth_status === "error") {
       on_login?.();
-    } else if (auth_status === "bypass" || auth_status === "authenticated") {
+    } else if (auth_status === "bypass") {
       on_start?.();
     }
   };
@@ -49,12 +49,11 @@ export class WelcomeOIDC extends Component {
         ? AppText.get(KEY_WELCOME_SIGN_IN)
         : AppText.get(KEY_WELCOME_START);
     return (
-      <styles.OIDCPlaceholder>
+      <styles.OIDCPlaceholder role="status">
         {message}
         {(auth_status === "anonymous" ||
           auth_status === "error" ||
-          auth_status === "bypass" ||
-          auth_status === "authenticated") && (
+          auth_status === "bypass") && (
           <styles.OIDCAction onClick={this.handle_action}>
             {action_label}
           </styles.OIDCAction>

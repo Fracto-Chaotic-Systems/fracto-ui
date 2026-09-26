@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import {
   Link,
@@ -47,6 +47,7 @@ import { APP_WELCOME_TEXT } from "./text/WelcomeText.jsx";
 import PageWelcome from "./pages/PageWelcome.jsx";
 import { KEY_WELCOME_SIGNED_IN_AS, KEY_WELCOME_SIGN_OUT } from "./text/WelcomeText.jsx";
 import AuthBackend from "./backend/AuthBackend.jsx";
+import { consume_auth_callback_error } from "./utils/auth_callback_error.js";
 
 const ROUTES = [
   { path: "/admin", element: <Admin />, title_key: KEY_MENU_ADMIN },
@@ -56,6 +57,33 @@ const ROUTES = [
   { path: "/study", element: <Study />, title_key: KEY_MENU_STUDY },
   { path: "/", title: "home" },
 ];
+
+// Keep the guard mounted across routes so session refreshes cannot re-enter.
+const AuthenticatedEntry = ({ auth_status, on_start }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const entered = useRef(false);
+
+  useEffect(() => {
+    if (auth_status !== "authenticated") {
+      entered.current = false;
+      return;
+    }
+    if (entered.current) return;
+    entered.current = true;
+    if (location.pathname === "/") {
+      on_start();
+      navigate("/study", { replace: true });
+    }
+  }, [auth_status, location.pathname, navigate, on_start]);
+
+  return null;
+};
+
+AuthenticatedEntry.propTypes = {
+  auth_status: PropTypes.string.isRequired,
+  on_start: PropTypes.func.isRequired,
+};
 
 const WelcomeRoute = ({
   auth_status,
@@ -72,6 +100,7 @@ const WelcomeRoute = ({
       on_login={on_login}
       on_logout={on_logout}
       on_start={() => {
+        if (auth_status !== "bypass") return;
         on_start();
         navigate("/study");
       }}
@@ -121,7 +150,10 @@ AppMenu.propTypes = {
 
 const AppHeader = ({ auth_status, auth_user, on_logout, selected_page, on_select }) => {
   const location = useLocation();
-  if (location.pathname === "/") {
+  if (
+    location.pathname === "/" ||
+    (auth_status !== "authenticated" && auth_status !== "bypass")
+  ) {
     return null;
   }
   return (
@@ -157,6 +189,7 @@ export class App extends Component {
   };
 
   componentDidMount() {
+    this.unmounted = false;
     // initialize text
     const all_text = Object.assign(
       {},
@@ -210,13 +243,14 @@ export class App extends Component {
   };
 
   check_auth_session = async () => {
+    const callback_failed = consume_auth_callback_error();
     try {
       const result = await AuthBackend.load_auth_session();
       if (!this.unmounted) {
         const auth_status =
           result.auth_enabled === false
             ? "bypass"
-            : result.auth_state ||
+            : callback_failed ? "error" : result.auth_state ||
               (result.authenticated
                 ? result.user?.enabled === true
                   ? "authenticated"
@@ -242,7 +276,7 @@ export class App extends Component {
     }
     const all_routes = ROUTES.map((route) => {
       const element =
-        route.path === "/" ? (
+        route.path === "/" || auth_status === "checking" ? (
           <WelcomeRoute
             auth_status={auth_status}
             auth_user={auth_user}
@@ -252,8 +286,6 @@ export class App extends Component {
           />
         ) : auth_status === "authenticated" || auth_status === "bypass" ? (
           route.element
-        ) : auth_status === "checking" ? (
-          null
         ) : (
           <Navigate to="/" replace />
         );
@@ -267,6 +299,10 @@ export class App extends Component {
     });
     return [
       <styles.FixedBodyWrapper>
+        <AuthenticatedEntry
+          auth_status={auth_status}
+          on_start={this.enter_application}
+        />
         <Routes key={"routes"}>{all_routes}</Routes>
       </styles.FixedBodyWrapper>,
       <AppHeader
@@ -285,7 +321,6 @@ export class App extends Component {
   };
 
   start_auth_login = () => {
-    this.enter_application();
     AuthBackend.start_auth_login();
   };
 

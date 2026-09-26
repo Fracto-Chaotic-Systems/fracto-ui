@@ -9,9 +9,9 @@ export const load_auth_session = () =>
     credentials: "include",
   });
 
-/** Start the provider login redirect. */
+/** Return to welcome so verified session state owns application entry. */
 export const start_auth_login = () => {
-  window.location.assign(`${MAIN_ORIGIN()}/auth/login?return_to=%2Fstudy`);
+  window.location.assign(`${MAIN_ORIGIN()}/auth/login?return_to=%2F`);
 };
 
 /** Invalidate the current server-side authentication session. */

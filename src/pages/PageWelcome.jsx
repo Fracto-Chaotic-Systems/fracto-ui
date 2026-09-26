@@ -254,7 +254,6 @@ export class PageWelcome extends Component {
     const can_show_button =
       auth_status === "anonymous" ||
       auth_status === "bypass" ||
-      auth_status === "authenticated" ||
       auth_status === "error";
     return (
       <styles.Wrapper
@@ -287,7 +286,7 @@ export class PageWelcome extends Component {
         </styles.TitleLayer>
         <styles.Content>
           {!login_open && access_message && (
-            <styles.AccessMessage>{access_message}</styles.AccessMessage>
+            <styles.AccessMessage role="status">{access_message}</styles.AccessMessage>
           )}
           {image_load_complete && !current_image && !login_open && (
             <styles.InfoBox>

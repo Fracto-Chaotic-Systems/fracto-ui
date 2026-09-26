@@ -17,6 +17,7 @@ export class DataBackend {
   static query_table = (table, limit = 1000) =>
     request_json(
       `${DATA_ORIGIN()}/query?${new URLSearchParams({ table, limit: `${limit}`, order: "id DESC" })}`,
+      { credentials: "include" },
     );
 
   /** Fetches one video record by id for page-state restoration.
@@ -34,7 +35,10 @@ export class DataBackend {
    * @calledBy DataBackups (legacy maintenance view)
    */
   static backup_status = (table) =>
-    request_json(`${DATA_ORIGIN()}/backup?table=${encodeURIComponent(table)}`);
+    request_json(`${DATA_ORIGIN()}/backup?table=${encodeURIComponent(table)}`, {
+      method: "POST",
+      credentials: "include",
+    });
 
   /**
    * Retrieves radian/vector data for a rational angle.
