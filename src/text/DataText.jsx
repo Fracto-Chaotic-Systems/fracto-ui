@@ -45,6 +45,7 @@ export const KEY_DATA_QUERY_TABLE_LORE_FILES = `${QUERY_TABLE_FOLDER}/lore_files
 export const KEY_DATA_QUERY_TABLE_TILES = `${QUERY_TABLE_FOLDER}/tiles`;
 export const KEY_DATA_QUERY_TABLE_VIDEOS = `${QUERY_TABLE_FOLDER}/videos`;
 export const KEY_DATA_QUERY_TABLE_AUTOMATION = `${QUERY_TABLE_FOLDER}/automation`;
+export const KEY_DATA_QUERY_TABLE_USERS = `${QUERY_TABLE_FOLDER}/users`;
 
 export const APP_DATA_TEXT = {
   [KEY_DATA_CONTENT_OVERVIEW]: "data overview",
@@ -87,4 +88,5 @@ export const APP_DATA_TEXT = {
   [KEY_DATA_QUERY_TABLE_TILES]: "tiles",
   [KEY_DATA_QUERY_TABLE_VIDEOS]: "videos",
   [KEY_DATA_QUERY_TABLE_AUTOMATION]: "automation",
+  [KEY_DATA_QUERY_TABLE_USERS]: "users",
 };

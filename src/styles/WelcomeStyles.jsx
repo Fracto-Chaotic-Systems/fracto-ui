@@ -152,6 +152,23 @@ export class WelcomeStyles {
     }
   `;
 
+  static OIDCPlaceholder = styled(CoolStyles.Block)`
+    color: #444444;
+    font-size: 0.875rem;
+    font-style: italic;
+    left: 50%;
+    position: absolute;
+    text-align: center;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: calc(100% - 2rem);
+    z-index: 4;
+  `;
+
+  static OIDCAction = styled(WelcomeStyles.StartButton)`
+    margin-top: 0.75rem;
+  `;
+
   static InfoBox = styled(CoolStyles.Block)`
     text-align: center;
     position: fixed;

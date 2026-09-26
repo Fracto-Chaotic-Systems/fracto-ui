@@ -15,6 +15,7 @@ import {
   KEY_DATA_QUERY_TABLE_LORE_FILES,
   KEY_DATA_QUERY_TABLE_TILES,
   KEY_DATA_QUERY_TABLE_VIDEOS,
+  KEY_DATA_QUERY_TABLE_USERS,
 } from "../../text/DataText.jsx";
 import AppSettings from "../../AppSettings.jsx";
 import {
@@ -39,6 +40,7 @@ const TABLE_TABS = [
   KEY_DATA_QUERY_TABLE_TILES,
   KEY_DATA_QUERY_TABLE_VIDEOS,
   KEY_DATA_QUERY_TABLE_AUTOMATION,
+  KEY_DATA_QUERY_TABLE_USERS,
 ];
 
 const TABLE_NAMES = [
@@ -49,6 +51,7 @@ const TABLE_NAMES = [
   "tiles",
   "videos",
   "automation",
+  "users",
 ];
 const TABLE_LIMIT = 1000;
 const TABLE_HEADER_SPACE_PX = 40;

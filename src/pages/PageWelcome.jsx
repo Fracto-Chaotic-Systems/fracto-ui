@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import AppText from "../AppText.jsx";
 import { AssetsBackend } from "../backend/AssetsBackend.jsx";
 import { WelcomeStyles as styles } from "../styles/WelcomeStyles.jsx";
+import WelcomeOIDC from "./WelcomeOIDC.jsx";
 import FractoUIColors from "../utils/render/FractoUIColors.jsx";
 import {
   KEY_WELCOME_ACCESS_DENIED,
@@ -213,19 +214,6 @@ export class PageWelcome extends Component {
     this.setState({ login_open: true });
   };
 
-  /** Perform the action appropriate for the current authentication state. */
-  handle_login_action = (event) => {
-    event.stopPropagation();
-    const { auth_status, on_login, on_start } = this.props;
-    if (auth_status === "anonymous" || auth_status === "error") {
-      on_login?.();
-      return;
-    }
-    if (auth_status === "bypass" || auth_status === "authenticated") {
-      on_start?.();
-    }
-  };
-
   /** Sign out without allowing the page-level click handler to reopen the panel. */
   handle_logout = (event) => {
     event.stopPropagation();
@@ -310,7 +298,7 @@ export class PageWelcome extends Component {
         {can_show_button && (
           <styles.SubtitleLayer
             data-login-open={login_open ? "true" : "false"}
-            onClick={login_open ? this.handle_login_action : this.handle_start}
+            onClick={this.handle_start}
           >
             {button_text}
           </styles.SubtitleLayer>
@@ -319,7 +307,15 @@ export class PageWelcome extends Component {
           data-login-open={login_open ? "true" : "false"}
           aria-hidden={!login_open}
           onClick={(event) => event.stopPropagation()}
-        />
+        >
+          {login_open && (
+            <WelcomeOIDC
+              auth_status={auth_status}
+              on_login={this.props.on_login}
+              on_start={this.props.on_start}
+            />
+          )}
+        </styles.LoginPanel>
       </styles.Wrapper>
     );
   }

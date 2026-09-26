@@ -15,6 +15,11 @@ export const KEY_ADMIN_SOCIAL_TITLE = `${ADMIN_FOLDER}/social`;
 export const KEY_ADMIN_SOCIAL_PAGE_TITLE = `${ADMIN_FOLDER}/social_page_title`;
 export const KEY_ADMIN_SOCIAL_LOADING = `${ADMIN_FOLDER}/social_loading`;
 export const KEY_ADMIN_SOCIAL_ERROR = `${ADMIN_FOLDER}/social_error`;
+export const KEY_ADMIN_SOCIAL_REFRESH = `${ADMIN_FOLDER}/social_refresh`;
+export const KEY_ADMIN_SOCIAL_REFRESHING = `${ADMIN_FOLDER}/social_refreshing`;
+export const KEY_ADMIN_SOCIAL_LAST_REFRESHED = `${ADMIN_FOLDER}/social_last_refreshed`;
+export const KEY_ADMIN_SOCIAL_STALE = `${ADMIN_FOLDER}/social_stale`;
+export const KEY_ADMIN_SOCIAL_REFRESH_WARNING = `${ADMIN_FOLDER}/social_refresh_warning`;
 export const KEY_ADMIN_OVERVIEW = `${ADMIN_FOLDER}/admin_overview`;
 export const KEY_ADMIN_SETTINGS = `${ADMIN_FOLDER}/admin_settings`;
 export const KEY_ADMIN_STATUS = `${ADMIN_FOLDER}/admin_status`;
@@ -55,6 +60,11 @@ export const APP_ADMIN_TEXT = {
   [KEY_ADMIN_SOCIAL_PAGE_TITLE]: "social media",
   [KEY_ADMIN_SOCIAL_LOADING]: "loading social documents...",
   [KEY_ADMIN_SOCIAL_ERROR]: "unable to load social documents:",
+  [KEY_ADMIN_SOCIAL_REFRESH]: "refresh social documents",
+  [KEY_ADMIN_SOCIAL_REFRESHING]: "refreshing...",
+  [KEY_ADMIN_SOCIAL_LAST_REFRESHED]: "last refreshed",
+  [KEY_ADMIN_SOCIAL_STALE]: "snapshot is stale",
+  [KEY_ADMIN_SOCIAL_REFRESH_WARNING]: "refresh warning",
   [KEY_OPERATOR_NAME_LABEL]: "Operator Name",
   [KEY_OPERATOR_NAME_PROMPT]: "may be phony",
   [KEY_OPERATOR_EMAIL_LABEL]: "Operator Email",

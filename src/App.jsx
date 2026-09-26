@@ -1,6 +1,13 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { Link, Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import {
+  Link,
+  Navigate,
+  Routes,
+  Route,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 
 import { MainStyles as styles } from "./styles/MainStyles.jsx";
 
@@ -206,13 +213,17 @@ export class App extends Component {
     try {
       const result = await AuthBackend.load_auth_session();
       if (!this.unmounted) {
+        const auth_status =
+          result.auth_enabled === false
+            ? "bypass"
+            : result.auth_state ||
+              (result.authenticated
+                ? result.user?.enabled === true
+                  ? "authenticated"
+                  : "denied"
+                : "anonymous");
         this.setState({
-          auth_status:
-            result.auth_enabled === false
-              ? "bypass"
-              : result.authenticated
-                ? "authenticated"
-                : "anonymous",
+          auth_status,
           auth_user: result.user || null,
           auth_error: null,
         });
@@ -239,8 +250,12 @@ export class App extends Component {
             on_logout={this.logout_auth_session}
             on_start={this.enter_application}
           />
-        ) : (
+        ) : auth_status === "authenticated" || auth_status === "bypass" ? (
           route.element
+        ) : auth_status === "checking" ? (
+          null
+        ) : (
+          <Navigate to="/" replace />
         );
       return (
         <Route
@@ -270,6 +285,7 @@ export class App extends Component {
   };
 
   start_auth_login = () => {
+    this.enter_application();
     AuthBackend.start_auth_login();
   };
 

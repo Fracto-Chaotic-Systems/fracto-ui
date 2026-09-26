@@ -11,6 +11,7 @@ export class LogsBackend {
   static load = (service_name) =>
     request_json(
       `${service_origin("main")}/logs?service=${encodeURIComponent(service_name)}`,
+      { credentials: "include" },
     );
 }
 

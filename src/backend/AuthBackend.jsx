@@ -11,7 +11,7 @@ export const load_auth_session = () =>
 
 /** Start the provider login redirect. */
 export const start_auth_login = () => {
-  window.location.assign(`${MAIN_ORIGIN()}/auth/login`);
+  window.location.assign(`${MAIN_ORIGIN()}/auth/login?return_to=%2Fstudy`);
 };
 
 /** Invalidate the current server-side authentication session. */

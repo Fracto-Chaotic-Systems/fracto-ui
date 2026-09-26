@@ -14,10 +14,16 @@ import {
   KEY_ADMIN_SOCIAL_ERROR,
   KEY_ADMIN_SOCIAL_LOADING,
   KEY_ADMIN_SOCIAL_PAGE_TITLE,
+  KEY_ADMIN_SOCIAL_REFRESH,
+  KEY_ADMIN_SOCIAL_LAST_REFRESHED,
+  KEY_ADMIN_SOCIAL_REFRESH_WARNING,
+  KEY_ADMIN_SOCIAL_REFRESHING,
+  KEY_ADMIN_SOCIAL_STALE,
 } from "../../text/AdminText.jsx";
 import CoolStyles from "../../utils/ui/styles/CoolStyles.jsx";
 import MarkdownStyles from "../../utils/ui/styles/MarkdownStyles.jsx";
 import CoolTree from "../../utils/ui/CoolTree.jsx";
+import CoolButton from "../../utils/ui/CoolButton.jsx";
 
 const build_document_tree = (documents) => {
   const root_nodes = [];
@@ -158,15 +164,18 @@ export class AdminSocial extends Component {
     selected_document_id: null,
     loading: true,
     error: null,
+    refreshing: false,
+    sync_status: null,
   };
 
   componentDidMount() {
     this.load_documents();
   }
 
-  load_documents = async () => {
+  load_documents = async (force_refresh = false) => {
+    this.setState({ refreshing: force_refresh });
     try {
-      const result = await AdminBackend.social();
+      const result = await AdminBackend.social(force_refresh);
       const documents = Array.isArray(result?.documents)
         ? result.documents
         : [];
@@ -181,11 +190,15 @@ export class AdminSocial extends Component {
         selected_document_id,
         loading: false,
         error: null,
+        refreshing: false,
+        sync_status: result.social_sync || null,
       });
     } catch (error) {
-      this.setState({ loading: false, error });
+      this.setState({ loading: false, refreshing: false, error });
     }
   };
+
+  refresh_documents = () => this.load_documents(true);
 
   select_document = (selected_document_id) => {
     this.setState({ selected_document_id });
@@ -271,7 +284,14 @@ export class AdminSocial extends Component {
   };
 
   render() {
-    const { documents, selected_document_id, loading, error } = this.state;
+    const {
+      documents,
+      selected_document_id,
+      loading,
+      error,
+      refreshing,
+      sync_status,
+    } = this.state;
     const document_tree = build_document_tree(documents);
     const selected_document =
       documents.find((document) => document.id === selected_document_id) ||
@@ -285,6 +305,38 @@ export class AdminSocial extends Component {
         <styles.SectionTitle>
           {AppText.get(KEY_ADMIN_SOCIAL_PAGE_TITLE)}
         </styles.SectionTitle>
+        <CoolStyles.Block style={{ textAlign: "right", margin: "0.25rem 1rem" }}>
+          <CoolButton
+            content={AppText.get(
+              refreshing ? KEY_ADMIN_SOCIAL_REFRESHING : KEY_ADMIN_SOCIAL_REFRESH,
+            )}
+            on_click={this.refresh_documents}
+            disabled={refreshing}
+          />
+        </CoolStyles.Block>
+        {sync_status && (
+          <CoolStyles.Block
+            style={{
+              color: sync_status.error || sync_status.stale ? "#9a5b00" : "#666666",
+              fontSize: "0.75rem",
+              fontStyle: "italic",
+              margin: "0 1rem 0.25rem",
+              textAlign: "right",
+            }}
+          >
+            {sync_status.error ? (
+              <>
+                {AppText.get(KEY_ADMIN_SOCIAL_REFRESH_WARNING)}: {sync_status.error}
+              </>
+            ) : sync_status.stale ? (
+              AppText.get(KEY_ADMIN_SOCIAL_STALE)
+            ) : sync_status.updated_at ? (
+              `${AppText.get(KEY_ADMIN_SOCIAL_LAST_REFRESHED)}: ${new Date(
+                sync_status.updated_at,
+              ).toLocaleString()}`
+            ) : null}
+          </CoolStyles.Block>
+        )}
         {loading && (
           <styles.CenteredBlock>
             {AppText.get(KEY_ADMIN_SOCIAL_LOADING)}
