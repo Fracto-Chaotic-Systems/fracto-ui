@@ -139,6 +139,7 @@ test("callback failure selects error instead of automatically entering an old se
 
 const session_flow = (initial_path = "/") => {
   let path = initial_path;
+  let last_route = "/study";
   let result = { auth_enabled: true, authenticated: false, auth_state: "anonymous" };
   let effect;
   const guard = { current: false };
@@ -150,7 +151,19 @@ const session_flow = (initial_path = "/") => {
     useRef: () => guard,
     useEffect: (callback) => { effect = callback; },
     useNavigate: () => (destination) => { navigations.push(destination); path = destination; },
-    AppSettings: { on_settings_changed: (value) => selections.push(value) },
+    KEY_LAST_APP_ROUTE: "root/last_app_route",
+    KEY_MENU_ADMIN: "admin",
+    KEY_MENU_ASSETS: "assets",
+    KEY_MENU_DATA: "data",
+    KEY_MENU_STUDY: "study",
+    KEY_MENU_TILES: "tiles",
+    AppSettings: {
+      get: () => last_route,
+      on_settings_changed: (value) => {
+        if ("root/last_app_route" in value) last_route = value["root/last_app_route"];
+        else selections.push(value);
+      },
+    },
     AuthBackend: {
       load_auth_session: async () => { if (result instanceof Error) throw result; return result; },
       logout_auth_session: async () => { result = { auth_enabled: true, auth_state: "anonymous" }; },
@@ -203,7 +216,7 @@ test("refreshing an existing session preserves each application destination", as
     await flow.check(enabled_session);
     assert.equal(flow.path, path);
     assert.equal(flow.navigations.length, 0);
-    assert.equal(flow.selections.length, 0);
+    assert.equal(flow.selections.length, 1);
   }
 });
 

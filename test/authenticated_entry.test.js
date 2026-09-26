@@ -11,9 +11,11 @@ const component = source.slice(
   source.indexOf("AuthenticatedEntry.propTypes ="),
 );
 
-const harness = () => {
+const harness = (initial_route = "/study") => {
   const guard = { current: false };
   const calls = [];
+  const changes = [];
+  let last_route = initial_route;
   let pathname = "/";
   let effect;
   const context = vm.createContext({
@@ -21,13 +23,29 @@ const harness = () => {
     useLocation: () => ({ pathname }),
     useNavigate: () => (path, options) => calls.push([path, options.replace]),
     useEffect: (callback) => { effect = callback; },
+    ROUTES: ["/admin", "/data", "/assets", "/tiles", "/study", "/"].map(
+      (path) => ({ path }),
+    ),
+    KEY_LAST_APP_ROUTE: "root/last_app_route",
+    AppSettings: {
+      get: () => last_route,
+      on_settings_changed: (setting) => {
+        last_route = setting["root/last_app_route"];
+        changes.push(last_route);
+      },
+    },
   });
   const render = vm.runInContext(`${component}\nAuthenticatedEntry`, context);
   return {
     calls,
+    changes,
+    get last_route() { return last_route; },
     update(status, path = pathname) {
       pathname = path;
-      render({ auth_status: status, on_start: () => calls.push("start") });
+      render({
+        auth_status: status,
+        on_start: (destination) => calls.push(["start", destination]),
+      });
       effect();
     },
     replayEffect() { effect(); },
@@ -44,14 +62,20 @@ test("successful login enters from welcome once, including effect replay", () =>
   app.update("authenticated");
   app.update("authenticated", "/study");
   app.update("authenticated", "/");
-  assert.deepEqual(app.calls, ["start", ["/study", true]]);
+  assert.deepEqual(app.calls, [["start", "/study"], ["/study", true]]);
 });
 
 test("an existing authenticated session on welcome enters automatically", () => {
   const app = harness();
   app.update("checking");
   app.update("authenticated");
-  assert.deepEqual(app.calls, ["start", ["/study", true]]);
+  assert.deepEqual(app.calls, [["start", "/study"], ["/study", true]]);
+});
+
+test("successful login returns to the last saved application page", () => {
+  const app = harness("/assets");
+  app.update("authenticated");
+  assert.deepEqual(app.calls, [["start", "/assets"], ["/assets", true]]);
 });
 
 test("refreshing an application route preserves its location and selection", () => {
@@ -60,7 +84,8 @@ test("refreshing an application route preserves its location and selection", () 
     app.update("checking", path);
     app.update("authenticated", path);
     app.update("authenticated", "/");
-    assert.deepEqual(app.calls, []);
+    assert.deepEqual(app.calls, [["start", path]]);
+    assert.equal(app.last_route, path);
   }
 });
 
@@ -78,6 +103,9 @@ test("leaving authenticated resets entry for a subsequent login", () => {
     app.update("authenticated");
     app.update(status);
     app.update("authenticated");
-    assert.deepEqual(app.calls, ["start", ["/study", true], "start", ["/study", true]]);
+    assert.deepEqual(app.calls, [
+      ["start", "/study"], ["/study", true],
+      ["start", "/study"], ["/study", true],
+    ]);
   }
 });

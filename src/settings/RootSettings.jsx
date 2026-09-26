@@ -3,6 +3,7 @@ import { copy_json, getViewportDimensions } from "../utils/Dom.jsx";
 
 const ROOT_FOLDER = "root";
 export const KEY_SELECTED_PAGE = `${ROOT_FOLDER}/selected_page`;
+export const KEY_LAST_APP_ROUTE = `${ROOT_FOLDER}/last_app_route`;
 export const KEY_VIEWPORT_DIMENSIONS = `${ROOT_FOLDER}/viewport_dimensions`;
 export const KEY_SERVER_ROOT = `${ROOT_FOLDER}/server_root`;
 export const KEY_CLIPBOARD_DATA = `${ROOT_FOLDER}/clipboard_data`;
@@ -12,6 +13,12 @@ export const APP_ROOT_SETTINGS = {
     data_type: TYPE_STRING,
     default_value: "admin",
     description: "status of every server attached to the current instance",
+    persist: true,
+  },
+  [KEY_LAST_APP_ROUTE]: {
+    data_type: TYPE_STRING,
+    default_value: "/study",
+    description: "last application page visited",
     persist: true,
   },
   [KEY_VIEWPORT_DIMENSIONS]: {

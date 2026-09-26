@@ -97,7 +97,7 @@ export const APP_STUDY_SETTINGS = {
   },
   [KEY_STUDY_SECTION]: {
     data_type: TYPE_STRING,
-    default_value: STUDY_OVERVIEW,
+    default_value: STUDY_CIRCUITRY,
     description: "selected section of the study page",
     persist: true,
   },

@@ -19,6 +19,7 @@ import Study from "./pages/Study.jsx";
 import AppSettings from "./AppSettings.jsx";
 import {
   APP_ROOT_SETTINGS,
+  KEY_LAST_APP_ROUTE,
   KEY_SELECTED_PAGE,
   poll_viewport_dimensions,
 } from "./settings/RootSettings.jsx";
@@ -65,6 +66,18 @@ const AuthenticatedEntry = ({ auth_status, on_start }) => {
   const entered = useRef(false);
 
   useEffect(() => {
+    const app_paths = ROUTES.filter((route) => route.path !== "/").map(
+      (route) => route.path,
+    );
+    if (
+      (auth_status === "authenticated" || auth_status === "bypass") &&
+      app_paths.includes(location.pathname)
+    ) {
+      AppSettings.on_settings_changed({
+        [KEY_LAST_APP_ROUTE]: location.pathname,
+      });
+    }
+
     if (auth_status !== "authenticated") {
       entered.current = false;
       return;
@@ -72,8 +85,12 @@ const AuthenticatedEntry = ({ auth_status, on_start }) => {
     if (entered.current) return;
     entered.current = true;
     if (location.pathname === "/") {
-      on_start();
-      navigate("/study", { replace: true });
+      const last_route = AppSettings.get(KEY_LAST_APP_ROUTE);
+      const destination = app_paths.includes(last_route) ? last_route : "/study";
+      on_start(destination);
+      navigate(destination, { replace: true });
+    } else if (app_paths.includes(location.pathname)) {
+      on_start(location.pathname);
     }
   }, [auth_status, location.pathname, navigate, on_start]);
 
@@ -316,8 +333,11 @@ export class App extends Component {
     ];
   }
 
-  enter_application = () => {
-    this.set_selected_page(AppText.get(KEY_MENU_STUDY));
+  enter_application = (route_path = "/study") => {
+    const route = ROUTES.find((entry) => entry.path === route_path);
+    if (route?.title_key) {
+      this.set_selected_page(AppText.get(route.title_key));
+    }
   };
 
   start_auth_login = () => {
