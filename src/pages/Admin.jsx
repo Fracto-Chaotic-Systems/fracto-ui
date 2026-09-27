@@ -6,7 +6,7 @@ import SplitterLayout from "./utils/SplitterLayout.jsx";
 import { MainStyles as styles } from "../styles/MainStyles.jsx";
 import AppSettings from "../AppSettings.jsx";
 import {
-  ADMIN_IDENTIFY,
+  ADMIN_REFERENCE,
   ADMIN_LOGS,
   ADMIN_OVERVIEW,
   ADMIN_SETTINGS,
@@ -19,7 +19,7 @@ import {
 
 import AppText from "../AppText.jsx";
 import {
-  KEY_IDENTIFY_TITLE,
+  KEY_REFERENCE_TITLE,
   KEY_COMMITS_TITLE,
   KEY_ADMIN_SOCIAL_TITLE,
 } from "../text/AdminText.jsx";
@@ -33,7 +33,7 @@ import {
 import AdminOverview from "./admin/AdminOverview.jsx";
 import AdminSettings from "./admin/AdminSettings.jsx";
 import AdminStatus from "./admin/AdminStatus.jsx";
-import AdminIdentify from "./admin/AdminIdentify.jsx";
+import AdminReference from "./admin/AdminReference.jsx";
 import AdminLogs from "./admin/AdminLogs.jsx";
 import AdminCommits from "./admin/AdminCommits.jsx";
 import AdminSocial from "./admin/AdminSocial.jsx";
@@ -46,9 +46,9 @@ const SIDEBAR_LIST = [
   },
   { section_code: SIDEBAR_BREAKER },
   {
-    title_key: KEY_IDENTIFY_TITLE,
-    section_code: ADMIN_IDENTIFY,
-    right_pane: <AdminIdentify />,
+    title_key: KEY_REFERENCE_TITLE,
+    section_code: ADMIN_REFERENCE,
+    right_pane: <AdminReference />,
   },
   {
     title_key: KEY_COMMITS_TITLE,
@@ -78,6 +78,7 @@ const SIDEBAR_LIST = [
   },
 ];
 const LEGACY_ADMIN_VERSIONS = "admin_versions";
+const LEGACY_ADMIN_IDENTIFY = "admin_identify";
 
 export class Admin extends Component {
   state = { section_code: ADMIN_OVERVIEW };
@@ -94,7 +95,12 @@ export class Admin extends Component {
     const section_code =
       saved_section_code === LEGACY_ADMIN_VERSIONS
         ? ADMIN_COMMITS
-        : saved_section_code;
+        : saved_section_code === LEGACY_ADMIN_IDENTIFY
+          ? ADMIN_REFERENCE
+          : saved_section_code;
+    if (section_code !== saved_section_code) {
+      AppSettings.on_settings_changed({ [KEY_ADMIN_SECTION]: section_code });
+    }
     this.setState({ section_code });
   }
 

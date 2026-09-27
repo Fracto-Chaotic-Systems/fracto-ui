@@ -4,7 +4,7 @@ This directory contains the routed application areas and the feature components 
 
 ## Routed areas
 
-- `Admin.jsx` (`/admin`) - service identification, overview, commits, status, logs, and administrative settings.
+- `Admin.jsx` (`/admin`) - repository Reference documents, overview, commits, status, logs, and administrative settings.
 - `Data.jsx` (`/data`) - data-service overview, queries, status, logs, and connection/settings forms.
 - `Assets.jsx` (`/assets`) - asset overview/status, image generation and gallery tools, lore content, video generation, logs, and settings.
 - `Tiles.jsx` (`/tiles`) - tile overview/status, inspection, test harness, generation, logs, and settings.
@@ -15,6 +15,7 @@ Each top-level page follows the same broad pattern: read the selected section fr
 ## Directory guide
 
 - `admin/` contains panels for the admin page.
+- `admin/AdminReference.jsx` renders tracked Markdown documents from the fixed repository allowlist. The admin service exposes the tree and document endpoints; the UI persists the selected repository and path.
 - `assets/` contains asset panels plus gallery, lore, detector, and video subcomponents.
 - `data/` contains data-service panels such as logs, overview, settings, and status; query administration is in `admin/AdminQueries.jsx`.
 - `study/` contains study panels and specialized implementations for fields, magnitudes, meridians, minibrots, and points.

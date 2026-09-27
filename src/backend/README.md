@@ -39,6 +39,11 @@ raw `tag_records` as separate response collections so timeline consumers can
 choose the appropriate representation. `BackendUtils.jsx` provides
 the shared JSON request and query-string helpers used by these clients.
 
+`AdminBackend.reference_tree()` loads tracked Markdown paths from the admin
+service's fixed repository allowlist. `reference_document(repository, path)`
+fetches one selected document. Both endpoints require an enabled administrator
+session, and keep server repository paths out of UI requests.
+
 ## Service origins
 
 The clients derive service origins from the browser's current host and the configured service port from the root `constants.js`, using `utils/service_origin.jsx`. This keeps requests on the same machine when the UI is opened remotely, including the development port range.

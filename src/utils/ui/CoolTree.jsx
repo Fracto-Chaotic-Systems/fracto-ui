@@ -234,33 +234,47 @@ export const normalize_tree_data = (
  */
 const render_tree_item_title = ({ item, title, context }) => {
   const node = item.data;
-  const node_depth = Array.isArray(node?.metadata?.path_segments)
+  const raw_node_depth = Array.isArray(node?.metadata?.path_segments)
     ? node.metadata.path_segments.length
     : node?.metadata?.parent_key
       ? 1
       : 0;
+  const node_depth = Math.max(
+    0,
+    raw_node_depth - (node?.metadata?.label_depth_offset_px || 0),
+  );
+  const label_depth_indent_px = Number.isFinite(
+    node?.metadata?.label_depth_indent_px,
+  )
+    ? node.metadata.label_depth_indent_px
+    : 16;
   const leaf_margin_left =
     node_depth > 0
-      ? `${-8 + node_depth * 16 + BRANCH_LEAF_EXTRA_MARGIN_LEFT_PX}px`
+      ? `${-8 + node_depth * label_depth_indent_px + BRANCH_LEAF_EXTRA_MARGIN_LEFT_PX}px`
       : `${Number.isFinite(node?.metadata?.root_leaf_margin_left_px)
           ? node.metadata.root_leaf_margin_left_px
           : -20}px`;
   const leaf_style =
     node_depth > 0 ? { marginLeft: leaf_margin_left } : undefined;
   const folder_style =
-    node_depth > 0 ? { marginLeft: `${node_depth * 16}px` } : undefined;
-  const label_style = context?.isSelected ? { fontWeight: "bold" } : undefined;
+    node_depth > 0
+      ? { marginLeft: `${node_depth * label_depth_indent_px}px` }
+      : undefined;
+  const label_style = {
+    ...(context?.isSelected ? { fontWeight: "bold" } : {}),
+    ...(node?.label_color ? { color: node.label_color } : {}),
+  };
   const is_expanded = context?.isExpanded ?? item?.isExpanded;
   const icon = item.isFolder
     ? is_expanded
       ? tree_folder_open_icon
       : tree_folder_closed_icon
     : null;
-  const icon_color = node?.type
+  const icon_color = node?.label_color || (node?.type
     ? JSON_TYPE_COLORS[node.type] || JSON_TYPE_COLORS.key
     : item.isFolder
       ? JSON_TYPE_COLORS.object
-      : JSON_TYPE_COLORS.key;
+      : JSON_TYPE_COLORS.key);
   const icon_element = icon ? (
     <CoolTreeStyles.IconWrapper
       onClick={
@@ -337,6 +351,8 @@ const build_tree_items = (
   dynamic = false,
   dynamic_placeholder_label = "building...",
   root_leaf_margin_left_px,
+  label_depth_indent_px,
+  label_depth_offset_px,
 ) => {
   const sort_nodes = (nodes) =>
     [...nodes].sort((left, right) => {
@@ -389,6 +405,10 @@ const build_tree_items = (
       path_segments: node.metadata?.path_segments ?? path_segments,
       root_leaf_margin_left_px:
         node.metadata?.root_leaf_margin_left_px ?? root_leaf_margin_left_px,
+      label_depth_indent_px:
+        node.metadata?.label_depth_indent_px ?? label_depth_indent_px,
+      label_depth_offset_px:
+        node.metadata?.label_depth_offset_px ?? label_depth_offset_px,
     };
     items[node.key] = {
       index: node.key,
@@ -459,6 +479,10 @@ export class CoolTree extends Component {
     dynamic_placeholder_label: PropTypes.string,
     /** Optional left margin for root-level leaf labels in this tree. */
     root_leaf_margin_left_px: PropTypes.number,
+    /** Per-level label indentation independent of hierarchy guide spacing. */
+    label_depth_indent_px: PropTypes.number,
+    /** Number of leading tree levels excluded from label indentation. */
+    label_depth_offset_px: PropTypes.number,
     /** Optional fixed left margin for nested leaf labels in this tree. */
     interaction_mode: PropTypes.oneOf([
       "double-click-item-to-expand",
@@ -492,6 +516,8 @@ export class CoolTree extends Component {
     dynamic: false,
     dynamic_placeholder_label: "building...",
     root_leaf_margin_left_px: undefined,
+    label_depth_indent_px: undefined,
+    label_depth_offset_px: 0,
     interaction_mode: "click-item-to-expand",
   };
 
@@ -714,6 +740,8 @@ export class CoolTree extends Component {
       dynamic,
       dynamic_placeholder_label,
       root_leaf_margin_left_px,
+      label_depth_indent_px,
+      label_depth_offset_px,
       interaction_mode,
     } = this.props;
     const resolved_expanded_keys =
@@ -728,6 +756,8 @@ export class CoolTree extends Component {
       dynamic,
       dynamic_placeholder_label,
       root_leaf_margin_left_px,
+      label_depth_indent_px,
+      label_depth_offset_px,
     );
     const items = built_tree.items;
     const resolved_root_item = data_provider

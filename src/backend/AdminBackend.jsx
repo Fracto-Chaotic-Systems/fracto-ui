@@ -35,6 +35,19 @@ export class AdminBackend {
       { credentials: "include" },
     );
 
+  /** Lists repositories and tracked Markdown paths for the admin Reference page. */
+  static reference_tree = () =>
+    request_json(`${service_origin("admin")}/reference/tree`, {
+      credentials: "include",
+    });
+
+  /** Loads one tracked Markdown document from the admin Reference page. */
+  static reference_document = (repository, path) =>
+    request_json(
+      `${service_origin("admin")}/reference/document?${new URLSearchParams({ repository, path })}`,
+      { credentials: "include" },
+    );
+
   /** Lists user allowlist records for the administrator workflow. */
   static users = () =>
     request_json(`${service_origin("admin")}/users`, { credentials: "include" });

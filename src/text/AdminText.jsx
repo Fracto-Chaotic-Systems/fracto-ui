@@ -1,15 +1,9 @@
-import { KEY_SERVER_ROOT } from "../settings/RootSettings.jsx";
-
 const ADMIN_FOLDER = "admin";
 
-export const KEY_OPERATOR_NAME_LABEL = `${ADMIN_FOLDER}/operator_name_label`;
-export const KEY_OPERATOR_NAME_PROMPT = `${ADMIN_FOLDER}/operator_name_prompt`;
-export const KEY_OPERATOR_EMAIL_LABEL = `${ADMIN_FOLDER}/operator_email_label`;
-export const KEY_OPERATOR_EMAIL_PROMPT = `${ADMIN_FOLDER}/operator_email_prompt`;
-export const KEY_SERVER_ROOT_LABEL = `${ADMIN_FOLDER}/server_root_label`;
-export const KEY_SERVER_ROOT_PROMPT = `${ADMIN_FOLDER}/server_root_prompt`;
-export const KEY_OPERATOR_CONSENT_LABEL = `${ADMIN_FOLDER}/operator_consent`;
-export const KEY_IDENTIFY_TITLE = `${ADMIN_FOLDER}/identify`;
+export const KEY_REFERENCE_TITLE = `${ADMIN_FOLDER}/reference`;
+export const KEY_ADMIN_REFERENCE_LOADING = `${ADMIN_FOLDER}/reference_loading`;
+export const KEY_ADMIN_REFERENCE_ERROR = `${ADMIN_FOLDER}/reference_error`;
+export const KEY_ADMIN_REFERENCE_EMPTY = `${ADMIN_FOLDER}/reference_empty`;
 export const KEY_COMMITS_TITLE = `${ADMIN_FOLDER}/commits`;
 export const KEY_ADMIN_SOCIAL_TITLE = `${ADMIN_FOLDER}/social`;
 export const KEY_ADMIN_SOCIAL_PAGE_TITLE = `${ADMIN_FOLDER}/social_page_title`;
@@ -49,12 +43,11 @@ export const KEY_ADMIN_REPOSITORY_ALL = `${ADMIN_FOLDER}/repository_all`;
 export const KEY_ADMIN_REPOSITORY_NONE = `${ADMIN_FOLDER}/repository_none`;
 export const KEY_ADMIN_COPY_HASH = `${ADMIN_FOLDER}/copy_full_hash`;
 export const KEY_ADMIN_VIEW_GITHUB = `${ADMIN_FOLDER}/view_github`;
-export const KEY_ADMIN_IDENTITY_FORM_TITLE = `${ADMIN_FOLDER}/identity_form_title`;
-export const KEY_ADMIN_IDENTITY_FORM_SAVE = `${ADMIN_FOLDER}/identity_form_save`;
-export const KEY_ADMIN_IDENTITY_FORM_SUBTITLE = `${ADMIN_FOLDER}/identity_form_subtitle`;
-
 export const APP_ADMIN_TEXT = {
-  [KEY_IDENTIFY_TITLE]: "Identify",
+  [KEY_REFERENCE_TITLE]: "Reference",
+  [KEY_ADMIN_REFERENCE_LOADING]: "loading reference documents...",
+  [KEY_ADMIN_REFERENCE_ERROR]: "unable to load reference documents:",
+  [KEY_ADMIN_REFERENCE_EMPTY]: "no tracked Markdown documents found",
   [KEY_COMMITS_TITLE]: "Commits",
   [KEY_ADMIN_SOCIAL_TITLE]: "social",
   [KEY_ADMIN_SOCIAL_PAGE_TITLE]: "social media",
@@ -65,14 +58,6 @@ export const APP_ADMIN_TEXT = {
   [KEY_ADMIN_SOCIAL_LAST_REFRESHED]: "last refreshed",
   [KEY_ADMIN_SOCIAL_STALE]: "snapshot is stale",
   [KEY_ADMIN_SOCIAL_REFRESH_WARNING]: "refresh warning",
-  [KEY_OPERATOR_NAME_LABEL]: "Operator Name",
-  [KEY_OPERATOR_NAME_PROMPT]: "may be phony",
-  [KEY_OPERATOR_EMAIL_LABEL]: "Operator Email",
-  [KEY_SERVER_ROOT_LABEL]: "Server Root Path",
-  [KEY_SERVER_ROOT_PROMPT]: "must be real",
-  [KEY_OPERATOR_EMAIL_PROMPT]: "must be real",
-  [KEY_OPERATOR_CONSENT_LABEL]:
-    "Clicking this checkbox has no affect. The intention is to enable consent but in a court of law it has no standing whatsoever. However, clicking it will allow you to continue using the application, so it may be worth your while to do so",
   [KEY_ADMIN_OVERVIEW]: "admin overview",
   [KEY_ADMIN_SETTINGS]: "admin settings",
   [KEY_ADMIN_STATUS]: "admin status",
@@ -102,8 +87,4 @@ export const APP_ADMIN_TEXT = {
   [KEY_ADMIN_REPOSITORY_NONE]: "none",
   [KEY_ADMIN_COPY_HASH]: "copy full hash to clipboard",
   [KEY_ADMIN_VIEW_GITHUB]: "view in GitHub",
-  [KEY_ADMIN_IDENTITY_FORM_TITLE]: "Operator Identification System",
-  [KEY_ADMIN_IDENTITY_FORM_SUBTITLE]:
-    "Enter this basic information to begin using Fracto",
-  [KEY_ADMIN_IDENTITY_FORM_SAVE]: "Save Operator Details",
 };
