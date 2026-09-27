@@ -14,6 +14,8 @@ export const KEY_ADMIN_LOGS_SHOW_TIMESTAMPS = `${ADMIN_FOLDER}/logs_show_timesta
 export const KEY_ADMIN_COMMITS_REPOSITORY_VISIBILITY = `${ADMIN_FOLDER}/commits_repository_visibility`;
 export const KEY_ADMIN_SOCIAL_DOCUMENT = `${ADMIN_FOLDER}/social_document`;
 export const KEY_ADMIN_REFERENCE_DOCUMENT = `${ADMIN_FOLDER}/reference_document`;
+export const KEY_ADMIN_REFERENCE_SELECTION = `${ADMIN_FOLDER}/reference_selection`;
+export const KEY_ADMIN_REFERENCE_EXPANDED_FOLDERS = `${ADMIN_FOLDER}/reference_expanded_folders`;
 
 export const ADMIN_OVERVIEW = "admin_overview";
 export const ADMIN_REFERENCE = "admin_reference";
@@ -58,6 +60,18 @@ export const APP_ADMIN_SETTINGS = {
     data_type: TYPE_STRING,
     default_value: "",
     description: "selected document on the admin Reference page",
+    persist: true,
+  },
+  [KEY_ADMIN_REFERENCE_SELECTION]: {
+    data_type: TYPE_STRING,
+    default_value: "",
+    description: "selected item on the admin Reference page",
+    persist: true,
+  },
+  [KEY_ADMIN_REFERENCE_EXPANDED_FOLDERS]: {
+    data_type: TYPE_STRING,
+    default_value: "",
+    description: "expanded folders on the admin Reference page",
     persist: true,
   },
 };

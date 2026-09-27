@@ -7,7 +7,11 @@ import { MainStyles as styles } from "../../styles/MainStyles.jsx";
 import AppText from "../../AppText.jsx";
 import AdminBackend from "../../backend/AdminBackend.jsx";
 import AppSettings from "../../AppSettings.jsx";
-import { KEY_ADMIN_REFERENCE_DOCUMENT } from "../../settings/AdminSettings.jsx";
+import {
+  KEY_ADMIN_REFERENCE_DOCUMENT,
+  KEY_ADMIN_REFERENCE_EXPANDED_FOLDERS,
+  KEY_ADMIN_REFERENCE_SELECTION,
+} from "../../settings/AdminSettings.jsx";
 import {
   KEY_ADMIN_REFERENCE_EMPTY,
   KEY_ADMIN_REFERENCE_ERROR,
@@ -17,7 +21,10 @@ import {
 import CoolStyles from "../../utils/ui/styles/CoolStyles.jsx";
 import MarkdownStyles from "../../utils/ui/styles/MarkdownStyles.jsx";
 import CoolTree from "../../utils/ui/CoolTree.jsx";
-import { build_reference_tree } from "./AdminReferenceTree.js";
+import {
+  build_reference_tree,
+  restore_reference_selection,
+} from "./AdminReferenceTree.js";
 
 const styles_reference = {
   content: {
@@ -83,6 +90,15 @@ const markdown_components = {
   hr: MarkdownStyles.HorizontalRule,
 };
 
+const parse_expanded_folder_keys = (stored_value) => {
+  try {
+    const keys = JSON.parse(stored_value);
+    return Array.isArray(keys) ? keys : null;
+  } catch {
+    return null;
+  }
+};
+
 export class AdminReference extends Component {
   state = {
     repositories: [],
@@ -109,20 +125,25 @@ export class AdminReference extends Component {
         ? result.repositories
         : [];
       const { documents, tree } = build_reference_tree(repositories);
-      const saved_id = AppSettings.get(KEY_ADMIN_REFERENCE_DOCUMENT);
-      const selected_document =
-        documents.find((document) => document.id === saved_id) || documents[0] || null;
+      const saved_selection = AppSettings.get(KEY_ADMIN_REFERENCE_SELECTION);
+      const saved_document_id = AppSettings.get(KEY_ADMIN_REFERENCE_DOCUMENT);
+      const { selected_document, selected_tree_key } = restore_reference_selection(
+        tree,
+        documents,
+        saved_selection,
+        saved_document_id,
+      );
       this.setState({
         repositories,
         documents,
         tree,
         selected_document_id: selected_document?.id || null,
-        selected_tree_key: selected_document?.tree_key || null,
+        selected_tree_key,
         loading: false,
         error: null,
       });
       if (selected_document) {
-        this.load_document(selected_document, selected_document.tree_key);
+        this.load_document(selected_document, selected_tree_key);
       }
     } catch (error) {
       this.setState({ loading: false, error });
@@ -140,6 +161,7 @@ export class AdminReference extends Component {
     });
     AppSettings.on_settings_changed({
       [KEY_ADMIN_REFERENCE_DOCUMENT]: document.id,
+      [KEY_ADMIN_REFERENCE_SELECTION]: tree_key,
     });
     try {
       const result = await AdminBackend.reference_document(
@@ -177,8 +199,17 @@ export class AdminReference extends Component {
         document_loading: false,
         error: null,
       });
-      AppSettings.on_settings_changed({ [KEY_ADMIN_REFERENCE_DOCUMENT]: "" });
+      AppSettings.on_settings_changed({
+        [KEY_ADMIN_REFERENCE_DOCUMENT]: "",
+        [KEY_ADMIN_REFERENCE_SELECTION]: selected_item.key,
+      });
     }
+  };
+
+  on_tree_expand = (expanded_keys) => {
+    AppSettings.on_settings_changed({
+      [KEY_ADMIN_REFERENCE_EXPANDED_FOLDERS]: JSON.stringify(expanded_keys),
+    });
   };
 
   render() {
@@ -190,6 +221,10 @@ export class AdminReference extends Component {
       document_loading,
       error,
     } = this.state;
+    const saved_expanded_keys = parse_expanded_folder_keys(
+      AppSettings.get(KEY_ADMIN_REFERENCE_EXPANDED_FOLDERS),
+    );
+    const default_expanded_keys = saved_expanded_keys || tree.map((node) => node.key);
     return (
       <CoolStyles.Block style={{ height: "100%", overflow: "hidden" }}>
         <styles.SectionTitle>{AppText.get(KEY_REFERENCE_TITLE)}</styles.SectionTitle>
@@ -212,8 +247,9 @@ export class AdminReference extends Component {
                     label_depth_offset_px={1}
                     root_leaf_margin_left_px={0}
                     default_selected_keys={selected_tree_key ? [selected_tree_key] : []}
-                    default_expanded_keys={tree.map((node) => node.key)}
+                    default_expanded_keys={default_expanded_keys}
                     on_select={this.on_tree_select}
+                    on_expand={this.on_tree_expand}
                     selectable
                     searchable
                     show_live_description={false}

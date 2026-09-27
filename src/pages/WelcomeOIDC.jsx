@@ -11,6 +11,9 @@ import {
   KEY_WELCOME_START,
 } from "../text/WelcomeText.jsx";
 
+const GOOGLE_SIGN_IN_BUTTON_IMAGE =
+  "https://developers.google.com/static/identity/gsi/web/images/standard-button-white.png";
+
 /**
  * OIDC-specific welcome workflow surface.
  *
@@ -44,18 +47,20 @@ export class WelcomeOIDC extends Component {
           : auth_status === "error"
             ? AppText.get(KEY_WELCOME_AUTH_ERROR)
             : null;
-    const action_label =
-      auth_status === "anonymous" || auth_status === "error"
-        ? AppText.get(KEY_WELCOME_SIGN_IN)
-        : AppText.get(KEY_WELCOME_START);
     return (
       <styles.OIDCPlaceholder role="status">
         {message}
-        {(auth_status === "anonymous" ||
-          auth_status === "error" ||
-          auth_status === "bypass") && (
+        {(auth_status === "anonymous" || auth_status === "error") && (
+          <styles.GoogleSignInAction onClick={this.handle_action}>
+            <img
+              src={GOOGLE_SIGN_IN_BUTTON_IMAGE}
+              alt={AppText.get(KEY_WELCOME_SIGN_IN)}
+            />
+          </styles.GoogleSignInAction>
+        )}
+        {auth_status === "bypass" && (
           <styles.OIDCAction onClick={this.handle_action}>
-            {action_label}
+            {AppText.get(KEY_WELCOME_START)}
           </styles.OIDCAction>
         )}
       </styles.OIDCPlaceholder>

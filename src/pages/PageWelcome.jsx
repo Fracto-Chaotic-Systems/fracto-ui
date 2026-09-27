@@ -11,7 +11,6 @@ import {
   KEY_WELCOME_AUTH_ERROR,
   KEY_WELCOME_CHECKING_ACCESS,
   KEY_WELCOME_NO_IMAGES,
-  KEY_WELCOME_SIGN_IN,
   KEY_WELCOME_START,
   KEY_WELCOME_TITLE,
 } from "../text/WelcomeText.jsx";
@@ -208,12 +207,6 @@ export class PageWelcome extends Component {
     this.setState(({ login_open }) => ({ login_open: !login_open }));
   };
 
-  /** Open the login surface from the visible welcome action. */
-  handle_start = (event) => {
-    event.stopPropagation();
-    this.setState({ login_open: true });
-  };
-
   /** Sign out without allowing the page-level click handler to reopen the panel. */
   handle_logout = (event) => {
     event.stopPropagation();
@@ -247,11 +240,8 @@ export class PageWelcome extends Component {
     const { auth_status } = this.props;
     const current_image = shuffled_images[image_index];
     const access_message = this.render_access_message();
-    const button_text =
-      auth_status === "anonymous" || auth_status === "error"
-        ? AppText.get(KEY_WELCOME_SIGN_IN)
-        : AppText.get(KEY_WELCOME_START);
-    const can_show_button =
+    const action_text = AppText.get(KEY_WELCOME_START);
+    const can_show_action =
       auth_status === "anonymous" ||
       auth_status === "bypass" ||
       auth_status === "error";
@@ -294,12 +284,9 @@ export class PageWelcome extends Component {
             </styles.InfoBox>
           )}
         </styles.Content>
-        {can_show_button && (
-          <styles.SubtitleLayer
-            data-login-open={login_open ? "true" : "false"}
-            onClick={this.handle_start}
-          >
-            {button_text}
+        {can_show_action && (
+          <styles.SubtitleLayer data-login-open={login_open ? "true" : "false"}>
+            {action_text}
           </styles.SubtitleLayer>
         )}
         <styles.LoginPanel

@@ -113,7 +113,7 @@ export class WelcomeStyles {
     }
   `;
 
-  static StartButton = styled.button`
+  static StartButton = styled(CoolStyles.Block)`
     ${CoolStyles.pointer}
     ${CoolStyles.noselect}
     box-sizing: border-box;
@@ -121,6 +121,7 @@ export class WelcomeStyles {
     text-transform: uppercase;
     padding: 0.25rem 1rem;
     font-size: 0.85rem;
+    line-height: 14px;
     letter-spacing: 5px;
     opacity: 0.5;
     background: rgb(34, 51, 68);
@@ -167,6 +168,19 @@ export class WelcomeStyles {
 
   static OIDCAction = styled(WelcomeStyles.StartButton)`
     margin-top: 0.75rem;
+  `;
+
+  static GoogleSignInAction = styled(CoolStyles.Block)`
+    ${CoolStyles.pointer}
+    margin: 0.75rem auto 0;
+    width: fit-content;
+
+    img {
+      display: block;
+      height: auto;
+      max-width: 100%;
+      width: 200px;
+    }
   `;
 
   static InfoBox = styled(CoolStyles.Block)`

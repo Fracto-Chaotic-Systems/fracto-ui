@@ -127,3 +127,31 @@ export const build_reference_tree = (repositories) => {
     : [];
   return { documents, tree };
 };
+
+export const restore_reference_selection = (
+  tree,
+  documents,
+  saved_selection,
+  saved_document_id,
+) => {
+  const find_item = (nodes, key) => {
+    for (const node of nodes) {
+      if (node.key === key) return node;
+      const nested_item = find_item(node.children || [], key);
+      if (nested_item) return nested_item;
+    }
+    return null;
+  };
+  const selected_item = saved_selection ? find_item(tree, saved_selection) : null;
+  const selected_document_id = selected_item?.document_id ||
+    selected_item?.readme_document_id;
+  const selected_document = selected_item
+    ? documents.find((document) => document.id === selected_document_id) || null
+    : documents.find((document) => document.id === saved_document_id) ||
+      documents[0] ||
+      null;
+  return {
+    selected_document,
+    selected_tree_key: selected_item?.key || selected_document?.tree_key || null,
+  };
+};

@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { build_reference_tree } from "../src/pages/admin/AdminReferenceTree.js";
+import {
+  build_reference_tree,
+  restore_reference_selection,
+} from "../src/pages/admin/AdminReferenceTree.js";
 
 test("Reference tree groups tracked Markdown paths by repository and folder", () => {
   const { documents, tree } = build_reference_tree([
@@ -107,4 +110,34 @@ test("all service repositories are nested below the main repository servers fold
   assert.deepEqual(servers_folder.children.map((node) => node.title), service_names);
   assert.equal(servers_folder.children[0].readme_document_id !== undefined, true);
   assert.equal(servers_folder.children[0].children[0].title, "docs");
+});
+
+test("Reference restores a selected document or folder from its saved tree key", () => {
+  const { documents, tree } = build_reference_tree([
+    {
+      name: "fracto",
+      files: ["README.md", "docs/guide.md"],
+      folders: ["assets"],
+    },
+  ]);
+  const docs_folder = tree[0].children.find((node) => node.title === "docs");
+  const assets_folder = tree[0].children.find((node) => node.title === "assets");
+
+  const restored_document = restore_reference_selection(
+    tree,
+    documents,
+    docs_folder.children[0].key,
+    "",
+  );
+  assert.equal(restored_document.selected_document.id, documents[1].id);
+  assert.equal(restored_document.selected_tree_key, docs_folder.children[0].key);
+
+  const restored_folder = restore_reference_selection(
+    tree,
+    documents,
+    assets_folder.key,
+    "",
+  );
+  assert.equal(restored_folder.selected_document, null);
+  assert.equal(restored_folder.selected_tree_key, assets_folder.key);
 });

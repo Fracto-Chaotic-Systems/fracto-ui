@@ -15,7 +15,7 @@ export const APP_WELCOME_TEXT = {
   [KEY_WELCOME_START]: "the atlas of chaos",
   [KEY_WELCOME_NO_IMAGES]: "welcome images are currently unavailable",
   [KEY_WELCOME_CHECKING_ACCESS]: "checking access...",
-  [KEY_WELCOME_SIGN_IN]: "sign in",
+  [KEY_WELCOME_SIGN_IN]: "Sign in with Google",
   [KEY_WELCOME_SIGN_OUT]: "sign out",
   [KEY_WELCOME_SIGNED_IN_AS]: "signed in as",
   [KEY_WELCOME_ACCESS_DENIED]:

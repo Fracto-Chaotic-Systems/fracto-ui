@@ -87,7 +87,9 @@ test("welcome and OIDC expose manual entry only in bypass", () => {
     const oidc = new WelcomeOIDC(props);
     const page = new PageWelcome(props);
     const actionable = ["bypass", "anonymous", "error"].includes(status);
-    assert.equal(Boolean(find(oidc.render(), "OIDCAction")), actionable);
+    assert.equal(Boolean(find(oidc.render(), "OIDCAction")), status === "bypass");
+    assert.equal(Boolean(find(oidc.render(), "GoogleSignInAction")),
+      ["anonymous", "error"].includes(status));
     assert.equal(Boolean(find(page.render(), "SubtitleLayer")), actionable);
     oidc.handle_action({ stopPropagation() {} });
     assert.deepEqual(calls, status === "bypass" ? ["start"] :
