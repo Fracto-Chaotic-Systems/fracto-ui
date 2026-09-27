@@ -38,6 +38,11 @@ respectively. `AdminBackend.commits()` keeps `commits`, `tag_events`, and the
 raw `tag_records` as separate response collections so timeline consumers can
 choose the appropriate representation. `BackendUtils.jsx` provides
 the shared JSON request and query-string helpers used by these clients.
+`ServerBackend.health()` and `readiness()` omit cookies because these public,
+read-only responses are fetched from the main server's separate browser origin.
+`health_at(url)` does the same for saved remote Fracto main servers and aborts
+after four seconds; the remote server's health endpoint must allow cross-origin
+reads without credentials.
 
 `AdminBackend.reference_tree()` loads tracked Markdown paths from the admin
 service's fixed repository allowlist. `reference_document(repository, path)`

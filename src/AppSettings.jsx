@@ -1,4 +1,8 @@
 import { copy_json, random_id } from "./utils/Dom.jsx";
+import {
+  parse_persisted_object,
+  persist_object_setting,
+} from "./settings/AppSettingsPersistence.js";
 
 export const TYPE_STRING = typeof "abc";
 export const TYPE_NUMBER = typeof 123;
@@ -83,20 +87,12 @@ export class AppSettings {
             break;
           case TYPE_OBJECT:
           case TYPE_ARRAY: {
-            const persist_value =
-              Array.isArray(key_settings.persist_fields) &&
-              new_settings[key] &&
-              typeof new_settings[key] === "object"
-                ? Object.fromEntries(
-                    key_settings.persist_fields
-                      .filter((field) => field in new_settings[key])
-                      .map((field) => [field, new_settings[key][field]]),
-                  )
-                : new_settings[key];
-            const object_str = JSON.stringify(persist_value);
-            if (object_str.length < 1000) {
-              localStorage.setItem(key, object_str);
-            }
+            persist_object_setting(
+              localStorage,
+              key,
+              key_settings,
+              new_settings[key],
+            );
             break;
           }
           default:
@@ -133,7 +129,7 @@ export class AppSettings {
             break;
           case TYPE_OBJECT:
           case TYPE_ARRAY:
-            AppSettings.settings_data[key] = JSON.parse(setting_str);
+            AppSettings.settings_data[key] = parse_persisted_object(setting_str);
             break;
           default:
             console.log(

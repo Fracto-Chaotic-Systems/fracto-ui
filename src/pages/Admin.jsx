@@ -7,6 +7,7 @@ import { MainStyles as styles } from "../styles/MainStyles.jsx";
 import AppSettings from "../AppSettings.jsx";
 import {
   ADMIN_REFERENCE,
+  ADMIN_SERVERS,
   ADMIN_LOGS,
   ADMIN_OVERVIEW,
   ADMIN_SETTINGS,
@@ -22,6 +23,7 @@ import {
   KEY_REFERENCE_TITLE,
   KEY_COMMITS_TITLE,
   KEY_ADMIN_SOCIAL_TITLE,
+  KEY_ADMIN_SERVERS,
 } from "../text/AdminText.jsx";
 import {
   KEY_SIDEBAR_LOGS,
@@ -31,6 +33,7 @@ import {
 } from "../text/RootText.jsx";
 
 import AdminOverview from "./admin/AdminOverview.jsx";
+import AdminServers from "./admin/AdminServers.jsx";
 import AdminSettings from "./admin/AdminSettings.jsx";
 import AdminStatus from "./admin/AdminStatus.jsx";
 import AdminReference from "./admin/AdminReference.jsx";
@@ -59,6 +62,11 @@ const SIDEBAR_LIST = [
     title_key: KEY_ADMIN_SOCIAL_TITLE,
     section_code: ADMIN_SOCIAL,
     right_pane: <AdminSocial />,
+  },
+  {
+    title_key: KEY_ADMIN_SERVERS,
+    section_code: ADMIN_SERVERS,
+    right_pane: <AdminServers />,
   },
   { section_code: SIDEBAR_BREAKER },
   {

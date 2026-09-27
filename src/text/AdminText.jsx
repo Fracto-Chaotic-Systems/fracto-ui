@@ -15,6 +15,40 @@ export const KEY_ADMIN_SOCIAL_LAST_REFRESHED = `${ADMIN_FOLDER}/social_last_refr
 export const KEY_ADMIN_SOCIAL_STALE = `${ADMIN_FOLDER}/social_stale`;
 export const KEY_ADMIN_SOCIAL_REFRESH_WARNING = `${ADMIN_FOLDER}/social_refresh_warning`;
 export const KEY_ADMIN_OVERVIEW = `${ADMIN_FOLDER}/admin_overview`;
+export const KEY_ADMIN_SERVERS = `${ADMIN_FOLDER}/servers`;
+export const KEY_ADMIN_SERVERS_TITLE = `${ADMIN_FOLDER}/servers_title`;
+export const KEY_ADMIN_SERVERS_THIS_SERVER = `${ADMIN_FOLDER}/servers_this_server`;
+export const KEY_ADMIN_SERVERS_ROLE_LABEL = `${ADMIN_FOLDER}/servers_role_label`;
+export const KEY_ADMIN_SERVERS_PUBLIC_ADDRESS_LABEL = `${ADMIN_FOLDER}/servers_public_address_label`;
+export const KEY_ADMIN_SERVERS_HEALTH_LABEL = `${ADMIN_FOLDER}/servers_health_label`;
+export const KEY_ADMIN_SERVERS_VERSION_LABEL = `${ADMIN_FOLDER}/servers_version_label`;
+export const KEY_ADMIN_SERVERS_UPTIME_LABEL = `${ADMIN_FOLDER}/servers_uptime_label`;
+export const KEY_ADMIN_SERVERS_STARTED_LABEL = `${ADMIN_FOLDER}/servers_started_label`;
+export const KEY_ADMIN_SERVERS_CHECKED_LABEL = `${ADMIN_FOLDER}/servers_checked_label`;
+export const KEY_ADMIN_SERVERS_SCOPE_NOTE = `${ADMIN_FOLDER}/servers_scope_note`;
+export const KEY_ADMIN_SERVERS_DEPENDENT_HEALTH_TITLE = `${ADMIN_FOLDER}/servers_dependent_health_title`;
+export const KEY_ADMIN_SERVERS_HEALTH_REFRESH_NOTE = `${ADMIN_FOLDER}/servers_health_refresh_note`;
+export const KEY_ADMIN_SERVERS_DATA_SERVER = `${ADMIN_FOLDER}/servers_data_server`;
+export const KEY_ADMIN_SERVERS_ASSET_SERVER = `${ADMIN_FOLDER}/servers_asset_server`;
+export const KEY_ADMIN_SERVERS_ADMIN_SERVER = `${ADMIN_FOLDER}/servers_admin_server`;
+export const KEY_ADMIN_SERVERS_UI_SERVER = `${ADMIN_FOLDER}/servers_ui_server`;
+export const KEY_ADMIN_SERVERS_TILES_SERVER = `${ADMIN_FOLDER}/servers_tiles_server`;
+export const KEY_ADMIN_SERVERS_REFRESH_ERROR = `${ADMIN_FOLDER}/servers_refresh_error`;
+export const KEY_ADMIN_SERVERS_ADD_SERVER = `${ADMIN_FOLDER}/servers_add_server`;
+export const KEY_ADMIN_SERVERS_SERVER_URL_PLACEHOLDER = `${ADMIN_FOLDER}/servers_server_url_placeholder`;
+export const KEY_ADMIN_SERVERS_CONFIRM_URL = `${ADMIN_FOLDER}/servers_confirm_url`;
+export const KEY_ADMIN_SERVERS_CANCEL_URL = `${ADMIN_FOLDER}/servers_cancel_url`;
+export const KEY_ADMIN_SERVERS_INVALID_URL = `${ADMIN_FOLDER}/servers_invalid_url`;
+export const KEY_ADMIN_SERVERS_URL_ACCEPTED = `${ADMIN_FOLDER}/servers_url_accepted`;
+export const KEY_ADMIN_SERVERS_MAIN_SERVER_ROLE = `${ADMIN_FOLDER}/servers_main_server_role`;
+export const KEY_ADMIN_SERVERS_UNAVAILABLE = `${ADMIN_FOLDER}/servers_unavailable`;
+export const KEY_ADMIN_SERVERS_SECONDS = `${ADMIN_FOLDER}/servers_seconds`;
+export const KEY_ADMIN_SERVERS_STATUS_READY = `${ADMIN_FOLDER}/servers_status_ready`;
+export const KEY_ADMIN_SERVERS_STATUS_STARTING = `${ADMIN_FOLDER}/servers_status_starting`;
+export const KEY_ADMIN_SERVERS_STATUS_HEALTHY = `${ADMIN_FOLDER}/servers_status_healthy`;
+export const KEY_ADMIN_SERVERS_STATUS_DEGRADED = `${ADMIN_FOLDER}/servers_status_degraded`;
+export const KEY_ADMIN_SERVERS_STATUS_STOPPED = `${ADMIN_FOLDER}/servers_status_stopped`;
+export const KEY_ADMIN_SERVERS_STATUS_FAILED = `${ADMIN_FOLDER}/servers_status_failed`;
 export const KEY_ADMIN_SETTINGS = `${ADMIN_FOLDER}/admin_settings`;
 export const KEY_ADMIN_STATUS = `${ADMIN_FOLDER}/admin_status`;
 export const KEY_ADMIN_STATUS_REFRESH = `${ADMIN_FOLDER}/admin_status_refresh`;
@@ -59,6 +93,43 @@ export const APP_ADMIN_TEXT = {
   [KEY_ADMIN_SOCIAL_STALE]: "snapshot is stale",
   [KEY_ADMIN_SOCIAL_REFRESH_WARNING]: "refresh warning",
   [KEY_ADMIN_OVERVIEW]: "admin overview",
+  [KEY_ADMIN_SERVERS]: "servers",
+  [KEY_ADMIN_SERVERS_TITLE]: "server awareness",
+  [KEY_ADMIN_SERVERS_THIS_SERVER]: "this server",
+  [KEY_ADMIN_SERVERS_ROLE_LABEL]: "role",
+  [KEY_ADMIN_SERVERS_PUBLIC_ADDRESS_LABEL]: "public address",
+  [KEY_ADMIN_SERVERS_HEALTH_LABEL]: "health",
+  [KEY_ADMIN_SERVERS_VERSION_LABEL]: "version",
+  [KEY_ADMIN_SERVERS_UPTIME_LABEL]: "uptime",
+  [KEY_ADMIN_SERVERS_STARTED_LABEL]: "started",
+  [KEY_ADMIN_SERVERS_CHECKED_LABEL]: "health checked",
+  [KEY_ADMIN_SERVERS_SCOPE_NOTE]:
+    "This page describes this Fracto main server. It does not list other Fracto main servers or treat this server's specialized services as separate main servers.",
+  [KEY_ADMIN_SERVERS_DEPENDENT_HEALTH_TITLE]: "dependent service health",
+  [KEY_ADMIN_SERVERS_HEALTH_REFRESH_NOTE]:
+    "Health indicators refresh every five seconds.",
+  [KEY_ADMIN_SERVERS_DATA_SERVER]: "data server",
+  [KEY_ADMIN_SERVERS_ASSET_SERVER]: "asset server",
+  [KEY_ADMIN_SERVERS_ADMIN_SERVER]: "admin server",
+  [KEY_ADMIN_SERVERS_UI_SERVER]: "UI server",
+  [KEY_ADMIN_SERVERS_TILES_SERVER]: "tiles server",
+  [KEY_ADMIN_SERVERS_REFRESH_ERROR]: "Unable to refresh server health:",
+  [KEY_ADMIN_SERVERS_ADD_SERVER]: "add server",
+  [KEY_ADMIN_SERVERS_SERVER_URL_PLACEHOLDER]: "https://server.example.com",
+  [KEY_ADMIN_SERVERS_CONFIRM_URL]: "accept server URL",
+  [KEY_ADMIN_SERVERS_CANCEL_URL]: "cancel server URL entry",
+  [KEY_ADMIN_SERVERS_INVALID_URL]:
+    "Enter a valid server URL beginning with http:// or https://.",
+  [KEY_ADMIN_SERVERS_URL_ACCEPTED]: "latest saved URL:",
+  [KEY_ADMIN_SERVERS_MAIN_SERVER_ROLE]: "Fracto main server",
+  [KEY_ADMIN_SERVERS_UNAVAILABLE]: "unavailable",
+  [KEY_ADMIN_SERVERS_SECONDS]: "seconds",
+  [KEY_ADMIN_SERVERS_STATUS_READY]: "ready",
+  [KEY_ADMIN_SERVERS_STATUS_STARTING]: "starting",
+  [KEY_ADMIN_SERVERS_STATUS_HEALTHY]: "healthy",
+  [KEY_ADMIN_SERVERS_STATUS_DEGRADED]: "degraded",
+  [KEY_ADMIN_SERVERS_STATUS_STOPPED]: "stopped",
+  [KEY_ADMIN_SERVERS_STATUS_FAILED]: "failed",
   [KEY_ADMIN_SETTINGS]: "admin settings",
   [KEY_ADMIN_STATUS]: "admin status",
   [KEY_ADMIN_STATUS_REFRESH]: "refresh status",

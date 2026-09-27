@@ -9,8 +9,16 @@ The components that use a setting read and update it through `AppSettings.jsx`.
 
 - `AdminSettings.jsx` defines admin-page navigation and layout preferences,
   log timestamp visibility, commit-repository visibility, and the selected
-  Social and Reference documents. Reference selection and expanded folders
-  are included here.
+  Social and Reference documents. Reference selection and expanded folders,
+  plus the selected Servers tree item and server URL list, are included here.
+  The address book is browser-local and stores only `{ urls: string[] }`;
+  this server and saved servers' names and status are fetched live. A future URL-list
+  import can merge normalized URL strings without storing import metadata.
+  It raises the serialized persistence limit for this setting to accommodate
+  a useful URL list.
+- `AppSettingsPersistence.js` serializes persistent object and array values,
+  writes and parses their browser-local values, and applies the setting's
+  optional size limit or the default 1,000-character limit.
 - `AssetsSettings.jsx` defines the Assets page section and splitter position,
   plus image generator, video, detector, simulator, gallery, and lore state
   such as frame parameters, resolutions, selected items, and panel positions.
@@ -43,8 +51,10 @@ Components call `AppSettings.get(key)` to read values and
 `AppSettings.on_settings_changed({ [key]: value })` to update them. Updates
 are applied only for registered keys, booleans are coerced, object and array
 values are copied, subscribers are notified, and values are saved when
-persistence is enabled. Components that need to react immediately to a setting
-can subscribe with `AppSettings.subscribe` and should unsubscribe when they are
+persistence is enabled. Object and array settings have a default 1,000-character
+serialized-value limit; a definition can set `max_persist_length` when its value
+needs more room. Components that need to react immediately to a setting can
+subscribe with `AppSettings.subscribe` and should unsubscribe when they are
 done. The `TYPE_STRING`, `TYPE_NUMBER`,
 `TYPE_OBJECT`, `TYPE_ARRAY`, and `TYPE_BOOLEAN` exports provide the supported
 setting types.
