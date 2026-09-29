@@ -1,7 +1,7 @@
 import { request_json } from "../backend/BackendUtils.jsx";
+import { uses_same_origin_proxy_for_port } from "./service_ports_mode.js";
 
 const ADMIN_PORT = Number(import.meta.env.VITE_FRACTO_ADMIN_PORT || 3005);
-const DIRECT_UI_PORTS = new Set(["3006", "3106"]);
 const ports = {};
 let ready;
 
@@ -12,8 +12,7 @@ let ready;
  */
 const uses_same_origin_proxy = () => {
   if (typeof window === "undefined") return false;
-  if (import.meta.env.PROD) return true;
-  return !DIRECT_UI_PORTS.has(window.location.port);
+  return uses_same_origin_proxy_for_port(window.location.port);
 };
 
 const admin_origin = () => {
