@@ -24,7 +24,9 @@ their own.
 - `service_origin.jsx` is a compatibility re-export of the service-origin
   resolver from `service_ports.jsx`.
 - `service_ports.jsx` discovers the installation's service-port map from the
-  admin service and builds same-host origins for backend clients.
+  admin service and builds same-host origins for backend clients. Production
+  builds always use the same-origin nginx `/api/` routes; Vite development keeps
+  direct service ports for the local UI ports.
 
 ## Rendering utilities (`render/`)
 

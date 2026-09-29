@@ -165,7 +165,7 @@ export class MarkdownStyles {
   `;
 
   static Paragraph = styled.p`
-    margin: 0 0 0.25rem;
+    margin: 0 0 0.75rem;
     line-height: 1.25;
   `;
 

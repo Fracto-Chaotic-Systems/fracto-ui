@@ -36,7 +36,13 @@ Visible application copy is keyed through `AppText.jsx`. Add feature text to the
 
 ## Backend and shared-code boundaries
 
-Code in `backend/` runs in the browser. Service URLs are derived by preserving the browser's current hostname and replacing only the port via `utils/service_origin.jsx`. This supports both production and development service port ranges when the UI is opened from another computer.
+Code in `backend/` runs in the browser. In local Compose mode (UI ports
+3006/3106), service URLs preserve the browser hostname and use the discovered
+service ports. When the UI is served on another port, the browser uses
+same-origin `/api/<service>/` paths; nginx can route those paths to private
+service listeners without exposing the service ports or requiring cross-origin
+cookies. See the root deployment example at
+[`deploy/nginx/fracto.conf.example`](../../../deploy/nginx/fracto.conf.example).
 
 The UI also imports shared files from the root Fracto repository. Keep this service at `servers/fracto-ui/` so those relative imports continue to resolve. Changes to files outside this service belong to the root repository, while changes under this directory belong to the independent `fracto-ui` repository.
 
