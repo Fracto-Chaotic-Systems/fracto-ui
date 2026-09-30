@@ -415,7 +415,10 @@ export class OrbitalSpectrumChart extends Component {
     const json_height_px = Math.max(120, height_px - 8);
     const tree_data = normalize_tree_data(this.state.spectrum_data);
     const selection_details = this.render_selection_details();
-    const minimum_cardinality = Math.max(1, peak_points[0].x);
+    // A successful detector response can still contain no usable peaks (for
+    // example, when the selected point has no detected orbital). Keep the
+    // chart range valid while the summary/tree still render in that case.
+    const minimum_cardinality = Math.max(1, peak_points[0]?.x ?? 1);
     const maximum_cardinality = Math.max(
       minimum_cardinality,
       peak_points.at(-1).x,
