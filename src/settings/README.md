@@ -32,7 +32,8 @@ The components that use a setting read and update it through `AppSettings.jsx`.
   selected app page and last visited route. It also defines server-root,
   viewport, and clipboard values, and provides `poll_viewport_dimensions` to
   keep viewport state current. Viewport and clipboard data are runtime-only.
-- `StudySettings.jsx` defines the Study page section and its feature state for
+- `StudySettings.jsx` defines the Study page sections (including the `full map`
+  destination) and feature state for
   magnitudes, points, meridians, fields, circuitry, detection, minibrots,
   nodes, and hyperplane views. It includes numeric controls, frame settings,
   splitter positions, animation speed, and selected rows.

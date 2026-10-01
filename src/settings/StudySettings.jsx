@@ -81,6 +81,7 @@ export const STUDY_CIRCUITRY = "study_circuitry";
 export const STUDY_DETECTION = "study_detection";
 export const STUDY_MINIBROTS = "study_minibrots";
 export const STUDY_MERIDIANS = "study_meridians";
+export const STUDY_FULL_MAP = "study_full_map";
 
 const DEFAULT_FRAME_SETTINGS = {
   focal_point: { x: -0.75, y: 0.0001 },

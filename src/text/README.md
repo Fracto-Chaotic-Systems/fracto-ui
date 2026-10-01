@@ -17,8 +17,10 @@ translations consistent identifiers.
 - `NavigatorText.jsx` contains canvas navigator labels, rendering-strategy
   descriptions, coverage messages, and related help text.
 - `RootText.jsx` contains shared navigation, menus, forms, and log viewer text
-  such as search, timestamps, relative-time labels, and empty/error messages.
-- `StudyText.jsx` contains Study section names, scientific controls and labels,
+  such as the Study sidebar's bailiwicks and bifurcations dividers, search,
+  timestamps, relative-time labels, and empty/error messages.
+- `StudyText.jsx` contains Study section names (including the `full map`
+  sidebar label), scientific controls and labels,
   and messages for magnitudes, orbitals, meridians, circuitry, detection,
   minibrots, nodes, and related views.
 - `TilesText.jsx` contains Tiles navigation and text for tile generation,

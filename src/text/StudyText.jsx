@@ -51,6 +51,8 @@ export const KEY_HYPERPLANE_TITLE = `${STUDY_FOLDER}/hyperplane_title`;
 export const KEY_NODES_TITLE = `${STUDY_FOLDER}/nodes_title`;
 export const KEY_CIRCUITRY_TITLE = `${STUDY_FOLDER}/circuitry_title`;
 export const KEY_MINIBROTS_TITLE = `${STUDY_FOLDER}/minibrots_title`;
+export const KEY_FULL_MAP_TITLE = `${STUDY_FOLDER}/full_map_title`;
+export const KEY_STUDY_FULL_MAP_TITLE = `${STUDY_FOLDER}/logistic_map_title`;
 export const KEY_INLINE_TITLE = `${STUDY_FOLDER}/inline_title`;
 export const KEY_STUDY_ASPECT = `${STUDY_FOLDER}/study_aspect`;
 export const KEY_STUDY_CARDINALITY = `${STUDY_FOLDER}/study_cardinality`;
@@ -121,6 +123,8 @@ export const APP_STUDY_TEXT = {
   [KEY_NODES_TITLE]: "nodal",
   [KEY_CIRCUITRY_TITLE]: "circuitry",
   [KEY_MINIBROTS_TITLE]: "freeform",
+  [KEY_FULL_MAP_TITLE]: "full map",
+  [KEY_STUDY_FULL_MAP_TITLE]: "logistic map",
   [KEY_INLINE_TITLE]: "inline",
   [KEY_STUDY_ASPECT]: "aspect",
   [KEY_STUDY_CARDINALITY]: "cardinality",

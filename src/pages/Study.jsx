@@ -15,10 +15,12 @@ import {
   STUDY_MERIDIANS,
   STUDY_CIRCUITRY,
   STUDY_DETECTION,
+  STUDY_FULL_MAP,
 } from "../settings/StudySettings.jsx";
 import AppText from "../AppText.jsx";
 import {
   KEY_BREAKER_BAILIWICKS,
+  KEY_BREAKER_BIFURCATIONS,
   KEY_SIDEBAR_OVERVIEW,
   KEY_SIDEBAR_SETTINGS,
   KEY_SIDEBAR_STATUS,
@@ -29,6 +31,8 @@ import {
   KEY_INLINE_TITLE,
   KEY_MERIDIANS_TITLE,
   KEY_MINIBROTS_TITLE,
+  KEY_FULL_MAP_TITLE,
+  KEY_STUDY_FULL_MAP_TITLE,
   KEY_NODES_TITLE,
   KEY_POINTS_TITLE,
 } from "../text/StudyText.jsx";
@@ -46,6 +50,7 @@ import StudyInline from "./study/StudyInline.jsx";
 import StudyMeridians from "./study/StudyMeridians.jsx";
 import StudyCircuitry from "./study/StudyCircuitry.jsx";
 import StudyOrbitalDetector from "./study/StudyOrbitalDetector.jsx";
+import StudyFullMap from "./study/StudyFullMap.jsx";
 
 export const BAILIWICK_TYPE_FREEFORM = "bailiwick_type_freeform";
 export const BAILIWICK_TYPE_INLINE = "bailiwick_type_inline";
@@ -93,6 +98,12 @@ const SIDEBAR_LIST = [
     title_key: KEY_MINIBROTS_TITLE,
     section_code: STUDY_MINIBROTS,
     right_pane: <StudyMinibrots />,
+  },
+  { section_code: SIDEBAR_BREAKER, section_text_key: KEY_BREAKER_BIFURCATIONS },
+  {
+    title_key: KEY_FULL_MAP_TITLE,
+    section_code: STUDY_FULL_MAP,
+    right_pane: <StudyFullMap />,
   },
   { section_code: SIDEBAR_BREAKER },
   {
