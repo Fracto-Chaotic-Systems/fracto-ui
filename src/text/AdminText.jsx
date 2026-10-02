@@ -14,6 +14,11 @@ export const KEY_ADMIN_SOCIAL_REFRESHING = `${ADMIN_FOLDER}/social_refreshing`;
 export const KEY_ADMIN_SOCIAL_LAST_REFRESHED = `${ADMIN_FOLDER}/social_last_refreshed`;
 export const KEY_ADMIN_SOCIAL_STALE = `${ADMIN_FOLDER}/social_stale`;
 export const KEY_ADMIN_SOCIAL_REFRESH_WARNING = `${ADMIN_FOLDER}/social_refresh_warning`;
+export const KEY_ADMIN_ACCOUNTS = "admin/accounts";
+export const KEY_ADMIN_ACCOUNTS_TITLE = "admin/accounts_title";
+export const KEY_ADMIN_ACCOUNTS_LOADING = "admin/accounts_loading";
+export const KEY_ADMIN_ACCOUNTS_ERROR = "admin/accounts_error";
+export const KEY_ADMIN_ACCOUNTS_EMPTY = "admin/accounts_empty";
 export const KEY_ADMIN_OVERVIEW = `${ADMIN_FOLDER}/admin_overview`;
 export const KEY_ADMIN_SERVERS = `${ADMIN_FOLDER}/servers`;
 export const KEY_ADMIN_SERVERS_TITLE = `${ADMIN_FOLDER}/servers_title`;
@@ -158,4 +163,9 @@ export const APP_ADMIN_TEXT = {
   [KEY_ADMIN_REPOSITORY_NONE]: "none",
   [KEY_ADMIN_COPY_HASH]: "copy full hash to clipboard",
   [KEY_ADMIN_VIEW_GITHUB]: "view in GitHub",
+  [KEY_ADMIN_ACCOUNTS]: "accounts",
+  [KEY_ADMIN_ACCOUNTS_TITLE]: "user accounts",
+  [KEY_ADMIN_ACCOUNTS_LOADING]: "loading user accounts...",
+  [KEY_ADMIN_ACCOUNTS_ERROR]: "unable to load user accounts:",
+  [KEY_ADMIN_ACCOUNTS_EMPTY]: "no user accounts found",
 };

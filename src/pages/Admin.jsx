@@ -33,6 +33,9 @@ import {
 } from "../text/RootText.jsx";
 
 import AdminOverview from "./admin/AdminOverview.jsx";
+import { ADMIN_ACCOUNTS } from "../settings/AdminSettings.jsx";
+import { KEY_ADMIN_ACCOUNTS } from "../text/AdminText.jsx";
+import AdminAccounts from "./admin/AdminAccounts.jsx";
 import AdminServers from "./admin/AdminServers.jsx";
 import AdminSettings from "./admin/AdminSettings.jsx";
 import AdminStatus from "./admin/AdminStatus.jsx";
@@ -46,6 +49,11 @@ const SIDEBAR_LIST = [
     title_key: KEY_SIDEBAR_OVERVIEW,
     section_code: ADMIN_OVERVIEW,
     right_pane: <AdminOverview />,
+  },
+  {
+    title_key: KEY_ADMIN_ACCOUNTS,
+    section_code: ADMIN_ACCOUNTS,
+    right_pane: <AdminAccounts />,
   },
   { section_code: SIDEBAR_BREAKER },
   {

@@ -45,3 +45,8 @@ in `src/settings/AdminSettings.jsx`.
   information.
 - `AdminLogs.jsx` presents server log records and timestamp controls.
 - `AdminQueries.jsx` displays administrative query and diagnostic results.
+- `AdminAccounts.jsx` loads user records from the administrator-only
+  `AdminBackend.users()` endpoint and displays every returned row and field in
+  a scrollable table, with loading, empty, and error states. The current server
+  endpoint caps a response at 1,000 users; filtering and column selection are
+  not implemented.

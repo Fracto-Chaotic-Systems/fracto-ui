@@ -19,6 +19,7 @@ export const KEY_ADMIN_REFERENCE_DOCUMENT = `${ADMIN_FOLDER}/reference_document`
 export const KEY_ADMIN_REFERENCE_SELECTION = `${ADMIN_FOLDER}/reference_selection`;
 export const KEY_ADMIN_REFERENCE_EXPANDED_FOLDERS = `${ADMIN_FOLDER}/reference_expanded_folders`;
 
+export const ADMIN_ACCOUNTS = "admin_accounts";
 export const ADMIN_OVERVIEW = "admin_overview";
 export const ADMIN_SERVERS = "admin_servers";
 export const ADMIN_REFERENCE = "admin_reference";

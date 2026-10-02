@@ -44,8 +44,10 @@ read-only responses are fetched from the main server's separate browser origin.
 after four seconds; the remote server's health endpoint must allow cross-origin
 reads without credentials.
 
-`AdminBackend.reference_tree()` loads tracked Markdown paths from the admin
-service's fixed repository allowlist. `reference_document(repository, path)`
+`AdminBackend.users()` loads up to 1,000 allowlisted user records for the
+administrator Accounts page; it uses the existing admin-only endpoint.
+`reference_tree()` loads tracked Markdown paths from the admin service's fixed
+repository allowlist. `reference_document(repository, path)`
 fetches one selected document. Both endpoints require an enabled administrator
 session, and keep server repository paths out of UI requests.
 
