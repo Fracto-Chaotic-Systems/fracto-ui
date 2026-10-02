@@ -10,9 +10,10 @@ each panel owns the content for one Study section. Visible labels come from
 - `StudyCircuitry.jsx` composes the circuitry controls, chart, and related
   orbital analysis.
 - `StudyFields.jsx` displays field views and their frame controls.
-- `StudyFullMap.jsx` is the initial title-only scaffold for the Full Map
-  sidebar destination. It displays the title `logistic map` and deliberately
-  has no map content yet.
+- `StudyFullMap.jsx` displays the temporary logistic-map diagnostic controls.
+  It starts the level-one calculation, polls its ephemeral job for progress,
+  and renders compact outcome/timing rows after completion (or partial rows if
+  the worker times out).
 - `StudyInline.jsx` displays inline bailiwick studies.
 - `StudyMeridians.jsx` composes core-meridian data and visualization.
 - `StudyMinibrots.jsx` composes the freeform minibrot list and detail panels.
@@ -38,3 +39,7 @@ each panel owns the content for one Study section. Visible labels come from
 
 When a Study page adds or changes behavior, update the corresponding panel and
 its text or setting registry, and keep this directory guide current.
+
+The Full Map diagnostic is exploratory. Results are held by the running data
+server only and disappear on restart or after their short retention period;
+durable tile-like result storage is a later feature phase.

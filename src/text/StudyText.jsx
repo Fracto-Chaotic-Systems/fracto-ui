@@ -53,6 +53,16 @@ export const KEY_CIRCUITRY_TITLE = `${STUDY_FOLDER}/circuitry_title`;
 export const KEY_MINIBROTS_TITLE = `${STUDY_FOLDER}/minibrots_title`;
 export const KEY_FULL_MAP_TITLE = `${STUDY_FOLDER}/full_map_title`;
 export const KEY_STUDY_FULL_MAP_TITLE = `${STUDY_FOLDER}/logistic_map_title`;
+export const KEY_LOGISTIC_MAP_RUN_DIAGNOSTIC = `${STUDY_FOLDER}/logistic_map_run_diagnostic`;
+export const KEY_LOGISTIC_MAP_RUNNING = `${STUDY_FOLDER}/logistic_map_running`;
+export const KEY_LOGISTIC_MAP_PROGRESS = `${STUDY_FOLDER}/logistic_map_progress`;
+export const KEY_LOGISTIC_MAP_STATUS = `${STUDY_FOLDER}/logistic_map_status`;
+export const KEY_LOGISTIC_MAP_R = `${STUDY_FOLDER}/logistic_map_r`;
+export const KEY_LOGISTIC_MAP_PERIOD = `${STUDY_FOLDER}/logistic_map_period`;
+export const KEY_LOGISTIC_MAP_ITERATIONS = `${STUDY_FOLDER}/logistic_map_iterations`;
+export const KEY_LOGISTIC_MAP_TIME = `${STUDY_FOLDER}/logistic_map_time`;
+export const KEY_LOGISTIC_MAP_SPEED = `${STUDY_FOLDER}/logistic_map_speed`;
+export const KEY_LOGISTIC_MAP_ERROR = `${STUDY_FOLDER}/logistic_map_error`;
 export const KEY_INLINE_TITLE = `${STUDY_FOLDER}/inline_title`;
 export const KEY_STUDY_ASPECT = `${STUDY_FOLDER}/study_aspect`;
 export const KEY_STUDY_CARDINALITY = `${STUDY_FOLDER}/study_cardinality`;
@@ -125,6 +135,16 @@ export const APP_STUDY_TEXT = {
   [KEY_MINIBROTS_TITLE]: "freeform",
   [KEY_FULL_MAP_TITLE]: "full map",
   [KEY_STUDY_FULL_MAP_TITLE]: "logistic map",
+  [KEY_LOGISTIC_MAP_RUN_DIAGNOSTIC]: "calculate initial level span",
+  [KEY_LOGISTIC_MAP_RUNNING]: "calculating level 1…",
+  [KEY_LOGISTIC_MAP_PROGRESS]: "progress",
+  [KEY_LOGISTIC_MAP_STATUS]: "outcome",
+  [KEY_LOGISTIC_MAP_R]: "r",
+  [KEY_LOGISTIC_MAP_PERIOD]: "period",
+  [KEY_LOGISTIC_MAP_ITERATIONS]: "iterations",
+  [KEY_LOGISTIC_MAP_TIME]: "time (ms)",
+  [KEY_LOGISTIC_MAP_SPEED]: "iterations/s",
+  [KEY_LOGISTIC_MAP_ERROR]: "error",
   [KEY_INLINE_TITLE]: "inline",
   [KEY_STUDY_ASPECT]: "aspect",
   [KEY_STUDY_CARDINALITY]: "cardinality",
