@@ -131,6 +131,7 @@ export class StudyCircuitry extends Component {
         >
           <CircuitryChart
             focal_point={frame_settings.focal_point}
+            scope={frame_settings.scope}
             height_px={rendered_height}
             width_px={right_pane_width}
           />

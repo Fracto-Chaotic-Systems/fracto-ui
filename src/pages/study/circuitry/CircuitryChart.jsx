@@ -79,6 +79,7 @@ const ORBITAL_POINT_COLUMNS = [
 export class CircuitryChart extends Component {
   static propTypes = {
     focal_point: PropTypes.object,
+    scope: PropTypes.number,
     height_px: PropTypes.number.isRequired,
     width_px: PropTypes.number.isRequired,
   };
@@ -452,6 +453,7 @@ export class CircuitryChart extends Component {
 
   render() {
     const { width_px, height_px } = this.props;
+    const { focal_point, scope } = this.props;
     const {
       circuitry_data,
       error,
@@ -481,6 +483,22 @@ export class CircuitryChart extends Component {
         : 0;
     const no_orbital =
       circuitry_data?.orbit_status === "outside_mandelbrot_set";
+    const single_point_orbit =
+      circuitry_data?.cardinality === 1 &&
+      circuitry_data?.orbital_points?.length === 1;
+    const navigator_bounds =
+      single_point_orbit &&
+      Number.isFinite(Number(scope)) &&
+      Number(scope) > 0 &&
+      Number.isFinite(Number(focal_point?.x)) &&
+      Number.isFinite(Number(focal_point?.y))
+        ? {
+            min_x: Number(focal_point.x) - Number(scope) / 2,
+            max_x: Number(focal_point.x) + Number(scope) / 2,
+            min_y: Number(focal_point.y) - Number(scope) / 2,
+            max_y: Number(focal_point.y) + Number(scope) / 2,
+          }
+        : null;
     const orbital_points = (circuitry_data?.result || [])
       .filter(({ t }, index) =>
         radial_sweep
@@ -759,7 +777,7 @@ export class CircuitryChart extends Component {
               "#888888",
               false,
               4,
-              radial_origin,
+              single_point_orbit ? null : radial_origin,
               highlighted_point,
               0,
               selected_orbital_row,
@@ -767,6 +785,7 @@ export class CircuitryChart extends Component {
               highlighted_t,
               orbital_t_values,
               true,
+              navigator_bounds,
             )
           ) : null}
         </styles.ContentWrapper>

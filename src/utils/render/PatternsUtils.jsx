@@ -29,6 +29,7 @@ export const click_point_chart = (
   highlighted_t = null,
   other_set_t_values = null,
   prominent_axes = false,
+  bounds_override = null,
 ) => {
   if (!set1) {
     return [];
@@ -158,7 +159,9 @@ export const click_point_chart = (
     const bounds_other_sets = radial_origin
       ? [...other_sets, radial_origin]
       : other_sets;
-    const bounds = find_bounds(set1, bounds_other_sets, in_cardioid, escaper);
+    const bounds =
+      bounds_override ||
+      find_bounds(set1, bounds_other_sets, in_cardioid, escaper);
     const options = get_scatter_options(bounds, prominent_axes);
     return (
       <Scatter
