@@ -132,7 +132,7 @@ export class PointsMainPanel extends Component {
       });
     }
     const experiment_used = Boolean(
-      response?.orbital_two_calc_newton_experiment?.used_for_chart,
+      response?.two_point_calc_newton_fallback?.used_for_newton,
     );
     return {
       cardinality: Number(
@@ -157,7 +157,7 @@ export class PointsMainPanel extends Component {
           response?.detection?.candidate_cardinality || result?.cardinality || 0,
         ) || 0) *
           (Number(result?.cycles) || 0),
-      two_point_fallback: response?.orbital_two_calc_newton_experiment || null,
+      two_point_fallback: response?.two_point_calc_newton_fallback || null,
     };
   };
 

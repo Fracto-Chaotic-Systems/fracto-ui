@@ -12,6 +12,12 @@ their interpolated circuitry curves.
 - `CircuitryAudioUtils.js` builds and validates waveform profiles from the
   interpolated curve data.
 
-The orbital-2 Newton investigation is experimental and is not invoked by normal
-circuitry requests. The UI renders the established `orbital_points` and
-`result` response fields.
+When the main-cardioid detector reports candidate cardinality 2, the data
+server automatically runs the experimental `FractoFastCalc`-cardinality →
+BigComplex-Newton fallback. The page continues to render the returned
+`orbital_points` and `result` fields and does not implement fallback logic
+itself. The fallback is candidate refinement, not proof of a true or primitive
+period: calculator cardinality is finite-precision, the solver's precision is
+not preserved end-to-end, and the current acceptance check does not verify
+cycle closure or stability. See the data-server orbital pipeline README for
+the full flow and remaining validation work.

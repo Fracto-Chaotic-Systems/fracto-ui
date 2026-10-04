@@ -71,7 +71,7 @@ export const send_to = (frame_settings, destination) => {
         [KEY_STUDY_CIRCUITRY_FRAME_SETTINGS]: frame_settings_copy,
         [KEY_STUDY_SECTION]: STUDY_CIRCUITRY,
       });
-      routing = "/assets";
+      routing = "/study";
       break;
 
     default:

@@ -14,9 +14,14 @@ point.
   points and displays fallback diagnostics.
 - `PointsSeriesChart.jsx` draws one point series and reports its cardinality,
   timing, detector/Newton effort, and two-point fallback status when applicable.
+  For legacy iterative data, its magnitude summary uses the raw offset from
+  the cardioid reference point. It selects pico (`p`) or micro (`μ`) only for
+  small values and otherwise displays the base value without a prefix. The
+  plotted coordinates may be multiplied by `10^13` separately to make tiny
+  offsets visible; that plotting scale is not the summary's unit conversion.
 - `StudyPoints.jsx` composes this directory's panels into the Study page.
 
 Visible labels are registered in `../../../text/StudyText.jsx` and rendered
-through `AppText` so the page remains ready for translation. The experimental
+through `AppText` so the page remains ready for translation. The fallback
 cardinality is a numerical candidate, not proof that a mathematical orbit has
 been established.

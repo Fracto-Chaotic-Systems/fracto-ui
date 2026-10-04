@@ -70,6 +70,7 @@ export class PointsSeriesChart extends Component {
   state = {
     point_data: [],
     point_magnitude: 0,
+    point_magnitude_unit: "",
   };
 
   componentDidMount() {
@@ -89,6 +90,9 @@ export class PointsSeriesChart extends Component {
       return [];
     }
     let point_list = copy_json(chart_data);
+    const has_offsets =
+      point_list.length > 0 &&
+      point_list.every((data) => Number.isFinite(Number(data.offset)));
     const point_data = point_list
       .sort((a, b) => a.step - b.step)
       .map((data) => {
@@ -102,6 +106,7 @@ export class PointsSeriesChart extends Component {
             y: parseFloat(data.point.im),
             x_scaled_str: data.point.re,
             y_scaled_str: data.point.im,
+            offset: Number(data.offset),
           };
         } else {
           return {
@@ -113,18 +118,40 @@ export class PointsSeriesChart extends Component {
             y: parseFloat(data.scaled_point.im),
             x_scaled_str: data.scaled_point.re,
             y_scaled_str: data.scaled_point.im,
+            offset: Number(data.offset),
           };
         }
       });
-    const point_magnitude = point_data.reduce(
-      (maximum, point) => Math.max(maximum, Math.hypot(point.x, point.y)),
-      0,
-    );
-    this.setState({ point_data, point_magnitude });
+    const raw_offset_magnitude = has_offsets
+      ? point_data.reduce(
+          (maximum, point) => Math.max(maximum, point.offset),
+          0,
+        )
+      : null;
+    const magnitude_scale =
+      raw_offset_magnitude === null ||
+      raw_offset_magnitude === 0 ||
+      raw_offset_magnitude >= 1e-3
+        ? 1
+        : raw_offset_magnitude >= 1e-9
+          ? 1e6
+          : 1e12;
+    const point_magnitude = has_offsets
+      ? raw_offset_magnitude * magnitude_scale
+      : point_data.reduce(
+          (maximum, point) => Math.max(maximum, Math.hypot(point.x, point.y)),
+          0,
+        );
+    this.setState({
+      point_data,
+      point_magnitude,
+      point_magnitude_unit:
+        magnitude_scale === 1e12 ? "p" : magnitude_scale === 1e6 ? "μ" : "",
+    });
   };
 
   render() {
-    const { point_data, point_magnitude } = this.state;
+    const { point_data, point_magnitude, point_magnitude_unit } = this.state;
     const {
       cardinality,
       detector_iterations,
@@ -166,7 +193,10 @@ export class PointsSeriesChart extends Component {
           <span style={CELL_LABEL_STYLE}>
             {AppText.get(KEY_STUDY_MAGNITUDE)}:
           </span>{" "}
-          <span style={numeric_value_style}>{point_magnitude}</span>
+          <span style={numeric_value_style}>
+            {point_magnitude}
+            {point_magnitude_unit}
+          </span>
           <br />
           <span style={CELL_LABEL_STYLE}>
             {AppText.get(KEY_STUDY_CARDINALITY)}:
