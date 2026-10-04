@@ -34,7 +34,6 @@ export const click_point_chart = (
   if (!set1) {
     return [];
   }
-  console.log(`click_point_chart ${set1.length} points`);
 
   const cardinality =
     Number.isFinite(cardinality_override)
@@ -165,7 +164,7 @@ export const click_point_chart = (
     const options = get_scatter_options(bounds, prominent_axes);
     return (
       <Scatter
-        datasetIdKey="id1"
+        datasetIdKey="Id"
         data={data_dataset}
         options={options}
         plugins={backgroundImagePlugin ? [backgroundImagePlugin] : []}

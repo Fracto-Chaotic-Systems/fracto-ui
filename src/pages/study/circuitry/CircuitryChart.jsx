@@ -115,6 +115,7 @@ export class CircuitryChart extends Component {
   // the cancellation source for transport commands.
   animation_timer_handle = null;
   audio_resume_generation = 0;
+  circuitry_request_generation = 0;
   is_unmounted = false;
 
   componentDidMount() {
@@ -144,6 +145,7 @@ export class CircuitryChart extends Component {
 
   componentWillUnmount() {
     this.is_unmounted = true;
+    this.circuitry_request_generation += 1;
     this.clear_animation_timer();
     this.audio_controller.dispose();
   }
@@ -178,6 +180,7 @@ export class CircuitryChart extends Component {
   };
 
   load_circuitry = (focal_point) => {
+    const request_generation = ++this.circuitry_request_generation;
     const resume_audio = this.state.audio_playing;
     const resume_generation = ++this.audio_resume_generation;
     // Keep the current waveform audible while the replacement is fetched.
@@ -188,6 +191,14 @@ export class CircuitryChart extends Component {
     DataBackend.get_circuitry(
       focal_point,
       (response) => {
+        // Navigation can issue another request before this response arrives.
+        // Only the newest focal point is allowed to replace the visible chart.
+        if (
+          this.is_unmounted ||
+          request_generation !== this.circuitry_request_generation
+        ) {
+          return;
+        }
         if (response.error) {
           this.setState({ error: response.error });
           return;
