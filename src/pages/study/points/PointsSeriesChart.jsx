@@ -19,6 +19,9 @@ import {
   KEY_STUDY_MAGNITUDE,
   KEY_STUDY_NEWTON_CYCLES,
   KEY_STUDY_NEWTON_EFFORT,
+  KEY_STUDY_POINTS_CALCULATOR_CANDIDATE,
+  KEY_STUDY_POINTS_CALCULATOR_ITERATION,
+  KEY_STUDY_POINTS_TWO_POINT_FALLBACK,
 } from "../../../text/StudyText.jsx";
 import { click_point_chart } from "../../../utils/render/PatternsUtils.jsx";
 import { copy_json } from "../../../utils/Dom.jsx";
@@ -58,6 +61,7 @@ export class PointsSeriesChart extends Component {
     detector_horizon_iterations: PropTypes.number,
     newton_cycles: PropTypes.number,
     newton_effort: PropTypes.number,
+    two_point_fallback: PropTypes.object,
     width_px: PropTypes.number.isRequired,
     waiting: PropTypes.bool.isRequired,
     title: PropTypes.string.isRequired,
@@ -129,6 +133,7 @@ export class PointsSeriesChart extends Component {
       iterations,
       newton_cycles,
       newton_effort,
+      two_point_fallback,
       width_px,
       title,
     } = this.props;
@@ -213,6 +218,39 @@ export class PointsSeriesChart extends Component {
               </span>{" "}
               <span style={numeric_value_style}>{newton_effort}</span>{" "}
               <span style={unit_style}>steps</span>
+            </>
+          ) : null}
+          {two_point_fallback ? (
+            <>
+              <br />
+              <span style={CELL_LABEL_STYLE}>
+                {AppText.get(KEY_STUDY_POINTS_TWO_POINT_FALLBACK)}:
+              </span>{" "}
+              <span style={numeric_value_style}>{two_point_fallback.status}</span>
+              {two_point_fallback.calc_cardinality !== null &&
+              two_point_fallback.calc_cardinality !== undefined ? (
+                <>
+                  <br />
+                  <span style={CELL_LABEL_STYLE}>
+                    {AppText.get(KEY_STUDY_POINTS_CALCULATOR_CANDIDATE)}:
+                  </span>{" "}
+                  <span style={numeric_value_style}>
+                    {two_point_fallback.calc_cardinality}
+                  </span>
+                </>
+              ) : null}
+              {two_point_fallback.calc_iteration !== null &&
+              two_point_fallback.calc_iteration !== undefined ? (
+                <>
+                  <br />
+                  <span style={CELL_LABEL_STYLE}>
+                    {AppText.get(KEY_STUDY_POINTS_CALCULATOR_ITERATION)}:
+                  </span>{" "}
+                  <span style={numeric_value_style}>
+                    {two_point_fallback.calc_iteration}
+                  </span>
+                </>
+              ) : null}
             </>
           ) : null}
         </SummaryWrapper>

@@ -131,22 +131,33 @@ export class PointsMainPanel extends Component {
         scaled_point: { ...point_list[0].scaled_point },
       });
     }
+    const experiment_used = Boolean(
+      response?.orbital_two_calc_newton_experiment?.used_for_chart,
+    );
     return {
       cardinality: Number(
-        response?.detection?.candidate_cardinality || result?.cardinality || 0,
+        experiment_used
+          ? result?.cardinality || 0
+          : response?.detection?.candidate_cardinality ||
+              result?.cardinality ||
+              0,
       ),
       point_list,
       elapsed_ms: Number(response?.elapsed_ms) || 0,
       detector_iterations: Number(response?.iterations) || 0,
       detector_horizon_iterations:
         Number(response?.detector_horizon_iterations) || 0,
-      newton_cycles: Number(result?.cycles) || 0,
-      newton_effort:
+      newton_cycles:
+        result?.cycles === undefined ? undefined : Number(result.cycles) || 0,
+      newton_effort: experiment_used
+        ? undefined
+        :
         (Number(response?.iterations) || 0) +
         (Number(
           response?.detection?.candidate_cardinality || result?.cardinality || 0,
         ) || 0) *
           (Number(result?.cycles) || 0),
+      two_point_fallback: response?.orbital_two_calc_newton_experiment || null,
     };
   };
 
@@ -216,7 +227,10 @@ export class PointsMainPanel extends Component {
         );
         this.setState({ newton_derived, in_fetch: false });
       },
-      { newton_mode: "big_complex", adaptive_detection: true },
+      {
+        newton_mode: "big_complex",
+        adaptive_detection: true,
+      },
     );
   };
 
@@ -264,6 +278,7 @@ export class PointsMainPanel extends Component {
           }
           newton_cycles={newton_derived.newton_cycles}
           newton_effort={newton_derived.newton_effort}
+          two_point_fallback={newton_derived.two_point_fallback}
           width_px={chart_width}
           waiting={!in_fetch}
           title={"Newton derived"}

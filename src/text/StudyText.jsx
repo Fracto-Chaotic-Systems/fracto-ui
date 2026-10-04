@@ -32,6 +32,9 @@ export const KEY_STUDY_DETECTOR_ITERATIONS = `${STUDY_FOLDER}/detector_iteration
 export const KEY_STUDY_DETECTOR_HORIZON = `${STUDY_FOLDER}/detector_horizon`;
 export const KEY_STUDY_NEWTON_CYCLES = `${STUDY_FOLDER}/newton_cycles`;
 export const KEY_STUDY_NEWTON_EFFORT = `${STUDY_FOLDER}/newton_effort`;
+export const KEY_STUDY_POINTS_TWO_POINT_FALLBACK = `${STUDY_FOLDER}/points_two_point_fallback`;
+export const KEY_STUDY_POINTS_CALCULATOR_CANDIDATE = `${STUDY_FOLDER}/points_calculator_candidate`;
+export const KEY_STUDY_POINTS_CALCULATOR_ITERATION = `${STUDY_FOLDER}/points_calculator_iteration`;
 export const KEY_STUDY_DETECTION_SELECTED_PATH = `${STUDY_FOLDER}/detection_selected_path`;
 export const KEY_STUDY_DETECTION_SELECTED_TYPE = `${STUDY_FOLDER}/detection_selected_type`;
 export const KEY_STUDY_DETECTION_SELECTED_VALUE = `${STUDY_FOLDER}/detection_selected_value`;
@@ -115,6 +118,9 @@ export const APP_STUDY_TEXT = {
   [KEY_STUDY_DETECTOR_HORIZON]: "detector horizon",
   [KEY_STUDY_NEWTON_CYCLES]: "Newton cycles",
   [KEY_STUDY_NEWTON_EFFORT]: "Newton effort",
+  [KEY_STUDY_POINTS_TWO_POINT_FALLBACK]: "2-point cardinality fallback",
+  [KEY_STUDY_POINTS_CALCULATOR_CANDIDATE]: "calculator candidate",
+  [KEY_STUDY_POINTS_CALCULATOR_ITERATION]: "calculator iteration",
   [KEY_STUDY_DETECTION_SELECTED_PATH]: "path",
   [KEY_STUDY_DETECTION_SELECTED_TYPE]: "type",
   [KEY_STUDY_DETECTION_SELECTED_VALUE]: "value",
