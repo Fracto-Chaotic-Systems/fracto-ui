@@ -213,7 +213,6 @@ export class PointsMainPanel extends Component {
     DataBackend.get_orbital_newton(
       focal_point,
       (response) => {
-        console.log("/orbital_newton response", { focal_point, response });
         if (response.error) {
           console.log("get_orbital_newton error", response.error);
           this.setState({
