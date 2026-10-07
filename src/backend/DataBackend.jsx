@@ -126,6 +126,17 @@ export class DataBackend {
     }, 250);
   };
 
+  /** Poll an asynchronous high-precision seed-plane survey. */
+  static get_seed_survey_job = (job_id, cb) => {
+    fetch(`${DATA_ORIGIN()}/orbitals/seed-survey/${encodeURIComponent(job_id)}`, {
+      credentials: "include",
+      headers: FETCH_JSON_HEADERS,
+    })
+      .then((response) => response.json().then((body) => ({ response, body })))
+      .then(({ response, body }) => cb(response.ok ? body : { error: body.error || `HTTP ${response.status}` }))
+      .catch((error) => cb({ error: error.message }));
+  };
+
   /**
    * Requests detector-derived orbital points refined by the Newton solver.
    * @param {{x:number,y:number}} focal_point Complex-plane focal point.

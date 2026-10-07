@@ -16,7 +16,7 @@ DataBackend.get_orbitals({ x: -0.75, y: 0.1 }, 200, (data) => {
 
 ### `DataBackend.jsx`
 
-Calls the data service (normally port 3002) for minibrot listings, orbital data, lore listings/content, Farey sequences, backups, and query-table records. Most query methods use callbacks and defer the request by 250 ms. `get_farey_sequence()` is asynchronous and caches its filtered result in `DataBackend.FAREY_SEQUENCE`; it keeps positive terms with denominators up to 128. `lore_storage()` sends a JSON `PUT` and does not return the saved record.
+Calls the data service (normally port 3002) for minibrot listings, orbital data, lore listings/content, Farey sequences, backups, and query-table records. Most query methods use callbacks and defer the request by 250 ms. `get_orbitals()` receives the legacy series and a high-precision survey job ID promptly; `get_seed_survey_job()` polls the worker-backed result separately. `get_farey_sequence()` is asynchronous and caches its filtered result in `DataBackend.FAREY_SEQUENCE`; it keeps positive terms with denominators up to 128. `lore_storage()` sends a JSON `PUT` and does not return the saved record.
 
 ### `AssetsBackend.jsx`
 

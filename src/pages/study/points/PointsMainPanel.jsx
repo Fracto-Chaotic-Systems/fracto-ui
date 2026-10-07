@@ -14,11 +14,15 @@ import {
   KEY_STUDY_POINTS_SPLITTER_POS,
   KEY_STUDY_SPLITTER_POS_PX,
 } from "../../../settings/StudySettings.jsx";
-import { KEY_STUDY_POINTS_LEGACY_ITERATIVE } from "../../../text/StudyText.jsx";
+import {
+  KEY_STUDY_POINTS_LEGACY_ITERATIVE,
+  KEY_STUDY_POINTS_SEED_SURVEY,
+} from "../../../text/StudyText.jsx";
 
 import { update_dimensions } from "./../../PageUtils.jsx";
 import DataBackend from "../../../backend/DataBackend.jsx";
 import PointsSeriesChart from "./PointsSeriesChart.jsx";
+import SeedSurveyChart from "./SeedSurveyChart.jsx";
 import Complex from "@fracto/sdk/math/Complex.js";
 
 const UPDATE_INTERVAL_MS = 1000;
@@ -32,15 +36,26 @@ export class PointsMainPanel extends Component {
     subscription: null,
     in_fetch: false,
     pro_derived: { cardinality: 0, point_list: [], elapsed_ms: 0 },
+    seed_survey: {
+      stable_count: 0,
+      total_samples: 0,
+      stable_points: [],
+      unresolved_points: [],
+    },
     newton_derived: { cardinality: 0, point_list: [], elapsed_ms: 0 },
     set2: [],
   };
 
   componentDidMount() {
+    this.is_mounted = true;
     this.update_dimensions();
+    const frame_settings = AppSettings.get(KEY_STUDY_POINTS_FRAME_SETTINGS);
+    this.last_chart_focal_point = frame_settings?.focal_point
+      ? { ...frame_settings.focal_point }
+      : null;
     this.setState({
       interval: setInterval(this.update_dimensions, UPDATE_INTERVAL_MS),
-      frame_settings: AppSettings.get(KEY_STUDY_POINTS_FRAME_SETTINGS),
+      frame_settings,
       subscription: AppSettings.subscribe(
         KEY_STUDY_POINTS_FRAME_SETTINGS,
         this.on_frame_settings_changed,
@@ -49,6 +64,12 @@ export class PointsMainPanel extends Component {
   }
 
   componentWillUnmount() {
+    this.is_mounted = false;
+    this.seed_survey_request_id = (this.seed_survey_request_id || 0) + 1;
+    this.pending_chart_update = null;
+    if (this.seed_survey_poll_timer) {
+      clearTimeout(this.seed_survey_poll_timer);
+    }
     const { interval, subscription } = this.state;
     if (interval) {
       clearInterval(interval);
@@ -59,28 +80,30 @@ export class PointsMainPanel extends Component {
   }
 
   on_frame_settings_changed = (key, value) => {
+    const focal_point = value?.focal_point;
     if (
-      Number.isNaN(value.focal_point.x) ||
-      Number.isNaN(value.focal_point.y)
+      !focal_point ||
+      !Number.isFinite(focal_point.x) ||
+      !Number.isFinite(focal_point.y)
     ) {
       console.log("on_frame_settings_changed bad number", value);
       return;
     }
-    let set2 = [];
-    if (value && value.focal_point) {
-      console.log("value", value);
-      const { focal_point } = value;
-      const Q_core_neg = FractoFastCalc.calculate_cardioid_Q(
-        focal_point.x,
-        focal_point.y,
-        -1,
-      );
-      set2 = [Q_core_neg];
+    const focal_point_changed =
+      !this.last_chart_focal_point ||
+      focal_point.x !== this.last_chart_focal_point.x ||
+      focal_point.y !== this.last_chart_focal_point.y;
+    this.setState({ frame_settings: value });
+    if (!focal_point_changed) {
+      return;
     }
-    this.setState({
-      frame_settings: value,
-      set2,
-    });
+    this.last_chart_focal_point = { ...focal_point };
+    const Q_core_neg = FractoFastCalc.calculate_cardioid_Q(
+      focal_point.x,
+      focal_point.y,
+      -1,
+    );
+    this.setState({ set2: [Q_core_neg] });
     this.on_chart_update(key, value);
   };
 
@@ -190,42 +213,108 @@ export class PointsMainPanel extends Component {
   on_chart_update = (key, value) => {
     const { in_fetch } = this.state;
     if (in_fetch) {
+      this.pending_chart_update = { key, value };
       return;
+    }
+    this.pending_chart_update = null;
+    const request_id = (this.seed_survey_request_id || 0) + 1;
+    this.seed_survey_request_id = request_id;
+    if (this.seed_survey_poll_timer) {
+      clearTimeout(this.seed_survey_poll_timer);
+      this.seed_survey_poll_timer = null;
     }
     this.setState({ in_fetch: true });
     DataBackend.get_orbitals(value.focal_point, 50000, (all_results) => {
+      if (request_id !== this.seed_survey_request_id || !this.is_mounted) {
+        return;
+      }
       if (all_results.error) {
         console.log("get_orbitals error", all_results.error);
-        this.setState({ in_fetch: false });
+        this.finish_chart_request(request_id);
         return;
       }
       const { pro_derived } = all_results.result;
-      // this.test_theory(pro_derived, value.focal_point)
+      const seed_survey = all_results.result.seed_survey || {
+        stable_count: 0,
+        total_samples: 0,
+        stable_points: [],
+        unresolved_points: [],
+      };
       this.setState({
         pro_derived,
+        seed_survey,
         newton_derived: { cardinality: 0, point_list: [], elapsed_ms: 0 },
       });
-      this.load_detected_newton(value.focal_point);
+      if (seed_survey.job_id) {
+        this.poll_seed_survey(seed_survey.job_id, request_id);
+      }
+      this.load_detected_newton(value.focal_point, request_id);
     });
   };
 
-  load_detected_newton = (focal_point) => {
+  poll_seed_survey = (job_id, request_id) => {
+    DataBackend.get_seed_survey_job(job_id, (job) => {
+      if (request_id !== this.seed_survey_request_id || !this.is_mounted) {
+        return;
+      }
+      if (job.error) {
+        this.setState((state) => ({
+          seed_survey: { ...state.seed_survey, status: "failed", error: job.error },
+        }));
+        return;
+      }
+      if (job.status === "completed") {
+        this.setState({ seed_survey: job.result });
+        return;
+      }
+      if (job.status === "failed") {
+        this.setState((state) => ({
+          seed_survey: { ...state.seed_survey, status: job.status, error: job.error },
+        }));
+        return;
+      }
+      this.setState((state) => ({
+        seed_survey: {
+          ...state.seed_survey,
+          status: job.status,
+          progress: job.progress,
+          stable_count: job.progress?.stable_count ?? state.seed_survey.stable_count,
+          stable_points: job.progress?.stable_points ?? state.seed_survey.stable_points,
+          unresolved_points:
+            job.progress?.unresolved_points ?? state.seed_survey.unresolved_points,
+          orbital_magnitude_range:
+            job.progress?.orbital_magnitude_range ?? state.seed_survey.orbital_magnitude_range,
+          outcome_counts: job.progress?.outcome_counts ?? state.seed_survey.outcome_counts,
+        },
+      }));
+      this.seed_survey_poll_timer = setTimeout(
+        () => this.poll_seed_survey(job_id, request_id),
+        1000,
+      );
+    });
+  };
+
+  load_detected_newton = (focal_point, request_id) => {
     DataBackend.get_orbital_newton(
       focal_point,
       (response) => {
+        if (request_id !== this.seed_survey_request_id || !this.is_mounted) {
+          return;
+        }
         if (response.error) {
           console.log("get_orbital_newton error", response.error);
           this.setState({
             newton_derived: { cardinality: 0, point_list: [], elapsed_ms: 0 },
-            in_fetch: false,
           });
+          this.finish_chart_request(request_id);
           return;
         }
         const newton_derived = this.format_detected_newton(
           response,
           focal_point,
         );
-        this.setState({ newton_derived, in_fetch: false });
+        this.setState({ newton_derived });
+        this.finish_chart_request(request_id);
       },
       {
         newton_mode: "big_complex",
@@ -234,12 +323,28 @@ export class PointsMainPanel extends Component {
     );
   };
 
+  finish_chart_request = (request_id) => {
+    if (request_id !== this.seed_survey_request_id || !this.is_mounted) {
+      return;
+    }
+    this.setState({ in_fetch: false }, () => {
+      if (request_id !== this.seed_survey_request_id || !this.is_mounted) {
+        return;
+      }
+      const pending = this.pending_chart_update;
+      if (pending) {
+        this.pending_chart_update = null;
+        this.on_chart_update(pending.key, pending.value);
+      }
+    });
+  };
+
   get_chart_width_px = () => {
     const { rendered_width } = this.state;
     const splitter_pos_1 = AppSettings.get(KEY_STUDY_POINTS_SPLITTER_POS);
     const splitter_pos_2 = AppSettings.get(KEY_STUDY_SPLITTER_POS_PX);
     return (
-      (rendered_width - splitter_pos_1 + splitter_pos_2 - 2 * MARGIN_PX) / 2 -
+      (rendered_width - splitter_pos_1 + splitter_pos_2 - 2 * MARGIN_PX) / 3 -
       2 * MARGIN_PX -
       5
     );
@@ -249,6 +354,7 @@ export class PointsMainPanel extends Component {
     const {
       in_fetch,
       pro_derived,
+      seed_survey,
       newton_derived,
     } = this.state;
     const chart_width = this.get_chart_width_px();
@@ -267,6 +373,11 @@ export class PointsMainPanel extends Component {
           width_px={chart_width}
           waiting={!in_fetch}
           title={AppText.get(KEY_STUDY_POINTS_LEGACY_ITERATIVE)}
+        />
+        <SeedSurveyChart
+          survey={seed_survey}
+          width_px={chart_width}
+          title={AppText.get(KEY_STUDY_POINTS_SEED_SURVEY)}
         />
         <PointsSeriesChart
           chart_data={newton_derived.point_list}

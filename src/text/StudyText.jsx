@@ -26,6 +26,11 @@ export const KEY_STUDY_CIRCUITRY_CYCLES_PER_ITERATION = `${STUDY_FOLDER}/circuit
 export const KEY_STUDY_CIRCUITRY_POWER = `${STUDY_FOLDER}/circuitry_power`;
 export const KEY_STUDY_CIRCUITRY_CARDINALITY_AXIS = `${STUDY_FOLDER}/circuitry_cardinality_axis`;
 export const KEY_STUDY_POINTS_LEGACY_ITERATIVE = `${STUDY_FOLDER}/points_legacy_iterative`;
+export const KEY_STUDY_POINTS_SEED_SURVEY = `${STUDY_FOLDER}/points_seed_survey`;
+export const KEY_STUDY_POINTS_SEED_SURVEY_RE = `${STUDY_FOLDER}/points_seed_survey_re`;
+export const KEY_STUDY_POINTS_SEED_SURVEY_IM = `${STUDY_FOLDER}/points_seed_survey_im`;
+export const KEY_STUDY_POINTS_SEED_SURVEY_STABLE_COUNT = `${STUDY_FOLDER}/points_seed_survey_stable_count`;
+export const KEY_STUDY_POINTS_SEED_SURVEY_MAGNITUDE_RANGE = `${STUDY_FOLDER}/points_seed_survey_magnitude_range`;
 export const KEY_STUDY_ELAPSED_TIME = `${STUDY_FOLDER}/elapsed_time`;
 export const KEY_STUDY_ITERATIONS = `${STUDY_FOLDER}/iterations`;
 export const KEY_STUDY_DETECTOR_ITERATIONS = `${STUDY_FOLDER}/detector_iterations`;
@@ -112,6 +117,11 @@ export const APP_STUDY_TEXT = {
   [KEY_STUDY_CIRCUITRY_POWER]: "power",
   [KEY_STUDY_CIRCUITRY_CARDINALITY_AXIS]: "cardinality",
   [KEY_STUDY_POINTS_LEGACY_ITERATIVE]: "legacy iterative",
+  [KEY_STUDY_POINTS_SEED_SURVEY]: "seed survey",
+  [KEY_STUDY_POINTS_SEED_SURVEY_RE]: "real seed",
+  [KEY_STUDY_POINTS_SEED_SURVEY_IM]: "imaginary seed",
+  [KEY_STUDY_POINTS_SEED_SURVEY_STABLE_COUNT]: "stable samples",
+  [KEY_STUDY_POINTS_SEED_SURVEY_MAGNITUDE_RANGE]: "orbital magnitude range (max distance to Q)",
   [KEY_STUDY_ELAPSED_TIME]: "elapsed time",
   [KEY_STUDY_ITERATIONS]: "iterations",
   [KEY_STUDY_DETECTOR_ITERATIONS]: "detector iterations",
