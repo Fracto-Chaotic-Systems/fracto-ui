@@ -11,7 +11,8 @@ translations consistent identifiers.
 - `AdminText.jsx` contains admin navigation labels, Reference and Social page
   messages, commit and status labels, and admin logs text.
 - `AssetsText.jsx` contains labels and help text for the Assets area, including
-  image and video generation, gallery, lore, detector, and simulator pages.
+  image and video generation, gallery, lore, detector, simulator, and seed
+  surveys pages.
 - `DataText.jsx` contains Data navigation, query and database labels, and
   MySQL/AWS settings and status text.
 - `NavigatorText.jsx` contains canvas navigator labels, rendering-strategy

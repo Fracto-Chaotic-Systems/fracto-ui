@@ -42,17 +42,30 @@ const SurveySummary = styled(CoolStyles.Block)`
   line-height: 1.25rem;
 `;
 
-const pattern_color_for_confidence = (pattern, confidence, confidence_min, confidence_max) => {
+export const pattern_color_for_lightness = (pattern, lightness) => {
   const base_color = FractoUtil.fracto_pattern_color(pattern);
-  if (!Number.isFinite(confidence)) return base_color;
+  if (!Number.isFinite(lightness)) return base_color;
   const hsl = base_color.match(/^hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)$/i);
   if (!hsl) return base_color;
+  const normalized_lightness = Math.max(0, Math.min(100, Math.round(lightness)));
+  return `hsl(${hsl[1]}, ${hsl[2]}%, ${normalized_lightness}%)`;
+};
+
+export const pattern_color_for_confidence = (
+  pattern,
+  confidence,
+  confidence_min,
+  confidence_max,
+) => {
+  if (!Number.isFinite(confidence)) {
+    return FractoUtil.fracto_pattern_color(pattern);
+  }
   const confidence_range = confidence_max - confidence_min;
   const normalized_confidence = confidence_range > 0
     ? Math.max(0, Math.min(1, (confidence - confidence_min) / confidence_range))
     : 0.5;
   const lightness = Math.round(18 + 70 * normalized_confidence);
-  return `hsl(${hsl[1]}, ${hsl[2]}%, ${lightness}%)`;
+  return pattern_color_for_lightness(pattern, lightness);
 };
 
 const chart_options = {

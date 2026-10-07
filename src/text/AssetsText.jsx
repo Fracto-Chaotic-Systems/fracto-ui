@@ -14,6 +14,12 @@ export const KEY_ASSETS_LORE_STYLES_ENTRY = `${ASSETS_FOLDER}/assets_lore_styles
 export const KEY_ASSETS_LORE_STYLES_VIEW = `${ASSETS_FOLDER}/assets_lore_styles_view`;
 export const KEY_ASSETS_DETECTOR = `${ASSETS_FOLDER}/assets_detector`;
 export const KEY_ASSETS_SIMULATOR = `${ASSETS_FOLDER}/assets_simulator`;
+export const KEY_ASSETS_SURVEYS = `${ASSETS_FOLDER}/seed_surveys_title`;
+export const KEY_ASSETS_SURVEYS_SIDEBAR = `${ASSETS_FOLDER}/seed_surveys_sidebar`;
+export const KEY_ASSETS_SURVEYS_PREVIEW = `${ASSETS_FOLDER}/seed_surveys_preview`;
+export const KEY_ASSETS_SURVEYS_RENDER = `${ASSETS_FOLDER}/seed_surveys_render`;
+export const KEY_ASSETS_SURVEYS_SAMPLES = `${ASSETS_FOLDER}/seed_surveys_samples`;
+export const KEY_ASSETS_SURVEYS_FAILED = `${ASSETS_FOLDER}/seed_surveys_failed`;
 export const KEY_ASSETS_LOGS = `${ASSETS_FOLDER}/assets_logs`;
 export const KEY_IMAGE_ASSETS_GENERATOR = `${ASSETS_FOLDER}/assets_generator`;
 export const KEY_IMAGE_ASSETS_GENERATE = `${ASSETS_FOLDER}/assets_generate`;
@@ -90,6 +96,12 @@ export const APP_ASSETS_TEXT = {
   [KEY_ASSETS_LORE_STYLES_VIEW]: "view",
   [KEY_ASSETS_DETECTOR]: "artifact detector",
   [KEY_ASSETS_SIMULATOR]: "flight simulator",
+  [KEY_ASSETS_SURVEYS]: "seed surveys",
+  [KEY_ASSETS_SURVEYS_SIDEBAR]: "surveys",
+  [KEY_ASSETS_SURVEYS_PREVIEW]: "preview",
+  [KEY_ASSETS_SURVEYS_RENDER]: "render",
+  [KEY_ASSETS_SURVEYS_SAMPLES]: "samples",
+  [KEY_ASSETS_SURVEYS_FAILED]: "survey failed",
   [KEY_ASSETS_LOGS]: "assets logs",
   [KEY_IMAGE_ASSETS_GENERATOR]: "images",
   [KEY_VIDEO_ASSETS_GENERATOR]: "video",

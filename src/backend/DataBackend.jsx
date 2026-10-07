@@ -126,9 +126,26 @@ export class DataBackend {
     }, 250);
   };
 
+  /** Start the shared asynchronous seed-plane survey without running other orbital work. */
+  static start_seed_survey = (focal_point, resolution, cb) => {
+    const params = new URLSearchParams({
+      re: `${focal_point.x}`,
+      im: `${focal_point.y}`,
+      resolution: `${resolution}`,
+    });
+    fetch(`${DATA_ORIGIN()}/orbitals/seed-survey?${params.toString()}`, {
+      credentials: "include",
+      headers: FETCH_JSON_HEADERS,
+    })
+      .then((response) => response.json().then((body) => ({ response, body })))
+      .then(({ response, body }) => cb(response.ok ? body : { error: body.error || `HTTP ${response.status}` }))
+      .catch((error) => cb({ error: error.message }));
+  };
+
   /** Poll an asynchronous high-precision seed-plane survey. */
-  static get_seed_survey_job = (job_id, cb) => {
-    fetch(`${DATA_ORIGIN()}/orbitals/seed-survey/${encodeURIComponent(job_id)}`, {
+  static get_seed_survey_job = (job_id, cb, after_row = 0) => {
+    const params = new URLSearchParams({ after_row: `${after_row}` });
+    fetch(`${DATA_ORIGIN()}/orbitals/seed-survey/${encodeURIComponent(job_id)}?${params.toString()}`, {
       credentials: "include",
       headers: FETCH_JSON_HEADERS,
     })

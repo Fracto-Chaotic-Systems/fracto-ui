@@ -6,7 +6,7 @@ This directory contains the routed application areas and the feature components 
 
 - `Admin.jsx` (`/admin`) - repository Reference documents, overview, commits, status, logs, and administrative settings.
 - `Data.jsx` (`/data`) - data-service overview, queries, status, logs, and connection/settings forms.
-- `Assets.jsx` (`/assets`) - asset overview/status, image generation and gallery tools, lore content, video generation, logs, and settings.
+- `Assets.jsx` (`/assets`) - asset overview/status, image generation and gallery tools, lore content, video generation, a seed-survey navigator with an incremental preview pane, logs, and settings.
 - `Tiles.jsx` (`/tiles`) - tile overview/status, inspection, test harness, generation, logs, and settings.
 - `Study.jsx` (`/study`) - fractal studies including points, minibrots, nodes, inline studies, meridians, circuitry, fields, overview, status, and settings. The `full map` sidebar item opens a title-only page scaffold titled `logistic map`.
 
@@ -16,7 +16,7 @@ Each top-level page follows the same broad pattern: read the selected section fr
 
 - `admin/` contains panels for the admin page.
 - `admin/AdminReference.jsx` renders tracked Markdown documents from the fixed repository allowlist. The admin service exposes the tree and document endpoints; the UI persists the selected repository and path.
-- `assets/` contains asset panels plus gallery, lore, detector, and video subcomponents.
+- `assets/` contains asset panels plus gallery, lore, detector, simulator, seed-survey preview canvas, and video subcomponents.
 - `data/` contains data-service panels such as logs, overview, settings, and status; query administration is in `admin/AdminQueries.jsx`.
 - `study/` contains study panels and specialized implementations for fields, magnitudes, meridians, minibrots, and points.
 - `tiles/` contains tile panels and the tile generator's control, progress, context, history, and operation components.

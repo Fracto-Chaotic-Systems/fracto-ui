@@ -22,6 +22,9 @@ The components that use a setting read and update it through `AppSettings.jsx`.
 - `AssetsSettings.jsx` defines the Assets page section and splitter position,
   plus image generator, video, detector, simulator, gallery, and lore state
   such as frame parameters, resolutions, selected items, and panel positions.
+  The seed-surveys page has an independent persisted navigator frame, internal
+  navigator splitters, and a page-level splitter between its left navigator
+  and right content panel. Its preview survey follows the frame's focal point.
 - `DataSettings.jsx` defines the Data page section, splitters, log display,
   selected query tab, and data-service connection fields.
 - `NavigatorSettings.jsx` defines the canvas navigator's rendering strategy,

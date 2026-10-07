@@ -25,11 +25,12 @@ point.
   offsets visible; that plotting scale is not the summary's unit conversion.
 - `SeedSurveyChart.jsx` plots stable non-singleton periodic candidates by their
   initial seed coordinates over `[-1.5, 1.5]` on both axes at 0.025 spacing. Each point uses the SDK's
-  conventional pattern hue, with HSL lightness normalized across the currently
-  visible stable candidates' confidence range (18–88%). Higher confidence is
-  lighter. The confidence is a heuristic evidence score, not a probability;
-  tooltips show its raw score to three decimals, since tone is relative to each
-  survey and should not be compared across surveys. Unresolved candidates retain grey
+  conventional pattern hue, with HSL lightness normalized across the survey's
+  observed confidence range (18–88%). The same per-survey mapping is used on
+  the Assets seed-surveys page; each survey's lowest confidence is darkest and
+  highest is lightest, even when the range is narrow. Confidence is a heuristic
+  evidence score, not a probability; tooltips show its raw score to three
+  decimals. Unresolved candidates retain grey
   markers and may still report their confidence in the tooltip. While its worker job runs, it shows
   sample progress and all stable and unresolved markers discovered so far; the
   chart remains fixed to the full `[-1.5, 1.5]` range on both axes. The completed

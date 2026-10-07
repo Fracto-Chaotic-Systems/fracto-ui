@@ -16,6 +16,7 @@ import {
   ASSETS_SETTINGS,
   ASSETS_STATUS,
   ASSETS_SIMULATOR,
+  ASSETS_SURVEYS,
   KEY_ASSETS_SECTION,
   KEY_ASSETS_SPLITTER_POS_PX,
   VIDEO_GENERATOR,
@@ -30,6 +31,7 @@ import {
 import {
   KEY_ASSETS_DETECTOR_SIDEBAR,
   KEY_ASSETS_SIMULATOR_SIDEBAR,
+  KEY_ASSETS_SURVEYS_SIDEBAR,
   KEY_ASSETS_GALLERY_SIDEBAR,
   KEY_ASSETS_LORE_SIDEBAR,
   KEY_ASSETS_LORE_STYLES_SIDEBAR,
@@ -47,6 +49,7 @@ import AssetsVideoGenerator from "./assets/AssetsVideoGenerator.jsx";
 import AssetsLore from "./assets/AssetsLore.jsx";
 import AssetsDetector from "./assets/AssetsDetector.jsx";
 import AssetsSimulator from "./assets/AssetsSimulator.jsx";
+import AssetsSurveys from "./assets/AssetsSurveys.jsx";
 import AssetsLoreStyles from "./assets/AssetsLoreStyles.jsx";
 
 const SIDEBAR_LIST = [
@@ -80,6 +83,11 @@ const SIDEBAR_LIST = [
     title_key: KEY_ASSETS_SIMULATOR_SIDEBAR,
     section_code: ASSETS_SIMULATOR,
     right_pane: <AssetsSimulator />,
+  },
+  {
+    title_key: KEY_ASSETS_SURVEYS_SIDEBAR,
+    section_code: ASSETS_SURVEYS,
+    right_pane: <AssetsSurveys />,
   },
   { section_code: SIDEBAR_BREAKER },
   {

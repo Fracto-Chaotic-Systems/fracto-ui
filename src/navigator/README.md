@@ -31,7 +31,7 @@ The usual event path is:
 - `NavigatorLegend.jsx` — frame metadata, controls, colors, clipboard, and transit entry points.
 - `NavigatorLegendTabs.jsx` — orbital and pattern legend tabs.
 - `NavigatorTransit.jsx` — canvas-drawn directional transition regions and hover/click handling.
-- `NavigatorKeys.jsx` — splitter-key maps shared by asset, video, tile, and study layouts.
+- `NavigatorKeys.jsx` — splitter-key maps shared by asset, video, tile, and study layouts, including the seed-surveys navigator scaffold.
 - `NavigatorUtils.jsx` — reusable crosshair, pointer, and small navigator rendering helpers.
 
 ## Shared state and props
