@@ -48,7 +48,6 @@ export class AssetsSurveys extends Component {
       stable_points: [],
       unresolved_points: [],
       escaped_points: [],
-      render_confidence_range: null,
       request_id: 0,
     },
     container_ref: React.createRef(),
@@ -134,7 +133,6 @@ export class AssetsSurveys extends Component {
         render_resolution: resolution === RENDER_RESOLUTION ? RENDER_RESOLUTION : null,
         render_rows_completed: 0,
         render_batch: null,
-        render_confidence_range: null,
         request_id,
       },
     });
@@ -162,7 +160,6 @@ export class AssetsSurveys extends Component {
             : null,
           render_rows_completed: survey.render_rows_completed || 0,
           render_batch: survey.render_batch || null,
-          render_confidence_range: survey.confidence_range || null,
           request_id,
         },
       });
@@ -187,7 +184,6 @@ export class AssetsSurveys extends Component {
             ...(job.result || {}),
             ...job,
             status: "completed",
-            render_confidence_range: job.confidence_range || null,
           },
         }));
         if (!job.render_mode || next_row >= job.render_rows_completed) return;
@@ -223,7 +219,6 @@ export class AssetsSurveys extends Component {
             : null,
           render_rows_completed: job.render_rows_completed || 0,
           render_batch: job.render_batch || null,
-          render_confidence_range: job.confidence_range || null,
         },
       }));
       const next_row = (job.render_batch?.row_start || 0) + (job.render_batch?.row_count || 0);
@@ -387,7 +382,6 @@ export class AssetsSurveys extends Component {
               survey={seed_survey}
               size_px={mode === "render" ? RENDER_RESOLUTION : 255}
               render_batch={mode === "render" ? seed_survey.render_batch : null}
-              confidence_range={seed_survey.render_confidence_range}
               render_complete={seed_survey.status === "completed"}
               render_key={seed_survey.request_id}
             />

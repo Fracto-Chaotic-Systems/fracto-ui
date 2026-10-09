@@ -58,11 +58,15 @@ export const update_confidence_distribution_lookup = (distribution) => {
 };
 
 /** Map a confidence's empirical percentile to the fixed 18–88% lightness span. */
-export const confidence_lightness_from_distribution = (confidence, distribution) => {
+export const confidence_lightness_from_distribution = (
+  confidence,
+  distribution,
+  refresh_lookup = true,
+) => {
   if (!Number.isFinite(confidence) || confidence < 0 || !distribution?.count) {
     return null;
   }
-  update_confidence_distribution_lookup(distribution);
+  if (refresh_lookup) update_confidence_distribution_lookup(distribution);
   const clamped_confidence = Math.max(0, Math.min(1, confidence));
   const bucket_index = Math.min(
     CONFIDENCE_DISTRIBUTION_BUCKETS - 1,

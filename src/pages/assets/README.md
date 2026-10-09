@@ -17,41 +17,46 @@ This directory contains the panels selected from the Assets section sidebar.
   It keeps the navigator in a left pane in both modes, separated from the
   right content pane by a persisted splitter. The right pane has a 35px header
   with mutually exclusive “preview” and “render” choices held in page-local
-  state. Preview starts the orbital seed survey for the navigator's current
-  focal point and paints stable candidates and unresolved samples in a 255×255
-  canvas spanning `[-1.5, 1.5]` on both axes. Render starts a separate
-  1024×1024 survey. Pixel-center seed coordinates are spaced by `3/1024` across
-  the same bounds. Compact row batches stream to the canvas, avoiding a million
-  in-memory point objects. Render can take substantially longer than preview.
-  Both modes rerun when the focal point or mode changes, not when scope changes.
+  state; preview is the default. The page starts one data-server job per
+  focal-point/resolution pair and polls for progress. Changing the focal point
+  or mode starts a new job; scope-only navigation changes do not. A request ID
+  prevents stale job responses from replacing the current image.
+  Preview samples a 121×121 grid at 0.025 spacing, including both bounds
+  `[-1.5, 1.5]`, and paints the results on a 255×255 canvas. Render samples
+  1024×1024 pixel centers across the same bounds at `3/1024` spacing. It streams
+  compact row batches, avoiding a million in-memory point objects; render can
+  take substantially longer than preview.
 - `SeedSurveyPreviewCanvas.jsx` draws preview samples or render row batches
-  from the data server. Stable-candidate confidence is mapped by its empirical
-  distribution: the lowest 1% maps to 18% HSL lightness, the highest 1% to 88%,
-  and intervening percentile ranks map evenly between them. A 4,096-bin
-  confidence histogram supports incremental render updates. Escaped and
-  unresolved samples are excluded from this distribution. Render keeps compact
-  pixel records containing status, pattern, confidence, and iteration count,
-  and separate confidence and escape-iteration distributions. It repaints
-  received rows when either distribution changes so they use one consistent
-  current mapping; it applies the completed distributions to the full canvas
-  at the end. It logs a diagnostic for each newly painted
-  render row, including backing/display dimensions, the active distribution
-  size, row confidence statistics, and counts by pixel status. A separate
-  diagnostic records the batch that changed the distribution and the rows
-  repainted under the updated mapping.
+  from the data server. Pixel status 1 is a non-singleton candidate for which
+  the server has a final pattern-sized suffix of orbit samples; it does not
+  independently prove recurrence or distinctness. Status 2 is unresolved;
+  status 3 escaped; status 0 is singleton or other/unpainted. Non-singleton
+  candidates use the existing pattern hue and empirical confidence rank.
+  Confidence scores from status-1 pixels with finite values are mapped so the
+  lowest 1% receives 18% HSL lightness, the highest 1% 88%, and intermediate
+  ranks are spread evenly. Escaped and unresolved pixels do not affect this
+  distribution. The confidence histogram has 4,096 bins.
+
+  The render protocol stores 13 little-endian bytes per pixel: `uint8` status,
+  `uint32` pattern at byte 1, `float32` confidence at byte 5 (`-1` if absent),
+  and `uint32` iterations at byte 9. Render row polling uses an `after_row`
+  cursor and returns up to 16 rows. Rows are retained client-side so mapping
+  changes can repaint the received prefix. The confidence scale is refreshed
+  at ten row-progress milestones during rendering; rows between milestones use
+  the last published scale. Completion computes the final distribution and
+  repaints the whole image once to normalize all pixels together.
 - `SeedSurveyConfidenceScale.js` builds the confidence histogram and maps
   empirical ranks to the 18–88% lightness range, clipping the bottom and top
   one-percent tails.
-  Unresolved samples appear grey. Escape-iteration percentile shading is
-  retained but currently disabled by `ENABLE_ESCAPE_ITERATION_SHADING`; escaped
-  samples therefore render white. When enabled, they are ranked by escape
-  iteration across the image: the lowest 1% map to light grey, the highest 1%
-  to dark grey, and intervening percentile ranks are distributed evenly.
-  Unprocessed/single-point samples remain `#eeeeee`.
+  Unresolved samples appear grey (`#888888`), escaped samples white
+  (`#ffffff`), and singleton/other/unprocessed samples remain `#eeeeee`.
 - `SeedSurveyEscapeScale.js` builds the escape-iteration histogram and maps
   iteration percentiles to reversed 88–18% HSL lightness so lower counts are
   lighter and higher counts darker. Its 4,097 buckets represent iteration
-  counts from zero through the survey's current 4,096-iteration horizon.
+  counts from zero through the survey's current 4,096-iteration horizon. This
+  mapping is retained but disabled by `ENABLE_ESCAPE_ITERATION_SHADING`; while
+  disabled, escaped pixels are white and escape percentiles do not trigger
+  canvas recoloring.
 - `AssetsLore.jsx` and `AssetsLoreStyles.jsx` provide lore content and style
   management.
 - `AssetsUtils.jsx` contains shared helpers used by Assets panels.
@@ -60,3 +65,8 @@ The left navigator uses the shared `NavigatorSplitterLayout`. Page titles,
 control labels, and sidebar labels are registered through `AssetsText.jsx`,
 while page preferences and the pane splitter position belong in
 `AssetsSettings.jsx`.
+
+The detector's input contract, seeded versus critical-orbit behavior,
+finite-precision evidence, and limitations are documented in the main
+repository's `sdk/FractoCardinality.md`. The data-server README describes how
+that result becomes preview records or compact render rows.

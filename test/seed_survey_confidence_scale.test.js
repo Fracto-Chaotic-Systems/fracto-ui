@@ -54,3 +54,19 @@ test("incremental updates produce the same distribution as a batch build", () =>
     );
   }
 });
+
+test("render sampling can keep using the published scale between refreshes", () => {
+  const distribution = build_confidence_distribution([0.2, 0.8]);
+  const published_lightness = confidence_lightness_from_distribution(0.5, distribution);
+  add_confidence_to_distribution(distribution, 0.5);
+
+  assert.equal(distribution.dirty, true);
+  assert.equal(
+    confidence_lightness_from_distribution(0.5, distribution, false),
+    published_lightness,
+  );
+  assert.equal(distribution.dirty, true);
+
+  confidence_lightness_from_distribution(0.5, distribution);
+  assert.equal(distribution.dirty, false);
+});

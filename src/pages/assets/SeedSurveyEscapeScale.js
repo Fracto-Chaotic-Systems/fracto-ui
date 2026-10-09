@@ -47,11 +47,15 @@ export const update_escape_distribution_lookup = (distribution) => {
   distribution.dirty = false;
 };
 
-export const escape_lightness_from_distribution = (iterations, distribution) => {
+export const escape_lightness_from_distribution = (
+  iterations,
+  distribution,
+  refresh_lookup = true,
+) => {
   if (!Number.isFinite(iterations) || iterations < 0 || !distribution?.count) {
     return null;
   }
-  update_escape_distribution_lookup(distribution);
+  if (refresh_lookup) update_escape_distribution_lookup(distribution);
   const index = Math.min(
     ESCAPE_ITERATION_BUCKETS - 1,
     Math.trunc(iterations),
