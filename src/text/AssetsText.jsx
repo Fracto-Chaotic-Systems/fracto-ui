@@ -18,6 +18,8 @@ export const KEY_ASSETS_SURVEYS = `${ASSETS_FOLDER}/seed_surveys_title`;
 export const KEY_ASSETS_SURVEYS_SIDEBAR = `${ASSETS_FOLDER}/seed_surveys_sidebar`;
 export const KEY_ASSETS_SURVEYS_PREVIEW = `${ASSETS_FOLDER}/seed_surveys_preview`;
 export const KEY_ASSETS_SURVEYS_RENDER = `${ASSETS_FOLDER}/seed_surveys_render`;
+export const KEY_ASSETS_SURVEYS_HALF_SPAN = `${ASSETS_FOLDER}/seed_surveys_half_span`;
+export const KEY_ASSETS_SURVEYS_LIMIT = `${ASSETS_FOLDER}/seed_surveys_limit`;
 export const KEY_ASSETS_SURVEYS_SAMPLES = `${ASSETS_FOLDER}/seed_surveys_samples`;
 export const KEY_ASSETS_SURVEYS_FAILED = `${ASSETS_FOLDER}/seed_surveys_failed`;
 export const KEY_ASSETS_LOGS = `${ASSETS_FOLDER}/assets_logs`;
@@ -100,6 +102,8 @@ export const APP_ASSETS_TEXT = {
   [KEY_ASSETS_SURVEYS_SIDEBAR]: "surveys",
   [KEY_ASSETS_SURVEYS_PREVIEW]: "preview",
   [KEY_ASSETS_SURVEYS_RENDER]: "render",
+  [KEY_ASSETS_SURVEYS_HALF_SPAN]: "half-span",
+  [KEY_ASSETS_SURVEYS_LIMIT]: "limit",
   [KEY_ASSETS_SURVEYS_SAMPLES]: "samples",
   [KEY_ASSETS_SURVEYS_FAILED]: "survey failed",
   [KEY_ASSETS_LOGS]: "assets logs",

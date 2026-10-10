@@ -31,6 +31,8 @@ export class NavigatorSplitterLayout extends Component {
     frame_settings: PropTypes.object.isRequired,
     splitter_keys: PropTypes.object.isRequired,
     frame_settings_key: PropTypes.number.isRequired,
+    main_splitter_min_position: PropTypes.number,
+    main_splitter_max_position: PropTypes.number,
   };
 
   state = {
@@ -55,17 +57,34 @@ export class NavigatorSplitterLayout extends Component {
   }
 
   change_main_splitter = (new_position) => {
-    const { bounding_rect, splitter_keys } = this.props;
+    const {
+      bounding_rect,
+      splitter_keys,
+      main_splitter_min_position,
+      main_splitter_max_position,
+    } = this.props;
     const steps_pos = AppSettings.get(splitter_keys.steps_key);
     let actual_pos = new_position;
-    if (new_position < bounding_rect.left + DEFAULT_SIDEBAR_WIDTH) {
-      actual_pos = bounding_rect.left + DEFAULT_SIDEBAR_WIDTH;
+    const minimum = Math.max(
+      bounding_rect.left + DEFAULT_SIDEBAR_WIDTH,
+      Number.isFinite(main_splitter_min_position)
+        ? main_splitter_min_position
+        : -Infinity,
+    );
+    const maximum = Math.min(
+      bounding_rect.left + MAX_MAIN_SPLITTER_POS - 10,
+      Number.isFinite(main_splitter_max_position)
+        ? main_splitter_max_position
+        : Infinity,
+    );
+    if (new_position < minimum) {
+      actual_pos = minimum;
     }
     if (new_position < bounding_rect.left + steps_pos) {
       actual_pos = bounding_rect.left + steps_pos;
     }
-    if (new_position > bounding_rect.left + MAX_MAIN_SPLITTER_POS - 10) {
-      actual_pos = bounding_rect.left + MAX_MAIN_SPLITTER_POS - 10;
+    if (new_position > maximum) {
+      actual_pos = maximum;
     }
     this.setState({ main_splitter_pos: actual_pos });
     AppSettings.on_settings_changed({
@@ -110,8 +129,14 @@ export class NavigatorSplitterLayout extends Component {
   render() {
     const { main_splitter_pos, legend_splitter_pos, steps_splitter_pos } =
       this.state;
-    const { bounding_rect, splitter_keys, frame_settings, frame_settings_key } =
-      this.props;
+    const {
+      bounding_rect,
+      splitter_keys,
+      frame_settings,
+      frame_settings_key,
+      main_splitter_min_position,
+      main_splitter_max_position,
+    } = this.props;
     const legend_bounding_rect = {
       left: bounding_rect.left - 1,
       width: main_splitter_pos - bounding_rect.left - 2,
@@ -129,6 +154,8 @@ export class NavigatorSplitterLayout extends Component {
         bar_width_px={SPLITTER_WIDTH_PX}
         container_bounds={bounding_rect}
         position={main_splitter_pos}
+        min_position={main_splitter_min_position}
+        max_position={main_splitter_max_position}
         on_change={this.change_main_splitter}
       />,
       <CoolSplitter

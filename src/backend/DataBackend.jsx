@@ -127,11 +127,13 @@ export class DataBackend {
   };
 
   /** Start the shared asynchronous seed-plane survey without running other orbital work. */
-  static start_seed_survey = (focal_point, resolution, cb) => {
+  static start_seed_survey = (focal_point, resolution, half_span, iteration_limit, cb) => {
     const params = new URLSearchParams({
       re: `${focal_point.x}`,
       im: `${focal_point.y}`,
       resolution: `${resolution}`,
+      half_span: `${half_span}`,
+      iteration_limit: `${iteration_limit}`,
     });
     fetch(`${DATA_ORIGIN()}/orbitals/seed-survey?${params.toString()}`, {
       credentials: "include",

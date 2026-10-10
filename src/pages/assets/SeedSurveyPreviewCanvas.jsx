@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import PropTypes from "prop-types";
-import FractoUtil from "@fracto/sdk/FractoUtil.js";
+import FractoCanvasBuffer from "@fracto/sdk/FractoCanvasBuffer.js";
 
 import { pattern_color_for_lightness } from "../study/points/SeedSurveyChart.jsx";
 import {
@@ -11,34 +11,31 @@ import {
   update_confidence_distribution_lookup,
 } from "./SeedSurveyConfidenceScale.js";
 import {
-  add_escape_iteration,
-  build_escape_distribution,
-  create_escape_distribution,
-  escape_lightness_from_distribution,
-  update_escape_distribution_lookup,
-} from "./SeedSurveyEscapeScale.js";
+  add_iteration_value,
+  build_iteration_distribution,
+  create_iteration_distribution,
+  iteration_lightness_from_distribution,
+  update_iteration_distribution_lookup,
+} from "./SeedSurveyIterationScale.js";
 
 export const SEED_SURVEY_PREVIEW_SIZE_PX = 255;
 export const SEED_SURVEY_RENDER_SIZE_PX = 1024;
-const SURVEY_MIN = -1.5;
-const SURVEY_MAX = 1.5;
-const SURVEY_STEP = 0.025;
+const SAMPLES_PER_AXIS = 121;
 const UNRESOLVED_COLOR = "#888888";
 const ESCAPED_COLOR = "#ffffff";
-const ENABLE_ESCAPE_ITERATION_SHADING = false;
 const EMPTY_POINTS = [];
+const PREVIEW_SAMPLES_PER_AXIS = 121;
 const BYTES_PER_RENDER_SAMPLE = 13;
 const ADAPTIVE_SCALE_REFRESHES = 10;
-const SAMPLES_PER_AXIS = Math.round((SURVEY_MAX - SURVEY_MIN) / SURVEY_STEP) + 1;
 const SAMPLE_CELL_SIZE = SEED_SURVEY_PREVIEW_SIZE_PX / SAMPLES_PER_AXIS;
 
-const draw_points = (context, points, color_for_point) => {
+const draw_points = (context, points, half_span, color_for_point) => {
   points.forEach((point) => {
     if (!Number.isFinite(point.x) || !Number.isFinite(point.y)) return;
     const x_index = Math.max(0, Math.min(SAMPLES_PER_AXIS - 1,
-      Math.round((point.x - SURVEY_MIN) / SURVEY_STEP)));
+      Math.round(((point.x + half_span) / (2 * half_span)) * (SAMPLES_PER_AXIS - 1))));
     const y_index = Math.max(0, Math.min(SAMPLES_PER_AXIS - 1,
-      Math.round((SURVEY_MAX - point.y) / SURVEY_STEP)));
+      Math.round(((half_span - point.y) / (2 * half_span)) * (SAMPLES_PER_AXIS - 1))));
     context.fillStyle = color_for_point(point);
     context.fillRect(
       x_index * SAMPLE_CELL_SIZE,
@@ -52,8 +49,8 @@ const draw_points = (context, points, color_for_point) => {
 const render_cache = (render_key) => {
   const confidence_distribution = create_confidence_distribution();
   confidence_distribution.lightness_by_bucket.fill(53);
-  const escape_distribution = create_escape_distribution();
-  escape_distribution.lightness_by_iteration.fill(53);
+  const iteration_distribution = create_iteration_distribution();
+  iteration_distribution.lightness_by_iteration.fill(53);
   return {
     render_key,
     bytes: new Uint8Array(
@@ -63,10 +60,34 @@ const render_cache = (render_key) => {
     received_row_count: 0,
     highest_received_row: -1,
     confidence_distribution,
-    escape_distribution,
+    iteration_distribution,
     last_scale_refresh_decile: 0,
     final_scale_normalized: false,
   };
+};
+
+const canvas_buffer_cache = (render_key, size_px) => {
+  const source_canvas = document.createElement("canvas");
+  source_canvas.width = size_px;
+  source_canvas.height = size_px;
+  return {
+    render_key,
+    canvas_buffer: Array.from(
+      { length: size_px },
+      () => Array(size_px).fill(null),
+    ),
+    source_canvas,
+  };
+};
+
+const paint_canvas_buffer = (cache, context, source_size_px, display_size_px) => {
+  const source_context = cache.source_canvas.getContext("2d");
+  if (!source_context) return;
+  source_context.fillStyle = "#eeeeee";
+  source_context.fillRect(0, 0, source_size_px, source_size_px);
+  FractoCanvasBuffer.buffer_to_canvas(cache.canvas_buffer, source_context);
+  context.clearRect(0, 0, display_size_px, display_size_px);
+  context.drawImage(cache.source_canvas, 0, 0, display_size_px, display_size_px);
 };
 
 const store_render_batch = (cache, batch) => {
@@ -82,13 +103,14 @@ const store_render_batch = (cache, batch) => {
     const row_offset = row * row_bytes;
     for (let column = 0; column < SEED_SURVEY_RENDER_SIZE_PX; column++) {
       const offset = row_offset + column * BYTES_PER_RENDER_SAMPLE;
-      if (cache.bytes[offset] === 3) {
-        if (ENABLE_ESCAPE_ITERATION_SHADING) {
-          const iterations = view.getUint32(offset + 9, true);
-          add_escape_iteration(cache.escape_distribution, iterations);
-        }
+      if (cache.bytes[offset] === 4) {
+        add_iteration_value(
+          cache.iteration_distribution,
+          view.getUint32(offset + 9, true),
+        );
         continue;
       }
+      if (cache.bytes[offset] === 3) continue;
       if (cache.bytes[offset] !== 1) continue;
       const confidence = view.getFloat32(offset + 5, true);
       if (!Number.isFinite(confidence) || confidence < 0) continue;
@@ -103,7 +125,7 @@ const paint_render_rows = (
   start_row,
   row_count,
   confidence_distribution,
-  escape_distribution,
+  iteration_distribution,
 ) => {
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   for (let row = start_row; row < start_row + row_count; row++) {
@@ -114,18 +136,19 @@ const paint_render_rows = (
         continue;
       }
       if (status === 3) {
-        const lightness = ENABLE_ESCAPE_ITERATION_SHADING
-          ? escape_lightness_from_distribution(
-              view.getUint32(offset + 9, true),
-              escape_distribution,
-              false,
-            )
-          : null;
-        context.fillStyle = ENABLE_ESCAPE_ITERATION_SHADING && Number.isFinite(lightness)
-          ? `hsl(0, 0%, ${lightness}%)`
-          : ESCAPED_COLOR;
+        context.fillStyle = ESCAPED_COLOR;
       } else if (status === 2) {
         context.fillStyle = UNRESOLVED_COLOR;
+      } else if (status === 4) {
+        const lightness = iteration_lightness_from_distribution(
+          view.getUint32(offset + 9, true),
+          iteration_distribution,
+          false,
+        );
+        context.fillStyle = pattern_color_for_lightness(
+          view.getUint32(offset + 1, true),
+          lightness,
+        );
       } else {
         const pattern = view.getUint32(offset + 1, true);
         const confidence = view.getFloat32(offset + 5, true);
@@ -148,10 +171,13 @@ export const SeedSurveyPreviewCanvas = ({
   render_batch,
   render_complete,
   render_key,
+  half_span,
 }) => {
   const canvas_ref = useRef(null);
   const render_cache_ref = useRef(null);
+  const canvas_buffer_cache_ref = useRef(null);
   const stable_points = survey?.stable_points || EMPTY_POINTS;
+  const iteration_points = survey?.iteration_points || EMPTY_POINTS;
   const unresolved_points = survey?.unresolved_points || EMPTY_POINTS;
   const escaped_points = survey?.escaped_points || EMPTY_POINTS;
   const is_render = size_px === SEED_SURVEY_RENDER_SIZE_PX;
@@ -168,6 +194,17 @@ export const SeedSurveyPreviewCanvas = ({
     ) {
       render_cache_ref.current = render_cache(render_key);
     }
+    if (
+      !canvas_buffer_cache_ref.current ||
+      canvas_buffer_cache_ref.current.render_key !== render_key ||
+      canvas_buffer_cache_ref.current.source_canvas.width !==
+        (is_render ? size_px : PREVIEW_SAMPLES_PER_AXIS)
+    ) {
+      canvas_buffer_cache_ref.current = canvas_buffer_cache(
+        render_key,
+        is_render ? size_px : PREVIEW_SAMPLES_PER_AXIS,
+      );
+    }
     context.fillStyle = "#eeeeee";
     context.fillRect(0, 0, size_px, size_px);
   }, [is_render, render_key, size_px]);
@@ -176,6 +213,38 @@ export const SeedSurveyPreviewCanvas = ({
     const context = canvas_ref.current?.getContext("2d");
     if (!context) return;
     if (is_render) {
+      if (survey?.uses_canvas_buffer) {
+        let cache = canvas_buffer_cache_ref.current;
+        if (
+          !cache ||
+          cache.render_key !== render_key ||
+          cache.source_canvas.width !== size_px
+        ) {
+          cache = canvas_buffer_cache(render_key, size_px);
+          canvas_buffer_cache_ref.current = cache;
+        }
+        if (render_batch?.data && render_batch.row_count) {
+          const batch_bytes = Uint8Array.from(
+            atob(render_batch.data),
+            (character) => character.charCodeAt(0),
+          );
+          const view = new DataView(batch_bytes.buffer);
+          for (let row_offset = 0; row_offset < render_batch.row_count; row_offset++) {
+            const row_index = render_batch.row_start + row_offset;
+            for (let column = 0; column < size_px; column++) {
+              const offset = (row_offset * size_px + column) * BYTES_PER_RENDER_SAMPLE;
+              if (view.getUint8(offset) === 0) continue;
+              // eslint-disable-next-line react-hooks/immutability -- this ref owns the incremental canvas buffer cache.
+              cache.canvas_buffer[column][row_index] = [
+                view.getUint32(offset + 1, true),
+                view.getUint32(offset + 9, true),
+              ];
+            }
+          }
+          paint_canvas_buffer(cache, context, size_px, size_px);
+        }
+        return;
+      }
       let cache = render_cache_ref.current;
       if (!cache || cache.render_key !== render_key) {
         cache = render_cache(render_key);
@@ -194,23 +263,21 @@ export const SeedSurveyPreviewCanvas = ({
         const previous_confidence_lookup = refresh_scale
           ? cache.confidence_distribution.lightness_by_bucket.slice()
           : null;
-        const previous_escape_lookup = refresh_scale && ENABLE_ESCAPE_ITERATION_SHADING
-          ? cache.escape_distribution.lightness_by_iteration.slice()
+        const previous_iteration_lookup = refresh_scale
+          ? cache.iteration_distribution.lightness_by_iteration.slice()
           : null;
         if (refresh_scale) {
           cache.last_scale_refresh_decile = refresh_decile;
           update_confidence_distribution_lookup(cache.confidence_distribution);
-          if (ENABLE_ESCAPE_ITERATION_SHADING) {
-            update_escape_distribution_lookup(cache.escape_distribution);
-          }
+          update_iteration_distribution_lookup(cache.iteration_distribution);
         }
         const confidence_mapping_changed = refresh_scale &&
           previous_confidence_lookup.some((lightness, index) =>
             lightness !== cache.confidence_distribution.lightness_by_bucket[index]);
-        const escape_mapping_changed = previous_escape_lookup &&
-          previous_escape_lookup.some((lightness, index) =>
-            lightness !== cache.escape_distribution.lightness_by_iteration[index]);
-        const mapping_changed = confidence_mapping_changed || Boolean(escape_mapping_changed);
+        const iteration_mapping_changed = refresh_scale &&
+          previous_iteration_lookup.some((lightness, index) =>
+            lightness !== cache.iteration_distribution.lightness_by_iteration[index]);
+        const mapping_changed = confidence_mapping_changed || iteration_mapping_changed;
         const final_pass_needed = render_complete &&
           cache.received_row_count === SEED_SURVEY_RENDER_SIZE_PX &&
           !cache.final_scale_normalized;
@@ -223,7 +290,7 @@ export const SeedSurveyPreviewCanvas = ({
             0,
             completed_rows,
             cache.confidence_distribution,
-            cache.escape_distribution,
+            cache.iteration_distribution,
           );
         } else if (!final_pass_needed) {
           paint_render_rows(
@@ -232,7 +299,7 @@ export const SeedSurveyPreviewCanvas = ({
             render_batch.row_start,
             render_batch.row_count,
             cache.confidence_distribution,
-            cache.escape_distribution,
+            cache.iteration_distribution,
           );
         }
       }
@@ -242,9 +309,7 @@ export const SeedSurveyPreviewCanvas = ({
         !cache.final_scale_normalized
       ) {
         update_confidence_distribution_lookup(cache.confidence_distribution);
-        if (ENABLE_ESCAPE_ITERATION_SHADING) {
-          update_escape_distribution_lookup(cache.escape_distribution);
-        }
+        update_iteration_distribution_lookup(cache.iteration_distribution);
         cache.final_scale_normalized = true;
         context.fillStyle = "#eeeeee";
         context.fillRect(0, 0, size_px, size_px);
@@ -254,9 +319,32 @@ export const SeedSurveyPreviewCanvas = ({
           0,
           SEED_SURVEY_RENDER_SIZE_PX,
           cache.confidence_distribution,
-          cache.escape_distribution,
+          cache.iteration_distribution,
         );
       }
+      return;
+    }
+    if (survey?.uses_canvas_buffer) {
+      let cache = canvas_buffer_cache_ref.current;
+      if (!cache || cache.render_key !== render_key) {
+        cache = canvas_buffer_cache(render_key, PREVIEW_SAMPLES_PER_AXIS);
+        canvas_buffer_cache_ref.current = cache;
+      }
+      if (Array.isArray(survey.canvas_buffer)) {
+        cache.canvas_buffer = survey.canvas_buffer;
+      } else if (survey.canvas_buffer_batch?.rows?.length) {
+        survey.canvas_buffer_batch.rows.forEach(({ row_index, values }) => {
+          values.forEach((point_data, canvas_x) => {
+            cache.canvas_buffer[canvas_x][row_index] = point_data;
+          });
+        });
+      }
+      paint_canvas_buffer(
+        cache,
+        context,
+        PREVIEW_SAMPLES_PER_AXIS,
+        size_px,
+      );
       return;
     }
     context.fillStyle = "#eeeeee";
@@ -264,10 +352,10 @@ export const SeedSurveyPreviewCanvas = ({
     const confidence_distribution = build_confidence_distribution(
       stable_points.map((point) => point.confidence),
     );
-    const escape_distribution = build_escape_distribution(
-      escaped_points.map((point) => Number(point.iterations)),
+    const iteration_distribution = build_iteration_distribution(
+      iteration_points.map((point) => Number(point.iterations)),
     );
-    draw_points(context, stable_points, (point) =>
+    draw_points(context, stable_points, half_span, (point) =>
       pattern_color_for_lightness(
         point.pattern,
         confidence_lightness_from_distribution(
@@ -276,23 +364,24 @@ export const SeedSurveyPreviewCanvas = ({
         ),
       ),
     );
-    draw_points(context, unresolved_points, () => UNRESOLVED_COLOR);
-    draw_points(context, escaped_points, (point) => {
-      if (!ENABLE_ESCAPE_ITERATION_SHADING) return ESCAPED_COLOR;
-      const lightness = escape_lightness_from_distribution(
+    draw_points(context, iteration_points, half_span, (point) => {
+      const lightness = iteration_lightness_from_distribution(
         Number(point.iterations),
-        escape_distribution,
+        iteration_distribution,
       );
-      return Number.isFinite(lightness)
-        ? `hsl(0, 0%, ${lightness}%)`
-        : FractoUtil.fracto_pattern_color(0, Math.max(1, Number(point.iterations) || 1));
+      return pattern_color_for_lightness(point.pattern, lightness);
     });
+    draw_points(context, unresolved_points, half_span, () => UNRESOLVED_COLOR);
+    draw_points(context, escaped_points, half_span, () => ESCAPED_COLOR);
   }, [
     escaped_points,
+    half_span,
+    iteration_points,
     is_render,
     render_batch,
     render_complete,
     render_key,
+    survey,
     size_px,
     stable_points,
     unresolved_points,
@@ -318,6 +407,7 @@ export const SeedSurveyPreviewCanvas = ({
 SeedSurveyPreviewCanvas.propTypes = {
   survey: PropTypes.shape({
     stable_points: PropTypes.arrayOf(PropTypes.object),
+    iteration_points: PropTypes.arrayOf(PropTypes.object),
     unresolved_points: PropTypes.arrayOf(PropTypes.object),
     escaped_points: PropTypes.arrayOf(PropTypes.object),
   }),
@@ -329,6 +419,7 @@ SeedSurveyPreviewCanvas.propTypes = {
   }),
   render_complete: PropTypes.bool,
   render_key: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  half_span: PropTypes.number,
 };
 
 SeedSurveyPreviewCanvas.defaultProps = {
@@ -336,6 +427,7 @@ SeedSurveyPreviewCanvas.defaultProps = {
   render_batch: null,
   render_complete: false,
   render_key: "default",
+  half_span: 1.5,
 };
 
 export default SeedSurveyPreviewCanvas;

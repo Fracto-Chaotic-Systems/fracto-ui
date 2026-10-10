@@ -22,9 +22,13 @@ The components that use a setting read and update it through `AppSettings.jsx`.
 - `AssetsSettings.jsx` defines the Assets page section and splitter position,
   plus image generator, video, detector, simulator, gallery, and lore state
   such as frame parameters, resolutions, selected items, and panel positions.
-  The seed-surveys page has an independent persisted navigator frame, internal
-  navigator splitters, and a page-level splitter between its left navigator
-  and right content panel. Its preview survey follows the frame's focal point.
+  The seed-surveys page has persisted navigator frame, navigator splitter,
+  half-span, and seeded iteration-limit settings. Half-span defaults to 1.5
+  and is constrained to `2^-11`–`2^1`; the iteration limit defaults to 100,000
+  and ranges from `10^5`–`10^10`. Changing either control starts a survey with
+  the new setting. The limit is consumed by seeded `FractoFastCalc` only when
+  the focal parameter is outside the main cardioid; in-cardioid detection keeps
+  its independent fixed 4,096-iteration horizon.
 - `DataSettings.jsx` defines the Data page section, splitters, log display,
   selected query tab, and data-service connection fields.
 - `NavigatorSettings.jsx` defines the canvas navigator's rendering strategy,

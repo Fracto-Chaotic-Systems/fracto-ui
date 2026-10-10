@@ -53,8 +53,9 @@ export const KEY_ASSETS_DETECTOR_RESOLUTION = `${ASSETS_DETECTOR_FOLDER}/generat
 
 export const KEY_ASSETS_SIMULATOR_FRAME_SETTINGS = `${ASSETS_SIMULATOR_FOLDER}/frame_settings`;
 export const KEY_ASSETS_SURVEYS_FRAME_SETTINGS = `${ASSETS_SURVEYS_FOLDER}/frame_settings`;
-export const KEY_ASSETS_SURVEYS_CONTENT_SPLITTER_POS = `${ASSETS_SURVEYS_FOLDER}/content_splitter_pos_px`;
 export const KEY_ASSETS_SURVEYS_SPLITTER_POS = `${ASSETS_SURVEYS_FOLDER}/splitter_pos`;
+export const KEY_ASSETS_SURVEYS_HALF_SPAN = `${ASSETS_SURVEYS_FOLDER}/half_span`;
+export const KEY_ASSETS_SURVEYS_ITERATION_LIMIT = `${ASSETS_SURVEYS_FOLDER}/iteration_limit`;
 export const KEY_ASSETS_SURVEYS_LEGEND_SPLITTER_POS = `${ASSETS_SURVEYS_FOLDER}/legend_splitter_pos`;
 export const KEY_ASSETS_SURVEYS_STEPS_SPLITTER_POS = `${ASSETS_SURVEYS_FOLDER}/steps_splitter_pos`;
 export const KEY_ASSETS_SIMULATOR_SPLITTER_POS = `${ASSETS_SIMULATOR_FOLDER}/splitter_pos`;
@@ -195,16 +196,22 @@ export const APP_ASSETS_SETTINGS = {
     persist: true,
     no_copy: true,
   },
-  [KEY_ASSETS_SURVEYS_CONTENT_SPLITTER_POS]: {
-    data_type: TYPE_NUMBER,
-    default_value: DEFAULT_SIDEBAR_WIDTH + 800,
-    description: "Position separating the Assets seed surveys navigator and content panels",
-    persist: true,
-  },
   [KEY_ASSETS_SURVEYS_SPLITTER_POS]: {
     data_type: TYPE_NUMBER,
     default_value: 500,
-    description: "Current position for the Assets seed surveys navigator splitter",
+    description: "Position separating the Assets seed surveys navigator and content panels",
+    persist: true,
+  },
+  [KEY_ASSETS_SURVEYS_HALF_SPAN]: {
+    data_type: TYPE_NUMBER,
+    default_value: 1.5,
+    description: "Half-span bounding both axes of the Assets seed survey region",
+    persist: true,
+  },
+  [KEY_ASSETS_SURVEYS_ITERATION_LIMIT]: {
+    data_type: TYPE_NUMBER,
+    default_value: 100000,
+    description: "Maximum seeded calculator iterations for the Assets seed survey",
     persist: true,
   },
   [KEY_ASSETS_SURVEYS_LEGEND_SPLITTER_POS]: {
