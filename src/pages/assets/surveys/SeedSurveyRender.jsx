@@ -204,6 +204,8 @@ export class SeedSurveyRender extends Component {
           }}
         >
           <SeedSurveyCanvas
+            sampling={mode === "render" ? "centers" : "bounds"}
+            encoding={mode === "render" ? "packed" : "rows"}
             size_px={mode === "render" ? RENDER_RESOLUTION : PREVIEW_SIZE_PX}
             source_size_px={
               mode === "render" ? RENDER_RESOLUTION : PREVIEW_RESOLUTION

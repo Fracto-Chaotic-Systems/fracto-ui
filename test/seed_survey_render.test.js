@@ -91,6 +91,8 @@ test("controls pass focal point and request parameters to canvas and persist sli
   h.component.on_iteration_limit_change({ target: { value: 6 } });
   canvas = find_canvas(h.component.render());
   assert.equal(canvas.props.source_size_px, 1024);
+  assert.equal(canvas.props.encoding, "packed");
+  assert.equal(canvas.props.sampling, "centers");
   assert.equal(canvas.props.size_px, 1024);
   assert.equal(canvas.props.half_span, 0.5);
   assert.equal(canvas.props.iteration_limit, 1000000);

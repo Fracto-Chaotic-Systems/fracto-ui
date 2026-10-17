@@ -19,10 +19,14 @@ export class SeedSurveyCanvas extends Component {
     source_size_px: PropTypes.number.isRequired,
     size_px: PropTypes.number.isRequired,
     aria_label: PropTypes.string.isRequired,
+    sampling: PropTypes.oneOf(["bounds", "centers"]),
+    encoding: PropTypes.oneOf(["rows", "packed"]),
     focal_point: PropTypes.shape({ x: PropTypes.number, y: PropTypes.number }),
     half_span: PropTypes.number.isRequired,
     iteration_limit: PropTypes.number.isRequired,
   };
+
+  static defaultProps = { sampling: "bounds", encoding: "rows" };
 
   state = { survey: { status: "idle" }, request_id: 0, after_row: 0 };
   active_request_id = 0;
@@ -37,7 +41,7 @@ export class SeedSurveyCanvas extends Component {
 
   request_key = (props) => {
     const { focal_point, source_size_px, half_span, iteration_limit } = props;
-    return `${focal_point?.x},${focal_point?.y}:${source_size_px}:${half_span}:${iteration_limit}`;
+    return `${focal_point?.x},${focal_point?.y}:${source_size_px}:${half_span}:${iteration_limit}:${props.sampling}:${props.encoding}`;
   };
 
   componentDidUpdate(previous_props, previous_state) {
@@ -86,6 +90,11 @@ export class SeedSurveyCanvas extends Component {
           return;
         }
         this.accept_job(response.result || {}, request_id);
+      },
+      {
+        canvas_size: this.props.size_px,
+        sampling: this.props.sampling,
+        encoding: this.props.encoding,
       },
     );
   };

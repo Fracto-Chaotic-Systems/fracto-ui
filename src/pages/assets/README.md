@@ -19,8 +19,8 @@ see [its README](surveys/README.md) for responsibilities.
   item. It owns independent persisted frame and navigator splitter settings.
   It keeps the navigator in a left pane in both modes, separated from the
   right content pane by a persisted splitter. The right pane has “render” and
-  “detect” tabs; “detect” mounts `surveys/SeedSurveyDetect.jsx`, an empty component-class
-  scaffold receiving focal-point data and content dimensions. Inside the
+  “detect” tabs; “detect” mounts `surveys/SeedSurveyDetect.jsx`, a component class
+  displaying a left-aligned 350×350 canvas backed by a 150×150 sample grid. Inside the
   “render” tab, a 35px header has
   mutually exclusive “preview” and “render” choices held in page-local state;
   preview is the default. `surveys/SeedSurveyRender.jsx` owns those controls,

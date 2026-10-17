@@ -68,9 +68,10 @@ export class DataBackend {
         })
         .join("&");
       const url = `${DATA_ORIGIN()}/minibrots?${all_params}`;
-      const minibrots = await fetch(url, { credentials: "include", headers: FETCH_JSON_HEADERS }).then((response) =>
-        response.json(),
-      );
+      const minibrots = await fetch(url, {
+        credentials: "include",
+        headers: FETCH_JSON_HEADERS,
+      }).then((response) => response.json());
       cb(minibrots.result);
     }, 250);
   };
@@ -91,9 +92,10 @@ export class DataBackend {
         `limit=${limit}`,
       ].join("&");
       const url = `${DATA_ORIGIN()}/orbital?${all_params}`;
-      const point_data = await fetch(url, { credentials: "include", headers: FETCH_JSON_HEADERS }).then((response) =>
-        response.json(),
-      );
+      const point_data = await fetch(url, {
+        credentials: "include",
+        headers: FETCH_JSON_HEADERS,
+      }).then((response) => response.json());
       cb(point_data);
     }, 250);
   };
@@ -115,9 +117,10 @@ export class DataBackend {
       ].join("&");
       const url = `${DATA_ORIGIN()}/orbitals?${all_params}`;
       try {
-        const point_data = await fetch(url, { credentials: "include", headers: FETCH_JSON_HEADERS }).then(
-          (response) => response.json(),
-        );
+        const point_data = await fetch(url, {
+          credentials: "include",
+          headers: FETCH_JSON_HEADERS,
+        }).then((response) => response.json());
         console.log("get_orbitals point_data", point_data);
         cb(point_data);
       } catch (err) {
@@ -127,11 +130,21 @@ export class DataBackend {
   };
 
   /** Start the shared asynchronous seed-plane survey without running other orbital work. */
-  static start_seed_survey = (focal_point, resolution, half_span, iteration_limit, cb) => {
+  static start_seed_survey = (
+    focal_point,
+    grid_size,
+    half_span,
+    iteration_limit,
+    cb,
+    options = {},
+  ) => {
     const params = new URLSearchParams({
       re: `${focal_point.x}`,
       im: `${focal_point.y}`,
-      resolution: `${resolution}`,
+      grid_size: `${grid_size}`,
+      canvas_size: `${options.canvas_size ?? grid_size}`,
+      sampling: options.sampling ?? "bounds",
+      encoding: options.encoding ?? "rows",
       half_span: `${half_span}`,
       iteration_limit: `${iteration_limit}`,
     });
@@ -140,19 +153,34 @@ export class DataBackend {
       headers: FETCH_JSON_HEADERS,
     })
       .then((response) => response.json().then((body) => ({ response, body })))
-      .then(({ response, body }) => cb(response.ok ? body : { error: body.error || `HTTP ${response.status}` }))
+      .then(({ response, body }) =>
+        cb(
+          response.ok
+            ? body
+            : { error: body.error || `HTTP ${response.status}` },
+        ),
+      )
       .catch((error) => cb({ error: error.message }));
   };
 
   /** Poll an asynchronous high-precision seed-plane survey. */
   static get_seed_survey_job = (job_id, cb, after_row = 0) => {
     const params = new URLSearchParams({ after_row: `${after_row}` });
-    fetch(`${DATA_ORIGIN()}/orbitals/seed-survey/${encodeURIComponent(job_id)}?${params.toString()}`, {
-      credentials: "include",
-      headers: FETCH_JSON_HEADERS,
-    })
+    fetch(
+      `${DATA_ORIGIN()}/orbitals/seed-survey/${encodeURIComponent(job_id)}?${params.toString()}`,
+      {
+        credentials: "include",
+        headers: FETCH_JSON_HEADERS,
+      },
+    )
       .then((response) => response.json().then((body) => ({ response, body })))
-      .then(({ response, body }) => cb(response.ok ? body : { error: body.error || `HTTP ${response.status}` }))
+      .then(({ response, body }) =>
+        cb(
+          response.ok
+            ? body
+            : { error: body.error || `HTTP ${response.status}` },
+        ),
+      )
       .catch((error) => cb({ error: error.message }));
   };
 
@@ -182,7 +210,11 @@ export class DataBackend {
         cb(
           response.ok
             ? data
-            : { error: data.error || `Orbital Newton request failed (${response.status})` },
+            : {
+                error:
+                  data.error ||
+                  `Orbital Newton request failed (${response.status})`,
+              },
         );
       } catch (error) {
         cb({ error: error.message });
@@ -217,10 +249,10 @@ export class DataBackend {
         params.set("interpolation", interpolation);
       }
       try {
-        const response = await fetch(
-          `${DATA_ORIGIN()}/circuitry?${params}`,
-          { credentials: "include", headers: FETCH_JSON_HEADERS },
-        );
+        const response = await fetch(`${DATA_ORIGIN()}/circuitry?${params}`, {
+          credentials: "include",
+          headers: FETCH_JSON_HEADERS,
+        });
         const data = await response.json();
         if (!response.ok) {
           cb({
@@ -263,7 +295,10 @@ export class DataBackend {
         cb(
           response.ok
             ? data
-            : { error: data.error || `Spectrum request failed (${response.status})` },
+            : {
+                error:
+                  data.error || `Spectrum request failed (${response.status})`,
+              },
         );
       } catch (error) {
         cb({ error: error.message });
@@ -283,9 +318,10 @@ export class DataBackend {
     setTimeout(async () => {
       const all_params = [`category_id=${category_id}`].join("&");
       const url = `${DATA_ORIGIN()}/lore_content_list?${all_params}`;
-      const category_list = await fetch(url, { credentials: "include", headers: FETCH_JSON_HEADERS }).then(
-        (response) => response.json(),
-      );
+      const category_list = await fetch(url, {
+        credentials: "include",
+        headers: FETCH_JSON_HEADERS,
+      }).then((response) => response.json());
       cb(category_list);
     }, 250);
   };
@@ -345,7 +381,9 @@ export class DataBackend {
       return DataBackend.FAREY_SEQUENCE;
     }
     const url = `${DATA_ORIGIN()}/utils/farey_sequence`;
-    const full_farey_sequence = await fetch(url, { credentials: "include" }).then((res) => res.json());
+    const full_farey_sequence = await fetch(url, {
+      credentials: "include",
+    }).then((res) => res.json());
     const farey_sequence = full_farey_sequence
       .filter((f) => f.den <= MAX_DENOMINATOR)
       .filter((f) => f.num > 0 && f.den > 2);

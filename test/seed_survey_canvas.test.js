@@ -177,6 +177,10 @@ test("canvas owns submissions while display and unchanged-coordinate updates ret
   h.update({ iteration_limit: 1000000 });
   assert.equal(h.starts.length, 4);
   assert.deepEqual(h.starts.at(-1).slice(1, 4), [4, 0.5, 1000000]);
+  assert.equal(h.starts.at(-1)[5].canvas_size, 29);
+  h.update({ sampling: "centers", encoding: "packed" });
+  assert.equal(h.starts.length, 5);
+  assert.equal(h.starts.at(-1)[5].encoding, "packed");
   h.component.canvas_ref.current = null;
   assert.doesNotThrow(() => h.component.paint_canvas(true));
 });

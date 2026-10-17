@@ -18,6 +18,7 @@ export const KEY_ASSETS_SURVEYS = `${ASSETS_FOLDER}/seed_surveys_title`;
 export const KEY_ASSETS_SURVEYS_SIDEBAR = `${ASSETS_FOLDER}/seed_surveys_sidebar`;
 export const KEY_ASSETS_SURVEYS_PREVIEW = `${ASSETS_FOLDER}/seed_surveys_preview`;
 export const KEY_ASSETS_SURVEYS_RENDER = `${ASSETS_FOLDER}/seed_surveys_render`;
+export const KEY_ASSETS_SURVEYS_CANVAS_DETECT = `${ASSETS_FOLDER}/seed_surveys_canvas_detect`;
 export const KEY_ASSETS_SURVEYS_CANVAS_PREVIEW = `${ASSETS_FOLDER}/seed_surveys_canvas_preview`;
 export const KEY_ASSETS_SURVEYS_CANVAS_RENDER = `${ASSETS_FOLDER}/seed_surveys_canvas_render`;
 export const KEY_ASSETS_SURVEYS_DETECT = `${ASSETS_FOLDER}/seed_surveys_detect`;
@@ -105,6 +106,7 @@ export const APP_ASSETS_TEXT = {
   [KEY_ASSETS_SURVEYS_SIDEBAR]: "surveys",
   [KEY_ASSETS_SURVEYS_PREVIEW]: "preview",
   [KEY_ASSETS_SURVEYS_RENDER]: "render",
+  [KEY_ASSETS_SURVEYS_CANVAS_DETECT]: "Seed survey detection canvas",
   [KEY_ASSETS_SURVEYS_CANVAS_PREVIEW]: "Seed survey preview",
   [KEY_ASSETS_SURVEYS_CANVAS_RENDER]: "Seed survey high-resolution render",
   [KEY_ASSETS_SURVEYS_DETECT]: "detect",
