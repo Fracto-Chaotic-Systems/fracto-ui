@@ -67,4 +67,4 @@ npm run lint
 npm run build
 ```
 
-There is no automated UI test command. After changing routing, browser state, or a backend integration, also run the application and smoke-test the affected page with the required Fracto services available.
+Focused Node test commands are available: `npm run test:auth`, `npm run test:commits`, `npm run test:reference`, `npm run test:servers`, `npm run test:automation`, and `npm run test:audio`. They cover application logic and selected component behavior, rather than a full browser session. After changing routing, browser state, or backend integration, also smoke-test the affected page with the required services running. A production build validates bundling, not live backend availability or interaction.

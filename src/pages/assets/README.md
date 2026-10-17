@@ -3,6 +3,9 @@
 This directory contains the panels selected from the Assets section sidebar.
 `Assets.jsx` owns the section navigation and mounts one page panel at a time.
 
+The `surveys/` folder contains seed-survey canvas and compatibility scale helpers;
+see [its README](surveys/README.md) for responsibilities.
+
 ## Files
 
 - `AssetsOverview.jsx`, `AssetsSettings.jsx`, `AssetsStatus.jsx`, and
@@ -15,9 +18,15 @@ This directory contains the panels selected from the Assets section sidebar.
 - `AssetsSurveys.jsx` is the seed-surveys page selected by the “surveys” sidebar
   item. It owns independent persisted frame and navigator splitter settings.
   It keeps the navigator in a left pane in both modes, separated from the
-  right content pane by a persisted splitter. The right pane has a 35px header
-  with mutually exclusive “preview” and “render” choices held in page-local
-  state; preview is the default. The page starts one data-server job per
+  right content pane by a persisted splitter. The right pane has “render” and
+  “detect” tabs; “detect” mounts `surveys/SeedSurveyDetect.jsx`, an empty component-class
+  scaffold receiving focal-point data and content dimensions. Inside the
+  “render” tab, a 35px header has
+  mutually exclusive “preview” and “render” choices held in page-local state;
+  preview is the default. `surveys/SeedSurveyRender.jsx` owns those controls,
+  display options; `surveys/SeedSurveyCanvas.jsx` owns survey state, job
+  requests, polling, batch cursors, and progress/error display. The page passes
+  focal-point data and content dimensions. The canvas starts one data-server job per
   focal-point/resolution/half-span/iteration-limit combination and polls for
   progress. Changing the focal point, mode, or either slider starts a new job;
   scope-only navigation changes do not. A request ID
@@ -31,56 +40,32 @@ This directory contains the panels selected from the Assets section sidebar.
   compact row batches, avoiding a million in-memory point objects; render can
   take substantially longer than preview. The logarithmic “limit” slider spans
   `10^5` to `10^10`, defaults to `100K`, displays K/M/G notation, and persists
-  locally. Its value is sent as `seed_iteration_limit` and caps each seeded
-  `FractoFastCalc.calc_from_seed()` run when the focal parameter is outside the
-  main cardioid; it does not alter the in-cardioid detector horizon. Worker
+  locally. Its value is sent as `seed_iteration_limit` to the SDK's seeded
+  calculation path for survey samples. Worker
   tasks still have five-minute preview and one-hour render timeouts, so large
   limits can time out before all samples finish.
-- `SeedSurveyPreviewCanvas.jsx` draws preview samples or render row batches
-  from the data server. Pixel status 1 is a non-singleton candidate for which
-  the server has a final pattern-sized suffix of orbit samples; it does not
-  independently prove recurrence or distinctness. Status 2 is unresolved;
-  status 3 escaped; status 4 is a nonzero `FractoFastCalc` pattern for a seed
-  survey whose parameter lies outside the main cardioid; status 0 is otherwise
-  unpainted. Status-1 candidates use the existing pattern hue and empirical
-  confidence rank. Outside-cardioid preview and render surveys instead paint
-  `[pattern, iteration]` pairs, including pattern-zero escapes, through SDK
-  `FractoCanvasBuffer.buffer_to_canvas`, matching the navigator's
-  `FractoColors` pipeline. In-cardioid preview and render retain diagnostic
-  confidence and iteration coloring.
-  These confidence and iteration histograms apply to the in-cardioid
-  diagnostic painter. Confidence scores from status-1 pixels with finite values are mapped so the
-  lowest 1% receives 18% HSL lightness, the highest 1% 88%, and intermediate
-  ranks are spread evenly. Escaped and unresolved pixels do not affect this
-  distribution. The confidence histogram has 4,096 bins. Escaped status-3
-  pixels remain white and do not affect either histogram. Status-4 pixels use
-  a separate iteration histogram: lower iteration percentiles are lighter and
-  higher percentiles are darker. The mapped lightness is applied to the
-  pattern's hue, matching the tile rendering color convention.
+- `surveys/SeedSurveyCanvas.jsx` receives explicit source/display sizes, data,
+  and accessibility text from `SeedSurveyRender.jsx`, which owns preview/render
+  options. The general canvas coordinates its lifecycle and delegates
+  all rendering to `SeedSurveyCanvasBuffer.js`. Samples are painted through
+  the SDK's `FractoCanvasBuffer.buffer_to_canvas`, using the same
+  `[pattern, iteration]` values and `FractoColors` mapping inside and outside
+  the main cardioid. Pattern-zero escape samples retain their iteration count
+  and receive the shared adaptive grey treatment; nonzero patterns use the
+  shared pattern hue and iteration shading. The focal domain does not select a
+  separate canvas renderer.
+
+  The canvas owns request invalidation and clears its polling timer on unmount;
+  switching tabs does not cancel already submitted server jobs.
 
   The render protocol stores 13 little-endian bytes per pixel: `uint8` status,
   `uint32` pattern at byte 1, `float32` confidence at byte 5 (`-1` if absent),
   and `uint32` iterations at byte 9. Render row polling uses an `after_row`
-  cursor and returns up to 16 rows. Rows are retained client-side so mapping
-  changes can repaint the received prefix. The confidence scale is refreshed
-  at ten row-progress milestones during rendering; rows between milestones use
-  the last published scale. Completion computes the final distribution and
-  repaints the whole image once to normalize all pixels together.
-- `SeedSurveyConfidenceScale.js` builds the confidence histogram and maps
-  empirical ranks to the 18–88% lightness range, clipping the bottom and top
-  one-percent tails.
-  Unresolved samples appear medium grey (`#888888`), while
-  singleton/other/unprocessed samples remain `#eeeeee`.
-- `SeedSurveyIterationScale.js` builds the status-4 iteration histogram and
-  maps iteration percentiles to reversed 88–18% HSL lightness, so fewer
-  iterations are lighter and more iterations darker. That lightness is applied
-  to the pattern hue. Its 10,001 buckets cover zero through the current
-  10,000-iteration seeded-calculator horizon. During rendering, this
-  scale refreshes at the same ten progress milestones as the confidence scale;
-  the final whole-image repaint normalizes both scales together.
-- `SeedSurveyEscapeScale.js` is a legacy histogram helper retained for
-  reference and tests; the canvas no longer uses it, and escaped samples remain
-  white.
+  cursor and returns up to 16 rows. Each packed render sample carries status,
+  pattern, confidence, and iteration fields; the canvas decodes the pattern and
+  iteration into the same 2D buffer used by preview before calling the shared
+  renderer. Legacy point-array rendering and confidence/percentile histogram
+  shading have been removed; all survey colors come from `FractoColors`.
 - `AssetsLore.jsx` and `AssetsLoreStyles.jsx` provide lore content and style
   management.
 - `AssetsUtils.jsx` contains shared helpers used by Assets panels.

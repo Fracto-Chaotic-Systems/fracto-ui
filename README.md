@@ -146,7 +146,7 @@ npm run start:check
 
 For a manual smoke test, start the full system and verify that `http://127.0.0.1:3006/` loads, navigation changes routes, and the relevant backend-driven pages return data.
 
-There is currently no UI test command or automated browser test suite. A successful production build catches module-resolution and bundling failures but does not validate backend availability or interactive behavior.
+Focused Node test commands are available: `npm run test:auth`, `npm run test:commits`, `npm run test:reference`, `npm run test:servers`, `npm run test:automation`, and `npm run test:audio`. They cover application logic and selected component behavior, rather than a full browser session. After changing routing, browser state, or backend integration, also smoke-test the affected page with the required services running. A production build validates bundling, not live backend availability or interaction.
 
 ## Troubleshooting
 
