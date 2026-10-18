@@ -24,7 +24,6 @@ import CoolTabs from "../../utils/ui/CoolTabs.jsx";
 const UPDATE_INTERVAL_MS = 1000;
 const MIN_NAVIGATOR_WIDTH_PX = 400;
 const MIN_CONTENT_WIDTH_PX = 255;
-const TAB_CHROME_HEIGHT_PX = 24;
 
 /** Seed-plane preview page with a persistent navigator and preview pane. */
 export class AssetsSurveys extends Component {
@@ -79,8 +78,7 @@ export class AssetsSurveys extends Component {
   on_navigator_splitter_changed = (_key, position) =>
     this.setState({ content_splitter_pos: position });
 
-  on_tab_select = (selected_tab_index) =>
-    this.setState({ selected_tab_index });
+  on_tab_select = (selected_tab_index) => this.setState({ selected_tab_index });
 
   render() {
     const {
@@ -98,11 +96,12 @@ export class AssetsSurveys extends Component {
       top = bounds.top;
       left = bounds.left;
     }
+    const available_height = Math.max(0, rendered_height - top);
     const bounding_rect = {
       top,
       left,
       width: rendered_width,
-      height: rendered_height,
+      height: available_height,
     };
     const max_navigator_width = Math.max(
       0,
@@ -117,10 +116,7 @@ export class AssetsSurveys extends Component {
       0,
       left + rendered_width - right_panel_left,
     );
-    const tab_content_height = Math.max(
-      0,
-      rendered_height - TAB_CHROME_HEIGHT_PX,
-    );
+    const tab_content_height = Math.max(0, available_height);
     let selected_content;
     switch (selected_tab_index) {
       case 0:
@@ -154,7 +150,7 @@ export class AssetsSurveys extends Component {
         key="assets-surveys-layout"
         style={{
           width: `${rendered_width}px`,
-          height: `${rendered_height}px`,
+          height: `${available_height}px`,
         }}
       >
         <NavigatorSplitterLayout
@@ -170,12 +166,15 @@ export class AssetsSurveys extends Component {
             top,
             left: right_panel_left,
             width: right_panel_width,
-            height: rendered_height,
+            height: available_height,
             overflow: "hidden",
             backgroundColor: "#fcfcfc",
+            display: "flex",
+            flexDirection: "column",
           }}
         >
           <CoolTabs
+            fill_height
             labels={[
               <span key="render-tab-label" style={{ textTransform: "none" }}>
                 {AppText.get(KEY_ASSETS_SURVEYS_RENDER)}

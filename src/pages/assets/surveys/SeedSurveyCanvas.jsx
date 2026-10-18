@@ -4,7 +4,8 @@ import DataBackend from "../../../backend/DataBackend.jsx";
 import AppText from "../../../AppText.jsx";
 import {
   KEY_ASSETS_SURVEYS_FAILED,
-  KEY_ASSETS_SURVEYS_SAMPLES,
+  KEY_ASSETS_SURVEYS_PROGRESS,
+  KEY_ASSETS_SURVEYS_COMPLETE,
 } from "../../../text/AssetsText.jsx";
 import {
   canvas_buffer_cache,
@@ -19,6 +20,9 @@ export class SeedSurveyCanvas extends Component {
     source_size_px: PropTypes.number.isRequired,
     size_px: PropTypes.number.isRequired,
     aria_label: PropTypes.string.isRequired,
+    on_seed_hover: PropTypes.func,
+    on_seed_leave: PropTypes.func,
+    on_canvas_rendered: PropTypes.func,
     sampling: PropTypes.oneOf(["bounds", "centers"]),
     encoding: PropTypes.oneOf(["rows", "packed"]),
     focal_point: PropTypes.shape({ x: PropTypes.number, y: PropTypes.number }),
@@ -176,10 +180,66 @@ export class SeedSurveyCanvas extends Component {
       store_packed_rows(cache, packed_batch, source_size_px);
     }
     paint_canvas_buffer(cache, context, source_size_px, size_px);
+    this.props.on_canvas_rendered?.(this.canvas_ref.current);
+  };
+
+  on_mouse_move = (event) => {
+    if (!this.props.on_seed_hover) return;
+    const bounds = event.currentTarget.getBoundingClientRect();
+    if (bounds.width <= 0 || bounds.height <= 0) return;
+    const fraction_x = Math.max(
+      0,
+      Math.min(1, (event.clientX - bounds.left) / bounds.width),
+    );
+    const fraction_y = Math.max(
+      0,
+      Math.min(1, (event.clientY - bounds.top) / bounds.height),
+    );
+    this.props.on_seed_hover({
+      x: (2 * fraction_x - 1) * this.props.half_span,
+      y: (1 - 2 * fraction_y) * this.props.half_span,
+    });
   };
 
   render() {
     const { size_px, aria_label } = this.props;
+    const { survey, after_row } = this.state;
+    const total_samples =
+      survey.total_samples ??
+      survey.progress?.total ??
+      this.props.source_size_px ** 2;
+    const available_rows = Math.max(
+      survey.render_rows_completed || 0,
+      survey.preview_rows_completed || 0,
+    );
+    const complete =
+      survey.status === "completed" && after_row >= available_rows;
+    const loading =
+      ["queued", "running"].includes(survey.status) ||
+      (survey.status === "completed" && !complete);
+    const collected =
+      survey.status === "completed" && !complete
+        ? after_row * this.props.source_size_px
+        : (survey.progress?.completed ?? 0);
+    let status_content = null;
+    if (survey.status === "failed") {
+      status_content = `${AppText.get(KEY_ASSETS_SURVEYS_FAILED)}: ${survey.error || "unknown error"}`;
+    } else if (complete) {
+      status_content = AppText.get(KEY_ASSETS_SURVEYS_COMPLETE).replace(
+        "${total_samples}",
+        String(total_samples),
+      );
+    } else if (loading) {
+      status_content = (
+        <progress
+          aria-label={AppText.get(KEY_ASSETS_SURVEYS_PROGRESS)}
+          max={Math.max(1, total_samples)}
+          value={Math.max(0, Math.min(total_samples, collected))}
+          style={{ display: "block", width: "100%", height: "0.75rem" }}
+        />
+      );
+    }
+
     return (
       <div>
         <canvas
@@ -187,6 +247,8 @@ export class SeedSurveyCanvas extends Component {
           width={size_px}
           height={size_px}
           aria-label={aria_label}
+          onMouseMove={this.on_mouse_move}
+          onMouseLeave={this.props.on_seed_leave}
           style={{
             display: "block",
             width: `${size_px}px`,
@@ -197,11 +259,15 @@ export class SeedSurveyCanvas extends Component {
         />
         <div
           aria-live="polite"
-          style={{ fontSize: "0.8rem", paddingTop: "0.25rem" }}
+          style={{
+            width: `${size_px}px`,
+            marginLeft: "0.25rem",
+            fontSize: "0.8rem",
+            paddingTop: "0.25rem",
+            boxSizing: "border-box",
+          }}
         >
-          {this.state.survey.status === "failed"
-            ? `${AppText.get(KEY_ASSETS_SURVEYS_FAILED)}: ${this.state.survey.error || "unknown error"}`
-            : `${AppText.get(KEY_ASSETS_SURVEYS_SAMPLES)}: ${this.state.survey.progress?.completed || 0} / ${this.state.survey.total_samples || this.state.survey.progress?.total || 0}`}
+          {status_content}
         </div>
       </div>
     );

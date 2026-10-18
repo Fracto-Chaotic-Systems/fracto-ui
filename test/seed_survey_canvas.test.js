@@ -108,9 +108,13 @@ const harness = (overrides = {}) => {
         createRef: () => ({ current: null }),
       },
       PropTypes: new Proxy({}, { get: () => type }),
-      AppText: { get: (key) => key },
+      AppText: {
+        get: (key) =>
+          key === "complete" ? "${total_samples} samples complete" : key,
+      },
       KEY_ASSETS_SURVEYS_FAILED: "failed",
-      KEY_ASSETS_SURVEYS_SAMPLES: "samples",
+      KEY_ASSETS_SURVEYS_PROGRESS: "progress",
+      KEY_ASSETS_SURVEYS_COMPLETE: "complete",
       DataBackend: {
         start_seed_survey: (...args) => starts.push(args),
         get_seed_survey_job: (...args) => polls.push(args),
@@ -271,4 +275,93 @@ test("failed submissions stop polling and invalid focal points invalidate the ac
   assert.equal(h.component.state.survey.status, "idle");
   h.starts[0][4]({ result: { job_id: "late" } });
   assert.equal(h.timers.size, 0);
+});
+
+const find_progress = (node) =>
+  node?.type === "progress"
+    ? node
+    : node?.children?.map(find_progress).find(Boolean);
+
+test("loading uses an image-width progress bar and completion waits for remaining rows", () => {
+  const h = harness();
+  let tree = h.component.render();
+  assert.equal(tree.children[1].props.style.width, "17px");
+  assert.equal(
+    tree.children[1].props.style.marginLeft,
+    tree.children[0].props.style.marginLeft,
+  );
+  assert.equal(find_progress(tree).props.max, 9);
+  assert.equal(find_progress(tree).props.value, 0);
+  h.component.state.survey = {
+    status: "running",
+    total_samples: 9,
+    progress: { completed: 4, total: 9 },
+  };
+  assert.equal(find_progress(h.component.render()).props.value, 4);
+  h.component.state = {
+    ...h.component.state,
+    after_row: 1,
+    survey: {
+      status: "completed",
+      total_samples: 9,
+      preview_rows_completed: 3,
+      progress: { completed: 9, total: 9 },
+    },
+  };
+  assert.equal(find_progress(h.component.render()).props.value, 3);
+  h.component.state.after_row = 3;
+  tree = h.component.render();
+  assert.equal(find_progress(tree), undefined);
+  assert.equal(tree.children[1].children[0], "9 samples complete");
+  h.component.state.survey = { status: "failed", error: "offline" };
+  tree = h.component.render();
+  assert.equal(find_progress(tree), undefined);
+  assert.match(tree.children[1].children[0], /offline/);
+});
+
+test("canvas hover maps displayed coordinates to the seed plane with upward imaginary axis", () => {
+  const points = [];
+  const h = harness({
+    half_span: 1.5,
+    on_seed_hover: (point) => points.push(point),
+  });
+  const currentTarget = {
+    getBoundingClientRect: () => ({
+      left: 100,
+      top: 50,
+      width: 350,
+      height: 350,
+    }),
+  };
+  const hover = (clientX, clientY) =>
+    h.component.on_mouse_move({ currentTarget, clientX, clientY });
+  hover(100, 50);
+  hover(275, 225);
+  hover(450, 400);
+  hover(0, 500);
+  assert.deepEqual(
+    points.map((point) => [point.x, point.y]),
+    [
+      [-1.5, 1.5],
+      [0, 0],
+      [1.5, -1.5],
+      [-1.5, -1.5],
+    ],
+  );
+  assert.equal(h.starts.length, 1, "hover does not start a server job");
+});
+
+test("post-paint callback receives the displayed canvas after every paint", () => {
+  const received = [];
+  const h = harness({ on_canvas_rendered: (canvas) => received.push(canvas) });
+  received.length = 0;
+  const previous_paints = h.painted.length;
+  h.component.paint_canvas(false);
+  assert.equal(h.painted.length, previous_paints + 1);
+  assert.equal(received[0], h.component.canvas_ref.current);
+  h.update({ size_px: 29 });
+  assert.equal(received.length, 2);
+  h.component.canvas_ref.current = null;
+  h.component.paint_canvas(false);
+  assert.equal(received.length, 2);
 });

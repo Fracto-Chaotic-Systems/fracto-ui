@@ -3,14 +3,31 @@
 `AssetsSurveys.jsx` in the parent folder owns navigation, tab selection, and
 splitter geometry. This folder owns the render and detect tabs and their helpers:
 
-- `SeedSurveyDetect.jsx` places a left-aligned 350×350 canvas in the detect tab.
-  It requests a 150×150 grid over half-span `1.5` with a `100K` iteration cap,
-  using the navigator focal point. The panel scrolls when space is limited.
+- `SeedSurveyDetect.jsx` places a left-aligned 550×550 canvas in the detect tab.
+  It requests a 250×250 grid over half-span `1.5` with a `100K` iteration cap,
+  using the navigator focal point. Its wrapper is an inline block with `0.5rem`
+  margins and top alignment, allowing adjacent components. The panel scrolls
+  when space is limited.
   Data loading, batching, and progress remain owned by `SeedSurveyCanvas`.
+  Beside it, a 550×550 chart reuses circuitry's `click_point_chart` markers,
+  radial guides, prominent axes, and shared image frame. Mouse positions map
+  continuously to seed coordinates over `[-1.5, 1.5]` with imaginary values
+  increasing upward. The chart starts at `(0, 0)` and resets there when the
+  focal point changes. Hover computation is client-side using
+  `FractoFastCalc.calc_from_seed` with the same 100K cap to obtain cardinality.
+  The chart and magnitude use only `newton_big_complex` points, refined with
+  that cardinality, the same starting seed, 10 Newton cycles, and 64-digit
+  arithmetic. Empty Newton results never fall back to calculator points. Animation-frame
+  coalescing keeps only the latest pointer position. Hover does not submit
+  survey jobs. Escaped or unavailable orbits show the shared no-orbital message;
+  estimated calculator results remain numerical candidates, not period proofs.
 - `SeedSurveyRender.jsx` owns preview/render mode and persisted half-span and
   iteration-limit controls. It passes the focal point, numeric source/display
   sizes, half-span, iteration limit, and translated accessibility label to the
-  canvas. It does not submit jobs or hold survey results.
+  canvas. It does not submit jobs or hold survey results. The header does not
+  shrink; the remaining area scrolls in render mode and includes both the full
+  image and its sample-count message. The page bounds the panel by the viewport
+  space below its title, and tabs fill that space without estimated tab heights.
 - `SeedSurveyCanvas.jsx` owns DataBackend submission and polling, survey and
   batch-cursor state, progress/error presentation, stale-response guards, and
   polling cleanup. It accumulates decoded or packed batches in its canvas cache
@@ -44,3 +61,31 @@ Run regressions from the UI repository with:
 ```powershell
 node --test test/seed_survey_canvas.test.js test/seed_survey_render.test.js
 ```
+
+While a job is queued, running, or still draining completed row batches, the
+canvas footer shows a native progress bar aligned to the image's left edge and
+width. After all available rows are received, it replaces the bar with
+`${total_samples} samples complete`. Footer text and the progress label are
+registered in `AssetsText.jsx`; failed jobs retain their error message.
+
+The detect chart lists the seed, calculator `pattern` (candidate cardinality),
+and magnitude below the plot. Magnitude is the maximum Euclidean distance of
+the displayed orbital points from `calculate_cardioid_Q(c.x, c.y, -1)`, the same
+Q used by its radial guides. Single-point orbits also use that Q. With no orbit,
+magnitude is unavailable (`—`); escaped seeds retain pattern `0`. Magnitude is
+computed at full numeric precision and displayed to ten significant digits.
+
+`SeedSurveyCanvas.on_canvas_rendered(canvas)` runs synchronously after each
+canvas paint, including streamed batches and display resizing. Callers can draw
+overlays without changing the cached survey image. Detect uses this callback to
+paint a white, four-pixel-radius dot with a one-pixel black outline at Q, using the same Q branch as its orbital
+chart and mapping the survey's seed bounds with imaginary values increasing
+upward. Repainting the overlay after each batch keeps it visible throughout loading.
+
+While hovering, detect also paints white orbital dots of radius 1.5 pixels with one-pixel black square outlines
+(4×4 pixels), from
+exactly the Newton point set displayed by the chart. It restores a snapshot of
+the latest survey paint before updating overlays, so previous dots disappear
+without new survey jobs. `on_seed_leave` clears hover overlays and pending pointer
+updates while retaining Q and the last orbital chart. Streamed paints refresh the
+snapshot and redraw current overlays. Q is drawn last, above all smaller orbital dots.

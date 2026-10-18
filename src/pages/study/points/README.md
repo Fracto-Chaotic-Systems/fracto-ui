@@ -6,16 +6,23 @@ point.
 ## Files
 
 - `PointsMainPanel.jsx` fetches the zero-seed legacy iterative series and
-  detector/Newton result, then polls the FractoCardinality seeded survey job
+  Newton result, then polls the FractoCardinality seeded survey job
   over `[-1.5, 1.5]` on both axes at 0.025 intervals. It adapts the orbital point
   records and owns the three charts. The survey runs asynchronously so it
   cannot hold the legacy chart response open; polling stops when the focal
-  point changes or the page unmounts. Scope-only navigator changes update the
+  point changes or the page unmounts. When legacy-iterative data has a positive
+  cardinality, the page passes it to `/orbital_newton` with source
+  `legacy_iterative`, bypassing independent detection. The supplied count is
+  retained while loading and as a formatting fallback. Missing/zero legacy
+  counts retain the detector-based request path. Scope-only navigator changes update the
   frame settings without refetching or restarting the charts. When the detector returns cardinality 2, the Newton endpoint
   automatically uses the FractoFastCalc cardinality as its next
   candidate. The chart displays the resulting Newton points when their count
   matches that candidate; otherwise it retains the normal detector/Newton
-  points and displays fallback diagnostics.
+  points and displays fallback diagnostics. Outside the main cardioid, the
+  endpoint refines a non-estimated positive calculator pattern using Newton
+  and labels its source `fracto_fast_calc_outside_cardioid`; it no longer
+  returns only the raw calculator shape that this chart cannot display.
 - `PointsSeriesChart.jsx` draws one point series and reports its cardinality,
   timing, detector/Newton effort, and two-point fallback status when applicable.
   For legacy iterative data, its magnitude summary uses the raw offset from
@@ -26,16 +33,17 @@ point.
 - `SeedSurveyChart.jsx` plots stable non-singleton periodic candidates by their
   initial seed coordinates over `[-1.5, 1.5]` on both axes at 0.025 spacing. Each point uses the SDK's
   conventional pattern hue, with HSL lightness normalized across the survey's
-  observed confidence range (18–88%). The same per-survey mapping is used on
-  the Assets seed-surveys page; each survey's lowest confidence is darkest and
-  highest is lightest, even when the range is narrow. Confidence is a heuristic
+  observed confidence range (18–88%) when detector confidence is available.
+  Calculator-derived candidates have no detector confidence and use the normal
+  pattern hue. Assets surveys use the separate `FractoColors` buffer renderer. Confidence is a heuristic
   evidence score, not a probability; tooltips show its raw score to three
   decimals. Unresolved candidates retain grey
   markers and may still report their confidence in the tooltip. While its worker job runs, it shows
   sample progress and all stable and unresolved markers discovered so far; the
   chart remains fixed to the full `[-1.5, 1.5]` range on both axes. The completed
-  result contains the same full point sets. A grid sample appears only when the
-  `FractoCardinality` reports a non-singleton candidate; its adaptive horizon
+  result contains the same full point sets. `stable_points` includes both
+  detector-derived and non-estimated calculator-derived non-singleton
+  candidates, with a per-point `cardinality_source`; its adaptive horizon
   expansion is disabled and capped at 4,096 iterations per seed inside the
   main cardioid. Outside it, the seeded fast-calculator fallback uses level
   `0.00625`. Escapes and
@@ -50,3 +58,9 @@ Visible labels are registered in `../../../text/StudyText.jsx` and rendered
 through `AppText` so the page remains ready for translation. The fallback
 cardinality is a numerical candidate, not proof that a mathematical orbit has
 been established.
+
+For the main-cardioid interior case, the Newton chart uses the positive
+legacy-iterative cardinality directly. The request explicitly supplies that
+period and does not depend on a detector envelope being present. For example,
+`0.2+0.3i` has legacy pattern 1 and yields one Newton-derived point (plus the
+chart's closing duplicate), rather than displaying cardinality 0.

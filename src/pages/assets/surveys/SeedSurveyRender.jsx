@@ -104,6 +104,8 @@ export class SeedSurveyRender extends Component {
         style={{
           width: `${width_px}px`,
           height: `${height_px}px`,
+          maxHeight: "100%",
+          minHeight: 0,
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
@@ -119,6 +121,7 @@ export class SeedSurveyRender extends Component {
             width: "100%",
             height: `${HEADER_HEIGHT_PX}px`,
             minHeight: `${HEADER_HEIGHT_PX}px`,
+            flexShrink: 0,
             padding: "0 0.5rem",
             borderBottom: "1px solid #666666",
             boxSizing: "border-box",
@@ -197,7 +200,8 @@ export class SeedSurveyRender extends Component {
         </div>
         <div
           style={{
-            height: `${Math.max(0, height_px - HEADER_HEIGHT_PX)}px`,
+            flex: "1 1 0",
+            minHeight: 0,
             overflow: mode === "render" ? "auto" : "hidden",
             padding: "0.5rem",
             boxSizing: "border-box",

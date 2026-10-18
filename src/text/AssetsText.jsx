@@ -24,6 +24,12 @@ export const KEY_ASSETS_SURVEYS_CANVAS_RENDER = `${ASSETS_FOLDER}/seed_surveys_c
 export const KEY_ASSETS_SURVEYS_DETECT = `${ASSETS_FOLDER}/seed_surveys_detect`;
 export const KEY_ASSETS_SURVEYS_HALF_SPAN = `${ASSETS_FOLDER}/seed_surveys_half_span`;
 export const KEY_ASSETS_SURVEYS_LIMIT = `${ASSETS_FOLDER}/seed_surveys_limit`;
+export const KEY_ASSETS_SURVEYS_PATTERN = `${ASSETS_FOLDER}/seed_surveys_pattern`;
+export const KEY_ASSETS_SURVEYS_ORBIT_MAGNITUDE = `${ASSETS_FOLDER}/seed_surveys_orbit_magnitude`;
+export const KEY_ASSETS_SURVEYS_SEEDED_ORBIT = `${ASSETS_FOLDER}/seed_surveys_seeded_orbit`;
+export const KEY_ASSETS_SURVEYS_SEED_COORDINATES = `${ASSETS_FOLDER}/seed_surveys_seed_coordinates`;
+export const KEY_ASSETS_SURVEYS_PROGRESS = `${ASSETS_FOLDER}/seed_surveys_progress`;
+export const KEY_ASSETS_SURVEYS_COMPLETE = `${ASSETS_FOLDER}/seed_surveys_complete`;
 export const KEY_ASSETS_SURVEYS_SAMPLES = `${ASSETS_FOLDER}/seed_surveys_samples`;
 export const KEY_ASSETS_SURVEYS_FAILED = `${ASSETS_FOLDER}/seed_surveys_failed`;
 export const KEY_ASSETS_LOGS = `${ASSETS_FOLDER}/assets_logs`;
@@ -112,6 +118,12 @@ export const APP_ASSETS_TEXT = {
   [KEY_ASSETS_SURVEYS_DETECT]: "detect",
   [KEY_ASSETS_SURVEYS_HALF_SPAN]: "half-span",
   [KEY_ASSETS_SURVEYS_LIMIT]: "limit",
+  [KEY_ASSETS_SURVEYS_PATTERN]: "pattern: ${pattern}",
+  [KEY_ASSETS_SURVEYS_ORBIT_MAGNITUDE]: "magnitude: ${magnitude}",
+  [KEY_ASSETS_SURVEYS_SEEDED_ORBIT]: "Seeded orbital point chart",
+  [KEY_ASSETS_SURVEYS_SEED_COORDINATES]: "seed: (${x}, ${y})",
+  [KEY_ASSETS_SURVEYS_PROGRESS]: "Survey loading progress",
+  [KEY_ASSETS_SURVEYS_COMPLETE]: "${total_samples} samples complete",
   [KEY_ASSETS_SURVEYS_SAMPLES]: "samples",
   [KEY_ASSETS_SURVEYS_FAILED]: "survey failed",
   [KEY_ASSETS_LOGS]: "assets logs",

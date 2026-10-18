@@ -20,7 +20,10 @@ see [its README](surveys/README.md) for responsibilities.
   It keeps the navigator in a left pane in both modes, separated from the
   right content pane by a persisted splitter. The right pane has “render” and
   “detect” tabs; “detect” mounts `surveys/SeedSurveyDetect.jsx`, a component class
-  displaying a left-aligned 350×350 canvas backed by a 150×150 sample grid. Inside the
+  displaying a left-aligned 550×550 canvas backed by a 250×250 sample grid,
+  beside a 550×550 circuitry-style orbital point chart driven by local
+  Newton refinement on hover, using the same starting seed and the
+  cardinality supplied by `calc_from_seed()`. Inside the
   “render” tab, a 35px header has
   mutually exclusive “preview” and “render” choices held in page-local state;
   preview is the default. `surveys/SeedSurveyRender.jsx` owns those controls,

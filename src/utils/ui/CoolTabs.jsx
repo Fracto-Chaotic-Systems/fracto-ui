@@ -54,11 +54,13 @@ export class CoolTabs extends Component {
     selected_content: PropTypes.object.isRequired,
     style: PropTypes.object,
     width_px: PropTypes.number,
+    fill_height: PropTypes.bool,
   };
 
   static defaultProps = {
     style: {},
     width_px: 0,
+    fill_height: false,
   };
 
   state = {};
@@ -71,6 +73,7 @@ export class CoolTabs extends Component {
       on_tab_select,
       selected_content,
       width_px,
+      fill_height,
     } = this.props;
     const tab_style = !width_px
       ? {}
@@ -93,10 +96,26 @@ export class CoolTabs extends Component {
       );
     });
     return [
-      <TabsWrapper key={"tab_wrapper"} style={style}>
+      <TabsWrapper
+        key={"tab_wrapper"}
+        style={{ ...style, ...(fill_height ? { flex: "0 0 auto" } : {}) }}
+      >
         {all_tabs}
       </TabsWrapper>,
-      <CardWrapper key={"card_wrapper"} style={style}>
+      <CardWrapper
+        key={"card_wrapper"}
+        style={{
+          ...style,
+          ...(fill_height
+            ? {
+                flex: "1 1 0",
+                minHeight: 0,
+                overflow: "hidden",
+                boxSizing: "border-box",
+              }
+            : {}),
+        }}
+      >
         {selected_content}
       </CardWrapper>,
     ];

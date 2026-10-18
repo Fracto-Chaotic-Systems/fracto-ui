@@ -127,7 +127,11 @@ export class PointsMainPanel extends Component {
    * @param {{x:number,y:number}} focal_point Complex-plane focal point.
    * @returns {{cardinality:number, point_list:Array<object>}} Chart data.
    */
-  format_detected_newton = (response, focal_point) => {
+  format_detected_newton = (
+    response,
+    focal_point,
+    supplied_cardinality = 0,
+  ) => {
     const result = response?.newton_big_complex || response?.newton_native;
     const q = FractoFastCalc.calculate_cardioid_Q(
       focal_point.x,
@@ -161,8 +165,10 @@ export class PointsMainPanel extends Component {
       cardinality: Number(
         experiment_used
           ? result?.cardinality || 0
-          : response?.detection?.candidate_cardinality ||
-              result?.cardinality ||
+          : result?.cardinality ||
+              response?.cardinality ||
+              supplied_cardinality ||
+              response?.detection?.candidate_cardinality ||
               0,
       ),
       point_list,
@@ -174,12 +180,13 @@ export class PointsMainPanel extends Component {
         result?.cycles === undefined ? undefined : Number(result.cycles) || 0,
       newton_effort: experiment_used
         ? undefined
-        :
-        (Number(response?.iterations) || 0) +
-        (Number(
-          response?.detection?.candidate_cardinality || result?.cardinality || 0,
-        ) || 0) *
-          (Number(result?.cycles) || 0),
+        : (Number(response?.iterations) || 0) +
+          (Number(
+            response?.detection?.candidate_cardinality ||
+              result?.cardinality ||
+              0,
+          ) || 0) *
+            (Number(result?.cycles) || 0),
       two_point_fallback: response?.two_point_calc_newton_fallback || null,
     };
   };
@@ -243,12 +250,20 @@ export class PointsMainPanel extends Component {
       this.setState({
         pro_derived,
         seed_survey,
-        newton_derived: { cardinality: 0, point_list: [], elapsed_ms: 0 },
+        newton_derived: {
+          cardinality: Number(pro_derived?.cardinality) || 0,
+          point_list: [],
+          elapsed_ms: 0,
+        },
       });
       if (seed_survey.job_id) {
         this.poll_seed_survey(seed_survey.job_id, request_id);
       }
-      this.load_detected_newton(value.focal_point, request_id);
+      this.load_detected_newton(
+        value.focal_point,
+        request_id,
+        Number(pro_derived?.cardinality),
+      );
     });
   };
 
@@ -259,7 +274,11 @@ export class PointsMainPanel extends Component {
       }
       if (job.error) {
         this.setState((state) => ({
-          seed_survey: { ...state.seed_survey, status: "failed", error: job.error },
+          seed_survey: {
+            ...state.seed_survey,
+            status: "failed",
+            error: job.error,
+          },
         }));
         return;
       }
@@ -269,7 +288,11 @@ export class PointsMainPanel extends Component {
       }
       if (job.status === "failed") {
         this.setState((state) => ({
-          seed_survey: { ...state.seed_survey, status: job.status, error: job.error },
+          seed_survey: {
+            ...state.seed_survey,
+            status: job.status,
+            error: job.error,
+          },
         }));
         return;
       }
@@ -278,13 +301,18 @@ export class PointsMainPanel extends Component {
           ...state.seed_survey,
           status: job.status,
           progress: job.progress,
-          stable_count: job.progress?.stable_count ?? state.seed_survey.stable_count,
-          stable_points: job.progress?.stable_points ?? state.seed_survey.stable_points,
+          stable_count:
+            job.progress?.stable_count ?? state.seed_survey.stable_count,
+          stable_points:
+            job.progress?.stable_points ?? state.seed_survey.stable_points,
           unresolved_points:
-            job.progress?.unresolved_points ?? state.seed_survey.unresolved_points,
+            job.progress?.unresolved_points ??
+            state.seed_survey.unresolved_points,
           orbital_magnitude_range:
-            job.progress?.orbital_magnitude_range ?? state.seed_survey.orbital_magnitude_range,
-          outcome_counts: job.progress?.outcome_counts ?? state.seed_survey.outcome_counts,
+            job.progress?.orbital_magnitude_range ??
+            state.seed_survey.orbital_magnitude_range,
+          outcome_counts:
+            job.progress?.outcome_counts ?? state.seed_survey.outcome_counts,
         },
       }));
       this.seed_survey_poll_timer = setTimeout(
@@ -294,7 +322,11 @@ export class PointsMainPanel extends Component {
     });
   };
 
-  load_detected_newton = (focal_point, request_id) => {
+  load_detected_newton = (focal_point, request_id, legacy_cardinality = 0) => {
+    const supplied_cardinality =
+      Number.isInteger(legacy_cardinality) && legacy_cardinality > 0
+        ? legacy_cardinality
+        : 0;
     DataBackend.get_orbital_newton(
       focal_point,
       (response) => {
@@ -304,7 +336,11 @@ export class PointsMainPanel extends Component {
         if (response.error) {
           console.log("get_orbital_newton error", response.error);
           this.setState({
-            newton_derived: { cardinality: 0, point_list: [], elapsed_ms: 0 },
+            newton_derived: {
+              cardinality: supplied_cardinality,
+              point_list: [],
+              elapsed_ms: 0,
+            },
           });
           this.finish_chart_request(request_id);
           return;
@@ -312,13 +348,19 @@ export class PointsMainPanel extends Component {
         const newton_derived = this.format_detected_newton(
           response,
           focal_point,
+          supplied_cardinality,
         );
         this.setState({ newton_derived });
         this.finish_chart_request(request_id);
       },
       {
         newton_mode: "big_complex",
-        adaptive_detection: true,
+        ...(supplied_cardinality
+          ? {
+              cardinality: supplied_cardinality,
+              cardinality_source: "legacy_iterative",
+            }
+          : { adaptive_detection: true }),
       },
     );
   };
@@ -351,12 +393,7 @@ export class PointsMainPanel extends Component {
   };
 
   render() {
-    const {
-      in_fetch,
-      pro_derived,
-      seed_survey,
-      newton_derived,
-    } = this.state;
+    const { in_fetch, pro_derived, seed_survey, newton_derived } = this.state;
     const chart_width = this.get_chart_width_px();
     return (
       <styles.ScrollingBlock
