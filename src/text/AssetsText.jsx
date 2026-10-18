@@ -24,6 +24,10 @@ export const KEY_ASSETS_SURVEYS_CANVAS_RENDER = `${ASSETS_FOLDER}/seed_surveys_c
 export const KEY_ASSETS_SURVEYS_DETECT = `${ASSETS_FOLDER}/seed_surveys_detect`;
 export const KEY_ASSETS_SURVEYS_HALF_SPAN = `${ASSETS_FOLDER}/seed_surveys_half_span`;
 export const KEY_ASSETS_SURVEYS_LIMIT = `${ASSETS_FOLDER}/seed_surveys_limit`;
+export const KEY_ASSETS_SURVEYS_NEWTON_CYCLES = `${ASSETS_FOLDER}/seed_surveys_newton_cycles`;
+export const KEY_ASSETS_SURVEYS_ORBIT_CONFIDENCE = `${ASSETS_FOLDER}/seed_surveys_orbit_confidence`;
+export const KEY_ASSETS_SURVEYS_ORBIT_NEWTON = `${ASSETS_FOLDER}/seed_surveys_orbit_newton`;
+export const KEY_ASSETS_SURVEYS_ORBIT_LEGACY = `${ASSETS_FOLDER}/seed_surveys_orbit_legacy`;
 export const KEY_ASSETS_SURVEYS_PATTERN = `${ASSETS_FOLDER}/seed_surveys_pattern`;
 export const KEY_ASSETS_SURVEYS_ORBIT_MAGNITUDE = `${ASSETS_FOLDER}/seed_surveys_orbit_magnitude`;
 export const KEY_ASSETS_SURVEYS_SEEDED_ORBIT = `${ASSETS_FOLDER}/seed_surveys_seeded_orbit`;
@@ -118,6 +122,10 @@ export const APP_ASSETS_TEXT = {
   [KEY_ASSETS_SURVEYS_DETECT]: "detect",
   [KEY_ASSETS_SURVEYS_HALF_SPAN]: "half-span",
   [KEY_ASSETS_SURVEYS_LIMIT]: "limit",
+  [KEY_ASSETS_SURVEYS_NEWTON_CYCLES]: "newton cycles: ${cycles}",
+  [KEY_ASSETS_SURVEYS_ORBIT_CONFIDENCE]: "confidence: ${confidence}",
+  [KEY_ASSETS_SURVEYS_ORBIT_NEWTON]: "newton",
+  [KEY_ASSETS_SURVEYS_ORBIT_LEGACY]: "legacy",
   [KEY_ASSETS_SURVEYS_PATTERN]: "pattern: ${pattern}",
   [KEY_ASSETS_SURVEYS_ORBIT_MAGNITUDE]: "magnitude: ${magnitude}",
   [KEY_ASSETS_SURVEYS_SEEDED_ORBIT]: "Seeded orbital point chart",

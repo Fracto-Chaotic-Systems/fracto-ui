@@ -11,13 +11,18 @@ ChartJS.register(...registerables);
 
 import AppText from "../../../AppText.jsx";
 import SeedSurveyCanvas from "./SeedSurveyCanvas.jsx";
+import { orbital_confirmation } from "./SeedSurveyOrbitConfirmation.js";
 import {
   KEY_ASSETS_SURVEYS_DETECT,
   KEY_ASSETS_SURVEYS_CANVAS_DETECT,
   KEY_ASSETS_SURVEYS_SEEDED_ORBIT,
   KEY_ASSETS_SURVEYS_SEED_COORDINATES,
   KEY_ASSETS_SURVEYS_PATTERN,
+  KEY_ASSETS_SURVEYS_ORBIT_NEWTON,
+  KEY_ASSETS_SURVEYS_ORBIT_LEGACY,
   KEY_ASSETS_SURVEYS_ORBIT_MAGNITUDE,
+  KEY_ASSETS_SURVEYS_ORBIT_CONFIDENCE,
+  KEY_ASSETS_SURVEYS_NEWTON_CYCLES,
 } from "../../../text/AssetsText.jsx";
 
 const HALF_SPAN = 1.5;
@@ -32,7 +37,7 @@ export class SeedSurveyDetect extends Component {
     height_px: PropTypes.number.isRequired,
   };
 
-  state = { seed: { x: 0, y: 0 }, calculation: null, newton: null };
+  state = { seed: { x: 0, y: 0 }, calculation: null, newton: null, orbit_method: "newton" };
   pending_frame = null;
   pending_seed = null;
   hovering = false;
@@ -73,7 +78,7 @@ export class SeedSurveyDetect extends Component {
           )
         : null;
     const newton = Number.isInteger(calculation?.pattern) && calculation.pattern > 0
-      ? newton_big_complex(focal_point, 10, calculation.pattern, {
+      ? newton_big_complex(focal_point, 150, calculation.pattern, {
           precision_digits: 64,
           seed,
         })
@@ -154,9 +159,11 @@ export class SeedSurveyDetect extends Component {
   };
 
   orbital_details = () => {
-    const { calculation, newton } = this.state;
-    const points = (newton?.point_list || [])
-      .map((point) => ({ x: Number(point.re), y: Number(point.im) }))
+    const { calculation, newton, orbit_method } = this.state;
+    const candidates = orbit_method === "legacy"
+      ? (calculation?.orbital_points || [])
+      : (newton?.point_list || []).map((point) => ({ x: Number(point.re), y: Number(point.im) }));
+    const points = candidates
       .filter((point) => Number.isFinite(point.x) && Number.isFinite(point.y))
       .slice(0, calculation?.pattern || 0);
     const { focal_point } = this.props;
@@ -178,7 +185,7 @@ export class SeedSurveyDetect extends Component {
             0,
           )
         : null;
-    return { points, Q, magnitude };
+    return { points, Q, magnitude, confirmation: orbital_confirmation(points, magnitude) };
   };
 
   render_orbital_chart = (details = this.orbital_details()) => {
@@ -205,6 +212,10 @@ export class SeedSurveyDetect extends Component {
       null,
       true,
     );
+  };
+
+  on_orbit_method_change = (event) => {
+    this.setState({ orbit_method: event.target.value }, this.paint_overlay);
   };
 
   render() {
@@ -260,6 +271,18 @@ export class SeedSurveyDetect extends Component {
             {this.render_orbital_chart(details)}
           </div>
           <div style={{ fontSize: "0.8rem", paddingTop: "0.25rem" }}>
+            {AppText.get(KEY_ASSETS_SURVEYS_ORBIT_CONFIDENCE).replace(
+              "${confidence}",
+              details.confirmation === null ? "—" : `${(100 * details.confirmation.confidence).toFixed(2)}%`,
+            )}
+            <div>
+              {AppText.get(KEY_ASSETS_SURVEYS_NEWTON_CYCLES).replace(
+                "${cycles}",
+                String(this.state.newton?.cycles ?? "—"),
+              )}
+            </div>
+          </div>
+          <div style={{ fontSize: "0.8rem", paddingTop: "0.25rem" }}>
             {AppText.get(KEY_ASSETS_SURVEYS_SEED_COORDINATES)
               .replace(
                 "${x}",
@@ -283,6 +306,23 @@ export class SeedSurveyDetect extends Component {
                   : Number(details.magnitude.toPrecision(10)).toString(),
               )}
             </div>
+          </div>
+          <div style={{ display: "flex", gap: "1rem", paddingTop: "0.5rem" }}>
+            {[
+              ["newton", KEY_ASSETS_SURVEYS_ORBIT_NEWTON],
+              ["legacy", KEY_ASSETS_SURVEYS_ORBIT_LEGACY],
+            ].map(([method, label]) => (
+              <label key={method}>
+                <input
+                  type="radio"
+                  name="seed-survey-orbit-method"
+                  value={method}
+                  checked={this.state.orbit_method === method}
+                  onChange={this.on_orbit_method_change}
+                />
+                {AppText.get(label)}
+              </label>
+            ))}
           </div>
         </div>
       </div>

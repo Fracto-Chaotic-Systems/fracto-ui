@@ -15,7 +15,7 @@ splitter geometry. This folder owns the render and detect tabs and their helpers
   increasing upward. The chart starts at `(0, 0)` and resets there when the
   focal point changes. Hover computation is client-side using
   `FractoFastCalc.calc_from_seed` with the same 100K cap to obtain cardinality.
-  The chart and magnitude use only `newton_big_complex` points, refined with
+  By default, the chart and magnitude use `newton_big_complex` points, refined with
   that cardinality, the same starting seed, 10 Newton cycles, and 64-digit
   arithmetic. Empty Newton results never fall back to calculator points. Animation-frame
   coalescing keeps only the latest pointer position. Hover does not submit
@@ -84,8 +84,28 @@ upward. Repainting the overlay after each batch keeps it visible throughout load
 
 While hovering, detect also paints white orbital dots of radius 1.5 pixels with one-pixel black square outlines
 (4×4 pixels), from
-exactly the Newton point set displayed by the chart. It restores a snapshot of
+exactly the selected point set displayed by the chart. It restores a snapshot of
 the latest survey paint before updating overlays, so previous dots disappear
 without new survey jobs. `on_seed_leave` clears hover overlays and pending pointer
 updates while retaining Q and the last orbital chart. Streamed paints refresh the
 snapshot and redraw current overlays. Q is drawn last, above all smaller orbital dots.
+
+The radio buttons below the orbital chart select `newton` (default) or `legacy`.
+Legacy displays `calc_from_seed()` orbital points; Newton displays its refined
+points. Both use the same seed and calculator cardinality. Switching reuses the
+computed data and updates the chart, magnitude, and hover dots together, without
+submitting a survey job or falling back between methods when points are absent.
+
+`SeedSurveyOrbitConfirmation.js` computes the cyclic complex product
+`P = (A+B)(B+C)…(last+first)` from the selected chart points when magnitude is
+strictly greater than 0.25. Confidence is `max(0, 1 - abs(abs(P) - 1))`, shown
+as a percentage directly beneath the orbital chart, above seed, pattern, and magnitude. This compares product length, not angle:
+any unit-length product scores 100%. Missing points, nonfinite products, and
+magnitudes at or below the threshold show `—`. The score is a numerical
+confirmation measure rather than a probability or proof of primitive period.
+
+The line immediately below confidence shows `newton cycles` from the current
+Newton solver result, or `—` when no Newton result exists. It remains explicitly
+labeled as Newton metadata when viewing legacy points. The count is the reported
+iterations performed, including runs that reached the iteration limit; it does
+not by itself certify convergence.

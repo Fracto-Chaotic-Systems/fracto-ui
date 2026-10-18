@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
+import { orbital_confirmation } from "../src/pages/assets/surveys/SeedSurveyOrbitConfirmation.js";
 import { transformSync } from "esbuild";
 
 const harness = (Q = { x: 0, y: 0 }) => {
@@ -40,6 +41,7 @@ const harness = (Q = { x: 0, y: 0 }) => {
     },
     ChartJS: { register: () => {} },
     registerables: [],
+    orbital_confirmation,
     IMAGE_FRAME_STYLE: {},
     FractoFastCalc: {
       calc_from_seed: (...args) => {
@@ -74,6 +76,10 @@ const harness = (Q = { x: 0, y: 0 }) => {
     AppText: { get: (key) => key },
     KEY_ASSETS_SURVEYS_DETECT: "detect",
     KEY_ASSETS_SURVEYS_CANVAS_DETECT: "detect-canvas",
+    KEY_ASSETS_SURVEYS_ORBIT_NEWTON: "newton",
+    KEY_ASSETS_SURVEYS_ORBIT_LEGACY: "legacy",
+    KEY_ASSETS_SURVEYS_NEWTON_CYCLES: "newton cycles: ${cycles}",
+    KEY_ASSETS_SURVEYS_ORBIT_CONFIDENCE: "confidence: ${confidence}",
     KEY_ASSETS_SURVEYS_PATTERN: "pattern: ${pattern}",
     KEY_ASSETS_SURVEYS_ORBIT_MAGNITUDE: "magnitude: ${magnitude}",
     KEY_ASSETS_SURVEYS_SEEDED_ORBIT: "seeded-orbit",
@@ -153,7 +159,7 @@ test("pattern and maximum orbital distance use the same Q as the chart", () => {
   h.component.componentDidMount();
   const details = h.component.orbital_details();
   assert.ok(Math.abs(details.magnitude - Math.sqrt(13)) < 1e-12);
-  const metadata = h.component.render().children[1].children[1];
+  const metadata = h.component.render().children[1].children[2];
   assert.equal(metadata.children[1].children[0], "pattern: 2");
   assert.equal(
     metadata.children[2].children[0],
@@ -169,7 +175,7 @@ test("pattern and maximum orbital distance use the same Q as the chart", () => {
   h.component.state.calculation = { pattern: 0 };
   assert.equal(h.component.orbital_details().magnitude, null);
   assert.equal(
-    h.component.render().children[1].children[1].children[1].children[0],
+    h.component.render().children[1].children[2].children[1].children[0],
     "pattern: 0",
   );
 });
@@ -233,4 +239,43 @@ test("hover overlays only chart points, clears old dots, and cancels pending hov
   assert.equal(h.frames.size, 0);
   assert.equal(arcs.length, 1);
   assert.ok(restores >= 4);
+});
+
+test("radio selection switches chart and magnitude between existing Newton and legacy data", () => {
+  const h = harness();
+  h.component.componentDidMount();
+  const radios = () => h.component.render().children[1].children[3].children[0];
+  assert.equal(radios()[0].children[0].props.checked, true);
+  assert.equal(radios()[1].children[0].props.checked, false);
+  const call_count = h.calls.length;
+  radios()[1].children[0].props.onChange({ target: { value: "legacy" } });
+  assert.equal(radios()[1].children[0].props.checked, true);
+  assert.equal(h.component.orbital_details().points[0].x, 90);
+  assert.equal(h.component.orbital_details().points.length, 2);
+  assert.equal(h.component.orbital_details().magnitude, Math.hypot(99, 99));
+  radios()[0].children[0].props.onChange({ target: { value: "newton" } });
+  assert.equal(h.component.orbital_details().points[0].x, 1);
+  assert.equal(h.calls.length, call_count, "switch uses already calculated data");
+});
+
+test("confidence uses the displayed method and is unavailable below the magnitude threshold", () => {
+  const h = harness();
+  h.component.state.calculation = { pattern: 3, orbital_points: [{x: 0.25, y: 0}, {x: 0.25, y: 0}, {x: 0.25, y: 0}] };
+  h.component.state.newton = { point_list: [{re: 0.5, im: 0}, {re: 0.5, im: 0}, {re: 0.5, im: 0}] };
+  assert.equal(h.component.orbital_details().confirmation.confidence, 1);
+  assert.equal(h.component.render().children[1].children[1].children[0], "confidence: 100.00%");
+  h.component.state.orbit_method = "legacy";
+  assert.equal(h.component.orbital_details().confirmation, null);
+});
+
+test("Newton cycles appear below confidence and clear when no solver result exists", () => {
+  const h = harness();
+  const cycle_text = () => h.component.render().children[1].children[1].children[1].children[0];
+  assert.equal(cycle_text(), "newton cycles: —");
+  h.component.state.newton = { cycles: 7, point_list: [] };
+  assert.equal(cycle_text(), "newton cycles: 7");
+  h.component.state.orbit_method = "legacy";
+  assert.equal(cycle_text(), "newton cycles: 7");
+  h.component.state.newton = null;
+  assert.equal(cycle_text(), "newton cycles: —");
 });
