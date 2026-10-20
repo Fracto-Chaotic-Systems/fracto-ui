@@ -14,6 +14,7 @@
     "test:auth": "node --test test/authenticated_entry.test.js test/welcome_auth_states.test.js test/auth_callback_error.test.js",
     "test:automation": "node --test test/automation_engine.test.js",
     "test:audio": "node --test test/circuitry_audio.test.js test/circuitry_audio_controller.test.js",
+    "test:minibrot-rays": "node --test test/minibrot_context_canvas.test.js",
     "preview": "vite preview"
   },
   "dependencies": {

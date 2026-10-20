@@ -7,7 +7,7 @@ The model is quadratic dynamic rays and angle doubling, as developed in
 and inverse-branch landing for connected polynomial Julia sets in
 [Benini–Lyubich, _Annales de l’Institut Fourier_ 64 (2014), §2](https://doi.org/10.5802/aif.2888).
 The implementation's search bounds and tolerances are numerical engineering
-choices. See the SDK's `sdk/orbitals/RAYS.md` for the full algorithm and limits.
+choices. See the [SDK ray guide](../../../../../../sdk/orbitals/RAYS.md) for the full algorithm and limits.
 
 ## Interaction and responsibilities
 
@@ -31,7 +31,8 @@ changed branch, disconnected/unresolved Julia sets, and search-period limits.
 A no-result message explicitly distinguishes a failed numerical search from
 mathematical nonexistence. Success also warns that additional accesses may exist.
 
-`SeedSurveyRayOverlay.js` clips the accepted polylines to the seed canvas and
+`SeedSurveyRayOverlay.js` supplies orbital colors to the shared
+`utils/render/FractoRayOverlay.js` painter, which clips the accepted polylines to the seed canvas and
 maps complex coordinates using the existing half-span. The parent restores the
 buffer image, paints rays using the selected orbital cardinality and the same
 `FractoUtil.fracto_pattern_color()` palette as the orbital chart, retaining a
@@ -79,3 +80,25 @@ stored point order. No dyadic sampling, angular subdivision, or broad fallback
 runs. A specific message identifies the family-budget limit; an unsuccessful
 numerical run never claims that no rays exist. Hover remains independent, and
 automatic table-selection tracing/cancellation/caching are unchanged.
+
+## Code flowcharts and current capability boundary
+
+The SDK guide now contains both detailed code-oriented flowcharts:
+
+- [Proposed discovery from only c and n](../../../../../../sdk/orbitals/RAYS.md#flowchart-1-proposed-discovery-from-c-and-n).
+- [Implemented single-ray tracing](../../../../../../sdk/orbitals/RAYS.md#flowchart-2-implemented-single-ray-tracer).
+
+The first is a design for using a traced endpoint as a Newton seed; it is not
+currently exposed by this tab or by `find_dynamic_rays()`. Today's worker
+receives the selected table entry's existing point list, refines/classifies
+that cycle, enumerates angle families, and checks each family against those
+selected points. Passing only a focal point and cardinality does not currently
+start standalone orbital discovery. The low-level tracer can trace a specified
+angle without an orbital, but its endpoint still needs independent validation.
+
+The second chart documents the implemented inverse-Böttcher chain, adaptive
+full-step/two-half-step comparison, terminal precision check, and termination
+reasons. The guide also details all result statuses, exact numerical thresholds,
+progress counters, and the distinction between reaching a finite potential and
+establishing a landing point. Its theoretical basis is the published works
+cited above; finite numerical checks are not rigorous landing certificates.

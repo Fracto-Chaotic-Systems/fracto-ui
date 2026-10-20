@@ -34,7 +34,14 @@ each panel owns the content for one Study section. Visible labels come from
 - `fields/` contains field-view components.
 - `magnitudes/` contains orbital magnitude and Farey sequence components.
 - `meridians/` contains meridian visualization components.
-- `minibrots/` contains the freeform list and detail-panel components.
+- `minibrots/` contains the shared bailiwick list and detail-panel components;
+  see [its README](minibrots/README.md). Freeform details include a 500px square
+  context canvas at three times the saved display scope, below the item details.
+  Automatic parameter paths include the principal antenna tip, 1/2, 1/3, 2/3
+  wakes and 0/1 root access. The adjacent table uses that order with tip selected
+  by default, pattern blocks and global angle fractions; only selected paths
+  have colored highlights and canvas labels. The feature README links the SDK
+  calculations and published Milnor/Schleicher theoretical basis.
 - `points/` contains orbital point chart and panel components.
 
 When a Study page adds or changes behavior, update the corresponding panel and

@@ -15,6 +15,7 @@ import {
 import AppSettings from "../../../AppSettings.jsx";
 import { KEY_STUDY_MINIBROTS_RENDER_SPLITTER_POS } from "../../../settings/StudySettings.jsx";
 import MinibrotRightPanel from "./MinibrotRightPanel.jsx";
+import { BAILIWICK_TYPE_FREEFORM } from "../../Study.jsx";
 
 export class MinibrotPanel extends Component {
   static propTypes = {
@@ -102,6 +103,7 @@ export class MinibrotPanel extends Component {
     );
     const right_panel = selected_minibrot?.id ? (
       <MinibrotRightPanel
+        show_context_canvas={bailiwick_type === BAILIWICK_TYPE_FREEFORM}
         selected_minibrot={selected_minibrot}
         container_bounds={container_bounds}
         ready={ready}
@@ -121,6 +123,10 @@ export class MinibrotPanel extends Component {
       KEY_STUDY_MINIBROTS_RENDER_SPLITTER_POS,
     );
     const right_block_style = {
+      right:
+        bailiwick_type === BAILIWICK_TYPE_FREEFORM
+          ? `${MARGIN_PX}px`
+          : undefined,
       left: `${splitter_pos + MARGIN_PX}px`,
       top: `${top}px`,
     };

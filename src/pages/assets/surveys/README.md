@@ -227,3 +227,9 @@ modulo `2^n-1`, followed by numerical landing validation. The former seven-point
 special case and broad angular-discovery fallback have been removed. Family
 and angle-period limits are reported explicitly. See [RAYS.md](RAYS.md), with
 the published basis in [Milnor (2000)](https://numdam.org/item/AST_2000__261__277_0/).
+
+The [ray documentation](RAYS.md#code-flowcharts-and-current-capability-boundary)
+links detailed flowcharts and explains the current capability boundary:
+table selection validates rays for an existing orbital; finding a new orbital
+from only `c,n` remains a documented design. Published theoretical references
+are included in those guides.

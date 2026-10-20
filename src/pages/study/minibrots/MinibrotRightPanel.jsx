@@ -11,6 +11,7 @@ import {
 } from "../../../settings/StudySettings.jsx";
 import { render_magnitude, render_pattern_block } from "../StudyUtils.jsx";
 import FractoLegend from "../../../utils/render/FractoLegend.jsx";
+import MinibrotContextCanvas from "./MinibrotContextCanvas.jsx";
 import { render_coordinates, render_scalar } from "../../../utils/Dom.jsx";
 import {
   CELL_ALIGN_LEFT,
@@ -31,6 +32,8 @@ import {
 } from "../../../text/NavigatorText.jsx";
 import { render_send_to } from "../../utils/SendTo.jsx";
 import { render_coverage } from "../../utils/Coverage.jsx";
+
+const CONTEXT_SCOPE_FACTOR = 3;
 
 const TABLE_COLUMNS = [
   {
@@ -56,6 +59,7 @@ export class MinibrotRightPanel extends Component {
     selected_minibrot: PropTypes.object.isRequired,
     container_bounds: PropTypes.object.isRequired,
     ready: PropTypes.bool.isRequired,
+    show_context_canvas: PropTypes.bool,
   };
 
   title_bar = () => {
@@ -109,19 +113,49 @@ export class MinibrotRightPanel extends Component {
     ];
 
     const data_table = (
-      <styles.FixedInlineBlock style={{ marginLeft: "0.5rem" }}>
+      <div style={{ flexShrink: 0 }}>
         <CoolTable
           columns={TABLE_COLUMNS}
           data={table_data}
           options={[TABLE_NO_HEADER, TABLE_NO_BORDER]}
         />
-      </styles.FixedInlineBlock>
+      </div>
     );
-    return [legend, data_table];
+    return (
+      <div style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem" }}>
+        <div style={{ flexShrink: 0 }}>{legend}</div>
+        {data_table}
+      </div>
+    );
+  };
+
+  render_context_canvas = () => {
+    const { selected_minibrot, show_context_canvas } = this.props;
+    if (!show_context_canvas || !selected_minibrot.pattern) return null;
+    const display_settings = JSON.parse(selected_minibrot.display_settings);
+    const { focal_point } = display_settings;
+    const scope = Number(display_settings.scope) * CONTEXT_SCOPE_FACTOR;
+    if (
+      !Number.isFinite(scope) ||
+      scope <= 0 ||
+      !Number.isFinite(focal_point?.x) ||
+      !Number.isFinite(focal_point?.y)
+    )
+      return null;
+    return (
+      <MinibrotContextCanvas
+        key={`${selected_minibrot.id}:${selected_minibrot.core_point}:${selected_minibrot.pattern}:${focal_point.x}:${focal_point.y}:${scope}`}
+        core_point={JSON.parse(selected_minibrot.core_point)}
+        period={Number(selected_minibrot.pattern)}
+        focal_point={focal_point}
+        scope={scope}
+      />
+    );
   };
 
   render() {
-    const { selected_minibrot, container_bounds, ready } = this.props;
+    const { selected_minibrot, container_bounds, ready, show_context_canvas } =
+      this.props;
     const splitter_pos = AppSettings.get(
       KEY_STUDY_MINIBROTS_RENDER_SPLITTER_POS,
     );
@@ -142,8 +176,14 @@ export class MinibrotRightPanel extends Component {
       );
     });
     return (
-      <CoolStyles.Block style={{ height: `${container_bounds.height}px` }}>
+      <CoolStyles.Block
+        style={{
+          height: `${container_bounds.height}px`,
+          overflow: show_context_canvas ? "auto" : undefined,
+        }}
+      >
         {blocks}
+        {this.render_context_canvas()}
       </CoolStyles.Block>
     );
   }

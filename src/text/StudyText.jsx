@@ -51,6 +51,7 @@ export const KEY_STUDY_DETECTION_COPY_FAILED = `${STUDY_FOLDER}/detection_copy_f
 export const KEY_STUDY_DETECTION_MULTI_ANALYSIS = `${STUDY_FOLDER}/detection_multi_analysis`;
 export const KEY_STUDY_DETECTION_CONSENSUS = `${STUDY_FOLDER}/detection_consensus`;
 export const KEY_STUDY_DETECTION_CONFIGURATION = `${STUDY_FOLDER}/detection_configuration`;
+export const KEY_STUDY_MINIBROT_CONTEXT_CANVAS = `${STUDY_FOLDER}/minibrot_context_canvas`;
 export const KEY_STUDY_MINIBROTS = `${STUDY_FOLDER}/study_minibrots`;
 export const KEY_MAGNITUDES_TITLE = `${STUDY_FOLDER}/magnitudes_title`;
 export const KEY_POINTS_TITLE = `${STUDY_FOLDER}/points_title`;
@@ -87,7 +88,98 @@ export const KEY_STUDY_CARDINAL = `${STUDY_FOLDER}/study_cardinal`;
 export const KEY_STUDY_COLUMN_LABEL_MAGNITUDE = `${STUDY_FOLDER}/label_magnitude`;
 export const KEY_STUDY_COLUMN_LABEL_CORE_POINT = `${STUDY_FOLDER}/label_Core_point`;
 
+export const MINIBROT_RAY_TEXT = {
+  tip_label: "study/minibrot_rays_tip_label",
+  tip_angles: "study/minibrot_rays_tip_angles",
+  tip_locating: "study/minibrot_rays_tip_locating",
+  tip_tracing: "study/minibrot_rays_tip_tracing",
+  tip_unresolved: "study/minibrot_rays_tip_unresolved",
+  no_pattern: "study/minibrot_rays_no_pattern",
+  pattern: "study/minibrot_rays_pattern",
+  relative_angle: "study/minibrot_rays_relative_angle",
+  absolute_angles: "study/minibrot_rays_absolute_angles",
+  angles_pending: "study/minibrot_rays_angles_pending",
+  third_attachment: "study/minibrot_rays_third_attachment",
+  third_angles: "study/minibrot_rays_third_angles",
+  third_tracing: "study/minibrot_rays_third_tracing",
+  third_one_label: "study/minibrot_rays_third_one_label",
+  third_two_label: "study/minibrot_rays_third_two_label",
+  root_angles_required: "study/minibrot_rays_root_angles_required",
+  root_attachment: "study/minibrot_rays_root_attachment",
+  root_angles: "study/minibrot_rays_root_angles",
+  root_tracing: "study/minibrot_rays_root_tracing",
+  partial: "study/minibrot_rays_partial",
+  incomplete: "study/minibrot_rays_incomplete",
+  root_access_label: "study/minibrot_rays_root_access_label",
+  doubling_label: "study/minibrot_rays_doubling_label",
+  attachment: "study/minibrot_rays_attachment",
+  angles: "study/minibrot_rays_angles",
+  tracing: "study/minibrot_rays_tracing",
+  complete: "study/minibrot_rays_complete",
+  unsupported: "study/minibrot_rays_unsupported",
+  period_mismatch: "study/minibrot_rays_period_mismatch",
+  core_unresolved: "study/minibrot_rays_core_unresolved",
+  attachment_unresolved: "study/minibrot_rays_attachment_unresolved",
+  angles_unresolved: "study/minibrot_rays_angles_unresolved",
+  trace_budget: "study/minibrot_rays_trace_budget",
+  trace_unresolved: "study/minibrot_rays_trace_unresolved",
+  trace_reference: "study/minibrot_rays_trace_reference",
+  unavailable: "study/minibrot_rays_unavailable",
+  unresolved: "study/minibrot_rays_unresolved",
+};
+
 export const APP_STUDY_TEXT = {
+  [MINIBROT_RAY_TEXT.tip_label]: "Principal antenna\u00a0tip",
+  [MINIBROT_RAY_TEXT.tip_angles]: "Determining the antenna tip angles…",
+  [MINIBROT_RAY_TEXT.tip_locating]: "Locating the preperiodic antenna tip…",
+  [MINIBROT_RAY_TEXT.tip_tracing]: "Tracing the antenna tip rays…",
+  [MINIBROT_RAY_TEXT.tip_unresolved]:
+    "The preperiodic tip could not be verified; landing is unconfirmed.",
+  [MINIBROT_RAY_TEXT.no_pattern]: "—",
+  [MINIBROT_RAY_TEXT.pattern]: "Pattern",
+  [MINIBROT_RAY_TEXT.relative_angle]: "Relative angle",
+  [MINIBROT_RAY_TEXT.absolute_angles]: "Absolute external angles",
+  [MINIBROT_RAY_TEXT.angles_pending]: "No ray paths available yet",
+  [MINIBROT_RAY_TEXT.third_attachment]:
+    "Locating a period-three bulb attachment…",
+  [MINIBROT_RAY_TEXT.third_angles]: "Determining the period-three wake angles…",
+  [MINIBROT_RAY_TEXT.third_tracing]: "Tracing the period-three wake rays…",
+  [MINIBROT_RAY_TEXT.third_one_label]: "1/3 wake",
+  [MINIBROT_RAY_TEXT.third_two_label]: "2/3 wake",
+  [MINIBROT_RAY_TEXT.root_angles_required]:
+    "Verified root angles are needed for this wake.",
+  [MINIBROT_RAY_TEXT.root_attachment]: "Locating the local 0/1 root access…",
+  [MINIBROT_RAY_TEXT.root_angles]: "Finding the global angles for local 0/1…",
+  [MINIBROT_RAY_TEXT.root_tracing]: "Tracing the local 0/1 access rays…",
+  [MINIBROT_RAY_TEXT.partial]: "Showing available ray paths.",
+  [MINIBROT_RAY_TEXT.incomplete]:
+    "Some rays are incomplete; landing is not confirmed.",
+  [MINIBROT_RAY_TEXT.root_access_label]: "Local 0/1 access",
+  [MINIBROT_RAY_TEXT.doubling_label]: "Doubling wake",
+  [MINIBROT_RAY_TEXT.attachment]: "Locating the period-doubling attachment…",
+  [MINIBROT_RAY_TEXT.angles]: "Finding the period-doubling ray angles…",
+  [MINIBROT_RAY_TEXT.tracing]: "Tracing the period-doubling rays…",
+  [MINIBROT_RAY_TEXT.complete]:
+    "Local root access, satellite wakes and principal antenna tip rays",
+  [MINIBROT_RAY_TEXT.unsupported]:
+    "Ray tracing supports parent periods 1–20 and scopes of at least 0.000000001.",
+  [MINIBROT_RAY_TEXT.period_mismatch]:
+    "The supplied core does not have the recorded period.",
+  [MINIBROT_RAY_TEXT.core_unresolved]:
+    "The minibrot core could not be verified.",
+  [MINIBROT_RAY_TEXT.attachment_unresolved]:
+    "The attachment could not be verified.",
+  [MINIBROT_RAY_TEXT.angles_unresolved]:
+    "The external angles could not be resolved.",
+  [MINIBROT_RAY_TEXT.trace_budget]:
+    "The rays did not reach the attachment within the tracing limit.",
+  [MINIBROT_RAY_TEXT.trace_unresolved]:
+    "Ray following failed its numerical checks.",
+  [MINIBROT_RAY_TEXT.trace_reference]:
+    "The reference orbit could not be computed reliably.",
+  [MINIBROT_RAY_TEXT.unavailable]: "Ray tracing is unavailable.",
+  [MINIBROT_RAY_TEXT.unresolved]: "The rays could not be verified.",
+
   [KEY_STUDY_OVERVIEW]: "study overview",
   [KEY_STUDY_SETTINGS]: "study settings",
   [KEY_STUDY_STATUS]: "study status",
@@ -96,6 +188,8 @@ export const APP_STUDY_TEXT = {
   [KEY_STUDY_MERIDIANS]: "core meridians",
   [KEY_STUDY_HYPERPLANE]: "hyper-logistic plane",
   [KEY_STUDY_NODES]: "nodal bailiwicks",
+  [KEY_STUDY_MINIBROT_CONTEXT_CANVAS]:
+    "Selected minibrot at three times the saved scope",
   [KEY_STUDY_MINIBROTS]: "freeform bailiwicks",
   [KEY_STUDY_INLINES]: "inline bailiwicks",
   [KEY_STUDY_FIELDS]: "orbital fields",
@@ -121,7 +215,8 @@ export const APP_STUDY_TEXT = {
   [KEY_STUDY_POINTS_SEED_SURVEY_RE]: "real seed",
   [KEY_STUDY_POINTS_SEED_SURVEY_IM]: "imaginary seed",
   [KEY_STUDY_POINTS_SEED_SURVEY_STABLE_COUNT]: "stable samples",
-  [KEY_STUDY_POINTS_SEED_SURVEY_MAGNITUDE_RANGE]: "orbital magnitude range (max distance to Q)",
+  [KEY_STUDY_POINTS_SEED_SURVEY_MAGNITUDE_RANGE]:
+    "orbital magnitude range (max distance to Q)",
   [KEY_STUDY_ELAPSED_TIME]: "elapsed time",
   [KEY_STUDY_ITERATIONS]: "iterations",
   [KEY_STUDY_DETECTOR_ITERATIONS]: "detector iterations",
