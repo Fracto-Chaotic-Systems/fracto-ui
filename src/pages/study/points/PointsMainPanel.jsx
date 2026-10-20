@@ -138,7 +138,7 @@ export class PointsMainPanel extends Component {
       focal_point.y,
       -1,
     );
-    const point_list = (result?.point_list || []).map((point, step) => {
+    const point_list = (result?.closure_reached === true ? result.point_list : []).map((point, step) => {
       const re = String(point.re);
       const im = String(point.im);
       return {
@@ -162,7 +162,9 @@ export class PointsMainPanel extends Component {
       response?.two_point_calc_newton_fallback?.used_for_newton,
     );
     return {
-      cardinality: Number(
+      closure_reached: result?.closure_reached === true,
+      closure_error: result?.closure_error ?? null,
+      cardinality: result?.closure_reached !== true ? 0 : Number(
         experiment_used
           ? result?.cardinality || 0
           : result?.cardinality ||

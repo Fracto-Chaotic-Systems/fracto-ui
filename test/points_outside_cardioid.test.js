@@ -128,7 +128,7 @@ test("page forwards legacy iterative cardinality and formats the supplied-period
   const formatted = panel.format_detected_newton({}, { x: 0, y: 0 }, 4);
   assert.equal(
     formatted.cardinality,
-    4,
-    "absent response cardinality does not erase the supplied value",
+    0,
+    "without confirmed closure a supplied estimate is not accepted",
   );
 });

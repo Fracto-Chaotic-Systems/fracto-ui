@@ -64,3 +64,19 @@ legacy-iterative cardinality directly. The request explicitly supplies that
 period and does not depend on a detector envelope being present. For example,
 `0.2+0.3i` has legacy pattern 1 and yields one Newton-derived point (plus the
 chart's closing duplicate), rather than displaying cardinality 0.
+
+Newton results now explicitly report `closure_reached`, `closure_error`, and
+`closure_tolerance` (1e-7). Closure checks every transition, including wraparound;
+BigComplex checks use its decimal precision. Failure has status
+`closure_not_reached`, an empty `point_list`, and accepted `cardinality: 0`.
+The supplied estimate remains `candidate_cardinality` for diagnostics only.
+Callers must require `closure_reached === true`; an iteration-limit approximation
+must never be rendered or counted as an orbital. Closure does not prove the
+supplied primitive period or dynamical stability.
+
+Best-iterate selection in BigComplex uses Decimal comparisons, not JavaScript
+object comparisons, and saves the updated root estimate. This corrects stale
+approximations caused by exponent-form comparisons and avoids constructing the
+saved cycle from the pre-update iterated point. The formerly reported six-point
+99.74% example now closes within tolerance after this correction; an insufficient
+iteration budget remains explicitly rejected.

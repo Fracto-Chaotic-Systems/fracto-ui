@@ -69,6 +69,7 @@ see [its README](surveys/README.md) for responsibilities.
   iteration into the same 2D buffer used by preview before calling the shared
   renderer. Legacy point-array rendering and confidence/percentile histogram
   shading have been removed; all survey colors come from `FractoColors`.
+
 - `AssetsLore.jsx` and `AssetsLoreStyles.jsx` provide lore content and style
   management.
 - `AssetsUtils.jsx` contains shared helpers used by Assets panels.
@@ -82,3 +83,8 @@ The detector's input contract, seeded versus critical-orbit behavior,
 finite-precision evidence, and limitations are documented in the main
 repository's `sdk/FractoCardinality.md`. The data-server README describes how
 that result becomes preview records or compact render rows.
+
+Selected survey orbitals support bounded numerical dynamic-ray tracing;
+see [the ray documentation](surveys/RAYS.md). Its published theoretical basis
+is [Milnor (2000)](https://numdam.org/item/AST_2000__261__277_0/) and
+[Benini–Lyubich (2014), polynomial case](https://doi.org/10.5802/aif.2888).

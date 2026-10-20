@@ -23,6 +23,8 @@ export class SeedSurveyCanvas extends Component {
     on_seed_hover: PropTypes.func,
     on_seed_leave: PropTypes.func,
     on_canvas_rendered: PropTypes.func,
+    on_survey_complete: PropTypes.func,
+    on_survey_update: PropTypes.func,
     sampling: PropTypes.oneOf(["bounds", "centers"]),
     encoding: PropTypes.oneOf(["rows", "packed"]),
     focal_point: PropTypes.shape({ x: PropTypes.number, y: PropTypes.number }),
@@ -181,6 +183,33 @@ export class SeedSurveyCanvas extends Component {
     }
     paint_canvas_buffer(cache, context, source_size_px, size_px);
     this.props.on_canvas_rendered?.(this.canvas_ref.current);
+    this.props.on_survey_update?.({
+      request_id: cache_key,
+      canvas_buffer: cache.canvas_buffer,
+      focal_point: this.props.focal_point,
+      half_span: this.props.half_span,
+      sampling: this.props.sampling || "bounds",
+      iteration_limit: this.props.iteration_limit,
+      status: survey.status,
+      cached_seeds: cache.canvas_buffer.reduce((total, column) => total + column.filter(cell => cell?.[0] > 0).length, 0),
+      complete: survey.status === "completed" &&
+        cache.canvas_buffer.every(column => column.every(Array.isArray)),
+    });
+    if (
+      this.props.on_survey_complete && survey.status === "completed" &&
+      this.completed_request_id !== cache_key &&
+      cache.canvas_buffer.length === source_size_px &&
+      cache.canvas_buffer.every((column) => column.length === source_size_px && column.every(Array.isArray))
+    ) {
+      this.completed_request_id = cache_key;
+      this.props.on_survey_complete({
+        canvas_buffer: cache.canvas_buffer,
+        focal_point: this.props.focal_point,
+        half_span: this.props.half_span,
+        sampling: this.props.sampling || "bounds",
+        iteration_limit: this.props.iteration_limit,
+      });
+    }
   };
 
   on_mouse_move = (event) => {

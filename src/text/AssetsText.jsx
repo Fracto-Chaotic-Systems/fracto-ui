@@ -1,3 +1,30 @@
+export const RAY_TEXT_KEYS = {
+  idle: "assets/seed_surveys_rays_idle",
+  no_selection: "assets/seed_surveys_rays_no_selection",
+  running: "assets/seed_surveys_rays_running",
+  cancelled: "assets/seed_surveys_rays_cancelled",
+  failed: "assets/seed_surveys_rays_failed",
+  unavailable: "assets/seed_surveys_rays_unavailable",
+  invalid_input: "assets/seed_surveys_rays_invalid_input",
+  invalid_orbital: "assets/seed_surveys_rays_invalid_orbital",
+  closure_failed: "assets/seed_surveys_rays_closure_failed",
+  branch_changed: "assets/seed_surveys_rays_branch_changed",
+  attracting: "assets/seed_surveys_rays_attracting",
+  neutral: "assets/seed_surveys_rays_neutral",
+  disconnected: "assets/seed_surveys_rays_disconnected",
+  unresolved: "assets/seed_surveys_rays_unresolved",
+  period_limit: "assets/seed_surveys_rays_period_limit",
+  no_rays: "assets/seed_surveys_rays_no_rays",
+  doubling_families: "assets/seed_surveys_rays_doubling_families",
+  family_limit: "assets/seed_surveys_rays_family_limit",
+  rays_found: "assets/seed_surveys_rays_rays_found",
+  classifying: "assets/seed_surveys_rays_classifying",
+  trace: "assets/seed_surveys_rays_trace",
+  cancel: "assets/seed_surveys_rays_cancel",
+  show: "assets/seed_surveys_rays_show",
+  angles: "assets/seed_surveys_rays_angles",
+};
+
 const ASSETS_FOLDER = "assets";
 const VIDEO_FOLDER = "assets/video";
 const LORE_FOLDER = "assets/lore";
@@ -24,6 +51,19 @@ export const KEY_ASSETS_SURVEYS_CANVAS_RENDER = `${ASSETS_FOLDER}/seed_surveys_c
 export const KEY_ASSETS_SURVEYS_DETECT = `${ASSETS_FOLDER}/seed_surveys_detect`;
 export const KEY_ASSETS_SURVEYS_HALF_SPAN = `${ASSETS_FOLDER}/seed_surveys_half_span`;
 export const KEY_ASSETS_SURVEYS_LIMIT = `${ASSETS_FOLDER}/seed_surveys_limit`;
+export const KEY_ASSETS_SURVEYS_TABLE_PATTERN = `${ASSETS_FOLDER}/seed_surveys_table_pattern`;
+export const KEY_ASSETS_SURVEYS_TABLE_CONFIDENCE = `${ASSETS_FOLDER}/seed_surveys_table_confidence`;
+export const KEY_ASSETS_SURVEYS_TABLE_DISCOVERIES = `${ASSETS_FOLDER}/seed_surveys_table_discoveries`;
+export const KEY_ASSETS_SURVEYS_TABLE_SEED = `${ASSETS_FOLDER}/seed_surveys_table_seed`;
+export const KEY_ASSETS_SURVEYS_DISCOVERIES = `${ASSETS_FOLDER}/seed_surveys_discoveries`;
+export const KEY_ASSETS_SURVEYS_SCAN_PROGRESS = `${ASSETS_FOLDER}/seed_surveys_scan_progress`;
+export const KEY_ASSETS_SURVEYS_SCAN_WAITING = `${ASSETS_FOLDER}/seed_surveys_scan_waiting`;
+export const KEY_ASSETS_SURVEYS_SCAN_RUNNING = `${ASSETS_FOLDER}/seed_surveys_scan_running`;
+export const KEY_ASSETS_SURVEYS_SCAN_COMPLETE = `${ASSETS_FOLDER}/seed_surveys_scan_complete`;
+export const KEY_ASSETS_SURVEYS_SCAN_ENTRY = `${ASSETS_FOLDER}/seed_surveys_scan_entry`;
+export const KEY_ASSETS_SURVEYS_CLOSURE_ERROR = `${ASSETS_FOLDER}/seed_surveys_closure_error`;
+export const KEY_ASSETS_SURVEYS_CLOSURE_PASS = `${ASSETS_FOLDER}/seed_surveys_closure_pass`;
+export const KEY_ASSETS_SURVEYS_CLOSURE_FAIL = `${ASSETS_FOLDER}/seed_surveys_closure_fail`;
 export const KEY_ASSETS_SURVEYS_NEWTON_CYCLES = `${ASSETS_FOLDER}/seed_surveys_newton_cycles`;
 export const KEY_ASSETS_SURVEYS_ORBIT_CONFIDENCE = `${ASSETS_FOLDER}/seed_surveys_orbit_confidence`;
 export const KEY_ASSETS_SURVEYS_ORBIT_NEWTON = `${ASSETS_FOLDER}/seed_surveys_orbit_newton`;
@@ -99,6 +139,48 @@ export const KEY_LORE_OP_CLONE_CONTENT = `${LORE_FOLDER}/clone_content`;
 export const KEY_LORE_OP_REMOVE_CONTENT = `${LORE_FOLDER}/remove_content`;
 
 export const APP_ASSETS_TEXT = {
+  [RAY_TEXT_KEYS.idle]:
+    "Trace external rays for the selected orbital configuration.",
+  [RAY_TEXT_KEYS.no_selection]:
+    "Select an orbital configuration in the table to trace its rays.",
+  [RAY_TEXT_KEYS.running]:
+    "Computing numerical dynamic rays for the selected orbital…",
+  [RAY_TEXT_KEYS.cancelled]: "Ray tracing cancelled.",
+  [RAY_TEXT_KEYS.failed]:
+    "Ray tracing failed. Try again or select another orbital.",
+  [RAY_TEXT_KEYS.unavailable]:
+    "Ray tracing requires browser Web Worker support.",
+  [RAY_TEXT_KEYS.invalid_input]:
+    "The focal point is invalid; rays cannot be traced.",
+  [RAY_TEXT_KEYS.invalid_orbital]:
+    "The orbital is invalid or exceeds the 256-point refinement limit.",
+  [RAY_TEXT_KEYS.closure_failed]:
+    "The selected orbital could not be refined to the required closure accuracy.",
+  [RAY_TEXT_KEYS.branch_changed]:
+    "Refinement moved to another orbital; select a more accurate result.",
+  [RAY_TEXT_KEYS.attracting]:
+    "External rays do not land on this attracting orbital.",
+  [RAY_TEXT_KEYS.neutral]:
+    "This orbital is neutral or near-parabolic; specialized tracing is required and is not supported here.",
+  [RAY_TEXT_KEYS.disconnected]:
+    "The critical orbit escapes. Tracing interrupted rays in disconnected Julia sets is not supported here.",
+  [RAY_TEXT_KEYS.unresolved]:
+    "Connected-Julia conditions could not be established within the critical-orbit budget.",
+  [RAY_TEXT_KEYS.period_limit]:
+    "The orbital period exceeds the current angle-search limit of 24.",
+  [RAY_TEXT_KEYS.no_rays]:
+    "No validated landing rays were found within the search and precision limits. This does not imply that no rays exist.",
+  [RAY_TEXT_KEYS.doubling_families]: "Tracing distinct angle-doubling families",
+  [RAY_TEXT_KEYS.family_limit]:
+    "The angle-family budget was reached without validated rays. Additional families may match; no broad search was performed.",
+  [RAY_TEXT_KEYS.rays_found]:
+    "Showing validated numerical ray approximations. Additional landing rays may exist.",
+  [RAY_TEXT_KEYS.classifying]:
+    "Checking closure, multiplier, and connected-Julia conditions",
+  [RAY_TEXT_KEYS.trace]: "trace rays",
+  [RAY_TEXT_KEYS.cancel]: "cancel rays",
+  [RAY_TEXT_KEYS.show]: "show rays",
+  [RAY_TEXT_KEYS.angles]: "External angles (turns):",
   [KEY_ASSETS_OVERVIEW]: "assets overview",
   [KEY_ASSETS_VIDEO]: "video generator",
   [KEY_ASSETS_SETTINGS]: "assets settings",
@@ -122,6 +204,23 @@ export const APP_ASSETS_TEXT = {
   [KEY_ASSETS_SURVEYS_DETECT]: "detect",
   [KEY_ASSETS_SURVEYS_HALF_SPAN]: "half-span",
   [KEY_ASSETS_SURVEYS_LIMIT]: "limit",
+  [KEY_ASSETS_SURVEYS_TABLE_PATTERN]: "pattern",
+  [KEY_ASSETS_SURVEYS_TABLE_CONFIDENCE]: "confidence",
+  [KEY_ASSETS_SURVEYS_TABLE_DISCOVERIES]: "discoveries",
+  [KEY_ASSETS_SURVEYS_TABLE_SEED]: "seed point",
+  [KEY_ASSETS_SURVEYS_DISCOVERIES]: "discoveries: ${count}",
+  [KEY_ASSETS_SURVEYS_SCAN_PROGRESS]:
+    "${processed} of ${total} cached seeds processed (${remaining} remaining)",
+  [KEY_ASSETS_SURVEYS_SCAN_WAITING]: "Waiting for survey data to scan.",
+  [KEY_ASSETS_SURVEYS_SCAN_RUNNING]:
+    "Scanning orbital configurations: top ${count} by discoveries",
+  [KEY_ASSETS_SURVEYS_SCAN_COMPLETE]:
+    "Top orbital configurations by discoveries: ${count} (up to 10)",
+  [KEY_ASSETS_SURVEYS_SCAN_ENTRY]:
+    "pattern: ${pattern}; seed: (${x}, ${y}); magnitude: ${magnitude}; confidence: ${confidence}%; newton cycles: ${cycles}; discoveries: ${discoveries}",
+  [KEY_ASSETS_SURVEYS_CLOSURE_ERROR]: "closure error: ${error} (${status})",
+  [KEY_ASSETS_SURVEYS_CLOSURE_PASS]: "within tolerance",
+  [KEY_ASSETS_SURVEYS_CLOSURE_FAIL]: "not closed",
   [KEY_ASSETS_SURVEYS_NEWTON_CYCLES]: "newton cycles: ${cycles}",
   [KEY_ASSETS_SURVEYS_ORBIT_CONFIDENCE]: "confidence: ${confidence}",
   [KEY_ASSETS_SURVEYS_ORBIT_NEWTON]: "newton",

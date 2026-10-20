@@ -11,7 +11,14 @@ ChartJS.register(...registerables);
 
 import AppText from "../../../AppText.jsx";
 import SeedSurveyCanvas from "./SeedSurveyCanvas.jsx";
-import { orbital_confirmation } from "./SeedSurveyOrbitConfirmation.js";
+import SeedSurveyOrbitals from "./SeedSurveyOrbitals.jsx";
+import SeedSurveyRays from "./SeedSurveyRays.jsx";
+import { paint_survey_rays } from "./SeedSurveyRayOverlay.js";
+import {
+  orbital_confirmation,
+  orbital_closure_error,
+  ORBIT_CLOSURE_TOLERANCE,
+} from "./SeedSurveyOrbitConfirmation.js";
 import {
   KEY_ASSETS_SURVEYS_DETECT,
   KEY_ASSETS_SURVEYS_CANVAS_DETECT,
@@ -23,6 +30,9 @@ import {
   KEY_ASSETS_SURVEYS_ORBIT_MAGNITUDE,
   KEY_ASSETS_SURVEYS_ORBIT_CONFIDENCE,
   KEY_ASSETS_SURVEYS_NEWTON_CYCLES,
+  KEY_ASSETS_SURVEYS_CLOSURE_ERROR,
+  KEY_ASSETS_SURVEYS_CLOSURE_PASS,
+  KEY_ASSETS_SURVEYS_CLOSURE_FAIL,
 } from "../../../text/AssetsText.jsx";
 
 const HALF_SPAN = 1.5;
@@ -37,7 +47,15 @@ export class SeedSurveyDetect extends Component {
     height_px: PropTypes.number.isRequired,
   };
 
-  state = { seed: { x: 0, y: 0 }, calculation: null, newton: null, orbit_method: "newton" };
+  state = {
+    seed: { x: 0, y: 0 },
+    calculation: null,
+    newton: null,
+    orbit_method: "newton",
+    survey_snapshot: null,
+    selected_orbital: null,
+    rays: [],
+  };
   pending_frame = null;
   pending_seed = null;
   hovering = false;
@@ -56,6 +74,7 @@ export class SeedSurveyDetect extends Component {
       if (this.pending_frame !== null) cancelAnimationFrame(this.pending_frame);
       this.pending_frame = null;
       this.pending_seed = null;
+      this.setState({ selected_orbital: null, rays: [] });
       this.calculate_orbit({ x: 0, y: 0 });
     }
   }
@@ -77,14 +96,19 @@ export class SeedSurveyDetect extends Component {
             ITERATION_LIMIT,
           )
         : null;
-    const newton = Number.isInteger(calculation?.pattern) && calculation.pattern > 0
-      ? newton_big_complex(focal_point, 150, calculation.pattern, {
-          precision_digits: 64,
-          seed,
-        })
-      : null;
+    const newton =
+      Number.isInteger(calculation?.pattern) && calculation.pattern > 0
+        ? newton_big_complex(focal_point, 80, calculation.pattern, {
+            precision_digits: 64,
+            seed,
+          })
+        : null;
     this.setState({ seed, calculation, newton }, this.paint_overlay);
   };
+
+  on_rays = (rays) => this.setState({ rays }, this.paint_overlay);
+
+  on_survey_update = (survey_snapshot) => this.setState({ survey_snapshot });
 
   draw_Q = (canvas) => {
     const context = canvas.getContext("2d");
@@ -101,23 +125,39 @@ export class SeedSurveyDetect extends Component {
     if (!context) return;
     context.putImageData(this.survey_image, 0, 0);
     const { focal_point } = this.props;
-    if (!Number.isFinite(focal_point?.x) || !Number.isFinite(focal_point?.y)) return;
-    const Q = FractoFastCalc.calculate_cardioid_Q(focal_point.x, focal_point.y, -1);
+    if (!Number.isFinite(focal_point?.x) || !Number.isFinite(focal_point?.y))
+      return;
+    if (!this.hovering && this.state.selected_orbital) {
+      paint_survey_rays(
+        context,
+        canvas,
+        this.state.rays,
+        HALF_SPAN,
+        this.state.selected_orbital.points.length,
+      );
+    }
+    const Q = FractoFastCalc.calculate_cardioid_Q(
+      focal_point.x,
+      focal_point.y,
+      -1,
+    );
     if (!Number.isFinite(Q?.x) || !Number.isFinite(Q?.y)) return;
     const x = ((Q.x + HALF_SPAN) / (2 * HALF_SPAN)) * canvas.width;
     const y = ((HALF_SPAN - Q.y) / (2 * HALF_SPAN)) * canvas.height;
     context.save();
     context.fillStyle = "#ffffff";
-    if (this.hovering) {
+    if (this.hovering || this.state.selected_orbital) {
       for (const point of this.orbital_details().points) {
-        const point_x = ((point.x + HALF_SPAN) / (2 * HALF_SPAN)) * canvas.width;
-        const point_y = ((HALF_SPAN - point.y) / (2 * HALF_SPAN)) * canvas.height;
+        const point_x =
+          ((point.x + HALF_SPAN) / (2 * HALF_SPAN)) * canvas.width;
+        const point_y =
+          ((HALF_SPAN - point.y) / (2 * HALF_SPAN)) * canvas.height;
         context.beginPath();
         context.arc(point_x, point_y, 1.5, 0, 2 * Math.PI);
         context.fill();
         context.strokeStyle = "#000000";
         context.lineWidth = 1;
-        context.strokeRect(point_x - 2, point_y - 2, 4, 4);
+        context.strokeRect(point_x - 3, point_y - 3, 6, 6);
       }
     }
     context.fillStyle = "#ffffff";
@@ -150,19 +190,35 @@ export class SeedSurveyDetect extends Component {
     });
   };
 
+  on_select_orbital = (orbital) => {
+    if (this.pending_frame !== null) cancelAnimationFrame(this.pending_frame);
+    this.pending_frame = null;
+    this.pending_seed = null;
+    this.setState({ selected_orbital: orbital, orbit_method: "newton" }, () =>
+      this.calculate_orbit(orbital.seed),
+    );
+  };
+
   on_seed_leave = () => {
     this.hovering = false;
     if (this.pending_frame !== null) cancelAnimationFrame(this.pending_frame);
     this.pending_frame = null;
     this.pending_seed = null;
-    this.paint_overlay();
+    if (this.state.selected_orbital) {
+      this.calculate_orbit(this.state.selected_orbital.seed);
+    } else {
+      this.paint_overlay();
+    }
   };
 
   orbital_details = () => {
     const { calculation, newton, orbit_method } = this.state;
-    const candidates = orbit_method === "legacy"
-      ? (calculation?.orbital_points || [])
-      : (newton?.point_list || []).map((point) => ({ x: Number(point.re), y: Number(point.im) }));
+    const candidates =
+      orbit_method === "legacy"
+        ? calculation?.orbital_points || []
+        : (newton?.closure_reached === true ? newton.point_list : []).map(
+            (point) => ({ x: Number(point.re), y: Number(point.im) }),
+          );
     const points = candidates
       .filter((point) => Number.isFinite(point.x) && Number.isFinite(point.y))
       .slice(0, calculation?.pattern || 0);
@@ -185,7 +241,17 @@ export class SeedSurveyDetect extends Component {
             0,
           )
         : null;
-    return { points, Q, magnitude, confirmation: orbital_confirmation(points, magnitude) };
+    return {
+      points,
+      Q,
+      magnitude,
+      confirmation: orbital_confirmation(points, magnitude),
+      closure_error:
+        orbit_method === "newton"
+          ? (newton?.closure_error ??
+            orbital_closure_error(points, focal_point))
+          : orbital_closure_error(points, focal_point),
+    };
   };
 
   render_orbital_chart = (details = this.orbital_details()) => {
@@ -249,6 +315,23 @@ export class SeedSurveyDetect extends Component {
             on_seed_hover={this.on_seed_hover}
             on_seed_leave={this.on_seed_leave}
             on_canvas_rendered={this.draw_Q}
+            on_survey_update={this.on_survey_update}
+          />
+          <SeedSurveyOrbitals
+            selected_orbital={this.state.selected_orbital}
+            on_select_orbital={this.on_select_orbital}
+            key={`${focal_point?.x},${focal_point?.y}`}
+            survey={
+              this.state.survey_snapshot?.focal_point?.x === focal_point?.x &&
+              this.state.survey_snapshot?.focal_point?.y === focal_point?.y
+                ? this.state.survey_snapshot
+                : null
+            }
+          />
+          <SeedSurveyRays
+            focal_point={focal_point}
+            orbital={this.state.selected_orbital}
+            on_rays={this.on_rays}
           />
         </div>
         <div
@@ -273,13 +356,34 @@ export class SeedSurveyDetect extends Component {
           <div style={{ fontSize: "0.8rem", paddingTop: "0.25rem" }}>
             {AppText.get(KEY_ASSETS_SURVEYS_ORBIT_CONFIDENCE).replace(
               "${confidence}",
-              details.confirmation === null ? "—" : `${(100 * details.confirmation.confidence).toFixed(2)}%`,
+              details.confirmation === null
+                ? "—"
+                : `${(100 * details.confirmation.confidence).toFixed(2)}%`,
             )}
             <div>
               {AppText.get(KEY_ASSETS_SURVEYS_NEWTON_CYCLES).replace(
                 "${cycles}",
                 String(this.state.newton?.cycles ?? "—"),
               )}
+            </div>
+            <div>
+              {AppText.get(KEY_ASSETS_SURVEYS_CLOSURE_ERROR)
+                .replace(
+                  "${error}",
+                  details.closure_error === null
+                    ? "—"
+                    : details.closure_error.toExponential(3),
+                )
+                .replace(
+                  "${status}",
+                  details.closure_error === null
+                    ? "—"
+                    : AppText.get(
+                        details.closure_error <= ORBIT_CLOSURE_TOLERANCE
+                          ? KEY_ASSETS_SURVEYS_CLOSURE_PASS
+                          : KEY_ASSETS_SURVEYS_CLOSURE_FAIL,
+                      ),
+                )}
             </div>
           </div>
           <div style={{ fontSize: "0.8rem", paddingTop: "0.25rem" }}>

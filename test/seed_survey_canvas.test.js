@@ -365,3 +365,39 @@ test("post-paint callback receives the displayed canvas after every paint", () =
   h.component.paint_canvas(false);
   assert.equal(received.length, 2);
 });
+
+test("completion callback waits for all cells and runs once despite repaint", () => {
+  const received=[];
+  const h=harness({on_survey_complete: survey=>received.push(survey)});
+  h.component.state.survey={status:"completed"};
+  h.component.paint_canvas(false);
+  assert.equal(received.length,0);
+  h.component.state.survey.canvas_buffer=Array.from({length:3},()=>Array.from({length:3},()=>[2,9]));
+  h.component.paint_canvas(false);
+  assert.equal(received.length,1);
+  assert.equal(received[0].canvas_buffer,h.component.canvas_buffer_cache.canvas_buffer);
+  assert.equal(received[0].half_span,1.5);
+  h.component.paint_canvas(false);
+  h.update({size_px:25});
+  assert.equal(received.length,1);
+});
+
+test("survey updates expose partial buffers before completion and retain request identity", () => {
+  const updates=[];
+  const h=harness({on_survey_update:survey=>updates.push(survey)});
+  const request_id=updates.at(-1).request_id;
+  h.component.state.survey={status:"running",canvas_buffer_batch:{rows:[{row_index:0,values:[[2,9],[0,1],[2,9]]}]}};
+  h.component.paint_canvas(false);
+  assert.equal(updates.at(-1).complete,false);
+  assert.equal(updates.at(-1).cached_seeds,2);
+  assert.equal(updates.at(-1).canvas_buffer[0][0][0],2);
+  assert.equal(updates.at(-1).request_id,request_id);
+  h.component.state.survey={status:"completed",canvas_buffer:Array.from({length:3},()=>Array.from({length:3},()=>[2,9]))};
+  h.component.paint_canvas(false);
+  assert.equal(updates.at(-1).complete,true);
+  assert.equal(updates.at(-1).cached_seeds,9);
+  assert.equal(updates.at(-1).request_id,request_id);
+  h.update({focal_point:{x:0.3,y:0.2}});
+  assert.notEqual(updates.at(-1).request_id,request_id);
+  assert.equal(updates.at(-1).complete,false);
+});

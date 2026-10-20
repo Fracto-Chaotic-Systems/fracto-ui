@@ -18,3 +18,22 @@ export const orbital_confirmation = (points, magnitude) => {
   const length_error = Math.abs(length - 1);
   return { re, im, length, length_error, confidence: Math.max(0, 1 - length_error) };
 };
+
+/** Absolute Euclidean tolerance for each transition, including last-to-first. */
+export const ORBIT_CLOSURE_TOLERANCE = 1e-7;
+
+export const orbital_closure_error = (points, parameter) => {
+  if (!points.length || !Number.isFinite(parameter?.x) || !Number.isFinite(parameter?.y)) return null;
+  let maximum = 0;
+  for (let index = 0; index < points.length; index++) {
+    const point = points[index];
+    const next = points[(index + 1) % points.length];
+    const error = Math.hypot(
+      point.x * point.x - point.y * point.y + parameter.x - next.x,
+      2 * point.x * point.y + parameter.y - next.y,
+    );
+    if (!Number.isFinite(error)) return null;
+    maximum = Math.max(maximum, error);
+  }
+  return maximum;
+};
