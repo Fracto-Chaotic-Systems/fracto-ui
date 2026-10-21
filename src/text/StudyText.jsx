@@ -89,6 +89,19 @@ export const KEY_STUDY_COLUMN_LABEL_MAGNITUDE = `${STUDY_FOLDER}/label_magnitude
 export const KEY_STUDY_COLUMN_LABEL_CORE_POINT = `${STUDY_FOLDER}/label_Core_point`;
 
 export const MINIBROT_RAY_TEXT = {
+  cache_loading: "study/minibrot_rays_cache_loading",
+  cache_loaded: "study/minibrot_rays_cache_loaded",
+  cache_load_failed: "study/minibrot_rays_cache_load_failed",
+  cache_saving: "study/minibrot_rays_cache_saving",
+  cache_saved: "study/minibrot_rays_cache_saved",
+  cache_no_paths: "study/minibrot_rays_cache_no_paths",
+  cache_progress_saved: "study/minibrot_rays_cache_progress_saved",
+  cache_save_failed: "study/minibrot_rays_cache_save_failed",
+
+  calculating: "study/minibrot_rays_calculating",
+  combinatorial_angles: "study/minibrot_rays_combinatorial_angles",
+  calculation_budget: "study/minibrot_rays_calculation_budget",
+  precision_calculating: "study/minibrot_rays_precision_calculating",
   tip_label: "study/minibrot_rays_tip_label",
   tip_angles: "study/minibrot_rays_tip_angles",
   tip_locating: "study/minibrot_rays_tip_locating",
@@ -129,6 +142,27 @@ export const MINIBROT_RAY_TEXT = {
 };
 
 export const APP_STUDY_TEXT = {
+  [MINIBROT_RAY_TEXT.cache_loading]: "Loading saved ray paths…",
+  [MINIBROT_RAY_TEXT.cache_loaded]: "Saved ray paths loaded.",
+  [MINIBROT_RAY_TEXT.cache_load_failed]:
+    "Saved paths could not be loaded; calculating paths now.",
+  [MINIBROT_RAY_TEXT.cache_saving]: "Saving calculated ray paths…",
+  [MINIBROT_RAY_TEXT.cache_saved]: "Calculated ray paths saved.",
+  [MINIBROT_RAY_TEXT.cache_progress_saved]:
+    "Calculation progress saved; ray discovery is still in progress.",
+  [MINIBROT_RAY_TEXT.cache_no_paths]:
+    "Calculation results saved; no ray paths were found. See the calculation status for the reason.",
+  [MINIBROT_RAY_TEXT.cache_save_failed]:
+    "Some calculated paths could not be saved. The current paths remain visible.",
+
+  [MINIBROT_RAY_TEXT.combinatorial_angles]:
+    "Resolving satellite ancestry and exact binary angles…",
+  [MINIBROT_RAY_TEXT.calculation_budget]:
+    "High-precision angle discovery reached its time limit. Other available paths are retained.",
+  [MINIBROT_RAY_TEXT.calculating]:
+    "Calculations in progress ({seconds}s). Higher periods may take several minutes.",
+  [MINIBROT_RAY_TEXT.precision_calculating]:
+    "Preparing high-precision parameter ray calculations…",
   [MINIBROT_RAY_TEXT.tip_label]: "Principal antenna\u00a0tip",
   [MINIBROT_RAY_TEXT.tip_angles]: "Determining the antenna tip angles…",
   [MINIBROT_RAY_TEXT.tip_locating]: "Locating the preperiodic antenna tip…",
@@ -162,7 +196,7 @@ export const APP_STUDY_TEXT = {
   [MINIBROT_RAY_TEXT.complete]:
     "Local root access, satellite wakes and principal antenna tip rays",
   [MINIBROT_RAY_TEXT.unsupported]:
-    "Ray tracing supports parent periods 1–20 and scopes of at least 0.000000001.",
+    "Ray tracing supports parent periods 1–32 and scopes of at least 0.000000001.",
   [MINIBROT_RAY_TEXT.period_mismatch]:
     "The supplied core does not have the recorded period.",
   [MINIBROT_RAY_TEXT.core_unresolved]:

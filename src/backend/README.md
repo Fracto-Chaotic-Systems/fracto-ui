@@ -85,3 +85,12 @@ When changing an endpoint, verify the corresponding backend route and test with 
 npm run lint
 npm run build
 ```
+
+`DataBackend.get_minibrot_ray_paths(id,signal)` lazily reads shared geometry for
+one selected record. `save_minibrot_ray_paths(id,payload)` saves one calculated
+group using the service's version/identity/quality contract. Both return Promises
+through `request_json`, include normal service credentials, and reject failed
+HTTP requests. The minibrot storage adapter serializes saves and owns the lookup
+timeout; list requests do not include large ray JSON. See
+[the cache contract](../../../../sdk/orbitals/RAY_CACHE.md) for schema rollout,
+limits and the linked published ray-theory basis.

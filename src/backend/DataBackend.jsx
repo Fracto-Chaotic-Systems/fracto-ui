@@ -53,6 +53,17 @@ export class DataBackend {
       `${DATA_ORIGIN()}/radian_data?${new URLSearchParams({ theta_num, theta_den, precision })}`,
     );
 
+  /** Lazy per-record ray geometry, excluded from minibrot list responses. */
+  static get_minibrot_ray_paths = (id, signal) =>
+    request_json(`${DATA_ORIGIN()}/minibrot/${id}/ray-paths`, { signal });
+  /** Save one calculated group; the server merges concurrent updates. */
+  static save_minibrot_ray_paths = (id, payload) =>
+    request_json(`${DATA_ORIGIN()}/minibrot/${id}/ray-paths`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
   /**
    * Lists minibrot records using the supplied query parameters.
    * @param {Object} params Data-server query parameters.

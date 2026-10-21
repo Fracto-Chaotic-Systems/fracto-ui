@@ -1,4 +1,5 @@
 import React from "react";
+import { format_minibrot_angle } from "./MinibrotRayLabels.js";
 import PropTypes from "prop-types";
 import { render_pattern_block } from "../StudyUtils.jsx";
 import AppText from "../../../AppText.jsx";
@@ -80,7 +81,7 @@ export default function MinibrotRayTable({
                         key={ray.angle.key}
                         style={{ fontFamily: "monospace" }}
                       >
-                        {ray.angle.key}
+                        {format_minibrot_angle(ray.angle, period, relative)}
                       </div>
                     ))
                   : AppText.get(MINIBROT_RAY_TEXT.angles_pending)}

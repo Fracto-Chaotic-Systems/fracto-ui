@@ -145,6 +145,7 @@ export class MinibrotRightPanel extends Component {
     return (
       <MinibrotContextCanvas
         key={`${selected_minibrot.id}:${selected_minibrot.core_point}:${selected_minibrot.pattern}:${focal_point.x}:${focal_point.y}:${scope}`}
+        minibrot_id={selected_minibrot.id}
         core_point={JSON.parse(selected_minibrot.core_point)}
         period={Number(selected_minibrot.pattern)}
         focal_point={focal_point}

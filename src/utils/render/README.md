@@ -29,3 +29,8 @@ true. The minibrot canvas passes false for its white background paths, then
 paints the selected group with labels enabled. Other callers keep their
 existing labels. Hiding labels suppresses both text and boxes while retaining
 outlined paths and restoring the drawing context.
+
+An optional per-ray `display_label` overrides the fraction text without changing
+`angle.key` or geometry. Minibrot callers use exact exponential-denominator
+labels in both the table and canvas; other callers keep their existing format.
+Label measurement and edge clipping use the displayed string.

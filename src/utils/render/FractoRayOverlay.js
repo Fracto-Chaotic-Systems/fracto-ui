@@ -89,7 +89,7 @@ export const paint_canvas_rays = (
   context.textAlign = "center";
   context.textBaseline = "middle";
   for (const ray of rays) {
-    const label = ray.angle?.key;
+    const label = ray.display_label || ray.angle?.key;
     if (!label || !ray.points?.length) continue;
     const position = ray_label_position(
       ray.points,

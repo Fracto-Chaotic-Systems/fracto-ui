@@ -15,7 +15,7 @@ selected-record details. `StudyMinibrots.jsx` selects the freeform mode;
   share a normal-flow flex row, with the locator on the left and the table on
   the right. Both retain their width; neither is positioned over other content.
   For freeform records, a 500×500 context canvas
-  appears below those details, using the saved display focal point and
+  appears below those details, initially using the saved display focal point and
   `3 * Number(display_settings.scope)`. It does not recenter on `core_point`
   or modify the saved settings. Its container scrolls when the available height
   is insufficient; the canvas retains its fixed dimensions. The outer panel
@@ -28,6 +28,20 @@ and the current tile strategy). It has its own renderer lifecycle and does not
 change the left panel's readiness or pattern buffer. A key including record ID,
 display focal point, and expanded scope remounts the raster on selection or
 saved-view changes, keeping old asynchronous paints on the detached old canvas.
+Wheel up zooms in and wheel down zooms out around the current center, using
+Navigator's factors: 1.5 normally, 1.618² with Shift, and 1.618 with Alt
+(Alt takes precedence). Clicking recenters on that parameter coordinate.
+A non-passive wheel listener prevents page scrolling over the image. This local
+viewport does not change the selected record, saved display settings, or ray
+selection. Each view remounts only a hidden raster; a persistent visible canvas retains
+the last complete image and ray overlays until the latest raster is ready.
+The completed raster is copied and its rays painted in the same callback, so
+zoom and focal-point changes do not flash a blank image. Obsolete completion callbacks
+cannot overwrite its base image. Existing world-coordinate ray paths are
+reprojected and clipped to the new view, without rerunning or saving traces.
+Zooming does not refine the original path sampling or landing tolerance.
+Selecting a different record or changing its saved view resets this local view.
+
 No extra canvas is mounted for missing patterns or invalid display coordinates
 or nonpositive/nonfinite scopes. Visible accessibility text lives in StudyText.
 
@@ -75,8 +89,8 @@ may be smaller because paths can lie outside the view or fail numerically.
 - `MinibrotRays.worker.js` calls `find_minibrot_rays` with `core_point`, the
   parent period and tolerance `scope/1000` (half a 500px pixel). It enables
   both `include_thirds` and `include_tip`; the SDK default stays root/doubling.
-  Progress messages are sent during calculation; all groups arrive together
-  in the final result, rather than streaming individual group paths.
+  Progress messages and per-group completion messages arrive during calculation;
+  each calculated group is saved immediately, followed by a final assembled result.
 - `MinibrotRayTable.jsx` displays relative angle, pattern and absolute external
   fractions. It receives group data, parent period, selection and callback;
   it does not derive angles or own selection state.
@@ -125,8 +139,8 @@ including incomplete paths; missing paths show a placeholder.
 Raster and ray calculations run independently. Worker results update state
 before painting via the `setState` completion callback; raster completion also
 repaints. This prevents a selected table row from appearing without its color
-when the worker finishes after the raster. Selection changes only repaint the
-cached result and do not recompute rays. Record/view changes remount the keyed
+when the worker finishes after the raster. Table selection changes only repaint the
+current result and do not recompute rays. Record/view changes remount the keyed
 component, terminate old work and suppress stale worker/raster callbacks.
 
 ## Completion, failures and numerical limits
@@ -144,12 +158,12 @@ supply tuning angles. Without it, doubling retains an independent exterior
 probe fallback; thirds and tip report that verified root angles are required.
 Tip endpoint-refinement failure retains available unconfirmed prefixes.
 
-Supported parent periods are 1–20. Root, doubling and final tip tracing receive
+The attempted parent-period range is 1–32. Root, doubling and final tip tracing receive
 `max(4096,512*P)` depth; thirds receive `max(4096,768*P)`; preliminary tip
-discovery uses `max(256,64*P)`. The tracer uses a 64-digit critical reference
-with native perturbations so tiny parameter corrections are not repeatedly
-rounded into the full parameter. Endpoint refinement and angle probes still
-have finite-precision limitations; narrow wakes and inaccurate cores can fail.
+discovery uses `max(256,64*P)`. The tracer uses a 64-digit native-path or 80-digit precise reference
+with native perturbations and Decimal sample retries so tiny parameter corrections are not repeatedly
+rounded into the full parameter. Higher-period endpoints use Decimal refinement; angle probes can use Decimal
+integration and reconstruction. Narrow wakes and inaccurate cores can still fail.
 The former "at this zoom" error was misleading: failures now identify the
 numerical check or budget, not an inferred zoom prohibition.
 
@@ -174,3 +188,106 @@ The antenna suite checks -2, the period-two tip and the rabbit tip. The reported
 period-sixteen core 0.273428557437+0.595445688613i was also checked with both
 tip rays landing within tolerance 0.000005015. See the SDK guides for exact
 example fractions and the distinction between tests and numerical observations.
+
+## Exponential fraction display
+
+`MinibrotRayLabels.js` formats the same exact angle for table cells and selected
+canvas labels. Natural denominators are 2^P-1 for root access, 2^(2P)-1 for
+doubling, 2^(3P)-1 for thirds, and 2^P(2^P-1) for the principal tip, displayed
+with superscript exponents. Numerators are expanded with BigInt to match these
+unreduced denominators; e.g. period-two root 1/3 becomes 1/(2²−1), while its
+doubling ray 2/5 becomes 6/(2⁴−1). Solver fractions, angle keys and selection
+identity remain unchanged. The shared painter accepts `display_label` and
+otherwise keeps its usual angle-key labels, preserving seed-survey behavior.
+This supersedes descriptions of reduced numeric denominators in these labels.
+The binary tuning basis remains the published Milnor reference above; changing
+notation changes neither the angle nor the numerical landing checks.
+
+## Higher-period calculations and progress
+
+Parent period 32 is the next supported ceiling to attempt. Above 20, center and
+attachment continuation use isolated 80-digit Decimal arithmetic and preserve
+exact coordinate strings for the reference orbit. Satellite ancestry can supply
+root-angle blocks by exact mechanical-word tuning, avoiding broad fine-angle
+searches and redundant ancestor ray traces. Primitive/unresolved ancestry uses
+exterior probes with a high-precision integration fallback. The principal tip
+uses Decimal preperiodic endpoint refinement. Native sample solves can retry
+in Decimal; endpoint distance is checked before projecting to Number.
+
+`MinibrotContextCanvas` displays the current worker stage and an elapsed-seconds
+message updated on the main thread once per second. It remains responsive
+while the worker performs a synchronous expensive phase. Result/error/unmount
+clear the timer, and record changes terminate the old worker. Individual
+precise ray traces and Decimal angle discovery have 120-second limits;
+these are operation limits, not a whole-request deadline. Existing depth caps
+also scale with the parent period. Partial paths and named failure messages
+remain available. Higher periods may take minutes; elapsed time is not a
+percentage or an estimated completion time.
+
+End-to-end SDK regressions require all ten rays at parent periods 21 and 32.
+Observed isolated runs took about 11 and 45 seconds respectively at tolerance
+1e-5; these times depend on the component, tolerance and machine load. UI tests
+check initial precision messaging and timer progress/cleanup. The
+[precision guide](../../../../../../sdk/orbitals/PARAMETER_PRECISION.md) records
+inputs, precision ownership, budgets and limitations, with published
+[Milnor (2000)](https://numdam.org/item/AST_2000__261__277_0/),
+[Schleicher (2000)](https://numdam.org/item/AST_2000__261__405_0/) and
+[Bulirsch–Stoer (1966)](https://doi.org/10.1007/BF02165234) references.
+The existing raster precision and minimum ray tolerance are unchanged; the
+higher period ceiling does not promise arbitrary zoom or universal convergence.
+
+## Shared persistent ray cache
+
+The selected record ID is passed to `MinibrotContextCanvas`. It lazily retrieves
+`GET /minibrot/:id/ray-paths` before starting a worker. A compatible cache that
+satisfies the current tolerance paints without starting any calculation. Partial
+or coarser saved paths remain visible while missing/inadequate groups calculate.
+Geometry is excluded from both ordinary minibrot lists and generic record lists.
+
+`MinibrotRayStorage.js` owns the backend adapter, immutable record identity and
+serialized save queue. The worker's `on_group` messages save each newly computed
+group through `PUT /minibrot/:id/ray-paths`, before the remaining groups finish.
+Queued saves continue after leaving the record; late reads/messages cannot
+paint another record's canvas. Failed storage does not suppress calculation or
+hide the current paths. Registered messages distinguish loading, saved results,
+saving and persistence failures. A lookup times out after five seconds.
+
+The server performs a transactional quality merge: successful groups survive
+failed/partial results, tighter completed requests supersede coarser ones, and
+other clients' groups are retained. Reuse requires matching algorithm version,
+exact core and period plus adequate requested/achieved tolerance. Core edits
+invalidate a saved cache and a late write against a changed record is rejected.
+The existing tip-first selection, colored highlights and exponential denominator
+labels are recreated from stored geometry and are not stored as canvas pixels.
+
+Root migration 003 adds nullable JSON `free_bailiwicks.ray_paths`. It preserves
+existing record data and can safely be resumed; deployments sharing a database
+serialize migrations. Larger documents compress transparently in the database.
+See [the cache guide](../../../../../../sdk/orbitals/RAY_CACHE.md) for payloads,
+size bounds, rollout, diagnostics and the retained published
+[Milnor (2000)](https://numdam.org/item/AST_2000__261__277_0/) and
+[Schleicher (2000)](https://numdam.org/item/AST_2000__261__405_0/) numerical basis.
+Caches are shared across browsers/machines using the same database; separate
+server databases keep separate cache contents. Tests cover cache-only display,
+partial reuse, incremental saves, offline behavior and stale record callbacks.
+
+Cached paths remain visible while missing or finer groups are calculated. Each
+worker group is merged by cache quality and painted immediately, including the
+selected row highlight; persistence is independent of display. A failed final
+calculation retains available paths and reports a partial result. Raster-first
+and cache-first completion both repaint the available geometry once ready.
+
+On initial mount the visible canvas is ready for cached ray painting before the
+background raster completes. Previously calculated groups therefore appear as
+soon as storage returns, while missing groups continue calculating. Background
+completion replaces the initial base and repaints the same available rays.
+
+Persistence also records unsuccessful attempts with empty ray arrays. A successful
+save alone does not establish that any drawable geometry exists: the UI reports
+that calculation results were saved with no paths when the available geometry
+is empty, and lists per-group failures after an empty final result. The older
+“Calculated ray paths saved” message incorrectly covered empty attempts too.
+
+An empty group save during ongoing discovery reports saved calculation progress,
+not a final no-paths outcome. The no-paths persistence message appears only once
+calculation finishes (or fails) and the elapsed progress timer has stopped.
