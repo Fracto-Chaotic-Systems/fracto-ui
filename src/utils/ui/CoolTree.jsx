@@ -99,9 +99,7 @@ const does_search_match_item = (search, item, item_title) => {
       : format_value(node?.value);
   return [node?.path, node?.label, item_title, value_text]
     .filter(Boolean)
-    .some((candidate) =>
-      String(candidate).toLocaleLowerCase().includes(query),
-    );
+    .some((candidate) => String(candidate).toLocaleLowerCase().includes(query));
 };
 
 const find_tree_path = (items, item_key) => {
@@ -164,9 +162,7 @@ export const normalize_tree_data = (
         Number(is_tree_folder_value(right.child)) -
         Number(is_tree_folder_value(left.child));
       if (folder_order !== 0) return folder_order;
-      return String(left.child_label).localeCompare(
-        String(right.child_label),
-      );
+      return String(left.child_label).localeCompare(String(right.child_label));
     });
     const children = entries.map(
       ({ child, segment, child_label, child_path, metadata: child_metadata }) =>
@@ -198,8 +194,7 @@ export const normalize_tree_data = (
       children,
       isLeaf: is_leaf,
       canRename:
-        key !== "root" &&
-        (is_leaf || metadata?.property_name !== undefined),
+        key !== "root" && (is_leaf || metadata?.property_name !== undefined),
       metadata,
     };
   };
@@ -251,9 +246,11 @@ const render_tree_item_title = ({ item, title, context }) => {
   const leaf_margin_left =
     node_depth > 0
       ? `${-8 + node_depth * label_depth_indent_px + BRANCH_LEAF_EXTRA_MARGIN_LEFT_PX}px`
-      : `${Number.isFinite(node?.metadata?.root_leaf_margin_left_px)
-          ? node.metadata.root_leaf_margin_left_px
-          : -20}px`;
+      : `${
+          Number.isFinite(node?.metadata?.root_leaf_margin_left_px)
+            ? node.metadata.root_leaf_margin_left_px
+            : -20
+        }px`;
   const leaf_style =
     node_depth > 0 ? { marginLeft: leaf_margin_left } : undefined;
   const folder_style =
@@ -270,11 +267,13 @@ const render_tree_item_title = ({ item, title, context }) => {
       ? tree_folder_open_icon
       : tree_folder_closed_icon
     : null;
-  const icon_color = node?.label_color || (node?.type
-    ? JSON_TYPE_COLORS[node.type] || JSON_TYPE_COLORS.key
-    : item.isFolder
-      ? JSON_TYPE_COLORS.object
-      : JSON_TYPE_COLORS.key);
+  const icon_color =
+    node?.label_color ||
+    (node?.type
+      ? JSON_TYPE_COLORS[node.type] || JSON_TYPE_COLORS.key
+      : item.isFolder
+        ? JSON_TYPE_COLORS.object
+        : JSON_TYPE_COLORS.key);
   const icon_element = icon ? (
     <CoolTreeStyles.IconWrapper
       onClick={
@@ -295,9 +294,7 @@ const render_tree_item_title = ({ item, title, context }) => {
   ) : null;
   if (node?.is_placeholder) {
     return (
-      <CoolTreeStyles.PlaceholderLabel
-        style={{ marginLeft: leaf_margin_left }}
-      >
+      <CoolTreeStyles.PlaceholderLabel style={{ marginLeft: leaf_margin_left }}>
         {node.label}
       </CoolTreeStyles.PlaceholderLabel>
     );
@@ -307,10 +304,12 @@ const render_tree_item_title = ({ item, title, context }) => {
       <span style={item.isFolder ? folder_style : undefined}>
         {icon_element}
         {item.isFolder ? (
-          <CoolTreeStyles.Label style={label_style}>{title}</CoolTreeStyles.Label>
+          <CoolTreeStyles.Label style={label_style}>
+            {React.isValidElement(node?.title) ? node.title : title}
+          </CoolTreeStyles.Label>
         ) : (
           <CoolTreeStyles.LeafLabel style={{ ...leaf_style, ...label_style }}>
-            {title}
+            {React.isValidElement(node?.title) ? node.title : title}
           </CoolTreeStyles.LeafLabel>
         )}
       </span>
@@ -320,7 +319,9 @@ const render_tree_item_title = ({ item, title, context }) => {
     return (
       <span style={folder_style}>
         {icon_element}
-        <CoolTreeStyles.Label style={label_style}>{node.label}</CoolTreeStyles.Label>
+        <CoolTreeStyles.Label style={label_style}>
+          {node.label}
+        </CoolTreeStyles.Label>
       </span>
     );
   }
@@ -364,9 +365,7 @@ const build_tree_items = (
         return Number(right_is_folder) - Number(left_is_folder);
       }
       const left_label = String(left.label ?? left.title ?? left.key ?? "");
-      const right_label = String(
-        right.label ?? right.title ?? right.key ?? "",
-      );
+      const right_label = String(right.label ?? right.title ?? right.key ?? "");
       return left_label.localeCompare(right_label);
     });
   const items = {};
@@ -672,9 +671,7 @@ export class CoolTree extends Component {
     context,
   }) => {
     const parent_key = item?.data?.metadata?.parent_key;
-    const parent_item = parent_key
-      ? this.current_tree_items[parent_key]
-      : null;
+    const parent_item = parent_key ? this.current_tree_items[parent_key] : null;
     const is_last_sibling =
       Boolean(parent_item?.children?.length) &&
       parent_item.children[parent_item.children.length - 1] === item.index;
@@ -760,9 +757,7 @@ export class CoolTree extends Component {
       label_depth_offset_px,
     );
     const items = built_tree.items;
-    const resolved_root_item = data_provider
-      ? root_item
-      : built_tree.root_item;
+    const resolved_root_item = data_provider ? root_item : built_tree.root_item;
     this.current_tree_items = items;
     const view_state = {
       [this.tree_id]: {

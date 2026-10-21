@@ -14,6 +14,8 @@ export const KEY_ADMIN_LOGS_SHOW_TIMESTAMPS = `${ADMIN_FOLDER}/logs_show_timesta
 export const KEY_ADMIN_COMMITS_REPOSITORY_VISIBILITY = `${ADMIN_FOLDER}/commits_repository_visibility`;
 export const KEY_ADMIN_SOCIAL_DOCUMENT = `${ADMIN_FOLDER}/social_document`;
 export const KEY_ADMIN_SERVERS_SELECTION = `${ADMIN_FOLDER}/servers_selection`;
+export const KEY_ADMIN_SERVERS_ROLES = `${ADMIN_FOLDER}/server_roles`;
+export const KEY_ADMIN_SERVERS_TITLES = `${ADMIN_FOLDER}/server_titles`;
 export const KEY_ADMIN_SERVERS_ADDRESS_BOOK = `${ADMIN_FOLDER}/server_address_book`;
 export const KEY_ADMIN_REFERENCE_DOCUMENT = `${ADMIN_FOLDER}/reference_document`;
 export const KEY_ADMIN_REFERENCE_SELECTION = `${ADMIN_FOLDER}/reference_selection`;
@@ -64,6 +66,22 @@ export const APP_ADMIN_SETTINGS = {
     data_type: TYPE_STRING,
     default_value: "",
     description: "selected item on the admin Servers page",
+    persist: true,
+  },
+  [KEY_ADMIN_SERVERS_ROLES]: {
+    data_type: TYPE_OBJECT,
+    default_value: {},
+    max_persist_length: 100000,
+    description:
+      "browser-local custom roles keyed by server URL or this-server",
+    persist: true,
+  },
+  [KEY_ADMIN_SERVERS_TITLES]: {
+    data_type: TYPE_OBJECT,
+    default_value: {},
+    max_persist_length: 100000,
+    description:
+      "browser-local custom titles keyed by server URL or this-server",
     persist: true,
   },
   [KEY_ADMIN_SERVERS_ADDRESS_BOOK]: {

@@ -1,4 +1,21 @@
 const ADMIN_FOLDER = "admin";
+export const KEY_ADMIN_SERVERS_CLIENTS_TITLE = `${ADMIN_FOLDER}/servers_clients_title`;
+export const KEY_ADMIN_SERVERS_CLIENTS_NOTE = `${ADMIN_FOLDER}/servers_clients_note`;
+export const KEY_ADMIN_SERVERS_CLIENTS_LOADING = `${ADMIN_FOLDER}/servers_clients_loading`;
+export const KEY_ADMIN_SERVERS_CLIENTS_EMPTY = `${ADMIN_FOLDER}/servers_clients_empty`;
+export const KEY_ADMIN_SERVERS_CLIENTS_ERROR = `${ADMIN_FOLDER}/servers_clients_error`;
+export const KEY_ADMIN_SERVERS_CLIENTS_USER = `${ADMIN_FOLDER}/servers_clients_user`;
+export const KEY_ADMIN_SERVERS_CLIENTS_BROWSER = `${ADMIN_FOLDER}/servers_clients_browser`;
+export const KEY_ADMIN_SERVERS_CLIENTS_STARTED = `${ADMIN_FOLDER}/servers_clients_started`;
+export const KEY_ADMIN_SERVERS_CLIENTS_SEEN = `${ADMIN_FOLDER}/servers_clients_seen`;
+export const KEY_ADMIN_SERVERS_CLIENTS_EXPIRES = `${ADMIN_FOLDER}/servers_clients_expires`;
+export const KEY_ADMIN_SERVERS_CLIENTS_REFRESH = `${ADMIN_FOLDER}/servers_clients_refresh`;
+export const KEY_ADMIN_SERVERS_EDIT_ROLE = `${ADMIN_FOLDER}/servers_edit_role`;
+export const KEY_ADMIN_SERVERS_SAVE_ROLE = `${ADMIN_FOLDER}/servers_save_role`;
+export const KEY_ADMIN_SERVERS_CANCEL_ROLE = `${ADMIN_FOLDER}/servers_cancel_role`;
+export const KEY_ADMIN_SERVERS_EDIT_TITLE = `${ADMIN_FOLDER}/servers_edit_title`;
+export const KEY_ADMIN_SERVERS_SAVE_TITLE = `${ADMIN_FOLDER}/servers_save_title`;
+export const KEY_ADMIN_SERVERS_CANCEL_TITLE = `${ADMIN_FOLDER}/servers_cancel_title`;
 
 export const KEY_REFERENCE_TITLE = `${ADMIN_FOLDER}/reference`;
 export const KEY_ADMIN_REFERENCE_LOADING = `${ADMIN_FOLDER}/reference_loading`;
@@ -83,6 +100,26 @@ export const KEY_ADMIN_REPOSITORY_NONE = `${ADMIN_FOLDER}/repository_none`;
 export const KEY_ADMIN_COPY_HASH = `${ADMIN_FOLDER}/copy_full_hash`;
 export const KEY_ADMIN_VIEW_GITHUB = `${ADMIN_FOLDER}/view_github`;
 export const APP_ADMIN_TEXT = {
+  [KEY_ADMIN_SERVERS_CLIENTS_TITLE]: "client sessions",
+  [KEY_ADMIN_SERVERS_CLIENTS_NOTE]:
+    "Unexpired login sessions; this does not indicate which tabs are currently open. Anonymous clients are not tracked.",
+  [KEY_ADMIN_SERVERS_CLIENTS_LOADING]: "loading client sessions…",
+  [KEY_ADMIN_SERVERS_CLIENTS_EMPTY]: "No authenticated client sessions.",
+  [KEY_ADMIN_SERVERS_CLIENTS_ERROR]:
+    "Client information is unavailable. Local access requires an administrator session. Protected remote lists must be viewed on that server; credentials are not sent to remote servers. Older servers may need an update.",
+  [KEY_ADMIN_SERVERS_CLIENTS_USER]: "user",
+  [KEY_ADMIN_SERVERS_CLIENTS_BROWSER]: "browser",
+  [KEY_ADMIN_SERVERS_CLIENTS_STARTED]: "session started",
+  [KEY_ADMIN_SERVERS_CLIENTS_SEEN]: "last activity",
+  [KEY_ADMIN_SERVERS_CLIENTS_EXPIRES]: "expires",
+  [KEY_ADMIN_SERVERS_CLIENTS_REFRESH]: "refresh client sessions",
+  [KEY_ADMIN_SERVERS_EDIT_ROLE]: "edit role",
+  [KEY_ADMIN_SERVERS_SAVE_ROLE]: "save role (leave empty to use the default)",
+  [KEY_ADMIN_SERVERS_CANCEL_ROLE]: "cancel role edit",
+  [KEY_ADMIN_SERVERS_EDIT_TITLE]: "edit title",
+  [KEY_ADMIN_SERVERS_SAVE_TITLE]:
+    "save title (leave empty to use the server name)",
+  [KEY_ADMIN_SERVERS_CANCEL_TITLE]: "cancel title edit",
   [KEY_REFERENCE_TITLE]: "Reference",
   [KEY_ADMIN_REFERENCE_LOADING]: "loading reference documents...",
   [KEY_ADMIN_REFERENCE_ERROR]: "unable to load reference documents:",

@@ -105,7 +105,7 @@ export class CoolInputText extends Component {
         autoFocus
         size={current_value?.length}
         style={style_extra}
-        value={current_value || value}
+        value={current_value ?? value}
         name={name}
         rows={5}
         cols={40}
@@ -114,7 +114,7 @@ export class CoolInputText extends Component {
       />
     ) : (
       <input
-        value={current_value || value}
+        value={current_value ?? value}
         name={name}
         id={name}
         ref={input_ref}
@@ -136,9 +136,7 @@ export class CoolInputText extends Component {
         {input}
         <CoolIconButton
           content={checkmark_icon}
-          on_click={() =>
-            this.confirm_action(input_ref.current?.value || "")
-          }
+          on_click={() => this.confirm_action(input_ref.current?.value || "")}
           title={actions.confirm_title}
           aria_label={actions.confirm_title}
           style={{

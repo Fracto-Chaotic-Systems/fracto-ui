@@ -21,3 +21,7 @@ built-in `node:test` runner and do not require a browser unless noted.
 - `orbital_pipeline_contract.test.js` verifies the UI contract for orbital
   processing.
 - `video_edit_history.test.js` verifies video-edit history behavior.
+
+`admin_server_clients.test.js` covers client-table refresh overlap, selected-server
+unmount handling, and empty versus restricted results. `remote_server_clients.test.js`
+checks direct/nginx discovery and ensures remote requests never include cookies.

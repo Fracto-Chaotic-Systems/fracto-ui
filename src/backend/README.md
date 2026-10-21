@@ -46,9 +46,13 @@ choose the appropriate representation. `BackendUtils.jsx` provides
 the shared JSON request and query-string helpers used by these clients.
 `ServerBackend.health()` and `readiness()` omit cookies because these public,
 read-only responses are fetched from the main server's separate browser origin.
-`health_at(url)` does the same for saved remote Fracto main servers and aborts
-after four seconds; the remote server's health endpoint must allow cross-origin
-reads without credentials.
+`health_at(url)` does the same for saved remote Fracto servers through
+`RemoteServerHealth.js`. It tries `/healthz`, then `/api/main/healthz` for nginx
+UI origins, validates contract version 1, and remembers the working endpoint.
+Each attempt times out after four seconds (up to eight seconds during discovery).
+Failed or non-health responses trigger discovery of the other route. The remote
+health route must allow cross-origin reads without credentials; nginx UI HTML
+fallbacks are not health responses.
 
 `AdminBackend.users()` loads up to 1,000 allowlisted user records for the
 administrator Accounts page; it uses the existing admin-only endpoint.
@@ -94,3 +98,8 @@ HTTP requests. The minibrot storage adapter serializes saves and owns the lookup
 timeout; list requests do not include large ray JSON. See
 [the cache contract](../../../../sdk/orbitals/RAY_CACHE.md) for schema rollout,
 limits and the linked published ray-theory basis.
+
+`ServerBackend.clients()` reads the administrator-protected main `/clients`
+snapshot. `clients_at(url)` discovers direct or nginx routes separately from
+public health, always without remote credentials. Protected remote client lists
+are viewed on that server. No client list is added to public `/healthz`.

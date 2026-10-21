@@ -1,3 +1,5 @@
+import { create_remote_clients_reader } from "./RemoteServerClients.js";
+import { create_remote_health_reader } from "./RemoteServerHealth.js";
 import { service_origin } from "../utils/service_origin.jsx";
 import { request_json } from "./BackendUtils.jsx";
 
@@ -16,13 +18,13 @@ export class ServerBackend {
    * @returns {Promise<Object>} Health contract returned by the remote server.
    * @calledBy AdminServers
    */
-  static health_at = (server_url) => {
-    const base_url = server_url.replace(/\/+$/, "");
-    return request_json(`${base_url}/healthz`, {
-      credentials: "omit",
+  static health_at = create_remote_health_reader(request_json);
+
+  static clients = () =>
+    request_json(`${service_origin("main")}/clients`, {
       signal: AbortSignal.timeout(4000),
     });
-  };
+  static clients_at = create_remote_clients_reader(request_json);
 
   /** Fetches main-server readiness state.
    * @returns {Promise<Object>} Readiness response from GET /readyz.

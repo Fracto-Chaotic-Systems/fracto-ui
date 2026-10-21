@@ -1,3 +1,11 @@
+import AdminServerClients from "./AdminServerClients.jsx";
+import AdminServerTime from "./AdminServerTime.jsx";
+import { server_times, format_server_uptime } from "./AdminServerTimes.js";
+import AdminServerRole from "./AdminServerRole.jsx";
+import AdminServerTitle from "./AdminServerTitle.jsx";
+import { server_title, update_server_title } from "./AdminServerTitles.js";
+import { render_server_template } from "./AdminServersTemplate.js";
+export { render_server_template } from "./AdminServersTemplate.js";
 import { Component } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -8,6 +16,8 @@ import AppText from "../../AppText.jsx";
 import AppSettings from "../../AppSettings.jsx";
 import {
   KEY_ADMIN_SERVERS_ADDRESS_BOOK,
+  KEY_ADMIN_SERVERS_TITLES,
+  KEY_ADMIN_SERVERS_ROLES,
   KEY_ADMIN_SERVERS_SELECTION,
 } from "../../settings/AdminSettings.jsx";
 import {
@@ -70,29 +80,69 @@ const SERVICE_NAMES = [
   "fracto-ui",
   "fracto-tiles-server",
 ];
-const make_server_tree = (server_urls, remote_health, local_server_name) => [
-  {
-    key: "servers-root",
-    title: "servers-root",
-    isLeaf: false,
-    children: [
-      {
-        key: THIS_SERVER_KEY,
-        isLeaf: true,
-        title: local_server_name,
-      },
-      ...server_urls.map((url) => ({
-        key: `server:${url}`,
-        isLeaf: true,
-        title: `${get_remote_server_name(remote_health[url]?.health, url) || AppText.get(KEY_ADMIN_SERVERS_UNAVAILABLE)} — ${
-          remote_health[url]
-            ? get_health_status_label(remote_health[url]?.health?.status)
-            : AppText.get(KEY_ADMIN_SERVERS_UNAVAILABLE)
-        }`,
-      })),
-    ],
-  },
-];
+const make_server_tree = (
+  server_urls,
+  remote_health,
+  local_server_name,
+  titles,
+  local_health,
+  local_error,
+) => {
+  const entry = (key, title, health, error) => {
+    const healthy = !error && ["ready", "healthy"].includes(health?.status);
+    const status = get_health_status_label(error ? null : health?.status);
+    return {
+      key,
+      label: title,
+      isLeaf: true,
+      title: (
+        <span
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "0.4rem",
+          }}
+        >
+          <span
+            role="img"
+            aria-label={status}
+            title={status}
+            style={{
+              color: healthy ? "#228b22" : "#b22222",
+              fontWeight: "bold",
+            }}
+          >
+            {healthy ? "✓" : "×"}
+          </span>
+          <span>{title}</span>
+        </span>
+      ),
+    };
+  };
+  return [
+    {
+      key: "servers-root",
+      title: "servers-root",
+      isLeaf: false,
+      children: [
+        entry(THIS_SERVER_KEY, local_server_name, local_health, local_error),
+        ...server_urls.map((url) =>
+          entry(
+            `server:${url}`,
+            server_title(
+              titles,
+              url,
+              get_remote_server_name(remote_health[url]?.health, url) ||
+                AppText.get(KEY_ADMIN_SERVERS_UNAVAILABLE),
+            ),
+            remote_health[url]?.health,
+            remote_health[url]?.error,
+          ),
+        ),
+      ],
+    },
+  ];
+};
 const documentation_layout = {
   content: {
     display: "flex",
@@ -166,7 +216,7 @@ const markdown_components = {
   ol: MarkdownStyles.OrderedList,
   li: MarkdownStyles.ListItem,
   blockquote: MarkdownStyles.Blockquote,
-  a: MarkdownStyles.Link,
+  a: AdminServerTime,
   code: MarkdownStyles.InlineCode,
   pre: MarkdownStyles.CodeBlock,
   table: MarkdownStyles.Table,
@@ -215,28 +265,13 @@ const LOCALIZED_TEXT_KEYS = {
   ),
 };
 
-const escape_markdown_value = (value) =>
-  String(value ?? "unavailable")
-    .replace(/\\/g, "\\\\")
-    .replace(/([`*_{}\x5B\x5D()#+.!|>])/g, "\\$1")
-    .replace(/[\r\n]+/g, " ");
-
-export const render_server_template = (template, values) =>
-  template.replace(/\{\{([a-z0-9_.-]+)\}\}/gi, (token, path) => {
-    const value = path
-      .split(".")
-      .reduce((current, key) => current?.[key], values);
-    return escape_markdown_value(value ?? values?.text?.unavailable ?? "unavailable");
-  });
-
 const make_template_values = (health, checked_at, server_name, public_url) => {
-  const uptime_seconds = Number(health?.uptime_seconds);
-  const started_at = Number.isFinite(uptime_seconds)
-    ? new Date(checked_at.getTime() - uptime_seconds * 1000)
-    : null;
+  const timestamps = server_times(health, checked_at);
   const localize_status = (status) => {
     const key = STATUS_TEXT_KEYS[status];
-    return key ? AppText.get(key) : status || AppText.get(KEY_ADMIN_SERVERS_UNAVAILABLE);
+    return key
+      ? AppText.get(key)
+      : status || AppText.get(KEY_ADMIN_SERVERS_UNAVAILABLE);
   };
   const services = Object.fromEntries(
     SERVICE_NAMES.map((name) => [
@@ -258,11 +293,9 @@ const make_template_values = (health, checked_at, server_name, public_url) => {
       public_url: public_url || text.unavailable,
       status: localize_status(health?.status),
       version: health?.build_info?.version || text.unavailable,
-      uptime: Number.isFinite(uptime_seconds)
-        ? `${Math.round(uptime_seconds).toLocaleString()} ${text.seconds}`
-        : text.unavailable,
-      started_at: started_at ? started_at.toLocaleString() : text.unavailable,
-      checked_at: checked_at ? checked_at.toLocaleString() : text.unavailable,
+      uptime: format_server_uptime(health?.uptime_seconds) || text.unavailable,
+      started_at: timestamps.started_at || text.unavailable,
+      checked_at: timestamps.checked_at || text.unavailable,
     },
     health: services,
   };
@@ -272,6 +305,8 @@ const make_template_values = (health, checked_at, server_name, public_url) => {
 export class AdminServers extends Component {
   state = {
     selected_server: "",
+    server_titles: {},
+    server_roles: {},
     health: null,
     remote_health: {},
     checked_at: null,
@@ -286,9 +321,15 @@ export class AdminServers extends Component {
   componentDidMount() {
     this.unmounted = false;
     const server_urls = this.get_saved_server_urls();
-    this.setState({ server_urls });
+    this.setState({
+      server_urls,
+      server_titles: AppSettings.get(KEY_ADMIN_SERVERS_TITLES) || {},
+      server_roles: AppSettings.get(KEY_ADMIN_SERVERS_ROLES) || {},
+    });
     const address_book = AppSettings.get(KEY_ADMIN_SERVERS_ADDRESS_BOOK);
-    if (JSON.stringify(address_book) !== JSON.stringify({ urls: server_urls })) {
+    if (
+      JSON.stringify(address_book) !== JSON.stringify({ urls: server_urls })
+    ) {
       AppSettings.on_settings_changed({
         [KEY_ADMIN_SERVERS_ADDRESS_BOOK]: { urls: server_urls },
       });
@@ -318,16 +359,73 @@ export class AdminServers extends Component {
 
   on_tree_select = (selected_keys) => {
     const selection = selected_keys[0] || "";
-    const selected_server =
-      !selection
-        ? ""
-        : selection === THIS_SERVER_KEY
-          ? THIS_SERVER_KEY
-          : selection.slice(7);
+    const selected_server = !selection
+      ? ""
+      : selection === THIS_SERVER_KEY
+        ? THIS_SERVER_KEY
+        : selection.slice(7);
     AppSettings.on_settings_changed({
       [KEY_ADMIN_SERVERS_SELECTION]: selected_server,
     });
     this.setState({ selected_server });
+  };
+
+  get_selected_title = () => {
+    const { selected_server, server_titles, health, remote_health } =
+      this.state;
+    if (!selected_server) return "";
+    const fallback =
+      selected_server === THIS_SERVER_KEY
+        ? (typeof health?.server_name === "string" &&
+            health.server_name.trim()) ||
+          AppText.get(KEY_ADMIN_SERVERS_THIS_SERVER)
+        : get_remote_server_name(
+            remote_health[selected_server]?.health,
+            selected_server,
+          ) || AppText.get(KEY_ADMIN_SERVERS_UNAVAILABLE);
+    return server_title(server_titles, selected_server, fallback);
+  };
+  render_server_title = () => (
+    <>
+      <AdminServerTitle
+        key={this.state.selected_server}
+        title={this.get_selected_title()}
+        on_save={this.save_server_title}
+      />
+      <AdminServerRole
+        key={`role:${this.state.selected_server}`}
+        role={server_title(
+          this.state.server_roles,
+          this.state.selected_server,
+          AppText.get(KEY_ADMIN_SERVERS_MAIN_SERVER_ROLE),
+        )}
+        on_save={this.save_server_role}
+      />
+    </>
+  );
+
+  save_server_role = (value) => {
+    const server_roles = update_server_title(
+      AppSettings.get(KEY_ADMIN_SERVERS_ROLES) || {},
+      this.state.selected_server,
+      value,
+    );
+    AppSettings.on_settings_changed({
+      [KEY_ADMIN_SERVERS_ROLES]: server_roles,
+    });
+    this.setState({ server_roles });
+  };
+
+  save_server_title = (value) => {
+    const server_titles = update_server_title(
+      AppSettings.get(KEY_ADMIN_SERVERS_TITLES) || {},
+      this.state.selected_server,
+      value,
+    );
+    AppSettings.on_settings_changed({
+      [KEY_ADMIN_SERVERS_TITLES]: server_titles,
+    });
+    this.setState({ server_titles });
   };
 
   open_server_url_entry = () => {
@@ -348,7 +446,9 @@ export class AdminServers extends Component {
   };
 
   accept_server_url = (value) => {
-    const current_address_book = AppSettings.get(KEY_ADMIN_SERVERS_ADDRESS_BOOK);
+    const current_address_book = AppSettings.get(
+      KEY_ADMIN_SERVERS_ADDRESS_BOOK,
+    );
     const current_urls = normalize_server_urls(current_address_book);
     const accepted_url = normalize_server_url(value);
     const { accepted, address_book } = merge_server_url(
@@ -397,7 +497,9 @@ export class AdminServers extends Component {
     }
   };
 
-  refresh_remote_servers = async (server_urls = this.get_saved_server_urls()) => {
+  refresh_remote_servers = async (
+    server_urls = this.get_saved_server_urls(),
+  ) => {
     if (this.remote_refreshing) return;
     this.remote_refreshing = true;
     const checked_at = new Date();
@@ -435,23 +537,31 @@ export class AdminServers extends Component {
       server_urls,
       url_error,
       input_generation,
+      server_titles,
     } = this.state;
-    const server_name =
+    const server_name = server_title(
+      server_titles,
+      THIS_SERVER_KEY,
       (typeof health?.server_name === "string" && health.server_name.trim()) ||
-      AppText.get(KEY_ADMIN_SERVERS_THIS_SERVER);
-    const server_tree = make_server_tree(server_urls, remote_health, server_name);
+        AppText.get(KEY_ADMIN_SERVERS_THIS_SERVER),
+    );
+    const server_tree = make_server_tree(
+      server_urls,
+      remote_health,
+      server_name,
+      server_titles,
+      health,
+      error,
+    );
     const is_local_server = selected_server === THIS_SERVER_KEY;
-    const selected_remote = is_local_server ? null : remote_health[selected_server];
+    const selected_remote = is_local_server
+      ? null
+      : remote_health[selected_server];
     const selected_health = is_local_server ? health : selected_remote?.health;
     const selected_checked_at = is_local_server
       ? checked_at
       : selected_remote?.checked_at;
-    const selected_name = !selected_server
-      ? ""
-      : is_local_server
-        ? server_name
-        : get_remote_server_name(selected_health, selected_server) ||
-          AppText.get(KEY_ADMIN_SERVERS_UNAVAILABLE);
+    const selected_name = this.get_selected_title();
     const selected_url = is_local_server
       ? globalThis.location?.origin
       : selected_server;
@@ -482,8 +592,12 @@ export class AdminServers extends Component {
               <CoolInputText
                 key={`server-url-entry-${input_generation}`}
                 value={server_url_draft}
-                on_change={(server_url_draft) => this.setState({ server_url_draft })}
-                placeholder={AppText.get(KEY_ADMIN_SERVERS_SERVER_URL_PLACEHOLDER)}
+                on_change={(server_url_draft) =>
+                  this.setState({ server_url_draft })
+                }
+                placeholder={AppText.get(
+                  KEY_ADMIN_SERVERS_SERVER_URL_PLACEHOLDER,
+                )}
                 style_extra={{
                   boxSizing: "border-box",
                   width: "16rem",
@@ -519,7 +633,8 @@ export class AdminServers extends Component {
                 }}
                 aria-live="polite"
               >
-                {AppText.get(KEY_ADMIN_SERVERS_URL_ACCEPTED)} {server_urls[server_urls.length - 1]}
+                {AppText.get(KEY_ADMIN_SERVERS_URL_ACCEPTED)}{" "}
+                {server_urls[server_urls.length - 1]}
               </span>
             )}
           </styles.ContentWrapper>
@@ -542,24 +657,42 @@ export class AdminServers extends Component {
             </styles.ContentWrapper>
             <styles.ContentWrapper style={documentation_layout.markdown}>
               {url_error && (
-                <div role="alert" style={{ color: "#b22222", marginBottom: "0.75rem" }}>
+                <div
+                  role="alert"
+                  style={{ color: "#b22222", marginBottom: "0.75rem" }}
+                >
                   {url_error}
                 </div>
               )}
               {(is_local_server ? error : selected_remote?.error) && (
-                <div role="status" style={{ color: "#b22222", marginBottom: "0.75rem" }}>
-                  {AppText.get(KEY_ADMIN_SERVERS_REFRESH_ERROR)} {is_local_server ? error : selected_remote?.error}
+                <div
+                  role="status"
+                  style={{ color: "#b22222", marginBottom: "0.75rem" }}
+                >
+                  {AppText.get(KEY_ADMIN_SERVERS_REFRESH_ERROR)}{" "}
+                  {is_local_server ? error : selected_remote?.error}
                 </div>
               )}
               {markdown && (
-                <MarkdownStyles.Document style={documentation_layout.markdown_text}>
+                <MarkdownStyles.Document
+                  style={documentation_layout.markdown_text}
+                >
                   <ReactMarkdown
-                    components={markdown_components}
+                    components={{
+                      ...markdown_components,
+                      h1: this.render_server_title,
+                    }}
                     remarkPlugins={[remarkGfm]}
                   >
                     {markdown}
                   </ReactMarkdown>
                 </MarkdownStyles.Document>
+              )}
+              {selected_server && (
+                <AdminServerClients
+                  key={selected_server}
+                  server_url={is_local_server ? undefined : selected_server}
+                />
               )}
             </styles.ContentWrapper>
           </styles.ContentWrapper>
