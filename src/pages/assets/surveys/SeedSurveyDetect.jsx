@@ -37,7 +37,8 @@ import {
 
 const HALF_SPAN = 1.5;
 const ITERATION_LIMIT = 100000;
-const ORBIT_CHART_SIZE_PX = 550;
+const MAX_CHART_SIZE_PX = 550;
+const MIN_CHART_SIZE_PX = 250;
 
 /** Detection view with a coarse sample grid scaled to its display canvas. */
 export class SeedSurveyDetect extends Component {
@@ -287,6 +288,11 @@ export class SeedSurveyDetect extends Component {
   render() {
     const { width_px, height_px, focal_point } = this.props;
     const details = this.orbital_details();
+    // Two equal columns, four 8px margins and a 16px scrollbar allowance.
+    const chart_size = Math.max(
+      MIN_CHART_SIZE_PX,
+      Math.min(MAX_CHART_SIZE_PX, Math.floor((width_px - 48) / 2)),
+    );
     return (
       <div
         aria-label={AppText.get(KEY_ASSETS_SURVEYS_DETECT)}
@@ -295,19 +301,25 @@ export class SeedSurveyDetect extends Component {
           height: `${height_px}px`,
           maxHeight: "100%",
           overflow: "auto",
+          display: "flex",
+          flexWrap: "nowrap",
+          alignItems: "flex-start",
           textAlign: "left",
         }}
       >
         <div
           style={{
-            display: "inline-block",
-            margin: "0.5rem",
+            width: `${chart_size}px`,
+            flexShrink: 0,
+            minWidth: 0,
+            overflowX: "auto",
+            margin: "8px",
             verticalAlign: "top",
           }}
         >
           <SeedSurveyCanvas
             focal_point={focal_point}
-            size_px={ORBIT_CHART_SIZE_PX}
+            size_px={chart_size}
             source_size_px={250}
             half_span={HALF_SPAN}
             iteration_limit={ITERATION_LIMIT}
@@ -336,8 +348,11 @@ export class SeedSurveyDetect extends Component {
         </div>
         <div
           style={{
-            display: "inline-block",
-            margin: "0.5rem",
+            width: `${chart_size}px`,
+            flexShrink: 0,
+            minWidth: 0,
+            overflowX: "auto",
+            margin: "8px",
             verticalAlign: "top",
           }}
         >
@@ -346,8 +361,8 @@ export class SeedSurveyDetect extends Component {
             aria-label={AppText.get(KEY_ASSETS_SURVEYS_SEEDED_ORBIT)}
             style={{
               ...IMAGE_FRAME_STYLE,
-              width: `${ORBIT_CHART_SIZE_PX}px`,
-              height: `${ORBIT_CHART_SIZE_PX}px`,
+              width: `${chart_size}px`,
+              height: `${chart_size}px`,
               boxSizing: "border-box",
             }}
           >

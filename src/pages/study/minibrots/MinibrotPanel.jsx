@@ -106,6 +106,12 @@ export class MinibrotPanel extends Component {
         show_context_canvas={bailiwick_type === BAILIWICK_TYPE_FREEFORM}
         selected_minibrot={selected_minibrot}
         container_bounds={container_bounds}
+        width_px={Math.max(
+          0,
+          (Number(container_bounds.right) || 0) -
+            rendered_splitter_pos -
+            2 * MARGIN_PX,
+        )}
         ready={ready}
       />
     ) : (

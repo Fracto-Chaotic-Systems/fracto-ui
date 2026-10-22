@@ -14,8 +14,12 @@ selected-record details. `StudyMinibrots.jsx` selects the freeform mode;
   coverage, and send-to controls. The small locator canvas and property table
   share a normal-flow flex row, with the locator on the left and the table on
   the right. Both retain their width; neither is positioned over other content.
-  For freeform records, a 500×500 context canvas
-  appears below those details, initially using the saved display focal point and
+  For freeform records, the shared `CoolTabs` interface appears below those
+  details with “orbital” first (selected initially), followed by “ray paths”
+  and “seeds”.
+  The ray-paths tab contains the 500×500 context canvas, wake table and
+  calculation/cache messages. The canvas initially uses the
+  saved display focal point and
   `3 * Number(display_settings.scope)`. It does not recenter on `core_point`
   or modify the saved settings. Its container scrolls when the available height
   is insufficient; the canvas retains its fixed dimensions. The outer panel
@@ -291,3 +295,47 @@ is empty, and lists per-group failures after an empty final result. The older
 An empty group save during ongoing discovery reports saved calculation progress,
 not a final no-paths outcome. The no-paths persistence message appears only once
 calculation finishes (or fails) and the elapsed progress timer has stopped.
+
+## Orbital tab
+
+`MinibrotStudyTabs.jsx` owns tab selection and mounts only the active analysis
+view. The first/default “orbital” tab reuses `CircuitryChart.jsx` directly, with
+the selected record's core point as its focal point, and saved display scope.
+It includes the same interpolated orbital chart, radial/sequence mode, distance
+plot, point selection, animation transport and audio controls as the
+orbital circuitry page. The embedded chart uses a 600px height and the actual right-pane width, minus
+24px for the tab card and padding. The outer `MinibrotPanel` supplies that width
+from its bounds and splitter position, avoiding the former study-sidebar offset
+that overstated available space. Narrow panels use a 500px minimum chart layout
+and clip small horizontal excess in the orbital flex row instead of wrapping
+its right column. The distance plot is half the main chart height.
+
+The second “ray paths” tab retains its saved-display focal point and triple
+scope. No circuitry algorithms or data requests are duplicated. Changing the
+record keys a fresh chart at the new core; the shared chart's existing request
+guard suppresses stale results. Switching tabs unmounts the inactive chart,
+stopping its animation/audio or ray worker; cached ray groups remain persisted.
+The selected tab is local state, retained across record selection within the
+mounted panel. The standalone circuitry page's navigator settings are unchanged.
+
+The shared orbital animation now runs at a fixed 100 steps per second, the
+former slider maximum; neither host shows a speed slider.
+
+## Seeds tab
+
+The third/rightmost “seeds” tab mounts the existing `SeedSurveyDetect` at the
+selected record’s core point. It receives the same content-width budget as the
+orbital chart and a 600px height. Its existing `overflow: auto` container provides
+vertical scrolling for survey results and controls (and horizontal scrolling
+when necessary). Canvas sampling, hover orbit detection, the discoveries table,
+selection overlays and dynamic-ray controls remain owned by the shared survey
+components; no detector or request code is duplicated here.
+
+The component is keyed by record ID and core point so selecting another minibrot
+resets the survey. Only the active tab is mounted; leaving seeds releases its
+polling/scan/ray resources using the existing lifecycle. Unmount stops client
+polling, but does not cancel a survey job already running on the data server.
+
+The shared seeds view sizes both images equally from the tab width (250–550px),
+keeps its columns in a non-wrapping flex row and preserves 250×250 sampling.
+Results still scroll vertically; very narrow panels can scroll horizontally.

@@ -3,13 +3,16 @@
 `AssetsSurveys.jsx` in the parent folder owns navigation, tab selection, and
 splitter geometry. This folder owns the render and detect tabs and their helpers:
 
-- `SeedSurveyDetect.jsx` places a left-aligned 550×550 canvas in the detect tab.
+- `SeedSurveyDetect.jsx` places equal-sized survey and orbital canvases in a
+  non-wrapping flex row, up to 550×550 each. Available width determines their
+  shared display size, with a 250px minimum per chart.
   It requests a 250×250 grid over half-span `1.5` with a `100K` iteration cap,
-  using the navigator focal point. Its wrapper is an inline block with `0.5rem`
-  margins and top alignment, allowing adjacent components. The panel scrolls
-  when space is limited.
+  using the caller-provided focal point: the navigator on Assets Surveys, or the
+  selected minibrot core in the freeform “seeds” tab. Each column has 8px
+  margins, top alignment and a fixed share of the row, with horizontal scrolling
+  for a wider discoveries table. The panel scrolls when space is limited.
   Data loading, batching, and progress remain owned by `SeedSurveyCanvas`.
-  Beside it, a 550×550 chart reuses circuitry's `click_point_chart` markers,
+  Beside it, an equally sized chart reuses circuitry's `click_point_chart` markers,
   radial guides, prominent axes, and shared image frame. Mouse positions map
   continuously to seed coordinates over `[-1.5, 1.5]` with imaginary values
   increasing upward. The chart starts at `(0, 0)` and resets there when the
@@ -233,3 +236,13 @@ links detailed flowcharts and explains the current capability boundary:
 table selection validates rays for an existing orbital; finding a new orbital
 from only `c,n` remains a documented design. Published theoretical references
 are included in those guides.
+
+The freeform minibrot study also embeds `SeedSurveyDetect` directly in its third
+“seeds” tab. The host supplies a finite core point, available width and 600px
+height; Detect’s existing scrolling and cleanup behavior applies unchanged.
+
+Detect column sizing reserves 32px for margins and 16px for a vertical scrollbar;
+both displayed images shrink together to fit narrower hosts without wrapping.
+The 250×250 data grid is independent of display size. Below the combined minimum
+width the existing container scrolls horizontally, keeping both columns on one
+row; vertical scrolling remains available for the table and metadata.

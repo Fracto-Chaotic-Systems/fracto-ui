@@ -1,3 +1,4 @@
+import { circuitry_layout } from "./CircuitryLayout.js";
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { Line } from "react-chartjs-2";
@@ -9,7 +10,6 @@ ChartJS.register(...registerables);
 import { MainStyles as styles } from "../../../styles/MainStyles.jsx";
 import DataBackend from "../../../backend/DataBackend.jsx";
 import AppText from "../../../AppText.jsx";
-import AppSettings from "../../../AppSettings.jsx";
 import { render_pattern_block } from "../StudyUtils.jsx";
 import {
   build_waveform_profile,
@@ -33,7 +33,6 @@ import {
   KEY_STUDY_CIRCUITRY_PLAY,
   KEY_STUDY_CIRCUITRY_STOP,
 } from "../../../text/StudyText.jsx";
-import { KEY_STUDY_CIRCUITRY_ANIMATION_SPEED } from "../../../settings/StudySettings.jsx";
 import { render_coordinates } from "../../../utils/Dom.jsx";
 import { click_point_chart } from "../../../utils/render/PatternsUtils.jsx";
 import {
@@ -53,7 +52,6 @@ import CoolMediaTransport, {
   TRANSPORT_PLAY,
   TRANSPORT_REVERSE,
 } from "../../../utils/ui/CoolMediaTransport.jsx";
-import CoolSlider from "../../../utils/ui/CoolSlider.jsx";
 
 const TRANSPORT_OPERATIONS = [
   TRANSPORT_BEGIN,
@@ -63,8 +61,7 @@ const TRANSPORT_OPERATIONS = [
   TRANSPORT_END,
 ];
 const TRANSPORT_BUTTON_SIZE_PX = 35;
-const SPEED_SLIDER_WIDTH_PX = TRANSPORT_BUTTON_SIZE_PX * 5;
-const PATH_ANIMATION_RATE_FPS = 20;
+const PATH_ANIMATION_RATE_FPS = 100; // Former 20 FPS base at the maximum 5× speed.
 const GOLDEN_RATIO = 1.618;
 const DISTANCE_CHART_SAMPLE_COUNT = 10;
 const FREQUENCY_PER_CARDINALITY_HZ = 27.5;
@@ -94,13 +91,6 @@ export class CircuitryChart extends Component {
     animation_playing: false,
     animation_timer: null,
     audio_playing: false,
-    animation_speed: Math.min(
-      5,
-      Math.max(
-        1,
-        Number(AppSettings.get(KEY_STUDY_CIRCUITRY_ANIMATION_SPEED)) || 1,
-      ),
-    ),
   };
 
   audio_controller = new CircuitryAudioController({
@@ -211,26 +201,28 @@ export class CircuitryChart extends Component {
         );
         const waveform_continuity =
           validate_waveform_continuity(waveform_profile);
-        this.setState({
-          circuitry_data: {
-            ...rotated_response,
-            waveform_profile,
-            waveform_continuity,
+        this.setState(
+          {
+            circuitry_data: {
+              ...rotated_response,
+              waveform_profile,
+              waveform_continuity,
+            },
+            error: null,
+            animation_index: 0,
+            selected_orbital_row: -1,
+            selected_orbital_point: null,
           },
-          error: null,
-          animation_index: 0,
-          selected_orbital_row: -1,
-          selected_orbital_point: null,
-        },
-        () => {
-          if (
-            resume_audio &&
-            resume_generation === this.audio_resume_generation &&
-            !this.is_unmounted
-          ) {
-            this.play_audio(AUDIO_TRANSITION_CROSSFADE);
-          }
-        });
+          () => {
+            if (
+              resume_audio &&
+              resume_generation === this.audio_resume_generation &&
+              !this.is_unmounted
+            ) {
+              this.play_audio(AUDIO_TRANSITION_CROSSFADE);
+            }
+          },
+        );
       },
       true,
       this.state.radial_sweep ? "radial_sweep" : "hermite",
@@ -289,8 +281,7 @@ export class CircuitryChart extends Component {
     if (nearest_index === 0) {
       return normalized_response;
     }
-    const samples_per_interval =
-      (samples.length - 1) / orbital_points.length;
+    const samples_per_interval = (samples.length - 1) / orbital_points.length;
     if (!Number.isInteger(samples_per_interval) || samples_per_interval < 1) {
       return normalized_response;
     }
@@ -303,10 +294,7 @@ export class CircuitryChart extends Component {
     return {
       ...normalized_response,
       orbital_points: rotated_orbital_points,
-      result: [
-        ...rotated_sample_cycle,
-        { ...rotated_sample_cycle[0] },
-      ],
+      result: [...rotated_sample_cycle, { ...rotated_sample_cycle[0] }],
     };
   };
 
@@ -412,27 +400,13 @@ export class CircuitryChart extends Component {
     this.clear_animation_timer();
     this.animation_timer_handle = setInterval(
       () => this.advance_animation(direction),
-      1000 / (PATH_ANIMATION_RATE_FPS * this.state.animation_speed),
+      1000 / PATH_ANIMATION_RATE_FPS,
     );
     this.setState({
       animation_direction: direction,
       animation_playing: true,
       animation_timer: this.animation_timer_handle,
       selected_orbital_point: null,
-    });
-  };
-
-  on_animation_speed_changed = (event, value) => {
-    const requested_speed = Number(value ?? event.target.value);
-    if (!Number.isFinite(requested_speed)) return;
-    const animation_speed = Math.min(5, Math.max(1, requested_speed));
-    this.setState({ animation_speed }, () => {
-      if (this.state.animation_playing) {
-        this.start_animation(this.state.animation_direction || 1);
-      }
-    });
-    AppSettings.on_settings_changed({
-      [KEY_STUDY_CIRCUITRY_ANIMATION_SPEED]: animation_speed,
     });
   };
 
@@ -472,12 +446,14 @@ export class CircuitryChart extends Component {
       animation_index,
       selected_orbital_row,
       selected_orbital_point,
-      animation_speed,
       audio_playing,
     } = this.state;
-    const chart_size = Math.floor(
-      Math.max(0, Math.min(width_px, height_px)) * 0.85,
-    );
+    const {
+      chart_size,
+      options_width,
+      distance_chart_width,
+      distance_chart_height,
+    } = circuitry_layout(width_px, height_px);
     const points_list_height = Math.floor(Math.max(0, height_px) / 3);
     const points = (circuitry_data?.result || []).map(({ C }) => ({
       x: C.re,
@@ -551,7 +527,8 @@ export class CircuitryChart extends Component {
     const distance_chart_data =
       circuitry_data?.Q && distance_sample_count > 0
         ? Array.from({ length: distance_sample_count }, (_, sample_index) => {
-            const is_closing_sample = sample_index === distance_sample_count - 1;
+            const is_closing_sample =
+              sample_index === distance_sample_count - 1;
             const result_index = is_closing_sample
               ? interpolated_points.length - 1
               : Math.round(
@@ -623,7 +600,7 @@ export class CircuitryChart extends Component {
             (circuitry_data.result.at(-2)?.t || 0) -
               (circuitry_data.result[0]?.t || 0),
           ) /
-            (2 * Math.PI)
+          (2 * Math.PI)
         : 0;
     const orbital_cycle_count = radial_sweep
       ? Math.max(
@@ -664,7 +641,9 @@ export class CircuitryChart extends Component {
       width: `${chart_size}px`,
       height: `${chart_size}px`,
       display: "inline-block",
-      margin: "0.5rem",
+      margin: "8px",
+      flexShrink: 0,
+      boxSizing: "border-box",
       backgroundColor: no_orbital ? "#eeeeee" : undefined,
       position: no_orbital ? "relative" : undefined,
     };
@@ -679,20 +658,17 @@ export class CircuitryChart extends Component {
       fontSize: "1.125rem",
       textAlign: "center",
     };
-    const options_width = Math.max(0, width_px - chart_size);
-    const controls_width = Math.max(options_width, 100);
+    const controls_width = options_width;
     const options_style = {
       width: `${options_width}px`,
-      height: `${chart_size}px`,
+      margin: "0 8px",
+      boxSizing: "border-box",
       verticalAlign: "top",
-      overflow: "visible",
+      flexShrink: 1,
+      minWidth: 0,
+      overflowX: "hidden",
       textAlign: "left",
     };
-    const distance_chart_width = Math.max(0, controls_width);
-    const distance_chart_height = Math.max(
-      1,
-      Math.floor(distance_chart_width / GOLDEN_RATIO),
-    );
     const distance_values = distance_chart_data.map(({ y }) => y);
     const distance_min = distance_values.length
       ? Math.min(...distance_values)
@@ -770,7 +746,16 @@ export class CircuitryChart extends Component {
     };
     /* spectral power chart removed; diagnostics now live on detector page */
     return (
-      <>
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "nowrap",
+          alignItems: "flex-start",
+          width: "100%",
+          minWidth: 0,
+          overflowX: "hidden",
+        }}
+      >
         <styles.ContentWrapper style={chart_style}>
           {error ? (
             error
@@ -935,21 +920,6 @@ export class CircuitryChart extends Component {
                 on_operation={this.on_transport_operation}
                 disabled={points.length === 0}
               />
-              <div
-                style={{
-                  width: `${SPEED_SLIDER_WIDTH_PX}px`,
-                  margin: "0.25rem auto 0",
-                }}
-              >
-                <CoolSlider
-                  min={1}
-                  max={5}
-                  value={animation_speed}
-                  step_count={40}
-                  is_vertical={false}
-                  on_change={this.on_animation_speed_changed}
-                />
-              </div>
             </div>
             <div
               style={{
@@ -995,7 +965,7 @@ export class CircuitryChart extends Component {
             />
           </div>
         </styles.ContentWrapper>
-      </>
+      </div>
     );
   }
 }

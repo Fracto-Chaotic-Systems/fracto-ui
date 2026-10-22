@@ -126,6 +126,7 @@ const harness = (Q = { x: 0, y: 0 }) => {
 
 test("detect places a 250-square source and a 550-square orbital chart side by side", () => {
   const { component, focal_point } = harness();
+  component.props.width_px = 1200;
   const tree = component.render();
   assert.equal(tree.props.style.textAlign, "left");
   const canvas = tree.children[0].children[0];
@@ -136,7 +137,8 @@ test("detect places a 250-square source and a 550-square orbital chart side by s
   assert.equal(canvas.props.iteration_limit, 100000);
   assert.equal(canvas.props.aria_label, "detect-canvas");
   assert.equal(canvas.props.on_seed_hover, component.on_seed_hover);
-  assert.equal(tree.children[1].props.style.display, "inline-block");
+  assert.equal(tree.props.style.display, "flex");
+  assert.equal(tree.props.style.flexWrap, "nowrap");
   assert.equal(tree.children[1].children[0].props.style.width, "550px");
   assert.equal(tree.children[1].children[0].props.style.height, "550px");
 });
@@ -468,4 +470,18 @@ test("rays belong only to table selection and are hidden during hover", () => {
   h.component.on_seed_leave();
   assert.equal(h.ray_paints.length, paints + 1);
   assert.equal(h.ray_paints.at(-1)[2], rays);
+});
+
+test("detect shrinks both columns to fit the tab without changing the sample grid", () => {
+  const h = harness();
+  h.component.props.width_px = 876;
+  const view = h.component.render();
+  const canvas = view.children[0].children[0];
+  assert.equal(canvas.props.size_px, 414);
+  assert.equal(canvas.props.source_size_px, 250);
+  assert.equal(view.children[0].props.style.width, "414px");
+  assert.equal(view.children[1].props.style.width, "414px");
+  assert.equal(view.children[1].children[0].props.style.height, "414px");
+  assert.equal(view.props.style.flexWrap, "nowrap");
+  assert.equal(view.props.style.overflow, "auto");
 });

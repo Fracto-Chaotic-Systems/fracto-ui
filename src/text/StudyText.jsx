@@ -1,3 +1,6 @@
+export const KEY_STUDY_MINIBROT_SEEDS_TAB = "study/minibrot_seeds_tab";
+export const KEY_STUDY_MINIBROT_ORBITAL_TAB = "study/minibrot_orbital_tab";
+export const KEY_STUDY_MINIBROT_RAY_PATHS_TAB = "study/minibrot_ray_paths_tab";
 const STUDY_FOLDER = "study";
 
 export const KEY_STUDY_OVERVIEW = `${STUDY_FOLDER}/study_overview`;
@@ -142,6 +145,9 @@ export const MINIBROT_RAY_TEXT = {
 };
 
 export const APP_STUDY_TEXT = {
+  [KEY_STUDY_MINIBROT_SEEDS_TAB]: "seeds",
+  [KEY_STUDY_MINIBROT_ORBITAL_TAB]: "orbital",
+  [KEY_STUDY_MINIBROT_RAY_PATHS_TAB]: "ray paths",
   [MINIBROT_RAY_TEXT.cache_loading]: "Loading saved ray paths…",
   [MINIBROT_RAY_TEXT.cache_loaded]: "Saved ray paths loaded.",
   [MINIBROT_RAY_TEXT.cache_load_failed]:

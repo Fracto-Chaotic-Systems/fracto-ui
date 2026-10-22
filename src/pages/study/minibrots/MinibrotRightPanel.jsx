@@ -3,15 +3,10 @@ import PropTypes from "prop-types";
 
 import { MainStyles as styles } from "../../../styles/MainStyles.jsx";
 import CoolStyles from "../../../utils/ui/styles/CoolStyles.jsx";
-import AppSettings from "../../../AppSettings.jsx";
 import AppText from "../../../AppText.jsx";
-import {
-  KEY_STUDY_MINIBROTS_RENDER_SPLITTER_POS,
-  KEY_STUDY_SPLITTER_POS_PX,
-} from "../../../settings/StudySettings.jsx";
 import { render_magnitude, render_pattern_block } from "../StudyUtils.jsx";
 import FractoLegend from "../../../utils/render/FractoLegend.jsx";
-import MinibrotContextCanvas from "./MinibrotContextCanvas.jsx";
+import MinibrotStudyTabs from "./MinibrotStudyTabs.jsx";
 import { render_coordinates, render_scalar } from "../../../utils/Dom.jsx";
 import {
   CELL_ALIGN_LEFT,
@@ -32,8 +27,6 @@ import {
 } from "../../../text/NavigatorText.jsx";
 import { render_send_to } from "../../utils/SendTo.jsx";
 import { render_coverage } from "../../utils/Coverage.jsx";
-
-const CONTEXT_SCOPE_FACTOR = 3;
 
 const TABLE_COLUMNS = [
   {
@@ -58,6 +51,7 @@ export class MinibrotRightPanel extends Component {
   static propTypes = {
     selected_minibrot: PropTypes.object.isRequired,
     container_bounds: PropTypes.object.isRequired,
+    width_px: PropTypes.number.isRequired,
     ready: PropTypes.bool.isRequired,
     show_context_canvas: PropTypes.bool,
   };
@@ -129,40 +123,19 @@ export class MinibrotRightPanel extends Component {
     );
   };
 
-  render_context_canvas = () => {
+  render_study_tabs = (width_px) => {
     const { selected_minibrot, show_context_canvas } = this.props;
     if (!show_context_canvas || !selected_minibrot.pattern) return null;
-    const display_settings = JSON.parse(selected_minibrot.display_settings);
-    const { focal_point } = display_settings;
-    const scope = Number(display_settings.scope) * CONTEXT_SCOPE_FACTOR;
-    if (
-      !Number.isFinite(scope) ||
-      scope <= 0 ||
-      !Number.isFinite(focal_point?.x) ||
-      !Number.isFinite(focal_point?.y)
-    )
-      return null;
     return (
-      <MinibrotContextCanvas
-        key={`${selected_minibrot.id}:${selected_minibrot.core_point}:${selected_minibrot.pattern}:${focal_point.x}:${focal_point.y}:${scope}`}
-        minibrot_id={selected_minibrot.id}
-        core_point={JSON.parse(selected_minibrot.core_point)}
-        period={Number(selected_minibrot.pattern)}
-        focal_point={focal_point}
-        scope={scope}
+      <MinibrotStudyTabs
+        selected_minibrot={selected_minibrot}
+        width_px={width_px}
       />
     );
   };
 
   render() {
-    const { selected_minibrot, container_bounds, ready, show_context_canvas } =
-      this.props;
-    const splitter_pos = AppSettings.get(
-      KEY_STUDY_MINIBROTS_RENDER_SPLITTER_POS,
-    );
-    const main_splitter_pos = AppSettings.get(KEY_STUDY_SPLITTER_POS_PX);
-    const panel_width_px =
-      container_bounds.width - splitter_pos + main_splitter_pos;
+    const { container_bounds, show_context_canvas, width_px } = this.props;
 
     const title_bar = this.title_bar();
     const legend_bar = this.legend_bar();
@@ -184,7 +157,7 @@ export class MinibrotRightPanel extends Component {
         }}
       >
         {blocks}
-        {this.render_context_canvas()}
+        {this.render_study_tabs(width_px)}
       </CoolStyles.Block>
     );
   }
