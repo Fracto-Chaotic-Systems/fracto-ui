@@ -15,6 +15,29 @@ see [its README](surveys/README.md) for responsibilities.
   `AssetsVideoGenerator.jsx` provide asset creation, browsing, and video tools.
 - `AssetsDetector.jsx` and `AssetsSimulator.jsx` compose navigator-based asset
   tools with their own persisted frame and splitter settings.
+- `AssetsSimulator.jsx` keeps the interactive 2D navigator on the left and mounts
+  a lazy-loaded Three.js terrain preview on the right of its main vertical
+  splitter. Selecting a new focal point or scope loads a 129×129 buffer from
+  the existing tiles endpoint; camera orbit, zoom, pan, top/oblique presets,
+  wireframe, and resizing do not fetch data. Reload retries the current view.
+  `SimulatorTerrain.jsx` owns the WebGL scene, request sequencing and resource
+  cleanup. It debounces navigation and ignores stale responses. Source colors
+  come directly from the existing SDK canvas renderer. The terrain uses an
+  unlit material with sRGB input/output and no tone mapping, so surface angles
+  do not wash out or darken the standard pattern colors. Nearest-neighbor
+  texture sampling avoids inventing colors between adjacent pattern samples.
+  `SimulatorTerrainStyles.jsx` owns preview styles.
+  `SimulatorTerrainData.js` converts column-major numerical data to a local
+  Y-up mesh (complex imaginary +y is world -Z). Both interior and escaping
+  counts use a provisional `0.25 * min(1, log1p(iterations)/log1p(1000000))`
+  height in complex-plane units, independent of each tile's value range.
+  Missing samples, invalid counts and pattern -1 are excluded from triangles.
+  The legacy buffer cannot distinguish every estimated or capped result;
+  these heights are for visual evaluation, not a certified convergence surface.
+  Compression and separate regional height calibration are deferred until the
+  initial rendering has been evaluated. Mesh positions match the endpoint's
+  sample spacing (`scope / width`); the last row/column falls one sample short
+  of the outer request boundary. Camera fitting accounts for relief height.
 - `AssetsSurveys.jsx` is the seed-surveys page selected by the “surveys” sidebar
   item. It owns independent persisted frame and navigator splitter settings.
   It keeps the navigator in a left pane in both modes, separated from the

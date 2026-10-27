@@ -41,6 +41,16 @@ export const KEY_ASSETS_LORE_STYLES_ENTRY = `${ASSETS_FOLDER}/assets_lore_styles
 export const KEY_ASSETS_LORE_STYLES_VIEW = `${ASSETS_FOLDER}/assets_lore_styles_view`;
 export const KEY_ASSETS_DETECTOR = `${ASSETS_FOLDER}/assets_detector`;
 export const KEY_ASSETS_SIMULATOR = `${ASSETS_FOLDER}/assets_simulator`;
+export const TERRAIN_TEXT = {
+  top: "assets/terrain_top",
+  reset: "assets/terrain_reset",
+  wireframe: "assets/terrain_wireframe",
+  reload: "assets/terrain_reload",
+  loading: "assets/terrain_loading",
+  ready: "assets/terrain_ready",
+  failed: "assets/terrain_failed",
+  help: "assets/terrain_help",
+};
 export const KEY_ASSETS_SURVEYS = `${ASSETS_FOLDER}/seed_surveys_title`;
 export const KEY_ASSETS_SURVEYS_SIDEBAR = `${ASSETS_FOLDER}/seed_surveys_sidebar`;
 export const KEY_ASSETS_SURVEYS_PREVIEW = `${ASSETS_FOLDER}/seed_surveys_preview`;
@@ -139,6 +149,14 @@ export const KEY_LORE_OP_CLONE_CONTENT = `${LORE_FOLDER}/clone_content`;
 export const KEY_LORE_OP_REMOVE_CONTENT = `${LORE_FOLDER}/remove_content`;
 
 export const APP_ASSETS_TEXT = {
+  [TERRAIN_TEXT.top]: "top view",
+  [TERRAIN_TEXT.reset]: "reset oblique view",
+  [TERRAIN_TEXT.wireframe]: "wireframe",
+  [TERRAIN_TEXT.reload]: "reload terrain",
+  [TERRAIN_TEXT.loading]: "Loading terrain…",
+  [TERRAIN_TEXT.ready]: "Terrain preview · maximum elevation 0.25 units",
+  [TERRAIN_TEXT.failed]: "Unable to display terrain. Check WebGL support or reload terrain.",
+  [TERRAIN_TEXT.help]: "Drag to orbit · scroll to zoom · right-drag to pan. Heights are provisional.",
   [RAY_TEXT_KEYS.idle]:
     "Trace external rays for the selected orbital configuration.",
   [RAY_TEXT_KEYS.no_selection]:

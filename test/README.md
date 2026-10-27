@@ -4,6 +4,9 @@ This directory contains Node.js tests for UI behavior and pure feature helpers.
 Run a focused suite with its `test:*` script in `package.json`; tests use the
 built-in `node:test` runner and do not require a browser unless noted.
 
+- `simulator_terrain.test.js` verifies the provisional height cap, sample/texture
+  orientation, missing-data holes, stale results, local wireframe, and cleanup.
+
 - `admin_commit_timeline.test.js` verifies commit timeline grouping and
   presentation helpers.
 - `admin_reference_tree.test.js` verifies construction and restoration of the
