@@ -2,16 +2,15 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import FractoCanvasBuffer from "@fracto/sdk/FractoCanvasBuffer.js";
 import TilesBackend from "../../backend/TilesBackend.jsx";
 import AppSettings from "../../AppSettings.jsx";
 import AppText from "../../AppText.jsx";
 import { KEY_NAVIGATOR_STRATEGY } from "../../settings/NavigatorSettings.jsx";
 import { TERRAIN_TEXT } from "../../text/AssetsText.jsx";
-import { terrain_mesh_data } from "./SimulatorTerrainData.js";
+import { TERRAIN_PREVIEW_SIZE, TERRAIN_RESOLUTIONS, terrain_resolution } from "./SimulatorTerrainData.js";
+import { KEY_ASSETS_SIMULATOR_RESOLUTION } from "../../settings/AssetsSettings.jsx";
+import SimulatorTerrainLoader from "./SimulatorTerrainLoader.js";
 import { TerrainPanel, TerrainToolbar, TerrainHost, TerrainMessage } from "./SimulatorTerrainStyles.jsx";
-
-const SAMPLE_SIZE = 129;
 
 /** Bounded terrain preview; orbiting is independent of data loading. */
 export default class SimulatorTerrain extends Component {
@@ -23,7 +22,9 @@ export default class SimulatorTerrain extends Component {
   };
   host = React.createRef();
   sequence = 0;
-  state = { status: "loading", wireframe: false };
+  loader = new SimulatorTerrainLoader();
+  state = { status: "loading", wireframe: false, loaded_size: null,
+    resolution: terrain_resolution(AppSettings.get(KEY_ASSETS_SIMULATOR_RESOLUTION)) };
 
   componentDidMount() {
     try {
@@ -41,6 +42,7 @@ export default class SimulatorTerrain extends Component {
       this.observer = new ResizeObserver(this.resize);
       this.observer.observe(this.host.current);
       this.subscription = AppSettings.subscribe(KEY_NAVIGATOR_STRATEGY, this.schedule_load);
+      this.resolution_subscription = AppSettings.subscribe(KEY_ASSETS_SIMULATOR_RESOLUTION, this.on_resolution_changed);
       this.resize();
       this.schedule_load();
     } catch (error) {
@@ -59,8 +61,10 @@ export default class SimulatorTerrain extends Component {
   componentWillUnmount() {
     this.sequence++;
     clearTimeout(this.timer);
+    this.loader.cancel();
     this.observer?.disconnect();
     if (this.subscription) AppSettings.unsubscribe(this.subscription);
+    if (this.resolution_subscription) AppSettings.unsubscribe(this.resolution_subscription);
     this.controls?.dispose();
     this.dispose_mesh();
     this.renderer?.dispose();
@@ -93,27 +97,41 @@ export default class SimulatorTerrain extends Component {
   schedule_load = () => {
     const sequence = ++this.sequence;
     clearTimeout(this.timer);
+    this.loader.cancel();
     if (!this.controls || !this.props.focal_point) return;
-    this.setState({ status: "loading" });
+    this.setState({ status: "loading", loaded_size: null });
     this.timer = setTimeout(() => this.load(sequence), 180);
   };
 
   load = async (sequence) => {
     const { focal_point, scope } = this.props;
+    const resolution = this.state.resolution;
+    const strategy = AppSettings.get(KEY_NAVIGATOR_STRATEGY) || "turbo";
+    let preview_ready = false;
     try {
-      const result = await TilesBackend.canvas_buffer("canvas_buffer", {
-        width_px: SAMPLE_SIZE, aspect_ratio: 1, resolution_factor: 1.5,
-        focal_point_x: focal_point.x, focal_point_y: focal_point.y, scope,
-        strategy: AppSettings.get(KEY_NAVIGATOR_STRATEGY) || "turbo",
-      });
-      if (sequence !== this.sequence) return;
-      const buffer = result?.canvas_buffer;
-      const data = terrain_mesh_data(buffer, scope);
-      const canvas = document.createElement("canvas");
-      canvas.width = buffer.length;
-      canvas.height = buffer[0].length;
-      FractoCanvasBuffer.buffer_to_canvas(buffer, canvas.getContext("2d"));
-      const texture = new THREE.CanvasTexture(canvas);
+      for (const size of resolution === TERRAIN_PREVIEW_SIZE ? [resolution] : [TERRAIN_PREVIEW_SIZE, resolution]) {
+        const url = TilesBackend.canvas_buffer_url("canvas_buffer", {
+          width_px: size, aspect_ratio: 1, resolution_factor: 1.5,
+          focal_point_x: focal_point.x, focal_point_y: focal_point.y, scope, strategy,
+        });
+        const data = await this.loader.load({ url, scope });
+        if (sequence !== this.sequence) return;
+        this.install_mesh(data, scope, !preview_ready);
+        preview_ready = true;
+        this.setState({ status: size === resolution ? "ready" : "refining", loaded_size: size });
+      }
+    } catch (error) {
+      if (sequence !== this.sequence || error.name === "AbortError") return;
+      console.error("Terrain loading failed", error);
+      this.setState({ status: preview_ready ? "detail_failed" : "failed" });
+    }
+  };
+
+  install_mesh = (data, scope, fit_view) => {
+      const texture = new THREE.DataTexture(data.pixels, data.width, data.height, THREE.RGBAFormat);
+      // Worker image data has the same top-down order as the old canvas texture.
+      texture.flipY = true;
+      texture.needsUpdate = true;
       texture.colorSpace = THREE.SRGBColorSpace;
       texture.minFilter = THREE.NearestFilter;
       texture.magFilter = THREE.NearestFilter;
@@ -121,8 +139,7 @@ export default class SimulatorTerrain extends Component {
       const geometry = new THREE.BufferGeometry();
       geometry.setAttribute("position", new THREE.BufferAttribute(data.positions, 3));
       geometry.setAttribute("uv", new THREE.BufferAttribute(data.uvs, 2));
-      geometry.setIndex(data.indices);
-      geometry.computeVertexNormals();
+      geometry.setIndex(new THREE.BufferAttribute(data.indices, 1));
       this.dispose_mesh();
       // Preserve the 2D renderer's palette regardless of surface angle or lights.
       this.mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({
@@ -132,14 +149,15 @@ export default class SimulatorTerrain extends Component {
       this.scene.add(this.mesh);
       this.extent = Math.max(scope, data.max_height, 0.001);
       this.target_height = data.max_height / 2;
-      this.set_view("oblique");
-      this.setState({ status: "ready" });
-    } catch (error) {
-      if (sequence !== this.sequence) return;
-      console.error("Terrain loading failed", error);
-      this.setState({ status: "failed" });
-    }
+      if (fit_view) this.set_view("oblique");
+      else this.draw();
   };
+
+  on_resolution_changed = (_key, value) => this.setState({ resolution: terrain_resolution(value) }, this.schedule_load);
+
+  change_resolution = (event) => AppSettings.on_settings_changed({
+    [KEY_ASSETS_SIMULATOR_RESOLUTION]: terrain_resolution(Number(event.target.value)),
+  });
 
   set_view = (view) => {
     if (!this.controls || !this.extent) return;
@@ -164,13 +182,20 @@ export default class SimulatorTerrain extends Component {
   render() {
     return <TerrainPanel>
       <TerrainToolbar>
+        <label>{AppText.get(TERRAIN_TEXT.resolution)}
+          <select value={this.state.resolution} onChange={this.change_resolution}>
+            {TERRAIN_RESOLUTIONS.map((size) => <option key={size} value={size}>{size} × {size}</option>)}
+          </select>
+        </label>
         <button onClick={() => this.set_view("top")}>{AppText.get(TERRAIN_TEXT.top)}</button>
         <button onClick={() => this.set_view("oblique")}>{AppText.get(TERRAIN_TEXT.reset)}</button>
         <label><input type="checkbox" checked={this.state.wireframe} onChange={this.toggle_wireframe} />
           {AppText.get(TERRAIN_TEXT.wireframe)}</label>
         <button onClick={this.schedule_load}>{AppText.get(TERRAIN_TEXT.reload)}</button>
       </TerrainToolbar>
-      <TerrainMessage aria-live="polite">{AppText.get(TERRAIN_TEXT[this.state.status])}</TerrainMessage>
+      <TerrainMessage aria-live="polite">{AppText.get(TERRAIN_TEXT[this.state.status])}
+        {this.state.loaded_size && ` · ${this.state.loaded_size} × ${this.state.loaded_size}`}
+      </TerrainMessage>
       <TerrainHost ref={this.host} />
       <TerrainMessage>{AppText.get(TERRAIN_TEXT.help)}</TerrainMessage>
     </TerrainPanel>;

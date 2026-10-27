@@ -17,11 +17,27 @@ see [its README](surveys/README.md) for responsibilities.
   tools with their own persisted frame and splitter settings.
 - `AssetsSimulator.jsx` keeps the interactive 2D navigator on the left and mounts
   a lazy-loaded Three.js terrain preview on the right of its main vertical
-  splitter. Selecting a new focal point or scope loads a 129×129 buffer from
-  the existing tiles endpoint; camera orbit, zoom, pan, top/oblique presets,
+  splitter. Selecting a new focal point or scope loads a 129×129 preview, then
+  upgrades it to the selected resolution (129, 250, 500, 1000, 1500, or 2000 samples per
+  edge; default 500). The selection persists in `assets/simulator/terrain_resolution`.
+  The detail upgrade preserves the camera, and failure retains the coarse mesh.
+  Both stages use the existing tiles endpoint; camera orbit, zoom, pan, top/oblique presets,
   wireframe, and resizing do not fetch data. Reload retries the current view.
   `SimulatorTerrain.jsx` owns the WebGL scene, request sequencing and resource
-  cleanup. It debounces navigation and ignores stale responses. Source colors
+  cleanup. `SimulatorTerrainLoader.js` owns disposable workers; navigation,
+  resolution changes, and unmount terminate obsolete workers. `SimulatorTerrain.worker.js`
+  fetches and parses source buffers, creates the geometry, and renders standard
+  colors using an OffscreenCanvas, transferring typed geometry and RGBA pixels
+  back to the UI without copying their buffers. This requires worker 2D
+  OffscreenCanvas support. The main thread only installs textures/geometry and
+  renders views; it does not process the large nested source buffer.
+  Indices are preallocated Uint32 arrays (up to 7,992,002 triangles at 2000×2000).
+  Unlit meshes omit normals. Position, UV and index buffers occupy about 44 MB
+  per complete set at 1000×1000 or 176 MB at 2000×2000, excluding textures,
+  CPU/GPU duplication,
+  worker source data and temporary allocations. Detail requests can still be
+  expensive on the server and GPU; this is a bounded preview, not streaming LOD.
+  It debounces navigation and ignores stale responses. Source colors
   come directly from the existing SDK canvas renderer. The terrain uses an
   unlit material with sRGB input/output and no tone mapping, so surface angles
   do not wash out or darken the standard pattern colors. Nearest-neighbor
@@ -29,8 +45,21 @@ see [its README](surveys/README.md) for responsibilities.
   `SimulatorTerrainStyles.jsx` owns preview styles.
   `SimulatorTerrainData.js` converts column-major numerical data to a local
   Y-up mesh (complex imaginary +y is world -Z). Both interior and escaping
-  counts use a provisional `0.25 * min(1, log1p(iterations)/log1p(1000000))`
-  height in complex-plane units, independent of each tile's value range.
+  counts use a provisional `(scope / 15) * min(1, log1p(iterations)/log1p(1000000))`
+  height in complex-plane units, independent of each tile's value range. The
+  maximum height tracks the selected 2D navigator scope at every zoom level.
+  Smoothing is always 100%; there is no slider or persisted smoothing setting.
+  Old stored smoothing preferences are ignored. `SimulatorTerrainSmoothing.js`
+  applies a radius-two separable Gaussian kernel to the heights. Coverage
+  normalization ignores invalid samples and handles mesh edges without treating
+  missing neighbors as zero. Invalid vertices remain holes. Smoothing changes
+  neither pattern colors nor source iteration data, and convex averaging keeps
+  relief within the existing scope/15 cap (subject to Float32 precision).
+  Radius is measured in samples, so its physical footprint depends on resolution.
+  Smoothing runs during mesh construction in the existing worker. Original
+  positions and validity are not transferred back to the UI or cached there,
+  avoiding the extra 13 MB of persistent buffers at 1000×1000 previously needed
+  for interactive smoothing adjustments.
   Missing samples, invalid counts and pattern -1 are excluded from triangles.
   The legacy buffer cannot distinguish every estimated or capped result;
   these heights are for visual evaluation, not a certified convergence surface.

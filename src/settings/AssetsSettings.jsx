@@ -52,6 +52,7 @@ export const KEY_ASSETS_DETECTOR_STEPS_SPLITTER_POS = `${ASSETS_DETECTOR_FOLDER}
 export const KEY_ASSETS_DETECTOR_RESOLUTION = `${ASSETS_DETECTOR_FOLDER}/generator_resolution`;
 
 export const KEY_ASSETS_SIMULATOR_FRAME_SETTINGS = `${ASSETS_SIMULATOR_FOLDER}/frame_settings`;
+export const KEY_ASSETS_SIMULATOR_RESOLUTION = `${ASSETS_SIMULATOR_FOLDER}/terrain_resolution`;
 export const KEY_ASSETS_SURVEYS_FRAME_SETTINGS = `${ASSETS_SURVEYS_FOLDER}/frame_settings`;
 export const KEY_ASSETS_SURVEYS_SPLITTER_POS = `${ASSETS_SURVEYS_FOLDER}/splitter_pos`;
 export const KEY_ASSETS_SURVEYS_HALF_SPAN = `${ASSETS_SURVEYS_FOLDER}/half_span`;
@@ -188,6 +189,12 @@ export const APP_ASSETS_SETTINGS = {
     description: "Frame settings of the assets flight simulator page",
     persist: true,
     no_copy: true,
+  },
+  [KEY_ASSETS_SIMULATOR_RESOLUTION]: {
+    data_type: TYPE_NUMBER,
+    default_value: 500,
+    description: "Detailed terrain samples per edge (129, 250, 500, 1000, 1500 or 2000)",
+    persist: true,
   },
   [KEY_ASSETS_SURVEYS_FRAME_SETTINGS]: {
     data_type: TYPE_OBJECT,

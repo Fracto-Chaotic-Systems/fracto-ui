@@ -74,16 +74,18 @@ export class TilesBackend {
       `${service_origin("tiles")}/tile_coverage?${new URLSearchParams(params)}`,
     );
 
-  /** Renders a canvas buffer for a tile-service endpoint.
+  /** Builds a canvas-buffer URL for UI requests and terrain worker requests.
    * @param {string} data_endpoint Endpoint name, normally canvas_buffer.
    * @param {Object} params Canvas dimensions and focal-point parameters.
-   * @returns {Promise<Object>} Response containing canvas_buffer data.
-   * @calledBy FractoCanvasClient.fill_canvas
+   * @returns {string} Tile-service request URL.
+   * @calledBy SimulatorTerrain.load, TilesBackend.canvas_buffer
    */
+  static canvas_buffer_url = (data_endpoint, params) =>
+    `${service_origin("tiles")}/${data_endpoint}?${new URLSearchParams(params)}`;
+
+  /** Requests numerical canvas data using the same URL as worker-based loading. */
   static canvas_buffer = (data_endpoint, params) =>
-    request_json(
-      `${service_origin("tiles")}/${data_endpoint}?${new URLSearchParams(params)}`,
-    );
+    request_json(TilesBackend.canvas_buffer_url(data_endpoint, params));
 
   /** Fetches a heat-map buffer for a rendered frame.
    * @param {Object} frame_settings Frame dimensions, focal point, and scope.
