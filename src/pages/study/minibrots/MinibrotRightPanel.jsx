@@ -27,6 +27,7 @@ import {
 } from "../../../text/NavigatorText.jsx";
 import { render_send_to } from "../../utils/SendTo.jsx";
 import { render_coverage } from "../../utils/Coverage.jsx";
+import MinibrotTerrainCache from "./MinibrotTerrainCache.jsx";
 
 const TABLE_COLUMNS = [
   {
@@ -113,6 +114,8 @@ export class MinibrotRightPanel extends Component {
           data={table_data}
           options={[TABLE_NO_HEADER, TABLE_NO_BORDER]}
         />
+        {this.props.show_context_canvas && <MinibrotTerrainCache
+          key={selected_minibrot.id} bailiwick_id={Number(selected_minibrot.id)} />}
       </div>
     );
     return (

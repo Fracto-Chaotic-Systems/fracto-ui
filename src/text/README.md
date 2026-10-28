@@ -6,6 +6,11 @@ those keys to the current English strings. Components use the constants rather
 than embedding the strings, which keeps wording centralized and gives future
 translations consistent identifiers.
 
+`TilesText.jsx` also defines the **transform** sidebar label and **mesh
+transforms** page title for the Tiles mesh transform scaffold.
+Its `MESH_MAP_TEXT` catalog supplies map status, retry, level selection and
+coverage-table labels.
+
 ## Files
 
 - `AdminText.jsx` contains admin navigation labels, Reference and Social page

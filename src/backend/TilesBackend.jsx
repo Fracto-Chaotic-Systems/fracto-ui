@@ -7,6 +7,21 @@ const FRACTO_PROD_URL =
   import.meta.env.VITE_FRACTO_PROD_URL || "https://fracto.mikehallstudio.com";
 
 export class TilesBackend {
+  static mesh_inventory = (options = {}) =>
+    request_json(`${service_origin("tiles")}/mesh_inventory`, options);
+
+  static mesh_heat_map = (params, options = {}) =>
+    request_json(`${service_origin("tiles")}/mesh_heat_map_buffer?${new URLSearchParams(params)}`, options);
+
+  static start_terrain_cache = (bailiwick_id) =>
+    request_json(`${service_origin("tiles")}/terrain-cache/jobs`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bailiwick_id }),
+    });
+
+  static terrain_cache_job = (id) =>
+    request_json(`${service_origin("tiles")}/terrain-cache/jobs/${encodeURIComponent(id)}`);
+
   /** Claims the oldest ready Tiles automation job atomically.
    * @returns {Promise<Object>} Response containing the claimed job or null.
    * @calledBy TilesGenerator

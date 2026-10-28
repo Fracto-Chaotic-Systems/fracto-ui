@@ -1,5 +1,10 @@
 # UI backend clients
 
+`TilesBackend.start_terrain_cache` and `terrain_cache_job` start/poll the
+freeform selected-entry terrain-cache test on the tiles service.
+`TilesBackend.mesh_heat_map` and `mesh_inventory` provide abortable JSON reads
+for the transforms page's viewport map and inventory revision checks.
+
 The modules in this directory are thin browser-side clients for Fracto's backend services. They keep request construction and service-specific payload handling out of page components; they do not start servers, provide a proxy, or define a shared API client.
 
 All modules use named exports and a default class export. Import them with the `.jsx` extension:

@@ -1,5 +1,15 @@
 # Minibrot study panels
 
+The freeform right panel includes a **test terrain mesh cache** button directly
+under **send to**. `MinibrotTerrainCache.jsx` starts a tile-service job for the
+selected record's saved display region and polls its progress. The server loads
+the record from `free_bailiwicks` and chooses native tile spacing meeting at
+least 1000 samples along both region axes. Results report created/reused meshes,
+coverage gaps, stored bytes and a relative assembly manifest. Changing selection
+unmounts the poller and prevents stale UI updates; background cache jobs continue.
+The button is not mounted for inline/nodal lists. Cached files are built for
+future simulator assembly; this test does not replace the current preview.
+
 These components display the freeform, inline, and nodal bailiwick lists and
 selected-record details. `StudyMinibrots.jsx` selects the freeform mode;
 `StudyInline.jsx` and `StudyNodes.jsx` reuse the same panel composition.

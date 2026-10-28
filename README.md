@@ -2,6 +2,14 @@
 
 React and Vite user interface for exploring Fracto services, tiles, assets, studies, and administrative status. The development server listens on port 3006 and communicates directly with the backend services on ports 3002 through 3005.
 
+## Development entry
+
+The Compose development UI is at `http://localhost:3106/` (the standalone
+default is port 3006). In authentication bypass mode, click anywhere on the
+title screen to reveal the entry panel, then click its **the atlas of chaos**
+button to enter the app. The initial title screen is intentional, not a loading
+failure. **tiles → transform** opens the mesh transforms workspace.
+
 ## Repository layout
 
 This is an independent Git repository expected at `fracto/servers/fracto-ui/`. Source files import `../../constants.js` and `../../config/network.json` from the root repository, so moving the UI outside that layout breaks both development and production builds.

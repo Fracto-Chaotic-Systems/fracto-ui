@@ -1,5 +1,21 @@
 const TILES_FOLDER = "tiles";
 const GENERATOR_FOLDER = "tiles/generator";
+export const MESH_MAP_TEXT = Object.fromEntries(
+  [
+    "title",
+    "loading",
+    "waiting",
+    "empty",
+    "error",
+    "retry",
+    "all",
+    "level",
+    "meshes",
+    "coverage",
+  ].map((name) => [name, `${TILES_FOLDER}/mesh_map/${name}`]),
+);
+export const KEY_TILES_TRANSFORM = `${TILES_FOLDER}/transform`;
+export const KEY_TILES_MESH_TRANSFORMS = `${TILES_FOLDER}/mesh_transforms`;
 
 export const KEY_TILES_OVERVIEW = `${TILES_FOLDER}/tiles_overview`;
 export const KEY_TILES_SETTINGS = `${TILES_FOLDER}/tiles_settings`;
@@ -61,6 +77,18 @@ export const KEY_TILES_GENERATOR_AUTOMATION_ERROR = `${GENERATOR_FOLDER}/automat
 export const KEY_TILES_GENERATOR_AUTOMATION_COUNTDOWN = `${GENERATOR_FOLDER}/automation_countdown`;
 
 export const APP_TILES_TEXT = {
+  [MESH_MAP_TEXT.title]: "mesh heat map",
+  [MESH_MAP_TEXT.loading]: "loading mesh heat map",
+  [MESH_MAP_TEXT.waiting]: "waiting for navigator",
+  [MESH_MAP_TEXT.empty]: "no mesh files cover this view",
+  [MESH_MAP_TEXT.error]: "unable to refresh the mesh heat map",
+  [MESH_MAP_TEXT.retry]: "retry",
+  [MESH_MAP_TEXT.all]: "all levels",
+  [MESH_MAP_TEXT.level]: "level",
+  [MESH_MAP_TEXT.meshes]: "meshes",
+  [MESH_MAP_TEXT.coverage]: "coverage",
+  [KEY_TILES_TRANSFORM]: "transform",
+  [KEY_TILES_MESH_TRANSFORMS]: "mesh transforms",
   [KEY_TILES_OVERVIEW]: "tiles overview",
   [KEY_TILES_SETTINGS]: "tiles settings",
   [KEY_TILES_STATUS]: "tiles status",

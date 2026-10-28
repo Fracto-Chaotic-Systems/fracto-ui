@@ -46,6 +46,9 @@ When embedding a navigator, follow the PropTypes declared by the entry component
 
 Splitter positions are feature-specific keys passed into `NavigatorSplitterLayout`. Do not hardcode a new splitter location in a child component; add or reuse a setting definition so the layout remains responsive and persisted behavior stays consistent.
 
+`TILE_TRANSFORM_SPLITTER_KEYS` isolates the mesh transforms navigator from tile
+generation, including its frame, main splitter, legend, and steps positions.
+
 ## Extension guidance
 
 Keep fractal drawing and raster conversion in `utils/render/`; keep backend calls in `backend/`. Add reusable controls to `utils/ui/` and navigator-specific styling to `styles/NavigatorStyles.jsx`. If a new page needs a navigator variant, prefer composing the existing layouts and passing splitter keys over duplicating the field/legend implementation.

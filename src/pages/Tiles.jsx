@@ -15,6 +15,7 @@ import {
   TILES_LOGS,
   TILES_INSPECTOR,
   TILES_TEST,
+  TILES_TRANSFORM,
 } from "../settings/TilesSettings.jsx";
 
 import AppText from "../AppText.jsx";
@@ -28,6 +29,7 @@ import {
   KEY_TILES_INSPECTOR,
   KEY_TILES_SIDEBAR_LOGS,
   KEY_TILES_TEST,
+  KEY_TILES_TRANSFORM,
 } from "../text/TilesText.jsx";
 
 import TilesOverview from "./tiles/TilesOverview.jsx";
@@ -37,6 +39,7 @@ import TilesLogs from "./tiles/TilesLogs.jsx";
 import TilesGenerator from "./tiles/TilesGenerator.jsx";
 import TilesInspector from "./tiles/TilesInspector.jsx";
 import TilesTest from "./tiles/TilesTest.jsx";
+import TilesTransform from "./tiles/TilesTransform.jsx";
 
 const SIDEBAR_LIST = [
   {
@@ -49,6 +52,11 @@ const SIDEBAR_LIST = [
     title_key: KEY_TILES_GENERATOR,
     section_code: TILES_GENERATOR,
     right_pane: <TilesGenerator />,
+  },
+  {
+    title_key: KEY_TILES_TRANSFORM,
+    section_code: TILES_TRANSFORM,
+    right_pane: <TilesTransform />,
   },
   {
     title_key: KEY_TILES_INSPECTOR,

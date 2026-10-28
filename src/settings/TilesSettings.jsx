@@ -29,6 +29,14 @@ export const TILES_LOGS = "tiles_logs";
 export const TILES_GENERATOR = "tiles_generator";
 export const TILES_INSPECTOR = "tiles_inspector";
 export const TILES_TEST = "tiles_test";
+export const TILES_TRANSFORM = "tiles_transform";
+export const KEY_TILES_TRANSFORM_FRAME_SETTINGS =
+  "tiles_transform/frame_settings";
+export const KEY_TILES_TRANSFORM_SPLITTER_POS = "tiles_transform/splitter_pos";
+export const KEY_TILES_TRANSFORM_LEGEND_SPLITTER_POS =
+  "tiles_transform/legend_splitter_pos";
+export const KEY_TILES_TRANSFORM_STEPS_SPLITTER_POS =
+  "tiles_transform/steps_splitter_pos";
 
 const DEFAULT_FRAME_SETTINGS = {
   focal_point: { x: -0.75, y: 0.0001 },
@@ -37,6 +45,31 @@ const DEFAULT_FRAME_SETTINGS = {
 };
 
 export const APP_TILES_SETTINGS = {
+  [KEY_TILES_TRANSFORM_FRAME_SETTINGS]: {
+    data_type: TYPE_OBJECT,
+    default_value: DEFAULT_FRAME_SETTINGS,
+    description: "Frame settings of the mesh transforms navigator",
+    persist: true,
+    persist_fields: ["focal_point", "scope", "aspect_ratio"],
+  },
+  [KEY_TILES_TRANSFORM_SPLITTER_POS]: {
+    data_type: TYPE_NUMBER,
+    default_value: 500,
+    description: "Position of the mesh transforms navigator splitter",
+    persist: true,
+  },
+  [KEY_TILES_TRANSFORM_LEGEND_SPLITTER_POS]: {
+    data_type: TYPE_NUMBER,
+    default_value: 400,
+    description: "Position of the mesh transforms legend splitter",
+    persist: true,
+  },
+  [KEY_TILES_TRANSFORM_STEPS_SPLITTER_POS]: {
+    data_type: TYPE_NUMBER,
+    default_value: 200,
+    description: "Position of the mesh transforms steps splitter",
+    persist: true,
+  },
   [KEY_TILES_SPLITTER_POS_PX]: {
     data_type: TYPE_NUMBER,
     default_value: DEFAULT_SIDEBAR_WIDTH,

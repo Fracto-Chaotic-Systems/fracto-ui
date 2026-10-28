@@ -2,6 +2,15 @@ export const KEY_STUDY_MINIBROT_SEEDS_TAB = "study/minibrot_seeds_tab";
 export const KEY_STUDY_MINIBROT_ORBITAL_TAB = "study/minibrot_orbital_tab";
 export const KEY_STUDY_MINIBROT_RAY_PATHS_TAB = "study/minibrot_ray_paths_tab";
 const STUDY_FOLDER = "study";
+export const TERRAIN_CACHE_TEXT = {
+  run: "study/terrain_cache_run", starting: "study/terrain_cache_starting",
+  queued: "study/terrain_cache_queued", running: "study/terrain_cache_running",
+  completed: "study/terrain_cache_completed", partial: "study/terrain_cache_partial",
+  failed: "study/terrain_cache_failed", tiles: "study/terrain_cache_tiles",
+  level: "study/terrain_cache_level", created: "study/terrain_cache_created",
+  reused: "study/terrain_cache_reused", missing: "study/terrain_cache_missing",
+  manifest: "study/terrain_cache_manifest",
+};
 
 export const KEY_STUDY_OVERVIEW = `${STUDY_FOLDER}/study_overview`;
 export const KEY_STUDY_SETTINGS = `${STUDY_FOLDER}/study_settings`;
@@ -145,6 +154,19 @@ export const MINIBROT_RAY_TEXT = {
 };
 
 export const APP_STUDY_TEXT = {
+  [TERRAIN_CACHE_TEXT.run]: "test terrain mesh cache",
+  [TERRAIN_CACHE_TEXT.starting]: "Planning tiles from the saved display region…",
+  [TERRAIN_CACHE_TEXT.queued]: "Terrain cache test queued…",
+  [TERRAIN_CACHE_TEXT.running]: "Constructing and caching tile meshes…",
+  [TERRAIN_CACHE_TEXT.completed]: "Terrain tile meshes cached for later assembly.",
+  [TERRAIN_CACHE_TEXT.partial]: "Meshes cached with missing coverage; edge stitching is deferred.",
+  [TERRAIN_CACHE_TEXT.failed]: "Terrain cache test failed. Retry after checking tile/data services.",
+  [TERRAIN_CACHE_TEXT.tiles]: "tiles",
+  [TERRAIN_CACHE_TEXT.level]: "level",
+  [TERRAIN_CACHE_TEXT.created]: "created",
+  [TERRAIN_CACHE_TEXT.reused]: "reused",
+  [TERRAIN_CACHE_TEXT.missing]: "missing / failed",
+  [TERRAIN_CACHE_TEXT.manifest]: "assembly manifest",
   [KEY_STUDY_MINIBROT_SEEDS_TAB]: "seeds",
   [KEY_STUDY_MINIBROT_ORBITAL_TAB]: "orbital",
   [KEY_STUDY_MINIBROT_RAY_PATHS_TAB]: "ray paths",

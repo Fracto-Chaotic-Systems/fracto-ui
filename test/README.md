@@ -1,5 +1,8 @@
 # UI tests
 
+- `minibrot_terrain_cache.test.js` verifies selected-ID job submission, polling,
+  duplicate prevention, failure recovery and stale-result suppression on unmount.
+
 This directory contains Node.js tests for UI behavior and pure feature helpers.
 Run a focused suite with its `test:*` script in `package.json`; tests use the
 built-in `node:test` runner and do not require a browser unless noted.
@@ -38,3 +41,10 @@ built-in `node:test` runner and do not require a browser unless noted.
 `admin_server_clients.test.js` covers client-table refresh overlap, selected-server
 unmount handling, and empty versus restricted results. `remote_server_clients.test.js`
 checks direct/nginx discovery and ensures remote requests never include cookies.
+## Mesh transforms
+
+`mesh_heat_map.test.js` verifies navigator request parameters, canvas level
+filtering, cancellation and late-response rejection during navigation,
+revision/namespace polling, selection preservation, timeout/retry behavior,
+unmount cleanup, and sizing within the endpoint's rounded pixel limits.
+Run with `npm run test:mesh-heat-map`.

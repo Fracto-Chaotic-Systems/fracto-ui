@@ -5,6 +5,12 @@ Each module in this directory declares namespaced setting keys and an
 value type, default value, description, and whether the value should persist.
 The components that use a setting read and update it through `AppSettings.jsx`.
 
+Mesh transforms uses `TilesSettings.jsx` definitions under `tiles_transform/`
+for its persisted frame and three navigator splitter positions. They are
+initialized through the existing `APP_TILES_SETTINGS` merge independently of
+the generator settings. Its mode is persisted by `PageAutomation` under the
+`tiles_transform` namespace.
+
 ## Files
 
 - `AdminSettings.jsx` defines admin-page navigation and layout preferences,
