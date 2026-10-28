@@ -42,6 +42,17 @@ export const KEY_ASSETS_LORE_STYLES_VIEW = `${ASSETS_FOLDER}/assets_lore_styles_
 export const KEY_ASSETS_DETECTOR = `${ASSETS_FOLDER}/assets_detector`;
 export const KEY_ASSETS_SIMULATOR = `${ASSETS_FOLDER}/assets_simulator`;
 export const TERRAIN_TEXT = {
+  progress_loading: "assets/terrain_progress_loading",
+  progress_parsing: "assets/terrain_progress_parsing",
+  progress_mesh: "assets/terrain_progress_mesh",
+  progress_smoothing: "assets/terrain_progress_smoothing",
+  progress_colors: "assets/terrain_progress_colors",
+  progress_installing: "assets/terrain_progress_installing",
+  lighting: "assets/terrain_lighting",
+  ambient: "assets/terrain_ambient",
+  intensity: "assets/terrain_intensity",
+  azimuth: "assets/terrain_azimuth",
+  elevation: "assets/terrain_elevation",
   resolution: "assets/terrain_resolution",
   refining: "assets/terrain_refining",
   detail_failed: "assets/terrain_detail_failed",
@@ -152,6 +163,17 @@ export const KEY_LORE_OP_CLONE_CONTENT = `${LORE_FOLDER}/clone_content`;
 export const KEY_LORE_OP_REMOVE_CONTENT = `${LORE_FOLDER}/remove_content`;
 
 export const APP_ASSETS_TEXT = {
+  [TERRAIN_TEXT.progress_loading]: "Loading terrain data",
+  [TERRAIN_TEXT.progress_parsing]: "Reading terrain data",
+  [TERRAIN_TEXT.progress_mesh]: "Constructing mesh",
+  [TERRAIN_TEXT.progress_smoothing]: "Smoothing terrain",
+  [TERRAIN_TEXT.progress_colors]: "Rendering terrain colors",
+  [TERRAIN_TEXT.progress_installing]: "Displaying terrain",
+  [TERRAIN_TEXT.lighting]: "lighting",
+  [TERRAIN_TEXT.ambient]: "ambient fill",
+  [TERRAIN_TEXT.intensity]: "light intensity",
+  [TERRAIN_TEXT.azimuth]: "light direction",
+  [TERRAIN_TEXT.elevation]: "light elevation",
   [TERRAIN_TEXT.resolution]: "samples per edge",
   [TERRAIN_TEXT.refining]: "Preview ready · loading detailed terrain…",
   [TERRAIN_TEXT.detail_failed]: "Detailed terrain unavailable · keeping preview. Reload to retry.",
@@ -160,7 +182,7 @@ export const APP_ASSETS_TEXT = {
   [TERRAIN_TEXT.wireframe]: "wireframe",
   [TERRAIN_TEXT.reload]: "reload terrain",
   [TERRAIN_TEXT.loading]: "Loading terrain…",
-  [TERRAIN_TEXT.ready]: "Terrain preview · maximum elevation = navigator scope / 15",
+  [TERRAIN_TEXT.ready]: "Terrain preview · maximum elevation = navigator scope / 25",
   [TERRAIN_TEXT.failed]: "Unable to display terrain. Check WebGL support or reload terrain.",
   [TERRAIN_TEXT.help]: "Drag to orbit · scroll to zoom · right-drag to pan. Heights are provisional.",
   [RAY_TEXT_KEYS.idle]:

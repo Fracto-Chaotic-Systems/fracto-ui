@@ -1,8 +1,8 @@
-export const TERRAIN_HEIGHT_SCOPE_RATIO = 1 / 15;
+export const TERRAIN_HEIGHT_SCOPE_RATIO = 1 / 25;
 const ITERATION_REFERENCE = 1_000_000;
 export const TERRAIN_PREVIEW_SIZE = 129;
-export const TERRAIN_MAX_SIZE = 2000;
-export const TERRAIN_RESOLUTIONS = [129, 250, 500, 1000, 1500, 2000];
+export const TERRAIN_MAX_SIZE = 5000;
+export const TERRAIN_RESOLUTIONS = [129, 250, 500, 1000, 1500, 2000, 3500, 5000];
 export function terrain_resolution(value) {
   return TERRAIN_RESOLUTIONS.includes(value) ? value : 500;
 }
@@ -15,7 +15,8 @@ export function terrain_height(iteration, scope) {
 }
 
 /** Column-major Fracto buffer to a local, Y-up grid; imaginary +y maps to -Z. */
-export function terrain_mesh_data(buffer, scope) {
+export function terrain_mesh_data(buffer, scope, on_progress) {
+  on_progress?.(0);
   const width = buffer?.length;
   const height = buffer?.[0]?.length;
   if (!Number.isFinite(scope) || scope <= 0 || width < 2 || height < 2 ||
@@ -50,6 +51,7 @@ export function terrain_mesh_data(buffer, scope) {
         }
       }
     }
+    on_progress?.((y + 1) / height);
   }
   if (!index_count) throw new Error("Terrain buffer has no valid surface");
   return { positions, valid, uvs, indices: indices.subarray(0, index_count), max_height, width, height };

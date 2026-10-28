@@ -8,9 +8,11 @@ import AppText from "../../AppText.jsx";
 import { KEY_NAVIGATOR_STRATEGY } from "../../settings/NavigatorSettings.jsx";
 import { TERRAIN_TEXT } from "../../text/AssetsText.jsx";
 import { TERRAIN_PREVIEW_SIZE, TERRAIN_RESOLUTIONS, terrain_resolution } from "./SimulatorTerrainData.js";
-import { KEY_ASSETS_SIMULATOR_RESOLUTION } from "../../settings/AssetsSettings.jsx";
+import { KEY_ASSETS_SIMULATOR_RESOLUTION, KEY_ASSETS_SIMULATOR_LIGHTING } from "../../settings/AssetsSettings.jsx";
+import { TerrainLighting, normalize_terrain_lighting } from "./SimulatorTerrainLighting.js";
+import SimulatorTerrainLightingControls from "./SimulatorTerrainLightingControls.jsx";
 import SimulatorTerrainLoader from "./SimulatorTerrainLoader.js";
-import { TerrainPanel, TerrainToolbar, TerrainHost, TerrainMessage } from "./SimulatorTerrainStyles.jsx";
+import { TerrainPanel, TerrainToolbar, TerrainHost, TerrainMessage, TerrainProgress } from "./SimulatorTerrainStyles.jsx";
 
 /** Bounded terrain preview; orbiting is independent of data loading. */
 export default class SimulatorTerrain extends Component {
@@ -23,7 +25,9 @@ export default class SimulatorTerrain extends Component {
   host = React.createRef();
   sequence = 0;
   loader = new SimulatorTerrainLoader();
-  state = { status: "loading", wireframe: false, loaded_size: null,
+  lighting = new TerrainLighting();
+  state = { status: "loading", wireframe: false, loaded_size: null, progress: null,
+    lighting: normalize_terrain_lighting(AppSettings.get(KEY_ASSETS_SIMULATOR_LIGHTING)),
     resolution: terrain_resolution(AppSettings.get(KEY_ASSETS_SIMULATOR_RESOLUTION)) };
 
   componentDidMount() {
@@ -43,6 +47,8 @@ export default class SimulatorTerrain extends Component {
       this.observer.observe(this.host.current);
       this.subscription = AppSettings.subscribe(KEY_NAVIGATOR_STRATEGY, this.schedule_load);
       this.resolution_subscription = AppSettings.subscribe(KEY_ASSETS_SIMULATOR_RESOLUTION, this.on_resolution_changed);
+      this.lighting_subscription = AppSettings.subscribe(KEY_ASSETS_SIMULATOR_LIGHTING, this.on_lighting_changed);
+      this.lighting.update(this.state.lighting);
       this.resize();
       this.schedule_load();
     } catch (error) {
@@ -65,6 +71,7 @@ export default class SimulatorTerrain extends Component {
     this.observer?.disconnect();
     if (this.subscription) AppSettings.unsubscribe(this.subscription);
     if (this.resolution_subscription) AppSettings.unsubscribe(this.resolution_subscription);
+    if (this.lighting_subscription) AppSettings.unsubscribe(this.lighting_subscription);
     this.controls?.dispose();
     this.dispose_mesh();
     this.renderer?.dispose();
@@ -99,31 +106,38 @@ export default class SimulatorTerrain extends Component {
     clearTimeout(this.timer);
     this.loader.cancel();
     if (!this.controls || !this.props.focal_point) return;
-    this.setState({ status: "loading", loaded_size: null });
+    this.setState({ status: "loading", loaded_size: null,
+      progress: { stage: "loading", value: null, size: TERRAIN_PREVIEW_SIZE } });
     this.timer = setTimeout(() => this.load(sequence), 180);
   };
 
   load = async (sequence) => {
     const { focal_point, scope } = this.props;
+    const view_region = JSON.stringify([focal_point.x, focal_point.y, scope]);
     const resolution = this.state.resolution;
     const strategy = AppSettings.get(KEY_NAVIGATOR_STRATEGY) || "turbo";
     let preview_ready = false;
     try {
       for (const size of resolution === TERRAIN_PREVIEW_SIZE ? [resolution] : [TERRAIN_PREVIEW_SIZE, resolution]) {
+        this.setState({ progress: { stage: "loading", value: null, size } });
         const url = TilesBackend.canvas_buffer_url("canvas_buffer", {
           width_px: size, aspect_ratio: 1, resolution_factor: 1.5,
           focal_point_x: focal_point.x, focal_point_y: focal_point.y, scope, strategy,
         });
-        const data = await this.loader.load({ url, scope });
+        const data = await this.loader.load({ url, scope }, [], (progress) => {
+          if (sequence === this.sequence) this.setState({ progress: { ...progress, size } });
+        });
         if (sequence !== this.sequence) return;
-        this.install_mesh(data, scope, !preview_ready);
+        // Resolution changes replace geometry, not the viewer's zoom or orbit.
+        this.install_mesh(data, scope, !this.mesh || this.view_region !== view_region);
+        this.view_region = view_region;
         preview_ready = true;
-        this.setState({ status: size === resolution ? "ready" : "refining", loaded_size: size });
+        this.setState({ status: size === resolution ? "ready" : "refining", loaded_size: size, progress: null });
       }
     } catch (error) {
       if (sequence !== this.sequence || error.name === "AbortError") return;
       console.error("Terrain loading failed", error);
-      this.setState({ status: preview_ready ? "detail_failed" : "failed" });
+      this.setState({ status: preview_ready ? "detail_failed" : "failed", progress: null });
     }
   };
 
@@ -141,11 +155,13 @@ export default class SimulatorTerrain extends Component {
       geometry.setAttribute("uv", new THREE.BufferAttribute(data.uvs, 2));
       geometry.setIndex(new THREE.BufferAttribute(data.indices, 1));
       this.dispose_mesh();
-      // Preserve the 2D renderer's palette regardless of surface angle or lights.
+      // Keep the standard palette as the base; optional lighting modulates brightness.
       this.mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({
         map: texture, toneMapped: false, side: THREE.DoubleSide,
         wireframe: this.state.wireframe,
       }));
+      this.lighting.update(this.state.lighting);
+      this.lighting.attach(this.mesh.material);
       this.scene.add(this.mesh);
       this.extent = Math.max(scope, data.max_height, 0.001);
       this.target_height = data.max_height / 2;
@@ -154,6 +170,15 @@ export default class SimulatorTerrain extends Component {
   };
 
   on_resolution_changed = (_key, value) => this.setState({ resolution: terrain_resolution(value) }, this.schedule_load);
+
+  on_lighting_changed = (_key, value) => this.setState({ lighting: normalize_terrain_lighting(value) }, () => {
+    this.lighting.update(this.state.lighting);
+    this.draw();
+  });
+
+  change_lighting = (key, value) => AppSettings.on_settings_changed({
+    [KEY_ASSETS_SIMULATOR_LIGHTING]: normalize_terrain_lighting({ ...this.state.lighting, [key]: value }),
+  });
 
   change_resolution = (event) => AppSettings.on_settings_changed({
     [KEY_ASSETS_SIMULATOR_RESOLUTION]: terrain_resolution(Number(event.target.value)),
@@ -193,9 +218,19 @@ export default class SimulatorTerrain extends Component {
           {AppText.get(TERRAIN_TEXT.wireframe)}</label>
         <button onClick={this.schedule_load}>{AppText.get(TERRAIN_TEXT.reload)}</button>
       </TerrainToolbar>
-      <TerrainMessage aria-live="polite">{AppText.get(TERRAIN_TEXT[this.state.status])}
+      <SimulatorTerrainLightingControls settings={this.state.lighting} on_change={this.change_lighting} />
+      {this.state.status !== "refining" && <TerrainMessage aria-live="polite">{AppText.get(TERRAIN_TEXT[this.state.status])}
         {this.state.loaded_size && ` · ${this.state.loaded_size} × ${this.state.loaded_size}`}
-      </TerrainMessage>
+      </TerrainMessage>}
+      {this.state.progress && <TerrainProgress>
+        <span>
+          {AppText.get(TERRAIN_TEXT[`progress_${this.state.progress.stage}`])}
+          {` · ${this.state.progress.size} × ${this.state.progress.size}`}
+          {this.state.progress.value !== null && ` · ${this.state.progress.value}%`}
+        </span>
+        <progress max="100" value={this.state.progress.value ?? undefined}
+          aria-label={AppText.get(TERRAIN_TEXT[`progress_${this.state.progress.stage}`])} />
+      </TerrainProgress>}
       <TerrainHost ref={this.host} />
       <TerrainMessage>{AppText.get(TERRAIN_TEXT.help)}</TerrainMessage>
     </TerrainPanel>;

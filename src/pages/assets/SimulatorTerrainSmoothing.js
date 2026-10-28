@@ -6,7 +6,8 @@ export function terrain_smoothing(value) {
 }
 
 /** Radius-two separable Gaussian, normalized by valid coverage (including at edges). */
-export function smooth_terrain_positions(base_positions, valid, width, height, strength) {
+export function smooth_terrain_positions(base_positions, valid, width, height, strength, on_progress) {
+  on_progress?.(0);
   const blend = terrain_smoothing(strength) / 100;
   const positions = new Float32Array(base_positions);
   let max_height = 0;
@@ -25,6 +26,7 @@ export function smooth_terrain_positions(base_positions, valid, width, height, s
           weights[index] += weight;
         }
       }
+      on_progress?.(0.45 * (y + 1) / height);
     }
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
@@ -41,10 +43,13 @@ export function smooth_terrain_positions(base_positions, valid, width, height, s
         const original = base_positions[index * 3 + 1];
         positions[index * 3 + 1] = original + blend * (sum / weight_sum - original);
       }
+      on_progress?.(0.45 + 0.45 * (y + 1) / height);
     }
   }
   for (let i = 0; i < valid.length; i++) {
     if (valid[i]) max_height = Math.max(max_height, positions[i * 3 + 1]);
+    if ((i + 1) % width === 0) on_progress?.(0.9 + 0.1 * (i + 1) / valid.length);
   }
+  on_progress?.(1);
   return { positions, max_height };
 }

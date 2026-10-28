@@ -6,9 +6,16 @@ built-in `node:test` runner and do not require a browser unless noted.
 
 - `simulator_terrain.test.js` verifies scope-relative height, sample/texture
   orientation, standard colors, missing-data holes, full 1000/1500/2000-edge geometry,
+  3500/5000 edge limits and detail requests using memory-bounded fixtures,
   progressive detail, worker transfers/cancellation, stale results and cleanup.
   It also checks Gaussian smoothing, normalized missing-data handling,
-  unchanged source data/colors, scope/15 bounds and fixed 100% worker smoothing.
+  unchanged source data/colors, scope/25 bounds and fixed 100% worker smoothing.
+  Lighting tests check bounded persisted settings, shader integration and uniform
+  updates without terrain reloads or geometry/texture replacement.
+  Progress tests cover stage ordering, measurable construction percentages,
+  preview/detail resets, stale-message suppression and failure cleanup.
+  Camera regression tests ensure resolution changes and reloads preserve zoom,
+  orbit and pan, while selecting a different navigator region refits the view.
 
 - `admin_commit_timeline.test.js` verifies commit timeline grouping and
   presentation helpers.

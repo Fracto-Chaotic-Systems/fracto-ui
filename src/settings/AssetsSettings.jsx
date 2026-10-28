@@ -53,6 +53,7 @@ export const KEY_ASSETS_DETECTOR_RESOLUTION = `${ASSETS_DETECTOR_FOLDER}/generat
 
 export const KEY_ASSETS_SIMULATOR_FRAME_SETTINGS = `${ASSETS_SIMULATOR_FOLDER}/frame_settings`;
 export const KEY_ASSETS_SIMULATOR_RESOLUTION = `${ASSETS_SIMULATOR_FOLDER}/terrain_resolution`;
+export const KEY_ASSETS_SIMULATOR_LIGHTING = `${ASSETS_SIMULATOR_FOLDER}/terrain_lighting`;
 export const KEY_ASSETS_SURVEYS_FRAME_SETTINGS = `${ASSETS_SURVEYS_FOLDER}/frame_settings`;
 export const KEY_ASSETS_SURVEYS_SPLITTER_POS = `${ASSETS_SURVEYS_FOLDER}/splitter_pos`;
 export const KEY_ASSETS_SURVEYS_HALF_SPAN = `${ASSETS_SURVEYS_FOLDER}/half_span`;
@@ -193,7 +194,13 @@ export const APP_ASSETS_SETTINGS = {
   [KEY_ASSETS_SIMULATOR_RESOLUTION]: {
     data_type: TYPE_NUMBER,
     default_value: 500,
-    description: "Detailed terrain samples per edge (129, 250, 500, 1000, 1500 or 2000)",
+    description: "Detailed terrain samples per edge (129, 250, 500, 1000, 1500, 2000, 3500 or 5000)",
+    persist: true,
+  },
+  [KEY_ASSETS_SIMULATOR_LIGHTING]: {
+    data_type: TYPE_OBJECT,
+    default_value: { enabled: false, ambient: 0.55, intensity: 0.7, azimuth: 315, elevation: 45 },
+    description: "Terrain lighting enable, ambient fill, directional intensity and sun angles",
     persist: true,
   },
   [KEY_ASSETS_SURVEYS_FRAME_SETTINGS]: {

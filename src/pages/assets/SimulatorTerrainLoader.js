@@ -15,7 +15,7 @@ export default class SimulatorTerrainLoader {
     }
   }
 
-  load(request, transfers = []) {
+  load(request, transfers = [], on_progress) {
     this.cancel();
     return new Promise((resolve, reject) => {
       const worker = this.create_worker();
@@ -28,7 +28,14 @@ export default class SimulatorTerrainLoader {
         worker.terminate();
         if (error) reject(error); else resolve(result);
       };
-      worker.onmessage = ({ data }) => finish(data.error ? new Error(data.error) : null, data);
+      worker.onmessage = ({ data }) => {
+        if (this.worker !== worker) return;
+        if (data.progress) {
+          try { on_progress?.(data.progress); } catch (error) { finish(error); }
+          return;
+        }
+        finish(data.error ? new Error(data.error) : null, data);
+      };
       worker.onerror = (event) => finish(new Error(event.message || "Terrain worker failed"));
       worker.onmessageerror = () => finish(new Error("Terrain worker response could not be read"));
       try { worker.postMessage(request, transfers); } catch (error) { finish(error); }

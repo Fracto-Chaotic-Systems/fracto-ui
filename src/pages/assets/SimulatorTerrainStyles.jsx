@@ -23,7 +23,27 @@ export const TerrainHost = styled.div`
   position: relative;
   canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 `;
+export const TerrainLightingControls = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding: 0 8px 8px;
+  label { display: flex; align-items: center; gap: 5px; font-size: 12px; }
+  input[type="range"] { width: 90px; }
+  output { min-width: 38px; font-family: monospace; }
+`;
 export const TerrainMessage = styled.div`
   padding: 0 8px 8px;
   font-size: 12px;
+`;
+export const TerrainProgress = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+  overflow-x: auto;
+  padding: 0 8px 8px;
+  font-size: 12px;
+  span { flex-shrink: 0; white-space: nowrap; }
+  progress { flex: 0 0 40rem; width: 40rem; height: 12px; accent-color: #64c8cc; }
 `;
