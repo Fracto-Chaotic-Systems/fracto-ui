@@ -112,3 +112,5 @@ are viewed on that server. No client list is added to public `/healthz`.
 TilesBackend.start_mesh_transform submits a captured navigator region and level to the mesh-transform queue. terrain_cache_job polls shared job status; stop_mesh_transform cancels while retaining published meshes. All accept request options including AbortSignal.
 
 TilesBackend.mesh_file retrieves the gzip mesh asset as an ArrayBuffer with service credentials and AbortSignal support. Preview decompression stays in the tile-preview adapter.
+
+TilesBackend.mesh_terrain requests the read-only runtime assembly manifest. mesh_url supplies authenticated worker asset URLs for the selected canonical tile files.

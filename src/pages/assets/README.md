@@ -15,84 +15,44 @@ see [its README](surveys/README.md) for responsibilities.
   `AssetsVideoGenerator.jsx` provide asset creation, browsing, and video tools.
 - `AssetsDetector.jsx` and `AssetsSimulator.jsx` compose navigator-based asset
   tools with their own persisted frame and splitter settings.
-- `AssetsSimulator.jsx` keeps the interactive 2D navigator on the left and mounts
-  a lazy-loaded Three.js terrain preview on the right of its main vertical
-  splitter. Selecting a new focal point or scope loads a 129×129 preview, then
-  upgrades it to the selected resolution (129, 250, 500, 1000, 1500, 2000, 3500, or 5000 samples per
-  edge; default 500). The selection persists in `assets/simulator/terrain_resolution`.
-  The detail upgrade preserves the camera, and failure retains the coarse mesh.
-  During refinement the construction progress bar replaces the redundant
-  "Preview ready" status line.
-  Changing sample resolution or reloading the same region also preserves camera
-  position, orbit and pan. Automatic framing runs only on the first mesh or when
-  the navigator focal point/scope changes; the reset-view button explicitly refits.
-  Both stages use the existing tiles endpoint; camera orbit, zoom, pan, top/oblique presets,
-  wireframe, and resizing do not fetch data. Reload retries the current view.
-  `SimulatorTerrain.jsx` owns the WebGL scene, request sequencing and resource
-  cleanup. `SimulatorTerrainLoader.js` owns disposable workers; navigation,
-  resolution changes, and unmount terminate obsolete workers. `SimulatorTerrain.worker.js`
-  fetches and parses source buffers, creates the geometry, and renders standard
-  colors using an OffscreenCanvas, transferring typed geometry and RGBA pixels
-  back to the UI without copying their buffers. This requires worker 2D
-  OffscreenCanvas support. The main thread only installs textures/geometry and
-  renders views; it does not process the large nested source buffer.
-  Indices are preallocated Uint32 arrays (up to 49,980,002 triangles at 5000×5000).
-  Unlit meshes omit normals. Position, UV and index buffers occupy about 44 MB
-  per complete set at 1000×1000, 176 MB at 2000×2000, 539 MB at 3500×3500,
-  or 1.1 GB at 5000×5000, excluding textures,
-  CPU/GPU duplication,
-  worker source data and temporary allocations. Detail requests can still be
-  expensive on the server and GPU; this is a bounded preview, not streaming LOD.
-  It debounces navigation and ignores stale responses. Source colors
-  come directly from the existing SDK canvas renderer. The terrain uses an
-  unlit material with sRGB input/output and no tone mapping, so surface angles
-  do not wash out or darken the standard pattern colors. Nearest-neighbor
-  texture sampling avoids inventing colors between adjacent pattern samples.
-  Optional lighting is disabled by default to preserve that palette. The
-  lighting controls enable shading and adjust ambient fill (0–1), directional
-  intensity (0–2), azimuth (0–360°, clockwise from imaginary +y) and elevation
-  (5–90°). Values persist in `assets/simulator/terrain_lighting`. Changes update
-  shader uniforms without fetching terrain, changing the texture or moving the
-  camera. `SimulatorTerrainLighting.js` derives face normals in the fragment
-  shader, avoiding per-vertex normal arrays at large resolutions; lighting uses
-  diffuse shading only, with no shadow-map passes or reflections. Turning it off
-  restores the unlit standard colors. `SimulatorTerrainLightingControls.jsx`
-  owns the controls. Invalid saved values are clamped or replaced with defaults.
-  A construction progress bar identifies the current preview/detail resolution
-  and stage. The bar is 40rem wide, placed to the right of its descriptive text;
-  narrow panes allow horizontal scrolling rather than shrinking it.
-  Mesh construction and smoothing report completed work as a
-  per-stage percentage; loading, JSON parsing, color rendering and display use
-  an indeterminate bar because those operations expose no measurable fraction.
-  Percentages restart for each stage and resolution, rather than estimating
-  overall elapsed time. Worker progress is limited to integer-percentage
-  changes. Progress messages do not complete the loader promise, and cancelled
-  worker messages cannot update the bar. Completion or failure removes it.
-  `SimulatorTerrainStyles.jsx` owns preview styles.
-  `SimulatorTerrainData.js` converts column-major numerical data to a local
-  Y-up mesh (complex imaginary +y is world -Z). Both interior and escaping
-  counts use a provisional `(scope / 25) * min(1, log1p(iterations)/log1p(1000000))`
-  height in complex-plane units, independent of each tile's value range. The
-  maximum height tracks the selected 2D navigator scope at every zoom level.
-  Smoothing is always 100%; there is no slider or persisted smoothing setting.
-  Old stored smoothing preferences are ignored. `SimulatorTerrainSmoothing.js`
-  applies a radius-two separable Gaussian kernel to the heights. Coverage
-  normalization ignores invalid samples and handles mesh edges without treating
-  missing neighbors as zero. Invalid vertices remain holes. Smoothing changes
-  neither pattern colors nor source iteration data, and convex averaging keeps
-  relief within the existing scope/25 cap (subject to Float32 precision).
-  Radius is measured in samples, so its physical footprint depends on resolution.
-  Smoothing runs during mesh construction in the existing worker. Original
-  positions and validity are not transferred back to the UI or cached there,
-  avoiding the extra 13 MB of persistent buffers at 1000×1000 previously needed
-  for interactive smoothing adjustments.
-  Missing samples, invalid counts and pattern -1 are excluded from triangles.
-  The legacy buffer cannot distinguish every estimated or capped result;
-  these heights are for visual evaluation, not a certified convergence surface.
-  Compression and separate regional height calibration are deferred until the
-  initial rendering has been evaluated. Mesh positions match the endpoint's
-  sample spacing (`scope / width`); the last row/column falls one sample short
-  of the outer request boundary. Camera fitting accounts for relief height.
+- `AssetsSimulator.jsx` keeps the interactive 2D navigator on the left and a lazy-loaded
+  cached-mesh terrain viewer on the right. Minimum resolution is an integer from
+  2 to 5000 across the shorter navigator edge, defaulting to 1000 for new settings.
+  The existing `assets/simulator/terrain_resolution` preference now stores this
+  minimum; previous values remain valid. Apply commits the numeric input.
+  The viewer requests `GET /mesh_terrain`, then only the selected cached mesh files.
+  No numerical raster request, mesh construction or smoothing runs in this path.
+  The actual level, effective X/Y resolution, loaded mesh count, decoded-cache hits
+  and loading/color-preparation time are displayed. Insufficient resolution and
+  missing files are reported explicitly. The manifest caps a view at 64 canonical
+  files; a lower level can be used to stay within this display budget.
+  `SimulatorTerrain.jsx` coordinates requests, camera, lighting and resize;
+  `SimulatorTerrainView.jsx` presents controls and progress. `SimulatorMeshLoader.js`
+  owns one persistent worker, request sequencing, timeouts and cancellation.
+  `SimulatorMesh.worker.js` fetches four files concurrently, verifies inventory
+  checksums and mesh identities, and keeps up to 64 decoded tiles in an LRU cache.
+  It renders colors from the standard SDK palette using shared visible-region
+  histograms, preventing independently shaded tile boundaries. Parsing and color
+  work stay off the UI thread; workers require OffscreenCanvas and native gzip
+  decompression. Geometry is transferred only when absent from the GPU cache.
+  `SimulatorMeshScene.js` retains up to 64 GPU geometry/material entries, places
+  tile instances, mirrors the lower half-plane and clips to the navigator region.
+  Coordinates are normalized relative to the navigator to retain precision when
+  zoomed in. Precomputed relief remains scaled to navigator scope / 25. Cached
+  local-edge smoothing remains provisional; cross-tile seam repair is deferred.
+  Gaps remain holes. Neither missing files nor insufficient resolution triggers
+  on-demand construction. Reload refreshes the manifest and retries failed files.
+  Camera orbit, pan, zoom, wireframe and lighting changes do not fetch terrain.
+  Camera settings survive navigation and resolution changes; initial display,
+  aspect changes and explicit top/oblique controls refit the camera.
+  Optional lighting remains off by default, preserving unlit standard colors.
+  Lighting settings persist in `assets/simulator/terrain_lighting`; shader-derived
+  normals avoid additional vertex arrays. Progress uses the existing 40rem bar
+  to the right of its description. Loaded geometry remains visible during loading.
+  Unmount aborts requests, terminates the worker and disposes GPU resources.
+  `SimulatorTerrainData.js`, `SimulatorTerrainLoader.js`, `SimulatorTerrain.worker.js`
+  and `SimulatorTerrainSmoothing.js` retain the prior numerical-raster helpers for
+  compatibility/testing; the simulator no longer invokes that construction path.
 - `AssetsSurveys.jsx` is the seed-surveys page selected by the “surveys” sidebar
   item. It owns independent persisted frame and navigator splitter settings.
   It keeps the navigator in a left pane in both modes, separated from the
@@ -166,3 +126,7 @@ Selected survey orbitals support bounded numerical dynamic-ray tracing;
 see [the ray documentation](surveys/RAYS.md). Its published theoretical basis
 is [Milnor (2000)](https://numdam.org/item/AST_2000__261__277_0/) and
 [Benini–Lyubich (2014), polynomial case](https://doi.org/10.5802/aif.2888).
+
+For an unchanged region and identical mesh checksums, the worker also reuses the already-installed textures. Such reloads validate the manifest but skip file requests, decompression, palette calculation and geometry transfers. A changed region or source checksum invalidates this fast path.
+
+Development verification (2026-10-28): overview minimum 1000 selected level 3, 13 files and 1281×1281 effective samples. Loading/color preparation took about 1.6–2.0 seconds cold; an unchanged reload reported 16ms. At scope 0.0861172966 the viewer selected level 7 and reported 706×706 with an unmet-1000 warning. Changing the minimum to 500 reused all eight files/textures in 9ms and cleared that warning. These are local observations excluding GPU frame-time guarantees.

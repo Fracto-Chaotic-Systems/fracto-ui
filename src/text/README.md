@@ -89,3 +89,5 @@ already been extracted; move hardcoded UI copy into the appropriate map when
 editing or translating those components.
 
 TilesText exports MESH_OPERATION_TEXT for transform headings, controls, progress and recoverable errors; count and level are substituted in the operation title.
+
+AssetsText terrain labels include minimum-resolution input, effective cached resolution, cache hits, missing coverage and display-budget fallback notices.

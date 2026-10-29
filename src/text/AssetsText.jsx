@@ -42,6 +42,11 @@ export const KEY_ASSETS_LORE_STYLES_VIEW = `${ASSETS_FOLDER}/assets_lore_styles_
 export const KEY_ASSETS_DETECTOR = `${ASSETS_FOLDER}/assets_detector`;
 export const KEY_ASSETS_SIMULATOR = `${ASSETS_FOLDER}/assets_simulator`;
 export const TERRAIN_TEXT = {
+  apply: "assets/terrain_apply",
+  empty: "assets/terrain_empty",
+  cached_summary: "assets/terrain_cached_summary",
+  below_minimum: "assets/terrain_below_minimum",
+  missing_meshes: "assets/terrain_missing_meshes",
   progress_loading: "assets/terrain_progress_loading",
   progress_parsing: "assets/terrain_progress_parsing",
   progress_mesh: "assets/terrain_progress_mesh",
@@ -174,17 +179,30 @@ export const APP_ASSETS_TEXT = {
   [TERRAIN_TEXT.intensity]: "light intensity",
   [TERRAIN_TEXT.azimuth]: "light direction",
   [TERRAIN_TEXT.elevation]: "light elevation",
-  [TERRAIN_TEXT.resolution]: "samples per edge",
+  [TERRAIN_TEXT.apply]: "apply",
+  [TERRAIN_TEXT.empty]:
+    "No cached meshes are available in this area within the display budget.",
+  [TERRAIN_TEXT.cached_summary]:
+    "level {level} · {x} × {y} samples · {loaded}/{total} meshes · {reused} reused · {ms} ms",
+  [TERRAIN_TEXT.below_minimum]:
+    "Requested minimum {minimum} is not met; showing the best available level within the display budget.",
+  [TERRAIN_TEXT.missing_meshes]:
+    "{count} meshes unavailable; gaps remain visible.",
+  [TERRAIN_TEXT.resolution]: "minimum resolution",
   [TERRAIN_TEXT.refining]: "Preview ready · loading detailed terrain…",
-  [TERRAIN_TEXT.detail_failed]: "Detailed terrain unavailable · keeping preview. Reload to retry.",
+  [TERRAIN_TEXT.detail_failed]:
+    "Detailed terrain unavailable · keeping preview. Reload to retry.",
   [TERRAIN_TEXT.top]: "top view",
   [TERRAIN_TEXT.reset]: "reset oblique view",
   [TERRAIN_TEXT.wireframe]: "wireframe",
   [TERRAIN_TEXT.reload]: "reload terrain",
   [TERRAIN_TEXT.loading]: "Loading terrain…",
-  [TERRAIN_TEXT.ready]: "Terrain preview · maximum elevation = navigator scope / 25",
-  [TERRAIN_TEXT.failed]: "Unable to display terrain. Check WebGL support or reload terrain.",
-  [TERRAIN_TEXT.help]: "Drag to orbit · scroll to zoom · right-drag to pan. Heights are provisional.",
+  [TERRAIN_TEXT.ready]:
+    "Cached terrain · maximum elevation = navigator scope / 25",
+  [TERRAIN_TEXT.failed]:
+    "Unable to display terrain. Check WebGL support or reload terrain.",
+  [TERRAIN_TEXT.help]:
+    "Drag to orbit · scroll to zoom · right-drag to pan. Heights are provisional.",
   [RAY_TEXT_KEYS.idle]:
     "Trace external rays for the selected orbital configuration.",
   [RAY_TEXT_KEYS.no_selection]:

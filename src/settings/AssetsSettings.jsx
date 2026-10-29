@@ -174,7 +174,8 @@ export const APP_ASSETS_SETTINGS = {
   [KEY_VIDEO_GENERATOR_CURRENT_VIDEO_ID]: {
     data_type: TYPE_NUMBER,
     default_value: 0,
-    description: "Id of the video project to reopen on the video generator page",
+    description:
+      "Id of the video project to reopen on the video generator page",
     persist: true,
   },
   [KEY_ASSETS_DETECTOR_FRAME_SETTINGS]: {
@@ -193,14 +194,22 @@ export const APP_ASSETS_SETTINGS = {
   },
   [KEY_ASSETS_SIMULATOR_RESOLUTION]: {
     data_type: TYPE_NUMBER,
-    default_value: 500,
-    description: "Detailed terrain samples per edge (129, 250, 500, 1000, 1500, 2000, 3500 or 5000)",
+    default_value: 1000,
+    description:
+      "Minimum cached terrain samples across the shorter navigator edge (integer 2–5000); actual resolution depends on available mesh levels and display budget",
     persist: true,
   },
   [KEY_ASSETS_SIMULATOR_LIGHTING]: {
     data_type: TYPE_OBJECT,
-    default_value: { enabled: false, ambient: 0.55, intensity: 0.7, azimuth: 315, elevation: 45 },
-    description: "Terrain lighting enable, ambient fill, directional intensity and sun angles",
+    default_value: {
+      enabled: false,
+      ambient: 0.55,
+      intensity: 0.7,
+      azimuth: 315,
+      elevation: 45,
+    },
+    description:
+      "Terrain lighting enable, ambient fill, directional intensity and sun angles",
     persist: true,
   },
   [KEY_ASSETS_SURVEYS_FRAME_SETTINGS]: {
@@ -213,19 +222,22 @@ export const APP_ASSETS_SETTINGS = {
   [KEY_ASSETS_SURVEYS_SPLITTER_POS]: {
     data_type: TYPE_NUMBER,
     default_value: 500,
-    description: "Position separating the Assets seed surveys navigator and content panels",
+    description:
+      "Position separating the Assets seed surveys navigator and content panels",
     persist: true,
   },
   [KEY_ASSETS_SURVEYS_HALF_SPAN]: {
     data_type: TYPE_NUMBER,
     default_value: 1.5,
-    description: "Half-span bounding both axes of the Assets seed survey region",
+    description:
+      "Half-span bounding both axes of the Assets seed survey region",
     persist: true,
   },
   [KEY_ASSETS_SURVEYS_ITERATION_LIMIT]: {
     data_type: TYPE_NUMBER,
     default_value: 100000,
-    description: "Maximum seeded calculator iterations for the Assets seed survey",
+    description:
+      "Maximum seeded calculator iterations for the Assets seed survey",
     persist: true,
   },
   [KEY_ASSETS_SURVEYS_LEGEND_SPLITTER_POS]: {

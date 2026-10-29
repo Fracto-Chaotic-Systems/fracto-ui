@@ -93,7 +93,10 @@ export class AssetsSimulator extends Component {
       width: rendered_width,
       height: rendered_height,
     };
-    const right_left = Math.max(left, content_splitter_pos + SPLITTER_WIDTH_PX / 2);
+    const right_left = Math.max(
+      left,
+      content_splitter_pos + SPLITTER_WIDTH_PX / 2,
+    );
     const right_width = Math.max(0, left + rendered_width - right_left);
     const available_height = Math.max(0, rendered_height - top);
     return [
@@ -104,17 +107,33 @@ export class AssetsSimulator extends Component {
         ref={container_ref}
         key="assets-simulator-content"
       >
-        {frame_settings?.focal_point && <NavigatorSplitterLayout
-          bounding_rect={bounding_rect}
-          frame_settings={frame_settings}
-          frame_settings_key={KEY_ASSETS_SIMULATOR_FRAME_SETTINGS}
-          splitter_keys={ASSETS_SIMULATOR_SPLITTER_KEYS}
-        />}
-        <styles.FixedBlock style={{ top, left: right_left, width: right_width,
-          height: available_height, overflow: "hidden" }}>
-          <React.Suspense fallback={<div>{AppText.get(TERRAIN_TEXT.loading)}</div>}>
-            <SimulatorTerrain width_px={right_width} height_px={available_height}
-              focal_point={frame_settings?.focal_point} scope={frame_settings?.scope} />
+        {frame_settings?.focal_point && (
+          <NavigatorSplitterLayout
+            bounding_rect={bounding_rect}
+            frame_settings={frame_settings}
+            frame_settings_key={KEY_ASSETS_SIMULATOR_FRAME_SETTINGS}
+            splitter_keys={ASSETS_SIMULATOR_SPLITTER_KEYS}
+          />
+        )}
+        <styles.FixedBlock
+          style={{
+            top,
+            left: right_left,
+            width: right_width,
+            height: available_height,
+            overflow: "hidden",
+          }}
+        >
+          <React.Suspense
+            fallback={<div>{AppText.get(TERRAIN_TEXT.loading)}</div>}
+          >
+            <SimulatorTerrain
+              width_px={right_width}
+              height_px={available_height}
+              focal_point={frame_settings?.focal_point}
+              scope={frame_settings?.scope}
+              aspect_ratio={frame_settings?.aspect_ratio ?? 1}
+            />
           </React.Suspense>
         </styles.FixedBlock>
       </styles.TightCenteredBlock>,

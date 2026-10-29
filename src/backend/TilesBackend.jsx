@@ -7,6 +7,14 @@ const FRACTO_PROD_URL =
   import.meta.env.VITE_FRACTO_PROD_URL || "https://fracto.mikehallstudio.com";
 
 export class TilesBackend {
+  static mesh_terrain = (params, options = {}) =>
+    request_json(
+      `${service_origin("tiles")}/mesh_terrain?${new URLSearchParams(params)}`,
+      options,
+    );
+
+  static mesh_url = (short_code) =>
+    `${service_origin("tiles")}/meshes/${encodeURIComponent(short_code)}`;
   static mesh_file = async (short_code, options = {}) => {
     const response = await fetch(
       `${service_origin("tiles")}/meshes/${encodeURIComponent(short_code)}`,

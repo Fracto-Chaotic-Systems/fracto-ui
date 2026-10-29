@@ -83,3 +83,5 @@ Persisted values are browser-local preferences and configuration, not a
 server-side configuration source. `localStorage` is accessible to scripts
 running in the page, so it is not a secure secret store; do not treat it as
 appropriate for long-lived production credentials.
+
+The simulator terrain_resolution setting now represents minimum native cached samples across the shorter navigator edge (2–5000), default 1000. Existing saved resolution values remain valid minimums.

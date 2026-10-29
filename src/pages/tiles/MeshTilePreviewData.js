@@ -1,34 +1,7 @@
-import { decode_terrain_bytes } from "@fracto/sdk/terrain/Decode.js";
 import FractoCanvasBuffer from "@fracto/sdk/FractoCanvasBuffer.js";
 import { TERRAIN_HEIGHT_SCOPE_RATIO } from "../assets/SimulatorTerrainData.js";
 
-/** Bound decompression before parsing the shared, validated mesh format. */
-export async function decode_preview_mesh(compressed) {
-  const reader = new Blob([compressed])
-    .stream()
-    .pipeThrough(new DecompressionStream("gzip"))
-    .getReader();
-  const chunks = [];
-  let length = 0;
-  try {
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      length += value.length;
-      if (length > 16 * 1024 * 1024) throw new Error("Mesh preview too large");
-      chunks.push(value);
-    }
-  } finally {
-    await reader.cancel();
-  }
-  const raw = new Uint8Array(length);
-  let offset = 0;
-  for (const chunk of chunks) {
-    raw.set(chunk, offset);
-    offset += chunk.length;
-  }
-  return decode_terrain_bytes(raw);
-}
+export { decode_terrain_gzip as decode_preview_mesh } from "@fracto/sdk/terrain/Decode.js";
 
 /** One palette pass supplies both the source image and the mesh texture. */
 export function paint_preview_tile(mesh, canvas) {

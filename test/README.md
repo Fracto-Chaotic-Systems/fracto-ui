@@ -56,3 +56,5 @@ counts, exact differences, shades and a read-only table without checkbox selecti
 mesh_transform_operations.test.js verifies explicit start, captured region/level/count, stop/resume accounting, stale responses, mode guards and the exact operation heading. Run npm run test:mesh-heat-map for these and heat-map/table tests.
 
 mesh_tile_preview.test.js verifies browser/server codec parity, standard palette equivalence, scope/25 relief, immutable cached geometry, request races, height changes, failure recovery and teardown. Included in test:mesh-heat-map and test:mesh-transform.
+
+simulator_mesh.test.js covers manifest-driven loading, persistent-worker reuse, checksum rejection, geometry transfer avoidance, GPU geometry reuse/disposal, mirrored placement, clipping, camera preservation, stale responses and local lighting/wireframe controls. Run npm run test:simulator. simulator_terrain.test.js retains regression coverage of the prior numerical helpers and lighting shader.

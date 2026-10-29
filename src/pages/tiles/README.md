@@ -67,3 +67,5 @@ MeshTilePreview displays two 300px square canvases beneath the operation heading
 The paired preview is lazy-loaded when an operation begins, keeping Three.js out of initial page loading. Live verification completed all 47 level-4 tiles in the default region and confirmed the local height control changes the mesh relief.
 
 While a transform is starting, queued, running or stopping, MeshHeatMap freezes its coverage image, counts and map parameters. Inventory polling and map refreshes pause, including navigator changes; in-flight responses are aborted and ignored. Terminal job notifications refresh the latest navigator region and resume ordinary polling. Tile/mesh previews and job progress continue independently.
+
+The preview status row always reserves one line, so waiting/loading messages cannot move the height control or operation progress. After the first tile is visible, routine per-tile loading text is suppressed while the existing canvases remain displayed; actual preview failures still appear in the reserved status row.

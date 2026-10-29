@@ -31,6 +31,11 @@ const Preview = styled.div`
     text-align: center;
     margin: 0.5rem 0;
   }
+  .preview-status {
+    min-height: 1.5em;
+    line-height: 1.5;
+    margin: 0.5rem 0;
+  }
   label {
     display: flex;
     align-items: center;
@@ -126,6 +131,7 @@ export default class MeshTilePreview extends Component {
     this.setState({ height: Number(event.target.value) }, this.install);
   render() {
     const { status, height, displayed, webgl_failed } = this.state;
+    const message = status === "preview_loading" && displayed ? null : status;
     return (
       <Preview>
         <div className="canvases">
@@ -151,7 +157,9 @@ export default class MeshTilePreview extends Component {
             <figcaption>{AppText.get(TEXT.preview_mesh)}</figcaption>
           </figure>
         </div>
-        {status && <p role="status">{AppText.get(TEXT[status])}</p>}
+        <p className="preview-status" role="status">
+          {message ? AppText.get(TEXT[message]) : null}
+        </p>
         {webgl_failed && <p role="alert">{AppText.get(TEXT.preview_webgl)}</p>}
         <label>
           {AppText.get(TEXT.preview_height)}
