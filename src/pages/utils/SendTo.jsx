@@ -8,13 +8,20 @@ import {
   KEY_TILES_GENERATOR_FRAME_SETTINGS,
   KEY_TILES_SECTION,
   TILES_GENERATOR,
+  KEY_TILES_TRANSFORM_FRAME_SETTINGS,
+  TILES_TRANSFORM,
 } from "../../settings/TilesSettings.jsx";
+import AppText from "../../AppText.jsx";
+import { KEY_TILES_MESH_TRANSFORMS } from "../../text/TilesText.jsx";
+import { KEY_ASSETS_SIMULATOR } from "../../text/AssetsText.jsx";
 import {
   ASSETS_DETECTOR,
   ASSETS_GENERATOR,
+  ASSETS_SIMULATOR,
   KEY_ASSETS_DETECTOR_FRAME_SETTINGS,
   KEY_ASSETS_GENERATOR_FRAME_SETTINGS,
   KEY_ASSETS_SECTION,
+  KEY_ASSETS_SIMULATOR_FRAME_SETTINGS,
 } from "../../settings/AssetsSettings.jsx";
 import { copy_json } from "../../utils/Dom.jsx";
 import {
@@ -29,6 +36,8 @@ export const PAGE_ASSETS_IMAGE_GENERATE = 2;
 export const PAGE_ASSETS_DETECTOR = 3;
 export const PAGE_LORE_IMAGE = 4;
 export const PAGE_STUDY_CIRCUITRY = 5;
+export const PAGE_TILES_TRANSFORM = 6;
+export const PAGE_ASSETS_SIMULATOR = 7;
 
 export const send_to = (frame_settings, destination) => {
   let routing = null;
@@ -47,6 +56,14 @@ export const send_to = (frame_settings, destination) => {
       routing = "/tiles";
       break;
 
+    case PAGE_TILES_TRANSFORM:
+      AppSettings.on_settings_changed({
+        [KEY_TILES_TRANSFORM_FRAME_SETTINGS]: frame_settings_copy,
+        [KEY_TILES_SECTION]: TILES_TRANSFORM,
+      });
+      routing = "/tiles";
+      break;
+
     case PAGE_ASSETS_IMAGE_GENERATE:
       console.log("it is image generate", frame_settings_copy);
       AppSettings.on_settings_changed({
@@ -61,6 +78,14 @@ export const send_to = (frame_settings, destination) => {
       AppSettings.on_settings_changed({
         [KEY_ASSETS_DETECTOR_FRAME_SETTINGS]: frame_settings_copy,
         [KEY_ASSETS_SECTION]: ASSETS_DETECTOR,
+      });
+      routing = "/assets";
+      break;
+
+    case PAGE_ASSETS_SIMULATOR:
+      AppSettings.on_settings_changed({
+        [KEY_ASSETS_SIMULATOR_FRAME_SETTINGS]: frame_settings_copy,
+        [KEY_ASSETS_SECTION]: ASSETS_SIMULATOR,
       });
       routing = "/assets";
       break;
@@ -86,11 +111,16 @@ export const send_to = (frame_settings, destination) => {
   }
 };
 
-const SEND_TO_OPTIONS = [
+const SEND_TO_OPTIONS = () => [
   { label: "select", value: -1, help: "where to go" },
   { label: "tiles", value: PAGE_TILES_GENERATE, help: "generate" },
+  {
+    label: AppText.get(KEY_TILES_MESH_TRANSFORMS),
+    value: PAGE_TILES_TRANSFORM,
+  },
   { label: "images", value: PAGE_ASSETS_IMAGE_GENERATE, help: "generate" },
   { label: "detector", value: PAGE_ASSETS_DETECTOR, help: "artrifact" },
+  { label: AppText.get(KEY_ASSETS_SIMULATOR), value: PAGE_ASSETS_SIMULATOR },
   { label: "circuitry", value: PAGE_STUDY_CIRCUITRY, help: "of orbitals" },
 ];
 
@@ -109,7 +139,7 @@ export class SendTo extends Component {
       <CoolStyles.InlineBlock style={select_style}>
         <CoolSelect
           extra_style={select_style}
-          options={SEND_TO_OPTIONS}
+          options={SEND_TO_OPTIONS()}
           value={SEND_TO_PROMPT}
           on_change={(e) => send_to(frame_settings, e.target.value)}
         />

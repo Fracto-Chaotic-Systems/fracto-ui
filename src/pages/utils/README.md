@@ -32,9 +32,16 @@ multiple application areas. It sits between the general UI building blocks in
 - `PatternsUtils.jsx` computes chart-ready pattern, iteration, escape-point,
   and polar-coordinate data for Study visualizations.
 - `SendTo.jsx` lets a user route the current frame settings to another
-  supported feature, such as tile generation, image generation, detector,
-  lore image, or Study circuitry. It updates that destination's settings and
-  selected section.
+  supported feature: tile generation, mesh transforms, image generation,
+  detector, flight simulator, or Study circuitry. It updates that destination's settings and
+  selected section. Mesh transforms uses its independent
+  `tiles_transform/frame_settings` preference and selects `tiles_transform`
+  before routing to `/tiles`. Flight simulator updates
+  `assets/simulator/frame_settings`, selects `assets_simulator`, and routes to
+  `/assets`. Frame transfer preserves focal point, scope and
+  aspect ratio, while removing canvas buffers, contexts and source canvas width.
+  Destination labels are resolved during rendering so the shared AppText
+  catalog is initialized before the mesh-transforms label is read.
 - `Sidebar.jsx` renders a page's configured sidebar list, including section
   selection and optional labeled dividers, using text keys from `AppText`.
 - `SplitterLayout.jsx` lays out a page's left and right panes with a draggable

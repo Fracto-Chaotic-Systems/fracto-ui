@@ -60,3 +60,5 @@ mesh_tile_preview.test.js verifies browser/server codec parity, standard palette
 simulator_mesh.test.js covers manifest-driven loading, persistent-worker reuse, checksum rejection, geometry transfer avoidance, GPU geometry reuse/disposal, mirrored placement, clipping, camera preservation, stale responses and local lighting/wireframe controls. Run npm run test:simulator. simulator_terrain.test.js retains regression coverage of the prior numerical helpers and lighting shader.
 
 simulator_lod.test.js covers camera distance, visibility, the eight-patch limit, hysteresis, failed quartet suppression and stale request rejection. simulator_mesh.test.js additionally exercises child-load fallback and mixed-level worker assembly. These are included in test:simulator.
+
+`simulator_welding.test.js` covers horizontal/vertical edge equality, four-way corner equality, reflected neighbors, invalid/absent geometry, 2:1 transitions in all four directions, collapsed edge coordinates, missing boundary segments, immutable buffers/colors, shader-lighting composition, override reuse and disposal after coarsening. Run npm run test:terrain-welding or test:simulator.

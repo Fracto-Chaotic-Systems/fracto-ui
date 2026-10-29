@@ -1,11 +1,13 @@
 import * as THREE from "three";
 import { TERRAIN_HEIGHT_SCOPE_RATIO } from "./SimulatorTerrainData.js";
+import SimulatorTerrainWelding from "./SimulatorTerrainWelding.js";
 
 /** Reuse native geometry; instances handle placement and lower-plane reflection. */
 export default class SimulatorMeshScene {
   constructor(scene, renderer, lighting) {
     Object.assign(this, { scene, renderer, lighting });
     this.cache = new Map();
+    this.welding = new SimulatorTerrainWelding();
     this.group = new THREE.Group();
     scene.add(this.group);
   }
@@ -87,6 +89,7 @@ export default class SimulatorMeshScene {
         this.group.add(mesh);
       }
     }
+    this.welding.apply(this.group.children);
     const visible = new Set(items.map((item) => item.key));
     for (const tile of plan.base_tiles || [])
       visible.add(`${plan.namespace}/${tile.short_code}/${tile.sha256}`);
@@ -99,6 +102,7 @@ export default class SimulatorMeshScene {
   }
   wireframe(value) {
     for (const entry of this.cache.values()) entry.material.wireframe = value;
+    this.welding.wireframe(value);
   }
   evict(key) {
     const entry = this.cache.get(key);
@@ -108,6 +112,7 @@ export default class SimulatorMeshScene {
     this.cache.delete(key);
   }
   dispose() {
+    this.welding.dispose();
     this.group.clear();
     this.scene.remove(this.group);
     for (const key of this.keys()) this.evict(key);

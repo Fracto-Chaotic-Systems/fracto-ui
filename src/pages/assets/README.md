@@ -40,7 +40,8 @@ see [its README](surveys/README.md) for responsibilities.
   tile instances, mirrors the lower half-plane and clips to the navigator region.
   Coordinates are normalized relative to the navigator to retain precision when
   zoomed in. Precomputed relief remains scaled to navigator scope / 25. Cached
-  local-edge smoothing remains provisional; cross-tile seam repair is deferred.
+  local-edge smoothing remains provisional. Same-level boundary heights are welded
+  at render time; coarse/fine transitions remain deferred.
   Gaps remain holes. Neither missing files nor insufficient resolution triggers
   on-demand construction. Reload refreshes the manifest and retries failed files.
   Camera orbit, pan and zoom can fetch nearby refinement tiles; wireframe and
@@ -141,6 +142,16 @@ The simulator now starts with a base minimum of 1500, persisted separately in as
 
 The manifest supplies only complete ready child quartets. Parents remain displayed while children load, and each quartet swaps atomically; a failed child retains its parent and that patch is not repeatedly retried until the view/manifest reloads. Mirrored placements share file data but can refine independently. Moving away restores retained base geometry. Reload terrain refreshes child availability. The status reports base sampling and the number/level of refined nearby patches separately.
 
-SimulatorMeshTextures.js fixes the tone mapping to the base view, extends it consistently for finer-only iteration values and caches up to 128 tile textures in worker memory. Per-entry GPU texture identities prevent stale colors when reusing offscreen geometry. The worker can reuse retained GPU parents without fetching evicted raw data; its small metadata cache retains up to 512 height records. Base geometry is protected from eviction while its children are shown, allowing prompt coarsening. The common normalized height scale remains scope/25 at every level. Crack repair, skirts and cross-level edge stitching are deferred, as authorized for this first milestone.
+SimulatorMeshTextures.js fixes the tone mapping to the base view, extends it consistently for finer-only iteration values and caches up to 128 tile textures in worker memory. Per-entry GPU texture identities prevent stale colors when reusing offscreen geometry. The worker can reuse retained GPU parents without fetching evicted raw data; its small metadata cache retains up to 512 height records. Base geometry is protected from eviction while its children are shown, allowing prompt coarsening. The common normalized height scale remains scope/25 at every level. Runtime welding closes equal-level height discontinuities and stitches 2:1 coarse/fine borders without modifying cached geometry.
 
-Development verification (2026-10-28): the 1500 base selected level 4 at 2561×2561 from 47 files with 66 ready refinement candidates. Zooming the camera close selected seven level-5 physical patches, using 65 canonical files in total. Pulling back restored all 47 base files in 5ms through reuse. Cracks remain deferred.
+Development verification (2026-10-28): the 1500 base selected level 4 at 2561×2561 from 47 files with 66 ready refinement candidates. Zooming the camera close selected seven level-5 physical patches, using 65 canonical files in total. Pulling back restored all 47 base files in 5ms through reuse. This verification preceded equal-level runtime welding.
+
+### Equal-level runtime welding
+
+SimulatorTerrainEdges.js extracts each native mesh’s 257-sample edges and triangle participation once. It locates visible same-level neighbors with exact integer quadtree addresses, including independently placed conjugate tiles. Shared edge interiors receive the same averaged height; all valid tiles meeting at a corner share one corner average. Missing neighbors and boundary vertices unused by triangles are left unchanged. Different levels are deliberately excluded.
+
+SimulatorTerrainWelding.js applies boundary overrides through a small per-placement RG float texture (about 8 KiB) in the vertex shader. Native positions, UVs, indices, stored mesh files and color textures remain unchanged. This avoids copying full geometry buffers and permits a mirrored instance to have different neighbors. Material overrides preserve the existing lighting shader and scope/25 scaling. Conservative per-object bounds include displaced vertices for frustum culling. Overrides are reused when the visible layout is unchanged, updated when neighbors change during refinement/coarsening, and disposed when no longer needed. Wireframe and lighting remain functional. No cache rebuild is required. Intentional data holes remain open.
+
+SimulatorTerrainTransitions.js follows equal-level welding with 2:1 boundary stitching. Fine boundary vertices snap to the authoritative coarse edge; odd vertices collapse onto the preceding even vertex, eliminating T-junctions rather than only matching interpolated heights. Fine corners propagate to every fine tile sharing that corner. Boundary triangle connectivity prevents collapsing across missing-data segments. Reflected placements use physical edge orientation. This supports the current one-extra-level LOD system; larger adjacent level differences require additional transition rules.
+
+Development verification (2026-10-29): the native level-4 overview rendered with equal-level runtime welding, standard colors and optional lighting, with no WebGL shader errors. Subsequent unit coverage verifies 2:1 transition coordinates and heights in every direction, reflected instances, shared corners, missing boundary segments, GPU override restoration and original-buffer immutability.
