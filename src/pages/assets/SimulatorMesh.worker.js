@@ -1,13 +1,12 @@
 import { decode_terrain_gzip } from "@fracto/sdk/terrain/Decode.js";
 import { resolve_lod_plan } from "@fracto/sdk/terrain/Lod.js";
 import SimulatorMeshTextures from "./SimulatorMeshTextures.js";
+import { scale_escape_relief } from "./SimulatorEscapeRelief.js";
 
 const cache = new Map();
 const metadata = new Map();
 const textures = new SimulatorMeshTextures();
 let controller, active_id, last_view;
-const key_of = (plan, tile) =>
-  `${plan.namespace}/${tile.short_code}/${tile.sha256}`;
 
 self.onmessage = async ({ data }) => {
   controller?.abort();
@@ -18,6 +17,9 @@ self.onmessage = async ({ data }) => {
   const { id, plan, urls, geometry_keys, current_palette_key, texture_keys } =
     data;
   active_id = id;
+  const scale = data.escape_scale || 1;
+  const key_of = (plan, tile) =>
+    `${plan.namespace}/${tile.short_code}/${tile.sha256}${scale === 1 ? "" : `/escape-${scale}`}`;
   const request = (controller = new AbortController());
   const emit = (message) => {
     if (active_id === id) self.postMessage({ id, ...message });
@@ -41,6 +43,7 @@ self.onmessage = async ({ data }) => {
       emit({
         result: {
           ...last_view,
+          escape_scale: scale,
           plan: resolve_lod_plan(plan, new Set(last_view.available_codes)),
           failures: [],
           detail_failures: [],
@@ -89,7 +92,10 @@ self.onmessage = async ({ data }) => {
               .map((byte) => byte.toString(16).padStart(2, "0"))
               .join("");
             if (sha256 !== tile.sha256) throw new Error("Mesh changed");
-            mesh = await decode_terrain_gzip(compressed);
+            mesh = scale_escape_relief(
+              await decode_terrain_gzip(compressed),
+              scale,
+            );
             if (
               mesh.metadata.short_code !== tile.short_code ||
               mesh.metadata.namespace !== plan.namespace
@@ -192,6 +198,7 @@ self.onmessage = async ({ data }) => {
             cache_hits,
             maximum_height,
             palette_key,
+            escape_scale: scale,
           },
         },
         transfers,

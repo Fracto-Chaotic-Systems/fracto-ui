@@ -92,7 +92,9 @@ export default class SimulatorMeshScene {
     this.welding.apply(this.group.children);
     const visible = new Set(items.map((item) => item.key));
     for (const tile of plan.base_tiles || [])
-      visible.add(`${plan.namespace}/${tile.short_code}/${tile.sha256}`);
+      visible.add(
+        `${plan.namespace}/${tile.short_code}/${tile.sha256}${data.escape_scale && data.escape_scale !== 1 ? `/escape-${data.escape_scale}` : ""}`,
+      );
     this.palette_key = data.palette_key ?? null;
     while (this.cache.size > 64) {
       const key = [...this.cache.keys()].find((key) => !visible.has(key));

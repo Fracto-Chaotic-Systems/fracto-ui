@@ -62,3 +62,11 @@ simulator_mesh.test.js covers manifest-driven loading, persistent-worker reuse, 
 simulator_lod.test.js covers camera distance, visibility, the eight-patch limit, hysteresis, failed quartet suppression and stale request rejection. simulator_mesh.test.js additionally exercises child-load fallback and mixed-level worker assembly. These are included in test:simulator.
 
 `simulator_welding.test.js` covers horizontal/vertical edge equality, four-way corner equality, reflected neighbors, invalid/absent geometry, 2:1 transitions in all four directions, collapsed edge coordinates, missing boundary segments, immutable buffers/colors, shader-lighting composition, override reuse and disposal after coarsening. Run npm run test:terrain-welding or test:simulator.
+
+`simulator_escape_relief.test.js` compares escape scaling against a full terrain
+rebuild with multiplied source iterations, including the escape/pattern boundary,
+missing samples, logarithm, cap and smoothing. It also verifies immutable stored
+attributes and unchanged pattern interiors. Worker integration checks geometry
+invalidation, reuse and restoration at 1×. Included in `test:simulator`.
+The 100× jagged-boundary regression checks reduced maximum adjacent height steps
+with radius-four smoothing while preserving plateau elevations.

@@ -21,6 +21,10 @@ import {
 import FractoCanvasBuffer from "../../../sdk/FractoCanvasBuffer.js";
 import { minimum_terrain_resolution } from "../src/pages/assets/SimulatorTerrainData.js";
 import {
+  scale_escape_relief,
+  escape_relief_scale,
+} from "../src/pages/assets/SimulatorEscapeRelief.js";
+import {
   TerrainLighting,
   normalize_terrain_lighting,
 } from "../src/pages/assets/SimulatorTerrainLighting.js";
@@ -138,6 +142,7 @@ test("persistent runtime worker reuses decoded files and skips geometry transfer
     {
       self,
       decode_terrain_gzip,
+      scale_escape_relief,
       terrain_palette,
       terrain_palette_mapper,
       resolve_lod_plan,
@@ -186,6 +191,24 @@ test("persistent runtime worker reuses decoded files and skips geometry transfer
   });
   assert.equal(corrupt.items.length, 0);
   assert.equal(corrupt.failures[0], "00");
+  const scaled = await run(40, [first.items[0].key], {
+    escape_scale: 10,
+    current_palette_key: first.palette_key,
+  });
+  assert.notEqual(scaled.items[0].key, first.items[0].key);
+  assert.ok(
+    scaled.items[0].positions,
+    "changed multiplier uploads new geometry",
+  );
+  assert.equal(scaled.escape_scale, 10);
+  const reused = await run(41, [scaled.items[0].key], {
+    escape_scale: 10,
+    current_palette_key: scaled.palette_key,
+  });
+  assert.equal(reused.items[0].positions, undefined);
+  const restored = await run(42, [scaled.items[0].key], { escape_scale: 1 });
+  assert.equal(restored.items[0].key, first.items[0].key);
+  assert.deepEqual(restored.items[0].positions, first.items[0].positions);
   const children = [];
   for (let digit = 0; digit < 4; digit++) {
     const code = `00${digit}`,
@@ -340,6 +363,8 @@ function controller_harness() {
     TerrainLighting,
     normalize_terrain_lighting,
     minimum_terrain_resolution,
+    escape_relief_scale,
+    KEY_ASSETS_SIMULATOR_ESCAPE_SCALE: "escape_scale",
     KEY_ASSETS_SIMULATOR_BASE_RESOLUTION: "resolution",
     KEY_ASSETS_SIMULATOR_LIGHTING: "lighting",
     AppSettings: {

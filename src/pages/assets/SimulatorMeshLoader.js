@@ -90,6 +90,7 @@ export default class SimulatorMeshLoader {
           geometry_keys,
           current_palette_key,
           texture_keys: options.texture_keys,
+          escape_scale: options.escape_scale,
           urls: Object.fromEntries(
             plan.tiles.map((tile) => [
               tile.short_code,

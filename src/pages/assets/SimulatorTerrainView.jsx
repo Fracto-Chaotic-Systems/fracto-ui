@@ -32,6 +32,9 @@ export default function SimulatorTerrainView({
   on_wireframe,
   on_reload,
   on_lighting,
+  escape_scale_input,
+  on_escape_change,
+  on_escape_apply,
 }) {
   const plan = loaded_info?.plan;
   const missing =
@@ -69,6 +72,24 @@ export default function SimulatorTerrainView({
         settings={lighting}
         on_change={on_lighting}
       />
+      <TerrainToolbar>
+        <form onSubmit={on_escape_apply}>
+          <label title={AppText.get(TEXT.escape_scale_help)}>
+            {AppText.get(TEXT.escape_scale)}
+            <input
+              type="number"
+              min="1"
+              max="1000000"
+              step="any"
+              required
+              value={escape_scale_input}
+              onChange={on_escape_change}
+              style={{ width: "7rem" }}
+            />
+          </label>
+          <button type="submit">{AppText.get(TEXT.apply)}</button>
+        </form>
+      </TerrainToolbar>
       <TerrainMessage aria-live="polite">
         {AppText.get(TEXT[status])}
         {plan?.level && (
@@ -153,4 +174,7 @@ SimulatorTerrainView.propTypes = {
   on_wireframe: PropTypes.func.isRequired,
   on_reload: PropTypes.func.isRequired,
   on_lighting: PropTypes.func.isRequired,
+  escape_scale_input: PropTypes.string,
+  on_escape_change: PropTypes.func,
+  on_escape_apply: PropTypes.func,
 };
