@@ -18,12 +18,15 @@ import {
 } from "../../../text/TilesText.jsx";
 
 import { generate_tile_points } from "./GeneratorInterface.jsx";
-import { bounds_from_short_code } from "../TilesUtils.jsx";
+import {
+  bounds_from_short_code,
+  TILE_RENDER_WIDTH_PX,
+} from "../TilesUtils.jsx";
 import GeneratorActions from "./GeneratorActions.jsx";
 import GeneratorHistory from "./GeneratorHistory.jsx";
 import { tiles_operation_name } from "./TilesAutomationOperations.jsx";
 
-export const TILE_RENDER_WIDTH_PX = 300;
+export { TILE_RENDER_WIDTH_PX };
 const ACTIONS_WIDTH_PX = 2 * TILE_RENDER_WIDTH_PX + 3 * MARGIN_PX;
 
 const NEXT_TILE_DELAY_MS = 150;
@@ -118,7 +121,9 @@ export class GeneratorOperations extends Component {
       );
     }
     if (this.automation_completion) {
-      return Promise.reject(new Error("a Tiles automation task is already running"));
+      return Promise.reject(
+        new Error("a Tiles automation task is already running"),
+      );
     }
     const task_data = task?.data || task;
     const short_codes = Array.isArray(task_data?.short_codes)
@@ -224,10 +229,13 @@ export class GeneratorOperations extends Component {
       this.setState({ history });
 
       if (tile_index === tiles.length - 1) {
-        this.setState({
-          in_progress: false,
-          tile_index: tiles.length,
-        }, this.complete_automation_task);
+        this.setState(
+          {
+            in_progress: false,
+            tile_index: tiles.length,
+          },
+          this.complete_automation_task,
+        );
       } else {
         this.setState({ tile_index: tile_index + 1 });
       }
@@ -299,35 +307,34 @@ export class GeneratorOperations extends Component {
         }}
       >
         <div style={label_style}>
-          {AppText.get(KEY_TILES_GENERATOR_AUTOMATION_STATE)}: {" "}
+          {AppText.get(KEY_TILES_GENERATOR_AUTOMATION_STATE)}:{" "}
           {automation_engine_state.state}
         </div>
         <div style={label_style}>
-          {AppText.get(KEY_TILES_GENERATOR_AUTOMATION_PROGRESS)}: {" "}
+          {AppText.get(KEY_TILES_GENERATOR_AUTOMATION_PROGRESS)}:{" "}
           {progress_percent}%
         </div>
         <div style={label_style}>
-          {AppText.get(KEY_TILES_GENERATOR_AUTOMATION_TASK)}: {" "}
+          {AppText.get(KEY_TILES_GENERATOR_AUTOMATION_TASK)}:{" "}
           {automation_engine_state.task_index + 1}
         </div>
         <div style={label_style}>
-          {AppText.get(KEY_TILES_GENERATOR_AUTOMATION_OPERATION)}: {" "}
+          {AppText.get(KEY_TILES_GENERATOR_AUTOMATION_OPERATION)}:{" "}
           {automation_engine_state.current_operation || ""}
         </div>
         <div style={label_style}>
-          {AppText.get(KEY_TILES_GENERATOR_AUTOMATION_ATTEMPT)}: {" "}
+          {AppText.get(KEY_TILES_GENERATOR_AUTOMATION_ATTEMPT)}:{" "}
           {automation_engine_state.operation_attempt || 0}
         </div>
         {automation_engine_state.operation_detail != null ? (
           <div style={label_style}>
-            {AppText.get(KEY_TILES_GENERATOR_AUTOMATION_COUNTDOWN)} {" "}
+            {AppText.get(KEY_TILES_GENERATOR_AUTOMATION_COUNTDOWN)}{" "}
             {automation_engine_state.operation_detail}
           </div>
         ) : null}
         {error_message ? (
           <div style={{ ...label_style, color: "#cc3333" }}>
-            {AppText.get(KEY_TILES_GENERATOR_AUTOMATION_ERROR)}: {" "}
-            {error_message}
+            {AppText.get(KEY_TILES_GENERATOR_AUTOMATION_ERROR)}: {error_message}
           </div>
         ) : null}
       </CoolStyles.Block>
@@ -337,7 +344,10 @@ export class GeneratorOperations extends Component {
   render() {
     const { history } = this.state;
     const { automation_mode } = this.props;
-    if (automation_mode === PAGE_MODE_AUTOMATION && !this.props.automation_engine_state) {
+    if (
+      automation_mode === PAGE_MODE_AUTOMATION &&
+      !this.props.automation_engine_state
+    ) {
       return <CoolStyles.Block style={{ display: "none" }} />;
     }
     const actions_block = this.actions_block();

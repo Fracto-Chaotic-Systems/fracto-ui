@@ -41,10 +41,18 @@ built-in `node:test` runner and do not require a browser unless noted.
 `admin_server_clients.test.js` covers client-table refresh overlap, selected-server
 unmount handling, and empty versus restricted results. `remote_server_clients.test.js`
 checks direct/nginx discovery and ensures remote requests never include cookies.
+
 ## Mesh transforms
 
 `mesh_heat_map.test.js` verifies navigator request parameters, canvas level
 filtering, cancellation and late-response rejection during navigation,
 revision/namespace polling, selection preservation, timeout/retry behavior,
+rebuild-generation changes even when namespace and revision repeat,
 unmount cleanup, and sizing within the endpoint's rounded pixel limits.
 Run with `npm run test:mesh-heat-map`.
+`mesh_coverage_table.test.js` checks Generate-compatible columns, plain numeric
+counts, exact differences, shades and a read-only table without checkbox selection.
+
+mesh_transform_operations.test.js verifies explicit start, captured region/level/count, stop/resume accounting, stale responses, mode guards and the exact operation heading. Run npm run test:mesh-heat-map for these and heat-map/table tests.
+
+mesh_tile_preview.test.js verifies browser/server codec parity, standard palette equivalence, scope/25 relief, immutable cached geometry, request races, height changes, failure recovery and teardown. Included in test:mesh-heat-map and test:mesh-transform.

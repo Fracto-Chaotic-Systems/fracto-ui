@@ -10,6 +10,8 @@ translations consistent identifiers.
 transforms** page title for the Tiles mesh transform scaffold.
 Its `MESH_MAP_TEXT` catalog supplies map status, retry, level selection and
 coverage-table labels.
+The mesh coverage table includes localized shade, level, tile count, mesh count
+and can do column labels.
 
 ## Files
 
@@ -85,3 +87,5 @@ while leaving locale negotiation and advanced language rules for a later
 implementation. It also does not guarantee that every visible string has
 already been extracted; move hardcoded UI copy into the appropriate map when
 editing or translating those components.
+
+TilesText exports MESH_OPERATION_TEXT for transform headings, controls, progress and recoverable errors; count and level are substituted in the operation title.

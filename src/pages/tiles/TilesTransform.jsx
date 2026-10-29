@@ -105,6 +105,7 @@ export default class TilesTransform extends Component {
             <MeshHeatMap
               frame_settings={frame_settings}
               width_px={right_width}
+              automation_mode={this.state.automation_mode}
             />
           </styles.FixedBlock>
         </styles.TightCenteredBlock>

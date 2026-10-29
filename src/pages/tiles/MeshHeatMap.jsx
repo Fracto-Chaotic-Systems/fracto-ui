@@ -7,7 +7,7 @@ import MeshHeatMapView from "./MeshHeatMapView.jsx";
 
 const POLL_MS = 5000;
 const token = (data) =>
-  `${data.namespace}|${data.inventory_revision ?? data.revision}`;
+  `${data.inventory_epoch ?? ""}|${data.namespace}|${data.inventory_revision ?? data.revision}`;
 
 export function mesh_map_params({ frame_settings: frame, width_px }) {
   const aspect = frame?.aspect_ratio ?? 1;
@@ -52,11 +52,14 @@ export default class MeshHeatMap extends Component {
   static propTypes = {
     frame_settings: PropTypes.object.isRequired,
     width_px: PropTypes.number.isRequired,
+    automation_mode: PropTypes.string,
   };
   canvas = createRef();
   alive = false;
   sequence = 0;
   revision_token = null;
+  operation_id = 0;
+  map_frozen = false;
   state = { result: null, loading: false, error: false, selected_levels: null };
 
   componentDidMount() {
@@ -65,7 +68,10 @@ export default class MeshHeatMap extends Component {
     this.timer = setTimeout(this.poll, POLL_MS);
   }
   componentDidUpdate(previous) {
-    if (signature(previous) !== signature(this.props)) this.load_map();
+    if (signature(previous) !== signature(this.props)) {
+      if (!this.state.operation_busy) this.setState({ operation: null });
+      this.load_map();
+    }
   }
   componentWillUnmount() {
     this.alive = false;
@@ -75,6 +81,7 @@ export default class MeshHeatMap extends Component {
     this.inventory_request?.abort();
   }
   load_map = async (preserve_selection = false) => {
+    if (this.map_frozen) return;
     const sequence = ++this.sequence;
     this.map_request?.abort();
     const params = mesh_map_params(this.props);
@@ -107,6 +114,10 @@ export default class MeshHeatMap extends Component {
   };
   poll = async () => {
     if (!this.alive) return;
+    if (this.map_frozen) {
+      this.timer = setTimeout(this.poll, POLL_MS);
+      return;
+    }
     const request = new AbortController();
     this.inventory_request = request;
     const timeout = setTimeout(() => request.abort(), 20000);
@@ -117,16 +128,34 @@ export default class MeshHeatMap extends Component {
       clearTimeout(timeout);
       if (
         this.alive &&
+        !this.map_frozen &&
+        !request.signal.aborted &&
         !this.state.loading &&
         (this.state.error || token(inventory) !== this.revision_token)
       )
         await this.load_map(true);
     } catch {
-      if (this.alive) this.setState({ error: true });
+      if (this.alive && !this.map_frozen && !request.signal.aborted)
+        this.setState({ error: true });
     } finally {
       clearTimeout(timeout);
       if (this.alive) this.timer = setTimeout(this.poll, POLL_MS);
     }
+  };
+  on_operation_busy = (operation_busy) => {
+    if (operation_busy === this.map_frozen) return;
+    this.map_frozen = operation_busy;
+    if (operation_busy) {
+      this.frozen_params = mesh_map_params(this.props);
+      // A refresh already in flight must not replace the frozen map either.
+      this.sequence++;
+      this.map_request?.abort();
+      this.inventory_request?.abort();
+    }
+    this.setState({
+      operation_busy,
+      ...(operation_busy ? { loading: false } : {}),
+    });
   };
   paint = () => {
     const ctx = this.canvas.current?.getContext("2d");
@@ -156,13 +185,36 @@ export default class MeshHeatMap extends Component {
       this.paint,
     );
   };
+  open_transform = ({ count, level }) => {
+    const params = mesh_map_params(this.props);
+    if (!params || this.state.operation_busy || count <= 0) return;
+    this.setState({
+      operation: {
+        id: ++this.operation_id,
+        count,
+        level,
+        region: {
+          focal_point: { x: params.focal_point_x, y: params.focal_point_y },
+          scope: params.scope,
+          aspect_ratio: params.aspect_ratio,
+        },
+      },
+    });
+  };
   render() {
     return (
       <MeshHeatMapView
         canvas_ref={this.canvas}
-        params={mesh_map_params(this.props)}
+        params={
+          this.map_frozen ? this.frozen_params : mesh_map_params(this.props)
+        }
         {...this.state}
         on_retry={() => this.load_map(true)}
+        on_transform={this.open_transform}
+        automation_mode={this.props.automation_mode}
+        on_operation_busy={this.on_operation_busy}
+        on_operation_change={() => this.load_map(true)}
+        on_operation_close={() => this.setState({ operation: null })}
         on_select_level={this.select_level}
         on_select_all={(all) =>
           this.setState({ selected_levels: all ? null : [] }, this.paint)

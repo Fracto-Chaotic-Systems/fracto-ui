@@ -17,7 +17,8 @@
     "test:minibrot-rays": "node --test test/minibrot_context_canvas.test.js",
     "preview": "vite preview",
     "test:terrain-cache": "node --test test/minibrot_terrain_cache.test.js",
-    "test:mesh-heat-map": "node --test test/mesh_heat_map.test.js"
+    "test:mesh-heat-map": "node --test test/mesh_heat_map.test.js test/mesh_coverage_table.test.js test/mesh_transform_operations.test.js test/mesh_tile_preview.test.js",
+    "test:mesh-transform": "node --test test/mesh_transform_operations.test.js test/mesh_tile_preview.test.js"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

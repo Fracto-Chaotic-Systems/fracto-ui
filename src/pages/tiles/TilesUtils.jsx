@@ -1,3 +1,5 @@
+export const TILE_RENDER_WIDTH_PX = 300;
+
 export const bounds_from_short_code = (short_code) => {
   let left = -2;
   let right = 2;

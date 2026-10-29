@@ -1,5 +1,36 @@
 const TILES_FOLDER = "tiles";
 const GENERATOR_FOLDER = "tiles/generator";
+export const MESH_OPERATION_TEXT = Object.fromEntries(
+  [
+    "title",
+    "start",
+    "stop",
+    "resume",
+    "close",
+    "ready",
+    "queued",
+    "running",
+    "stopping",
+    "completed",
+    "partial",
+    "failed",
+    "cancelled",
+    "error",
+    "changed",
+    "lost",
+    "operator",
+    "saved",
+    "failed_count",
+    "last_tile",
+    "preview_tile",
+    "preview_mesh",
+    "preview_height",
+    "preview_waiting",
+    "preview_loading",
+    "preview_failed",
+    "preview_webgl",
+  ].map((name) => [name, `${TILES_FOLDER}/mesh_operation/${name}`]),
+);
 export const MESH_MAP_TEXT = Object.fromEntries(
   [
     "title",
@@ -12,6 +43,10 @@ export const MESH_MAP_TEXT = Object.fromEntries(
     "level",
     "meshes",
     "coverage",
+    "shade",
+    "tile_count",
+    "mesh_count",
+    "can_do",
   ].map((name) => [name, `${TILES_FOLDER}/mesh_map/${name}`]),
 );
 export const KEY_TILES_TRANSFORM = `${TILES_FOLDER}/transform`;
@@ -77,6 +112,42 @@ export const KEY_TILES_GENERATOR_AUTOMATION_ERROR = `${GENERATOR_FOLDER}/automat
 export const KEY_TILES_GENERATOR_AUTOMATION_COUNTDOWN = `${GENERATOR_FOLDER}/automation_countdown`;
 
 export const APP_TILES_TEXT = {
+  [MESH_OPERATION_TEXT.title]: "transforming {count} tiles of level {level}",
+  [MESH_OPERATION_TEXT.start]: "start",
+  [MESH_OPERATION_TEXT.stop]: "stop",
+  [MESH_OPERATION_TEXT.resume]: "resume",
+  [MESH_OPERATION_TEXT.close]: "close",
+  [MESH_OPERATION_TEXT.ready]: "ready to transform",
+  [MESH_OPERATION_TEXT.queued]: "waiting for the mesh worker",
+  [MESH_OPERATION_TEXT.running]: "transforming tiles",
+  [MESH_OPERATION_TEXT.stopping]: "stopping and saving completed meshes",
+  [MESH_OPERATION_TEXT.completed]: "transformation complete",
+  [MESH_OPERATION_TEXT.partial]: "some tiles could not be transformed",
+  [MESH_OPERATION_TEXT.failed]:
+    "transformation failed; completed meshes remain saved",
+  [MESH_OPERATION_TEXT.cancelled]: "stopped; completed meshes remain saved",
+  [MESH_OPERATION_TEXT.error]: "unable to update the transform operation",
+  [MESH_OPERATION_TEXT.changed]:
+    "tile availability changed; refresh and select the count again",
+  [MESH_OPERATION_TEXT.lost]:
+    "the worker restarted; refresh and select the remaining tiles",
+  [MESH_OPERATION_TEXT.operator]:
+    "switch to operator mode to start a transformation",
+  [MESH_OPERATION_TEXT.saved]: "meshes saved",
+  [MESH_OPERATION_TEXT.failed_count]: "failed",
+  [MESH_OPERATION_TEXT.last_tile]: "last tile",
+  [MESH_OPERATION_TEXT.preview_tile]: "source tile",
+  [MESH_OPERATION_TEXT.preview_mesh]: "meshed tile",
+  [MESH_OPERATION_TEXT.preview_height]: "relief height",
+  [MESH_OPERATION_TEXT.preview_waiting]: "waiting for the first meshed tile",
+  [MESH_OPERATION_TEXT.preview_loading]: "loading tile preview",
+  [MESH_OPERATION_TEXT.preview_failed]:
+    "tile preview unavailable; transformation continues",
+  [MESH_OPERATION_TEXT.preview_webgl]: "3D preview requires WebGL",
+  [MESH_MAP_TEXT.shade]: "shade",
+  [MESH_MAP_TEXT.tile_count]: "tile count",
+  [MESH_MAP_TEXT.mesh_count]: "mesh count",
+  [MESH_MAP_TEXT.can_do]: "can do",
   [MESH_MAP_TEXT.title]: "mesh heat map",
   [MESH_MAP_TEXT.loading]: "loading mesh heat map",
   [MESH_MAP_TEXT.waiting]: "waiting for navigator",

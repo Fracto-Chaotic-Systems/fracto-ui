@@ -30,6 +30,7 @@ function harness() {
     );
   const sandbox = {
     Component,
+    MeshHeatMapView: "view",
     React: {
       createElement: (type, props, ...children) => ({ type, props, children }),
     },
@@ -216,6 +217,75 @@ test("failed/timeout requests are retryable and unmount cancels polling and both
   assert.equal(h.timers.size, 0);
 });
 
+test("a rebuilt inventory refreshes even when source and revision repeat", async () => {
+  const h = harness();
+  h.component.componentDidMount();
+  h.maps[0].resolve({ ...result(1), inventory_epoch: "original-inventory" });
+  await tick();
+  const polling = h.poll();
+  h.inventories[0].resolve({
+    namespace: "mesh-source",
+    revision: 1,
+    inventory_epoch: "rebuilt-inventory",
+  });
+  await tick();
+  assert.equal(h.maps.length, 2);
+  h.maps[1].resolve({ ...result(1), inventory_epoch: "rebuilt-inventory" });
+  await polling;
+  assert.equal(h.component.state.result.inventory_epoch, "rebuilt-inventory");
+  h.component.componentWillUnmount();
+});
+
+test("transforms freeze coverage through polling, navigation and late responses, then refresh on completion", async () => {
+  const h = harness();
+  await mount_ready(h);
+  const frozen = h.component.state.result;
+  const polling = h.poll();
+  h.component.on_operation_busy(true);
+  assert.equal(h.inventories[0].options.signal.aborted, true);
+  h.inventories[0].resolve({ namespace: "mesh-source", revision: 99 });
+  await polling;
+  await h.poll();
+  assert.equal(
+    h.inventories.length,
+    1,
+    "inventory polling pauses during construction",
+  );
+  const previous = h.component.props;
+  h.component.props = {
+    ...previous,
+    frame_settings: { ...previous.frame_settings, scope: 0.5 },
+  };
+  h.component.componentDidUpdate(previous);
+  await h.component.load_map(true);
+  assert.equal(h.maps.length, 1);
+  assert.equal(h.component.state.result, frozen);
+  assert.equal(h.component.state.loading, false);
+  assert.equal(h.component.render().props.params.scope, 1);
+  h.component.on_operation_busy(false);
+  const refresh = h.component.render().props.on_operation_change();
+  assert.equal(h.maps[1].params.scope, 0.5);
+  h.maps[1].resolve(result(99));
+  await refresh;
+  assert.equal(h.component.state.result.inventory_revision, 99);
+  h.component.componentWillUnmount();
+});
+
+test("starting a transform invalidates a heat-map response already in flight", async () => {
+  const h = harness();
+  await mount_ready(h);
+  const refresh = h.component.load_map(true);
+  h.component.on_operation_busy(true);
+  assert.equal(h.maps[1].options.signal.aborted, true);
+  const draws = h.draws.length;
+  h.maps[1].resolve(result(2));
+  await refresh;
+  assert.equal(h.component.state.result, null);
+  assert.equal(h.draws.length, draws);
+  assert.equal(h.component.state.loading, false);
+  h.component.componentWillUnmount();
+});
+
 test("view sizing respects available space, aspect ratio, and endpoint pixel limits", () => {
   const h = harness();
   assert.equal(h.params({ ...h.component.props, width_px: 0 }), null);
@@ -245,4 +315,25 @@ test("view sizing respects available space, aspect ratio, and endpoint pixel lim
     params.width_px * Math.round(params.width_px * params.aspect_ratio) <=
       1048576,
   );
+});
+
+test("opening a transform snapshots the clicked region and preserves a running selection during navigation", async () => {
+  const h = harness();
+  await mount_ready(h);
+  h.component.open_transform({ count: 13, level: 3 });
+  const selected = h.component.state.operation;
+  assert.equal(selected.count, 13);
+  assert.equal(selected.level, 3);
+  assert.equal(selected.region.focal_point.x, -1.5);
+  h.component.setState({ operation_busy: true });
+  h.component.open_transform({ count: 20, level: 4 });
+  assert.equal(h.component.state.operation, selected);
+  const previous = h.component.props;
+  h.component.props = {
+    ...previous,
+    frame_settings: { ...previous.frame_settings, scope: 0.5 },
+  };
+  h.component.componentDidUpdate(previous);
+  assert.equal(h.component.state.operation.region.scope, 1);
+  h.component.componentWillUnmount();
 });

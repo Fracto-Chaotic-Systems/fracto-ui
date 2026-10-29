@@ -7,20 +7,55 @@ const FRACTO_PROD_URL =
   import.meta.env.VITE_FRACTO_PROD_URL || "https://fracto.mikehallstudio.com";
 
 export class TilesBackend {
+  static mesh_file = async (short_code, options = {}) => {
+    const response = await fetch(
+      `${service_origin("tiles")}/meshes/${encodeURIComponent(short_code)}`,
+      {
+        credentials: "include",
+        ...options,
+      },
+    );
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return response.arrayBuffer();
+  };
   static mesh_inventory = (options = {}) =>
     request_json(`${service_origin("tiles")}/mesh_inventory`, options);
 
   static mesh_heat_map = (params, options = {}) =>
-    request_json(`${service_origin("tiles")}/mesh_heat_map_buffer?${new URLSearchParams(params)}`, options);
+    request_json(
+      `${service_origin("tiles")}/mesh_heat_map_buffer?${new URLSearchParams(params)}`,
+      options,
+    );
 
   static start_terrain_cache = (bailiwick_id) =>
     request_json(`${service_origin("tiles")}/terrain-cache/jobs`, {
-      method: "POST", headers: { "Content-Type": "application/json" },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ bailiwick_id }),
     });
 
-  static terrain_cache_job = (id) =>
-    request_json(`${service_origin("tiles")}/terrain-cache/jobs/${encodeURIComponent(id)}`);
+  static terrain_cache_job = (id, options = {}) =>
+    request_json(
+      `${service_origin("tiles")}/terrain-cache/jobs/${encodeURIComponent(id)}`,
+      options,
+    );
+
+  static start_mesh_transform = (selection, options = {}) =>
+    request_json(`${service_origin("tiles")}/mesh-transforms/jobs`, {
+      ...options,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(selection),
+    });
+
+  static stop_mesh_transform = (id, options = {}) =>
+    request_json(
+      `${service_origin("tiles")}/terrain-cache/jobs/${encodeURIComponent(id)}/cancel`,
+      {
+        ...options,
+        method: "POST",
+      },
+    );
 
   /** Claims the oldest ready Tiles automation job atomically.
    * @returns {Promise<Object>} Response containing the claimed job or null.
@@ -118,7 +153,9 @@ export class TilesBackend {
     const origin = service_origin("tiles");
     const url = `${origin}/heat_map_buffer?${all_params}`;
     try {
-      return await fetch(url, { credentials: "include" }).then((res) => res.json());
+      return await fetch(url, { credentials: "include" }).then((res) =>
+        res.json(),
+      );
     } catch (error) {
       console.error(`error fetching ${url}`, error.message);
       return error;
