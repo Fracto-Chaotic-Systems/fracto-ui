@@ -10,7 +10,14 @@ import SimulatorMeshScene from "../src/pages/assets/SimulatorMeshScene.js";
 import { build_terrain_tile } from "../../../sdk/terrain/Mesh.js";
 import { encode_terrain_mesh } from "../../../sdk/terrain/Cache.js";
 import { decode_terrain_gzip } from "../../../sdk/terrain/Decode.js";
-import { terrain_palette } from "../../../sdk/terrain/Palette.js";
+import {
+  terrain_palette,
+  terrain_palette_mapper,
+} from "../../../sdk/terrain/Palette.js";
+import {
+  resolve_lod_plan,
+  request_lod_plan,
+} from "../../../sdk/terrain/Lod.js";
 import FractoCanvasBuffer from "../../../sdk/FractoCanvasBuffer.js";
 import { minimum_terrain_resolution } from "../src/pages/assets/SimulatorTerrainData.js";
 import {
@@ -111,6 +118,7 @@ test("persistent runtime worker reuses decoded files and skips geometry transfer
   const sha256 = createHash("sha256").update(compressed).digest("hex");
   const manifest = { ...plan, tiles: [{ ...tile, sha256 }] };
   const messages = [];
+  const assets = new Map([["mesh", compressed]]);
   let reads = 0;
   class OffscreenCanvas {
     getContext() {
@@ -123,21 +131,28 @@ test("persistent runtime worker reuses decoded files and skips geometry transfer
     }
   }
   const self = { postMessage: (message) => messages.push(message) };
-  vm.runInNewContext(read("SimulatorMesh.worker.js"), {
-    self,
-    decode_terrain_gzip,
-    terrain_palette,
-    FractoCanvasBuffer,
-    AbortController,
-    AbortSignal,
-    crypto: webcrypto,
-    Uint8Array,
-    OffscreenCanvas,
-    fetch: async () => {
-      reads++;
-      return new Response(compressed);
+  vm.runInNewContext(
+    read("SimulatorMeshTextures.js").replace("export default class", "class") +
+      "\n" +
+      read("SimulatorMesh.worker.js"),
+    {
+      self,
+      decode_terrain_gzip,
+      terrain_palette,
+      terrain_palette_mapper,
+      resolve_lod_plan,
+      FractoCanvasBuffer,
+      AbortController,
+      AbortSignal,
+      crypto: webcrypto,
+      Uint8Array,
+      OffscreenCanvas,
+      fetch: async (url) => {
+        reads++;
+        return new Response(assets.get(url) || compressed);
+      },
     },
-  });
+  );
   const run = async (id, geometry_keys, overrides = {}) => {
     await self.onmessage({
       data: {
@@ -171,6 +186,56 @@ test("persistent runtime worker reuses decoded files and skips geometry transfer
   });
   assert.equal(corrupt.items.length, 0);
   assert.equal(corrupt.failures[0], "00");
+  const children = [];
+  for (let digit = 0; digit < 4; digit++) {
+    const code = `00${digit}`,
+      left = -2 + (digit % 2) * 0.5,
+      top = 2 - Math.floor(digit / 2) * 0.5;
+    const child_bounds = { left, right: left + 0.5, top, bottom: top - 0.5 };
+    const child = encode_terrain_mesh(mesh, {
+      namespace: plan.namespace,
+      short_code: code,
+      bounds: child_bounds,
+    }).compressed;
+    assets.set(code, child);
+    children.push({
+      short_code: code,
+      bounds: child_bounds,
+      sha256: createHash("sha256").update(child).digest("hex"),
+      instances: [{ mirror_y: false, bounds: child_bounds }],
+    });
+  }
+  const local = request_lod_plan(
+    {
+      ...manifest,
+      refinements: [
+        { id: "00/0", parent_short_code: "00", mirror_y: false, children },
+      ],
+    },
+    ["00/0"],
+  );
+  const urls = {
+    "00": "mesh",
+    ...Object.fromEntries(
+      children.map((child) => [child.short_code, child.short_code]),
+    ),
+  };
+  const good = assets.get("003");
+  assets.set("003", compressed);
+  const fallback = await run(5, [], { plan: local, urls });
+  assert.equal(fallback.items.length, 1);
+  assert.equal(fallback.plan.tiles[0].instances.length, 2);
+  assert.equal(fallback.failures.length, 0);
+  assert.equal(fallback.detail_failures[0], "003");
+  assets.set("003", good);
+  const refined = await run(6, [], { plan: local, urls });
+  assert.equal(refined.plan.refined_groups[0], "00/0");
+  assert.equal(refined.items.length, 5);
+  assert.equal(
+    refined.plan.tiles.find((tile) => tile.short_code === "00").instances
+      .length,
+    1,
+  );
 });
 
 test("runtime loader cancels obsolete navigation and retains one worker until unmount", async () => {
@@ -275,7 +340,7 @@ function controller_harness() {
     TerrainLighting,
     normalize_terrain_lighting,
     minimum_terrain_resolution,
-    KEY_ASSETS_SIMULATOR_RESOLUTION: "resolution",
+    KEY_ASSETS_SIMULATOR_BASE_RESOLUTION: "resolution",
     KEY_ASSETS_SIMULATOR_LIGHTING: "lighting",
     AppSettings: {
       get: (key) => (key === "resolution" ? 1000 : undefined),
@@ -317,6 +382,40 @@ const loaded = {
   cache_hits: 1,
   elapsed_ms: 10,
 };
+
+test("active terrain can exceed the 64-entry reuse cache without losing visible meshes", () => {
+  const runtime = new SimulatorMeshScene(
+    new THREE.Scene(),
+    {},
+    { attach() {} },
+  );
+  const tiles = Array.from({ length: 65 }, (_, index) => ({
+    ...tile,
+    short_code: index.toString(4).padStart(4, "0"),
+  }));
+  const items = tiles.map((entry, index) => ({
+    key: String(index),
+    short_code: entry.short_code,
+    positions: new Float32Array([0, 0, 0, 1, 0, 1, 0, 0, 1]),
+    uvs: new Float32Array(6),
+    indices: new Uint32Array([0, 1, 2]),
+    pixels: new Uint8Array(256 * 256 * 4),
+  }));
+  runtime.install({ plan: { ...plan, tiles }, items }, false);
+  assert.equal(runtime.cache.size, 65);
+  assert.equal(runtime.group.children.length, 130);
+  const last = runtime.cache.get("64").geometry;
+  runtime.install(
+    {
+      plan: { ...plan, tiles },
+      items: [{ key: "64", short_code: tiles[64].short_code }],
+    },
+    false,
+  );
+  assert.equal(runtime.cache.size, 64);
+  assert.equal(runtime.group.children[0].geometry, last);
+  runtime.dispose();
+});
 
 test("simulator requests a minimum and aspect, preserves the view on reload, and keeps lighting/wireframe local", async () => {
   const h = controller_harness();

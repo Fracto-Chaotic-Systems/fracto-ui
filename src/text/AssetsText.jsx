@@ -42,10 +42,15 @@ export const KEY_ASSETS_LORE_STYLES_VIEW = `${ASSETS_FOLDER}/assets_lore_styles_
 export const KEY_ASSETS_DETECTOR = `${ASSETS_FOLDER}/assets_detector`;
 export const KEY_ASSETS_SIMULATOR = `${ASSETS_FOLDER}/assets_simulator`;
 export const TERRAIN_TEXT = {
+  lod_summary: "assets/terrain_lod_summary",
+  detail_loading: "assets/terrain_detail_loading",
+  detail_ready: "assets/terrain_detail_ready",
+  detail_fallback: "assets/terrain_detail_fallback",
   apply: "assets/terrain_apply",
   empty: "assets/terrain_empty",
   cached_summary: "assets/terrain_cached_summary",
   below_minimum: "assets/terrain_below_minimum",
+  budget_limited: "assets/terrain_budget_limited",
   missing_meshes: "assets/terrain_missing_meshes",
   progress_loading: "assets/terrain_progress_loading",
   progress_parsing: "assets/terrain_progress_parsing",
@@ -183,12 +188,19 @@ export const APP_ASSETS_TEXT = {
   [TERRAIN_TEXT.empty]:
     "No cached meshes are available in this area within the display budget.",
   [TERRAIN_TEXT.cached_summary]:
-    "level {level} · {x} × {y} samples · {loaded}/{total} meshes · {reused} reused · {ms} ms",
+    "base level {level} · {x} × {y} samples · {loaded}/{total} meshes · {reused} reused · {ms} ms",
+  [TERRAIN_TEXT.lod_summary]:
+    "nearby detail: level {level} · {count} refined patches · {status}",
+  [TERRAIN_TEXT.detail_loading]: "loading",
+  [TERRAIN_TEXT.detail_ready]: "ready",
+  [TERRAIN_TEXT.detail_fallback]: "some finer tiles unavailable; base retained",
   [TERRAIN_TEXT.below_minimum]:
-    "Requested minimum {minimum} is not met; showing the best available level within the display budget.",
+    "Requested minimum {minimum} is not met by the available cached mesh coverage; showing the best available level.",
+  [TERRAIN_TEXT.budget_limited]:
+    "Requested minimum {minimum} is not met because finer levels exceed the {limit}-file display limit; showing a coarser level.",
   [TERRAIN_TEXT.missing_meshes]:
     "{count} meshes unavailable; gaps remain visible.",
-  [TERRAIN_TEXT.resolution]: "minimum resolution",
+  [TERRAIN_TEXT.resolution]: "base minimum resolution",
   [TERRAIN_TEXT.refining]: "Preview ready · loading detailed terrain…",
   [TERRAIN_TEXT.detail_failed]:
     "Detailed terrain unavailable · keeping preview. Reload to retry.",

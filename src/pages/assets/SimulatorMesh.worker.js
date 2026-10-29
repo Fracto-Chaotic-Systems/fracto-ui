@@ -1,8 +1,10 @@
 import { decode_terrain_gzip } from "@fracto/sdk/terrain/Decode.js";
-import { terrain_palette } from "@fracto/sdk/terrain/Palette.js";
-import FractoCanvasBuffer from "@fracto/sdk/FractoCanvasBuffer.js";
+import { resolve_lod_plan } from "@fracto/sdk/terrain/Lod.js";
+import SimulatorMeshTextures from "./SimulatorMeshTextures.js";
 
 const cache = new Map();
+const metadata = new Map();
+const textures = new SimulatorMeshTextures();
 let controller, active_id, last_view;
 const key_of = (plan, tile) =>
   `${plan.namespace}/${tile.short_code}/${tile.sha256}`;
@@ -13,27 +15,35 @@ self.onmessage = async ({ data }) => {
     active_id = null;
     return;
   }
-  const { id, plan, urls, geometry_keys, current_palette_key } = data;
+  const { id, plan, urls, geometry_keys, current_palette_key, texture_keys } =
+    data;
   active_id = id;
   const request = (controller = new AbortController());
   const emit = (message) => {
     if (active_id === id) self.postMessage({ id, ...message });
   };
   try {
-    const palette_key = JSON.stringify([
+    const base_palette_key = textures.key_for(plan);
+    const selection_key = JSON.stringify([
       plan.region,
+      plan.requested_refinements || [],
       plan.tiles.map((tile) => [key_of(plan, tile), tile.instances]),
     ]);
     if (
-      last_view?.palette_key === palette_key &&
-      current_palette_key === palette_key &&
-      last_view.items.every((item) => geometry_keys.includes(item.key))
+      last_view?.selection_key === selection_key &&
+      current_palette_key === last_view.palette_key &&
+      last_view.items.every(
+        (item) =>
+          geometry_keys.includes(item.key) &&
+          (!texture_keys || texture_keys[item.key] === last_view.palette_key),
+      )
     ) {
       emit({
         result: {
           ...last_view,
-          plan,
+          plan: resolve_lod_plan(plan, new Set(last_view.available_codes)),
           failures: [],
+          detail_failures: [],
           cache_hits: last_view.items.length,
         },
       });
@@ -54,6 +64,16 @@ self.onmessage = async ({ data }) => {
           if (mesh) {
             cache_hits++;
             cache.delete(key);
+          } else if (
+            available.has(key) &&
+            texture_keys?.[key] === base_palette_key &&
+            textures.key === base_palette_key &&
+            metadata.has(key)
+          ) {
+            cache_hits++;
+            entries.push({ mesh: { metadata: metadata.get(key) }, tile, key });
+            completed++;
+            continue;
           } else {
             const response = await fetch(urls[tile.short_code], {
               credentials: "include",
@@ -78,6 +98,10 @@ self.onmessage = async ({ data }) => {
           }
           if (request.signal.aborted) return;
           cache.set(key, mesh);
+          metadata.delete(key);
+          metadata.set(key, { maximum_height: mesh.metadata.maximum_height });
+          while (metadata.size > 512)
+            metadata.delete(metadata.keys().next().value);
           while (cache.size > 64) cache.delete(cache.keys().next().value);
           entries.push({ mesh, tile, key });
         } catch {
@@ -100,32 +124,39 @@ self.onmessage = async ({ data }) => {
     );
     if (request.signal.aborted || active_id !== id) return;
     emit({ progress: { stage: "colors", value: 70 } });
-    const palette = terrain_palette(entries, plan.region);
+    const resolved = resolve_lod_plan(
+      plan,
+      new Set(entries.map((entry) => entry.tile.short_code)),
+    );
+    const base_codes = new Set(
+      resolved.base_tiles.map((tile) => tile.short_code),
+    );
+    const refined = new Set(resolved.refined_groups);
+    const gap_failures = failures.filter((code) =>
+      resolved.base_tiles.some(
+        (tile) =>
+          tile.short_code === code &&
+          tile.instances.some(
+            (instance) => !refined.has(`${code}/${instance.mirror_y ? 1 : 0}`),
+          ),
+      ),
+    );
+    const detail_failures = failures.filter((code) => !base_codes.has(code));
+    const active = new Set(resolved.tiles.map((tile) => tile.short_code));
+    const palette_key = textures.prepare(entries, plan);
     const items = [],
       transfers = [];
     let maximum_height = 0;
     for (const { mesh, tile, key } of entries) {
-      const buffer = Array.from({ length: 256 }, (_, x) =>
-        Array.from({ length: 256 }, (_, y) => {
-          const index = y * 256 + x;
-          return mesh.patterns[index] === -2147483648
-            ? null
-            : [mesh.patterns[index], mesh.iterations[index]];
-        }),
-      );
-      const canvas = new OffscreenCanvas(256, 256),
-        context = canvas.getContext("2d");
-      FractoCanvasBuffer.buffer_to_canvas(
-        buffer,
-        context,
-        1,
-        false,
-        null,
-        palette,
-      );
-      const pixels = context.getImageData(0, 0, 256, 256).data;
-      const item = { key, short_code: tile.short_code, pixels };
-      transfers.push(pixels.buffer);
+      if (!active.has(tile.short_code)) continue;
+      const item = { key, short_code: tile.short_code };
+      const colored = texture_keys
+        ? texture_keys[key] === palette_key
+        : available.has(key) && current_palette_key === palette_key;
+      if (!colored) {
+        item.pixels = textures.pixels(mesh, key).slice();
+        transfers.push(item.pixels.buffer);
+      }
       if (!available.has(key)) {
         for (const name of ["positions", "uvs", "indices"]) {
           item[name] = mesh[name].slice();
@@ -145,6 +176,8 @@ self.onmessage = async ({ data }) => {
       if (!failures.length)
         last_view = {
           palette_key,
+          selection_key,
+          available_codes: entries.map((entry) => entry.tile.short_code),
           maximum_height,
           items: items.map(({ key, short_code }) => ({ key, short_code })),
         };
@@ -152,9 +185,10 @@ self.onmessage = async ({ data }) => {
         {
           id,
           result: {
-            plan,
+            plan: resolved,
             items,
-            failures,
+            failures: gap_failures,
+            detail_failures,
             cache_hits,
             maximum_height,
             palette_key,

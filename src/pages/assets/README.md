@@ -17,14 +17,14 @@ see [its README](surveys/README.md) for responsibilities.
   tools with their own persisted frame and splitter settings.
 - `AssetsSimulator.jsx` keeps the interactive 2D navigator on the left and a lazy-loaded
   cached-mesh terrain viewer on the right. Minimum resolution is an integer from
-  2 to 5000 across the shorter navigator edge, defaulting to 1000 for new settings.
-  The existing `assets/simulator/terrain_resolution` preference now stores this
-  minimum; previous values remain valid. Apply commits the numeric input.
+  2 to 5000 across the shorter navigator edge, defaulting to 1500.
+  The `assets/simulator/base_terrain_resolution` preference stores this base
+  minimum. Apply commits the numeric input.
   The viewer requests `GET /mesh_terrain`, then only the selected cached mesh files.
   No numerical raster request, mesh construction or smoothing runs in this path.
   The actual level, effective X/Y resolution, loaded mesh count, decoded-cache hits
   and loading/color-preparation time are displayed. Insufficient resolution and
-  missing files are reported explicitly. The manifest caps a view at 64 canonical
+  missing files are reported explicitly. The manifest caps the base selection at 256 canonical
   files; a lower level can be used to stay within this display budget.
   `SimulatorTerrain.jsx` coordinates requests, camera, lighting and resize;
   `SimulatorTerrainView.jsx` presents controls and progress. `SimulatorMeshLoader.js`
@@ -35,14 +35,16 @@ see [its README](surveys/README.md) for responsibilities.
   histograms, preventing independently shaded tile boundaries. Parsing and color
   work stay off the UI thread; workers require OffscreenCanvas and native gzip
   decompression. Geometry is transferred only when absent from the GPU cache.
-  `SimulatorMeshScene.js` retains up to 64 GPU geometry/material entries, places
+  `SimulatorMeshScene.js` retains every visible GPU geometry/material entry and
+  keeps smaller views within a 64-entry reuse cache; it places
   tile instances, mirrors the lower half-plane and clips to the navigator region.
   Coordinates are normalized relative to the navigator to retain precision when
   zoomed in. Precomputed relief remains scaled to navigator scope / 25. Cached
   local-edge smoothing remains provisional; cross-tile seam repair is deferred.
   Gaps remain holes. Neither missing files nor insufficient resolution triggers
   on-demand construction. Reload refreshes the manifest and retries failed files.
-  Camera orbit, pan, zoom, wireframe and lighting changes do not fetch terrain.
+  Camera orbit, pan and zoom can fetch nearby refinement tiles; wireframe and
+  lighting changes do not fetch terrain.
   Camera settings survive navigation and resolution changes; initial display,
   aspect changes and explicit top/oblique controls refit the camera.
   Optional lighting remains off by default, preserving unlit standard colors.
@@ -130,3 +132,15 @@ is [Milnor (2000)](https://numdam.org/item/AST_2000__261__277_0/) and
 For an unchanged region and identical mesh checksums, the worker also reuses the already-installed textures. Such reloads validate the manifest but skip file requests, decompression, palette calculation and geometry transfers. A changed region or source checksum invalidates this fast path.
 
 Development verification (2026-10-28): overview minimum 1000 selected level 3, 13 files and 1281×1281 effective samples. Loading/color preparation took about 1.6–2.0 seconds cold; an unchanged reload reported 16ms. At scope 0.0861172966 the viewer selected level 7 and reported 706×706 with an unmet-1000 warning. Changing the minimum to 500 reused all eight files/textures in 9ms and cleared that warning. These are local observations excluding GPU frame-time guarantees.
+
+Resolution fallback messages distinguish unavailable cached coverage from the 256-file display limit. The limit applies to canonical files, with mirrored placements sharing geometry. The former 64-file cap incorrectly forced a complete 3500-sample overview down to level 4.
+
+### Camera-driven local refinement
+
+The simulator now starts with a base minimum of 1500, persisted separately in assets/simulator/base_terrain_resolution. The prior terrain_resolution setting remains intact for compatibility and does not override the new base preference. SimulatorTerrainLod.js ranks visible nearby parent placements by camera-to-tile distance and projected sample size. At most eight physical patches refine by one level. Selection is throttled to 250ms, permits only one detail request at a time, and uses different enter/leave thresholds plus retention preference to avoid flicker. Camera changes during loading are reconsidered after completion.
+
+The manifest supplies only complete ready child quartets. Parents remain displayed while children load, and each quartet swaps atomically; a failed child retains its parent and that patch is not repeatedly retried until the view/manifest reloads. Mirrored placements share file data but can refine independently. Moving away restores retained base geometry. Reload terrain refreshes child availability. The status reports base sampling and the number/level of refined nearby patches separately.
+
+SimulatorMeshTextures.js fixes the tone mapping to the base view, extends it consistently for finer-only iteration values and caches up to 128 tile textures in worker memory. Per-entry GPU texture identities prevent stale colors when reusing offscreen geometry. The worker can reuse retained GPU parents without fetching evicted raw data; its small metadata cache retains up to 512 height records. Base geometry is protected from eviction while its children are shown, allowing prompt coarsening. The common normalized height scale remains scope/25 at every level. Crack repair, skirts and cross-level edge stitching are deferred, as authorized for this first milestone.
+
+Development verification (2026-10-28): the 1500 base selected level 4 at 2561×2561 from 47 files with 66 ready refinement candidates. Zooming the camera close selected seven level-5 physical patches, using 65 canonical files in total. Pulling back restored all 47 base files in 5ms through reuse. Cracks remain deferred.

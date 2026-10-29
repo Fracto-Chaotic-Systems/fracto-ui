@@ -12,6 +12,11 @@ export default class SimulatorMeshScene {
   keys() {
     return [...this.cache.keys()];
   }
+  texture_keys() {
+    return Object.fromEntries(
+      [...this.cache].map(([key, entry]) => [key, entry.palette_key]),
+    );
+  }
   install(data, wireframe) {
     const { plan, items } = data;
     this.group.clear();
@@ -57,6 +62,7 @@ export default class SimulatorMeshScene {
         if (item.pixels) cached.material.map.image.data = item.pixels;
       }
       if (item.pixels) cached.material.map.needsUpdate = true;
+      if (item.pixels) cached.palette_key = data.palette_key ?? null;
       cached.material.wireframe = wireframe;
       const tile = tiles.get(item.short_code),
         size = (tile.bounds.right - tile.bounds.left) / scope;
@@ -76,10 +82,14 @@ export default class SimulatorMeshScene {
           TERRAIN_HEIGHT_SCOPE_RATIO,
           instance.mirror_y ? -size : size,
         );
+        mesh.userData.short_code = tile.short_code;
+        mesh.userData.mirror_y = instance.mirror_y;
         this.group.add(mesh);
       }
     }
     const visible = new Set(items.map((item) => item.key));
+    for (const tile of plan.base_tiles || [])
+      visible.add(`${plan.namespace}/${tile.short_code}/${tile.sha256}`);
     this.palette_key = data.palette_key ?? null;
     while (this.cache.size > 64) {
       const key = [...this.cache.keys()].find((key) => !visible.has(key));

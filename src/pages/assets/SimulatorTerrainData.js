@@ -8,7 +8,7 @@ export const TERRAIN_RESOLUTIONS = [
 export function minimum_terrain_resolution(value) {
   return Number.isSafeInteger(value) && value >= 2 && value <= 5000
     ? value
-    : 1000;
+    : 1500;
 }
 export function terrain_resolution(value) {
   return TERRAIN_RESOLUTIONS.includes(value) ? value : 500;

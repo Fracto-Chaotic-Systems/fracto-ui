@@ -58,3 +58,5 @@ mesh_transform_operations.test.js verifies explicit start, captured region/level
 mesh_tile_preview.test.js verifies browser/server codec parity, standard palette equivalence, scope/25 relief, immutable cached geometry, request races, height changes, failure recovery and teardown. Included in test:mesh-heat-map and test:mesh-transform.
 
 simulator_mesh.test.js covers manifest-driven loading, persistent-worker reuse, checksum rejection, geometry transfer avoidance, GPU geometry reuse/disposal, mirrored placement, clipping, camera preservation, stale responses and local lighting/wireframe controls. Run npm run test:simulator. simulator_terrain.test.js retains regression coverage of the prior numerical helpers and lighting shader.
+
+simulator_lod.test.js covers camera distance, visibility, the eight-patch limit, hysteresis, failed quartet suppression and stale request rejection. simulator_mesh.test.js additionally exercises child-load fallback and mixed-level worker assembly. These are included in test:simulator.

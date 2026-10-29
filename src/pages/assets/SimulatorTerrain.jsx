@@ -5,7 +5,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import AppSettings from "../../AppSettings.jsx";
 import { minimum_terrain_resolution } from "./SimulatorTerrainData.js";
 import {
-  KEY_ASSETS_SIMULATOR_RESOLUTION,
+  KEY_ASSETS_SIMULATOR_BASE_RESOLUTION,
   KEY_ASSETS_SIMULATOR_LIGHTING,
 } from "../../settings/AssetsSettings.jsx";
 import {
@@ -15,6 +15,7 @@ import {
 import SimulatorMeshLoader from "./SimulatorMeshLoader.js";
 import SimulatorMeshScene from "./SimulatorMeshScene.js";
 import SimulatorTerrainView from "./SimulatorTerrainView.jsx";
+import SimulatorTerrainLod from "./SimulatorTerrainLod.js";
 
 /** Bounded terrain preview; orbiting is independent of data loading. */
 export default class SimulatorTerrain extends Component {
@@ -34,15 +35,16 @@ export default class SimulatorTerrain extends Component {
     wireframe: false,
     loaded_info: null,
     progress: null,
+    detail_loading: false,
     lighting: normalize_terrain_lighting(
       AppSettings.get(KEY_ASSETS_SIMULATOR_LIGHTING),
     ),
     resolution: minimum_terrain_resolution(
-      AppSettings.get(KEY_ASSETS_SIMULATOR_RESOLUTION),
+      AppSettings.get(KEY_ASSETS_SIMULATOR_BASE_RESOLUTION),
     ),
     resolution_input: String(
       minimum_terrain_resolution(
-        AppSettings.get(KEY_ASSETS_SIMULATOR_RESOLUTION),
+        AppSettings.get(KEY_ASSETS_SIMULATOR_BASE_RESOLUTION),
       ),
     ),
   };
@@ -64,11 +66,17 @@ export default class SimulatorTerrain extends Component {
       this.camera = new THREE.PerspectiveCamera(45, 1, 0.001, 100);
       this.controls = new OrbitControls(this.camera, this.renderer.domElement);
       this.controls.maxPolarAngle = Math.PI / 2 - 0.01;
-      this.controls.addEventListener("change", this.draw);
+      this.lod = new SimulatorTerrainLod({
+        camera: this.camera,
+        viewport_height: () =>
+          this.host.current?.clientHeight || this.props.height_px,
+        on_change: this.load_detail,
+      });
+      this.controls.addEventListener("change", this.on_camera_changed);
       this.observer = new ResizeObserver(this.resize);
       this.observer.observe(this.host.current);
       this.resolution_subscription = AppSettings.subscribe(
-        KEY_ASSETS_SIMULATOR_RESOLUTION,
+        KEY_ASSETS_SIMULATOR_BASE_RESOLUTION,
         this.on_resolution_changed,
       );
       this.lighting_subscription = AppSettings.subscribe(
@@ -99,6 +107,7 @@ export default class SimulatorTerrain extends Component {
     this.sequence++;
     clearTimeout(this.timer);
     this.loader.dispose();
+    this.lod?.dispose();
     this.observer?.disconnect();
     if (this.resolution_subscription)
       AppSettings.unsubscribe(this.resolution_subscription);
@@ -114,6 +123,10 @@ export default class SimulatorTerrain extends Component {
     if (this.renderer && this.scene)
       this.renderer.render(this.scene, this.camera);
   };
+  on_camera_changed = () => {
+    this.draw();
+    this.lod?.schedule();
+  };
 
   resize = () => {
     if (!this.renderer || !this.camera) return;
@@ -123,17 +136,20 @@ export default class SimulatorTerrain extends Component {
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
     this.draw();
+    this.lod?.schedule();
   };
 
   schedule_load = () => {
     const sequence = ++this.sequence;
     clearTimeout(this.timer);
     this.loader.cancel();
+    this.lod?.reset();
     if (!this.controls || !this.props.focal_point) return;
     this.setState({
       status: "loading",
       loaded_info: null,
       progress: { stage: "loading", value: null },
+      detail_loading: false,
     });
     this.timer = setTimeout(() => this.load(sequence), 180);
   };
@@ -154,6 +170,7 @@ export default class SimulatorTerrain extends Component {
           if (sequence === this.sequence) this.setState({ progress });
         },
         this.terrain.palette_key,
+        { texture_keys: this.terrain.texture_keys?.() || {} },
       );
       if (sequence !== this.sequence) return;
       this.terrain.install(data, this.state.wireframe);
@@ -164,10 +181,11 @@ export default class SimulatorTerrain extends Component {
       else this.draw();
       this.has_terrain = Boolean(data.items.length);
       this.view_aspect = aspect_ratio;
+      this.lod?.set_plan(data.plan);
       this.setState({
         status: data.items.length
           ? "ready"
-          : data.plan.tiles.length
+          : (data.plan.base_tiles || data.plan.tiles).length
             ? "failed"
             : "empty",
         loaded_info: data,
@@ -177,6 +195,39 @@ export default class SimulatorTerrain extends Component {
       if (sequence !== this.sequence || error.name === "AbortError") return;
       console.error("Cached terrain loading failed", error);
       this.setState({ status: "failed", progress: null });
+    }
+  };
+
+  load_detail = async (plan) => {
+    const sequence = this.sequence;
+    this.setState({ detail_loading: true });
+    try {
+      const data = await this.loader.load(
+        null,
+        this.terrain.keys(),
+        null,
+        this.terrain.palette_key,
+        { plan, texture_keys: this.terrain.texture_keys() },
+      );
+      if (sequence !== this.sequence) return null;
+      this.terrain.install(data, this.state.wireframe);
+      this.target_height = data.maximum_height / 50;
+      this.draw();
+      this.setState({
+        loaded_info: data,
+        detail_loading: false,
+        status: data.items.length
+          ? "ready"
+          : (data.plan.base_tiles || data.plan.tiles).length
+            ? "failed"
+            : "empty",
+      });
+      return data.plan;
+    } catch (error) {
+      if (sequence === this.sequence) this.setState({ detail_loading: false });
+      if (error.name !== "AbortError")
+        console.error("Nearby terrain unavailable", error);
+      return { refined_groups: [...(this.lod?.current || [])] };
     }
   };
 
@@ -210,7 +261,7 @@ export default class SimulatorTerrain extends Component {
     const value = Number(this.state.resolution_input);
     if (!Number.isSafeInteger(value) || value < 2 || value > 5000) return;
     AppSettings.on_settings_changed({
-      [KEY_ASSETS_SIMULATOR_RESOLUTION]: value,
+      [KEY_ASSETS_SIMULATOR_BASE_RESOLUTION]: value,
     });
   };
 

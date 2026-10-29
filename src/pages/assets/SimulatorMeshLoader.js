@@ -36,7 +36,13 @@ export default class SimulatorMeshLoader {
       this.worker = null;
     }
   }
-  async load(params, geometry_keys, on_progress, current_palette_key = null) {
+  async load(
+    params,
+    geometry_keys,
+    on_progress,
+    current_palette_key = null,
+    options = {},
+  ) {
     this.cancel();
     const id = ++this.sequence,
       controller = (this.controller = new AbortController());
@@ -49,7 +55,9 @@ export default class SimulatorMeshLoader {
     }, 120000);
     try {
       on_progress?.({ stage: "loading", value: null });
-      const plan = await this.fetch_plan(params, { signal: controller.signal });
+      const plan =
+        options.plan ||
+        (await this.fetch_plan(params, { signal: controller.signal }));
       if (id !== this.sequence) throw aborted();
       if (!plan.tiles.length)
         return {
@@ -81,6 +89,7 @@ export default class SimulatorMeshLoader {
           plan,
           geometry_keys,
           current_palette_key,
+          texture_keys: options.texture_keys,
           urls: Object.fromEntries(
             plan.tiles.map((tile) => [
               tile.short_code,

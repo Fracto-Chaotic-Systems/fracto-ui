@@ -53,6 +53,7 @@ export const KEY_ASSETS_DETECTOR_RESOLUTION = `${ASSETS_DETECTOR_FOLDER}/generat
 
 export const KEY_ASSETS_SIMULATOR_FRAME_SETTINGS = `${ASSETS_SIMULATOR_FOLDER}/frame_settings`;
 export const KEY_ASSETS_SIMULATOR_RESOLUTION = `${ASSETS_SIMULATOR_FOLDER}/terrain_resolution`;
+export const KEY_ASSETS_SIMULATOR_BASE_RESOLUTION = `${ASSETS_SIMULATOR_FOLDER}/base_terrain_resolution`;
 export const KEY_ASSETS_SIMULATOR_LIGHTING = `${ASSETS_SIMULATOR_FOLDER}/terrain_lighting`;
 export const KEY_ASSETS_SURVEYS_FRAME_SETTINGS = `${ASSETS_SURVEYS_FOLDER}/frame_settings`;
 export const KEY_ASSETS_SURVEYS_SPLITTER_POS = `${ASSETS_SURVEYS_FOLDER}/splitter_pos`;
@@ -197,6 +198,13 @@ export const APP_ASSETS_SETTINGS = {
     default_value: 1000,
     description:
       "Minimum cached terrain samples across the shorter navigator edge (integer 2–5000); actual resolution depends on available mesh levels and display budget",
+    persist: true,
+  },
+  [KEY_ASSETS_SIMULATOR_BASE_RESOLUTION]: {
+    data_type: TYPE_NUMBER,
+    default_value: 1500,
+    description:
+      "Base cached terrain minimum samples across the shorter navigator edge (2–5000), with one camera-driven refinement level",
     persist: true,
   },
   [KEY_ASSETS_SIMULATOR_LIGHTING]: {

@@ -24,6 +24,7 @@ export default function SimulatorTerrainView({
   status,
   loaded_info,
   progress,
+  detail_loading = false,
   host,
   on_resolution_change,
   on_resolution_apply,
@@ -83,9 +84,34 @@ export default function SimulatorTerrainView({
             })}
           </div>
         )}
+        {plan?.level && (
+          <div>
+            {format("lod_summary", {
+              level: plan.detail_level ?? plan.level,
+              count: plan.refined_groups?.length || 0,
+              status: AppText.get(
+                TEXT[
+                  detail_loading
+                    ? "detail_loading"
+                    : loaded_info.detail_failures?.length
+                      ? "detail_fallback"
+                      : "detail_ready"
+                ],
+              ),
+            })}
+          </div>
+        )}
         {plan?.level && !plan.minimum_met && (
           <div>
-            {format("below_minimum", { minimum: plan.minimum_resolution })}
+            {format(
+              plan.limiting_reason === "mesh_budget"
+                ? "budget_limited"
+                : "below_minimum",
+              {
+                minimum: plan.minimum_resolution,
+                limit: plan.mesh_limit,
+              },
+            )}
           </div>
         )}
         {missing > 0 && (
@@ -119,6 +145,7 @@ SimulatorTerrainView.propTypes = {
   status: PropTypes.string.isRequired,
   loaded_info: PropTypes.object,
   progress: PropTypes.object,
+  detail_loading: PropTypes.bool,
   host: PropTypes.object.isRequired,
   on_resolution_change: PropTypes.func.isRequired,
   on_resolution_apply: PropTypes.func.isRequired,
