@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import * as THREE from "three";
-import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { TrackballControls } from "three/addons/controls/TrackballControls.js";
 import AppSettings from "../../AppSettings.jsx";
 import { minimum_terrain_resolution } from "./SimulatorTerrainData.js";
 import {
@@ -72,8 +72,12 @@ export default class SimulatorTerrain extends Component {
         this.lighting,
       );
       this.camera = new THREE.PerspectiveCamera(45, 1, 0.001, 100);
-      this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-      this.controls.maxPolarAngle = Math.PI / 2 - 0.01;
+      this.controls = new TrackballControls(
+        this.camera,
+        this.renderer.domElement,
+      );
+      this.controls.staticMoving = true;
+      this.controls.multiTouchRoll = true;
       this.lod = new SimulatorTerrainLod({
         camera: this.camera,
         viewport_height: () =>
@@ -97,6 +101,7 @@ export default class SimulatorTerrain extends Component {
         this.on_escape_changed,
       );
       this.resize();
+      this.update_controls();
       this.schedule_load();
     } catch (error) {
       console.error("Terrain initialization failed", error);
@@ -118,6 +123,8 @@ export default class SimulatorTerrain extends Component {
   componentWillUnmount() {
     this.sequence++;
     clearTimeout(this.timer);
+    if (this.controls_frame !== undefined)
+      cancelAnimationFrame(this.controls_frame);
     this.loader.dispose();
     this.lod?.dispose();
     this.observer?.disconnect();
@@ -137,6 +144,11 @@ export default class SimulatorTerrain extends Component {
     if (this.renderer && this.scene)
       this.renderer.render(this.scene, this.camera);
   };
+  // Trackball input accumulates between frames; only its change event redraws terrain.
+  update_controls = () => {
+    this.controls?.update();
+    this.controls_frame = requestAnimationFrame(this.update_controls);
+  };
   on_camera_changed = () => {
     this.draw();
     this.lod?.schedule();
@@ -149,6 +161,7 @@ export default class SimulatorTerrain extends Component {
     this.renderer.setSize(width, height, false);
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
+    this.controls?.handleResize();
     this.draw();
     this.lod?.schedule();
   };
@@ -308,6 +321,7 @@ export default class SimulatorTerrain extends Component {
     if (!this.controls || !this.extent) return;
     const distance = (this.extent * 1.15) / Math.min(1, this.camera.aspect);
     this.controls.target.set(0, this.target_height, 0);
+    this.camera.up.set(0, 1, 0);
     this.camera.near = Math.max(this.extent / 10000, 1e-7);
     this.camera.far = distance * 100;
     this.controls.minDistance = this.extent / 100;

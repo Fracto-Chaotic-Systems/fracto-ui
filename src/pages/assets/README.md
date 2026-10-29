@@ -148,6 +148,13 @@ Development verification (2026-10-28): the 1500 base selected level 4 at 2561×2
 
 ### Equal-level runtime welding
 
+Flight simulator navigation uses TrackballControls for unrestricted rotation,
+including rolling and passing over the poles to explore the double-sided terrain
+from below. A lightweight animation callback processes controls; rendering and
+LOD updates still occur on camera changes. Resize updates the trackball bounds,
+and unmount cancels the callback. Top/reset oblique presets restore the camera's
+upright orientation. Right-drag panning and wheel zoom remain available.
+
 The persisted **escape relief multiplier** starts at 10× and accepts values from
 1 to 1,000,000. Apply a value to rebuild displayed heights while retaining the
 camera view. 1× restores the stored relief. `SimulatorEscapeRelief.js` uses the

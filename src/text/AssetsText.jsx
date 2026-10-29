@@ -219,7 +219,7 @@ export const APP_ASSETS_TEXT = {
   [TERRAIN_TEXT.failed]:
     "Unable to display terrain. Check WebGL support or reload terrain.",
   [TERRAIN_TEXT.help]:
-    "Drag to orbit · scroll to zoom · right-drag to pan. Heights are provisional.",
+    "Drag to rotate freely above or below the terrain · scroll to zoom · right-drag to pan. Reset oblique view restores upright orientation. Heights are provisional.",
   [RAY_TEXT_KEYS.idle]:
     "Trace external rays for the selected orbital configuration.",
   [RAY_TEXT_KEYS.no_selection]:
