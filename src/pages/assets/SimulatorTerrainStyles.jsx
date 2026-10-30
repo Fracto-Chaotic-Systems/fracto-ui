@@ -73,6 +73,43 @@ export const TerrainHost = styled.div`
     touch-action: none;
   }
 `;
+export const TerrainViewport = styled.div`
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+`;
+export const TerrainFlightReadings = styled.div`
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  z-index: 1;
+  max-width: calc(100% - 16px);
+  box-sizing: border-box;
+  padding: 8px;
+  background: #17212be6;
+  border-radius: 4px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+`;
+export const TerrainBoundaryNotice = styled.div`
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 1;
+  max-width: calc(100% - 64px);
+  box-sizing: border-box;
+  padding: 8px;
+  border: 1px solid #e4b96b;
+  border-radius: 4px;
+  background: #17212bf2;
+  font-size: 12px;
+  button {
+    margin-left: 8px;
+    cursor: pointer;
+  }
+`;
 export const TerrainLightingControls = styled.div`
   display: flex;
   flex-wrap: wrap;

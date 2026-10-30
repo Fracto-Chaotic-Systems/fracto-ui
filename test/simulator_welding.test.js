@@ -9,6 +9,7 @@ import {
 import SimulatorTerrainWelding from "../src/pages/assets/SimulatorTerrainWelding.js";
 import { weld_terrain_edges } from "../src/pages/assets/SimulatorTerrainTransitions.js";
 import { TerrainLighting } from "../src/pages/assets/SimulatorTerrainLighting.js";
+import SimulatorTerrainSurface from "../src/pages/assets/SimulatorTerrainSurface.js";
 
 function geometry(height) {
   const positions = new Float32Array(EDGE * EDGE * 3),
@@ -254,6 +255,58 @@ function mesh(code, data, material, mirror_y = false) {
   result.userData = { short_code: code, mirror_y };
   return result;
 }
+
+test("vertical terrain sampling interpolates reflected triangles and respects missing surface", () => {
+  const surface = new SimulatorTerrainSurface(),
+    material = new THREE.MeshBasicMaterial();
+  const data = geometry((x, z) => (x + z) / 512),
+    terrain = mesh("00", data, material);
+  terrain.position.set(1, 5, 4);
+  terrain.scale.set(2, 3, -2);
+  close(surface.height_at([terrain], 2, 3), 6.5);
+  assert.equal(surface.height_at([terrain], 99, 99), null);
+  const sparse = geometry(0.5);
+  sparse.setIndex(new THREE.BufferAttribute(new Uint32Array([0, EDGE, 1]), 1));
+  const hole = mesh("00", sparse, material);
+  assert.equal(surface.height_at([hole], 0.5, 0.5), null);
+  close(surface.height_at([hole], 0.25 / 256, 0.25 / 256), 0.5);
+  data.dispose();
+  sparse.dispose();
+  material.dispose();
+});
+
+test("clearance queries follow actual shader-welded equal and mixed-resolution boundaries", () => {
+  const welding = new SimulatorTerrainWelding(),
+    surface = new SimulatorTerrainSurface(),
+    material = new THREE.MeshBasicMaterial();
+  const data = geometry(0),
+    other = geometry(1);
+  const a = mesh("00", data, material),
+    b = mesh("01", other, material);
+  b.position.x = 1;
+  welding.apply([a, b]);
+  close(surface.height_at([a], 1, 0.3), 0.5);
+  close(surface.height_at([b], 1, 0.3), 0.5);
+  const ramp = geometry((_x, z) => z / 256),
+    coarse = mesh("00", ramp, material),
+    fine = mesh("010", other, material);
+  fine.position.x = 1;
+  fine.scale.set(0.5, 1, 0.5);
+  welding.apply([coarse, fine]);
+  close(surface.height_at([fine], 1, 11 / 512), 11 / 512);
+  close(
+    surface.height_at([fine], 1, 11 / 512),
+    surface.height_at([coarse], 1, 11 / 512),
+  );
+  welding.apply([fine]);
+  assert.equal(fine.userData.terrain_edges, undefined);
+  close(surface.height_at([fine], 1, 11 / 512), 1);
+  welding.dispose();
+  data.dispose();
+  other.dispose();
+  ramp.dispose();
+  material.dispose();
+});
 function shader(material) {
   const result = {
     uniforms: {},

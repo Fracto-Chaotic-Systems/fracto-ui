@@ -16,6 +16,9 @@ import Data from "./pages/Data.jsx";
 import Assets from "./pages/Assets.jsx";
 import Tiles from "./pages/Tiles.jsx";
 import Study from "./pages/Study.jsx";
+import Games from "./pages/Games.jsx";
+import { APP_GAMES_SETTINGS } from "./settings/GamesSettings.jsx";
+import { APP_GAMES_TEXT } from "./text/GamesText.jsx";
 import AppSettings from "./AppSettings.jsx";
 import {
   APP_ROOT_SETTINGS,
@@ -36,6 +39,7 @@ import {
   KEY_MENU_ASSETS,
   KEY_MENU_DATA,
   KEY_MENU_STUDY,
+  KEY_MENU_GAMES,
   KEY_MENU_TILES,
 } from "./text/RootText.jsx";
 import { APP_ASSETS_TEXT } from "./text/AssetsText.jsx";
@@ -56,6 +60,7 @@ const ROUTES = [
   { path: "/assets", element: <Assets />, title_key: KEY_MENU_ASSETS },
   { path: "/tiles", element: <Tiles />, title_key: KEY_MENU_TILES },
   { path: "/study", element: <Study />, title_key: KEY_MENU_STUDY },
+  { path: "/games", element: <Games />, title_key: KEY_MENU_GAMES },
   { path: "/", title: "home" },
 ];
 
@@ -214,6 +219,7 @@ export class App extends Component {
       APP_ASSETS_TEXT,
       APP_DATA_TEXT,
       APP_STUDY_TEXT,
+      APP_GAMES_TEXT,
       APP_TILES_TEXT,
       APP_ROOT_TEXT,
       APP_NAVIGATOR_TEXT,
@@ -230,6 +236,7 @@ export class App extends Component {
       APP_DATA_SETTINGS,
       APP_TILES_SETTINGS,
       APP_STUDY_SETTINGS,
+      APP_GAMES_SETTINGS,
       APP_NAVIGATOR_SETTINGS,
     );
     AppSettings.initialize(all_settings);

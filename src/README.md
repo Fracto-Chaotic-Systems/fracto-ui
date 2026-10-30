@@ -10,7 +10,7 @@ This directory contains the React application for the Fracto user interface. For
 2. combines the feature setting definitions and initializes `AppSettings`;
 3. starts viewport-dimension polling;
 4. creates the top navigation; and
-5. registers the `/admin`, `/data`, `/assets`, `/tiles`, `/study`, and `/` routes.
+5. registers the `/admin`, `/data`, `/assets`, `/tiles`, `/study`, `/games`, and `/` routes.
 
 The top-level feature components live in `pages/`. Most features divide their UI into overview, status, settings, logs, or specialized tool components in a matching lowercase subdirectory.
 

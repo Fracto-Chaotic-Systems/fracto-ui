@@ -14,6 +14,7 @@ export const KEY_MENU_ADMIN = `${MENU_FOLDER}/admin`;
 export const KEY_MENU_DATA = `${MENU_FOLDER}/data`;
 export const KEY_MENU_ASSETS = `${MENU_FOLDER}/assets`;
 export const KEY_MENU_TILES = `${MENU_FOLDER}/tiles`;
+export const KEY_MENU_GAMES = `${MENU_FOLDER}/games`;
 export const KEY_MENU_STUDY = `${MENU_FOLDER}/study`;
 export const KEY_FORM_CANCEL = `${FORM_FOLDER}/cancel`;
 export const KEY_LOG_AUTO_SCROLL = `${LOGS_FOLDER}/auto_scroll`;
@@ -45,6 +46,7 @@ export const APP_ROOT_TEXT = {
   [KEY_MENU_ASSETS]: "artifacts",
   [KEY_MENU_TILES]: "tiles",
   [KEY_MENU_STUDY]: "study",
+  [KEY_MENU_GAMES]: "games",
   [KEY_FORM_CANCEL]: "cancel",
   [KEY_LOG_AUTO_SCROLL]: "auto-scroll",
   [KEY_LOG_SHOW_TIMESTAMPS]: "timestamps",

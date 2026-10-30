@@ -20,6 +20,13 @@ import {
 } from "../../../sdk/terrain/Lod.js";
 import FractoCanvasBuffer from "../../../sdk/FractoCanvasBuffer.js";
 import { minimum_terrain_resolution } from "../src/pages/assets/SimulatorTerrainData.js";
+import { flight_readings } from "../src/pages/assets/SimulatorFlightMetrics.js";
+import {
+  flight_region_key,
+  prepare_flight_pose,
+  confine_flight,
+  flight_boundary_status,
+} from "../src/pages/assets/SimulatorFlightRegion.js";
 import {
   scale_escape_relief,
   ESCAPE_RELIEF_MULTIPLIER,
@@ -344,9 +351,17 @@ function controller_harness() {
     }
   }
   class Loader {
-    load(params, keys, on_progress) {
+    load(params, keys, on_progress, palette_key, options) {
       return new Promise((resolve, reject) =>
-        requests.push({ params, keys, on_progress, resolve, reject }),
+        requests.push({
+          params,
+          keys,
+          on_progress,
+          palette_key,
+          options,
+          resolve,
+          reject,
+        }),
       );
     }
     cancel() {}
@@ -364,6 +379,29 @@ function controller_harness() {
     normalize_terrain_lighting,
     minimum_terrain_resolution,
     ESCAPE_RELIEF_MULTIPLIER,
+    flight_readings,
+    flight_region_key,
+    prepare_flight_pose,
+    confine_flight,
+    flight_boundary_status,
+    create_navigation_controls: (_camera, _canvas, mode, previous) => {
+      previous?.dispose();
+      return {
+        target: mode === "inspect" ? new THREE.Vector3() : undefined,
+        inspection_distance: previous?.inspection_distance || 1,
+        enabled: mode === "inspect",
+        paused: mode === "fly",
+        set_paused(value) {
+          this.paused = value;
+          if (value) this.speed = 0;
+        },
+        addEventListener() {},
+        update() {},
+        dispose() {
+          this.disposed = true;
+        },
+      };
+    },
     KEY_ASSETS_SIMULATOR_BASE_RESOLUTION: "resolution",
     KEY_ASSETS_SIMULATOR_LIGHTING: "lighting",
     AppSettings: {
@@ -395,8 +433,17 @@ function controller_harness() {
     dispose() {},
     wireframe: (value) => wireframes.push(value),
   };
+  const real_set_view = controller.set_view;
   controller.set_view = (view) => views.push(view);
-  return { controller, requests, installs, views, settings, wireframes };
+  return {
+    controller,
+    requests,
+    installs,
+    views,
+    settings,
+    wireframes,
+    real_set_view,
+  };
 }
 const loaded = {
   plan,
@@ -406,6 +453,196 @@ const loaded = {
   cache_hits: 1,
   elapsed_ms: 10,
 };
+
+test("mode selection defaults to inspect, keeps pose and terrain, and clears flight on blur/presets", () => {
+  const { controller: c, requests, real_set_view } = controller_harness();
+  c.camera = new THREE.PerspectiveCamera();
+  c.camera.position.set(0.3, -0.2, 0.6);
+  c.camera.quaternion.setFromEuler(new THREE.Euler(1, 2, 3));
+  c.renderer = { domElement: { focus() {} } };
+  c.draw = () => {};
+  c.flight_ready = true;
+  c.flight_region = plan.region;
+  assert.equal(c.state.navigation_mode, "inspect");
+  c.replace_controls("inspect");
+  const previous = c.controls,
+    pose = c.camera.quaternion.clone(),
+    position = c.camera.position.clone();
+  c.change_navigation_mode({ target: { value: "fly" } });
+  assert.equal(previous.disposed, true);
+  assert.equal(c.state.navigation_mode, "fly");
+  assert.equal(c.controls.enabled, false);
+  c.focus_canvas();
+  assert.equal(c.controls.enabled, true);
+  const flying = c.controls;
+  c.stop_flight();
+  assert.equal(flying.disposed, true);
+  assert.equal(c.controls.enabled, false);
+  c.extent = 1;
+  c.target_height = 0.02;
+  real_set_view("top");
+  assert.equal(c.controls.enabled, false);
+  assert.ok(c.controls.inspection_distance > 0);
+  c.camera.position.copy(position);
+  c.camera.quaternion.copy(pose);
+  c.change_navigation_mode({ target: { value: "inspect" } });
+  assert.equal(c.state.navigation_mode, "inspect");
+  assert.deepEqual(c.camera.position, position);
+  assert.ok(c.camera.quaternion.equals(pose));
+  assert.equal(requests.length, 0, "switching modes never reloads terrain");
+});
+
+test("optional instruments use installed terrain scope and skip surface work when hidden", () => {
+  const { controller: c } = controller_harness();
+  c.camera = new THREE.PerspectiveCamera();
+  c.camera.position.set(0.1, 0.02, 0.2);
+  c.controls = { speed: 0.1 };
+  c.terrain.region = { scope: 2 };
+  let queries = 0;
+  c.terrain.height_at = (x, z) => {
+    queries++;
+    assert.equal(x, 0.1);
+    assert.equal(z, 0.2);
+    return 0.03;
+  };
+  c.update_flight_readings();
+  assert.equal(queries, 0);
+  c.toggle_flight_instruments({ target: { checked: true } });
+  assert.equal(queries, 1);
+  assert.equal(c.state.flight_readings.speed_units, 0.2);
+  assert.equal(c.state.flight_readings.altitude, 0.04);
+  assert.ok(Math.abs(c.state.flight_readings.clearance + 0.02) < 1e-12);
+  c.toggle_flight_instruments({ target: { checked: false } });
+  assert.equal(queries, 1);
+});
+
+test("detail prediction receives actual flight speed only while flight input is active", () => {
+  const { controller: c } = controller_harness();
+  c.controls = { enabled: true, paused: false, speed: 0.12 };
+  c.control_mode = "inspect";
+  assert.equal(c.flight_motion(), null);
+  c.control_mode = "fly";
+  assert.equal(c.flight_motion().speed, 0.12);
+  c.controls.paused = true;
+  assert.equal(c.flight_motion(), null);
+  c.controls.paused = false;
+  c.controls.enabled = false;
+  assert.equal(c.flight_motion(), null);
+});
+
+test("flight starts inside the navigator, pauses at the boundary and returns without reloading", () => {
+  const { controller: c, requests } = controller_harness();
+  c.camera = new THREE.PerspectiveCamera();
+  c.camera.position.set(2, 2, 2);
+  c.renderer = { domElement: { focus() {} } };
+  c.draw = () => {};
+  c.flight_region = { ...plan.region, aspect_ratio: 1 };
+  c.change_navigation_mode({ target: { value: "fly" } });
+  c.focus_canvas();
+  assert.equal(
+    c.controls.enabled,
+    false,
+    "wait for loaded terrain before starting flight",
+  );
+  assert.equal(c.state.flight_start_ready, false);
+  c.flight_ready = true;
+  c.prepare_flight_start();
+  assert.ok(
+    Math.abs(c.camera.position.x) < 0.5 && Math.abs(c.camera.position.z) < 0.5,
+  );
+  assert.equal(c.state.flight_start_ready, true);
+  const start = c.camera.position.clone(),
+    orientation = c.camera.quaternion.clone();
+  c.focus_canvas();
+  c.controls.speed = 0.2;
+  c.camera.position.x = 0.46;
+  c.on_camera_changed();
+  assert.equal(c.state.flight_boundary, "near");
+  c.camera.position.x = 0.6;
+  c.on_camera_changed();
+  assert.ok(c.camera.position.x < 0.5);
+  assert.equal(c.controls.paused, true);
+  assert.equal(c.state.flight_boundary, "edge");
+  c.return_to_start();
+  assert.ok(c.camera.position.equals(start));
+  assert.ok(c.camera.quaternion.equals(orientation));
+  assert.equal(c.controls.paused, true);
+  assert.equal(c.state.flight_boundary, null);
+  assert.equal(requests.length, 0);
+  c.camera.position.x = 0.1;
+  c.flight_region = { ...c.flight_region, scope: 2 };
+  c.return_to_start();
+  assert.equal(
+    c.camera.position.x,
+    0.1,
+    "never return to an old region's start",
+  );
+});
+
+test("new navigator regions reset the start, while resolution reloads preserve the flight pose", async () => {
+  const { controller: c, requests } = controller_harness();
+  c.camera = new THREE.PerspectiveCamera();
+  c.renderer = { domElement: { focus() {} } };
+  c.draw = () => {};
+  c.replace_controls("fly");
+  const first = c.load(0);
+  requests[0].resolve(loaded);
+  await first;
+  const start = c.flight_start;
+  c.camera.position.x = 0.15;
+  const reload = c.load(0);
+  requests[1].resolve(loaded);
+  await reload;
+  assert.equal(c.flight_start, start);
+  assert.equal(c.camera.position.x, 0.15);
+  c.controls.paused = false;
+  const changed = c.load(0);
+  requests[2].resolve({
+    ...loaded,
+    plan: { ...plan, region: { ...plan.region, scope: 2 } },
+  });
+  await changed;
+  assert.notEqual(c.flight_start, start);
+  assert.equal(c.camera.position.x, 0);
+  assert.equal(c.controls.paused, true);
+  assert.equal(c.flight_region.scope, 2);
+});
+
+test("detail requests keep displayed terrain while loading and install coarse fallback atomically", async () => {
+  const { controller: c, requests, installs } = controller_harness();
+  c.state.loaded_info = loaded;
+  c.terrain.texture_keys = () => ({ cached: "palette" });
+  c.terrain.palette_key = "palette";
+  const pending = c.load_detail(plan);
+  assert.equal(c.state.detail_loading, true);
+  assert.equal(
+    installs.length,
+    0,
+    "existing meshes stay displayed during the request",
+  );
+  assert.equal(c.state.loaded_info, loaded);
+  assert.equal(requests[0].options.plan, plan);
+  assert.equal(requests[0].options.escape_scale, 100);
+  const fallback = {
+    ...loaded,
+    detail_failures: ["001"],
+    plan: { ...plan, refined_groups: [] },
+  };
+  requests[0].resolve(fallback);
+  await pending;
+  assert.equal(installs.length, 1);
+  assert.equal(installs[0][0], fallback);
+  assert.equal(c.state.detail_loading, false);
+  const failed = c.load_detail(plan);
+  requests[1].reject(new Error("unavailable"));
+  await failed;
+  assert.equal(
+    installs.length,
+    1,
+    "failed detail never clears the current scene",
+  );
+  assert.equal(c.state.loaded_info, fallback);
+});
 
 test("active terrain can exceed the 64-entry reuse cache without losing visible meshes", () => {
   const runtime = new SimulatorMeshScene(

@@ -22,6 +22,7 @@ and can do column labels.
   surveys pages.
 - `DataText.jsx` contains Data navigation, query and database labels, and
   MySQL/AWS settings and status text.
+- `GamesText.jsx` contains the wordnet sidebar label, reference title, graph scope, loading/error states, and synset detail labels.
 - `NavigatorText.jsx` contains canvas navigator labels, rendering-strategy
   descriptions, coverage messages, and related help text.
 - `RootText.jsx` contains shared navigation, menus, forms, and log viewer text

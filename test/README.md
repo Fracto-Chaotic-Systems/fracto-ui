@@ -70,3 +70,34 @@ attributes and unchanged pattern interiors. Worker integration checks geometry
 invalidation, reuse and restoration at 1×. Included in `test:simulator`.
 The 100× jagged-boundary regression checks reduced maximum adjacent height steps
 with radius-four smoothing while preserving plateau elevations.
+
+`simulator_navigation.test.js` exercises the real Three.js controllers against
+event surfaces: switching preserves rolled/underside poses, only one controller's
+listeners remain, fly mode starts stationary, local forward movement works, held
+input is cleared on replacement, and disposal removes keyboard handlers.
+Powered-flight tests additionally check continuous acceleration, gentle throttle
+deceleration, immediate pause, non-repeating Space toggles, resume from rest,
+30/120fps equivalence, capped/invalid deltas, throttle limits, bank turning,
+unrestricted pitch and focus-gated input.
+
+Scope/instrument tests cover proportional complex-plane speed and altitude at
+different navigator scales, signed underside clearance, missing surfaces and use
+of the installed region's scope. Instrumentation skips surface queries when off.
+Surface tests verify interpolation, mirrored placement, holes and equal/mixed
+level shader-welded edges, including restoration after coarsening.
+
+Flight/LOD tests cover speed-dependent lookahead, direction reversal, underside
+flight, pause/zero speed, blocked groups, the eight-patch/two-predictive budgets,
+and movement during an outstanding request. Controller integration confirms
+existing terrain remains displayed during detail loads and on failures; worker
+tests continue to verify atomic child-quartet fallback.
+
+Region tests cover inside/outside start poses, narrow aspect ratios, preservation
+of inverted/underside poses, signed/unrestricted altitude, directional warnings,
+first crossed edge, pause and return-to-start without a base reload. Controller
+checks include waiting for terrain, region-change invalidation, resolution-only
+pose retention and rejecting a return to an obsolete region's start.
+
+- `wordnet.test.js` covers noun parsing, abstraction graph extraction, multiple
+  inheritance, cycle/missing-link rejection, incremental tree expansion, and
+  generated dictionary integrity. Run `node --test test/wordnet.test.js`.

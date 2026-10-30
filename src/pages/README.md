@@ -8,6 +8,7 @@ This directory contains the routed application areas and the feature components 
 - `Data.jsx` (`/data`) - data-service overview, queries, status, logs, and connection/settings forms.
 - `Assets.jsx` (`/assets`) - asset overview/status, image generation and gallery tools, lore content, video generation, a seed-survey navigator with an incremental preview pane, logs, and settings.
 - `Tiles.jsx` (`/tiles`) - tile overview/status, inspection, test harness, generation, logs, and settings.
+- `Games.jsx` (`/games`) - blank Overview, Settings, and Status panels, plus an abstract-noun tree and synset details on the wordnet reference page with sidebar separators above and below wordnet.
 - `Study.jsx` (`/study`) - fractal studies including points, minibrots, nodes, inline studies, meridians, circuitry, fields, overview, status, and settings. The `full map` sidebar item opens a title-only page scaffold titled `logistic map`.
 
 Each top-level page follows the same broad pattern: read the selected section from `AppSettings`, resolve display labels through `AppText`, render a sidebar, and mount the selected child panel inside `SplitterLayout`.

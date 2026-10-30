@@ -36,6 +36,7 @@ export default class SimulatorTerrainWelding {
         });
       const source = this.sources.get(mesh);
       mesh.material = source.material;
+      delete mesh.userData.terrain_edges;
       if (source.sphere === undefined) delete mesh.boundingSphere;
       else mesh.boundingSphere = source.sphere;
       const code = mesh.userData.short_code;
@@ -107,6 +108,7 @@ export default class SimulatorTerrainWelding {
       }
       overlay.material.wireframe = patch.source.wireframe;
       patch.mesh.material = overlay.material;
+      patch.mesh.userData.terrain_edges = overlay.texture.image.data;
       // Shader-adjusted heights stay inside the original unit cube, even on otherwise-flat tiles.
       patch.mesh.boundingSphere = new THREE.Sphere(
         new THREE.Vector3(0.5, 0.5, 0.5),

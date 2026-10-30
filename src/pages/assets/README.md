@@ -161,6 +161,93 @@ Options start hidden on each mount and are not persisted. Toggling keeps the
 canvas, camera and terrain mounted; resizing updates the rendering area and
 trackball bounds. The toggle supports keyboard access and exposes expanded state.
 
+The gear panel's navigation selector switches between **inspect** (default on
+each mount) and **fly**. `SimulatorNavigation.js` disposes the previous controller
+before creating TrackballControls or SimulatorFlightControls, preserving camera position,
+orientation and roll. Returning to inspect places its pivot ahead of the current
+camera at the retained inspection distance. Switching does not reload terrain.
+Powered fly mode uses a small Three.js Controls implementation for continuous
+camera-local forward motion. Throttle starts at 25%, with maximum speed 0.2
+navigator scopes per second. W/S changes throttle at 25 percentage points per
+second; up/down pitch, left/right bank, A/D yaw, Q/E roll, and dragging steers.
+Banking gently contributes to turning. The gear panel includes throttle,
+steering sensitivity (0.25–2×), and pause/resume. Keyboard Space toggles pause
+without repeated toggles when held. Click the terrain to activate input; focus loss, Escape or window blur
+recreates a paused, disabled flight controller to clear held keys, retaining
+throttle and sensitivity. Switching modes retains those settings too. Pausing
+freezes motion immediately, and resuming accelerates from rest. Presets pause
+flight and remain usable in both modes. The animation callback supplies bounded elapsed seconds to flight
+updates; normal camera-change events continue rendering and LOD selection.
+Speed approaches its throttle target exponentially, with exact distance
+integration for consistent frame-rate behavior. Steering rates ease over 150ms.
+Zero throttle decelerates gently toward a hover. This is an exploration flight
+model: aerodynamic lift, stalls, gravity, collisions and streaming beyond the
+selected region remain subsequent work.
+
+`SimulatorFlightMetrics.js` defines the maximum speed explicitly as **0.2
+navigator scopes per second**. Scene coordinates are normalized by navigator
+scope, so camera motion has the same relative pace at every magnification,
+aspect ratio and mesh resolution. Physical distance per second is the current
+normalized speed multiplied by the installed region's scope; no metre-based
+geographic scale is assumed.
+
+The fly-mode **show flight instruments** checkbox is off by default. Enabling it
+adds an optional canvas overlay with throttle, speed (complex-plane units/s and
+scope/s), signed altitude above the complex plane, and signed vertical terrain
+clearance. Negative clearance means below the surface; it is not a nearest-point
+distance or a collision constraint. Missing tiles/holes and positions outside
+the clipped navigator region report no terrain. Readings refresh at most four
+times per second, with no surface sampling while disabled.
+
+`SimulatorTerrainSurface.js` samples only candidate visible tile triangles under
+the camera's X/Z, respecting omitted triangles, reflected placements and height
+scaling. Triangle participation is cached weakly per geometry. Welding exposes
+its existing RG edge overrides to the sampler, which follows the shader's corner
+precedence and collapsed 2:1 boundary positions. Sampling neighboring grid cells
+accounts for transition triangles crossing their original cell bounds. No full
+raycast or extra copy of mesh positions is required.
+
+Active powered flight supplies actual normalized speed to the LOD selector.
+`SimulatorTerrainLod.js` predicts two seconds along the camera's forward motion,
+with a maximum 0.4-scope lookahead. It evaluates the future viewing frustum and
+flight corridor, using projected distance and sample density. Up to two of the
+eight nearby-detail slots may be used for predictive-only patches; the other
+slots prioritize the current visible terrain. Inspect, pause, lost focus and
+zero speed disable prediction. Above/below and rolled flight share the same
+three-dimensional selection rules. Only indexed complete child quartets within
+the selected navigator region are candidates; this does not stream new regions.
+
+Selection still runs at most every 250ms and permits one detail request at a
+time. Camera/flight changes during a request queue reevaluation of the latest
+pose, rather than overlapping loads. Failed quartets remain suppressed until
+navigation resets. Existing terrain stays displayed while replacement data
+loads; complete child groups replace parents atomically, and parents remain on
+missing/failed child reads. Retained parent geometry enables quick coarsening.
+Welding/stitching runs for each assembled layout, including predictive detail.
+
+Flight is confined to the installed navigator region's horizontal footprint:
+normalized X spans ±0.5, Z spans ±aspect/2. `SimulatorFlightRegion.js` handles
+start poses, region identity, warnings and first-edge segment clipping. An
+inspection pose already inside the region (including below or inverted) is
+preserved when entering fly mode. An outside overview starts at X=0, altitude
+0.08 scope, and Z=min(0.25, aspect/4), facing forward. This is above the scope/25
+height cap. Flight cannot activate until the base terrain has loaded.
+
+Warnings appear within 8% of the shorter edge or when the two-second flight
+projection would leave the footprint. Crossing an edge stops the movement
+segment just inside the first crossed boundary and pauses flight, preserving
+orientation. The warning and return-to-start action remain accessible with the
+gear panel closed. The gear panel also includes return to start. Return restores
+the saved position, orientation and roll and leaves flight paused; nearby LOD
+can refresh, but it does not reload or change the navigator region. Inspect
+mode remains unrestricted so the user can turn back before resuming flight.
+
+Changing focal point, scope or aspect clears the old flight start and pauses
+flight. A new region establishes a fresh start if fly mode is selected. Reloads
+or resolution-only changes retain the start and current camera pose. Altitude
+is unrestricted and no terrain collisions are enforced, allowing underside
+exploration. Neighbor-region streaming remains a separate future feature.
+
 The escape relief multiplier is fixed at **100×** by
 `ESCAPE_RELIEF_MULTIPLIER` in `SimulatorEscapeRelief.js`; there is no UI control
 or persisted setting. Both base and nearby-detail loads use this constant,
