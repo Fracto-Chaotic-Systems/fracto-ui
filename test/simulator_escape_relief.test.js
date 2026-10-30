@@ -1,10 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { build_terrain_tile } from "../../../sdk/terrain/Mesh.js";
-import {
-  scale_escape_relief,
-  escape_relief_scale,
-} from "../src/pages/assets/SimulatorEscapeRelief.js";
+import { scale_escape_relief } from "../src/pages/assets/SimulatorEscapeRelief.js";
 
 test("escape scaling precedes log/cap/smoothing and preserves cached buffers and palette samples", () => {
   const tile = Array.from({ length: 256 }, (_, x) =>
@@ -106,11 +103,4 @@ test("100x relief rounds jagged escape/pattern interfaces more than the original
     previous.positions[(100 * 257 + 200) * 3 + 1],
     "pattern plateau stays unchanged",
   );
-});
-
-test("escape multiplier normalization provides a visual starting point and bounds input", () => {
-  assert.equal(escape_relief_scale(undefined), 10);
-  assert.equal(escape_relief_scale(1), 1);
-  assert.equal(escape_relief_scale(20), 20);
-  assert.equal(escape_relief_scale(Infinity), 10);
 });

@@ -55,7 +55,6 @@ export const KEY_ASSETS_SIMULATOR_FRAME_SETTINGS = `${ASSETS_SIMULATOR_FOLDER}/f
 export const KEY_ASSETS_SIMULATOR_RESOLUTION = `${ASSETS_SIMULATOR_FOLDER}/terrain_resolution`;
 export const KEY_ASSETS_SIMULATOR_BASE_RESOLUTION = `${ASSETS_SIMULATOR_FOLDER}/base_terrain_resolution`;
 export const KEY_ASSETS_SIMULATOR_LIGHTING = `${ASSETS_SIMULATOR_FOLDER}/terrain_lighting`;
-export const KEY_ASSETS_SIMULATOR_ESCAPE_SCALE = `${ASSETS_SIMULATOR_FOLDER}/escape_scale`;
 export const KEY_ASSETS_SURVEYS_FRAME_SETTINGS = `${ASSETS_SURVEYS_FOLDER}/frame_settings`;
 export const KEY_ASSETS_SURVEYS_SPLITTER_POS = `${ASSETS_SURVEYS_FOLDER}/splitter_pos`;
 export const KEY_ASSETS_SURVEYS_HALF_SPAN = `${ASSETS_SURVEYS_FOLDER}/half_span`;
@@ -206,13 +205,6 @@ export const APP_ASSETS_SETTINGS = {
     default_value: 1500,
     description:
       "Base cached terrain minimum samples across the shorter navigator edge (2–5000), with one camera-driven refinement level",
-    persist: true,
-  },
-  [KEY_ASSETS_SIMULATOR_ESCAPE_SCALE]: {
-    data_type: TYPE_NUMBER,
-    default_value: 10,
-    description:
-      "Escape iteration multiplier before terrain logarithm and smoothing",
     persist: true,
   },
   [KEY_ASSETS_SIMULATOR_LIGHTING]: {

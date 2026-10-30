@@ -7,7 +7,6 @@ import { minimum_terrain_resolution } from "./SimulatorTerrainData.js";
 import {
   KEY_ASSETS_SIMULATOR_BASE_RESOLUTION,
   KEY_ASSETS_SIMULATOR_LIGHTING,
-  KEY_ASSETS_SIMULATOR_ESCAPE_SCALE,
 } from "../../settings/AssetsSettings.jsx";
 import {
   TerrainLighting,
@@ -17,7 +16,7 @@ import SimulatorMeshLoader from "./SimulatorMeshLoader.js";
 import SimulatorMeshScene from "./SimulatorMeshScene.js";
 import SimulatorTerrainView from "./SimulatorTerrainView.jsx";
 import SimulatorTerrainLod from "./SimulatorTerrainLod.js";
-import { escape_relief_scale } from "./SimulatorEscapeRelief.js";
+import { ESCAPE_RELIEF_MULTIPLIER } from "./SimulatorEscapeRelief.js";
 
 /** Bounded terrain preview; orbiting is independent of data loading. */
 export default class SimulatorTerrain extends Component {
@@ -38,12 +37,6 @@ export default class SimulatorTerrain extends Component {
     loaded_info: null,
     progress: null,
     detail_loading: false,
-    escape_scale: escape_relief_scale(
-      AppSettings.get(KEY_ASSETS_SIMULATOR_ESCAPE_SCALE),
-    ),
-    escape_scale_input: String(
-      escape_relief_scale(AppSettings.get(KEY_ASSETS_SIMULATOR_ESCAPE_SCALE)),
-    ),
     lighting: normalize_terrain_lighting(
       AppSettings.get(KEY_ASSETS_SIMULATOR_LIGHTING),
     ),
@@ -96,10 +89,6 @@ export default class SimulatorTerrain extends Component {
         this.on_lighting_changed,
       );
       this.lighting.update(this.state.lighting);
-      this.escape_subscription = AppSettings.subscribe(
-        KEY_ASSETS_SIMULATOR_ESCAPE_SCALE,
-        this.on_escape_changed,
-      );
       this.resize();
       this.update_controls();
       this.schedule_load();
@@ -132,8 +121,6 @@ export default class SimulatorTerrain extends Component {
       AppSettings.unsubscribe(this.resolution_subscription);
     if (this.lighting_subscription)
       AppSettings.unsubscribe(this.lighting_subscription);
-    if (this.escape_subscription)
-      AppSettings.unsubscribe(this.escape_subscription);
     this.controls?.dispose();
     this.terrain?.dispose();
     this.renderer?.dispose();
@@ -199,7 +186,7 @@ export default class SimulatorTerrain extends Component {
         this.terrain.palette_key,
         {
           texture_keys: this.terrain.texture_keys?.() || {},
-          escape_scale: this.state.escape_scale,
+          escape_scale: ESCAPE_RELIEF_MULTIPLIER,
         },
       );
       if (sequence !== this.sequence) return;
@@ -240,7 +227,7 @@ export default class SimulatorTerrain extends Component {
         {
           plan,
           texture_keys: this.terrain.texture_keys(),
-          escape_scale: this.state.escape_scale,
+          escape_scale: ESCAPE_RELIEF_MULTIPLIER,
         },
       );
       if (sequence !== this.sequence) return null;
@@ -273,24 +260,6 @@ export default class SimulatorTerrain extends Component {
       },
       this.schedule_load,
     );
-
-  on_escape_changed = (_key, value) =>
-    this.setState(
-      {
-        escape_scale: escape_relief_scale(value),
-        escape_scale_input: String(escape_relief_scale(value)),
-      },
-      this.schedule_load,
-    );
-
-  apply_escape_scale = (event) => {
-    event.preventDefault();
-    const value = Number(this.state.escape_scale_input);
-    if (!Number.isFinite(value) || value < 1 || value > 1000000) return;
-    AppSettings.on_settings_changed({
-      [KEY_ASSETS_SIMULATOR_ESCAPE_SCALE]: value,
-    });
-  };
 
   on_lighting_changed = (_key, value) =>
     this.setState({ lighting: normalize_terrain_lighting(value) }, () => {
@@ -356,10 +325,6 @@ export default class SimulatorTerrain extends Component {
         on_wireframe={this.toggle_wireframe}
         on_reload={this.schedule_load}
         on_lighting={this.change_lighting}
-        on_escape_change={(event) =>
-          this.setState({ escape_scale_input: event.target.value })
-        }
-        on_escape_apply={this.apply_escape_scale}
       />
     );
   }

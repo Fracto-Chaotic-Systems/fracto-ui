@@ -22,7 +22,7 @@ import FractoCanvasBuffer from "../../../sdk/FractoCanvasBuffer.js";
 import { minimum_terrain_resolution } from "../src/pages/assets/SimulatorTerrainData.js";
 import {
   scale_escape_relief,
-  escape_relief_scale,
+  ESCAPE_RELIEF_MULTIPLIER,
 } from "../src/pages/assets/SimulatorEscapeRelief.js";
 import {
   TerrainLighting,
@@ -363,8 +363,7 @@ function controller_harness() {
     TerrainLighting,
     normalize_terrain_lighting,
     minimum_terrain_resolution,
-    escape_relief_scale,
-    KEY_ASSETS_SIMULATOR_ESCAPE_SCALE: "escape_scale",
+    ESCAPE_RELIEF_MULTIPLIER,
     KEY_ASSETS_SIMULATOR_BASE_RESOLUTION: "resolution",
     KEY_ASSETS_SIMULATOR_LIGHTING: "lighting",
     AppSettings: {

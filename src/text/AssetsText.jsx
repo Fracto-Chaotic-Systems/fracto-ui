@@ -47,8 +47,8 @@ export const TERRAIN_TEXT = {
   detail_ready: "assets/terrain_detail_ready",
   detail_fallback: "assets/terrain_detail_fallback",
   apply: "assets/terrain_apply",
-  escape_scale: "assets/terrain_escape_scale",
-  escape_scale_help: "assets/terrain_escape_scale_help",
+  open_options: "assets/terrain_open_options",
+  close_options: "assets/terrain_close_options",
   empty: "assets/terrain_empty",
   cached_summary: "assets/terrain_cached_summary",
   below_minimum: "assets/terrain_below_minimum",
@@ -187,9 +187,8 @@ export const APP_ASSETS_TEXT = {
   [TERRAIN_TEXT.azimuth]: "light direction",
   [TERRAIN_TEXT.elevation]: "light elevation",
   [TERRAIN_TEXT.apply]: "apply",
-  [TERRAIN_TEXT.escape_scale]: "escape relief multiplier",
-  [TERRAIN_TEXT.escape_scale_help]:
-    "Multiply escape iterations before logarithmic height mapping and smoothing. 1 restores original relief.",
+  [TERRAIN_TEXT.open_options]: "Show simulator options",
+  [TERRAIN_TEXT.close_options]: "Hide simulator options",
   [TERRAIN_TEXT.empty]:
     "No cached meshes are available in this area within the display budget.",
   [TERRAIN_TEXT.cached_summary]:

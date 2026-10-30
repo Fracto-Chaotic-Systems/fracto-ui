@@ -155,22 +155,28 @@ LOD updates still occur on camera changes. Resize updates the trackball bounds,
 and unmount cancels the callback. Top/reset oblique presets restore the camera's
 upright orientation. Right-drag panning and wheel zoom remain available.
 
-The persisted **escape relief multiplier** starts at 10× and accepts values from
-1 to 1,000,000. Apply a value to rebuild displayed heights while retaining the
-camera view. 1× restores the stored relief. `SimulatorEscapeRelief.js` uses the
+The simulator gear in the upper-right corner reveals controls, lighting, status,
+progress and navigation help above the canvas. It becomes an × to close the panel.
+Options start hidden on each mount and are not persisted. Toggling keeps the
+canvas, camera and terrain mounted; resizing updates the rendering area and
+trackball bounds. The toggle supports keyboard access and exposes expanded state.
+
+The escape relief multiplier is fixed at **100×** by
+`ESCAPE_RELIEF_MULTIPLIER` in `SimulatorEscapeRelief.js`; there is no UI control
+or persisted setting. Both base and nearby-detail loads use this constant,
+regardless of any legacy stored preference. The height reconstruction uses the
 original pattern/iteration arrays carried by each cached mesh: only pattern 0
 (escaped) iterations are multiplied, before log1p mapping, the normalized cap of
 1, and radius-four Gaussian smoothing. The wider kernel rounds the larger
 escape/pattern steps created by boosting escape iterations, and applies uniformly
-across the height grid. At 1×, original cached radius-two relief is restored.
+across the height grid.
 Constant pattern interiors retain their original
 heights; the shared smoothing pass blends the immediate interface. The world
 height cap remains navigator scope / 25. Original numerical samples, palette,
 UVs, indices and stored files remain unchanged; no mesh regeneration is needed.
 Runtime geometry/cache identities include the multiplier so refinement,
-coarsening and repeated adjustments cannot reuse heights from another setting.
-Changing the multiplier may reload mesh files; subsequent requests reuse the
-bounded worker/GPU caches. At large multipliers the cap produces plateaus.
+coarsening cannot reuse heights from another profile. Requests reuse the bounded
+worker/GPU caches. The height cap can produce plateaus.
 
 SimulatorTerrainEdges.js extracts each native mesh’s 257-sample edges and triangle participation once. It locates visible same-level neighbors with exact integer quadtree addresses, including independently placed conjugate tiles. Shared edge interiors receive the same averaged height; all valid tiles meeting at a corner share one corner average. Missing neighbors and boundary vertices unused by triangles are left unchanged. Different levels are deliberately excluded.
 

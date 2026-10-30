@@ -4,12 +4,7 @@ const EDGE = 257,
   KERNEL = [1, 3, 7, 11, 13, 11, 7, 3, 1],
   RADIUS = 4;
 
-export function escape_relief_scale(value) {
-  const number = Number(value);
-  return Number.isFinite(number) && number >= 1 && number <= 1000000
-    ? number
-    : 10;
-}
+export const ESCAPE_RELIEF_MULTIPLIER = 100;
 
 /** Rebuild only heights from original samples: escape multiplier, log, cap, Gaussian smoothing. */
 export function scale_escape_relief(mesh, scale) {
