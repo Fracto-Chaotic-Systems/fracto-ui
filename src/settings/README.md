@@ -37,7 +37,7 @@ the generator settings. Its mode is persisted by `PageAutomation` under the
   its independent fixed 4,096-iteration horizon.
 - `DataSettings.jsx` defines the Data page section, splitters, log display,
   selected query tab, and data-service connection fields.
-- `GamesSettings.jsx` defines the Games page section and persisted sidebar width.
+- `GamesSettings.jsx` defines the Games page section, persisted sidebar width, and browser-local worlds mapping, per-cardinality notes, and the applied proposal version. Mapping and notes begin empty; the worlds page applies the first-round proposal once while preserving manual edits.
 - `NavigatorSettings.jsx` defines the canvas navigator's rendering strategy,
   crosshair visibility, hover/client coordinates, and temporary disabled
   state. The pointer and disabled values are runtime-only; the strategy is

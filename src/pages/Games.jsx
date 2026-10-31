@@ -8,6 +8,7 @@ import AppSettings from "../AppSettings.jsx";
 import {
   GAMES_OVERVIEW,
   GAMES_WORDNET,
+  GAMES_WORLDS,
   GAMES_SETTINGS,
   GAMES_STATUS,
   KEY_GAMES_SECTION,
@@ -22,7 +23,8 @@ import {
 } from "../text/RootText.jsx";
 
 import GamesWordnet from "./games/GamesWordnet.jsx";
-import { KEY_GAMES_WORDNET } from "../text/GamesText.jsx";
+import GamesWorlds from "./games/GamesWorlds.jsx";
+import { KEY_GAMES_WORDNET, KEY_GAMES_WORLDS } from "../text/GamesText.jsx";
 
 const SIDEBAR_LIST = [
   {
@@ -35,6 +37,12 @@ const SIDEBAR_LIST = [
     title_key: KEY_GAMES_WORDNET,
     section_code: GAMES_WORDNET,
     right_pane: <GamesWordnet />,
+  },
+  { section_code: SIDEBAR_BREAKER },
+  {
+    title_key: KEY_GAMES_WORLDS,
+    section_code: GAMES_WORLDS,
+    right_pane: <GamesWorlds />,
   },
   { section_code: SIDEBAR_BREAKER },
   {

@@ -101,3 +101,9 @@ pose retention and rejecting a return to an obsolete region's start.
 - `wordnet.test.js` covers noun parsing, abstraction graph extraction, multiple
   inheritance, cycle/missing-link rejection, incremental tree expansion, and
   generated dictionary integrity. Run `node --test test/wordnet.test.js`.
+
+- `worlds_mapping.test.js` checks factorization, association moves/swaps, saved
+  mapping validation, and contender consistency with WordNet source senses.
+
+- `worlds_draft.test.js` checks both proposal layers (298 placements, including every cardinality 1-256), compound arithmetic,
+  verified WordNet subtype paths, and preservation of user edits on reload.
