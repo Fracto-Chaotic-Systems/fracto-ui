@@ -15,7 +15,7 @@ Overview, Settings, and Status intentionally remain blank.
   uses one quarter of the remaining width (half its former balanced share),
   leaving the rest for notes. Association content wraps within that width.
 - WorldsNotes.jsx renders each row's controlled editable notes; GamesWorlds
-  coordinates browser-local overrides of database defaults.
+  saves edits to the database on blur; useWorldsData owns server loading and saving.
 - WorldsCard.jsx renders static rectangular sense cards.
   In the association column, cards display `word: short definition`, using the
   first semicolon-delimited gloss clause to omit examples. The word and colon
@@ -92,12 +92,13 @@ prime-power factorizations are calculated from each database cardinality.
 
 Associations remain read-only. The static contender tray stays searchable and its
 assigned labels reflect database placements. Existing browser mapping and proposal
-version settings no longer control the table. Local notes continue using the
-existing notes setting, overriding database note defaults; clearing a note stores
-an explicit empty override. Notes on unassigned rows remain editable. Browser edits
-are not sent to the database. Existing saved notes are retained, including any
-previously seeded note text. Database changes to such notes will be masked by those
-local overrides until browser notes are cleared. Database failures never fall back
+version settings no longer control the table. Notes come exclusively from the database. Editing creates only a temporary
+in-memory draft; leaving the field saves it through the notes API with the original
+server text as an optimistic concurrency check. Failed edits remain visible with
+retry and reload-server controls. No notes are saved in AppSettings or localStorage;
+obsolete note cache keys are removed when the page loads. Returning focus to the
+page refreshes database entries. CSV exports use committed database notes.
+Database failures never fall back
 to a static proposal. Legacy proposal files and WorldsDraft remain for migration
 provenance and historical tests, and are not imported by the page.
 
@@ -196,7 +197,7 @@ and explained in their notes rather than performed by moving cards.
 The toolbar link downloads `wordnet-mappings.csv` locally. It exports all loaded
 mapped worlds in numeric order, independent of paging and contender filtering.
 Columns are cardinality (numeric in place of the visual pattern), factorization,
-`word: short definition`, and notes including current browser edits. WorldsCsv.js
+`word: short definition`, and committed database notes. WorldsCsv.js
 quotes fields and escapes quotes, retaining multiline notes and Unicode with a
 UTF-8 BOM. The link is available after a successful load, including empty tables.
 
@@ -296,9 +297,35 @@ holds the bounds calculation.
 
 ## World names
 
-The table now reads card, formula, theme, name, notes. The theme column occupies
-one eighth of the width remaining after the numeric columns (half its prior
-width); name occupies one sixteenth, with the freed width allocated to notes.
+The table reads card, formula, theme, name, notes. Theme uses 20% of the table
+width and name uses 10%, giving them a 2:1 ratio. Notes take the remaining width
+after the fixed numeric columns.
 Migration 005 initializes the database world_name field to `world N`; the page
 and CSV export read it directly, preserving future custom names. Names are
 read-only in this interface.
+
+## Unapproved name proposals
+
+Migration 006 appends a section to every database note with 1-2 candidate world
+names and brief reasons. The name column stays `world N` pending individual
+approval. Existing compound explanations remain above the suggestions.
+The proposal is stored only in the database. The former browser override and
+proposal-merge mechanism has been removed; later API edits take precedence.
+
+Theme and name use direct percentage widths for reliable fixed-table sizing,
+with wrapping for long names. Notes fields initially show three text rows.
+
+## Database-only note editing
+
+useWorldsData.js owns requests, focus/visibility refresh and write/read race guards.
+WorldsNotesData.js validates saved responses and removes the two obsolete storage
+keys. WorldsNotes.jsx keeps only an unsaved in-memory draft and saves on blur.
+PUT /wordnet_mappings/:cardinality/notes accepts notes and expected_notes; it
+reuses the transactional editor and checks the configured UI origin, alongside
+normal service authentication. A conflict never overwrites a newer server edit.
+
+A circular-arrow button immediately before download CSV reloads mappings and notes
+from the database. It shows a busy state during refresh; the table and CSV then
+use the latest committed values.
+
+CSV download is an icon link with a download CSV tooltip and accessible label.

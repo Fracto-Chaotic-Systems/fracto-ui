@@ -7,6 +7,14 @@ const DATA_ORIGIN = () => service_origin("data");
 const MAX_DENOMINATOR = 128;
 
 export class DataBackend {
+  static save_world_notes = (cardinality, notes, expected_notes) =>
+    request_json(`${DATA_ORIGIN()}/wordnet_mappings/${cardinality}/notes`, {
+      method: "PUT",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ notes, expected_notes }),
+    });
+
   static get_wordnet_mappings = (signal) =>
     request_json(`${DATA_ORIGIN()}/wordnet_mappings`, {
       signal,

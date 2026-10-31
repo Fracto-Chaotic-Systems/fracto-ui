@@ -37,7 +37,7 @@ the generator settings. Its mode is persisted by `PageAutomation` under the
   its independent fixed 4,096-iteration horizon.
 - `DataSettings.jsx` defines the Data page section, splitters, log display,
   selected query tab, and data-service connection fields.
-- `GamesSettings.jsx` defines the Games page section, persisted sidebar width, and browser-local worlds mapping, per-cardinality notes, and the applied proposal version. Mapping and notes begin empty; the worlds page applies the first-round proposal once while preserving manual edits.
+- `GamesSettings.jsx` defines the Games section and persisted sidebar/reference splitter widths. Legacy mapping/proposal settings remain for compatibility, but current mappings and notes come from the database. Notes are not AppSettings preferences.
 - `NavigatorSettings.jsx` defines the canvas navigator's rendering strategy,
   crosshair visibility, hover/client coordinates, and temporary disabled
   state. The pointer and disabled values are runtime-only; the strategy is
@@ -91,3 +91,6 @@ Adaptive terrain uses the new base_terrain_resolution preference with a 1500 def
 
 GamesSettings defines the persisted numeric `games/wordnet_splitter_pos_px` key
 for the reference tree/detail divider, separate from the games sidebar splitter.
+
+The obsolete games/world_notes and games/world_name_notes_version keys are no
+longer registered and are removed on the worlds page mount.

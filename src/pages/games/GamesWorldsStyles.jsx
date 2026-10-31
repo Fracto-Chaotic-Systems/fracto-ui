@@ -55,10 +55,13 @@ export const MappingTable = styled.table`
     width: 120px;
   }
   th:nth-child(3) {
-    width: calc((100% - 225px) / 8);
+    width: 20%;
   }
   th:nth-child(4) {
-    width: calc((100% - 225px) / 16);
+    width: 10%;
+  }
+  td:nth-child(4) {
+    overflow-wrap: anywhere;
   }
   th:nth-child(-n + 2),
   td:nth-child(-n + 2) {
@@ -157,5 +160,25 @@ export const ThemePatternButton = styled.button`
   &:focus-visible {
     outline: 2px solid #446b91;
     outline-offset: 3px;
+  }
+`;
+
+export const RefreshButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  &:disabled {
+    cursor: wait;
+    opacity: 0.5;
+  }
+  &:focus-visible {
+    outline: 2px solid #446b91;
+    outline-offset: 2px;
   }
 `;

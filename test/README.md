@@ -131,3 +131,6 @@ restoring a saved width into a smaller container.
 
 World database and CSV tests verify that stored world_name values, including
 custom names, survive response adaptation and export.
+
+`node --test test/worlds_notes_data.test.js` verifies removal of obsolete note
+caches without reading them, plus expected-value saves and response validation.

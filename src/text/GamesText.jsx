@@ -31,6 +31,8 @@ export const WORLDS_TEXT = Object.fromEntries(
     "name",
     "notes",
     "notes_placeholder",
+    "save_notes_error",
+    "reload_notes",
     "association",
     "unassigned",
     "contenders",
@@ -44,6 +46,7 @@ export const WORLDS_TEXT = Object.fromEntries(
     "empty",
     "tray_help",
     "download_csv",
+    "refresh",
     "show_card",
     "loading",
     "error",
@@ -52,6 +55,7 @@ export const WORLDS_TEXT = Object.fromEntries(
 );
 export const APP_GAMES_TEXT = {
   [WORLDS_TEXT.show_card]: "show card",
+  [WORLDS_TEXT.refresh]: "refresh worlds",
   [WORLDS_TEXT.download_csv]: "download CSV",
   [WORLDS_TEXT.loading]: "loading worlds...",
   [WORLDS_TEXT.error]: "Unable to load worlds.",
@@ -62,12 +66,15 @@ export const APP_GAMES_TEXT = {
   [WORLDS_TEXT.factorization]: "formula",
   [WORLDS_TEXT.name]: "name",
   [WORLDS_TEXT.notes]: "notes",
+  [WORLDS_TEXT.save_notes_error]:
+    "Notes were not saved. Retry, or reload the server version if it changed.",
+  [WORLDS_TEXT.reload_notes]: "reload server notes",
   [WORLDS_TEXT.notes_placeholder]: "add notes...",
   [WORLDS_TEXT.association]: "theme",
   [WORLDS_TEXT.unassigned]: "unassigned",
   [WORLDS_TEXT.contenders]: "all themes",
   [WORLDS_TEXT.help]:
-    "Associations are curated in the database so changes can be considered together with their compound meanings. Notes remain editable and are saved in this browser.",
+    "Associations are curated in the database so changes can be considered together with their compound meanings. Notes are saved to the database when you leave the field.",
   [WORLDS_TEXT.scope]:
     "Curated abstractions with defined placements, including every cardinality from 1 through 256. Notes explain archetypes, creative compounds and WordNet specializations.",
   [WORLDS_TEXT.search]: "filter themes",

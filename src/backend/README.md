@@ -117,3 +117,6 @@ TilesBackend.mesh_terrain requests the read-only runtime assembly manifest. mesh
 
 `DataBackend.get_wordnet_mappings(signal)` retrieves the complete database mapping
 with credentials, cancellation and no HTTP caching for the worlds page.
+
+DataBackend.save_world_notes sends notes and their original server value through
+PUT /wordnet_mappings/:cardinality/notes. It never persists browser copies.

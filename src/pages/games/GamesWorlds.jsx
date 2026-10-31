@@ -1,12 +1,11 @@
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faDownload, faRotateRight } from "@fortawesome/free-solid-svg-icons";
 import { useSearchParams } from "react-router-dom";
 import { scroll_world_row, scroll_world_theme } from "./WorldsNavigation.js";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MainStyles as styles } from "../../styles/MainStyles.jsx";
 import AppText from "../../AppText.jsx";
-import AppSettings from "../../AppSettings.jsx";
-import { KEY_GAMES_WORLD_NOTES } from "../../settings/GamesSettings.jsx";
-import { DataBackend } from "../../backend/DataBackend.jsx";
-import { index_world_mappings } from "./WorldsDatabase.js";
+import useWorldsData from "./useWorldsData.js";
 import { KEY_GAMES_WORLDS_TITLE, WORLDS_TEXT } from "../../text/GamesText.jsx";
 import { render_pattern_block } from "../study/StudyUtils.jsx";
 import { WORLD_CONTENDERS } from "./WorldsContenders.js";
@@ -18,6 +17,7 @@ import {
   WorldsLayout,
   MappingPane,
   Toolbar,
+  RefreshButton,
   TableScroll,
   MappingTable,
   ContendersPane,
@@ -36,34 +36,8 @@ const GamesWorlds = () => {
   const requested_card = params.get("card");
   const show_assignment = (cardinality) =>
     scroll_world_row(table_scroll.current, cardinality);
-  const [data, set_data] = useState({
-    mapping: {},
-    associations: {},
-    notes: {},
-  });
-  const [local_notes, set_local_notes] = useState(
-    () => AppSettings.get(KEY_GAMES_WORLD_NOTES) || {},
-  );
-  const [loading, set_loading] = useState(true);
-  const [error, set_error] = useState(false);
-  const [attempt, set_attempt] = useState(0);
-  const { mapping, associations } = data;
-  const notes = { ...data.notes, ...local_notes };
-  useEffect(() => {
-    const controller = new AbortController();
-    DataBackend.get_wordnet_mappings(controller.signal)
-      .then((response) => {
-        const next = index_world_mappings(response.result);
-        if (!controller.signal.aborted) set_data(next);
-      })
-      .catch(() => {
-        if (!controller.signal.aborted) set_error(true);
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) set_loading(false);
-      });
-    return () => controller.abort();
-  }, [attempt]);
+  const { data, loading, error, reload, save_note } = useWorldsData();
+  const { mapping, associations, notes } = data;
   useEffect(() => {
     if (requested_card && data.mapping[requested_card]) {
       scroll_world_row(table_scroll.current, requested_card);
@@ -72,14 +46,9 @@ const GamesWorlds = () => {
   }, [data, requested_card]);
   const csv_url = useMemo(
     () =>
-      `data:text/csv;charset=utf-8,${encodeURIComponent(worlds_csv(data.associations, { ...data.notes, ...local_notes }))}`,
-    [data, local_notes],
+      `data:text/csv;charset=utf-8,${encodeURIComponent(worlds_csv(data.associations, data.notes))}`,
+    [data],
   );
-  const update_note = (row, value) => {
-    const next = { ...local_notes, [row]: value };
-    set_local_notes(next);
-    AppSettings.on_settings_changed({ [KEY_GAMES_WORLD_NOTES]: next });
-  };
   const [query, set_query] = useState("");
   const rows = Object.keys(mapping)
     .map(Number)
@@ -112,22 +81,29 @@ const GamesWorlds = () => {
           {error && (
             <p role="alert">
               {text("error")}{" "}
-              <button
-                type="button"
-                onClick={() => {
-                  set_error(false);
-                  set_loading(true);
-                  set_attempt((value) => value + 1);
-                }}
-              >
+              <button type="button" onClick={reload}>
                 {text("retry")}
               </button>
             </p>
           )}
           <Toolbar>
+            <RefreshButton
+              type="button"
+              onClick={reload}
+              disabled={loading}
+              aria-label={text("refresh")}
+              title={text("refresh")}
+            >
+              <FontAwesomeIcon icon={faRotateRight} spin={loading} />
+            </RefreshButton>
             {!loading && !error && (
-              <a href={csv_url} download="wordnet-mappings.csv">
-                <em>{text("download_csv")}</em>
+              <a
+                href={csv_url}
+                download="wordnet-mappings.csv"
+                aria-label={text("download_csv")}
+                title={text("download_csv")}
+              >
+                <FontAwesomeIcon icon={faDownload} />
               </a>
             )}
           </Toolbar>
@@ -171,7 +147,10 @@ const GamesWorlds = () => {
                         <WorldsNotes
                           cardinality={row}
                           value={notes[row] ?? ""}
-                          on_change={(value) => update_note(row, value)}
+                          on_save={(value, expected) =>
+                            save_note(row, value, expected)
+                          }
+                          on_reload={reload}
                         />
                       </td>
                     </tr>
