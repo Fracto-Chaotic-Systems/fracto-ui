@@ -1,3 +1,7 @@
+import {
+  WORLDS_COMPOUNDS,
+  WORLDS_COMPOUND_VERSION,
+} from "../src/pages/games/WorldsCompounds.js";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
@@ -19,16 +23,20 @@ const by_label = Object.fromEntries(
 test("combined proposals assign all source senses once and supply a note for every assignment", () => {
   const draft = prepare_worlds_draft({}, {}, "", WORLD_CONTENDERS);
   assert.equal(WORLDS_FIRST_ROUND.length, 100);
-  assert.equal(Object.keys(draft.mapping).length, 298);
-  assert.equal(new Set(Object.values(draft.mapping)).size, 298);
+  assert.equal(Object.keys(draft.mapping).length, 318);
+  assert.equal(new Set(Object.values(draft.mapping)).size, 318);
   assert.deepEqual(
     new Set(Object.values(draft.mapping)),
     new Set(WORLD_CONTENDERS.map((item) => item.id)),
   );
-  assert.equal(Object.keys(draft.notes).length, 298);
+  assert.equal(Object.keys(draft.notes).length, 318);
   assert.equal(draft.mapping[15], by_label.learning);
   assert.equal(draft.mapping[65], by_label.memory);
-  for (const entry of [...WORLDS_FIRST_ROUND, ...WORLDS_GAP_FILL]) {
+  for (const entry of [
+    ...WORLDS_FIRST_ROUND,
+    ...WORLDS_GAP_FILL,
+    ...WORLDS_COMPOUNDS,
+  ]) {
     assert.equal(entry.synset_id, by_label[entry.label]);
     assert.ok(entry.note.length > 40);
     const formula = entry.note.match(
@@ -120,7 +128,7 @@ test("versioned draft keeps later removals and cleared notes through remounts", 
   );
   assert.equal(restored.mapping[15], undefined);
   assert.equal(restored.notes[65], undefined);
-  assert.equal(Object.keys(restored.mapping).length, 297);
+  assert.equal(Object.keys(restored.mapping).length, 317);
 });
 
 test("expansion fills every gap from 1 through 256 without changing the original 100 placements", () => {
@@ -134,7 +142,7 @@ test("expansion fills every gap from 1 through 256 without changing the original
     assert.equal(draft.mapping[entry.cardinality], entry.synset_id);
     assert.equal(draft.notes[entry.cardinality], entry.note);
   }
-  assert.equal(draft.version, WORLDS_GAP_VERSION);
+  assert.equal(draft.version, WORLDS_COMPOUND_VERSION);
 });
 
 test("upgrading an existing first round adds only new rows and preserves cleared or edited original entries", () => {
@@ -153,7 +161,7 @@ test("upgrading an existing first round adds only new rows and preserves cleared
     WORLDS_DRAFT_VERSION,
     WORLD_CONTENDERS,
   );
-  assert.equal(Object.keys(expanded.mapping).length, 297);
+  assert.equal(Object.keys(expanded.mapping).length, 317);
   assert.equal(expanded.mapping[15], undefined);
   assert.equal(expanded.notes[65], undefined);
   assert.equal(expanded.notes[5], "User explanation");
@@ -210,4 +218,63 @@ test("new power notes correctly distinguish verified base ancestry from creative
     assert.equal(entry.is_a_verified, found, entry.label);
     if (!found) assert.match(entry.note, /creative|interpretive/i);
   }
+});
+
+test("approved compound additions occupy new rows and introduce no new prime archetypes", () => {
+  assert.equal(WORLDS_COMPOUNDS.length, 20);
+  const previous = [...WORLDS_FIRST_ROUND, ...WORLDS_GAP_FILL];
+  const occupied = new Set(previous.map((entry) => entry.cardinality));
+  const used_senses = new Set(previous.map((entry) => entry.synset_id));
+  const primes = new Set(
+    previous
+      .filter((entry) => {
+        const factors = prime_factorization(entry.cardinality);
+        return factors.length === 1 && factors[0].exponent === 1;
+      })
+      .map((entry) => entry.cardinality),
+  );
+  for (const entry of WORLDS_COMPOUNDS) {
+    assert.ok(!occupied.has(entry.cardinality), entry.label);
+    assert.ok(!used_senses.has(entry.synset_id), entry.label);
+    const factors = prime_factorization(entry.cardinality);
+    assert.ok(factors.reduce((total, item) => total + item.exponent, 0) > 1);
+    for (const factor of factors) assert.ok(primes.has(factor.prime));
+  }
+});
+
+test("gap-version upgrade adds the approved twenty while preserving prior edits and later removals", () => {
+  const previous = [...WORLDS_FIRST_ROUND, ...WORLDS_GAP_FILL];
+  const mapping = Object.fromEntries(
+    previous.map((entry) => [entry.cardinality, entry.synset_id]),
+  );
+  const notes = Object.fromEntries(
+    previous.map((entry) => [entry.cardinality, entry.note]),
+  );
+  delete mapping[8];
+  delete notes[21];
+  notes[15] = "Edited learning explanation";
+  const expanded = prepare_worlds_draft(
+    mapping,
+    notes,
+    WORLDS_GAP_VERSION,
+    WORLD_CONTENDERS,
+  );
+  assert.equal(Object.keys(expanded.mapping).length, 317);
+  assert.equal(expanded.mapping[8], undefined);
+  assert.equal(expanded.notes[21], undefined);
+  assert.equal(expanded.notes[15], "Edited learning explanation");
+  for (const entry of WORLDS_COMPOUNDS) {
+    assert.equal(expanded.mapping[entry.cardinality], entry.synset_id);
+    assert.equal(expanded.notes[entry.cardinality], entry.note);
+  }
+  delete expanded.mapping[447];
+  delete expanded.notes[511];
+  const restored = prepare_worlds_draft(
+    expanded.mapping,
+    expanded.notes,
+    expanded.version,
+    WORLD_CONTENDERS,
+  );
+  assert.equal(restored.mapping[447], undefined);
+  assert.equal(restored.notes[511], undefined);
 });

@@ -102,8 +102,32 @@ pose retention and rejecting a return to an obsolete region's start.
   inheritance, cycle/missing-link rejection, incremental tree expansion, and
   generated dictionary integrity. Run `node --test test/wordnet.test.js`.
 
-- `worlds_mapping.test.js` checks factorization, association moves/swaps, saved
+- `worlds_mapping.test.js` checks factorization, saved
   mapping validation, and contender consistency with WordNet source senses.
 
-- `worlds_draft.test.js` checks both proposal layers (298 placements, including every cardinality 1-256), compound arithmetic,
+- `worlds_draft.test.js` checks all proposal layers (318 placements, including every cardinality 1-256), compound arithmetic,
   verified WordNet subtype paths, and preservation of user edits on reload.
+
+`node --test test/worlds_database.test.js` verifies database mapping adaptation,
+including senses absent from the contenders list and rejection of invalid rows.
+
+`node --test test/worlds_csv.test.js` verifies CSV ordering, factors, edited notes,
+Unicode BOM, escaping, multiline values and empty-table headers.
+
+`node --test test/wordnet_navigation.test.js` covers theme links resolving to
+materialized WordNet branches, including every current contender sense.
+
+WordNet navigation tests also verify the three-generation detail tree, leaf
+entries, shared occurrence paths and cycle protection.
+
+`node --test test/worlds_navigation.test.js` verifies targeted table scrolling,
+sticky-header clearance, and safe handling of missing or invalid targets.
+
+World navigation tests also cover independent theme-list scrolling and missing
+theme targets.
+
+`node --test test/wordnet_layout.test.js` checks reference splitter bounds and
+restoring a saved width into a smaller container.
+
+World database and CSV tests verify that stored world_name values, including
+custom names, survive response adaptation and export.

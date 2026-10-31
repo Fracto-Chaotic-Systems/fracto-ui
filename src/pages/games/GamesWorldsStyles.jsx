@@ -2,10 +2,10 @@ import styled from "styled-components";
 
 export const WorldsLayout = styled.div`
   display: flex;
-  gap: 1rem;
+  gap: 0;
   height: calc(100vh - 100px);
   min-height: 0;
-  padding: 0 1rem 1rem;
+  padding: 0 0 1rem;
   box-sizing: border-box;
 `;
 export const MappingPane = styled.section`
@@ -16,6 +16,8 @@ export const MappingPane = styled.section`
 `;
 export const Toolbar = styled.div`
   display: flex;
+  justify-content: flex-end;
+  margin-right: 1rem;
   align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
@@ -31,6 +33,7 @@ export const TableScroll = styled.div`
 export const MappingTable = styled.table`
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
   text-align: left;
   font-size: 0.9rem;
   th {
@@ -41,7 +44,8 @@ export const MappingTable = styled.table`
   }
   th,
   td {
-    padding: 0.55rem 0.75rem;
+    box-sizing: border-box;
+    padding: 0.25rem 0.75rem;
     border-bottom: 1px solid #dddddd;
   }
   th:first-child {
@@ -50,59 +54,44 @@ export const MappingTable = styled.table`
   th:nth-child(2) {
     width: 120px;
   }
+  th:nth-child(3) {
+    width: calc((100% - 225px) / 8);
+  }
+  th:nth-child(4) {
+    width: calc((100% - 225px) / 16);
+  }
+  th:nth-child(-n + 2),
+  td:nth-child(-n + 2) {
+    text-align: center;
+    vertical-align: middle;
+  }
   td:nth-child(2) {
     font-family: monospace;
-    white-space: nowrap;
+    font-size: 1.1rem;
+    white-space: normal;
   }
 `;
-export const AssociationCard = styled.button`
+export const AssociationCard = styled.div`
   display: block;
   width: 100%;
   box-sizing: border-box;
-  padding: 0.6rem 0.75rem;
+  padding: ${({ $compact }) => ($compact ? "0.25rem" : "0.6rem")} 0.75rem;
   border: 1px solid #9baebc;
   border-radius: 2px;
-  background: ${({ $selected }) => ($selected ? "#dbeafa" : "#f5f8fa")};
+  background: #f5f8fa;
   color: #243c50;
   text-align: left;
-  cursor: grab;
+  overflow-wrap: anywhere;
   font: inherit;
-  &:active {
-    cursor: grabbing;
-  }
-  &:focus-visible {
-    outline: 2px solid #446b91;
-    outline-offset: 2px;
-  }
   strong {
-    display: block;
-    font-weight: 600;
+    display: ${({ $compact }) => ($compact ? "inline" : "block")};
+    font-weight: 700;
   }
   small {
     display: block;
     margin-top: 0.3rem;
     line-height: 1.35;
     color: #555555;
-  }
-`;
-export const DropCell = styled.div`
-  min-width: 180px;
-  min-height: 38px;
-  padding: 4px;
-  border: 1px dashed #b4c2cc;
-  background: ${({ $active }) => ($active ? "#e5f1fc" : "#ffffff")};
-`;
-export const EmptySlot = styled.button`
-  width: 100%;
-  min-height: 38px;
-  border: none;
-  background: transparent;
-  color: #6a7780;
-  text-align: left;
-  font: inherit;
-  cursor: pointer;
-  &:disabled {
-    cursor: default;
   }
 `;
 export const ContendersPane = styled.aside`
@@ -155,5 +144,18 @@ export const NotesInput = styled.textarea`
   &:focus-visible {
     outline: 2px solid #446b91;
     outline-offset: 1px;
+  }
+`;
+
+export const ThemePatternButton = styled.button`
+  display: block;
+  border: 0;
+  padding: 0;
+  margin-top: 0.3rem;
+  background: transparent;
+  cursor: pointer;
+  &:focus-visible {
+    outline: 2px solid #446b91;
+    outline-offset: 3px;
   }
 `;

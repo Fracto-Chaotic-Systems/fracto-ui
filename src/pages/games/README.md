@@ -1,23 +1,33 @@
 # Games panels
 
 The parent ../Games.jsx owns sidebar selection and the persisted splitter.
-Sidebar order is Overview, separator, wordnet, separator, worlds, separator,
-Settings, Status.
+Sidebar order is Overview, separator, worlds, separator, wordnet, Settings, Status.
 Overview, Settings, and Status intentionally remain blank.
 
 - GamesWorlds.jsx coordinates the **all worlds** mapping table and searchable
-  right-hand contender tray. It uses the existing StudyUtils pattern blocks.
-- GamesWorldsStyles.jsx owns the mapping table, drop targets and panel layout.
+  right-hand contender tray. It uses the existing StudyUtils pattern blocks
+  at a 25px font size. Pattern blocks and factorizations are centered in their
+  columns, including the column headings.
+- GamesWorldsStyles.jsx owns the mapping table, association cells and panel layout.
+  Table cells and mapping association cards use compact 0.25rem vertical
+  padding; detailed contender cards retain their roomier spacing. The fixed table
+  layout reserves 105px and 120px for the numeric columns; the association column
+  uses one quarter of the remaining width (half its former balanced share),
+  leaving the rest for notes. Association content wraps within that width.
 - WorldsNotes.jsx renders each row's controlled editable notes; GamesWorlds
-  coordinates persistence. Notes stay with the cardinality when cards move.
-- WorldsCard.jsx renders draggable, keyboard-selectable rectangular sense cards.
-- WorldsMapping.js owns factorization, saved-state validation, move/swap and
-  unassignment rules independently of React.
+  coordinates browser-local overrides of database defaults.
+- WorldsCard.jsx renders static rectangular sense cards.
+  In the association column, cards display `word: short definition`, using the
+  first semicolon-delimited gloss clause to omit examples. The word and colon
+  are bold, with the definition continuing inline. The full gloss remains
+  in the tooltip and the contender panel.
+- WorldsMapping.js owns factorization and saved-state validation independently of React.
 - WorldsFirstRound.js preserves the original 100-placement editorial proposal.
   WorldsGapFill.js adds 198 placements to fill all gaps from 1 through 256.
-  WorldsDraft.js applies these versioned layers while preserving existing row
-  assignments, moved contenders and user notes.
-- WorldsContenders.js is a provisional alphabetical selection of 298 broad
+  WorldsCompounds.js adds the approved twenty compounds using existing primes.
+  WorldsDraft.js preserves the historical browser seeding logic for tests; the
+  active worlds page uses the database instead.
+- WorldsContenders.js is a provisional alphabetical selection of 318 broad
   WordNet senses with potential for creative compounds, not numeric assignments.
   Labels distinguish the intended sense; full source glosses and IDs remain
   available. This is an editorial starting list, not a ranking or exhaustive set.
@@ -54,8 +64,8 @@ and shipped separately with the data. Regeneration is deterministic.
    their location. CoolTree's local search alone would miss collapsed branches.
 3. Add parent navigation and relation types, including references outside the
    branch, without merging distinct word senses.
-4. Persist selected synset and expanded paths; introduce a resizable inner
-   splitter if the tree/details layout needs adjustment.
+4. Persist selected synset and expanded paths beyond explicit navigation links.
+   The inner tree/details splitter now persists its width through AppSettings.
 5. If the static payload grows beyond this prototype, serve indexed children
    and synset endpoints or partition the asset, preserving canonical IDs.
 
@@ -73,34 +83,26 @@ WordNet's is-a relationships can supply more specific versions of a base
 archetype for related values such as 2, 4, and 8.
 A later layer will add fractional aspects: an entity assigned denominator 5
 will have four aspects represented by 1/5, 2/5, 3/5, and 4/5.
-The first visit applies the first-round proposal to available rows. The default
-assigned-only view shows every mapped cardinality in ascending order, including
-sparse large compounds. Turn off show assigned only to browse all cardinalities
-in pages of 64 starting at 1. Factorization uses prime powers; 1 is shown as
-1, the empty product. Rows are numeric denominator slots, not assertions that
-specific orbital components have been detected. Fractions are not implemented.
+The table fetches GET `/wordnet_mappings` through DataBackend on mount, cancels
+on unmount and exposes loading, error and retry states. WorldsDatabase.js validates
+and indexes database rows independently of the contenders list. Database words,
+short definitions and glosses render directly, even for senses outside that list.
+The table shows every mapped database cardinality in ascending order. Pattern blocks and
+prime-power factorizations are calculated from each database cardinality.
 
-Drag a contender onto a mapping row to assign it. Moving a mapped card to an
-occupied row swaps the two; assigning an unassigned contender replaces that
-row's card, which remains in the tray. All contenders remain listed, with their
-current assigned row shown. Dropping a card into the tray unassigns it.
-Cards can also be selected with click/keyboard and assigned with the destination
-button. Unassign selected provides a keyboard alternative to the tray drop.
-A contender has at most one mapped cardinality. Selection and filtering are
-transient. The {cardinality: synset_id} draft and a separate
-{cardinality: note_text} notes map are persisted through GamesSettings/AppSettings
-in browser storage. They begin as empty settings and receive the proposal once
-when the worlds page mounts. The fourth table column, notes, is
-editable even on unassigned rows. Clearing a note removes its saved entry. Unknown IDs,
-invalid cardinalities and duplicates in restored settings are discarded.
-Run node --test test/worlds_mapping.test.js for factorization, move/swap,
-restore validation and exact contender-to-source consistency tests.
+Associations remain read-only. The static contender tray stays searchable and its
+assigned labels reflect database placements. Existing browser mapping and proposal
+version settings no longer control the table. Local notes continue using the
+existing notes setting, overriding database note defaults; clearing a note stores
+an explicit empty override. Notes on unassigned rows remain editable. Browser edits
+are not sent to the database. Existing saved notes are retained, including any
+previously seeded note text. Database changes to such notes will be masked by those
+local overrides until browser notes are cleared. Database failures never fall back
+to a static proposal. Legacy proposal files and WorldsDraft remain for migration
+provenance and historical tests, and are not imported by the page.
 
-Browser verification used a temporary isolated component harness because the
-running Compose UI served an earlier source snapshot and the standalone app
-could not complete cross-origin service discovery. Verified contender drag to
-a row, card movement between rows, keyboard/click unassignment and reload;
-the test mapping was returned to empty. No backend service changes were made.
+The proposal and verification sections below record historical behavior before
+database integration, rather than the current persistence or interaction model.
 
 ## First-round proposal
 
@@ -162,3 +164,141 @@ Gap-expansion browser verification: the existing first-round local draft upgrade
 to 298 assigned worlds and 298 contenders. All cardinalities 1-256 were present
 in the rendered table; reload retained new notes and the original learning note.
 The isolated preview files and temporary server were removed afterward.
+
+## Approved twenty-compound expansion
+
+WorldsCompounds.js adds 20 distinct senses at previously unused composite
+cardinalities, including reconciliation 447, self-control 2911, gratitude 4117,
+authority 7913, and loyalty 28891. Every factor uses an existing prime archetype.
+The total is now 318 assigned contenders in a fresh draft; the original 298
+placements and notes remain unchanged. Cards for all additions appear in the
+alphabetical contender tray, and every addition includes an editable explanation.
+
+A gaps-256-v1 saved draft receives only this compound layer; first-round-v1
+receives the gap and compound layers. compounds-20-v1 prevents later edits or
+removals from being reseeded. Existing user placements and notes win conflicts.
+Tests verify that no new prime archetypes or reused source senses are introduced,
+and that upgrading preserves edits and applies the twenty approved additions.
+
+## Read-only associations
+
+Direct reassignment controls and drag/drop handlers have been removed from both
+the mapping table and contender panel. Cards are ordinary divs with no button,
+toggle or drag semantics; their full-gloss tooltips remain available. The
+assignment-selection status and unassign action are removed. Existing saved
+notes are retained; placements now come from the database.
+Earlier browser-verification notes above describe the historical interactive
+prototype. Future semantic changes should be made to the database mappings
+and explained in their notes rather than performed by moving cards.
+
+## CSV download
+
+The toolbar link downloads `wordnet-mappings.csv` locally. It exports all loaded
+mapped worlds in numeric order, independent of paging and contender filtering.
+Columns are cardinality (numeric in place of the visual pattern), factorization,
+`word: short definition`, and notes including current browser edits. WorldsCsv.js
+quotes fields and escapes quotes, retaining multiline notes and Unicode with a
+UTF-8 BOM. The link is available after a successful load, including empty tables.
+
+The area above the table contains only the italic `download CSV` link during
+normal use. Introductory help, assignment count, assigned-only toggle and paging
+controls have been removed. Loading and failure/retry feedback appear only while
+needed. The page title and contender panel remain in place.
+
+Formula values use a 1.1rem monospace font and can wrap within their column.
+
+Theme cards render directly in table cells, without a white background wrapper
+or its extra padding. Long theme text wraps within the card.
+
+WorldsLayout has no horizontal padding or gap between the table and contenders
+panel, allowing the table to fill the available content width.
+
+The CSV toolbar aligns its link to the right with a 1rem right margin.
+
+The all themes panel places its filter directly below the heading; introductory
+scope and usage text are no longer displayed.
+
+Detailed cards in the all themes panel show the assigned cardinality as a 20px
+pattern block instead of assignment text; unassigned themes show no block.
+
+Theme-card pattern blocks are keyboard-accessible buttons that smoothly scroll
+the table to the assigned row, accounting for its sticky header. Only the table
+scrolls; the theme panel stays in place.
+
+## Theme links to WordNet
+
+Theme-card synset IDs link to `/games?synset=ID`. Games selects the reference
+sidebar item for this query and passes the ID to GamesWordnet. Selecting another
+sidebar item clears the query so later links, including the same ID, reopen the
+reference. Direct links and browser navigation use the same path.
+WordnetTree.wordnet_selection finds one shortest root-to-sense path, using visited
+IDs to handle shared ancestors safely. Its path keys expand each ancestor and
+control tree selection; the sense details and selected tree item are revealed.
+Missing IDs fall back to the abstraction root. The graph fetch is cancelled when
+leaving the page. `test/wordnet_navigation.test.js` verifies all theme IDs can be
+revealed in the actual graph and covers multiple-parent and missing-ID behavior.
+
+Theme-card WordNet links appear inline at the end of the description, in
+parentheses, rather than on a separate line.
+
+## Reference detail ancestry and descendants
+
+WordnetDetails.jsx shows breadcrumb steps immediately after the selected gloss,
+using the actual selected occurrence path rather than choosing a different path
+through multiple inheritance. Ancestors are clickable; the current entry is omitted. The root has no
+breadcrumb list. A nested list below the breadcrumbs shows children, grandchildren
+and great-grandchildren, with no fourth generation and no section for leaf senses.
+Descendant labels select their occurrence and expand its ancestors in the main
+tree. WordnetTree.wordnet_descendants owns the depth limit and avoids path cycles.
+
+## WordNet detail to world navigation
+
+WordnetWorldLink.jsx reads the database mappings once while the reference details
+are mounted. A mapped sense displays a 20px pattern-block link just above the synset line;
+unmapped senses omit it. Mapping failures provide retry feedback. No static
+contender assignments are consulted. The link opens `/games?card=N`, selecting
+all worlds. After database rows render, WorldsNavigation.scroll_world_row scrolls
+only the table viewport, positioning the requested row below the sticky header.
+The same helper handles theme-card pattern clicks. Sidebar changes clear unrelated
+target parameters, so repeated links and browser navigation remain usable.
+
+Pattern-block links into all worlds also reveal the mapped sense in the all themes
+list. The list and table scroll independently after mappings load; senses absent
+from the static theme list leave its position unchanged.
+
+The reference detail panel starts with the selected entry title at 1.75rem.
+Introductory taxonomy scope and total synset count are no longer shown above it.
+
+The selected entry definition uses 1.25rem italic text.
+
+The detail panel omits the direct-descendant count line; the descendant tree remains.
+
+Synset and license metadata use margin-free lines to avoid a blank paragraph gap.
+
+Breadcrumb chevrons use CSS Unicode escapes. The license line uses a plain ASCII
+pipe separator to avoid encoding or font issues.
+
+The breadcrumb section is headed “predecessors,” matching the descendant section heading.
+
+Predecessors render as a vertical cascade, with each successive ancestor indented
+an additional 0.75rem. Inline chevron separators are removed.
+
+The entry title and definition are separated by a compact 0.35rem gap.
+
+## Reference splitter
+
+GamesWordnet owns the inner tree/detail geometry, measured with ResizeObserver.
+It uses CoolSplitter in flow layout and persists tree width in the numeric
+`games/wordnet_splitter_pos_px` AppSettings key, initially 450px. Both panes keep
+180px where space allows. Resizing temporarily clamps the displayed width without
+replacing the saved preference. The observer disconnects on unmount. WordnetLayout.js
+holds the bounds calculation.
+
+## World names
+
+The table now reads card, formula, theme, name, notes. The theme column occupies
+one eighth of the width remaining after the numeric columns (half its prior
+width); name occupies one sixteenth, with the freed width allocated to notes.
+Migration 005 initializes the database world_name field to `world N`; the page
+and CSV export read it directly, preserving future custom names. Names are
+read-only in this interface.

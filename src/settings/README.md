@@ -88,3 +88,6 @@ appropriate for long-lived production credentials.
 The simulator terrain_resolution setting now represents minimum native cached samples across the shorter navigator edge (2–5000), default 1000. Existing saved resolution values remain valid minimums.
 
 Adaptive terrain uses the new base_terrain_resolution preference with a 1500 default. The previous uniform terrain_resolution preference is retained but no longer drives the simulator.
+
+GamesSettings defines the persisted numeric `games/wordnet_splitter_pos_px` key
+for the reference tree/detail divider, separate from the games sidebar splitter.

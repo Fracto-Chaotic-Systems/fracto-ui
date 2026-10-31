@@ -3,7 +3,7 @@ import AppText from "../../AppText.jsx";
 import { WORLDS_TEXT } from "../../text/GamesText.jsx";
 import { NotesInput } from "./GamesWorldsStyles.jsx";
 
-// Notes belong to the row; the page coordinates persistence with draft seeding.
+// Notes belong to the row; the page coordinates browser-local note persistence.
 const WorldsNotes = ({ cardinality, value, on_change }) => (
   <NotesInput
     aria-label={`${AppText.get(WORLDS_TEXT.notes)} ${cardinality}`}

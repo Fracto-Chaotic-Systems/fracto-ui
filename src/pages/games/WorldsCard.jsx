@@ -1,45 +1,49 @@
-import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
 import AppText from "../../AppText.jsx";
 import { WORLDS_TEXT } from "../../text/GamesText.jsx";
-import { AssociationCard } from "./GamesWorldsStyles.jsx";
-import { WORLD_DRAG_TYPE } from "./WorldsMapping.js";
+import PropTypes from "prop-types";
+import { render_pattern_block } from "../study/StudyUtils.jsx";
+import { AssociationCard, ThemePatternButton } from "./GamesWorldsStyles.jsx";
 
 const WorldsCard = ({
   contender,
-  selected,
-  on_select,
   assigned_row,
   details,
+  on_show_assignment,
 }) => (
-  <AssociationCard
-    type="button"
-    draggable
-    $selected={selected}
-    aria-pressed={selected}
-    title={contender.gloss}
-    onClick={() => on_select(contender.id)}
-    onDragStart={(event) => {
-      event.dataTransfer.setData(WORLD_DRAG_TYPE, contender.id);
-      event.dataTransfer.effectAllowed = "move";
-    }}
-  >
-    <strong>{contender.label}</strong>
-    {details && <small>{contender.gloss}</small>}
+  <AssociationCard $compact={!details} title={contender.gloss}>
+    {details ? (
+      <strong>{contender.label}</strong>
+    ) : (
+      <span>
+        <strong>{contender.label}:</strong>{" "}
+        {contender.definition ?? contender.gloss.split(";")[0].trim()}
+      </span>
+    )}
     {details && (
       <small>
-        {contender.id}
-        {assigned_row
-          ? ` - ${AppText.get(WORLDS_TEXT.mapped)} ${assigned_row}`
-          : ""}
+        {contender.gloss} (
+        <Link to={`/games?synset=${encodeURIComponent(contender.id)}`}>
+          {contender.id}
+        </Link>
+        )
       </small>
+    )}
+    {details && assigned_row && (
+      <ThemePatternButton
+        type="button"
+        aria-label={`${AppText.get(WORLDS_TEXT.show_card)} ${assigned_row}`}
+        onClick={() => on_show_assignment?.(assigned_row)}
+      >
+        {render_pattern_block(Number(assigned_row), 20)}
+      </ThemePatternButton>
     )}
   </AssociationCard>
 );
 WorldsCard.propTypes = {
   contender: PropTypes.object.isRequired,
-  selected: PropTypes.bool.isRequired,
-  on_select: PropTypes.func.isRequired,
   assigned_row: PropTypes.string,
   details: PropTypes.bool,
+  on_show_assignment: PropTypes.func,
 };
 export default WorldsCard;

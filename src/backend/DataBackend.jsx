@@ -7,6 +7,13 @@ const DATA_ORIGIN = () => service_origin("data");
 const MAX_DENOMINATOR = 128;
 
 export class DataBackend {
+  static get_wordnet_mappings = (signal) =>
+    request_json(`${DATA_ORIGIN()}/wordnet_mappings`, {
+      signal,
+      credentials: "include",
+      cache: "no-store",
+    });
+
   /**
    * Fetches the newest rows from a whitelisted database table.
    * @param {string} table Table name accepted by the data server query route.

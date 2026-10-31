@@ -4,6 +4,7 @@ import { DEFAULT_SIDEBAR_WIDTH } from "../constants.jsx";
 const GAMES_FOLDER = "games";
 
 export const KEY_GAMES_SPLITTER_POS_PX = `${GAMES_FOLDER}/splitter_pos_px`;
+export const KEY_GAMES_WORDNET_SPLITTER_POS_PX = `${GAMES_FOLDER}/wordnet_splitter_pos_px`;
 export const KEY_GAMES_SECTION = `${GAMES_FOLDER}/games_section`;
 
 export const KEY_GAMES_WORLDS_DRAFT_VERSION = `${GAMES_FOLDER}/worlds_draft_version`;
@@ -17,6 +18,12 @@ export const GAMES_SETTINGS = "games_settings";
 export const GAMES_STATUS = "games_status";
 
 export const APP_GAMES_SETTINGS = {
+  [KEY_GAMES_WORDNET_SPLITTER_POS_PX]: {
+    data_type: TYPE_NUMBER,
+    default_value: 450,
+    description: "pixel width of the WordNet reference tree pane",
+    persist: true,
+  },
   [KEY_GAMES_WORLDS_DRAFT_VERSION]: {
     data_type: TYPE_STRING,
     default_value: "",

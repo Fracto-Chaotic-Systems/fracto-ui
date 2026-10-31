@@ -1,3 +1,7 @@
+import {
+  WORLDS_COMPOUNDS,
+  WORLDS_COMPOUND_VERSION,
+} from "./WorldsCompounds.js";
 import { WORLDS_GAP_FILL, WORLDS_GAP_VERSION } from "./WorldsGapFill.js";
 import { normalize_world_mapping } from "./WorldsMapping.js";
 import {
@@ -28,11 +32,13 @@ export function prepare_worlds_draft(
         typeof note === "string",
     ),
   );
-  if (saved_version !== WORLDS_GAP_VERSION) {
+  if (saved_version !== WORLDS_COMPOUND_VERSION) {
     const additions =
-      saved_version === WORLDS_DRAFT_VERSION
-        ? WORLDS_GAP_FILL
-        : [...WORLDS_FIRST_ROUND, ...WORLDS_GAP_FILL];
+      saved_version === WORLDS_GAP_VERSION
+        ? WORLDS_COMPOUNDS
+        : saved_version === WORLDS_DRAFT_VERSION
+          ? [...WORLDS_GAP_FILL, ...WORLDS_COMPOUNDS]
+          : [...WORLDS_FIRST_ROUND, ...WORLDS_GAP_FILL, ...WORLDS_COMPOUNDS];
     const assigned = new Set(Object.values(mapping));
     const allowed = new Set(contenders.map((item) => item.id));
     for (const entry of additions) {
@@ -47,5 +53,5 @@ export function prepare_worlds_draft(
       }
     }
   }
-  return { mapping, notes, version: WORLDS_GAP_VERSION };
+  return { mapping, notes, version: WORLDS_COMPOUND_VERSION };
 }

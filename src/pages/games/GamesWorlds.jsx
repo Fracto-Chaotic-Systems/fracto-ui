@@ -1,23 +1,17 @@
-import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { scroll_world_row, scroll_world_theme } from "./WorldsNavigation.js";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { MainStyles as styles } from "../../styles/MainStyles.jsx";
 import AppText from "../../AppText.jsx";
 import AppSettings from "../../AppSettings.jsx";
-import {
-  KEY_GAMES_WORLD_MAPPING,
-  KEY_GAMES_WORLD_NOTES,
-  KEY_GAMES_WORLDS_DRAFT_VERSION,
-} from "../../settings/GamesSettings.jsx";
+import { KEY_GAMES_WORLD_NOTES } from "../../settings/GamesSettings.jsx";
+import { DataBackend } from "../../backend/DataBackend.jsx";
+import { index_world_mappings } from "./WorldsDatabase.js";
 import { KEY_GAMES_WORLDS_TITLE, WORLDS_TEXT } from "../../text/GamesText.jsx";
 import { render_pattern_block } from "../study/StudyUtils.jsx";
 import { WORLD_CONTENDERS } from "./WorldsContenders.js";
-import {
-  WORLD_DRAG_TYPE,
-  WORLDS_PAGE_SIZE,
-  place_world,
-  prime_factorization,
-  remove_world,
-} from "./WorldsMapping.js";
-import { prepare_worlds_draft } from "./WorldsDraft.js";
+import { prime_factorization } from "./WorldsMapping.js";
+import { worlds_csv } from "./WorldsCsv.js";
 import WorldsNotes from "./WorldsNotes.jsx";
 import WorldsCard from "./WorldsCard.jsx";
 import {
@@ -26,8 +20,6 @@ import {
   Toolbar,
   TableScroll,
   MappingTable,
-  DropCell,
-  EmptySlot,
   ContendersPane,
   ContenderList,
 } from "./GamesWorldsStyles.jsx";
@@ -36,37 +28,62 @@ const by_id = Object.fromEntries(
   WORLD_CONTENDERS.map((item) => [item.id, item]),
 );
 const text = (key) => AppText.get(WORLDS_TEXT[key]);
-const accepts_drag = (event) =>
-  event.dataTransfer.types.includes(WORLD_DRAG_TYPE);
 
 const GamesWorlds = () => {
-  const [draft, set_draft] = useState(() =>
-    prepare_worlds_draft(
-      AppSettings.get(KEY_GAMES_WORLD_MAPPING),
-      AppSettings.get(KEY_GAMES_WORLD_NOTES),
-      AppSettings.get(KEY_GAMES_WORLDS_DRAFT_VERSION),
-      WORLD_CONTENDERS,
-    ),
+  const table_scroll = useRef(null);
+  const themes_scroll = useRef(null);
+  const [params] = useSearchParams();
+  const requested_card = params.get("card");
+  const show_assignment = (cardinality) =>
+    scroll_world_row(table_scroll.current, cardinality);
+  const [data, set_data] = useState({
+    mapping: {},
+    associations: {},
+    notes: {},
+  });
+  const [local_notes, set_local_notes] = useState(
+    () => AppSettings.get(KEY_GAMES_WORLD_NOTES) || {},
   );
-  const { mapping, notes } = draft;
+  const [loading, set_loading] = useState(true);
+  const [error, set_error] = useState(false);
+  const [attempt, set_attempt] = useState(0);
+  const { mapping, associations } = data;
+  const notes = { ...data.notes, ...local_notes };
   useEffect(() => {
-    AppSettings.on_settings_changed({
-      [KEY_GAMES_WORLD_MAPPING]: draft.mapping,
-      [KEY_GAMES_WORLD_NOTES]: draft.notes,
-      [KEY_GAMES_WORLDS_DRAFT_VERSION]: draft.version,
-    });
-  }, [draft]);
-  const [assigned_only, set_assigned_only] = useState(true);
-  const [selected, set_selected] = useState(null);
+    const controller = new AbortController();
+    DataBackend.get_wordnet_mappings(controller.signal)
+      .then((response) => {
+        const next = index_world_mappings(response.result);
+        if (!controller.signal.aborted) set_data(next);
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) set_error(true);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) set_loading(false);
+      });
+    return () => controller.abort();
+  }, [attempt]);
+  useEffect(() => {
+    if (requested_card && data.mapping[requested_card]) {
+      scroll_world_row(table_scroll.current, requested_card);
+      scroll_world_theme(themes_scroll.current, data.mapping[requested_card]);
+    }
+  }, [data, requested_card]);
+  const csv_url = useMemo(
+    () =>
+      `data:text/csv;charset=utf-8,${encodeURIComponent(worlds_csv(data.associations, { ...data.notes, ...local_notes }))}`,
+    [data, local_notes],
+  );
+  const update_note = (row, value) => {
+    const next = { ...local_notes, [row]: value };
+    set_local_notes(next);
+    AppSettings.on_settings_changed({ [KEY_GAMES_WORLD_NOTES]: next });
+  };
   const [query, set_query] = useState("");
-  const [page, set_page] = useState(0);
-  const [hovered, set_hovered] = useState(null);
-  const first = page * WORLDS_PAGE_SIZE + 1;
-  const rows = assigned_only
-    ? Object.keys(mapping)
-        .map(Number)
-        .sort((a, b) => a - b)
-    : Array.from({ length: WORLDS_PAGE_SIZE }, (_, index) => first + index);
+  const rows = Object.keys(mapping)
+    .map(Number)
+    .sort((a, b) => a - b);
   const assigned_rows = Object.fromEntries(
     Object.entries(mapping).map(([row, id]) => [id, row]),
   );
@@ -75,22 +92,12 @@ const GamesWorlds = () => {
       .toLowerCase()
       .includes(query.trim().toLowerCase()),
   );
-  const update_mapping = (next) => {
-    set_draft((previous) => ({ ...previous, mapping: next }));
-  };
-  const assign = (row, id) => {
-    if (!by_id[id]) return;
-    update_mapping(place_world(mapping, row, id, WORLD_CONTENDERS));
-    set_selected(null);
-    set_hovered(null);
-  };
   const card = (id, details = false) => (
     <WorldsCard
       contender={by_id[id]}
-      selected={selected === id}
-      on_select={(next) => set_selected(selected === next ? null : next)}
       assigned_row={assigned_rows[id]}
       details={details}
+      on_show_assignment={show_assignment}
     />
   );
 
@@ -101,58 +108,37 @@ const GamesWorlds = () => {
       </styles.SectionTitle>
       <WorldsLayout>
         <MappingPane aria-label={text("association")}>
-          <p>{text("help")}</p>
+          {loading && <p role="status">{text("loading")}</p>}
+          {error && (
+            <p role="alert">
+              {text("error")}{" "}
+              <button
+                type="button"
+                onClick={() => {
+                  set_error(false);
+                  set_loading(true);
+                  set_attempt((value) => value + 1);
+                }}
+              >
+                {text("retry")}
+              </button>
+            </p>
+          )}
           <Toolbar>
-            <label>
-              <input
-                type="checkbox"
-                checked={assigned_only}
-                onChange={(event) => set_assigned_only(event.target.checked)}
-              />
-              {text("assigned_only")}
-            </label>
-            {assigned_only ? (
-              <span>
-                {rows.length} {text("assigned_worlds")}
-              </span>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  disabled={page === 0}
-                  onClick={() => set_page(page - 1)}
-                >
-                  {text("previous")}
-                </button>
-                <span>
-                  {text("rows")} {first} - {first + WORLDS_PAGE_SIZE - 1}
-                </span>
-                <button type="button" onClick={() => set_page(page + 1)}>
-                  {text("next")}
-                </button>
-              </>
+            {!loading && !error && (
+              <a href={csv_url} download="wordnet-mappings.csv">
+                <em>{text("download_csv")}</em>
+              </a>
             )}
-            <span role="status">
-              {text("selected")}: {by_id[selected]?.label ?? text("none")}
-            </span>
-            <button
-              type="button"
-              disabled={!assigned_rows[selected]}
-              onClick={() => {
-                update_mapping(remove_world(mapping, selected));
-                set_selected(null);
-              }}
-            >
-              {text("clear")}
-            </button>
           </Toolbar>
-          <TableScroll>
+          <TableScroll ref={table_scroll}>
             <MappingTable>
               <thead>
                 <tr>
                   <th scope="col">{text("cardinality")}</th>
                   <th scope="col">{text("factorization")}</th>
                   <th scope="col">{text("association")}</th>
+                  <th scope="col">{text("name")}</th>
                   <th scope="col">{text("notes")}</th>
                 </tr>
               </thead>
@@ -160,8 +146,8 @@ const GamesWorlds = () => {
                 {rows.map((row) => {
                   const factors = prime_factorization(row);
                   return (
-                    <tr key={row}>
-                      <td>{render_pattern_block(row)}</td>
+                    <tr key={row} data-cardinality={row}>
+                      <td>{render_pattern_block(row, 25)}</td>
                       <td>
                         {factors.length
                           ? factors.map(({ prime, exponent }, index) => (
@@ -174,65 +160,18 @@ const GamesWorlds = () => {
                           : "1"}
                       </td>
                       <td>
-                        <DropCell
-                          $active={hovered === row}
-                          onDragOver={(event) => {
-                            if (accepts_drag(event)) {
-                              event.preventDefault();
-                              event.dataTransfer.dropEffect = "move";
-                              set_hovered(row);
-                            }
-                          }}
-                          onDragLeave={(event) => {
-                            if (
-                              !event.currentTarget.contains(event.relatedTarget)
-                            )
-                              set_hovered(null);
-                          }}
-                          onDrop={(event) => {
-                            event.preventDefault();
-                            assign(
-                              row,
-                              event.dataTransfer.getData(WORLD_DRAG_TYPE),
-                            );
-                          }}
-                        >
-                          {mapping[row] ? (
-                            <>
-                              {card(mapping[row])}
-                              {selected && selected !== mapping[row] && (
-                                <EmptySlot
-                                  type="button"
-                                  onClick={() => assign(row, selected)}
-                                >
-                                  {text("assign")}
-                                </EmptySlot>
-                              )}
-                            </>
-                          ) : (
-                            <EmptySlot
-                              type="button"
-                              disabled={!selected}
-                              aria-label={`${text("assign")} ${row}`}
-                              onClick={() => assign(row, selected)}
-                            >
-                              {text(selected ? "assign" : "drop")}
-                            </EmptySlot>
-                          )}
-                        </DropCell>
+                        {mapping[row] ? (
+                          <WorldsCard contender={associations[row]} />
+                        ) : (
+                          text("unassigned")
+                        )}
                       </td>
+                      <td>{associations[row]?.world_name ?? ""}</td>
                       <td>
                         <WorldsNotes
                           cardinality={row}
                           value={notes[row] ?? ""}
-                          on_change={(value) =>
-                            set_draft((previous) => {
-                              const next_notes = { ...previous.notes };
-                              if (value) next_notes[row] = value;
-                              else delete next_notes[row];
-                              return { ...previous, notes: next_notes };
-                            })
-                          }
+                          on_change={(value) => update_note(row, value)}
                         />
                       </td>
                     </tr>
@@ -242,26 +181,10 @@ const GamesWorlds = () => {
             </MappingTable>
           </TableScroll>
         </MappingPane>
-        <ContendersPane
-          aria-label={text("contenders")}
-          onDragOver={(event) => {
-            if (accepts_drag(event)) event.preventDefault();
-          }}
-          onDrop={(event) => {
-            event.preventDefault();
-            const id = event.dataTransfer.getData(WORLD_DRAG_TYPE);
-            if (by_id[id]) {
-              update_mapping(remove_world(mapping, id));
-              set_selected(null);
-              set_hovered(null);
-            }
-          }}
-        >
+        <ContendersPane aria-label={text("contenders")}>
           <h3>
             {text("contenders")} ({WORLD_CONTENDERS.length})
           </h3>
-          <p>{text("scope")}</p>
-          <p>{text("tray_help")}</p>
           <input
             type="search"
             aria-label={text("search")}
@@ -269,10 +192,12 @@ const GamesWorlds = () => {
             value={query}
             onChange={(event) => set_query(event.target.value)}
           />
-          <ContenderList>
+          <ContenderList ref={themes_scroll}>
             {contenders.length ? (
               contenders.map((item) => (
-                <div key={item.id}>{card(item.id, true)}</div>
+                <div key={item.id} data-synset-id={item.id}>
+                  {card(item.id, true)}
+                </div>
               ))
             ) : (
               <p>{text("empty")}</p>

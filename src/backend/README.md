@@ -114,3 +114,6 @@ TilesBackend.start_mesh_transform submits a captured navigator region and level 
 TilesBackend.mesh_file retrieves the gzip mesh asset as an ArrayBuffer with service credentials and AbortSignal support. Preview decompression stays in the tile-preview adapter.
 
 TilesBackend.mesh_terrain requests the read-only runtime assembly manifest. mesh_url supplies authenticated worker asset URLs for the selected canonical tile files.
+
+`DataBackend.get_wordnet_mappings(signal)` retrieves the complete database mapping
+with credentials, cancellation and no HTTP caching for the worlds page.

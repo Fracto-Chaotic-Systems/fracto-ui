@@ -151,6 +151,26 @@ export const WORLD_CONTENDERS = [
     gloss: "an abstraction belonging to or characteristic of an entity",
   },
   {
+    id: "05203850",
+    label: "authority",
+    words: [
+      "authority",
+      "authorization",
+      "authorisation",
+      "potency",
+      "dominance",
+      "say-so",
+    ],
+    gloss:
+      'the power or right to give orders or make decisions; "he has the authority to issue warrants"; "deputies are given authorization to make arrests"; "a place of potency in the state"',
+  },
+  {
+    id: "14024516",
+    label: "autonomy",
+    words: ["autonomy", "self-direction", "self-reliance", "self-sufficiency"],
+    gloss: "personal independence",
+  },
+  {
     id: "05683749",
     label: "awareness",
     words: [
@@ -296,6 +316,13 @@ export const WORLD_CONTENDERS = [
       'the quality of being intricate and compounded; "he enjoyed the complexity of modern computers"',
   },
   {
+    id: "07194002",
+    label: "compromise",
+    words: ["compromise"],
+    gloss:
+      'an accommodation in which both sides make concessions; "the newly elected congressmen rejected a compromise because they considered it `business as usual\'"',
+  },
+  {
     id: "05844071",
     label: "concept",
     words: ["concept", "conception", "construct"],
@@ -314,6 +341,20 @@ export const WORLD_CONTENDERS = [
     words: ["conditioning"],
     gloss:
       "a learning process in which an organism's behavior becomes dependent on the occurrence of a stimulus in its environment",
+  },
+  {
+    id: "05705328",
+    label: "confidence",
+    words: [
+      "assurance",
+      "self-assurance",
+      "confidence",
+      "self-confidence",
+      "authority",
+      "sureness",
+    ],
+    gloss:
+      'freedom from doubt; belief in yourself and your abilities; "his assurance in his superiority did not make him popular"; "after that failure he lost his confidence"; "she spoke with authority"',
   },
   {
     id: "05833569",
@@ -335,6 +376,12 @@ export const WORLD_CONTENDERS = [
     words: ["connection", "connexion", "connectedness"],
     gloss:
       'a relation between things or events (as in the case of one causing the other or sharing features with it); "there was a connection between eating that pickle and having that nightmare"',
+  },
+  {
+    id: "06702412",
+    label: "consent",
+    words: ["consent"],
+    gloss: 'permission to do something; "he indicated his consent"',
   },
   {
     id: "07308725",
@@ -408,6 +455,13 @@ export const WORLD_CONTENDERS = [
       'value measured by what must be given or done or undergone to obtain something; "the cost in human life was enormous"; "the price of success is hard work"; "what price glory?"',
   },
   {
+    id: "04864314",
+    label: "courage",
+    words: ["courage", "courageousness", "bravery", "braveness"],
+    gloss:
+      "a quality of spirit that enables you to face danger or pain without showing fear",
+  },
+  {
     id: "06034695",
     label: "covariance",
     words: ["covariance"],
@@ -419,6 +473,12 @@ export const WORLD_CONTENDERS = [
     label: "creation",
     words: ["creation", "creative_activity"],
     gloss: "the human act of creating",
+  },
+  {
+    id: "05632483",
+    label: "creativity",
+    words: ["creativity", "creativeness", "creative_thinking"],
+    gloss: "the ability to create",
   },
   {
     id: "05741963",
@@ -825,6 +885,13 @@ export const WORLD_CONTENDERS = [
       'an event as apprehended; "a surprising experience"; "that painful experience certainly got our attention"',
   },
   {
+    id: "05806051",
+    label: "experiment",
+    words: ["experiment", "experimentation"],
+    gloss:
+      'the testing of an idea; "it was an experiment in living"; "not all experimentation is done in laboratories"',
+  },
+  {
     id: "05648574",
     label: "expertise",
     words: ["expertness", "expertise"],
@@ -907,6 +974,12 @@ export const WORLD_CONTENDERS = [
       'what something is used for; "the function of an auger is to bore holes"; "ballet is beautiful but what use is it?"',
   },
   {
+    id: "04838958",
+    label: "generosity",
+    words: ["generosity", "generousness"],
+    gloss: "the trait of being willing to give your money or time",
+  },
+  {
     id: "05989760",
     label: "goal",
     words: ["goal", "end"],
@@ -921,6 +994,13 @@ export const WORLD_CONTENDERS = [
       'that which is pleasing or valuable or useful; "weigh the good against the bad"; "among the highest goods of all are happiness and self-realization"',
   },
   {
+    id: "07519582",
+    label: "gratitude",
+    words: ["gratitude"],
+    gloss:
+      'a feeling of thankfulness and appreciation; "he was overwhelmed with gratitude for their help"',
+  },
+  {
     id: "07550398",
     label: "grief",
     words: ["grief", "heartache", "heartbreak", "brokenheartedness"],
@@ -932,6 +1012,12 @@ export const WORLD_CONTENDERS = [
     words: ["emergence", "outgrowth", "growth"],
     gloss:
       'the gradual beginning or coming forth; "figurines presage the emergence of sculpture in Greece"',
+  },
+  {
+    id: "07551633",
+    label: "guilt",
+    words: ["guilt", "guilty_conscience", "guilt_feelings", "guilt_trip"],
+    gloss: "remorse caused by feeling responsible for some offense",
   },
   {
     id: "07435370",
@@ -1083,6 +1169,13 @@ export const WORLD_CONTENDERS = [
     gloss: "the practice of being unjust or unfair",
   },
   {
+    id: "05805605",
+    label: "inquiry",
+    words: ["inquiry", "enquiry", "research"],
+    gloss:
+      'a search for knowledge; "their pottery deserves more research than it has received"',
+  },
+  {
     id: "05815314",
     label: "insight",
     words: ["insight", "brainstorm", "brainwave"],
@@ -1100,6 +1193,13 @@ export const WORLD_CONTENDERS = [
     words: ["consolidation", "integration"],
     gloss:
       'the act of combining into an integral whole; "a consolidation of two corporations"; "after their consolidation the two bills were passed unanimously"; "the defendants asked for a consolidation of the actions against them"',
+  },
+  {
+    id: "04876782",
+    label: "integrity",
+    words: ["integrity"],
+    gloss:
+      'moral soundness; "he expects to find in us the common honesty and integrity of men of business"; "they admired his scrupulous professional integrity"',
   },
   {
     id: "05043549",
@@ -1194,6 +1294,12 @@ export const WORLD_CONTENDERS = [
       'a generalization that describes recurring facts or events in nature; "the laws of thermodynamics"',
   },
   {
+    id: "01259004",
+    label: "leadership",
+    words: ["leadership", "leading"],
+    gloss: 'the activity of leading; "his leadership inspired the team"',
+  },
+  {
     id: "05760541",
     label: "learning",
     words: ["learning", "acquisition"],
@@ -1231,6 +1337,12 @@ export const WORLD_CONTENDERS = [
     words: ["love"],
     gloss:
       'a strong positive emotion of regard and affection; "his love for his work"; "children need a lot of love"',
+  },
+  {
+    id: "04884725",
+    label: "loyalty",
+    words: ["loyalty", "trueness"],
+    gloss: "the quality of being loyal",
   },
   {
     id: "05097645",
@@ -1315,6 +1427,13 @@ export const WORLD_CONTENDERS = [
       "(logic) a proposition that is true if and only if another proposition is false",
   },
   {
+    id: "01268857",
+    label: "negotiation",
+    words: ["negotiation"],
+    gloss:
+      "the activity or business of negotiating an agreement; coming to terms",
+  },
+  {
     id: "13876685",
     label: "norm",
     words: ["norm"],
@@ -1353,6 +1472,13 @@ export const WORLD_CONTENDERS = [
     label: "opposition",
     words: ["opposition", "oppositeness"],
     gloss: "the relation between opposed entities",
+  },
+  {
+    id: "00260894",
+    label: "optimization",
+    words: ["optimization", "optimisation"],
+    gloss:
+      'the act of rendering optimal; "the simultaneous optimization of growth and profitability"; "in an optimization problem we seek values of the variables that lead to an optimal value of the function that is to be optimized"; "to promote the optimization and diversification of agricultural products"',
   },
   {
     id: "08474004",
@@ -1620,6 +1746,12 @@ export const WORLD_CONTENDERS = [
       'the process of remembering (especially the process of recovering information by mental effort); "he has total recall of the episode"',
   },
   {
+    id: "01208317",
+    label: "reconciliation",
+    words: ["reconciliation", "rapprochement"],
+    gloss: "the reestablishing of cordial relations",
+  },
+  {
     id: "07357963",
     label: "recurrence",
     words: ["recurrence", "return"],
@@ -1800,10 +1932,30 @@ export const WORLD_CONTENDERS = [
     gloss: 'an ordered reference standard; "judging on a scale of 1 to 10"',
   },
   {
+    id: "05124253",
+    label: "scarcity",
+    words: ["scarcity", "scarceness"],
+    gloss: "a small and inadequate amount",
+  },
+  {
     id: "05683445",
     label: "self",
     words: ["self", "ego"],
     gloss: "your consciousness of your own identity",
+  },
+  {
+    id: "04869236",
+    label: "self-control",
+    words: [
+      "self-control",
+      "self-possession",
+      "possession",
+      "willpower",
+      "will_power",
+      "self-command",
+      "self-will",
+    ],
+    gloss: "the trait of resolutely controlling your own behavior",
   },
   {
     id: "07497091",

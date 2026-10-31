@@ -1,3 +1,4 @@
+import { useSearchParams } from "react-router-dom";
 import React, { Component } from "react";
 
 import SplitterLayout from "./utils/SplitterLayout.jsx";
@@ -34,17 +35,16 @@ const SIDEBAR_LIST = [
   },
   { section_code: SIDEBAR_BREAKER },
   {
-    title_key: KEY_GAMES_WORDNET,
-    section_code: GAMES_WORDNET,
-    right_pane: <GamesWordnet />,
-  },
-  { section_code: SIDEBAR_BREAKER },
-  {
     title_key: KEY_GAMES_WORLDS,
     section_code: GAMES_WORLDS,
     right_pane: <GamesWorlds />,
   },
   { section_code: SIDEBAR_BREAKER },
+  {
+    title_key: KEY_GAMES_WORDNET,
+    section_code: GAMES_WORDNET,
+    right_pane: <GamesWordnet />,
+  },
   {
     title_key: KEY_SIDEBAR_SETTINGS,
     section_code: GAMES_SETTINGS,
@@ -61,6 +61,7 @@ export class Games extends Component {
   state = { section_code: GAMES_OVERVIEW };
 
   sidebar_select = (section_code) => {
+    this.props.on_sidebar_select?.(section_code);
     AppSettings.on_settings_changed({
       [KEY_GAMES_SECTION]: section_code,
     });
@@ -68,8 +69,23 @@ export class Games extends Component {
   };
 
   componentDidMount() {
-    const section_code = AppSettings.get(KEY_GAMES_SECTION);
+    const section_code = this.props.synset_id
+      ? GAMES_WORDNET
+      : this.props.world_card
+        ? GAMES_WORLDS
+        : AppSettings.get(KEY_GAMES_SECTION);
     this.setState({ section_code });
+  }
+
+  componentDidUpdate(previous) {
+    if (this.props.synset_id && previous.synset_id !== this.props.synset_id) {
+      this.sidebar_select(GAMES_WORDNET);
+    } else if (
+      this.props.world_card &&
+      previous.world_card !== this.props.world_card
+    ) {
+      this.sidebar_select(GAMES_WORLDS);
+    }
   }
 
   render_left_pane = () => {
@@ -97,7 +113,13 @@ export class Games extends Component {
     );
     return (
       <styles.PaneWrapper>
-        {section ? section.right_pane : ""}
+        {section_code === GAMES_WORDNET ? (
+          <GamesWordnet synset_id={this.props.synset_id} />
+        ) : section ? (
+          section.right_pane
+        ) : (
+          ""
+        )}
       </styles.PaneWrapper>
     );
   };
@@ -116,4 +138,20 @@ export class Games extends Component {
   }
 }
 
-export default Games;
+const GamesRoute = () => {
+  const [params, set_params] = useSearchParams();
+  const on_sidebar_select = (section) => {
+    const next = new URLSearchParams(params);
+    if (section !== GAMES_WORDNET) next.delete("synset");
+    if (section !== GAMES_WORLDS) next.delete("card");
+    if (next.toString() !== params.toString()) set_params(next);
+  };
+  return (
+    <Games
+      synset_id={params.get("synset")}
+      world_card={params.get("card")}
+      on_sidebar_select={on_sidebar_select}
+    />
+  );
+};
+export default GamesRoute;

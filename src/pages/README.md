@@ -62,3 +62,9 @@ npm run build
 ```
 
 For page changes, manually check the affected route, sidebar selection, browser back/forward behavior, splitter resizing, persisted settings, and any backend-driven loading or error state.
+
+Games wraps its sidebar controller with router search parameters so theme synset
+links can open the WordNet reference directly. See games/README.md for details.
+
+Games also accepts `?card=N` to open all worlds and reveal its requested row
+after the database mappings load.
