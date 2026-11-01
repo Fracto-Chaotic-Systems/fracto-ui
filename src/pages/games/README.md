@@ -76,6 +76,17 @@ selection, long definitions, failure/retry, and scrolling.
 
 ## Worlds creative direction
 
+World names are now discussed case by case, favoring significant literary and
+cinematic references from mystery, science fiction and fantasy, including Harry
+Potter, LOTR, Star Trek and Star Wars. Fictional institutions, characters, objects
+and motifs may supply names when their narrative role connects to the theme.
+Historical places, general settings and abstract worlds are equally available.
+Prefer variety across franchises and retain provenance, variants and preference
+order in database notes; naming suggestions do not adopt a name or implement
+a proposed gameplay mechanic.
+See [the naming philosophy and unapproved examples](../../../../../database/seeds/README.md#current-naming-philosophy-literary-references-one-world-at-a-time)
+for the authoritative guidance. Keep world N until that individual name is chosen.
+
 The mapping is curated and allows creative interpretations of composite
 abstractions. The initial focus is the fundamental denominators, assigning
 more prominent and connectable archetypes to lower numeric values.
