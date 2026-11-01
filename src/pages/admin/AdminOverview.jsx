@@ -1,6 +1,5 @@
 import { Component } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import MarkdownDocument from "../../utils/ui/MarkdownDocument.jsx";
 import styled from "styled-components";
 
 import { MainStyles as styles } from "../../styles/MainStyles.jsx";
@@ -59,26 +58,6 @@ const DocumentationTreeWrapper = styled(CoolStyles.Block)`
   }
 `;
 
-const markdown_components = {
-  h1: MarkdownStyles.Heading1,
-  h2: MarkdownStyles.Heading2,
-  h3: MarkdownStyles.Heading3,
-  p: MarkdownStyles.Paragraph,
-  ul: MarkdownStyles.UnorderedList,
-  ol: MarkdownStyles.OrderedList,
-  li: MarkdownStyles.ListItem,
-  blockquote: MarkdownStyles.Blockquote,
-  a: MarkdownStyles.Link,
-  code: MarkdownStyles.InlineCode,
-  pre: MarkdownStyles.CodeBlock,
-  table: MarkdownStyles.Table,
-  thead: MarkdownStyles.TableHead,
-  th: MarkdownStyles.TableHeader,
-  tr: MarkdownStyles.TableRow,
-  td: MarkdownStyles.TableCell,
-  hr: MarkdownStyles.HorizontalRule,
-};
-
 export class AdminOverview extends Component {
   state = { selected_markdown: "" };
 
@@ -116,16 +95,9 @@ export class AdminOverview extends Component {
           </styles.ContentWrapper>
           <styles.ContentWrapper style={documentation_layout.markdown}>
             {selected_markdown ? (
-              <MarkdownStyles.Document
-                style={documentation_layout.markdown_text}
-              >
-                <ReactMarkdown
-                  components={markdown_components}
-                  remarkPlugins={[remarkGfm]}
-                >
-                  {selected_markdown}
-                </ReactMarkdown>
-              </MarkdownStyles.Document>
+              <MarkdownDocument style={documentation_layout.markdown_text}>
+                {selected_markdown}
+              </MarkdownDocument>
             ) : null}
           </styles.ContentWrapper>
         </styles.ContentWrapper>

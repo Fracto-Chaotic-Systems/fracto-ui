@@ -134,3 +134,11 @@ custom names, survive response adaptation and export.
 
 `node --test test/worlds_notes_data.test.js` verifies removal of obsolete note
 caches without reading them, plus expected-value saves and response validation.
+
+- `markdown_document.test.js` loads the real shared renderer and worlds notes
+  through Vite in middleware mode, checking matching reference typography,
+  heading sizes, lists/tables, component overrides, safe links, and explicit
+  trusted-HTML opt-in. Run from the UI directory with
+  `node --test test/markdown_document.test.js` (also supported in fracto-dev).
+
+`worlds_references.test.js` verifies valid world reference targets and preservation of source text, existing links and code.

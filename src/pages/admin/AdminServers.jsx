@@ -7,8 +7,7 @@ import { server_title, update_server_title } from "./AdminServerTitles.js";
 import { render_server_template } from "./AdminServersTemplate.js";
 export { render_server_template } from "./AdminServersTemplate.js";
 import { Component } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import MarkdownDocument from "../../utils/ui/MarkdownDocument.jsx";
 import styled from "styled-components";
 
 import { MainStyles as styles } from "../../styles/MainStyles.jsx";
@@ -207,25 +206,6 @@ const ServersTreeWrapper = styled(CoolStyles.Block)`
     cursor: pointer;
   }
 `;
-const markdown_components = {
-  h1: MarkdownStyles.Heading1,
-  h2: MarkdownStyles.Heading2,
-  h3: MarkdownStyles.Heading3,
-  p: MarkdownStyles.Paragraph,
-  ul: MarkdownStyles.UnorderedList,
-  ol: MarkdownStyles.OrderedList,
-  li: MarkdownStyles.ListItem,
-  blockquote: MarkdownStyles.Blockquote,
-  a: AdminServerTime,
-  code: MarkdownStyles.InlineCode,
-  pre: MarkdownStyles.CodeBlock,
-  table: MarkdownStyles.Table,
-  thead: MarkdownStyles.TableHead,
-  th: MarkdownStyles.TableHeader,
-  tr: MarkdownStyles.TableRow,
-  td: MarkdownStyles.TableCell,
-  hr: MarkdownStyles.HorizontalRule,
-};
 const STATUS_TEXT_KEYS = {
   ready: KEY_ADMIN_SERVERS_STATUS_READY,
   starting: KEY_ADMIN_SERVERS_STATUS_STARTING,
@@ -674,19 +654,15 @@ export class AdminServers extends Component {
                 </div>
               )}
               {markdown && (
-                <MarkdownStyles.Document
+                <MarkdownDocument
+                  components={{
+                    a: AdminServerTime,
+                    h1: this.render_server_title,
+                  }}
                   style={documentation_layout.markdown_text}
                 >
-                  <ReactMarkdown
-                    components={{
-                      ...markdown_components,
-                      h1: this.render_server_title,
-                    }}
-                    remarkPlugins={[remarkGfm]}
-                  >
-                    {markdown}
-                  </ReactMarkdown>
-                </MarkdownStyles.Document>
+                  {markdown}
+                </MarkdownDocument>
               )}
               {selected_server && (
                 <AdminServerClients

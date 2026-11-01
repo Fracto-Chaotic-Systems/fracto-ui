@@ -31,6 +31,13 @@ const text = (key) => AppText.get(WORLDS_TEXT[key]);
 
 const GamesWorlds = () => {
   const table_scroll = useRef(null);
+  const [note_expansions, set_note_expansions] = useState({});
+  const show_world_notes = (cardinality) => {
+    set_note_expansions((previous) => ({
+      ...previous,
+      [cardinality]: (previous[cardinality] ?? 0) + 1,
+    }));
+  };
   const themes_scroll = useRef(null);
   const [params] = useSearchParams();
   const requested_card = params.get("card");
@@ -53,6 +60,9 @@ const GamesWorlds = () => {
   const rows = Object.keys(mapping)
     .map(Number)
     .sort((a, b) => a - b);
+  const world_themes = Object.fromEntries(
+    Object.entries(associations).map(([card, item]) => [card, item.label]),
+  );
   const assigned_rows = Object.fromEntries(
     Object.entries(mapping).map(([row, id]) => [id, row]),
   );
@@ -122,7 +132,11 @@ const GamesWorlds = () => {
                 {rows.map((row) => {
                   const factors = prime_factorization(row);
                   return (
-                    <tr key={row} data-cardinality={row}>
+                    <tr
+                      key={row}
+                      id={`world-row-${row}`}
+                      data-cardinality={row}
+                    >
                       <td>{render_pattern_block(row, 25)}</td>
                       <td>
                         {factors.length
@@ -146,11 +160,27 @@ const GamesWorlds = () => {
                       <td>
                         <WorldsNotes
                           cardinality={row}
+                          world_cards={rows}
+                          world_themes={world_themes}
+                          on_world={show_world_notes}
+                          expand_request={note_expansions[row] ?? 0}
                           value={notes[row] ?? ""}
                           on_save={(value, expected) =>
                             save_note(row, value, expected)
                           }
                           on_reload={reload}
+                          on_expand={() => {
+                            const viewport = table_scroll.current;
+                            const header = viewport?.querySelector("thead");
+                            const height = Math.max(
+                              144,
+                              (viewport?.clientHeight ?? 400) -
+                                (header?.getBoundingClientRect().height ?? 0) -
+                                8,
+                            );
+                            requestAnimationFrame(() => show_assignment(row));
+                            return height;
+                          }}
                         />
                       </td>
                     </tr>

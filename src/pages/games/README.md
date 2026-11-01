@@ -14,8 +14,23 @@ Overview, Settings, and Status intentionally remain blank.
   layout reserves 105px and 120px for the numeric columns; the association column
   uses one quarter of the remaining width (half its former balanced share),
   leaving the rest for notes. Association content wraps within that width.
-- WorldsNotes.jsx renders each row's controlled editable notes; GamesWorlds
-  saves edits to the database on blur; useWorldsData owns server loading and saving.
+- WorldsNotes.jsx renders compact, scrollable Markdown previews with an edit
+  control for raw Markdown. A reserved 28px rail inside the notes cell stacks
+  expand/collapse above a mode-switch icon, both with accessible labels. The mode switch
+  shows only view (eye) while editing or edit (pen) while viewing.
+  Switching to view saves the draft; expanding retains the current mode.
+  Expanded previews reveal the full note with at least a viewport-sized height,
+  while editors grow to the available viewport height. GamesWorlds measures the
+  viewport and scrolls only the table to the row beneath its sticky header after
+  expansion. Collapsing restores the compact height. Expansion is local UI state,
+  not a database edit. Moving focus to rail controls does not trigger blur-save. Leaving the editor saves through the existing
+  expected-value API; failed saves retain the draft and retry/reload controls.
+  useWorldsData owns server loading and saving. The shared MarkdownDocument
+  renderer supplies the same typography as admin/reference, including distinct
+  heading sizes, lists, links, code and tables. Raw HTML is skipped and links open
+  separately with safe URL handling. NotesPreview extends the shared document
+  with scrolling, height, a white background and 0.5rem padding. Mapping-table selectors target direct cells
+  so they cannot override tables embedded in Markdown. CSV retains Markdown source.
 - WorldsCard.jsx renders static rectangular sense cards.
   In the association column, cards display `word: short definition`, using the
   first semicolon-delimited gloss clause to omit examples. The word and colon
@@ -104,7 +119,7 @@ prime-power factorizations are calculated from each database cardinality.
 Associations remain read-only. The static contender tray stays searchable and its
 assigned labels reflect database placements. Existing browser mapping and proposal
 version settings no longer control the table. Notes come exclusively from the database. Editing creates only a temporary
-in-memory draft; leaving the field saves it through the notes API with the original
+in-memory Markdown draft; leaving the field saves it through the notes API with the original
 server text as an optimistic concurrency check. Failed edits remain visible with
 retry and reload-server controls. No notes are saved in AppSettings or localStorage;
 obsolete note cache keys are removed when the page loads. Returning focus to the
@@ -340,3 +355,9 @@ from the database. It shows a busy state during refresh; the table and CSV then
 use the latest committed values.
 
 CSV download is an icon link with a download CSV tooltip and accessible label.
+
+## Browser world references
+
+WorldsReferences.js decorates parsed notes prose references (`#68`, `world 68`, or `world #68`) for cardinalities present in the table, excluding existing links and code. Clicking expands destination notes and scrolls the table after layout. Repeated clicks re-expand collapsed destinations. Saved Markdown, drafts and CSV remain unchanged.
+
+When the referenced number is followed by its database theme label, the entire reference (for example `#17 space`) forms one link. Matching is case-insensitive with a word boundary, so unrelated following prose is not included.

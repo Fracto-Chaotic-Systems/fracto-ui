@@ -130,3 +130,9 @@ activity and expiry. Times use relative display with full hover dates. These
 are unexpired login sessions, not online-presence or tab counts. Auth-disabled
 anonymous browsers do not create rows. Logout, expiration or restart removes
 sessions; no session tokens, emails or provider identities are returned.
+
+All admin Markdown panels use `utils/ui/MarkdownDocument.jsx`, which centralizes
+parsing and the original reference typography. Reference and overview use its
+default renderers. Servers retain custom title/timestamp renderers; social retains
+its custom document wrapper, link interactions and trusted raw-HTML media markup.
+Feature panels own scrolling and layout rather than duplicating Markdown styling.

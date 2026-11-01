@@ -1,9 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import ReactMarkdown from "react-markdown";
+import MarkdownDocument from "../../utils/ui/MarkdownDocument.jsx";
 import ReactTimeAgo from "react-time-ago";
-import rehypeRaw from "rehype-raw";
-import remarkGfm from "remark-gfm";
 import styled from "styled-components";
 
 import { MainStyles as styles } from "../../styles/MainStyles.jsx";
@@ -147,26 +145,6 @@ const SocialMarkdownDocument = styled(MarkdownStyles.Document)`
     }
   }
 `;
-
-const markdown_components = {
-  h1: MarkdownStyles.Heading1,
-  h2: MarkdownStyles.Heading2,
-  h3: MarkdownStyles.Heading3,
-  p: MarkdownStyles.Paragraph,
-  ul: MarkdownStyles.UnorderedList,
-  ol: MarkdownStyles.OrderedList,
-  li: MarkdownStyles.ListItem,
-  blockquote: MarkdownStyles.Blockquote,
-  a: MarkdownStyles.Link,
-  code: MarkdownStyles.InlineCode,
-  pre: MarkdownStyles.CodeBlock,
-  table: MarkdownStyles.Table,
-  thead: MarkdownStyles.TableHead,
-  th: MarkdownStyles.TableHeader,
-  tr: MarkdownStyles.TableRow,
-  td: MarkdownStyles.TableCell,
-  hr: MarkdownStyles.HorizontalRule,
-};
 
 /**
  * Administrative entry point for Fracto's public communication workspace.
@@ -344,10 +322,14 @@ export class AdminSocial extends Component {
         <styles.SectionTitle>
           {AppText.get(KEY_ADMIN_SOCIAL_PAGE_TITLE)}
         </styles.SectionTitle>
-        <CoolStyles.Block style={{ textAlign: "right", margin: "0.25rem 1rem" }}>
+        <CoolStyles.Block
+          style={{ textAlign: "right", margin: "0.25rem 1rem" }}
+        >
           <CoolButton
             content={AppText.get(
-              refreshing ? KEY_ADMIN_SOCIAL_REFRESHING : KEY_ADMIN_SOCIAL_REFRESH,
+              refreshing
+                ? KEY_ADMIN_SOCIAL_REFRESHING
+                : KEY_ADMIN_SOCIAL_REFRESH,
             )}
             on_click={this.refresh_documents}
             disabled={refreshing}
@@ -356,7 +338,8 @@ export class AdminSocial extends Component {
         {sync_status && (
           <CoolStyles.Block
             style={{
-              color: sync_status.error || sync_status.stale ? "#9a5b00" : "#666666",
+              color:
+                sync_status.error || sync_status.stale ? "#9a5b00" : "#666666",
               fontSize: "0.75rem",
               fontStyle: "italic",
               margin: "0 1rem 0.25rem",
@@ -365,7 +348,8 @@ export class AdminSocial extends Component {
           >
             {sync_status.error ? (
               <>
-                {AppText.get(KEY_ADMIN_SOCIAL_REFRESH_WARNING)}: {sync_status.error}
+                {AppText.get(KEY_ADMIN_SOCIAL_REFRESH_WARNING)}:{" "}
+                {sync_status.error}
               </>
             ) : sync_status.stale ? (
               AppText.get(KEY_ADMIN_SOCIAL_STALE)
@@ -406,7 +390,7 @@ export class AdminSocial extends Component {
           </styles.CenteredBlock>
         )}
         {!loading && !error && (
-            <styles.ContentWrapper style={styles_social.content}>
+          <styles.ContentWrapper style={styles_social.content}>
             <styles.ContentWrapper style={styles_social.list}>
               <SocialTreeWrapper>
                 <CoolTree
@@ -424,7 +408,10 @@ export class AdminSocial extends Component {
               </SocialTreeWrapper>
             </styles.ContentWrapper>
             <styles.ContentWrapper style={styles_social.document}>
-              <SocialMarkdownDocument
+              <MarkdownDocument
+                document_component={SocialMarkdownDocument}
+                allow_html
+                components={{ a: this.render_document_link }}
                 style={styles_social.document_text}
                 className={
                   selected_document?.path?.includes("/media/")
@@ -433,17 +420,8 @@ export class AdminSocial extends Component {
                 }
                 onClick={this.on_markdown_click}
               >
-                <ReactMarkdown
-                  components={{
-                    ...markdown_components,
-                    a: this.render_document_link,
-                  }}
-                  remarkPlugins={[remarkGfm]}
-                  rehypePlugins={[rehypeRaw]}
-                >
-                  {selected_document?.content || ""}
-                </ReactMarkdown>
-              </SocialMarkdownDocument>
+                {selected_document?.content || ""}
+              </MarkdownDocument>
             </styles.ContentWrapper>
           </styles.ContentWrapper>
         )}

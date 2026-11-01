@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import MarkdownStyles from "../../utils/ui/styles/MarkdownStyles.jsx";
 
 export const WorldsLayout = styled.div`
   display: flex;
@@ -36,39 +37,39 @@ export const MappingTable = styled.table`
   table-layout: fixed;
   text-align: left;
   font-size: 0.9rem;
-  th {
+  > thead > tr > th {
     position: sticky;
     top: 0;
     z-index: 1;
     background: #eeeeee;
   }
-  th,
-  td {
+  > thead > tr > th,
+  > tbody > tr > td {
     box-sizing: border-box;
     padding: 0.25rem 0.75rem;
     border-bottom: 1px solid #dddddd;
   }
-  th:first-child {
+  > thead > tr > th:first-child {
     width: 105px;
   }
-  th:nth-child(2) {
+  > thead > tr > th:nth-child(2) {
     width: 120px;
   }
-  th:nth-child(3) {
+  > thead > tr > th:nth-child(3) {
     width: 20%;
   }
-  th:nth-child(4) {
+  > thead > tr > th:nth-child(4) {
     width: 10%;
   }
-  td:nth-child(4) {
+  > tbody > tr > td:nth-child(4) {
     overflow-wrap: anywhere;
   }
-  th:nth-child(-n + 2),
-  td:nth-child(-n + 2) {
+  > thead > tr > th:nth-child(-n + 2),
+  > tbody > tr > td:nth-child(-n + 2) {
     text-align: center;
     vertical-align: middle;
   }
-  td:nth-child(2) {
+  > tbody > tr > td:nth-child(2) {
     font-family: monospace;
     font-size: 1.1rem;
     white-space: normal;
@@ -180,5 +181,56 @@ export const RefreshButton = styled.button`
   &:focus-visible {
     outline: 2px solid #446b91;
     outline-offset: 2px;
+  }
+`;
+
+// Bound long editorial notes so the mapping table remains easy to scan.
+export const NotesPreview = styled(MarkdownStyles.Document)`
+  background: #ffffff;
+  padding: 0.5rem;
+  box-sizing: border-box;
+  min-height: ${({ $expandedHeight }) => ($expandedHeight ? `${$expandedHeight}px` : "4.05em")};
+  max-height: ${({ $expandedHeight }) => ($expandedHeight ? "none" : "9rem")};
+  overflow: auto;
+`;
+
+export const NotesLayout = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+`;
+export const NotesContent = styled.div`
+  flex: 1;
+  min-width: 0;
+`;
+export const NotesControls = styled.div`
+  flex: 0 0 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+`;
+export const NotesIconButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: transparent;
+  color: #446b91;
+  cursor: pointer;
+  &[aria-pressed="true"],
+  &:hover {
+    background: #e4edf5;
+  }
+  &:focus-visible {
+    outline: 2px solid #446b91;
+    outline-offset: 1px;
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: wait;
   }
 `;
