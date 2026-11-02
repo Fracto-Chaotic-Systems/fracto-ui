@@ -81,6 +81,13 @@ export const MUSIC_TEXT = Object.fromEntries(
     "file_read_failed",
     "file_too_large",
     "sample_load_failed",
+    "catalog_unavailable",
+    "instrument_coverage",
+    "instrument_assets_unavailable",
+    "instrument_not_enabled",
+    "instrument_availability_help",
+
+    "sample_integrity_unavailable",
     "invalid_sample",
     "sample_memory_limit",
     "unsupported_pitch",
@@ -221,6 +228,11 @@ export const APP_GAMES_TEXT = {
     "Select a track label for its details. Scroll to explore the timeline; zoom in for note detail.",
   [MUSIC_TEXT.conductor_tracks]: "{count} conductor or empty tracks",
 
+  [MUSIC_TEXT.instrument_coverage]: "Unsupported notes on this track",
+  [MUSIC_TEXT.instrument_assets_unavailable]: "Audio unavailable",
+  [MUSIC_TEXT.instrument_not_enabled]: "Not enabled for playback",
+  [MUSIC_TEXT.instrument_availability_help]:
+    "Unavailable instruments are listed for reference. Only enabled sources that support every note on this track can be selected.",
   [MUSIC_TEXT.open]: "Open MIDI",
   [MUSIC_TEXT.play]: "Play",
   [MUSIC_TEXT.stop]: "Stop",
@@ -243,14 +255,18 @@ export const APP_GAMES_TEXT = {
     "The file could not be read. Try opening it again.",
   [MUSIC_TEXT.file_too_large]:
     "The MIDI file is too large. Choose a file up to 8 MiB.",
+  [MUSIC_TEXT.sample_integrity_unavailable]:
+    "Instrument audio verification requires HTTPS or localhost.",
+  [MUSIC_TEXT.catalog_unavailable]:
+    "The instrument library is unavailable. Existing piano playback remains available.",
   [MUSIC_TEXT.sample_load_failed]:
     "An instrument sample could not be loaded. Check your connection and press Play to retry.",
   [MUSIC_TEXT.invalid_sample]:
-    "An instrument sample could not be decoded. Press Play to retry.",
+    "An instrument sample failed verification or decoding. Press Play to retry.",
   [MUSIC_TEXT.sample_memory_limit]:
     "This song needs more instrument sample memory than the player supports. Choose a smaller song.",
   [MUSIC_TEXT.unsupported_pitch]:
-    "This song includes notes outside piano pitches 21–108. Choose a file within this range.",
+    "The selected instrument does not support every pitch in this song. Choose another instrument or file.",
   [MUSIC_TEXT.unsupported_percussion]:
     "This song includes a percussion channel. Choose a MIDI file without percussion.",
   [MUSIC_TEXT.invalid_velocity]:
@@ -268,7 +284,7 @@ export const APP_GAMES_TEXT = {
   [MUSIC_TEXT.trailing_bytes_ignored]:
     "{count} extra bytes after the MIDI tracks were ignored.",
   [MUSIC_TEXT.sample_shorter_than_note]:
-    "{count} long notes exceed their piano sample length and will fade before their MIDI release.",
+    "{count} long notes exceed their instrument sample length and will end before their MIDI release.",
   [KEY_GAMES_MUSIC]: "music",
   [KEY_GAMES_MUSIC_TITLE]: "All Music",
   [WORLDS_TEXT.show_card]: "show card",

@@ -37,6 +37,9 @@ export default function GamesMusic() {
       </styles.SectionTitle>
       <MusicPanel aria-label={AppText.get(KEY_GAMES_MUSIC_TITLE)}>
         <p>{text("help")}</p>
+        {player.catalog.status === "error" && (
+          <p>{text("catalog_unavailable")}</p>
+        )}
         <input
           ref={input}
           type="file"
@@ -90,6 +93,7 @@ export default function GamesMusic() {
             mix={player.mix}
             set_mix={player.set_mix}
             reset_mix={player.reset_mix}
+            catalog={player.catalog}
             instruments={player.instruments}
             set_instrument={player.set_instrument}
           />

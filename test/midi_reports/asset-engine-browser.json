@@ -1,0 +1,39 @@
+{
+  "verified_date": "2026-11-02",
+  "pass": true,
+  "server_entries": 21,
+  "test_only_prepared_source_opt_in": true,
+  "product_sources_still_disabled": true,
+  "native_sample_rate": 48000,
+  "native_decoded_sample_rate": 48000,
+  "shared_native_buffers": 1,
+  "simultaneous_voices": 4,
+  "chunk_fetches": 1,
+  "active": {
+    "rms": 0.03068021621483463,
+    "peak": 0.10794176161289215,
+    "samples": 19200
+  },
+  "after_stop": {
+    "rms": 0,
+    "peak": 0,
+    "samples": 15360
+  },
+  "after_note_boundary": {
+    "rms": 0,
+    "peak": 0,
+    "samples": 17280
+  },
+  "bounded_note_seconds": 7.87,
+  "hardware_duration_seconds": 7.870000000000001,
+  "next_pitch_bleed": false,
+  "natural_completion": true,
+  "replay": true,
+  "cleanup": {
+    "pending_frames": 0,
+    "pending_intervals": 0,
+    "open_contexts": 0,
+    "connected_product_nodes": 0,
+    "source_callbacks": 0
+  }
+}

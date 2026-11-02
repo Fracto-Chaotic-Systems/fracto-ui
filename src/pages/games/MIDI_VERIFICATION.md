@@ -1,5 +1,9 @@
 # MIDI samples and parser verification
 
+Current asset migration verification: [music/ASSET_MIGRATION.md](music/ASSET_MIGRATION.md).
+The final 2026-11-02 runs supersede earlier browser-access and zoom failures.
+All 103 MIDI tests and the full page and native flute browser suites pass.
+
 Verified November 2, 2026. The results below record import-plan step 1.
 Step 2 has since added the validating adapter in [music/](music/README.md);
 the playback controller has since been added as well. The All Music page controls have now been integrated too.
@@ -404,3 +408,50 @@ artifact `midi-verification/final-interface/corpus-results.json`.
 Resume with the README harness command, a visible tab, and Run playback
 verification; confirm `pass: true` plus zero cleanup counts, then update this
 report with the resulting audio/rendering measurements.
+
+
+## Asset-server engine connection (2026-11-02)
+
+`MidiInstrumentCatalog.js` discovers `/instruments` using the runtime asset service
+origin, session credentials, cancellation and an eight-second timeout. It preserves
+production `/api/asset` proxy prefixes and accepts configured public audio URLs.
+Only enabled, available entries become providers; prepared-source opt-in exists
+solely for verification. GrandB remains the fallback. Library sources use `asset-`
+provider IDs; no program mapping is inferred from instrument names. Instrument
+selector population is the next migration step.
+
+Catalog providers validate mono PCM16 octave assets, coverage, note boundaries,
+versioned URLs and velocity layers. `MidiSampleAsset.js` verifies encoded size and
+SHA-256 before decoding (Web Crypto requires HTTPS or localhost). Shared chunks
+are fetched/decoded once, with credentials; legacy S3 requests omit credentials.
+The cache estimates decoded memory at the actual context sample rate before
+fetching and enforces its 256 MiB limit. Oversized songs fail explicitly.
+
+Each voice starts at its pitch offset plus elapsed lateness, and passes an explicit
+bounded duration to AudioBufferSourceNode.start. Sustained notes cannot continue
+into the next pitch; samples do not loop. Replay reuses chunks. Stop, replacement,
+failed preparation and disposal cancel work and discard late results. Catalog
+refresh preserves mix/compatible assignments, clears stale provider caches and
+stops playback only when provider identity changes. Discovery errors retain the
+fallback and display a nonblocking message; discovery never opens audio devices.
+
+Verification: 99 MIDI tests pass, targeted lint and production build pass. The
+real-library HTTP probe resolves all 1,999 mappings across 21 entries. A visible
+browser decoded one flute chunk at 48 kHz for four voices: captured RMS 0.03068,
+exact silence after Stop and after the 7.87-second pitch boundary, replay and
+natural completion, and zero remaining tracked resources after disposal.
+All asset-server sources remain disabled; this single-source verification does
+not certify every instrument or change the production selection gate.
+
+Additional browser regression run (2026-11-02): the full playback harness stopped
+at TrackChecks “Zoom did not enlarge timeline” before its audio checks. This
+run does not establish a pass for the broader rendering suite. The independent
+asset-engine browser check above passed.
+
+
+Step 6 catalog assignment: 102 MIDI tests, targeted ESLint and production build
+passed. Catalog choice coverage includes disabled inventory, exact provider names,
+missing audio, pitch/percussion coverage and fallback. Browser rendering could
+not be checked: the tool returned `browser.user is unavailable`. All prepared
+sources remain disabled; no library enablement or additional audio certification
+is claimed by this step.

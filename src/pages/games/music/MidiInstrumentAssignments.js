@@ -20,6 +20,20 @@ export default class MidiInstrumentAssignments {
     );
     return this.assignments;
   }
+  replace_registry(registry) {
+    this.registry = registry;
+    this.assignments = Object.freeze(
+      Object.fromEntries(
+        [...this.routes].map(([id, notes]) => [
+          id,
+          registry.can_assign(notes, this.assignments[id])
+            ? this.assignments[id]
+            : DEFAULT_INSTRUMENT,
+        ]),
+      ),
+    );
+    return this.assignments;
+  }
   can_set(id, selection) {
     const notes = this.routes.get(id);
     return !!notes && this.registry.can_assign(notes, selection);

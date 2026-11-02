@@ -1,0 +1,52 @@
+import { DEFAULT_INSTRUMENT, ORIGINAL_INSTRUMENT } from "./MidiInstruments.js";
+
+export const instrument_label = (provider, text) =>
+  provider.name ?? text(provider.label_key);
+
+// The registry is the authority for playability; inventory never enables a source.
+export function instrument_choices(notes, registry, catalog) {
+  const choices = Object.values(registry.providers).map((provider) => ({
+    id: provider.id,
+    name: provider.name,
+    label_key: provider.label_key,
+    reason: registry.can_assign(notes, provider.id)
+      ? null
+      : "instrument_coverage",
+  }));
+  const ids = new Set(choices.map((choice) => choice.id));
+  for (const item of catalog?.instruments ?? []) {
+    const id = `asset-${item.id}`;
+    if (ids.has(id)) continue;
+    choices.push({
+      id,
+      name: item.name,
+      reason: !item.available
+        ? "instrument_assets_unavailable"
+        : "instrument_not_enabled",
+    });
+  }
+  return choices;
+}
+
+export function effective_instrument(
+  notes,
+  selection = DEFAULT_INSTRUMENT,
+  registry,
+  text,
+) {
+  if (!registry.can_assign(notes, selection))
+    return text("instrument_not_playable");
+  const ids =
+    selection === ORIGINAL_INSTRUMENT
+      ? [
+          ...new Set(
+            notes.map(
+              (note) => registry.resolve(note, selection).instrument_id,
+            ),
+          ),
+        ]
+      : [selection];
+  return ids
+    .map((id) => instrument_label(registry.providers[id], text))
+    .join(", ");
+}

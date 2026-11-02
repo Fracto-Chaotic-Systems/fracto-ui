@@ -1,8 +1,18 @@
+import { createRequire } from "node:module";
+import { create_instrument_router } from "../../../fracto-asset-server/handlers/instruments.js";
 import http from "node:http";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { build } from "vite";
+const require = createRequire(
+  new URL("../../../fracto-asset-server/package.json", import.meta.url),
+);
+const asset_app = require("express")();
+asset_app.use(
+  "/api/asset/instruments",
+  create_instrument_router({ public_url: "" }),
+);
 const directory = path.dirname(fileURLToPath(import.meta.url));
 if (!process.argv[2] || !path.isAbsolute(process.argv[2]))
   throw new Error("Supply an absolute output directory.");
@@ -21,9 +31,35 @@ await fs.copyFile(
 http
   .createServer(async (req, res) => {
     try {
+      if (req.url === "/api/admin/ports") {
+        res.setHeader("Content-Type", "application/json");
+        res.end(
+          JSON.stringify({
+            ports: {
+              main: 3001,
+              data: 3002,
+              asset: 3003,
+              tiles: 3004,
+              admin: 3005,
+            },
+          }),
+        );
+        return;
+      }
+      if (req.url.startsWith("/api/asset/instruments")) {
+        asset_app(req, res);
+        return;
+      }
       if (
         req.method === "POST" &&
-        ["/report", "/audio", "/mixer_audio"].includes(req.url)
+        [
+          "/report",
+          "/audio",
+          "/mixer_audio",
+          "/library_report",
+          "/asset_report",
+          "/asset_audio",
+        ].includes(req.url)
       ) {
         let length = 0;
         const chunks = [];
@@ -35,11 +71,14 @@ http
         await fs.writeFile(
           path.join(
             output,
-            req.url === "/report"
-              ? "browser-results.json"
-              : req.url === "/mixer_audio"
-                ? "mixer-playback.wav"
-                : "playback.wav",
+            {
+              "/report": "browser-results.json",
+              "/audio": "playback.wav",
+              "/mixer_audio": "mixer-playback.wav",
+              "/library_report": "library-browser-results.json",
+              "/asset_report": "asset-engine-results.json",
+              "/asset_audio": "asset-engine-playback.wav",
+            }[req.url],
           ),
           Buffer.concat(chunks),
         );

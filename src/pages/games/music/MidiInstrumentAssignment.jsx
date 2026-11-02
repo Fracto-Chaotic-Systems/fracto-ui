@@ -6,6 +6,11 @@ import {
   DEFAULT_INSTRUMENT,
   ORIGINAL_INSTRUMENT,
 } from "./MidiInstruments.js";
+import {
+  instrument_choices,
+  instrument_label,
+  effective_instrument,
+} from "./MidiInstrumentChoices.js";
 import { timeline_time } from "./MidiTrackGeometry.js";
 
 const text = (key, values = {}) => {
@@ -19,34 +24,22 @@ function MidiInstrumentAssignment({
   assignments,
   on_change,
   program_changes,
+  catalog,
 }) {
   const selection = assignments[row.id] ?? DEFAULT_INSTRUMENT;
+  const registry = catalog?.registry ?? INSTRUMENT_REGISTRY;
   const original_available = useMemo(
-    () => INSTRUMENT_REGISTRY.can_assign(row.notes, ORIGINAL_INSTRUMENT),
-    [row.notes],
+    () => registry.can_assign(row.notes, ORIGINAL_INSTRUMENT),
+    [registry, row.notes],
   );
   const choices = useMemo(
-    () =>
-      Object.values(INSTRUMENT_REGISTRY.providers).map((provider) => ({
-        provider,
-        available: INSTRUMENT_REGISTRY.can_assign(row.notes, provider.id),
-      })),
-    [row.notes],
+    () => instrument_choices(row.notes, registry, catalog?.catalog),
+    [row.notes, registry, catalog?.catalog],
   );
-  const effective = useMemo(() => {
-    if (!INSTRUMENT_REGISTRY.can_assign(row.notes, selection))
-      return text("instrument_not_playable");
-    const ids = [
-      ...new Set(
-        row.notes.map(
-          (note) => INSTRUMENT_REGISTRY.resolve(note, selection).instrument_id,
-        ),
-      ),
-    ];
-    return ids
-      .map((id) => text(INSTRUMENT_REGISTRY.providers[id].label_key))
-      .join(", ");
-  }, [row.notes, selection]);
+  const effective = useMemo(
+    () => effective_instrument(row.notes, selection, registry, text),
+    [row.notes, selection, registry],
+  );
   const history = useMemo(
     () => program_changes.filter((event) => event.channel === row.channel),
     [program_changes, row.channel],
@@ -77,9 +70,14 @@ function MidiInstrumentAssignment({
                 : "instrument_original_unavailable",
             )}
           </option>
-          {choices.map(({ provider, available }) => (
-            <option key={provider.id} value={provider.id} disabled={!available}>
-              {text(provider.label_key)}
+          {choices.map((choice) => (
+            <option
+              key={choice.id}
+              value={choice.id}
+              disabled={!!choice.reason}
+            >
+              {instrument_label(choice, text)}
+              {choice.reason ? ` · ${text(choice.reason)}` : ""}
             </option>
           ))}
         </select>
@@ -96,6 +94,9 @@ function MidiInstrumentAssignment({
       <p>{text("instrument_effective", { name: effective })}</p>
       {!original_available && <p>{text("instrument_original_help")}</p>}
       <p>{text("instrument_change_help")}</p>
+      {choices.some((choice) => choice.reason) && (
+        <p>{text("instrument_availability_help")}</p>
+      )}
       <details style={{ marginTop: "0.6rem" }}>
         <summary>
           {text("instrument_program_history", { count: history.length })}

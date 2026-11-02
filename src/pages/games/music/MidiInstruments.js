@@ -36,7 +36,8 @@ export function create_instrument_registry(definitions) {
     !!provider &&
     (provider.percussion ? note.channel === 9 : note.channel !== 9) &&
     note.pitch >= provider.min_pitch &&
-    note.pitch <= provider.max_pitch;
+    note.pitch <= provider.max_pitch &&
+    (!provider.supports_note || provider.supports_note(note));
   const original = (note) => {
     // Only standard-bank mappings are verified. A numbered GM program alone
     // must not silently reinterpret a bank-select or percussion assignment.
@@ -49,6 +50,14 @@ export function create_instrument_registry(definitions) {
   };
   return Object.freeze({
     providers,
+    signature: JSON.stringify(
+      Object.values(providers).map((provider) => [
+        provider.id,
+        provider.version,
+        provider.programs,
+        provider.source_identity ?? null,
+      ]),
+    ),
     can_assign(notes, selection) {
       return (
         notes.length > 0 &&

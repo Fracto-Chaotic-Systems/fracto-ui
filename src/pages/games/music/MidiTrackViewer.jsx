@@ -34,6 +34,7 @@ function MidiTrackViewer({
   reset_mix,
   instruments,
   set_instrument,
+  catalog,
 }) {
   const model = useMemo(() => build_midi_display_model(song), [song]);
   const rows = useMemo(
@@ -161,6 +162,7 @@ function MidiTrackViewer({
         row={detail}
         mix={mix}
         on_change={set_mix}
+        catalog={catalog}
         instruments={instruments}
         set_instrument={set_instrument}
         program_changes={song.program_changes}

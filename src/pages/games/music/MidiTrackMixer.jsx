@@ -44,6 +44,7 @@ function MidiTrackMixer({
   on_change,
   instruments,
   set_instrument,
+  catalog,
   program_changes,
 }) {
   if (!row) return <p style={{ fontSize: "0.8rem" }}>{text("select_mix")}</p>;
@@ -121,6 +122,7 @@ function MidiTrackMixer({
       <MidiInstrumentAssignment
         key={row.id}
         row={row}
+        catalog={catalog}
         assignments={instruments}
         on_change={set_instrument}
         program_changes={program_changes}

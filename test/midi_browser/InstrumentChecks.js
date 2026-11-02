@@ -87,10 +87,30 @@ export async function verify_instruments(until) {
   );
   choose();
   await select_route(until);
-  check(
-    choice().value === "grandb" && choice().options.length === 2,
-    "Only verified piano and original should be listed",
+  const response = await fetch("/api/asset/instruments", {
+    credentials: "include",
+  });
+  check(response.ok, "Catalog unavailable in assignment verification");
+  const catalog = await response.json();
+  await until(
+    () => choice()?.options.length === catalog.instruments.length + 2,
+    "catalog instrument options",
   );
+  check(
+    choice().value === "grandb",
+    "Discovery changed the default assignment",
+  );
+  for (const item of catalog.instruments) {
+    const option = [...choice().options].find(
+      (option) => option.value === `asset-${item.id}`,
+    );
+    check(
+      option &&
+        option.disabled === !(item.enabled && item.available) &&
+        option.textContent.includes(item.name),
+      "Inventory name or playback availability differs from catalog",
+    );
+  }
   check(
     !choice().querySelector('[value="original"]').disabled,
     "Piano original assignment unavailable",
@@ -138,6 +158,36 @@ export async function verify_instruments(until) {
   change("grandb");
   await sleep(50);
   check(status() !== "Playing.", "Override change did not stop");
+  let catalog_sound_selected = false;
+  const flute = [...choice().options].find(
+    (option) => option.value === "asset-flute",
+  );
+  if (flute && !flute.disabled) {
+    change("asset-flute");
+    await sleep(50);
+    check(
+      panel().textContent.includes("Playback sound: Flute"),
+      "Catalog effective name missing",
+    );
+    button("Play").click();
+    await until(() => status() === "Playing.", "catalog instrument playback");
+    const began = context.currentTime;
+    await until(
+      () => context.currentTime >= began + 0.35,
+      "catalog audio clock",
+    );
+    await until(
+      () => rms(context, began + 0.1, began + 0.25).samples > 0,
+      "catalog capture",
+    );
+    check(
+      rms(context, began + 0.1, began + 0.25).rms > 0.00001,
+      "Selected catalog source was silent",
+    );
+    change("grandb");
+    await sleep(50);
+    catalog_sound_selected = true;
+  }
   choose(12);
   await select_route(until);
   check(
@@ -166,7 +216,10 @@ export async function verify_instruments(until) {
     mixer_preserved: true,
     unsupported_original_disabled: true,
     bank_checked: true,
-    verified_choices_only: true,
+    playable_choices_verified_only: true,
+    catalog_entries_rendered: catalog.instruments.length,
+    availability_matches_catalog: true,
+    catalog_sound_selected,
     context_after_unmount: context.state,
   };
 }

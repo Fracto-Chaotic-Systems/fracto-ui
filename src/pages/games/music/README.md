@@ -1,5 +1,19 @@
 # MIDI playback modules
 
+Current playback status (2026-11-02): **all 21 instruments are enabled** after
+75 native Chromium decode/render probes (low/middle/high pitches of every
+recording layer) passed through the sample cache and voice engine at 48 kHz.
+The catalog marks them playback_verified; detailed evidence is recorded in
+browser-verification.json in the asset-server instruments directory. Earlier
+disabled/pending statements below describe the initial migration stages.
+Native probes confirm signal output, not a subjective listening review.
+Reload All Music to fetch the updated catalog. A source can still be disabled
+for a track containing notes outside that instrument's verified pitch range.
+
+
+Current migration results and setup: [ASSET_MIGRATION.md](ASSET_MIGRATION.md).
+Earlier step reports below are historical; final browser verification now passes.
+
 `MidiEvents.js` exposes `events_from_midi(ArrayBuffer | Uint8Array)` and
 `MidiFileError`, without React, audio devices, network requests or UI state.
 `MidiValidation.js` bounds input before calling the legacy parser (8 MiB,
@@ -324,3 +338,62 @@ The S3 instrument directory listing returned 403 during discovery; no additional
 sound source or redistribution rights were established, and no assets were copied.
 
 Step 6 validation: 79 MIDI tests, targeted lint, production and harness builds pass; all 190 legacy files retain original note fields/timing and complete display grouping. Final expanded browser rendering/timing/mix/cleanup checks remain pending browser tool access; see ../MIDI_VERIFICATION.md.
+
+
+## Asset-server engine connection (2026-11-02)
+
+`MidiInstrumentCatalog.js` discovers `/instruments` using the runtime asset service
+origin, session credentials, cancellation and an eight-second timeout. It preserves
+production `/api/asset` proxy prefixes and accepts configured public audio URLs.
+Only enabled, available entries become providers; prepared-source opt-in exists
+solely for verification. GrandB remains the fallback. Library sources use `asset-`
+provider IDs; no program mapping is inferred from instrument names. The instrument selector now consumes this runtime registry and inventory.
+
+Catalog providers validate mono PCM16 octave assets, coverage, note boundaries,
+versioned URLs and velocity layers. `MidiSampleAsset.js` verifies encoded size and
+SHA-256 before decoding (Web Crypto requires HTTPS or localhost). Shared chunks
+are fetched/decoded once, with credentials; legacy S3 requests omit credentials.
+The cache estimates decoded memory at the actual context sample rate before
+fetching and enforces its 256 MiB limit. Oversized songs fail explicitly.
+
+Each voice starts at its pitch offset plus elapsed lateness, and passes an explicit
+bounded duration to AudioBufferSourceNode.start. Sustained notes cannot continue
+into the next pitch; samples do not loop. Replay reuses chunks. Stop, replacement,
+failed preparation and disposal cancel work and discard late results. Catalog
+refresh preserves mix/compatible assignments, clears stale provider caches and
+stops playback only when provider identity changes. Discovery errors retain the
+fallback and display a nonblocking message; discovery never opens audio devices.
+
+Verification: 99 MIDI tests pass, targeted lint and production build pass. The
+real-library HTTP probe resolves all 1,999 mappings across 21 entries. A visible
+browser decoded one flute chunk at 48 kHz for four voices: captured RMS 0.03068,
+exact silence after Stop and after the 7.87-second pitch boundary, replay and
+natural completion, and zero remaining tracked resources after disposal.
+All asset-server sources remain disabled; this single-source verification does
+not certify every instrument or change the production selection gate.
+
+
+## Catalog-backed instrument assignment (step 6)
+
+The selected track/channel instrument menu receives the controller's live catalog
+through the viewer and mixer. `MidiInstrumentChoices.js` derives labels, effective
+sounds and coverage from that same registry. Catalog names render as ordinary
+React text; no translated label key is required for remote providers. Inventory
+entries absent from the playable registry remain visible as disabled choices,
+with missing-audio or not-enabled explanations. Playable sources with incomplete
+pitch/velocity coverage or incompatible percussion are also disabled. Original
+MIDI assignment still requires explicit verified program/bank mappings.
+
+GrandB remains the default, including discovery failures. Catalog refresh updates
+options without reloading the MIDI file; existing controller rules retain compatible
+assignments and mix settings, and reset removed assignments. Choosing a source
+uses the controller's validation, stops playback and requires an explicit Play.
+No inventory entry is enabled merely by appearing in the menu. All 21 prepared
+asset-server sources remain disabled pending library verification/enablement.
+
+Validation: 102 MIDI tests, targeted lint and production build pass. New choice
+model tests cover runtime labels, inventory deduplication, availability, coverage,
+percussion, fallback and effective/original assignments. Existing engine tests
+cover source changes, registry refresh, mixing preservation and cancellation.
+A rendered-browser check was attempted, but the browser tool reported
+`browser.user is unavailable`; the updated selector was not browser-verified.

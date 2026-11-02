@@ -1,5 +1,19 @@
 # MIDI browser verification
 
+Current playback status (2026-11-02): **all 21 instruments are enabled** after
+75 native Chromium decode/render probes (low/middle/high pitches of every
+recording layer) passed through the sample cache and voice engine at 48 kHz.
+The catalog marks them playback_verified; detailed evidence is recorded in
+browser-verification.json in the asset-server instruments directory. Earlier
+disabled/pending statements below describe the initial migration stages.
+Native probes confirm signal output, not a subjective listening review.
+Reload All Music to fetch the updated catalog. A source can still be disabled
+for a track containing notes outside that instrument's verified pitch range.
+
+
+Latest 2026-11-02 verification: full page suite and native flute asset suite PASS.
+Dated reports live in ../midi_reports/. Earlier failures below are historical.
+
 Run from fracto-ui: `node test/midi_browser/serve.mjs ABSOLUTE_OUTPUT_DIRECTORY`.
 Open http://127.0.0.1:43191 and press Run playback verification. This builds the
 actual All Music page under React StrictMode, uses its real controls, downloads
@@ -64,3 +78,29 @@ Latest status: expanded harness compiles, but has not run. Browser tool access
 was disabled even after the settings change and connection reset. Earlier 1.5s
 fixture timeouts are retained in the verification report; the longer fixture
 reduces a suspected observation-window race and is not yet a verified fix.
+
+
+## Asset-engine verification
+
+Press Run asset-engine verification in a visible tab. The loopback harness mounts
+the actual asset router at `/api/asset/instruments`, initializes runtime service
+ports and explicitly opts into prepared flute assets only for this test. Product
+catalog flags are unchanged. AssetEngineChecks.js tests native decoding, shared
+polyphony, replay, Stop silence, bounded held notes and resource cleanup. It writes
+asset-engine-results.json and asset-engine-playback.wav to the output directory.
+The 2026-11-02 run passed at 48 kHz. Background tabs may suspend the native audio
+clock; keep the verification tab visible. Signal capture proves output at the
+AudioDestination graph, not physical speaker volume or subjective sound quality.
+
+Additional browser regression run (2026-11-02): the full playback harness stopped
+at TrackChecks “Zoom did not enlarge timeline” before its audio checks. This
+run does not establish a pass for the broader rendering suite. The independent
+asset-engine browser check above passed.
+
+
+Final assignment checks wait for the actual catalog and assert all 21 server
+names appear as disabled inventory alongside the two fallback/original choices.
+Discovery must not change the default assignment. The worklet records rendered
+zero-input silence, and the boundary test waits for delivered PCM before checking.
+These recorder changes affect tests only. Reports establish graph output, not
+physical speakers or per-instrument certification. All catalog enable flags stay false.

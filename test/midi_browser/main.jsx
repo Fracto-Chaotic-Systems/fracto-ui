@@ -1,3 +1,6 @@
+import { verify_library } from "./LibraryChecks.js";
+import { initialize_service_ports } from "../../src/utils/service_ports.jsx";
+import { verify_asset_engine } from "./AssetEngineChecks.js";
 import { resource_counts } from "./ResourceChecks.js";
 import React, { StrictMode, useState } from "react";
 import { createRoot } from "react-dom/client";
@@ -128,7 +131,7 @@ async function import_checks() {
   };
 }
 async function run() {
-  document.getElementById("report").textContent = "RunningÃ¢â‚¬Â¦";
+  document.getElementById("report").textContent = "Running verification...";
   try {
     const imports = await import_checks();
     const song = events_from_midi(midi);
@@ -251,7 +254,7 @@ async function run() {
   }
 }
 async function run_instruments() {
-  document.getElementById("report").textContent = "Running instrumentsÃ¯Â¿Â½";
+  document.getElementById("report").textContent = "Running verification...";
   try {
     click("Leave music");
     await sleep(100);
@@ -279,11 +282,61 @@ async function run_instruments() {
     );
   }
 }
+async function run_asset_engine() {
+  document.getElementById("report").textContent = "Running verification...";
+  try {
+    const { report, context } = await verify_asset_engine(until);
+    await fetch("/asset_audio", { method: "POST", body: wav(context) });
+    await fetch("/asset_report", {
+      method: "POST",
+      body: JSON.stringify(report, null, 2),
+    });
+    document.getElementById("report").textContent = JSON.stringify(
+      report,
+      null,
+      2,
+    );
+  } catch (error) {
+    const report = { pass: false, error: error.message, stack: error.stack };
+    await fetch("/asset_report", {
+      method: "POST",
+      body: JSON.stringify(report, null, 2),
+    });
+    document.getElementById("report").textContent = JSON.stringify(
+      report,
+      null,
+      2,
+    );
+  }
+}
+async function run_library() {
+  let report;
+  try {
+    report = await verify_library((message) => {
+      document.getElementById("report").textContent = message;
+    });
+  } catch (error) {
+    report = { pass: false, error: error.message, stack: error.stack };
+  }
+  await fetch("/library_report", {
+    method: "POST",
+    body: JSON.stringify(report, null, 2),
+  });
+  document.getElementById("report").textContent = JSON.stringify(
+    report,
+    null,
+    2,
+  );
+}
 function Harness() {
   const [show, set_show] = useState(true);
   return (
     <>
       <nav>
+        <button onClick={run_library}>Verify instrument library</button>
+        <button onClick={run_asset_engine}>
+          Run asset-engine verification
+        </button>
         <button onClick={run_instruments}>Run instrument verification</button>
         <button onClick={run}>Run playback verification</button>
         <button onClick={select}>Load track preview</button>
@@ -297,8 +350,10 @@ function Harness() {
     </>
   );
 }
-createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <Harness />
-  </StrictMode>,
+initialize_service_ports().then(() =>
+  createRoot(document.getElementById("root")).render(
+    <StrictMode>
+      <Harness />
+    </StrictMode>,
+  ),
 );

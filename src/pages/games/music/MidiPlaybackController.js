@@ -1,3 +1,4 @@
+import { sample_window } from "./MidiSampleAsset.js";
 import { events_from_midi } from "./MidiEvents.js";
 import { MidiPlaybackError } from "./MidiPianoSamples.js";
 import MidiSampleCache from "./MidiSampleCache.js";
@@ -10,6 +11,8 @@ export default class MidiPlaybackController {
     on_status = () => {},
     on_mix = () => {},
     on_instruments = () => {},
+    on_catalog = () => {},
+    catalog_loader,
     instrument_registry,
     create_context = () => new AudioContext(),
     fetch_sample,
@@ -21,6 +24,8 @@ export default class MidiPlaybackController {
       on_status,
       on_mix,
       on_instruments,
+      on_catalog,
+      catalog_loader,
       create_context,
       set_interval,
       clear_interval,
@@ -28,6 +33,12 @@ export default class MidiPlaybackController {
     this.instruments = new MidiInstrumentAssignments(instrument_registry);
     this.mixer = new MidiMixer();
     this.cache = new MidiSampleCache({ fetch_sample, sample_root });
+    this.catalog_request = null;
+    this.catalog_state = {
+      status: "idle",
+      registry: this.instruments.registry,
+      catalog: null,
+    };
     this.song = null;
     this.context = null;
     this.master = null;
@@ -71,7 +82,7 @@ export default class MidiPlaybackController {
         "disposed",
         "This MIDI player has been disposed.",
       );
-    this.stop();
+    this.stop({ cancel_catalog: false });
     this.song = null;
     this.on_mix(this.mixer.load(null));
     this.on_instruments(this.instruments.load(null));
@@ -92,7 +103,7 @@ export default class MidiPlaybackController {
 
   unload() {
     if (this.disposed) return;
-    this.stop();
+    this.stop({ cancel_catalog: false });
     this.song = null;
     this.on_mix(this.mixer.load(null));
     this.on_instruments(this.instruments.load(null));
@@ -142,7 +153,7 @@ export default class MidiPlaybackController {
       const short = song.notes.filter(
         (note, index) =>
           note.end_seconds - note.start_seconds >
-          samples[index].buffer.duration,
+          sample_window(samples[index]).duration,
       ).length;
       if (short)
         this.warnings.push({ code: "sample_shorter_than_note", count: short });
@@ -183,9 +194,19 @@ export default class MidiPlaybackController {
     }
   }
 
-  stop() {
+  stop({ cancel_catalog = true } = {}) {
     if (this.disposed) return;
     ++this.generation;
+    if (cancel_catalog && this.catalog_request) {
+      this.catalog_request.abort();
+      this.catalog_request = null;
+      this.catalog_state = {
+        ...this.catalog_state,
+        status: this.catalog_state.catalog ? "ready" : "idle",
+        error: null,
+      };
+      this.on_catalog(this.catalog_state);
+    }
     this.request?.abort();
     this.request = null;
     if (this.master && this.context) {
@@ -196,6 +217,56 @@ export default class MidiPlaybackController {
     this.scheduler = null;
     this.mixer.disconnect();
     this.notify(this.song ? "stopped" : "idle");
+  }
+
+  async refresh_catalog() {
+    if (this.disposed || !this.catalog_loader) return false;
+    this.catalog_request?.abort();
+    const request = new AbortController();
+    this.catalog_request = request;
+    const publish = (update) => {
+      this.catalog_state = { ...this.catalog_state, ...update };
+      this.on_catalog(this.catalog_state);
+    };
+    publish({ status: "loading", error: null });
+    if (
+      this.disposed ||
+      request.signal.aborted ||
+      this.catalog_request !== request
+    )
+      return false;
+    try {
+      const { registry, catalog } = await this.catalog_loader(request.signal);
+      if (
+        this.disposed ||
+        request.signal.aborted ||
+        this.catalog_request !== request
+      )
+        return false;
+      this.catalog_request = null;
+      if (registry.signature !== this.instruments.registry.signature) {
+        this.stop();
+        this.cache.clear();
+        this.on_instruments(this.instruments.replace_registry(registry));
+      }
+      publish({
+        status: "ready",
+        registry: this.instruments.registry,
+        catalog,
+      });
+      return true;
+    } catch {
+      if (
+        this.disposed ||
+        request.signal.aborted ||
+        this.catalog_request !== request
+      )
+        return false;
+      publish({ status: "error", error: "catalog_unavailable" });
+      return false;
+    } finally {
+      if (this.catalog_request === request) this.catalog_request = null;
+    }
   }
 
   set_mix(id, patch) {
@@ -237,6 +308,8 @@ export default class MidiPlaybackController {
     this.on_status = () => {};
     this.on_mix = () => {};
     this.on_instruments = () => {};
+    this.on_catalog = () => {};
+    this.catalog_state = null;
     return context ? context.close().catch(() => {}) : Promise.resolve();
   }
 }

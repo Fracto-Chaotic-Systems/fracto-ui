@@ -13,7 +13,7 @@
     "test:servers": "node --test test/admin_servers_address_book.test.js",
     "test:auth": "node --test test/authenticated_entry.test.js test/welcome_auth_states.test.js test/auth_callback_error.test.js",
     "test:automation": "node --test test/automation_engine.test.js",
-    "test:midi": "node --test test/midi_events.test.js test/midi_display_model.test.js test/midi_track_geometry.test.js test/midi_track_playback.test.js test/midi_mixer.test.js test/midi_instruments.test.js test/midi_parser_compatibility.test.js test/midi_playback_controller.test.js test/midi_scheduler.test.js test/midi_sample_cache.test.js",
+    "test:midi": "node --test test/midi_events.test.js test/midi_display_model.test.js test/midi_track_geometry.test.js test/midi_track_playback.test.js test/midi_mixer.test.js test/midi_instruments.test.js test/midi_parser_compatibility.test.js test/midi_playback_controller.test.js test/midi_scheduler.test.js test/midi_sample_cache.test.js test/midi_asset_engine.test.js test/midi_instrument_choices.test.js test/midi_browser_capture.test.js",
     "test:audio": "node --test test/circuitry_audio.test.js test/circuitry_audio_controller.test.js",
     "test:minibrot-rays": "node --test test/minibrot_context_canvas.test.js",
     "preview": "vite preview",

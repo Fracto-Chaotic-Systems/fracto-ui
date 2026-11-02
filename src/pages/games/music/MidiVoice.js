@@ -1,3 +1,4 @@
+import { sample_window } from "./MidiSampleAsset.js";
 // Every note owns a separate source, envelope and pan node. Never reuse a
 // voice by pitch: repeated/sustained notes must be able to overlap.
 export function schedule_midi_voice(
@@ -10,13 +11,15 @@ export function schedule_midi_voice(
 ) {
   const nominal_start = origin + note.start_seconds;
   const start = Math.max(nominal_start, context.currentTime);
-  const offset = start - nominal_start;
+  const window = sample_window(sample);
+  const late = start - nominal_start;
+  const offset = window.offset + late;
   const release = origin + note.end_seconds;
   // A delayed scheduler skips finished notes rather than replaying a burst.
-  if (release <= start || offset >= sample.buffer.duration) return null;
+  if (release <= start || late >= window.duration) return null;
   const stop = Math.min(
     release + sample.release_seconds,
-    nominal_start + sample.buffer.duration,
+    nominal_start + window.duration,
   );
   const source = context.createBufferSource();
   const gain = context.createGain();
@@ -58,7 +61,7 @@ export function schedule_midi_voice(
       gain.gain.linearRampToValueAtTime(0, stop);
     }
     source.onended = cleanup;
-    source.start(start, offset);
+    source.start(start, offset, stop - start);
     source.stop(stop);
     return voice;
   } catch (error) {

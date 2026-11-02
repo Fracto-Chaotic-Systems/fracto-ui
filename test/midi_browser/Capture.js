@@ -33,7 +33,11 @@ window.AudioContext = class extends NativeContext {
     const source = this.track_node(super.createBufferSource());
     const start = source.start.bind(source);
     source.start = (...args) => {
-      this.scheduled_starts.push({ when: args[0], offset: args[1] ?? 0 });
+      this.scheduled_starts.push({
+        when: args[0],
+        offset: args[1] ?? 0,
+        duration: args[2],
+      });
       return start(...args);
     };
     return source;

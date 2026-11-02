@@ -1,3 +1,5 @@
+import { service_origin } from "../../../utils/service_origin.jsx";
+import { load_instrument_catalog } from "./MidiInstrumentCatalog.js";
 import { useCallback, useEffect, useRef, useState } from "react";
 import MidiPlaybackController from "./MidiPlaybackController.js";
 import { MAX_MIDI_BYTES } from "./MidiValidation.js";
@@ -13,6 +15,7 @@ const initial = {
   song: null,
   mix: {},
   instruments: {},
+  catalog: { status: "idle" },
   song_revision: 0,
   file_name: "",
   reading: false,
@@ -27,6 +30,13 @@ export default function useMidiPlayer() {
   useEffect(() => {
     let active = true;
     const player = new MidiPlaybackController({
+      catalog_loader: (signal) =>
+        load_instrument_catalog(`${service_origin("asset")}/instruments`, {
+          signal,
+        }),
+      on_catalog: (catalog) => {
+        if (active) set_state((previous) => ({ ...previous, catalog }));
+      },
       on_instruments: (instruments) => {
         if (active) set_state((previous) => ({ ...previous, instruments }));
       },
@@ -38,6 +48,7 @@ export default function useMidiPlayer() {
       },
     });
     controller.current = player;
+    void player.refresh_catalog();
     return () => {
       active = false;
       controller.current = null;
@@ -119,6 +130,7 @@ export default function useMidiPlayer() {
   return {
     ...state,
     set_instrument,
+    refresh_catalog: () => controller.current?.refresh_catalog(),
     set_mix,
     reset_mix,
     get_snapshot,

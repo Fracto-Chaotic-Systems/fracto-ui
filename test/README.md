@@ -199,3 +199,13 @@ caches without reading them, plus expected-value saves and response validation.
 midi_instruments.test.js covers verified-only providers, per-note original program/bank resolution, provider/version cache isolation, immutable assignments and cancellation/reset/disposal. Browser InstrumentChecks.js exercises actual assignment controls and captured output silence.
 
 Step 6 adds completion/stale-callback and 20-cycle combined controller lifecycle regressions (79 total MIDI tests). Browser ResourceChecks.js accounts for frames, intervals, contexts, product connections and source callbacks; SyncChecks.js also tests audio suspension with a longer six-second fixture. The revised browser run remains pending tool access.
+
+
+Current instrument migration coverage: 103 MIDI tests (`npm run test:midi`).
+`midi_asset_engine.test.js` covers catalog URLs/gates, chunk cache integrity,
+memory, bounded voices, cancellation and refresh. `midi_instrument_choices.test.js`
+covers live catalog names, coverage and disabled inventory. `midi_browser_capture.test.js`
+checks PCM capture after all source inputs disconnect. `midi_asset_engine_probe.mjs`
+uses actual HTTP/WAV bytes with a deterministic decoder stub. The browser harness
+independently verifies native playback; dated JSON evidence is in midi_reports/.
+See ../src/pages/games/music/ASSET_MIGRATION.md for current results and setup.

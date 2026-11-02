@@ -1,0 +1,25 @@
+{
+  "verified_date": "2026-11-02",
+  "pass": true,
+  "instruments": {
+    "active": {
+      "rms": 0.015107128603483615,
+      "peak": 0.047586482018232346,
+      "samples": 20224
+    },
+    "after_assignment_change": {
+      "rms": 0,
+      "peak": 0,
+      "samples": 16318
+    },
+    "explicit_play_required": true,
+    "mixer_preserved": true,
+    "unsupported_original_disabled": true,
+    "bank_checked": true,
+    "playable_choices_verified_only": true,
+    "catalog_entries_rendered": 21,
+    "availability_matches_catalog": true,
+    "catalog_sound_selected": true,
+    "context_after_unmount": "closed"
+  }
+}
