@@ -1,4 +1,6 @@
-import { MidiPlaybackError, piano_sample } from "./MidiPianoSamples.js";
+import { MidiPlaybackError } from "./MidiPianoSamples.js";
+import { INSTRUMENT_REGISTRY, DEFAULT_INSTRUMENT } from "./MidiInstruments.js";
+import { midi_route_id } from "./MidiMixer.js";
 
 const MAX_CACHE_BYTES = 256 * 1024 * 1024;
 
@@ -22,16 +24,30 @@ export default class MidiSampleCache {
     this.bytes = 0;
   }
 
-  async prepare(notes, context, signal) {
+  async prepare(
+    notes,
+    context,
+    signal,
+    { registry = INSTRUMENT_REGISTRY, assignments = {} } = {},
+  ) {
     // Validate every note before making any requests; no partial song playback.
-    const samples = notes.map((note) => piano_sample(note, this.sample_root));
-    const urls = [...new Set(samples.map((sample) => sample.url))];
-    const required = new Set(urls);
+    const samples = notes.map((note) =>
+      registry.resolve(
+        note,
+        assignments[midi_route_id(note)] ?? DEFAULT_INSTRUMENT,
+        { sample_root: this.sample_root },
+      ),
+    );
+    const assets = new Map(
+      samples.map((sample) => [sample.cache_key, sample.url]),
+    );
+    const keys = [...assets.keys()];
+    const required = new Set(keys);
     // Retain the intersection for quick replay; release previous song samples.
-    for (const [url, buffer] of this.buffers) {
-      if (!required.has(url)) {
+    for (const [key, buffer] of this.buffers) {
+      if (!required.has(key)) {
         this.bytes -= buffer.length * buffer.numberOfChannels * 4;
-        this.buffers.delete(url);
+        this.buffers.delete(key);
       }
     }
     let next = 0;
@@ -44,12 +60,13 @@ export default class MidiSampleCache {
     };
     await Promise.all(
       Array.from(
-        { length: Math.min(this.concurrency, urls.length) },
+        { length: Math.min(this.concurrency, keys.length) },
         async () => {
-          while (next < urls.length) {
+          while (next < keys.length) {
             check();
-            const url = urls[next++];
-            if (this.buffers.has(url)) continue;
+            const key = keys[next++];
+            const url = assets.get(key);
+            if (this.buffers.has(key)) continue;
             let buffer;
             try {
               const response = await this.fetch_sample(url, {
@@ -65,7 +82,7 @@ export default class MidiSampleCache {
               check();
               throw new MidiPlaybackError(
                 "sample_load_failed",
-                "Unable to download or decode a required piano sample.",
+                "Unable to download or decode a required instrument sample.",
               );
             }
             check();
@@ -77,15 +94,15 @@ export default class MidiSampleCache {
             )
               throw new MidiPlaybackError(
                 "invalid_sample",
-                "A piano sample contains no usable audio.",
+                "An instrument sample contains no usable audio.",
               );
             const bytes = buffer.length * buffer.numberOfChannels * 4;
             if (this.bytes + bytes > this.max_bytes)
               throw new MidiPlaybackError(
                 "sample_memory_limit",
-                "This song requires more than the piano sample memory limit.",
+                "This song requires more than the instrument sample memory limit.",
               );
-            this.buffers.set(url, buffer);
+            this.buffers.set(key, buffer);
             this.bytes += bytes;
           }
         },
@@ -94,7 +111,7 @@ export default class MidiSampleCache {
     check();
     return samples.map((sample) => ({
       ...sample,
-      buffer: this.buffers.get(sample.url),
+      buffer: this.buffers.get(sample.cache_key),
     }));
   }
 }

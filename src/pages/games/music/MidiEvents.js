@@ -1,3 +1,4 @@
+import { freeze_midi_song } from "./MidiMetadata.js";
 import MidiParser from "midi-parser-js";
 import { validate_midi, MidiFileError } from "./MidiValidation.js";
 import { build_midi_timeline } from "./MidiTimeline.js";
@@ -72,5 +73,5 @@ export function events_from_midi(input) {
       code: "trailing_bytes_ignored",
       count: validated.trailing_bytes,
     });
-  return song;
+  return freeze_midi_song(song);
 }

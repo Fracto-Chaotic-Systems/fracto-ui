@@ -14,6 +14,7 @@ const tempo = [
   39,
   192,
   ...event(960, 255, 81, 3, 4, 147, 224),
+  ...event(0, 255, 88, 4, 3, 2, 24, 8),
   ...end,
 ];
 const notes = [
@@ -77,6 +78,8 @@ const chunk = (bytes) => [
   bytes.length & 255,
   ...bytes,
 ];
+// Longer phases leave time for real DOM scrolling and highlight assertions.
+// 120 ticks/quarter: held 0–2.4s, sustained 2.4–4.8s, final chord to 6s.
 export const midi = new Uint8Array([
   77,
   84,
@@ -90,8 +93,8 @@ export const midi = new Uint8Array([
   1,
   0,
   2,
-  1,
-  224,
+  0,
+  120,
   ...chunk(tempo),
   ...chunk(notes),
 ]);

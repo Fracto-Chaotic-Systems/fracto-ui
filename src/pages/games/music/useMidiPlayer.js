@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import MidiPlaybackController from "./MidiPlaybackController.js";
 import { MAX_MIDI_BYTES } from "./MidiValidation.js";
 
@@ -10,6 +10,10 @@ const initial = {
     position_seconds: 0,
     duration_seconds: 0,
   },
+  song: null,
+  mix: {},
+  instruments: {},
+  song_revision: 0,
   file_name: "",
   reading: false,
   loaded: false,
@@ -23,6 +27,12 @@ export default function useMidiPlayer() {
   useEffect(() => {
     let active = true;
     const player = new MidiPlaybackController({
+      on_instruments: (instruments) => {
+        if (active) set_state((previous) => ({ ...previous, instruments }));
+      },
+      on_mix: (mix) => {
+        if (active) set_state((previous) => ({ ...previous, mix }));
+      },
       on_status: (snapshot) => {
         if (active) set_state((previous) => ({ ...previous, snapshot }));
       },
@@ -50,6 +60,7 @@ export default function useMidiPlayer() {
     player.unload();
     set_state((previous) => ({
       ...previous,
+      song: null,
       reading: true,
       loaded: false,
       file_name: "",
@@ -64,11 +75,13 @@ export default function useMidiPlayer() {
       const bytes = await file.arrayBuffer();
       if (request !== generation.current || player.disposed) return;
       error_code = "invalid_midi_file";
-      player.load(bytes);
+      const song = player.load(bytes);
       set_state((previous) => ({
         ...previous,
         reading: false,
         loaded: true,
+        song,
+        song_revision: previous.song_revision + 1,
         file_name: file.name,
       }));
     } catch {
@@ -90,8 +103,25 @@ export default function useMidiPlayer() {
       import_error: null,
     }));
   };
+  const get_snapshot = useCallback(
+    () => controller.current?.snapshot() ?? null,
+    [],
+  );
+  const set_mix = useCallback(
+    (id, patch) => controller.current?.set_mix(id, patch),
+    [],
+  );
+  const reset_mix = useCallback(() => controller.current?.reset_mix(), []);
+  const set_instrument = useCallback(
+    (id, selection) => controller.current?.set_instrument(id, selection),
+    [],
+  );
   return {
     ...state,
+    set_instrument,
+    set_mix,
+    reset_mix,
+    get_snapshot,
     open_file,
     stop,
     play: () => {

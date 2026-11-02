@@ -21,7 +21,10 @@ await fs.copyFile(
 http
   .createServer(async (req, res) => {
     try {
-      if (req.method === "POST" && ["/report", "/audio"].includes(req.url)) {
+      if (
+        req.method === "POST" &&
+        ["/report", "/audio", "/mixer_audio"].includes(req.url)
+      ) {
         let length = 0;
         const chunks = [];
         for await (const chunk of req) {
@@ -32,7 +35,11 @@ http
         await fs.writeFile(
           path.join(
             output,
-            req.url === "/report" ? "browser-results.json" : "playback.wav",
+            req.url === "/report"
+              ? "browser-results.json"
+              : req.url === "/mixer_audio"
+                ? "mixer-playback.wav"
+                : "playback.wav",
           ),
           Buffer.concat(chunks),
         );

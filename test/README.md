@@ -171,3 +171,31 @@ caches without reading them, plus expected-value saves and response validation.
   Expanded MIDI Node suites also cover nonzero context clocks, long notes,
   partially scheduled chord failures, late sample exhaustion, decode retry,
   and 50 Play/Stop cycles without timers or connected voices remaining.
+
+- `midi_display_model.test.js` checks timed display metadata, inferred defaults,
+  stable IDs, frozen shared notes, format-0 channel routes, conductor/empty
+  tracks and shared-channel sustain/program state. Included in `test:midi`.
+  The browser harness also checks immutable song exposure and reference stability.
+
+- `midi_track_geometry.test.js` verifies fit/zoom bounds, center anchoring,
+  readable ruler intervals, clipping, long-note interval queries, virtualization
+  and a 100,000-note index. Included in test:midi. Browser TrackChecks.js verifies
+  actual note pixels, selected labels, scroll alignment, fit/resize, 64-track
+  virtualization, 10,000-note density rendering and replacement reset.
+
+- `midi_track_playback.test.js` checks note-state boundaries, follow clamping,
+  simultaneous/default event lanes, independent pedal intervals, and one
+  audio-clock animation loop with cancellation. The controller suite also
+  checks lead-in and replay identity. Browser SyncChecks.js checks real playhead
+  accuracy, held-to-sustained transitions, current tempo/meter/pedal values,
+  follow-off scrolling, follow-on recentering, Stop and completion states.
+
+- `midi_mixer.test.js` covers route independence, mute/solo precedence, multiple
+  solos, volume/pan normalization, live ramps, bus allocation cleanup,
+  preparation/replay/replacement state, and preserved unsupported-route errors.
+  Included in test:midi. Browser MixerChecks.js measures actual volume, stereo
+  pan, mute/solo silence, reset, replacement, Stop and context cleanup.
+
+midi_instruments.test.js covers verified-only providers, per-note original program/bank resolution, provider/version cache isolation, immutable assignments and cancellation/reset/disposal. Browser InstrumentChecks.js exercises actual assignment controls and captured output silence.
+
+Step 6 adds completion/stale-callback and 20-cycle combined controller lifecycle regressions (79 total MIDI tests). Browser ResourceChecks.js accounts for frames, intervals, contexts, product connections and source callbacks; SyncChecks.js also tests audio suspension with a longer six-second fixture. The revised browser run remains pending tool access.

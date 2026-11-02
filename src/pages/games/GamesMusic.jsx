@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { MainStyles as styles } from "../../styles/MainStyles.jsx";
 import AppText from "../../AppText.jsx";
 import { KEY_GAMES_MUSIC_TITLE, MUSIC_TEXT } from "../../text/GamesText.jsx";
+import MidiTrackViewer from "./music/MidiTrackViewer.jsx";
 import useMidiPlayer from "./music/useMidiPlayer.js";
 import {
   MusicPanel,
@@ -78,6 +79,20 @@ export default function GamesMusic() {
               </li>
             ))}
           </ul>
+        )}
+        {player.song && (
+          <MidiTrackViewer
+            key={player.song_revision}
+            song={player.song}
+            status={snapshot.status}
+            playback_id={snapshot.playback_id}
+            get_snapshot={player.get_snapshot}
+            mix={player.mix}
+            set_mix={player.set_mix}
+            reset_mix={player.reset_mix}
+            instruments={player.instruments}
+            set_instrument={player.set_instrument}
+          />
         )}
       </MusicPanel>
     </>

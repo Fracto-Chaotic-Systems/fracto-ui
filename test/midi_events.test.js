@@ -72,14 +72,20 @@ test("default tempo, running status, long notes, buffer views and track metadata
   wrapped.set(bytes, 4);
   const result = events_from_midi(wrapped.subarray(4, bytes.length + 4));
   assert.deepEqual(result.tracks, [
-    { index: 0, name: "Test", end_tick: 10080 },
+    { index: 0, name: "Test", instrument_name: "", end_tick: 10080 },
   ]);
   assert.deepEqual(result.notes[0], {
+    id: "note:0:2",
+    start_tick: 0,
+    key_release_tick: 9600,
+    end_tick: 9600,
     track: 0,
     channel: 2,
     pitch: 60,
     velocity: 100,
     program: 7,
+    bank_msb: 0,
+    bank_lsb: 0,
     start_seconds: 0,
     key_release_seconds: 10,
     end_seconds: 10,

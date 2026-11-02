@@ -10,6 +10,7 @@ export default class MidiScheduler {
   constructor({
     context,
     destination,
+    route_destination,
     song,
     samples,
     on_complete,
@@ -20,6 +21,7 @@ export default class MidiScheduler {
     Object.assign(this, {
       context,
       destination,
+      route_destination,
       song,
       samples,
       on_complete,
@@ -60,7 +62,9 @@ export default class MidiScheduler {
         const sample = this.samples[this.index++];
         const voice = schedule_midi_voice(
           this.context,
-          this.destination,
+          this.route_destination
+            ? this.route_destination(note)
+            : this.destination,
           note,
           sample,
           this.origin,

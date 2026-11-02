@@ -238,3 +238,98 @@ test("repeated Play/Stop cycles leave no timers or connected voice nodes", async
   await player.dispose();
   assert.equal(context.close_count, 1);
 });
+
+test("clock snapshots distinguish scheduling lead-in and give each replay a new identity", async () => {
+  const { player, context, timers } = setup();
+  player.load(midi_file());
+  await player.play();
+  const first = player.snapshot();
+  assert.equal(first.clock_started, false);
+  timers.advance(0.1);
+  assert.equal(player.snapshot().clock_started, true);
+  assert.ok(Math.abs(player.snapshot().position_seconds - 0.05) < 1e-9);
+  player.stop();
+  assert.equal(player.snapshot().clock_started, false);
+  await player.play();
+  assert.notEqual(player.snapshot().playback_id, first.playback_id);
+  assert.equal(player.snapshot().position_seconds, 0);
+  assert.equal(player.snapshot().clock_started, false);
+  await player.dispose();
+});
+
+test("completion releases routes and stale callbacks cannot stop the next playback", async () => {
+  const { player, context, timers } = setup();
+  player.load(midi_file());
+  const id = Object.keys(player.mixer.mix)[0];
+  player.set_mix(id, { volume: 0.4, pan: -0.5, solo: true });
+  player.set_instrument(id, "original");
+  await player.play();
+  const old = player.scheduler;
+  timers.advance(2);
+  assert.equal(player.status, "completed");
+  assert.equal(
+    player.snapshot().position_seconds,
+    player.song.duration_seconds,
+  );
+  assert.equal(player.mixer.buses.size, 0);
+  assert.equal(old.voices.size, 0);
+  assert.equal(timers.timers.size, 0);
+  assert.ok(context.gains.slice(1).every((node) => node.disconnected));
+  assert.ok(context.pans.every((node) => node.disconnected));
+  assert.equal(player.mixer.mix[id].volume, 0.4);
+  assert.equal(player.instruments.assignments[id], "original");
+  await player.play();
+  const next = player.scheduler,
+    bus = player.mixer.buses.get(id);
+  old.on_complete();
+  old.on_error(new Error("late error"));
+  old.pump();
+  assert.equal(player.status, "playing");
+  assert.equal(player.scheduler, next);
+  assert.equal(player.mixer.buses.get(id), bus);
+  assert.equal(bus.gain.disconnected, false);
+  assert.equal(context.decoded, 1);
+  await player.dispose();
+  assert.equal(timers.timers.size, 0);
+  assert.equal(player.cache.bytes, 0);
+  assert.equal(player.mixer.buses.size, 0);
+});
+
+test("mixed assignment, replacement and playback cycles retain no old audio graph", async () => {
+  const { player, context, timers, statuses } = setup();
+  for (let cycle = 0; cycle < 20; cycle++) {
+    player.load(midi_file());
+    const id = Object.keys(player.mixer.mix)[0];
+    player.set_mix(id, { mute: true, solo: true, volume: 0.2, pan: 1 });
+    await player.play();
+    const old = player.scheduler;
+    assert.equal(player.set_instrument(id, "original"), true);
+    assert.equal(old.voices.size, 0);
+    assert.equal(timers.timers.size, 0);
+    assert.equal(player.mixer.buses.size, 0);
+    await player.play();
+    player.set_mix(id, { mute: false });
+    if (cycle % 2) player.unload();
+    else assert.throws(() => player.load(new Uint8Array()), /Truncated/);
+    assert.equal(player.song, null);
+    assert.equal(player.mixer.buses.size, 0);
+    assert.deepEqual(player.instruments.assignments, {});
+    assert.equal(player.cache.bytes, 0);
+    assert.equal(timers.timers.size, 0);
+    assert.ok(
+      context.sources.every(
+        (source) =>
+          source.stopped && source.disconnected && source.onended === null,
+      ),
+    );
+    assert.ok(context.gains.slice(1).every((node) => node.disconnected));
+    assert.ok(context.pans.every((node) => node.disconnected));
+  }
+  await player.dispose();
+  const count = statuses.length;
+  player.stop();
+  player.reset_mix();
+  assert.equal(await player.play(), false);
+  assert.equal(statuses.length, count);
+  assert.equal(context.close_count, 1);
+});

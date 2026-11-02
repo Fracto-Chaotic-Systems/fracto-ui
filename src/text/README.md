@@ -23,7 +23,8 @@ and can do column labels.
 - `DataText.jsx` contains Data navigation, query and database labels, and
   MySQL/AWS settings and status text.
 - `GamesText.jsx` contains Worlds and WordNet labels and messages, plus the `music` sidebar label, `All Music` title and `MUSIC_TEXT` labels for
-  controls, status, errors and file warnings. Diagnostic engine messages are
+  controls, status, errors, file warnings and track timeline/zoom/selection labels, follow-playhead controls, held/sustained
+  legends, event-lane text and mixer control/reset labels. Diagnostic engine messages are
   mapped to catalog text before display.
 - `NavigatorText.jsx` contains canvas navigator labels, rendering-strategy
   descriptions, coverage messages, and related help text.
@@ -96,3 +97,5 @@ TilesText exports MESH_OPERATION_TEXT for transform headings, controls, progress
 AssetsText terrain labels include minimum-resolution input, effective cached resolution, cache hits, missing coverage and display-budget fallback notices.
 
 Terrain controls identify the base minimum separately from nearby detail; the status reports refined patches, fine level, loading and parent fallback.
+
+MUSIC_TEXT also owns instrument choices, original/effective assignment labels, bank/program history, unsupported-source help and assignment errors.

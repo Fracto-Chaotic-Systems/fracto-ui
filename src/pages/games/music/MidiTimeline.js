@@ -1,4 +1,10 @@
 import { MidiFileError } from "./MidiValidation.js";
+import {
+  create_midi_metadata,
+  record_midi_metadata,
+  complete_midi_metadata,
+  midi_event_id,
+} from "./MidiMetadata.js";
 
 // Input is adapter-validated parser output. Channel state is shared across tracks.
 export function build_midi_timeline(data) {
@@ -11,7 +17,7 @@ export function build_midi_timeline(data) {
       if (event.type === 255 && event.metaType === 3) name = event.data;
       events.push({ ...event, tick, track: track_index, event_index });
     });
-    return { index: track_index, name, end_tick: tick };
+    return { index: track_index, name, instrument_name: "", end_tick: tick };
   });
   // Preserve order within each track; simultaneous tracks resolve by track index.
   events.sort(
@@ -23,7 +29,10 @@ export function build_midi_timeline(data) {
     pressed: new Map(),
     sustained: new Set(),
     program: 0,
+    bank_msb: 0,
+    bank_lsb: 0,
   }));
+  const metadata = create_midi_metadata();
   const notes = [];
   const warnings = [];
   const tempos = [];
@@ -33,6 +42,7 @@ export function build_midi_timeline(data) {
   let unmatched = 0;
   const finish = (note) => {
     note.end_seconds = seconds;
+    note.end_tick = previous_tick;
   };
   const release_pedal = (channel) => {
     channel.sustained.forEach(finish);
@@ -48,6 +58,7 @@ export function build_midi_timeline(data) {
     const note = queue.notes[queue.head++];
     if (queue.head === queue.notes.length) channel.pressed.delete(pitch);
     note.key_release_seconds = seconds;
+    note.key_release_tick = previous_tick;
     if (channel.sustain) channel.sustained.add(note);
     else finish(note);
   };
@@ -57,6 +68,13 @@ export function build_midi_timeline(data) {
     previous_tick = event.tick;
     if (!Number.isFinite(seconds))
       throw new MidiFileError("Invalid MIDI timeline duration.");
+    record_midi_metadata(
+      metadata,
+      tracks,
+      event,
+      seconds,
+      channels[event.channel],
+    );
     if (event.type === 255) {
       if (event.metaType === 81) {
         tempo = event.data;
@@ -64,6 +82,11 @@ export function build_midi_timeline(data) {
           tick: event.tick,
           seconds,
           microseconds_per_quarter: tempo,
+          id: midi_event_id(event),
+          track: event.track,
+          channel: null,
+          event_index: event.event_index,
+          inferred: false,
         });
       }
       continue;
@@ -74,11 +97,17 @@ export function build_midi_timeline(data) {
     if (event.type === 9 && event.data[1] > 0) {
       const pitch = event.data[0];
       const note = {
+        id: `note:${event.track}:${event.event_index}`,
+        start_tick: event.tick,
+        key_release_tick: null,
+        end_tick: null,
         track: event.track,
         channel: event.channel,
         pitch,
         velocity: event.data[1],
         program: channel.program,
+        bank_msb: channel.bank_msb,
+        bank_lsb: channel.bank_lsb,
         start_seconds: seconds,
         key_release_seconds: null,
         end_seconds: null,
@@ -91,13 +120,16 @@ export function build_midi_timeline(data) {
       release_key(channel, event.data[0]);
     } else if (event.type === 11) {
       const [controller, value] = event.data;
-      if (controller === 64) {
+      if (controller === 0) channel.bank_msb = value;
+      else if (controller === 32) channel.bank_lsb = value;
+      else if (controller === 64) {
         channel.sustain = value >= 64;
         if (!channel.sustain) release_pedal(channel);
       } else if (controller === 120) {
         channel.pressed.forEach((queue) =>
           queue.notes.slice(queue.head).forEach((note) => {
             note.key_release_seconds = seconds;
+            note.key_release_tick = previous_tick;
             finish(note);
           }),
         );
@@ -120,6 +152,7 @@ export function build_midi_timeline(data) {
       queue.notes.slice(queue.head).forEach((note) => {
         unfinished++;
         note.key_release_seconds = seconds;
+        note.key_release_tick = previous_tick;
         finish(note);
       }),
     );
@@ -143,7 +176,9 @@ export function build_midi_timeline(data) {
     warnings.push({ code: "percussion_channel", count: percussion.length });
   if (!notes.length)
     throw new MidiFileError("MIDI file contains no playable note events.");
+  complete_midi_metadata(metadata, tempos);
   return {
+    ...metadata,
     format: data.formatType,
     ppq: data.timeDivision,
     tracks,

@@ -1,11 +1,16 @@
 import { events_from_midi } from "./MidiEvents.js";
 import { MidiPlaybackError } from "./MidiPianoSamples.js";
 import MidiSampleCache from "./MidiSampleCache.js";
+import MidiInstrumentAssignments from "./MidiInstrumentAssignments.js";
+import MidiMixer from "./MidiMixer.js";
 import MidiScheduler from "./MidiScheduler.js";
 
 export default class MidiPlaybackController {
   constructor({
     on_status = () => {},
+    on_mix = () => {},
+    on_instruments = () => {},
+    instrument_registry,
     create_context = () => new AudioContext(),
     fetch_sample,
     sample_root,
@@ -14,10 +19,14 @@ export default class MidiPlaybackController {
   } = {}) {
     Object.assign(this, {
       on_status,
+      on_mix,
+      on_instruments,
       create_context,
       set_interval,
       clear_interval,
     });
+    this.instruments = new MidiInstrumentAssignments(instrument_registry);
+    this.mixer = new MidiMixer();
     this.cache = new MidiSampleCache({ fetch_sample, sample_root });
     this.song = null;
     this.context = null;
@@ -34,6 +43,10 @@ export default class MidiPlaybackController {
   snapshot() {
     return {
       status: this.status,
+      playback_id: this.generation,
+      clock_started: !!(
+        this.scheduler && this.context.currentTime >= this.scheduler.origin
+      ),
       error: this.error,
       warnings: [...this.warnings],
       duration_seconds: this.song?.duration_seconds ?? 0,
@@ -60,9 +73,13 @@ export default class MidiPlaybackController {
       );
     this.stop();
     this.song = null;
+    this.on_mix(this.mixer.load(null));
+    this.on_instruments(this.instruments.load(null));
     this.warnings = [];
     try {
       this.song = events_from_midi(input);
+      this.on_mix(this.mixer.load(this.song));
+      this.on_instruments(this.instruments.load(this.song));
       this.warnings = [...this.song.warnings];
       this.notify("ready");
       return this.song;
@@ -77,6 +94,8 @@ export default class MidiPlaybackController {
     if (this.disposed) return;
     this.stop();
     this.song = null;
+    this.on_mix(this.mixer.load(null));
+    this.on_instruments(this.instruments.load(null));
     this.warnings = [];
     this.cache.clear();
     this.notify("idle");
@@ -113,6 +132,10 @@ export default class MidiPlaybackController {
         song.notes,
         context,
         request.signal,
+        {
+          registry: this.instruments.registry,
+          assignments: this.instruments.assignments,
+        },
       );
       if (stale()) return false;
       this.warnings = [...song.warnings];
@@ -123,10 +146,12 @@ export default class MidiPlaybackController {
       ).length;
       if (short)
         this.warnings.push({ code: "sample_shorter_than_note", count: short });
+      this.mixer.connect(context, this.master);
       this.master.gain.setValueAtTime(1, context.currentTime);
       const scheduler = new MidiScheduler({
         context,
         destination: this.master,
+        route_destination: (note) => this.mixer.destination(note),
         song,
         samples,
         set_interval: this.set_interval,
@@ -134,6 +159,7 @@ export default class MidiPlaybackController {
         on_complete: () => {
           if (stale()) return;
           this.scheduler = null;
+          this.mixer.disconnect();
           this.notify("completed");
         },
         on_error: (error) => {
@@ -168,7 +194,31 @@ export default class MidiPlaybackController {
     }
     this.scheduler?.stop();
     this.scheduler = null;
+    this.mixer.disconnect();
     this.notify(this.song ? "stopped" : "idle");
+  }
+
+  set_mix(id, patch) {
+    if (this.disposed || !this.song || !this.mixer.update(id, patch))
+      return false;
+    this.on_mix(this.mixer.mix);
+    return true;
+  }
+
+  set_instrument(id, selection) {
+    if (this.disposed || !this.song || !this.instruments.can_set(id, selection))
+      return false;
+    if (this.instruments.assignments[id] === selection) return true;
+    this.stop();
+    this.instruments.set(id, selection);
+    this.on_instruments(this.instruments.assignments);
+    return true;
+  }
+
+  reset_mix() {
+    if (this.disposed || !this.song) return;
+    this.mixer.reset();
+    this.on_mix(this.mixer.mix);
   }
 
   dispose() {
@@ -176,6 +226,8 @@ export default class MidiPlaybackController {
     this.stop();
     this.disposed = true;
     this.song = null;
+    this.mixer.load(null);
+    this.instruments.load(null);
     this.cache.clear();
     this.master?.disconnect();
     const context = this.context;
@@ -183,6 +235,8 @@ export default class MidiPlaybackController {
     this.master = null;
     this.notify("disposed");
     this.on_status = () => {};
+    this.on_mix = () => {};
+    this.on_instruments = () => {};
     return context ? context.close().catch(() => {}) : Promise.resolve();
   }
 }

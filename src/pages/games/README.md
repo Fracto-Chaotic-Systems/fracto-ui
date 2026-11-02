@@ -5,7 +5,9 @@ Sidebar order is Overview, separator, worlds, music, separator, wordnet, Setting
 Overview, Settings, and Status intentionally remain blank.
 
 - GamesMusic.jsx renders **All Music** with Open MIDI, Play, Stop, filename,
-  playback position, status, errors and file warnings. The music/ modules own
+  playback position, status, errors, file warnings, and a zoomable track/channel
+  viewer with aligned labels, audio-clock playhead/highlighting, event lanes, and live mute/solo/volume/pan
+  controls for the selected route. The music/ modules own
   MIDI parsing, audio scheduling and lifecycle cleanup.
 
 - GamesWorlds.jsx coordinates the **all worlds** mapping table and searchable
@@ -382,3 +384,17 @@ are connected to All Music through useMidiPlayer. File bytes stay local; the
 player fetches only the needed piano samples. Leaving the panel disposes its
 audio context. See music/README.md for supported files, sample limits and
 error/retry behavior.
+
+## Planned track and instrument interface
+
+[MIDI_TRACK_INTERFACE_PLAN.md](MIDI_TRACK_INTERFACE_PLAN.md) maps the legacy
+track display and placeholders to a staged viewer, mixer and instrument-provider
+extension. Steps 1–4 now supply immutable metadata and a pure track/route
+summary helper, plus a pane-local viewer with timeline, strips, zoom, sticky
+labels, a synchronized playhead, highlights and tempo/meter/pedal lanes.
+The selected route has a working mixer and Reset mix restores all routes;
+additional instrument assignment remains planned.
+
+All Music now offers per-route instrument assignment, with original file programs/banks separate from effective sound. Only verified GrandB piano is available; unsupported original assignments are disabled. See music/README.md.
+
+Interface step 6 automated checks pass (79 MIDI tests and 190-file compatibility corpus). The expanded real-browser verification remains pending tool access; see MIDI_VERIFICATION.md.

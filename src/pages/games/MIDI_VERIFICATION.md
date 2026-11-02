@@ -214,3 +214,193 @@ Artifacts are in the task's `midi-verification/step5/` directory:
 Targeted ESLint, formatting and whitespace checks pass. The app's production
 build passes with its existing Vite large-chunk advisory. No additional
 production changes were needed for this verification step.
+
+
+## Track display model — step 1
+
+The song now retains stable note IDs, start/key-release/end ticks, instrument
+and track name history, timed meter/pedal/program/controller events, provenance,
+and explicit inferred default tempo/meter records. MidiDisplayModel groups
+note-bearing tracks and track/channel routes while retaining conductor/empty
+tracks separately. Parsed songs and display models are immutable; route notes
+share the original note objects. useMidiPlayer exposes the song outside its
+progress snapshot and preserves the reference during transport updates.
+
+All **47 MIDI tests** pass, including seven new metadata/display tests. A scan
+of all **190 legacy files** compared each note's track/channel/pitch/velocity,
+program and start/key-release/end seconds against the committed pre-metadata
+MidiTimeline implementation. Every note and song duration matched exactly;
+IDs were unique and display grouping retained every note. Scan details are in
+`display-model-corpus.json` in the task's MIDI verification artifacts.
+
+The real StrictMode browser harness also passed immutable hook song exposure,
+stable references, no song in progress snapshots, clearing during replacement,
+stale-read handling, piano output, silent Stop/replacement and context closure.
+Browser results and captured output are in the `display-metadata/` artifact
+subdirectory. Targeted lint, formatting and whitespace checks pass. This step
+adds the data foundation; the track viewer and instrument controls remain planned.
+
+The production app build also passes (2,817 modules), with the existing Vite large-chunk advisory.
+
+
+## Track viewer — step 2
+
+All Music now renders track/channel strips below the transport, with a seconds
+ruler, logarithmic zoom, fit-to-view, selectable sticky labels and metadata
+summaries. Only visible rows plus overscan have viewport-sized canvases.
+Dense passages use an occupancy overview instead of per-note DOM elements.
+The outer Games pane owns vertical scrolling for short screens.
+
+All **54 MIDI tests** pass. Seven geometry tests cover fit bounds over tiny
+and very long songs, zoom anchoring, ruler spacing/formatting, clipping,
+zero-length notes, row virtualization and interval queries over 100,000 notes.
+The browser checks actual colored note pixels, row selection, horizontal zoom,
+fit reset, label/canvas alignment after both-axis scrolling, resize to a 360px
+pane, 64-track virtualization, a dense 10,000-note strip and replacement reset.
+A per-load song revision resets view state even for files with the same name.
+
+The real piano playback regression still passes: non-silent output, exact
+silence after Stop/replacement, replay/completion and context closure on unmount.
+Results are retained in `midi-verification/track-viewer/browser-results.json`
+and playback.wav in the task artifacts. Targeted lint, formatting, whitespace
+checks and the production build pass. Playhead/highlighting and event lanes
+remain step 3; this viewer does not seek or change audio behavior.
+
+
+## Track synchronization — step 3
+
+The viewer now has one audio-clock playhead, held versus pedal-held note
+highlights, pale sustain tails, follow on/off, and tempo/meter/channel-pedal
+lanes whose current labels follow the cursor. Static note/event canvases stay
+cached; a separate transparent highlight overlay reuses buffers at up to
+30 paints/second. Stop clears overlays and resets the cursor; completion
+retains the endpoint; a replay identity avoids reusing the previous frame.
+No per-note timers or audio-to-React refs are introduced.
+
+All **62 MIDI tests** pass. New coverage includes exclusive highlight end
+boundaries, repeated pitches, follow viewport clamps, simultaneous event
+lookup, inferred/empty lanes, independent channel pedal spans and Reset
+Controllers, one animation request loop and cancellation, and scheduling
+lead-in versus a new replay. Targeted lint, formatting and whitespace checks
+pass; the full production build passes (2,828 modules) with the existing
+large-chunk advisory.
+
+The StrictMode browser harness verifies the rendered playhead against real
+scheduled audio time, blue held notes transitioning to amber sustained notes,
+100-to-200 BPM and default 4/4-to-3/4 transitions, and pedal down-to-up state.
+Follow-off preserves a manual scroll to the far end; follow-on recenters the
+cursor. Stop clears both state counts and every highlight canvas pixel;
+completion clears highlights and keeps the final cursor, and replay resets it.
+Existing zoom/fit/dense-file, import-race, silent Stop/replacement, non-silent
+piano playback and context-close checks continue to pass. Results and audio
+are retained in the task's `midi-verification/track-sync/` artifact directory.
+
+
+## Working mixer — step 4
+
+The selected track/channel now exposes Mute, Solo, Volume and Pan, with Reset
+mix applying to all routes. Voice outputs route through per-track/channel
+gain/pan buses. Live updates ramp over 12ms without recreating sources; mute
+wins over solo, multiple solos are supported, and other tracks sharing a MIDI
+channel remain independent. Stop/completion/error/disposal release all buses;
+Stop/replay preserves overrides, while replacement resets them. Imported MIDI
+volume/expression/pan automation is still metadata and is explicitly not applied.
+
+All **69 MIDI tests** pass. New tests cover immutable normalized settings,
+route isolation, multi-solo/mute precedence, absolute-time ramps, partial graph
+allocation failure, active/scheduled route destinations, preparation edits,
+reset/replay/replacement behavior, cleanup and unsupported-route validation.
+Targeted lint, formatting and whitespace checks pass. The production build
+passes (2,830 modules) with the existing Vite large-chunk advisory.
+
+The browser drives the actual controls while two tracks share channel 1:
+
+| Live operation | Captured result |
+| --- | --- |
+| Volume 100% to 20% | RMS fell from 0.03912 to 0.00525 |
+| Full left | Left RMS 0.03439; right RMS 0 |
+| Full right | Right RMS 0.02113; left near numerical zero |
+| Mute | Both channels exactly silent |
+| Muted solo with a non-solo unmuted track | Both channels exactly silent |
+| Add a second unmuted solo | Audible output restored |
+| Mute both solos | Both channels exactly silent |
+| Reset mix | Both routes restored to defaults and audible output |
+| File replacement / Stop | Both channels exactly silent |
+| Navigate away | Context closed |
+
+The volume windows occur at different times in a naturally decaying sample,
+so their RMS ratio is not a calibrated gain measurement. Unit tests verify the
+exact gain coefficient; the browser verifies an audible-level reduction.
+Only the two original sources were started during live edits, proving controls
+do not restart voices. All earlier track rendering, synchronization, import-race
+and piano playback checks also pass. Full results are retained in the task's
+`midi-verification/track-mixer/browser-results.json`; mixer-playback.wav records
+the live mixer checks separately from the ordinary playback regression audio.
+
+
+## Instrument assignment verification (2026-11-02)
+
+77 MIDI tests pass, including eight assignment tests for verified catalogs,
+per-note program resolution, bank support, provider/version cache isolation,
+immutable per-song assignment and cancellation during fetch/decode. Targeted
+lint and production build pass (existing large-chunk advisory remains).
+
+Discovery found only the existing remote GrandB piano. Representative p/mp/mf/f/ff
+assets at pitches 21, 60 and 108 returned HTTP 200 and CORS `*`; prior complete
+440-asset checks and browser decode verification remain applicable. Bucket
+instrument listing returned 403. No additional timbre is enabled and no samples
+were copied. Unsupported original programs/banks remain disabled; the explicit
+piano override remains available for supported pitched notes.
+
+Focused browser instrument checks pass: captured active RMS 0.01497, peak
+0.04759; after assignment change, 16,318 captured channel samples were exactly
+silent. Explicit Play restarted playback, volume remained 40%, unsupported
+program 13 and bank 3:0 original assignments were disabled, and navigation
+closed the context. Only Original MIDI and verified GrandB were listed.
+Results: task artifact `midi-verification/instrument-assignment/instrument-results.json`.
+The initial hidden-tab full regression timed out waiting for animation highlights;
+use a visible tab for timing checks. A visible run reached the new instrument
+check after passing the existing checks; the fixture initially used 0.4 rather
+than 40 slider units and was corrected before the passing focused verification.
+
+A final visible full-suite rerun timed out at the existing pedal-held highlight
+window. The focused instrument verification passes independently; the final
+full browser regression is not reported as a pass. Its timing-sensitive
+highlight waits need separate stabilization.
+
+
+## Interface step 6 verification (2026-11-02)
+
+| Check | Result |
+| --- | --- |
+| MIDI unit suites | 79 passed, zero failures |
+| Targeted lint: MIDI source, page/text, MIDI tests and browser harness | Passed |
+| Production build | Passed; existing large-chunk advisory remains |
+| Expanded browser harness production bundle | Passed (90 modules) |
+| Corpus against committed playback milestone | 190 files, 621,307 notes, 1,285 routes; unchanged original note fields and song durations; complete unique display grouping |
+| Revised real-browser rendering/audio/resource run | Pending browser tool access |
+
+Added regression tests verify that natural completion disconnects routes and
+voices, clears timers, and retains mix/assignment for replay; old completion,
+error and pump callbacks cannot disturb the next playback. Twenty combined
+mix/assignment/replacement cycles leave no connected voices, gains, panners,
+buses, buffers or timers; dispose closes once and suppresses later callbacks.
+
+The browser fixture now lasts 6s: held 0–2.4s, pedal-held 2.4–4.8s, final chord
+4.8–6s. This provides longer observation windows for real scrolling and follow
+checks, retaining the 120ms clock tolerance. It addresses a suspected timing
+race in the test sequence; resolution is not claimed without a browser run.
+New browser checks suspend/resume audio time and require frozen playhead and
+held highlights. Final cleanup accounts for pending RAFs/intervals, open audio
+contexts, connected product nodes and retained source callbacks, all zero.
+
+The browser tool reported local browser use disabled. The user enabled it, but
+retry and a fresh connection still returned the same disabled status. The revised
+browser tests therefore have **not** executed; earlier browser passes and PCM
+captures above are historical and do not establish a pass for these revisions.
+The temporary server was stopped. Corpus results are retained in the task
+artifact `midi-verification/final-interface/corpus-results.json`.
+
+Resume with the README harness command, a visible tab, and Run playback
+verification; confirm `pass: true` plus zero cleanup counts, then update this
+report with the resulting audio/rendering measurements.

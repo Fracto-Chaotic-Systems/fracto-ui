@@ -3,12 +3,43 @@ const NativeContext = window.AudioContext;
 window.AudioContext = class extends NativeContext {
   constructor(...args) {
     super(...args);
+    this.product_nodes = [];
     this.captured = [];
+    this.scheduled_starts = [];
     contexts.push(this);
     this.master_created = false;
   }
+  track_node(node) {
+    this.product_nodes.push(node);
+    const connect = node.connect.bind(node),
+      disconnect = node.disconnect.bind(node);
+    node.test_connected = false;
+    node.connect = (...args) => {
+      const result = connect(...args);
+      node.test_connected = true;
+      return result;
+    };
+    node.disconnect = (...args) => {
+      const result = disconnect(...args);
+      node.test_connected = false;
+      return result;
+    };
+    return node;
+  }
+  createStereoPanner() {
+    return this.track_node(super.createStereoPanner());
+  }
+  createBufferSource() {
+    const source = this.track_node(super.createBufferSource());
+    const start = source.start.bind(source);
+    source.start = (...args) => {
+      this.scheduled_starts.push({ when: args[0], offset: args[1] ?? 0 });
+      return start(...args);
+    };
+    return source;
+  }
   createGain() {
-    const gain = super.createGain();
+    const gain = this.track_node(super.createGain());
     if (this.master_created) return gain;
     this.master_created = true;
     const connect = gain.connect.bind(gain);

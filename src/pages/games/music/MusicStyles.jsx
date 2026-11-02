@@ -2,7 +2,8 @@ import styled from "styled-components";
 
 export const MusicPanel = styled.section`
   padding: 1.25rem;
-  max-width: 48rem;
+  max-width: 80rem;
+  box-sizing: border-box;
   margin: 0 auto;
   overflow-wrap: anywhere;
 `;
