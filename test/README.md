@@ -142,3 +142,32 @@ caches without reading them, plus expected-value saves and response validation.
   `node --test test/markdown_document.test.js` (also supported in fracto-dev).
 
 `worlds_references.test.js` verifies valid world reference targets and preservation of source text, existing links and code.
+
+- `midi_parser_compatibility.test.js` characterizes midi-parser-js 4.0.4: PPQ,
+  tempo, running status, channels, controllers, formats 0/1, SMPTE detection,
+  and the required unknown-metadata interpreter workaround. Run with
+  `node --test test/midi_parser_compatibility.test.js`. The production adapter is
+  tested separately by midi_events.test.js.
+
+- `midi_events.test.js` verifies the plain MIDI adapter: track tempo merging,
+  sustain/channel isolation, FIFO overlapping notes, controller resets, safe
+  parsing bounds, malformed files, parser hook cleanup and legacy export tails.
+  Run `node --test test/midi_events.test.js test/midi_parser_compatibility.test.js`.
+
+
+- `midi_playback_controller.test.js` verifies playback lifecycle and stale-work
+  cancellation, including MIDI channel/sustain integration. `midi_scheduler.test.js`
+  checks audio-clock scheduling and independent voices; `midi_sample_cache.test.js`
+  checks sample mappings, caching, concurrency, failures and memory bounds.
+  `midi_audio_fakes.js` supplies deterministic Web Audio and timer test doubles.
+  Run `npm run test:midi` for all MIDI suites. A separate Chromium offline
+  render is documented in the games MIDI verification report.
+
+
+- `midi_browser/` is a reproducible browser integration harness for the actual
+  All Music page and hook under StrictMode. It verifies real piano output,
+  silent Stop/replacement, replay/completion, context closure, and stale file
+  reads. See midi_browser/README.md for the loopback command and generated WAV.
+  Expanded MIDI Node suites also cover nonzero context clocks, long notes,
+  partially scheduled chord failures, late sample exhaustion, decode retry,
+  and 50 Play/Stop cycles without timers or connected voices remaining.

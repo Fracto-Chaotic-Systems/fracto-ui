@@ -1,8 +1,12 @@
 # Games panels
 
 The parent ../Games.jsx owns sidebar selection and the persisted splitter.
-Sidebar order is Overview, separator, worlds, separator, wordnet, Settings, Status.
+Sidebar order is Overview, separator, worlds, music, separator, wordnet, Settings, Status.
 Overview, Settings, and Status intentionally remain blank.
+
+- GamesMusic.jsx renders **All Music** with Open MIDI, Play, Stop, filename,
+  playback position, status, errors and file warnings. The music/ modules own
+  MIDI parsing, audio scheduling and lifecycle cleanup.
 
 - GamesWorlds.jsx coordinates the **all worlds** mapping table and searchable
   right-hand contender tray. It uses the existing StudyUtils pattern blocks
@@ -361,3 +365,20 @@ CSV download is an icon link with a download CSV tooltip and accessible label.
 WorldsReferences.js decorates parsed notes prose references (`#68`, `world 68`, or `world #68`) for cardinalities present in the table, excluding existing links and code. Clicking expands destination notes and scrolls the table after layout. Repeated clicks re-expand collapsed destinations. Saved Markdown, drafts and CSV remain unchanged.
 
 When the referenced number is followed by its database theme label, the entire reference (for example `#17 space`) forms one link. Matching is case-insensitive with a word boundary, so unrelated following prose is not included.
+
+## Planned MIDI playback
+
+See [MIDI_IMPORT_PLAN.md](MIDI_IMPORT_PLAN.md) for the legacy source review,
+minimal playback scope, required corrections and verification sequence.
+
+Step 1 results are recorded in [MIDI_VERIFICATION.md](MIDI_VERIFICATION.md):
+verified sample coverage/CORS/browser decoding, parser compatibility, and
+required metadata and malformed-input handling before playback integration.
+
+Step 2 is implemented in [music/](music/README.md): the plain JavaScript MIDI
+adapter validates local bytes and produces a channel-aware note timeline with
+tempo changes and sustain. The audio controller, sample cache and scheduler
+are connected to All Music through useMidiPlayer. File bytes stay local; the
+player fetches only the needed piano samples. Leaving the panel disposes its
+audio context. See music/README.md for supported files, sample limits and
+error/retry behavior.
