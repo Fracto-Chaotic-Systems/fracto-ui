@@ -15,7 +15,12 @@ const require = createRequire(
   new URL("../../fracto-asset-server/package.json", import.meta.url),
 );
 const express = require("express");
-const { values } = parseArgs({ options: { output: { type: "string" } } });
+const { values } = parseArgs({
+  options: {
+    output: { type: "string" },
+    prepared: { type: "boolean", default: false },
+  },
+});
 const token = randomBytes(24).toString("hex");
 const app = express();
 app.use(
@@ -52,10 +57,12 @@ try {
     });
   const loaded = await load_instrument_catalog(url, {
     fetch_catalog: authorized_fetch,
+    allow_prepared: values.prepared,
   });
   let mappings = 0;
   const velocity = { p: 1, mp: 30, mf: 60, f: 90, ff: 127 };
   for (const instrument of loaded.catalog.instruments) {
+    if (!loaded.registry.providers[`asset-${instrument.id}`]) continue;
     for (const asset of instrument.playback_assets) {
       for (const pitch of asset.notes) {
         const sample = loaded.registry.resolve(
@@ -118,14 +125,18 @@ try {
   assert.equal(await player.refresh_catalog(), true);
   assert.equal(context.resume_count, 0);
   const route = Object.keys(player.instruments.assignments)[0];
-  player.set_instrument(route, "asset-flute");
+  const sound_id =
+    values.prepared && loaded.registry.providers["asset-fluidr3-gm-flute"]
+      ? "fluidr3-gm-flute"
+      : "flute";
+  assert.equal(player.set_instrument(route, `asset-${sound_id}`), true);
   assert.equal(await player.play(), true);
   timers.advance(0.2);
   assert.equal(context.sources.length, 4);
   assert.equal(fetches, 1);
   assert.equal(context.decoded, 1);
   const pitches = loaded.catalog.instruments
-    .find((instrument) => instrument.id === "flute")
+    .find((instrument) => instrument.id === sound_id)
     .playback_assets.flatMap((asset) => asset.notes);
   for (let i = 0; i < player.song.notes.length; i++) {
     const midi = player.song.notes[i],
@@ -157,10 +168,11 @@ try {
     pass: true,
     server_library_entries: loaded.catalog.instruments.length,
     validated_pitch_mappings: mappings,
-    test_only_prepared_source_opt_in: false,
+    test_only_prepared_source_opt_in: values.prepared,
     enabled_sources: loaded.catalog.instruments.filter((item) => item.enabled)
       .length,
     proxy_prefix_preserved: true,
+    playback_provider: `asset-${sound_id}`,
     actual_wav_fetches: fetches,
     decoded_chunks: context.decoded,
     simultaneous_voices: 4,

@@ -52,11 +52,50 @@ export default function GamesMusic() {
             void player.open_file(file);
           }}
         />
+        <label>
+          {text("library_label")}
+          <select
+            aria-label={text("library_label")}
+            value={player.catalog.registry?.default_library_id ?? "legacy"}
+            onChange={(event) => player.set_library(event.target.value)}
+          >
+            {(player.catalog.registry?.libraries.length
+              ? player.catalog.registry.libraries
+              : [{ id: "legacy", name: "Legacy recordings" }]
+            ).map((library) => (
+              <option
+                key={library.id}
+                value={library.id}
+                disabled={
+                  player.catalog.registry
+                    ? !player.catalog.registry.can_select_library(library.id)
+                    : false
+                }
+              >
+                {library.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <MusicButton
+          disabled={player.catalog.status === "loading"}
+          onClick={player.refresh_catalog}
+        >
+          {text("library_refresh")}
+        </MusicButton>
+        <p>{text("library_help")}</p>
         <MusicControls>
           <MusicButton onClick={() => input.current?.click()}>
             {text("open")}
           </MusicButton>
-          <MusicButton disabled={!loaded || busy} onClick={player.play}>
+          <MusicButton
+            disabled={
+              !loaded ||
+              busy ||
+              (player.catalog.status === "loading" && !player.catalog.catalog)
+            }
+            onClick={player.play}
+          >
             {text("play")}
           </MusicButton>
           <MusicButton disabled={!busy} onClick={player.stop}>

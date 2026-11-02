@@ -4,17 +4,30 @@ export const instrument_label = (provider, text) =>
   provider.name ?? text(provider.label_key);
 
 // The registry is the authority for playability; inventory never enables a source.
-export function instrument_choices(notes, registry, catalog) {
-  const choices = Object.values(registry.providers).map((provider) => ({
-    id: provider.id,
-    name: provider.name,
-    label_key: provider.label_key,
-    reason: registry.can_assign(notes, provider.id)
-      ? null
-      : "instrument_coverage",
-  }));
+export function instrument_choices(notes, registry, catalog, selection) {
+  const choices = Object.values(registry.providers)
+    .filter(
+      (provider) =>
+        provider.id === DEFAULT_INSTRUMENT ||
+        provider.library_id === registry.default_library_id ||
+        provider.id === selection,
+    )
+    .map((provider) => ({
+      id: provider.id,
+      name:
+        provider.name &&
+        provider.library_id !== registry.default_library_id &&
+        provider.id !== DEFAULT_INSTRUMENT
+          ? `${provider.name} · ${provider.library_name ?? provider.library_id}`
+          : provider.name,
+      label_key: provider.label_key,
+      reason: registry.can_assign(notes, provider.id)
+        ? null
+        : "instrument_coverage",
+    }));
   const ids = new Set(choices.map((choice) => choice.id));
   for (const item of catalog?.instruments ?? []) {
+    if ((item.library_id ?? "legacy") !== registry.default_library_id) continue;
     const id = `asset-${item.id}`;
     if (ids.has(id)) continue;
     choices.push({

@@ -92,15 +92,43 @@ export async function verify_instruments(until) {
   });
   check(response.ok, "Catalog unavailable in assignment verification");
   const catalog = await response.json();
+  const legacy = catalog.instruments.filter(
+    (item) => (item.library_id ?? "legacy") === "legacy",
+  );
   await until(
-    () => choice()?.options.length === catalog.instruments.length + 2,
+    () =>
+      document.querySelector('select[aria-label="Sound library"]')?.value ===
+      "fluidr3-gm",
+    "FluidR3 default library",
+  );
+  check(
+    choice().value === "original",
+    "Default MIDI assignment must follow FluidR3",
+  );
+  check(choice().options.length === 130, "Default FluidR3 inventory");
+  const library_control = document.querySelector(
+    'select[aria-label="Sound library"]',
+  );
+  Object.getOwnPropertyDescriptor(
+    HTMLSelectElement.prototype,
+    "value",
+  ).set.call(library_control, "legacy");
+  library_control.dispatchEvent(new Event("change", { bubbles: true }));
+  await until(
+    () => choice()?.options.length === legacy.length + 2,
+    "Legacy selection",
+  );
+  change("grandb");
+  await sleep(30);
+  await until(
+    () => choice()?.options.length === legacy.length + 2,
     "catalog instrument options",
   );
   check(
     choice().value === "grandb",
     "Discovery changed the default assignment",
   );
-  for (const item of catalog.instruments) {
+  for (const item of legacy) {
     const option = [...choice().options].find(
       (option) => option.value === `asset-${item.id}`,
     );
@@ -191,13 +219,15 @@ export async function verify_instruments(until) {
   choose(12);
   await select_route(until);
   check(
-    choice().value === "grandb" &&
+    choice().value === "original" &&
       choice().querySelector('[value="original"]').disabled,
     "Unsupported original must be disabled",
   );
   check(
     panel().textContent.includes("File programs: 13") &&
-      panel().textContent.includes("Playback sound: GrandB piano"),
+      panel().textContent.includes(
+        "Playback sound: Unavailable for these notes",
+      ),
     "Original/effective labels are misleading",
   );
   choose(0, 3);
@@ -207,9 +237,84 @@ export async function verify_instruments(until) {
       panel().textContent.includes("3:0"),
     "Bank support incorrectly inferred",
   );
+
+  // Exercise the production library selector and GM assignment path.
+  choose(73);
+  await select_route(until);
+  const library = () =>
+    document.querySelector('select[aria-label="Sound library"]');
+  const switch_library = (value) => {
+    Object.getOwnPropertyDescriptor(
+      HTMLSelectElement.prototype,
+      "value",
+    ).set.call(library(), value);
+    library().dispatchEvent(new Event("change", { bubbles: true }));
+  };
+  switch_library("fluidr3-gm");
+  await until(
+    () => choice()?.value === "original",
+    "FluidR3 original assignment",
+  );
+  check(choice().options.length === 130, "FluidR3 scoped choices");
+  check(
+    !choice().querySelector('[value="original"]').disabled,
+    "GM flute unavailable",
+  );
+  check(
+    panel().textContent.includes("Playback sound: Flute"),
+    "GM flute effective label",
+  );
+  button("Play").click();
+  await until(() => status() === "Playing.", "FluidR3 GM playback");
+  const fluid_start = context.currentTime;
+  await until(
+    () => context.currentTime > fluid_start + 0.4,
+    "FluidR3 audio clock",
+  );
+  await until(
+    () => rms(context, fluid_start + 0.1, fluid_start + 0.3).samples > 0,
+    "FluidR3 capture",
+  );
+  const fluid_audio = rms(context, fluid_start + 0.1, fluid_start + 0.3);
+  check(fluid_audio.rms > 0.00001, "FluidR3 output silent");
+  switch_library("legacy");
+  await until(() => status() !== "Playing.", "library change Stop");
+  const fluid_stopped = context.currentTime;
+  await sleep(250);
+  check(
+    rms(context, fluid_stopped + 0.03, fluid_stopped + 0.2).peak < 0.000001,
+    "Library change left sound playing",
+  );
+  check(
+    choice().value === "original" &&
+      choice().querySelector('[value="original"]').disabled,
+    "Unsupported original silently substituted",
+  );
+  change("asset-flute");
+  await sleep(40);
+  switch_library("fluidr3-gm");
+  await until(() => library().value === "fluidr3-gm", "switch back");
+  check(choice().value === "asset-flute", "Cross-library override lost");
+  button("Refresh libraries").click();
+  await until(() => !button("Refresh libraries").disabled, "catalog refresh");
+  check(
+    library().value === "fluidr3-gm" && choice().value === "asset-flute",
+    "Refresh lost selection",
+  );
+  choose(73);
+  await select_route(until);
+  check(
+    library().value === "fluidr3-gm" && choice().value === "original",
+    "Replacement lost selected library",
+  );
   button("Leave music").click();
   await until(() => context.state === "closed", "instrument cleanup");
   return {
+    fluidr3_default_original_assignment: true,
+    fluid_audio,
+    library_switch_stop: true,
+    library_refresh_and_replacement: true,
+    cross_library_override_retained: true,
     active,
     after_assignment_change: silent,
     explicit_play_required: true,

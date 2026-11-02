@@ -38,10 +38,16 @@ const chord = file([
   0x81, 0x10, 176, 64, 0, 0, 255, 47, 0,
 ]);
 const held = file([0, 144, 60, 100, 0xcb, 0, 128, 60, 0, 0, 255, 47, 0]);
-export async function verify_asset_engine(until) {
+export async function verify_asset_engine(
+  until,
+  { instrument_id = "flute", allow_prepared = false } = {},
+) {
   const loaded = await load_instrument_catalog(
     `${window.location.origin}/api/asset/instruments`,
+    { allow_prepared },
   );
+  const began = performance.now();
+  let first_load_ms, decoded_bytes;
   let fetches = 0;
   const player = new MidiPlaybackController({
     catalog_loader: async () => loaded,
@@ -57,10 +63,12 @@ export async function verify_asset_engine(until) {
     await player.refresh_catalog();
     const route = Object.keys(player.instruments.assignments)[0];
     assert(
-      player.set_instrument(route, "asset-flute"),
+      player.set_instrument(route, `asset-${instrument_id}`),
       "Flute assignment unavailable to probe",
     );
     assert(await player.play(), "Native chunk playback failed");
+    first_load_ms = performance.now() - began;
+    decoded_bytes = player.cache.bytes;
     context = contexts.at(-1);
     const origin = context.scheduled_starts[0].when;
     await until(
@@ -97,7 +105,7 @@ export async function verify_asset_engine(until) {
     player.load(held);
     player.set_instrument(
       Object.keys(player.instruments.assignments)[0],
-      "asset-flute",
+      `asset-${instrument_id}`,
     );
     assert(await player.play(), "Held chunk playback failed");
     assert(
@@ -107,7 +115,10 @@ export async function verify_asset_engine(until) {
       "Missing bounded-note warning",
     );
     const start = context.scheduled_starts.at(-1),
-      source = loaded.registry.resolve(player.song.notes[0], "asset-flute");
+      source = loaded.registry.resolve(
+        player.song.notes[0],
+        `asset-${instrument_id}`,
+      );
     assert(
       start.duration <= source.duration_seconds + 1e-6,
       "Source hardware duration crossed its note window",
@@ -149,7 +160,10 @@ export async function verify_asset_engine(until) {
       report: {
         pass: true,
         server_entries: loaded.catalog.instruments.length,
-        test_only_prepared_source_opt_in: false,
+        test_only_prepared_source_opt_in: allow_prepared,
+        instrument_id,
+        first_load_ms,
+        decoded_bytes,
         enabled_sources: loaded.catalog.instruments.filter(
           (item) => item.enabled,
         ).length,

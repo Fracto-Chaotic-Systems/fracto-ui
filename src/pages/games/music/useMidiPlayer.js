@@ -130,6 +130,7 @@ export default function useMidiPlayer() {
   return {
     ...state,
     set_instrument,
+    set_library: (id) => controller.current?.set_library(id),
     refresh_catalog: () => controller.current?.refresh_catalog(),
     set_mix,
     reset_mix,

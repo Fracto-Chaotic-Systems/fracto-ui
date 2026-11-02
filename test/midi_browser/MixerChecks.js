@@ -110,6 +110,18 @@ function defaults() {
 }
 export async function verify_mixer(until) {
   button("Return to music").click();
+  // Mixer measurements need a sustained reference beyond FluidR3's finite samples.
+  // Wait for discovery before explicitly selecting the existing Legacy reference.
+  await until(
+    () => button("Refresh libraries") && !button("Refresh libraries").disabled,
+    "mixer catalog discovery",
+  );
+  const library = document.querySelector('select[aria-label="Sound library"]');
+  Object.getOwnPropertyDescriptor(
+    HTMLSelectElement.prototype,
+    "value",
+  ).set.call(library, "legacy");
+  library.dispatchEvent(new Event("change", { bubbles: true }));
   await sleep(40);
   choose();
   await until(() => status() === "Ready to play.", "mixer fixture");

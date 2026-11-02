@@ -231,3 +231,122 @@ test("bank-select provenance is preserved and never relabeled as standard-bank o
   assert.equal(INSTRUMENT_REGISTRY.can_assign(song.notes, "original"), false);
   assert.equal(INSTRUMENT_REGISTRY.can_assign(song.notes, "grandb"), true);
 });
+
+const multi = create_instrument_registry(
+  [
+    GRANDB_PROVIDER,
+    other,
+    { ...GRANDB_PROVIDER, id: "fluid-piano", library_id: "fluidr3-gm" },
+    {
+      ...other,
+      id: "fluid-flute",
+      library_id: "fluidr3-gm",
+      supports_note: (note) => note.pitch !== 61,
+    },
+  ],
+  {
+    libraries: [
+      { id: "legacy", status: "active" },
+      { id: "fluidr3-gm", status: "active" },
+      { id: "audited", status: "audited" },
+    ],
+  },
+);
+
+test("library selection scopes GM history, retains overrides and rejects missing keys/banks", () => {
+  const notes = [n(0, 0), n(0, 73), n(1, 73)];
+  const model = new MidiInstrumentAssignments(multi);
+  model.load({ notes });
+  const [automatic, manual] = [...model.routes.keys()];
+  model.set(manual, "test-provider");
+  assert.equal(model.select_library("audited"), false);
+  assert.equal(model.select_library("fluidr3-gm"), true);
+  assert.equal(model.assignments[automatic], "original");
+  assert.equal(model.assignments[manual], "test-provider");
+  assert.deepEqual(
+    notes
+      .slice(0, 2)
+      .map((note) => model.registry.resolve(note, "original").instrument_id),
+    ["fluid-piano", "fluid-flute"],
+  );
+  assert.equal(
+    model.registry.can_assign([n(0, 73, { pitch: 61 })], "original"),
+    false,
+  );
+  assert.equal(
+    model.registry.can_assign([n(0, 73, { bank_lsb: 1 })], "original"),
+    false,
+  );
+  model.replace_registry(multi);
+  assert.equal(model.registry.default_library_id, "fluidr3-gm");
+  model.select_library("legacy");
+  assert.equal(model.assignments[automatic], "original");
+  assert.equal(model.assignments[manual], "test-provider");
+  model.select_library("fluidr3-gm");
+  model.load({ notes });
+  assert.ok(Object.values(model.assignments).every((id) => id === "original"));
+  model.replace_registry(INSTRUMENT_REGISTRY);
+  assert.equal(model.registry.default_library_id, "legacy");
+  assert.ok(Object.values(model.assignments).every((id) => id === "grandb"));
+});
+
+test("switching libraries stops native scheduling, preserves mix and cancels stale preparation", async () => {
+  const context = new FakeContext(),
+    pending = deferred();
+  let calls = 0;
+  const player = new MidiPlaybackController({
+    instrument_registry: multi,
+    create_context: () => context,
+    fetch_sample: async () => (++calls === 1 ? pending.promise : response()),
+    ...fake_timers(context),
+  });
+  player.load(midi_file());
+  const route = Object.keys(player.instruments.assignments)[0];
+  player.set_mix(route, { volume: 0.4, pan: 0.2, solo: true });
+  const mix = player.mixer.mix;
+  const loading = player.play();
+  await flush();
+  assert.equal(player.set_library("fluidr3-gm"), true);
+  pending.resolve(response());
+  assert.equal(await loading, false);
+  assert.equal(context.sources.length, 0);
+  assert.equal(player.cache.buffers.size, 0);
+  assert.equal(player.mixer.mix, mix);
+  assert.equal(player.instruments.assignments[route], "original");
+  assert.equal(await player.play(), true);
+  player.set_library("legacy");
+  assert.equal(player.status, "stopped");
+  assert.equal(player.scheduler, null);
+  assert.equal(player.mixer.mix, mix);
+  player.load(midi_file());
+  assert.equal(player.instruments.assignments[route], "original");
+  await player.dispose();
+});
+
+test("catalog refresh preserves selected library and original unsupported assignments", async () => {
+  let next = multi;
+  const player = new MidiPlaybackController({
+    instrument_registry: multi,
+    catalog_loader: async () => ({ registry: next, catalog: {} }),
+  });
+  player.load(midi_file());
+  player.set_library("fluidr3-gm");
+  const route = Object.keys(player.instruments.assignments)[0];
+  player.set_instrument(route, "original");
+  await player.refresh_catalog();
+  assert.equal(player.catalog_state.registry.default_library_id, "fluidr3-gm");
+  next = create_instrument_registry(
+    [
+      GRANDB_PROVIDER,
+      { ...other, id: "fluid-flute", library_id: "fluidr3-gm" },
+    ],
+    { libraries: multi.libraries },
+  );
+  await player.refresh_catalog();
+  assert.equal(player.instruments.assignments[route], "original");
+  assert.equal(
+    player.instruments.registry.can_assign(player.song.notes, "original"),
+    false,
+  );
+  await player.dispose();
+});

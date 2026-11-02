@@ -107,8 +107,9 @@ export async function verify_tracks(until) {
   native_value(slider(), "3");
   await settle();
   check(
-    region().scrollWidth > region().clientWidth * 4,
-    "Zoom did not enlarge timeline",
+    region().scrollWidth - labels()[0].getBoundingClientRect().width >
+      (region().clientWidth - labels()[0].getBoundingClientRect().width) * 4,
+    "Zoom did not enlarge the visible note area",
   );
   region().scrollLeft = region().scrollWidth / 3;
   region().dispatchEvent(new Event("scroll"));

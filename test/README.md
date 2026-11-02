@@ -209,3 +209,14 @@ checks PCM capture after all source inputs disconnect. `midi_asset_engine_probe.
 uses actual HTTP/WAV bytes with a deterministic decoder stub. The browser harness
 independently verifies native playback; dated JSON evidence is in midi_reports/.
 See ../src/pages/games/music/ASSET_MIGRATION.md for current results and setup.
+
+
+`midi_catalog_libraries.test.js` adds multi-library identity validation,
+scoped program lookup, cache isolation, metadata refresh, 149-entry catalogs and
+bounded UTF-8 catalog-stream tests. The MIDI suite now contains 109 tests.
+
+
+FluidR3 importer integration: midi_asset_engine_probe.mjs --prepared validates
+all prepared mappings and loads a real FluidR3 flute WAV through the cache and
+voice scheduler with a stub decoder/clock. Default mode tests enabled providers
+only. Neither mode changes catalog enablement or substitutes for native playback.

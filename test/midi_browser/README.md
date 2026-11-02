@@ -1,5 +1,29 @@
 # MIDI browser verification
 
+## Current default: FluidR3 GM (migration step 6)
+
+The catalog now declares `default_library_id: "fluidr3-gm"`. All Music selects it
+when catalog discovery completes, and new files use **Original MIDI assignment**.
+Each note resolves its recorded GM program within FluidR3, including program
+changes. The selection persists across file replacement within the mounted page;
+manual route overrides reset on replacement. Explicit Legacy selection and
+compatible manual overrides survive catalog refresh. Before discovery or when the
+catalog cannot be loaded, the existing GrandB fallback remains available.
+
+Legacy recordings is still selectable and all 149 instruments remain enabled.
+Missing/silent keys, percussion and nonstandard banks report unavailable rather
+than silently substituting piano. Samples remain finite, without invented loops
+or additional velocity layers. This changes the default choice, not the audio
+assets, gain, or memory limits. To roll back, set the catalog default to `legacy`
+and validate it using `npm run instruments:verify`; clients receive it on refresh
+unless they explicitly selected a library. Earlier step 4/5 reports record the
+historical Legacy default.
+
+Validation: 117 MIDI tests cover initial defaults, replacement, late discovery,
+manual overrides and Legacy selection. Full catalog verification confirms all 149
+enabled instruments. Production build and targeted lint pass.
+
+
 Current playback status (2026-11-02): **all 21 instruments are enabled** after
 75 native Chromium decode/render probes (low/middle/high pitches of every
 recording layer) passed through the sample cache and voice engine at 48 kHz.
@@ -104,3 +128,54 @@ Discovery must not change the default assignment. The worklet records rendered
 zero-input silence, and the boundary test waits for delivered PCM before checking.
 These recorder changes affect tests only. Reports establish graph output, not
 physical speakers or per-instrument certification. All catalog enable flags stay false.
+
+
+## FluidR3 native verification
+
+Run Verify FluidR3 representatives, then Verify complete FluidR3 library after a
+reload. FluidChecks.js uses native OfflineAudioContext and the real cache/voice
+code for all 10,648 non-silent notes and 1,099 chunks, checks release silence,
+program scoping and all 616 excluded keys, and checkpoints each instrument.
+Representatives also use actual AudioContext output capture with AssetEngineChecks
+parameterized for the prepared source, checking four shared voices, replay, Stop,
+finite source boundaries and cleanup. The A/B export has 14 C4 clips: legacy then
+FluidR3 for piano/flute/violin/bass/guitar/organ/vibraphone. Each clip is 5.4s.
+
+Outputs: fluidr3-representatives.json, fluidr3-complete.json and
+fluidr3-ab-audition.wav. The asset-server analyze_fluidr3_audition.py produces
+spectral evidence and a separate level-matched audition. No source audio is
+changed. Full notes are native-rendered at 48kHz; subjective quality and other
+browsers/rates are not certified. Prepared-source access is test-only; enablement
+is unchanged by the harness.
+
+TrackChecks now measures zoom against the note area excluding fixed-width
+labels, so narrow panes do not falsely fail. Audition frame counts use rounding.
+
+
+## FluidR3 library selection (migration step 5)
+
+All Music offers **Sound library** and **Refresh libraries** before loading a file.
+All 128 verified FluidR3 GM instruments are enabled; Legacy recordings remains the
+catalog and initial UI default. Changing that global default is step 6.
+
+Choosing a library stops playback and pending sample preparation, clears decoded
+sample caches, and requires Play again. Unmodified routes use Original MIDI
+assignment within the chosen library, including each note's program changes.
+Compatible explicit overrides remain assigned even across libraries; the retained
+option includes its library name. Mixer settings and parsed file metadata remain
+unchanged. New files reset route overrides/mix but retain the selected library for
+this mounted page. Leaving the page resets that choice.
+
+Instrument menus show the selected library, GrandB piano fallback, and any retained
+cross-library override. Original assignments never silently substitute another
+library. Nonzero banks, percussion, missing programs, and excluded silent keys
+remain unavailable; choose a supported explicit override when appropriate.
+Catalog refresh retains the selection if playable, otherwise uses the catalog
+default. Failed discovery retains the last usable registry and fallback piano.
+Audio stays lazy: only the song's required chunks download on Play.
+
+Validation: 115 MIDI unit/integration tests, production build, targeted lint,
+29 asset-server tests, full catalog integrity verification (149 enabled instruments),
+and native Chromium 48 kHz library switching/GM flute output/Stop/refresh/replacement/
+cleanup checks. The original full-library sample verification still applies to the
+unchanged audio assets. Human quality ranking and other browsers are not certified.

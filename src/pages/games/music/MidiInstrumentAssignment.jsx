@@ -33,8 +33,8 @@ function MidiInstrumentAssignment({
     [registry, row.notes],
   );
   const choices = useMemo(
-    () => instrument_choices(row.notes, registry, catalog?.catalog),
-    [row.notes, registry, catalog?.catalog],
+    () => instrument_choices(row.notes, registry, catalog?.catalog, selection),
+    [row.notes, registry, catalog?.catalog, selection],
   );
   const effective = useMemo(
     () => effective_instrument(row.notes, selection, registry, text),

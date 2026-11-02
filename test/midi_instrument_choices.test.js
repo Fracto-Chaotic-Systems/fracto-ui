@@ -69,3 +69,21 @@ test("effective names use runtime providers, while original mappings remain expl
     "instrument_not_playable",
   );
 });
+
+test("choices scope inventory to selected library and retain a named cross-library override", () => {
+  const scoped = create_instrument_registry(
+    [
+      GRANDB_PROVIDER,
+      flute,
+      { ...flute, id: "fluid-flute", library_id: "fluidr3-gm" },
+    ],
+    { default_library_id: "fluidr3-gm" },
+  );
+  assert.deepEqual(
+    instrument_choices(notes, scoped, catalog).map((c) => c.id),
+    ["grandb", "fluid-flute"],
+  );
+  const choices = instrument_choices(notes, scoped, catalog, "asset-flute");
+  assert.equal(choices.length, 3);
+  assert.match(choices.find((c) => c.id === "asset-flute").name, /legacy/);
+});

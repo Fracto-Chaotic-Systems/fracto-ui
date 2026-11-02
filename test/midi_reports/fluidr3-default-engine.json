@@ -1,0 +1,18 @@
+{
+  "verified_date": "2026-11-02",
+  "pass": true,
+  "server_library_entries": 149,
+  "validated_pitch_mappings": 1999,
+  "test_only_prepared_source_opt_in": false,
+  "enabled_sources": 21,
+  "proxy_prefix_preserved": true,
+  "playback_provider": "asset-flute",
+  "actual_wav_fetches": 1,
+  "decoded_chunks": 1,
+  "simultaneous_voices": 4,
+  "decoded_bytes": 16766820,
+  "replay_reused_chunk": true,
+  "context_close_count": 1,
+  "timers_after_dispose": 0,
+  "verification": "Real HTTP/catalog/checksum/WAV bytes with deterministic clock and WAV-header decoder stub; browser audio output remains pending."
+}

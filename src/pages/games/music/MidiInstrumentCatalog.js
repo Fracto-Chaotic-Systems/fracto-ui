@@ -1,4 +1,9 @@
 import {
+  catalog_libraries,
+  MAX_CATALOG_BYTES,
+  MAX_INSTRUMENTS,
+} from "./MidiCatalogLibraries.js";
+import {
   create_instrument_registry,
   GRANDB_PROVIDER,
 } from "./MidiInstruments.js";
@@ -199,9 +204,15 @@ export function registry_from_catalog(
     !hash(catalog.revision) ||
     !integer(catalog.library_version, 1) ||
     !Array.isArray(catalog.instruments) ||
-    catalog.instruments.length > 128
+    catalog.instruments.length > MAX_INSTRUMENTS
   )
     fail();
+  let metadata;
+  try {
+    metadata = catalog_libraries(catalog);
+  } catch {
+    fail();
+  }
   const ids = new Set(),
     definitions = [GRANDB_PROVIDER];
   for (const item of catalog.instruments) {
@@ -222,11 +233,56 @@ export function registry_from_catalog(
         item.verification_status,
       )
     )
-      definitions.push(
-        provider_from_catalog(item, catalog.revision, catalog_url),
-      );
+      definitions.push({
+        ...provider_from_catalog(item, catalog.revision, catalog_url),
+        library_id: item.library_id ?? "legacy",
+        instrument_key: item.instrument_key ?? item.id,
+        library_name: metadata.libraries.find(
+          (library) => library.id === (item.library_id ?? "legacy"),
+        ).name,
+      });
   }
-  return create_instrument_registry(definitions);
+  return create_instrument_registry(definitions, metadata);
+}
+
+async function bounded_catalog_json(response) {
+  const declared = Number(response.headers?.get("content-length"));
+  if (declared > MAX_CATALOG_BYTES) {
+    await response.body?.cancel();
+    fail();
+  }
+  if (!response.body?.getReader) {
+    const value = await response.json();
+    if (
+      new TextEncoder().encode(JSON.stringify(value)).byteLength >
+      MAX_CATALOG_BYTES
+    )
+      fail();
+    return value;
+  }
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder("utf-8", { fatal: true });
+  let size = 0,
+    text = "";
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > MAX_CATALOG_BYTES) {
+        await reader.cancel();
+        fail();
+      }
+      text += decoder.decode(value, { stream: true });
+    }
+    text += decoder.decode();
+    return JSON.parse(text);
+  } catch (error) {
+    await reader.cancel().catch(() => {});
+    throw error;
+  } finally {
+    reader.releaseLock();
+  }
 }
 
 export async function load_instrument_catalog(
@@ -250,7 +306,7 @@ export async function load_instrument_catalog(
       signal: request.signal,
     });
     if (!response.ok) fail();
-    const catalog = await response.json();
+    const catalog = await bounded_catalog_json(response);
     if (request.signal.aborted) fail();
     const registry = registry_from_catalog(
       catalog,

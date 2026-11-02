@@ -4,6 +4,8 @@ export const ORIGINAL_INSTRUMENT = "original";
 
 export const GRANDB_PROVIDER = Object.freeze({
   id: DEFAULT_INSTRUMENT,
+  library_id: "legacy",
+  instrument_key: "grandb",
   version: "1",
   label_key: "instrument_grandb",
   verified: true,
@@ -15,7 +17,10 @@ export const GRANDB_PROVIDER = Object.freeze({
 });
 
 // Providers are an explicit code-owned, verified catalog, never remote scripts.
-export function create_instrument_registry(definitions) {
+export function create_instrument_registry(
+  definitions,
+  { default_library_id = "legacy", libraries = [] } = {},
+) {
   const providers = Object.create(null);
   for (const definition of definitions) {
     if (!definition.verified) continue;
@@ -28,6 +33,8 @@ export function create_instrument_registry(definitions) {
       throw new Error("Invalid or duplicate instrument provider.");
     providers[definition.id] = Object.freeze({
       ...definition,
+      library_id: definition.library_id ?? "legacy",
+      instrument_key: definition.instrument_key ?? definition.id,
       programs: Object.freeze([...definition.programs]),
     });
   }
@@ -38,32 +45,53 @@ export function create_instrument_registry(definitions) {
     note.pitch >= provider.min_pitch &&
     note.pitch <= provider.max_pitch &&
     (!provider.supports_note || provider.supports_note(note));
-  const original = (note) => {
+  const original = (note, library_id = default_library_id) => {
     // Only standard-bank mappings are verified. A numbered GM program alone
     // must not silently reinterpret a bank-select or percussion assignment.
     if ((note.bank_msb ?? 0) !== 0 || (note.bank_lsb ?? 0) !== 0) return null;
     return Object.values(providers).find(
       (provider) =>
+        provider.library_id === library_id &&
         provider.programs.includes(note.program ?? 0) &&
         supports(provider, note),
     );
   };
   return Object.freeze({
     providers,
-    signature: JSON.stringify(
+    can_select_library(id) {
+      return (
+        (libraries.length === 0 ||
+          libraries.some((l) => l.id === id && l.status === "active")) &&
+        Object.values(providers).some((p) => p.library_id === id)
+      );
+    },
+    with_library(id) {
+      return create_instrument_registry(Object.values(providers), {
+        libraries,
+        default_library_id: id,
+      });
+    },
+    default_library_id,
+    libraries: Object.freeze(
+      libraries.map((library) => Object.freeze({ ...library })),
+    ),
+    signature: JSON.stringify([
+      default_library_id,
       Object.values(providers).map((provider) => [
         provider.id,
         provider.version,
         provider.programs,
         provider.source_identity ?? null,
+        provider.library_id,
+        provider.instrument_key,
       ]),
-    ),
-    can_assign(notes, selection) {
+    ]),
+    can_assign(notes, selection, library_id = default_library_id) {
       return (
         notes.length > 0 &&
         notes.every((note) =>
           selection === ORIGINAL_INSTRUMENT
-            ? !!original(note)
+            ? !!original(note, library_id)
             : supports(providers[selection], note),
         )
       );
@@ -71,7 +99,7 @@ export function create_instrument_registry(definitions) {
     resolve(note, selection = DEFAULT_INSTRUMENT, options = {}) {
       const provider =
         selection === ORIGINAL_INSTRUMENT
-          ? original(note)
+          ? original(note, options.library_id ?? default_library_id)
           : providers[selection];
       if (!provider)
         throw new MidiPlaybackError(
@@ -87,6 +115,8 @@ export function create_instrument_registry(definitions) {
       return {
         ...sample,
         instrument_id: provider.id,
+        library_id: provider.library_id,
+        instrument_key: provider.instrument_key,
         cache_key: `${provider.id}@${provider.version}:${sample.url}`,
       };
     },

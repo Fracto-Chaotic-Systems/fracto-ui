@@ -244,11 +244,13 @@ export default class MidiPlaybackController {
       )
         return false;
       this.catalog_request = null;
-      if (registry.signature !== this.instruments.registry.signature) {
-        this.stop();
+      const previous = this.instruments.source_signature();
+      this.instruments.replace_registry(registry);
+      if (previous !== this.instruments.source_signature()) {
+        this.stop({ cancel_catalog: false });
         this.cache.clear();
-        this.on_instruments(this.instruments.replace_registry(registry));
       }
+      this.on_instruments(this.instruments.assignments);
       publish({
         status: "ready",
         registry: this.instruments.registry,
@@ -276,11 +278,27 @@ export default class MidiPlaybackController {
     return true;
   }
 
+  set_library(id) {
+    if (this.disposed || !this.instruments.base_registry.can_select_library(id))
+      return false;
+    if (id === this.instruments.registry.default_library_id) return true;
+    this.stop({ cancel_catalog: false });
+    this.cache.clear();
+    this.instruments.select_library(id);
+    this.on_instruments(this.instruments.assignments);
+    this.catalog_state = {
+      ...this.catalog_state,
+      registry: this.instruments.registry,
+    };
+    this.on_catalog(this.catalog_state);
+    return true;
+  }
+
   set_instrument(id, selection) {
     if (this.disposed || !this.song || !this.instruments.can_set(id, selection))
       return false;
     if (this.instruments.assignments[id] === selection) return true;
-    this.stop();
+    this.stop({ cancel_catalog: false });
     this.instruments.set(id, selection);
     this.on_instruments(this.instruments.assignments);
     return true;

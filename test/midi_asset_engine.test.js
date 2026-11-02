@@ -374,13 +374,17 @@ test("catalog refresh is silent, preserves mix, and stops active playback when s
   });
   player.load(midi_file());
   player.set_mix(route, { volume: 0.4 });
-  await player.play();
+  assert.equal(await player.refresh_catalog(), true);
+  assert.equal(context.resume_count, 0);
+  assert.equal(player.set_instrument(route, "asset-flute"), true);
+  assert.equal(await player.play(), true);
+  f.catalog.revision = "b".repeat(64);
   assert.equal(await player.refresh_catalog(), true);
   assert.equal(context.sources[0].stopped, true);
   assert.equal(player.status, "stopped");
   assert.equal(player.mixer.mix[route].volume, 0.4);
-  assert.equal(player.set_instrument(route, "asset-flute"), true);
-  await player.play();
+  assert.equal(player.instruments.assignments[route], "asset-flute");
+  assert.equal(await player.play(), true);
   assert.equal(player.status, "playing");
   assert.equal(state.at(-1).status, "ready");
   await player.dispose();
@@ -533,4 +537,43 @@ test("disposal in a catalog-loading callback prevents the fetch from starting", 
   });
   assert.equal(await player.refresh_catalog(), false);
   assert.equal(called, false);
+});
+
+test("discovery of unrelated providers does not stop the active legacy piano", async () => {
+  const f = asset_fixture();
+  const { player, context } = setup(f, {
+    catalog_loader: async () => ({ catalog: f.catalog, registry: registry(f) }),
+  });
+  player.load(midi_file());
+  player.set_mix(route, { volume: 0.4 });
+  assert.equal(await player.play(), true);
+  const scheduler = player.scheduler,
+    bytes = player.cache.bytes;
+  assert.equal(await player.refresh_catalog(), true);
+  assert.equal(player.scheduler, scheduler);
+  assert.equal(player.status, "playing");
+  assert.equal(player.cache.bytes, bytes);
+  assert.equal(player.mixer.mix[route].volume, 0.4);
+  assert.ok(player.instruments.registry.providers["asset-flute"]);
+  assert.ok(context.sources.every((source) => !source.stopped));
+  await player.dispose();
+});
+
+test("discovery during unchanged-source preparation does not cancel the first Play", async () => {
+  const f = asset_fixture(),
+    pending = deferred();
+  const { player } = setup(f, {
+    fetch_sample: () => pending.promise,
+    catalog_loader: async () => ({ catalog: f.catalog, registry: registry(f) }),
+  });
+  player.load(midi_file());
+  const playing = player.play();
+  await flush();
+  assert.equal(player.status, "loading");
+  assert.equal(await player.refresh_catalog(), true);
+  assert.equal(player.status, "loading");
+  pending.resolve(f.response());
+  assert.equal(await playing, true);
+  assert.equal(player.status, "playing");
+  await player.dispose();
 });

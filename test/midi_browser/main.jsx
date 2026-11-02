@@ -1,3 +1,4 @@
+import { fluid_representatives, fluid_complete } from "./FluidChecks.js";
 import { verify_library } from "./LibraryChecks.js";
 import { initialize_service_ports } from "../../src/utils/service_ports.jsx";
 import { verify_asset_engine } from "./AssetEngineChecks.js";
@@ -143,6 +144,14 @@ async function run() {
     await until(() => status() === "Ready to play.", "ready");
     const tracks = await verify_tracks(until);
     await prepare_sync();
+    await until(
+      () =>
+        !document.querySelector("#page button:disabled") ||
+        [...document.querySelectorAll("#page button")].some(
+          (button) => button.textContent === "Play" && !button.disabled,
+        ),
+      "initial catalog settled",
+    );
     click("Play");
     await until(() => status() === "Playing.", "playing");
     const context = contexts.at(-1),
@@ -328,11 +337,41 @@ async function run_library() {
     2,
   );
 }
+async function run_fluid(mode) {
+  const route =
+    mode === "representatives" ? "/fluid_representatives" : "/fluid_complete";
+  const progress = (message) => {
+    document.getElementById("report").textContent = message;
+  };
+  const save = (report) =>
+    fetch(route, { method: "POST", body: JSON.stringify(report, null, 2) });
+  let report;
+  try {
+    report =
+      mode === "representatives"
+        ? await fluid_representatives(until, progress)
+        : await fluid_complete(progress, save);
+  } catch (error) {
+    report = { pass: false, error: error.message, stack: error.stack };
+  }
+  await save(report);
+  document.getElementById("report").textContent = JSON.stringify(
+    report,
+    null,
+    2,
+  );
+}
 function Harness() {
   const [show, set_show] = useState(true);
   return (
     <>
       <nav>
+        <button onClick={() => run_fluid("representatives")}>
+          Verify FluidR3 representatives
+        </button>
+        <button onClick={() => run_fluid("complete")}>
+          Verify complete FluidR3 library
+        </button>
         <button onClick={run_library}>Verify instrument library</button>
         <button onClick={run_asset_engine}>
           Run asset-engine verification

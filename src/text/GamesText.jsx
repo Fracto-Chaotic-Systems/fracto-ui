@@ -81,6 +81,9 @@ export const MUSIC_TEXT = Object.fromEntries(
     "file_read_failed",
     "file_too_large",
     "sample_load_failed",
+    "library_label",
+    "library_refresh",
+    "library_help",
     "catalog_unavailable",
     "instrument_coverage",
     "instrument_assets_unavailable",
@@ -158,6 +161,10 @@ export const MUSIC_TEXT = Object.fromEntries(
 );
 
 export const APP_GAMES_TEXT = {
+  [MUSIC_TEXT.library_label]: "Sound library",
+  [MUSIC_TEXT.library_refresh]: "Refresh libraries",
+  [MUSIC_TEXT.library_help]:
+    "Changing libraries stops playback. Original MIDI assignments follow the selected library; compatible manual overrides are retained. Press Play to hear changes.",
   [MUSIC_TEXT.instrument_assignment]: "Instrument",
   [MUSIC_TEXT.instrument_grandb]: "GrandB piano",
   [MUSIC_TEXT.instrument_original]: "Original MIDI assignment",
@@ -240,7 +247,7 @@ export const APP_GAMES_TEXT = {
   [MUSIC_TEXT.file_input]: "Select a MIDI file",
   [MUSIC_TEXT.progress]: "Playback position",
   [MUSIC_TEXT.help]:
-    "Open a MIDI file, then press Play. Files stay in your browser. Piano playback supports pitches 21–108; percussion is not supported.",
+    "Open a MIDI file, then press Play. Files stay in your browser. FluidR3 GM follows the MIDI instrument assignments. Verified sounds cover pitches 21–108 with some missing keys; percussion is not supported.",
   [MUSIC_TEXT.idle]: "Open a MIDI file to begin.",
   [MUSIC_TEXT.reading]: "Reading MIDI file…",
   [MUSIC_TEXT.ready]: "Ready to play.",
@@ -258,7 +265,7 @@ export const APP_GAMES_TEXT = {
   [MUSIC_TEXT.sample_integrity_unavailable]:
     "Instrument audio verification requires HTTPS or localhost.",
   [MUSIC_TEXT.catalog_unavailable]:
-    "The instrument library is unavailable. Existing piano playback remains available.",
+    "The instrument catalog could not be refreshed. Existing sound sources remain available.",
   [MUSIC_TEXT.sample_load_failed]:
     "An instrument sample could not be loaded. Check your connection and press Play to retry.",
   [MUSIC_TEXT.invalid_sample]:
