@@ -333,3 +333,37 @@ test("mixed assignment, replacement and playback cycles retain no old audio grap
   assert.equal(statuses.length, count);
   assert.equal(context.close_count, 1);
 });
+
+test("stalled audio resume becomes a retryable error and late resume cannot start sources", async () => {
+  const pending = deferred(),
+    context = new FakeContext();
+  context.resume = () => pending.promise;
+  const { player } = setup({
+    create_context: () => context,
+    resume_timeout_ms: 10,
+  });
+  player.load(midi_file());
+  assert.equal(await player.play(), false);
+  assert.equal(player.snapshot().error.code, "audio_resume_timeout");
+  pending.resolve();
+  await flush();
+  assert.equal(context.sources.length, 0);
+  context.resume = async () => {};
+  assert.equal(await player.play(), true);
+  await player.dispose();
+});
+
+test("a sample timeout leaves loading, permits retry and clears loading progress", async () => {
+  const { player } = setup({
+    fetch_sample: () => new Promise(() => {}),
+    load_timeout_ms: 10,
+  });
+  player.load(midi_file());
+  assert.equal(await player.play(), false);
+  assert.equal(player.status, "error");
+  assert.equal(player.snapshot().error.code, "sample_load_timeout");
+  assert.equal(player.snapshot().loading_progress, null);
+  player.cache.fetch_sample = async () => response();
+  assert.equal(await player.play(), true);
+  await player.dispose();
+});

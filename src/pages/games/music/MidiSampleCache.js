@@ -1,3 +1,4 @@
+import { loading_task } from "./MidiLoadingTask.js";
 import { MidiPlaybackError } from "./MidiPianoSamples.js";
 import { INSTRUMENT_REGISTRY, DEFAULT_INSTRUMENT } from "./MidiInstruments.js";
 import { midi_route_id } from "./MidiMixer.js";
@@ -14,8 +15,15 @@ export default class MidiSampleCache {
     sample_root,
     concurrency = 4,
     max_bytes = MAX_CACHE_BYTES,
+    load_timeout_ms = 60000,
   } = {}) {
-    Object.assign(this, { fetch_sample, sample_root, concurrency, max_bytes });
+    Object.assign(this, {
+      fetch_sample,
+      sample_root,
+      concurrency,
+      max_bytes,
+      load_timeout_ms,
+    });
     this.buffers = new Map();
     this.bytes = 0;
     this.preparation = null;
@@ -30,7 +38,11 @@ export default class MidiSampleCache {
     notes,
     context,
     signal,
-    { registry = INSTRUMENT_REGISTRY, assignments = {} } = {},
+    {
+      registry = INSTRUMENT_REGISTRY,
+      assignments = {},
+      on_progress = () => {},
+    } = {},
   ) {
     this.preparation?.abort();
     const request = new AbortController();
@@ -80,6 +92,8 @@ export default class MidiSampleCache {
       if (estimate > this.max_bytes) throw memory_error();
       const keys = [...assets.keys()];
       let next = 0;
+      let completed = keys.filter((key) => this.buffers.has(key)).length;
+      on_progress({ completed, total: keys.length });
       await Promise.all(
         Array.from(
           { length: Math.min(this.concurrency, keys.length) },
@@ -91,17 +105,25 @@ export default class MidiSampleCache {
               if (this.buffers.has(key)) continue;
               let buffer;
               try {
-                const response = await this.fetch_sample(sample.url, {
-                  signal: request.signal,
-                  credentials: sample.credentials ?? "omit",
-                });
-                check();
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                const bytes = await response.arrayBuffer();
-                check();
-                await verify_asset_bytes(sample, bytes);
-                check();
-                buffer = await context.decodeAudioData(bytes);
+                buffer = await loading_task(
+                  async () => {
+                    const response = await this.fetch_sample(sample.url, {
+                      signal: request.signal,
+                      credentials: sample.credentials ?? "omit",
+                    });
+                    check();
+                    if (!response.ok)
+                      throw new Error(`HTTP ${response.status}`);
+                    const bytes = await response.arrayBuffer();
+                    check();
+                    await verify_asset_bytes(sample, bytes);
+                    check();
+                    return await context.decodeAudioData(bytes);
+                  },
+                  request.signal,
+                  this.load_timeout_ms,
+                  "sample_load_timeout",
+                );
               } catch (error) {
                 check();
                 if (error instanceof MidiPlaybackError) throw error;
@@ -143,6 +165,7 @@ export default class MidiSampleCache {
               if (this.bytes + bytes > this.max_bytes) throw memory_error();
               this.buffers.set(key, buffer);
               this.bytes += bytes;
+              on_progress({ completed: ++completed, total: keys.length });
             }
           },
         ),

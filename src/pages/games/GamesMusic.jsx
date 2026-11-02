@@ -105,6 +105,8 @@ export default function GamesMusic() {
         <p>{file_name || text("no_file")}</p>
         <p role="status" aria-live="polite">
           {text(reading ? "reading" : snapshot.status) || text("idle")}
+          {snapshot.loading_progress &&
+            ` ${text("loading_progress").replace("{completed}", snapshot.loading_progress.completed).replace("{total}", snapshot.loading_progress.total)}`}
         </p>
         {loaded && (
           <MusicProgress aria-label={text("progress")}>

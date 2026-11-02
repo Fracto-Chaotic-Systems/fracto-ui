@@ -127,3 +127,59 @@ test("decode failure is retryable and an empty decoded sample is rejected", asyn
   await cache.prepare([note()], context, signal);
   assert.equal(cache.buffers.size, 1);
 });
+
+test("stalled fetch, response body and decoder time out without retaining late buffers", async () => {
+  for (const stage of ["fetch", "body", "decode"]) {
+    const pending = deferred(),
+      context = new FakeContext();
+    const cache = new MidiSampleCache({
+      load_timeout_ms: 10,
+      fetch_sample: async () => {
+        if (stage === "fetch") return pending.promise;
+        if (stage === "body")
+          return { ok: true, arrayBuffer: () => pending.promise };
+        return response();
+      },
+    });
+    if (stage === "decode") context.decodeAudioData = () => pending.promise;
+    await assert.rejects(
+      cache.prepare([note()], context, new AbortController().signal),
+      { code: "sample_load_timeout" },
+    );
+    pending.resolve(
+      stage === "decode"
+        ? context.buffer
+        : stage === "body"
+          ? new ArrayBuffer(1)
+          : response(),
+    );
+    await flush();
+    assert.equal(cache.buffers.size, 0);
+    assert.equal(cache.bytes, 0);
+    assert.equal(cache.preparation, null);
+  }
+});
+
+test("Stop settles preparation even when the transport ignores abort; retry reports progress", async () => {
+  const pending = deferred(),
+    controller = new AbortController(),
+    context = new FakeContext();
+  const cache = new MidiSampleCache({ fetch_sample: () => pending.promise });
+  const loading = cache.prepare([note()], context, controller.signal);
+  await flush();
+  controller.abort();
+  await assert.rejects(loading, { code: "cancelled" });
+  cache.fetch_sample = async () => response();
+  const progress = [];
+  await cache.prepare([note(), note()], context, new AbortController().signal, {
+    on_progress: (value) => progress.push(value),
+  });
+  assert.deepEqual(progress, [
+    { completed: 0, total: 1 },
+    { completed: 1, total: 1 },
+  ]);
+  pending.resolve(response());
+  await flush();
+  assert.equal(cache.buffers.size, 1);
+  cache.clear();
+});

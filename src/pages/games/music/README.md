@@ -482,3 +482,4 @@ and native Chromium 48 kHz library switching/GM flute output/Stop/refresh/replac
 cleanup checks. The original full-library sample verification still applies to the
 unchanged audio assets. Human quality ranking and other browsers are not certified.
 Step 6 browser regression passed. Play waits for first catalog discovery to settle, avoiding fallback playback being interrupted when the default arrives. Failed discovery leaves fallback playback available.
+Sample preparation now reports completed/required chunk counts. Each download/body-read/integrity/decode operation has a 60-second chunk deadline; audio-context resume has a 15-second deadline. Timeouts leave Loading with a retryable error. Stop settles pending preparation even when the underlying browser promise ignores abort; late work cannot schedule voices or populate the cache.

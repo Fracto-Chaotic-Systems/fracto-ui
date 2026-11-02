@@ -1,3 +1,4 @@
+import { loading_task } from "./MidiLoadingTask.js";
 import { sample_window } from "./MidiSampleAsset.js";
 import { events_from_midi } from "./MidiEvents.js";
 import { MidiPlaybackError } from "./MidiPianoSamples.js";
@@ -17,6 +18,8 @@ export default class MidiPlaybackController {
     create_context = () => new AudioContext(),
     fetch_sample,
     sample_root,
+    load_timeout_ms,
+    resume_timeout_ms = 15000,
     set_interval,
     clear_interval,
   } = {}) {
@@ -29,10 +32,15 @@ export default class MidiPlaybackController {
       create_context,
       set_interval,
       clear_interval,
+      resume_timeout_ms,
     });
     this.instruments = new MidiInstrumentAssignments(instrument_registry);
     this.mixer = new MidiMixer();
-    this.cache = new MidiSampleCache({ fetch_sample, sample_root });
+    this.cache = new MidiSampleCache({
+      fetch_sample,
+      sample_root,
+      load_timeout_ms,
+    });
     this.catalog_request = null;
     this.catalog_state = {
       status: "idle",
@@ -54,6 +62,8 @@ export default class MidiPlaybackController {
   snapshot() {
     return {
       status: this.status,
+      loading_progress:
+        this.status === "loading" ? this.loading_progress : null,
       playback_id: this.generation,
       clock_started: !!(
         this.scheduler && this.context.currentTime >= this.scheduler.origin
@@ -128,6 +138,7 @@ export default class MidiPlaybackController {
     const stale = () => this.disposed || generation !== this.generation;
     const song = this.song;
     try {
+      this.loading_progress = null;
       this.notify("loading");
       if (stale()) return false;
       if (!this.context) {
@@ -137,7 +148,12 @@ export default class MidiPlaybackController {
         this.master.connect(this.context.destination);
       }
       const context = this.context;
-      await context.resume();
+      await loading_task(
+        () => context.resume(),
+        request.signal,
+        this.resume_timeout_ms,
+        "audio_resume_timeout",
+      );
       if (stale()) return false;
       const samples = await this.cache.prepare(
         song.notes,
@@ -146,6 +162,11 @@ export default class MidiPlaybackController {
         {
           registry: this.instruments.registry,
           assignments: this.instruments.assignments,
+          on_progress: (progress) => {
+            if (stale()) return;
+            this.loading_progress = progress;
+            this.on_status(this.snapshot());
+          },
         },
       );
       if (stale()) return false;

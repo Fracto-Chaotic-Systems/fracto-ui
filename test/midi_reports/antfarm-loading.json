@@ -1,0 +1,22 @@
+{
+  "file": "2018-antfarm-01.mid",
+  "app_url": "http://localhost:3106/games",
+  "notes": 672,
+  "duration_seconds": 297.53616988671877,
+  "required_chunks": 6,
+  "encoded_sample_bytes": 20161020,
+  "decoded_sample_bytes_at_48000": 43887360,
+  "unsupported_assignments": 0,
+  "before_fix": "Long loading wait reproduced on actual development app; eventually played. Precise source of delay was not isolated.",
+  "after_fix": "Actual development app served updated loader after container restart; showed 0 of 6 ready, then Playing with advancing position; explicit Stop returned stopped.",
+  "validation": {
+    "midi_tests": 121,
+    "production_build": "passed",
+    "targeted_lint": "passed",
+    "native_full_regression": "passed; zero remaining resources"
+  },
+  "deadlines_ms": {
+    "audio_resume": 15000,
+    "per_sample_chunk": 60000
+  }
+}

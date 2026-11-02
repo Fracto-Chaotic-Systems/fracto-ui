@@ -81,6 +81,9 @@ export const MUSIC_TEXT = Object.fromEntries(
     "file_read_failed",
     "file_too_large",
     "sample_load_failed",
+    "sample_load_timeout",
+    "audio_resume_timeout",
+    "loading_progress",
     "library_label",
     "library_refresh",
     "library_help",
@@ -266,6 +269,11 @@ export const APP_GAMES_TEXT = {
     "Instrument audio verification requires HTTPS or localhost.",
   [MUSIC_TEXT.catalog_unavailable]:
     "The instrument catalog could not be refreshed. Existing sound sources remain available.",
+  [MUSIC_TEXT.loading_progress]: "{completed} of {total} ready.",
+  [MUSIC_TEXT.sample_load_timeout]:
+    "An instrument sample took too long to download or decode. Check the asset server and connection, then press Play to retry.",
+  [MUSIC_TEXT.audio_resume_timeout]:
+    "The browser did not start audio. Press Play to retry; check the browser’s audio permissions if this continues.",
   [MUSIC_TEXT.sample_load_failed]:
     "An instrument sample could not be loaded. Check your connection and press Play to retry.",
   [MUSIC_TEXT.invalid_sample]:
