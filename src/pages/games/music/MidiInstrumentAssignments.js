@@ -22,7 +22,10 @@ export default class MidiInstrumentAssignments {
     }
     this.assignments = Object.freeze(
       Object.fromEntries(
-        [...this.routes.keys()].map((id) => [id, this.automatic_selection()]),
+        [...this.routes].map(([id, notes]) => [
+          id,
+          this.automatic_selection(notes),
+        ]),
       ),
     );
     return this.assignments;
@@ -45,7 +48,8 @@ export default class MidiInstrumentAssignments {
       }),
     );
   }
-  automatic_selection() {
+  automatic_selection(notes) {
+    if (notes?.every((note) => note.channel === 9)) return ORIGINAL_INSTRUMENT;
     return this.registry.default_library_id === "legacy" &&
       !this.explicit_library
       ? DEFAULT_INSTRUMENT
@@ -63,7 +67,7 @@ export default class MidiInstrumentAssignments {
           )
             return [id, current];
           this.overrides.delete(id);
-          return [id, this.automatic_selection()];
+          return [id, this.automatic_selection(notes)];
         }),
       ),
     );

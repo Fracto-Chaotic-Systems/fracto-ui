@@ -483,3 +483,37 @@ cleanup checks. The original full-library sample verification still applies to t
 unchanged audio assets. Human quality ranking and other browsers are not certified.
 Step 6 browser regression passed. Play waits for first catalog discovery to settle, avoiding fallback playback being interrupted when the default arrives. Failed discovery leaves fallback playback available.
 Sample preparation now reports completed/required chunk counts. Each download/body-read/integrity/decode operation has a 60-second chunk deadline; audio-context resume has a 15-second deadline. Timeouts leave Loading with a retryable error. Stop settles pending preparation even when the underlying browser promise ignores abort; late work cannot schedule voices or populate the cache.
+
+
+Percussion step 2: catalog discovery validates the separate audited drum-kit inventory and SF2 library metadata. It does not create percussion providers or alter melodic program lookup. Kit playback and UI assignment follow asset preparation and native verification. See asset-server instruments/DRUM_KITS.md.
+
+
+Percussion step 3: discovery validates `assets_prepared` kit hit windows without creating providers. Prepared kit URLs are available for the next verification step; kit availability/selection remains disabled. See asset-server instruments/fluidr3-percussion/IMPORT.md for the pinned offline renderer and velocity policy.
+
+## Percussion playback — step 5
+
+The verified Standard kit now resolves through FluidR3 GM's explicit percussion
+library link for channel 10, standard bank and program 0. Other kits, unsupported
+notes and nonstandard banks remain unavailable. Percussion providers never
+replace pitched programs, and SF2 kit libraries cannot be selected as melodic
+libraries. Kit assignment UI follows in step 6.
+
+`MidiDrumKit.js` converts validated hit windows to authenticated, checksum-bound
+sample descriptors with per-interval velocity gain and exclusive classes.
+`MidiVoice.js` preserves finite one-shot tails independently of key releases or
+sustain. `MidiScheduler.js` chokes earlier class members across tracks on the
+same kit/channel, using a 5 ms fade at the incoming hit's audio time. Stable
+MIDI event order determines simultaneous class members. Stop/reload/dispose
+cancel active and future hits; natural completion waits for all drum tails.
+
+Validation: 132 MIDI, 38 server and 38 Python tests; production build and targeted
+lint pass. Native browser production-path checks cover short note-offs, all
+7,747 Standard note/velocity mappings, polyphony, cross-track hi-hat choking,
+silent Stop, cached replay, natural completion and complete cleanup. The
+existing melodic browser playback regression also passes. See
+`test/midi_reports/percussion-playback.json` and asset-server
+`instruments/fluidr3-percussion/PLAYBACK.md` for scope and deployment details.
+
+Percussion step 6 adds [kit assignment controls](KIT_ASSIGNMENT.md) to channel 10 strips, with linked kit inventory, exact coverage gates, effective names, explicit overrides and preserved stop/refresh behavior.
+
+Percussion step 7: [release/install/rollback](PERCUSSION_RELEASE.md), coordinated local tag release/fluidr3-percussion-v1. Final validation includes the rapid-roll choke regression.

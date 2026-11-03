@@ -30,6 +30,7 @@ export default class MidiScheduler {
       clear_interval,
     });
     this.voices = new Set();
+    this.choke_groups = new Map();
     this.index = 0;
     this.timer = null;
     this.stopped = false;
@@ -60,6 +61,18 @@ export default class MidiScheduler {
         const note = this.song.notes[this.index];
         if (this.origin + note.start_seconds > horizon) break;
         const sample = this.samples[this.index++];
+        // Exclusive classes belong to a kit on a MIDI channel, including hits
+        // split across tracks. Schedule the cut at the hit time, not pump time.
+        const key =
+          sample.playback_mode === "one-shot" && sample.choke_group
+            ? `${note.channel}:${sample.instrument_id}:${sample.choke_group}`
+            : null;
+        const group = key ? (this.choke_groups.get(key) ?? new Set()) : null;
+        if (group) {
+          this.choke_groups.set(key, group);
+          for (const previous of group)
+            previous.choke(this.origin + note.start_seconds);
+        }
         const voice = schedule_midi_voice(
           this.context,
           this.route_destination
@@ -68,9 +81,16 @@ export default class MidiScheduler {
           note,
           sample,
           this.origin,
-          (ended) => this.voices.delete(ended),
+          (ended) => {
+            this.voices.delete(ended);
+            group?.delete(ended);
+            if (key && !group.size) this.choke_groups.delete(key);
+          },
         );
-        if (voice) this.voices.add(voice);
+        if (voice) {
+          this.voices.add(voice);
+          group?.add(voice);
+        } else if (key && !group.size) this.choke_groups.delete(key);
       }
       if (
         this.index === this.song.notes.length &&
@@ -99,5 +119,6 @@ export default class MidiScheduler {
       }
     }
     this.voices.clear();
+    this.choke_groups.clear();
   }
 }

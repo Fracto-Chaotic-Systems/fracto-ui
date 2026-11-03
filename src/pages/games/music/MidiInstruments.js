@@ -51,7 +51,11 @@ export function create_instrument_registry(
     if ((note.bank_msb ?? 0) !== 0 || (note.bank_lsb ?? 0) !== 0) return null;
     return Object.values(providers).find(
       (provider) =>
-        provider.library_id === library_id &&
+        provider.library_id ===
+          (note.channel === 9
+            ? libraries.find((library) => library.id === library_id)
+                ?.percussion_library_id
+            : library_id) &&
         provider.programs.includes(note.program ?? 0) &&
         supports(provider, note),
     );
@@ -61,7 +65,10 @@ export function create_instrument_registry(
     can_select_library(id) {
       return (
         (libraries.length === 0 ||
-          libraries.some((l) => l.id === id && l.status === "active")) &&
+          libraries.some(
+            (l) =>
+              l.id === id && l.status === "active" && l.source_format !== "sf2",
+          )) &&
         Object.values(providers).some((p) => p.library_id === id)
       );
     },

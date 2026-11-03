@@ -146,6 +146,10 @@ export const MUSIC_TEXT = Object.fromEntries(
     "mix_channel",
     "mix_help",
     "instrument_assignment",
+    "kit_assignment",
+    "kit_original_help",
+    "kit_change_help",
+    "kit_channel_help",
     "instrument_grandb",
     "instrument_original",
     "instrument_original_unavailable",
@@ -169,6 +173,10 @@ export const APP_GAMES_TEXT = {
   [MUSIC_TEXT.library_help]:
     "Changing libraries stops playback. Original MIDI assignments follow the selected library; compatible manual overrides are retained. Press Play to hear changes.",
   [MUSIC_TEXT.instrument_assignment]: "Instrument",
+  [MUSIC_TEXT.kit_assignment]: "Drum kit",
+  [MUSIC_TEXT.kit_original_help]: "Some file kit programs, banks, or drum notes have no verified source. Choose an available kit override.",
+  [MUSIC_TEXT.kit_change_help]: "Changing the drum kit stops playback. Press Play to use the new assignment.",
+  [MUSIC_TEXT.kit_channel_help]: "Channel 10 uses drum note identities. A kit override replaces the file kit program and bank for this track; every note must be supported.",
   [MUSIC_TEXT.instrument_grandb]: "GrandB piano",
   [MUSIC_TEXT.instrument_original]: "Original MIDI assignment",
   [MUSIC_TEXT.instrument_original_unavailable]:
@@ -250,7 +258,7 @@ export const APP_GAMES_TEXT = {
   [MUSIC_TEXT.file_input]: "Select a MIDI file",
   [MUSIC_TEXT.progress]: "Playback position",
   [MUSIC_TEXT.help]:
-    "Open a MIDI file, then press Play. Files stay in your browser. FluidR3 GM follows the MIDI instrument assignments. Verified sounds cover pitches 21–108 with some missing keys; percussion is not supported.",
+    "Open a MIDI file, then press Play. Files stay in your browser. FluidR3 GM follows the MIDI instrument assignments and supports the Standard drum kit on channel 10. Unsupported sounds report unavailable.",
   [MUSIC_TEXT.idle]: "Open a MIDI file to begin.",
   [MUSIC_TEXT.reading]: "Reading MIDI file…",
   [MUSIC_TEXT.ready]: "Ready to play.",
@@ -283,7 +291,7 @@ export const APP_GAMES_TEXT = {
   [MUSIC_TEXT.unsupported_pitch]:
     "The selected instrument does not support every pitch in this song. Choose another instrument or file.",
   [MUSIC_TEXT.unsupported_percussion]:
-    "This song includes a percussion channel. Choose a MIDI file without percussion.",
+    "No verified drum kit supports this percussion assignment or note.",
   [MUSIC_TEXT.invalid_velocity]:
     "This MIDI file contains an invalid note velocity. Choose another file.",
   [MUSIC_TEXT.no_song]: "Open a MIDI file before pressing Play.",
@@ -295,7 +303,7 @@ export const APP_GAMES_TEXT = {
     "{count} unfinished notes were closed at the end of the song.",
   [MUSIC_TEXT.piano_pitch_out_of_range]:
     "{count} notes are outside the supported piano range.",
-  [MUSIC_TEXT.percussion_channel]: "{count} percussion notes are unsupported.",
+  [MUSIC_TEXT.percussion_channel]: "{count} notes use the percussion channel.",
   [MUSIC_TEXT.trailing_bytes_ignored]:
     "{count} extra bytes after the MIDI tracks were ignored.",
   [MUSIC_TEXT.sample_shorter_than_note]:

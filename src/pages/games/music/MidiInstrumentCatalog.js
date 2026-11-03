@@ -8,6 +8,7 @@ import {
   GRANDB_PROVIDER,
 } from "./MidiInstruments.js";
 import { MidiPlaybackError } from "./MidiPianoSamples.js";
+import { drum_kit_provider } from "./MidiDrumKit.js";
 const fail = () => {
   throw new MidiPlaybackError(
     "catalog_unavailable",
@@ -241,6 +242,22 @@ export function registry_from_catalog(
           (library) => library.id === (item.library_id ?? "legacy"),
         ).name,
       });
+  }
+  for (const kit of metadata.drum_kits) {
+    if (
+      kit.verification_status !== "playback_verified" ||
+      !(kit.enabled || allow_prepared) ||
+      !kit.available
+    )
+      continue;
+    definitions.push({
+      ...drum_kit_provider(kit, catalog.revision, (value) =>
+        instrument_audio_url(value, catalog_url),
+      ),
+      library_name: metadata.libraries.find(
+        (library) => library.id === kit.library_id,
+      ).name,
+    });
   }
   return create_instrument_registry(definitions, metadata);
 }

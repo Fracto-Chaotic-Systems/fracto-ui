@@ -1,3 +1,6 @@
+import { verify_standard } from "./StandardChecks.js";
+import { verify_percussion } from "./PercussionChecks.js";
+import { verify_kit_assignment } from "./KitAssignmentChecks.js";
 import { fluid_representatives, fluid_complete } from "./FluidChecks.js";
 import { verify_library } from "./LibraryChecks.js";
 import { initialize_service_ports } from "../../src/utils/service_ports.jsx";
@@ -43,6 +46,50 @@ async function until(check, label) {
     await sleep(25);
   }
   throw new Error(`Timed out: ${label}`);
+}
+async function run_percussion() {
+  const summary = document.getElementById("standard-summary");
+  summary.textContent = "Production percussion verification running…";
+  let report;
+  try {
+    report = await verify_percussion(until);
+  } catch (error) {
+    report = { pass: false, error: error.message, stack: error.stack };
+  }
+  await fetch("/percussion_report", {
+    method: "POST",
+    body: JSON.stringify(report, null, 2),
+  });
+  summary.textContent = report.pass
+    ? "Production percussion: PASS · short note-offs, choke groups, Stop, replay, completion and cleanup."
+    : `Production percussion: FAIL · ${report.error}`;
+  document.getElementById("report").textContent = JSON.stringify(
+    report,
+    null,
+    2,
+  );
+}
+async function run_kit_assignment() {
+  const summary = document.getElementById("standard-summary");
+  summary.textContent = "Kit assignment verification running…";
+  let report;
+  try {
+    report = await verify_kit_assignment(until);
+  } catch (error) {
+    report = { pass: false, error: error.message, stack: error.stack };
+  }
+  await fetch("/kit_assignment_report", {
+    method: "POST",
+    body: JSON.stringify(report, null, 2),
+  });
+  summary.textContent = report.pass
+    ? "Kit assignment: PASS · coverage, overrides, Stop, library refresh and cleanup."
+    : `Kit assignment: FAIL · ${report.error}`;
+  document.getElementById("report").textContent = JSON.stringify(
+    report,
+    null,
+    2,
+  );
 }
 function select() {
   const input = document.querySelector('#page input[type="file"]');
@@ -361,11 +408,42 @@ async function run_fluid(mode) {
     2,
   );
 }
+async function run_standard() {
+  const progress = (message) => {
+    document.getElementById("report").textContent = message;
+  };
+  const save = (report) =>
+    fetch("/standard_report", {
+      method: "POST",
+      body: JSON.stringify(report, null, 2),
+    });
+  progress("Starting Standard kit verification...");
+  document.getElementById("standard-summary").textContent =
+    "Standard kit verification running…";
+  let report;
+  try {
+    report = await verify_standard(until, progress, save);
+  } catch (error) {
+    report = { pass: false, error: error.message, stack: error.stack };
+  }
+  await save(report);
+  document.getElementById("standard-summary").textContent = report.pass
+    ? `Standard kit: PASS · ${report.note_identities} notes · ${report.hit_windows} windows · ${report.chunks_checked} chunks · 48 / 44.1 kHz · Stop, replay and cleanup passed.`
+    : `Standard kit: FAIL · ${report.error}`;
+  document.getElementById("report").textContent = JSON.stringify(
+    report,
+    null,
+    2,
+  );
+}
 function Harness() {
   const [show, set_show] = useState(true);
   return (
     <>
       <nav>
+        <button onClick={run_standard}>Verify Standard drum kit</button>
+        <button onClick={run_percussion}>Verify production percussion</button>
+        <button onClick={run_kit_assignment}>Verify kit assignment</button>
         <button onClick={() => run_fluid("representatives")}>
           Verify FluidR3 representatives
         </button>
@@ -383,6 +461,7 @@ function Harness() {
           {show ? "Leave music" : "Return to music"}
         </button>
       </nav>
+      <p id="standard-summary" role="status" />
       <div id="page">{show ? <GamesMusic /> : <p>Another page</p>}</div>
       <ImportProbe />
       <pre id="report">Not run</pre>

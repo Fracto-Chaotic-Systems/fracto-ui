@@ -173,6 +173,7 @@ export default class MidiPlaybackController {
       this.warnings = [...song.warnings];
       const short = song.notes.filter(
         (note, index) =>
+          samples[index].playback_mode !== "one-shot" &&
           note.end_seconds - note.start_seconds >
           sample_window(samples[index]).duration,
       ).length;

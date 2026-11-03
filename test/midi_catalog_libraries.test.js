@@ -1,3 +1,4 @@
+import { prepared_kit } from "./midi_drum_assets_fixture.js";
 import MidiPlaybackController from "../src/pages/games/music/MidiPlaybackController.js";
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -252,4 +253,221 @@ test("late default discovery adopts FluidR3 for automatic routes and preserves e
   await player.refresh_catalog();
   assert.equal(player.instruments.assignments[route], "grandb");
   await player.dispose();
+});
+
+const drum_catalog = () => ({
+  schema_version: 1,
+  library_version: 5,
+  revision: "a".repeat(64),
+  default_library_id: "legacy",
+  instruments: [],
+  libraries: [
+    {
+      id: "legacy",
+      name: "Legacy",
+      version: "1",
+      source_format: "chromatic-mp3",
+      status: "active",
+      percussion_library_id: "fluidr3-percussion",
+    },
+    {
+      id: "fluidr3-percussion",
+      name: "FluidR3 percussion",
+      version: "1",
+      source_format: "sf2",
+      status: "audited",
+      license: "MIT",
+    },
+  ],
+  drum_kits: [
+    {
+      id: "fluidr3-percussion-kit-standard",
+      library_id: "fluidr3-percussion",
+      kit_key: "standard",
+      kind: "drum-kit",
+      name: "Standard",
+      midi_program: 0,
+      midi_bank: { msb: 0, lsb: 0 },
+      source_preset: { bank: 128, program: 0 },
+      source_sha256: "b".repeat(64),
+      enabled: false,
+      verification_status: "source_audited",
+      coverage_status: "source-audited",
+      playback_mode: "one-shot",
+      notes: [35, 42, 44, 46].map((midi_note) => ({
+        midi_note,
+        velocity_ranges: [[1, 127]],
+      })),
+      choke_groups: [{ source_exclusive_class: 1, midi_notes: [42, 44, 46] }],
+      recordings: [],
+      playback_assets: [],
+    },
+  ],
+});
+
+test("audited drum kits use explicit program, note, velocity and choke identities", () => {
+  const catalog = drum_catalog(),
+    metadata = catalog_libraries(catalog);
+  assert.equal(metadata.drum_kits.length, 1);
+  assert.deepEqual(
+    metadata.drum_kits[0].choke_groups[0].midi_notes,
+    [42, 44, 46],
+  );
+  assert.equal(metadata.default_library_id, "legacy");
+  const old = drum_catalog();
+  delete old.drum_kits;
+  assert.deepEqual(catalog_libraries(old).drum_kits, []);
+});
+
+test("drum catalog rejects ambiguous mappings, premature activation and malformed source identity", () => {
+  const cases = [
+    (c) => (c.drum_kits = null),
+    (c) => (c.drum_kits[0].enabled = true),
+    (c) => (c.drum_kits[0].verification_status = "playback_verified"),
+    (c) => (c.drum_kits[0].playback_assets = [{}]),
+    (c) => (c.drum_kits[0].recordings = [{}]),
+    (c) => (c.drum_kits[0].id = "standard"),
+    (c) => (c.drum_kits[0].kind = "single"),
+    (c) => (c.drum_kits[0].source_sha256 = "bad"),
+    (c) => (c.drum_kits[0].midi_bank.msb = 128),
+    (c) => (c.drum_kits[0].midi_program = 128),
+    (c) => (c.drum_kits[0].source_preset.program = 1),
+    (c) => c.drum_kits[0].notes.push(c.drum_kits[0].notes[0]),
+    (c) => (c.drum_kits[0].notes[0].midi_note = -1),
+    (c) => (c.drum_kits[0].notes[0].velocity_ranges = [[0, 127]]),
+    (c) =>
+      (c.drum_kits[0].notes[0].velocity_ranges = [
+        [1, 90],
+        [80, 127],
+      ]),
+    (c) => (c.drum_kits[0].choke_groups[0].midi_notes = [42, 42]),
+    (c) => (c.drum_kits[0].choke_groups[0].midi_notes = [127]),
+    (c) =>
+      c.drum_kits[0].choke_groups.push({
+        source_exclusive_class: 2,
+        midi_notes: [42],
+      }),
+    (c) => {
+      const copy = structuredClone(c.drum_kits[0]);
+      copy.id = "fluidr3-percussion-kit-other";
+      copy.kit_key = "other";
+      c.drum_kits.push(copy);
+    },
+    (c) => (c.libraries[0].percussion_library_id = "missing"),
+    (c) => (c.libraries[1].percussion_library_id = "fluidr3-percussion"),
+    (c) =>
+      c.instruments.push({ ...c.drum_kits[0], instrument_key: "kit-standard" }),
+  ];
+  for (const mutate of cases) {
+    const catalog = drum_catalog();
+    mutate(catalog);
+    assert.throws(() => catalog_libraries(catalog));
+  }
+});
+
+test("percussion metadata never becomes a melodic provider, including prepared verification opt-in", () => {
+  const catalog = drum_catalog();
+  for (const allow_prepared of [false, true]) {
+    const registry = registry_from_catalog(catalog, catalog_url, {
+      allow_prepared,
+    });
+    assert.deepEqual(Object.keys(registry.providers), ["grandb"]);
+    assert.equal(
+      registry.can_assign([{ ...note(), channel: 9, pitch: 42 }], "original"),
+      false,
+    );
+    assert.equal(registry.can_select_library("fluidr3-percussion"), false);
+  }
+});
+
+test("prepared kits validate bounded hit/velocity mappings while remaining disabled", () => {
+  const catalog = drum_catalog();
+  catalog.drum_kits = [prepared_kit(catalog.drum_kits[0]).kit];
+  assert.equal(
+    catalog_libraries(catalog).drum_kits[0].verification_status,
+    "assets_prepared",
+  );
+  for (const mutate of [
+    (k) => (k.enabled = true),
+    (k) => k.playback_assets[0].frames++,
+    (k) => (k.playback_assets[0].source_sha256 = "0".repeat(64)),
+    (k) => (k.playback_assets[0].hits[0].velocity_min = 2),
+    (k) => (k.playback_assets[0].hits[0].render_velocity = 10),
+    (k) => (k.playback_assets[0].hits[0].offset_frames = 1),
+    (k) => (k.playback_assets[0].hits[0].frames = 30 * 48000 + 1),
+    (k) => (k.playback_assets[0].hits[1].midi_note = 35),
+    (k) => k.playback_assets[0].hits.pop(),
+    (k) => (k.rendering.config_sha256 = "bad"),
+  ]) {
+    const copy = structuredClone(catalog);
+    mutate(copy.drum_kits[0]);
+    assert.throws(() => catalog_libraries(copy));
+  }
+});
+
+test("prepared kit audio remains outside melodic providers even with prepared-source opt-in", () => {
+  const catalog = drum_catalog();
+  catalog.drum_kits = [prepared_kit(catalog.drum_kits[0]).kit];
+  const registry = registry_from_catalog(catalog, catalog_url, {
+    allow_prepared: true,
+  });
+  assert.deepEqual(Object.keys(registry.providers), ["grandb"]);
+  assert.equal(
+    registry.can_assign([{ ...note(), channel: 9 }], "original"),
+    false,
+  );
+});
+
+test("verified drum assets retain disabled metadata until engine integration", () => {
+  const catalog = drum_catalog(),
+    kit = prepared_kit(catalog.drum_kits[0]).kit;
+  kit.verification_status = "playback_verified";
+  catalog.drum_kits = [kit];
+  assert.equal(catalog_libraries(catalog).drum_kits[0].enabled, false);
+  kit.enabled = true;
+  assert.throws(() => catalog_libraries(catalog));
+});
+
+test("verified active kits resolve through the melodic library link with strict channel/bank/program identities", () => {
+  const catalog = drum_catalog(),
+    kit = prepared_kit(catalog.drum_kits[0]).kit;
+  kit.enabled = true;
+  kit.verification_status = "playback_verified";
+  kit.available = true;
+  catalog.libraries[1].status = "active";
+  catalog.drum_kits = [kit];
+  for (const asset of kit.playback_assets) {
+    asset.available = true;
+    asset.url = `/instruments/${kit.id}/audio/${asset.id}?v=${asset.sha256}`;
+  }
+  const registry = registry_from_catalog(catalog, catalog_url),
+    hit = { ...note(), channel: 9, pitch: 42, program: 0 },
+    id = `asset-${kit.id}`;
+  assert.equal(registry.can_assign([hit], "original"), true);
+  const sample = registry.resolve(hit, "original");
+  assert.equal(sample.playback_mode, "one-shot");
+  assert.equal(sample.choke_group, 1);
+  assert.equal(sample.gain, 100 / 127);
+  assert.equal(sample.credentials, "include");
+  assert.equal(registry.can_select_library(kit.library_id), false);
+  for (const patch of [
+    { pitch: 26 },
+    { velocity: 0 },
+    { program: 1 },
+    { bank_msb: 1 },
+    { bank_lsb: 1 },
+  ])
+    assert.equal(
+      registry.can_assign([{ ...hit, ...patch }], "original"),
+      false,
+    );
+  assert.equal(registry.can_assign([{ ...hit, channel: 0 }], id), false);
+  const broken = structuredClone(catalog);
+  broken.drum_kits[0].playback_assets[0].url += "bad";
+  assert.throws(() => registry_from_catalog(broken, catalog_url));
+  delete catalog.libraries[0].percussion_library_id;
+  assert.equal(
+    registry_from_catalog(catalog, catalog_url).can_assign([hit], "original"),
+    false,
+  );
 });

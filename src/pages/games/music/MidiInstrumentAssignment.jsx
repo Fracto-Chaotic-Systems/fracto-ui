@@ -28,6 +28,7 @@ function MidiInstrumentAssignment({
 }) {
   const selection = assignments[row.id] ?? DEFAULT_INSTRUMENT;
   const registry = catalog?.registry ?? INSTRUMENT_REGISTRY;
+  const percussion = row.channel === 9;
   const original_available = useMemo(
     () => registry.can_assign(row.notes, ORIGINAL_INSTRUMENT),
     [registry, row.notes],
@@ -57,9 +58,12 @@ function MidiInstrumentAssignment({
   );
   return (
     <div style={{ marginTop: "1rem" }}>
-      <label>
-        {text("instrument_assignment")}
+      <label style={{ flexWrap: "wrap" }}>
+        <span style={{ whiteSpace: "nowrap" }}>
+          {text(percussion ? "kit_assignment" : "instrument_assignment")}
+        </span>
         <select
+          style={{ maxWidth: "100%", minWidth: 0 }}
           value={selection}
           onChange={(event) => on_change(row.id, event.target.value)}
         >
@@ -92,8 +96,13 @@ function MidiInstrumentAssignment({
           : ""}
       </p>
       <p>{text("instrument_effective", { name: effective })}</p>
-      {!original_available && <p>{text("instrument_original_help")}</p>}
-      <p>{text("instrument_change_help")}</p>
+      {!original_available && (
+        <p>
+          {text(percussion ? "kit_original_help" : "instrument_original_help")}
+        </p>
+      )}
+      <p>{text(percussion ? "kit_change_help" : "instrument_change_help")}</p>
+      {percussion && <p>{text("kit_channel_help")}</p>}
       {choices.some((choice) => choice.reason) && (
         <p>{text("instrument_availability_help")}</p>
       )}
