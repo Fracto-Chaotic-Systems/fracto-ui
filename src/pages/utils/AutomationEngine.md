@@ -55,15 +55,16 @@ same operation without importing Tiles code.
 
 ## Tiles integration boundary
 
-Tiles automation already claims jobs and stores task data, including the
-operation code, level, shortcodes, focal point, and scope. The remaining page
-specific step is to provide an executor that performs one of those tile tasks
-and resolves when its tile work is actually complete. Until that executor is
-defined, the existing Tiles operator and automation controls remain unchanged;
-this prevents the engine from falsely reporting a claimed job as complete.
+`TilesGenerator.jsx` claims persisted jobs, normalizes their tasks with
+`TilesAutomationOperations.jsx`, and constructs an engine with a page-owned
+executor that calls `operations.execute_automation_task()`. The registry
+sequences frame preparation, a shared countdown, and the tile operation.
+Lifecycle callbacks persist checkpoints and job state through the backend.
+Frame preparation waits for the Navigator's matching rendered settings, so
+this execution path currently depends on the mounted browser page. Persisted
+job records do not make it an unattended server-side runner.
 
-When that executor is available, it can be registered without changing the
-engine:
+A caller can register a task executor without changing the engine:
 
 ```js
 const registry = new AutomationOperationRegistry().register({

@@ -80,7 +80,7 @@ The top-level router provides these browser routes:
 - `/data`: database overview, backups, logs, and data settings.
 - `/assets`: image rendering, gallery, lore, video, and asset tools.
 - `/tiles`: tile status, inspection, generation, coverage, and logs.
-- `/games`: blank Overview, Settings, and Status pages plus a WordNet abstract-noun tree and synset definitions.
+- `/games`: world-theme mappings and notes, MIDI music playback and track inspection, and a WordNet abstract-noun tree with synset definitions. Overview, Settings, and Status remain blank.
 - `/study`: minibrots, points, meridians, fields, circuitry, and other fractal studies.
 - `/`: minimal Fracto landing page.
 

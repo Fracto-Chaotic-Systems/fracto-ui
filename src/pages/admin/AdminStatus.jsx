@@ -24,6 +24,7 @@ const SERVICE_NAMES = [
   "fracto-admin-server",
   "fracto-ui",
   "fracto-tiles-server",
+  "fracto-ai-server",
 ];
 const STATUS_COLORS = {
   healthy: "#228b22",

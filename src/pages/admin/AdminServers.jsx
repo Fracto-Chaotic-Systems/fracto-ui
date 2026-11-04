@@ -48,6 +48,7 @@ import {
   KEY_ADMIN_SERVERS_TILES_SERVER,
   KEY_ADMIN_SERVERS_TITLE,
   KEY_ADMIN_SERVERS_UI_SERVER,
+  KEY_ADMIN_SERVERS_AI_SERVER,
   KEY_ADMIN_SERVERS_UNAVAILABLE,
   KEY_ADMIN_SERVERS_SERVER_URL_PLACEHOLDER,
   KEY_ADMIN_SERVERS_URL_ACCEPTED,
@@ -78,6 +79,7 @@ const SERVICE_NAMES = [
   "fracto-admin-server",
   "fracto-ui",
   "fracto-tiles-server",
+  "fracto-ai-server",
 ];
 const make_server_tree = (
   server_urls,
@@ -233,6 +235,7 @@ const LOCALIZED_TEXT_KEYS = {
   asset_server: KEY_ADMIN_SERVERS_ASSET_SERVER,
   admin_server: KEY_ADMIN_SERVERS_ADMIN_SERVER,
   ui_server: KEY_ADMIN_SERVERS_UI_SERVER,
+  ai_server: KEY_ADMIN_SERVERS_AI_SERVER,
   tiles_server: KEY_ADMIN_SERVERS_TILES_SERVER,
   main_server_role: KEY_ADMIN_SERVERS_MAIN_SERVER_ROLE,
   unavailable: KEY_ADMIN_SERVERS_UNAVAILABLE,

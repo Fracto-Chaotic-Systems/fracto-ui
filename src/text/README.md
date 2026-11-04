@@ -1,5 +1,7 @@
 # UI text and translation
 
+AdminText also registers AI server-health and repository labels.
+
 The modules in this directory define the user-facing text for the major UI
 areas. Each exports stable text-key constants and an `APP_*_TEXT` map from
 those keys to the current English strings. Components use the constants rather

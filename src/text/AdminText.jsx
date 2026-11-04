@@ -1,4 +1,6 @@
 const ADMIN_FOLDER = "admin";
+export const KEY_ADMIN_SERVERS_AI_SERVER = `${ADMIN_FOLDER}/servers_ai_server`;
+export const KEY_ADMIN_REPOSITORY_AI = `${ADMIN_FOLDER}/repository_ai`;
 export const KEY_ADMIN_SERVERS_CLIENTS_TITLE = `${ADMIN_FOLDER}/servers_clients_title`;
 export const KEY_ADMIN_SERVERS_CLIENTS_NOTE = `${ADMIN_FOLDER}/servers_clients_note`;
 export const KEY_ADMIN_SERVERS_CLIENTS_LOADING = `${ADMIN_FOLDER}/servers_clients_loading`;
@@ -100,6 +102,8 @@ export const KEY_ADMIN_REPOSITORY_NONE = `${ADMIN_FOLDER}/repository_none`;
 export const KEY_ADMIN_COPY_HASH = `${ADMIN_FOLDER}/copy_full_hash`;
 export const KEY_ADMIN_VIEW_GITHUB = `${ADMIN_FOLDER}/view_github`;
 export const APP_ADMIN_TEXT = {
+  [KEY_ADMIN_SERVERS_AI_SERVER]: "AI server",
+  [KEY_ADMIN_REPOSITORY_AI]: "AI",
   [KEY_ADMIN_SERVERS_CLIENTS_TITLE]: "client sessions",
   [KEY_ADMIN_SERVERS_CLIENTS_NOTE]:
     "Unexpired login sessions; this does not indicate which tabs are currently open. Anonymous clients are not tracked.",

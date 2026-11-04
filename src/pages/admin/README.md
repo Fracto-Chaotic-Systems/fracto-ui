@@ -1,5 +1,8 @@
 # Admin pages
 
+Status and server-awareness views include the AI service. Commits includes its
+repository filter; labels are registered in AdminText.
+
 This folder contains the page components and feature-specific helpers rendered
 inside the admin section. `src/pages/Admin.jsx` owns sidebar navigation and
 selects one of these components for the right pane. User-visible text is

@@ -44,6 +44,7 @@ import {
   KEY_ADMIN_REPOSITORY_NONE,
   KEY_ADMIN_REPOSITORY_TILES,
   KEY_ADMIN_REPOSITORY_UI,
+  KEY_ADMIN_REPOSITORY_AI,
 } from "../../text/AdminText.jsx";
 
 const TABLE_HEADER_SPACE_PX = 40;
@@ -76,6 +77,7 @@ const REPOSITORY_LABEL_KEYS = {
   "fracto-tiles-server": KEY_ADMIN_REPOSITORY_TILES,
   "fracto-asset-server": KEY_ADMIN_REPOSITORY_ASSETS,
   "fracto-ui": KEY_ADMIN_REPOSITORY_UI,
+  "fracto-ai-server": KEY_ADMIN_REPOSITORY_AI,
 };
 const REPOSITORY_NAMES = Object.keys(REPOSITORY_LABEL_KEYS);
 const GITHUB_ORIGIN = "https://github.com/Fracto-Chaotic-Systems";

@@ -17,4 +17,5 @@
 - **{{text.asset_server}}**: {{health.fracto-asset-server}}
 - **{{text.admin_server}}**: {{health.fracto-admin-server}}
 - **{{text.ui_server}}**: {{health.fracto-ui}}
+- **{{text.ai_server}}**: {{health.fracto-ai-server}}
 - **{{text.tiles_server}}**: {{health.fracto-tiles-server}}
