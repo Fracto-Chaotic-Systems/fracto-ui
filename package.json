@@ -24,6 +24,7 @@
     "test:terrain-welding": "node --test test/simulator_welding.test.js"
   },
   "dependencies": {
+    "@assistant-ui/react": "^0.15.32",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@fortawesome/fontawesome-svg-core": "^7.1.0",

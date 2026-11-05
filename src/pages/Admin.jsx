@@ -33,6 +33,9 @@ import {
 } from "../text/RootText.jsx";
 
 import AdminOverview from "./admin/AdminOverview.jsx";
+import { ADMIN_CHAT } from "../settings/AdminSettings.jsx";
+import { KEY_ADMIN_CHAT } from "../text/AdminText.jsx";
+import AdminChat from "./admin/AdminChat.jsx";
 import { ADMIN_ACCOUNTS } from "../settings/AdminSettings.jsx";
 import { KEY_ADMIN_ACCOUNTS } from "../text/AdminText.jsx";
 import AdminAccounts from "./admin/AdminAccounts.jsx";
@@ -75,6 +78,11 @@ const SIDEBAR_LIST = [
     title_key: KEY_ADMIN_SERVERS,
     section_code: ADMIN_SERVERS,
     right_pane: <AdminServers />,
+  },
+  {
+    title_key: KEY_ADMIN_CHAT,
+    section_code: ADMIN_CHAT,
+    right_pane: <AdminChat />,
   },
   { section_code: SIDEBAR_BREAKER },
   {

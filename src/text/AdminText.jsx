@@ -38,6 +38,21 @@ export const KEY_ADMIN_ACCOUNTS_TITLE = "admin/accounts_title";
 export const KEY_ADMIN_ACCOUNTS_LOADING = "admin/accounts_loading";
 export const KEY_ADMIN_ACCOUNTS_ERROR = "admin/accounts_error";
 export const KEY_ADMIN_ACCOUNTS_EMPTY = "admin/accounts_empty";
+export const KEY_ADMIN_CHAT = "admin/chat";
+export const KEY_ADMIN_CHAT_STATUS = "admin/chat_status";
+export const KEY_ADMIN_CHAT_EMPTY_TITLE = "admin/chat_empty_title";
+export const KEY_ADMIN_CHAT_EMPTY_NOTE = "admin/chat_empty_note";
+export const KEY_ADMIN_CHAT_PLACEHOLDER = "admin/chat_placeholder";
+export const KEY_ADMIN_CHAT_ATTACH = "admin/chat_attach";
+export const KEY_ADMIN_CHAT_REMOVE = "admin/chat_remove";
+export const KEY_ADMIN_CHAT_SEND = "admin/chat_send";
+export const KEY_ADMIN_CHAT_STOP = "admin/chat_stop";
+export const KEY_ADMIN_CHAT_WORKING = "admin/chat_working";
+export const KEY_ADMIN_CHAT_ERROR = "admin/chat_error";
+export const KEY_ADMIN_CHAT_FILES_NOTE = "admin/chat_files_note";
+export const KEY_ADMIN_CHAT_FILE_ERRORS = "admin/chat_file_errors";
+export const KEY_ADMIN_CHAT_RESPONSE_ERRORS = "admin/chat_response_errors";
+export const KEY_ADMIN_CHAT_TITLE = "admin/chat_title";
 export const KEY_ADMIN_OVERVIEW = `${ADMIN_FOLDER}/admin_overview`;
 export const KEY_ADMIN_SERVERS = `${ADMIN_FOLDER}/servers`;
 export const KEY_ADMIN_SERVERS_TITLE = `${ADMIN_FOLDER}/servers_title`;
@@ -209,4 +224,57 @@ export const APP_ADMIN_TEXT = {
   [KEY_ADMIN_ACCOUNTS_LOADING]: "loading user accounts...",
   [KEY_ADMIN_ACCOUNTS_ERROR]: "unable to load user accounts:",
   [KEY_ADMIN_ACCOUNTS_EMPTY]: "no user accounts found",
+  [KEY_ADMIN_CHAT]: "chat",
+  [KEY_ADMIN_CHAT_TITLE]: "fracto AI",
+  [KEY_ADMIN_CHAT_STATUS]:
+    "Chat uses the local AI server. Access requires an administrator login or the explicit private-lab chat setting. Attached file text is sent with your message; files and conversations are not saved.",
+  [KEY_ADMIN_CHAT_EMPTY_TITLE]: "Start a conversation",
+  [KEY_ADMIN_CHAT_EMPTY_NOTE]:
+    "Ask a question, then follow up. Recent messages provide context; this conversation is cleared when you leave the page.",
+  [KEY_ADMIN_CHAT_PLACEHOLDER]: "Write a message to fracto AI...",
+  [KEY_ADMIN_CHAT_ATTACH]: "Attach files",
+  [KEY_ADMIN_CHAT_REMOVE]: "Remove file",
+  [KEY_ADMIN_CHAT_SEND]: "Send",
+  [KEY_ADMIN_CHAT_STOP]: "Stop",
+  [KEY_ADMIN_CHAT_WORKING]: "Generating response...",
+  [KEY_ADMIN_CHAT_ERROR]:
+    "The response was interrupted or unavailable. Any text shown may be incomplete. Check your administrator login, message length, and AI server availability, then try again.",
+  [KEY_ADMIN_CHAT_RESPONSE_ERRORS]: {
+    CHAT_MEMORY_PRESSURE:
+      "The AI server cannot start generation because available memory is below its configured reserve. Free memory or adjust the private-lab memory setting before retrying.",
+    CHAT_DISK_PRESSURE:
+      "The AI server cannot start generation because free disk space is below its configured reserve.",
+    CHAT_MODEL_MISSING:
+      "The configured local AI model is not installed or available.",
+    CHAT_AUTH_REQUIRED:
+      "Chat requires an administrator login. This server has not enabled private-lab chat access.",
+    CHAT_FORBIDDEN:
+      "Chat access was denied. Use the configured UI address and an enabled administrator account, or the explicit private-lab chat setting.",
+    CHAT_BUSY:
+      "The local AI server is busy. Wait for the current generation to finish, then try again.",
+    CHAT_TIMEOUT:
+      "The AI response timed out. Any text shown is incomplete; try a shorter request.",
+    CHAT_REQUEST_TOO_LARGE:
+      "This message exceeds the chat context limit. Shorten it or remove attachments.",
+  },
+  [KEY_ADMIN_CHAT_FILES_NOTE]:
+    "Attach up to 4 UTF-8 TXT, Markdown, JSON or CSV files, 4 KiB each. Message and file text must fit within 8 KiB together. PDF and image support is not available yet.",
+  [KEY_ADMIN_CHAT_FILE_ERRORS]: {
+    CHAT_FILE_TYPE: "Choose a TXT, Markdown, JSON or CSV file.",
+    CHAT_FILE_SIZE:
+      "This file exceeds the 4 KiB limit. Use a smaller file or excerpt.",
+    CHAT_FILE_COUNT: "Attach no more than four files to a message.",
+    CHAT_FILE_NAME: "Use a shorter file name (at most 128 UTF-8 bytes).",
+    CHAT_FILE_ENCODING:
+      "This file must contain UTF-8 text, without binary data.",
+    CHAT_FILE_EMPTY: "This file is empty. Choose a file containing text.",
+    CHAT_FILE_JSON:
+      "This file contains invalid JSON. Correct it before attaching it.",
+    CHAT_FILE_PENDING:
+      "Wait for the files to finish reading, or remove the failed attachment.",
+    CHAT_REQUEST_TOO_LARGE:
+      "The message and file text exceed the 8 KiB context limit. Shorten the message or remove files; nothing has been sent.",
+    default:
+      "Unable to read this attachment. Check the file format and try again.",
+  },
 };

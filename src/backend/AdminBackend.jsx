@@ -1,7 +1,20 @@
 import { service_origin } from "../utils/service_origin.jsx";
 import { request_json } from "./BackendUtils.jsx";
+import { stream_chat } from "./ChatStream.js";
 
 export class AdminBackend {
+  static chat_stream = (messages, signal) =>
+    stream_chat(`${service_origin("admin")}/chat`, messages, signal);
+  /** Sends bounded text history through the administrator-authorized bridge. */
+  static chat = (messages, signal) =>
+    request_json(`${service_origin("admin")}/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ contract_version: 1, messages }),
+      signal,
+    });
+
   /** Fetches recent commits from all allowlisted Fracto repositories.
    * @param {number} limit Maximum number of aggregate commits to return.
    * @returns {Promise<{commits: Array, tag_events: Array, tag_records: Array}>}
@@ -10,9 +23,12 @@ export class AdminBackend {
    * @calledBy AdminCommits componentDidMount.
    */
   static commits = (limit = 100) =>
-    request_json(`${service_origin("admin")}/commits?limit=${encodeURIComponent(limit)}`, {
-      credentials: "include",
-    });
+    request_json(
+      `${service_origin("admin")}/commits?limit=${encodeURIComponent(limit)}`,
+      {
+        credentials: "include",
+      },
+    );
 
   /** Fetches the build/version report for one service.
    * @param {string} service_name Service identifier passed to the admin server.
@@ -50,7 +66,9 @@ export class AdminBackend {
 
   /** Lists user allowlist records for the administrator workflow. */
   static users = () =>
-    request_json(`${service_origin("admin")}/users`, { credentials: "include" });
+    request_json(`${service_origin("admin")}/users`, {
+      credentials: "include",
+    });
 
   /** Enables or disables one user allowlist record. */
   static update_user = (id, enabled) =>

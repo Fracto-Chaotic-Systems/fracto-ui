@@ -1,0 +1,43 @@
+import { CHAT_FILE_COUNT } from "./chat_attachments.js";
+
+export const chat_message_content = (message) => {
+  const attachments = message.attachments || [];
+  if (attachments.length > CHAT_FILE_COUNT) throw new Error("CHAT_FILE_COUNT");
+  const parts = [...message.content];
+  for (const attachment of attachments) {
+    if (
+      !attachment.content?.length ||
+      attachment.status?.type === "running" ||
+      attachment.status?.type === "incomplete"
+    )
+      throw new Error("CHAT_FILE_PENDING");
+    parts.push(...attachment.content);
+  }
+  if (parts.some((part) => part.type !== "text"))
+    throw new Error("CHAT_FILES_UNSUPPORTED");
+  return parts.map((part) => part.text).join("\n\n");
+};
+
+/** Fit recent text history to the server contract without truncating a message. */
+export const prepare_chat_messages = (messages) => {
+  const history = messages
+    .filter((message) => ["user", "assistant"].includes(message.role))
+    .map((message) => {
+      return {
+        role: message.role,
+        content: chat_message_content(message),
+      };
+    })
+    .filter((message) => message.content.trim());
+  const encoder = new TextEncoder();
+  if (!history.length || history.at(-1).role !== "user")
+    throw new Error("INVALID_CHAT_REQUEST");
+  while (
+    history.length > 16 ||
+    encoder.encode(JSON.stringify(history)).length > 8192
+  ) {
+    if (history.length === 1) throw new Error("CHAT_REQUEST_TOO_LARGE");
+    history.shift();
+  }
+  return history;
+};
