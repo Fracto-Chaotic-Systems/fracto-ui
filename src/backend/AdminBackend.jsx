@@ -3,15 +3,25 @@ import { request_json } from "./BackendUtils.jsx";
 import { stream_chat } from "./ChatStream.js";
 
 export class AdminBackend {
-  static chat_stream = (messages, signal) =>
-    stream_chat(`${service_origin("admin")}/chat`, messages, signal);
+  static chat_stream = (messages, signal, mode = "chat") =>
+    stream_chat(
+      `${service_origin("admin")}/chat`,
+      messages,
+      signal,
+      undefined,
+      mode,
+    );
   /** Sends bounded text history through the administrator-authorized bridge. */
-  static chat = (messages, signal) =>
+  static chat = (messages, signal, mode = "chat") =>
     request_json(`${service_origin("admin")}/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ contract_version: 1, messages }),
+      body: JSON.stringify({
+        contract_version: 1,
+        messages,
+        ...(mode === "chat" ? {} : { mode }),
+      }),
       signal,
     });
 

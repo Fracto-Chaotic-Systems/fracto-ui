@@ -21,7 +21,10 @@
     "test:mesh-heat-map": "node --test test/mesh_heat_map.test.js test/mesh_coverage_table.test.js test/mesh_transform_operations.test.js test/mesh_tile_preview.test.js",
     "test:mesh-transform": "node --test test/mesh_transform_operations.test.js test/mesh_tile_preview.test.js",
     "test:simulator": "node --test test/simulator_mesh.test.js test/simulator_terrain.test.js test/simulator_lod.test.js test/simulator_welding.test.js test/simulator_escape_relief.test.js test/simulator_navigation.test.js",
-    "test:terrain-welding": "node --test test/simulator_welding.test.js"
+    "test:terrain-welding": "node --test test/simulator_welding.test.js",
+    "check:catalog": "node scripts/check_feature_catalog.js",
+    "prebuild": "node scripts/check_feature_catalog.js && node ../../scripts/build_knowledge_bundle.js",
+    "test:catalog": "node --test test/feature_catalog.test.js test/knowledge_documents.test.js"
   },
   "dependencies": {
     "@assistant-ui/react": "^0.15.32",
@@ -62,6 +65,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
-    "vite": "^7.2.4"
+    "vite": "^7.2.4",
+    "@babel/parser": "7.29.8"
   }
 }

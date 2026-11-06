@@ -10,7 +10,7 @@ import {
   useAuiEvent,
 } from "@assistant-ui/react";
 import styled from "styled-components";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { MainStyles as styles } from "../../styles/MainStyles.jsx";
 import AppText from "../../AppText.jsx";
@@ -24,6 +24,11 @@ import {
 import {
   KEY_ADMIN_CHAT_TITLE,
   KEY_ADMIN_CHAT_STATUS,
+  KEY_ADMIN_CHAT_MODE,
+  KEY_ADMIN_CHAT_GENERAL,
+  KEY_ADMIN_CHAT_REFERENCE,
+  KEY_ADMIN_CHAT_REFERENCE_NOTE,
+  KEY_ADMIN_CHAT_MODE_NOTE,
   KEY_ADMIN_CHAT_EMPTY_TITLE,
   KEY_ADMIN_CHAT_EMPTY_NOTE,
   KEY_ADMIN_CHAT_PLACEHOLDER,
@@ -38,16 +43,17 @@ import {
   KEY_ADMIN_CHAT_RESPONSE_ERRORS,
 } from "../../text/AdminText.jsx";
 
-const model_adapter = {
+const model_adapter = (mode) => ({
   async *run({ messages, abortSignal }) {
     for await (const text of AdminBackend.chat_stream(
-      prepare_chat_messages(messages),
+      prepare_chat_messages(messages, mode),
       abortSignal,
+      mode,
     )) {
       yield { content: [{ type: "text", text }] };
     }
   },
-};
+});
 
 const ChatLayout = styled.div`
   height: 100%;
@@ -224,7 +230,7 @@ function ChatText() {
   return <MarkdownDocument external_links>{text}</MarkdownDocument>;
 }
 
-function ChatComposer({ file_error, set_file_error }) {
+function ChatComposer({ file_error, set_file_error, mode }) {
   useAuiEvent("composer.attachmentAddError", ({ message, reason }) => {
     set_file_error(
       (message.startsWith("CHAT_") ? message : null) ||
@@ -235,13 +241,16 @@ function ChatComposer({ file_error, set_file_error }) {
   let draft_error = null;
   if (draft.text.trim() || draft.attachments.length) {
     try {
-      prepare_chat_messages([
-        {
-          role: "user",
-          content: [{ type: "text", text: draft.text }],
-          attachments: draft.attachments,
-        },
-      ]);
+      prepare_chat_messages(
+        [
+          {
+            role: "user",
+            content: [{ type: "text", text: draft.text }],
+            attachments: draft.attachments,
+          },
+        ],
+        mode,
+      );
     } catch (error) {
       draft_error = error.message;
     }
@@ -261,7 +270,13 @@ function ChatComposer({ file_error, set_file_error }) {
       className="chat-composer"
       onSubmitCapture={block_invalid}
     >
-      <p id="admin-chat-files-note">{AppText.get(KEY_ADMIN_CHAT_FILES_NOTE)}</p>
+      <p id="admin-chat-files-note">
+        {AppText.get(
+          mode === "app-reference"
+            ? KEY_ADMIN_CHAT_REFERENCE_NOTE
+            : KEY_ADMIN_CHAT_FILES_NOTE,
+        )}
+      </p>
       {error_text && (
         <p role="alert" id="admin-chat-file-error">
           {error_text}
@@ -285,7 +300,10 @@ function ChatComposer({ file_error, set_file_error }) {
         <ComposerPrimitive.AddAttachment
           type="button"
           multiple
-          disabled={draft.attachments.length >= CHAT_FILE_COUNT}
+          disabled={
+            mode === "app-reference" ||
+            draft.attachments.length >= CHAT_FILE_COUNT
+          }
           title={AppText.get(KEY_ADMIN_CHAT_FILES_NOTE)}
         >
           {AppText.get(KEY_ADMIN_CHAT_ATTACH)}
@@ -309,44 +327,75 @@ function ChatComposer({ file_error, set_file_error }) {
   );
 }
 
-export function AdminChat() {
+function ChatThread({ mode }) {
   const [file_error, set_file_error] = useState(null);
   const attachment_adapter = useMemo(
     () => create_chat_attachment_adapter(set_file_error),
     [],
   );
-  const runtime = useLocalRuntime(model_adapter, {
+  const adapter = useMemo(() => model_adapter(mode), [mode]);
+  const runtime = useLocalRuntime(adapter, {
     adapters: { attachments: attachment_adapter },
   });
+  useEffect(() => () => runtime.thread.cancelRun(), [runtime]);
 
   return (
     <AssistantRuntimeProvider runtime={runtime}>
-      <ChatLayout>
-        <styles.SectionTitle>
-          {AppText.get(KEY_ADMIN_CHAT_TITLE)}
-        </styles.SectionTitle>
-        <ThreadPrimitive.Root className="chat-thread">
-          <p className="chat-status" role="status" id="admin-chat-status">
-            {AppText.get(KEY_ADMIN_CHAT_STATUS)}
-          </p>
-          <ThreadPrimitive.Viewport className="chat-viewport">
-            <AuiIf condition={(state) => state.thread.isEmpty}>
-              <div className="chat-empty">
-                <h2>{AppText.get(KEY_ADMIN_CHAT_EMPTY_TITLE)}</h2>
-                <p>{AppText.get(KEY_ADMIN_CHAT_EMPTY_NOTE)}</p>
-              </div>
-            </AuiIf>
-            <ThreadPrimitive.Messages>
-              {() => <ChatMessage />}
-            </ThreadPrimitive.Messages>
-          </ThreadPrimitive.Viewport>
-          <ChatComposer
-            file_error={file_error}
-            set_file_error={set_file_error}
-          />
-        </ThreadPrimitive.Root>
-      </ChatLayout>
+      <ThreadPrimitive.Root className="chat-thread">
+        <p className="chat-status" role="status" id="admin-chat-status">
+          {AppText.get(KEY_ADMIN_CHAT_STATUS)}
+        </p>
+        <ThreadPrimitive.Viewport className="chat-viewport">
+          <AuiIf condition={(state) => state.thread.isEmpty}>
+            <div className="chat-empty">
+              <h2>{AppText.get(KEY_ADMIN_CHAT_EMPTY_TITLE)}</h2>
+              <p>
+                {AppText.get(
+                  mode === "app-reference"
+                    ? KEY_ADMIN_CHAT_REFERENCE_NOTE
+                    : KEY_ADMIN_CHAT_EMPTY_NOTE,
+                )}
+              </p>
+            </div>
+          </AuiIf>
+          <ThreadPrimitive.Messages>
+            {() => <ChatMessage />}
+          </ThreadPrimitive.Messages>
+        </ThreadPrimitive.Viewport>
+        <ChatComposer
+          file_error={file_error}
+          set_file_error={set_file_error}
+          mode={mode}
+        />
+      </ThreadPrimitive.Root>
     </AssistantRuntimeProvider>
+  );
+}
+
+export function AdminChat() {
+  const [mode, set_mode] = useState("chat");
+  return (
+    <ChatLayout>
+      <styles.SectionTitle>
+        {AppText.get(KEY_ADMIN_CHAT_TITLE)}
+      </styles.SectionTitle>
+      <div className="chat-status">
+        <label>
+          {AppText.get(KEY_ADMIN_CHAT_MODE)}{" "}
+          <select
+            value={mode}
+            onChange={(event) => set_mode(event.target.value)}
+          >
+            <option value="chat">{AppText.get(KEY_ADMIN_CHAT_GENERAL)}</option>
+            <option value="app-reference">
+              {AppText.get(KEY_ADMIN_CHAT_REFERENCE)}
+            </option>
+          </select>
+        </label>
+        <p>{AppText.get(KEY_ADMIN_CHAT_MODE_NOTE)}</p>
+      </div>
+      <ChatThread key={mode} mode={mode} />
+    </ChatLayout>
   );
 }
 

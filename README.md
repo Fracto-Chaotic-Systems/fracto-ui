@@ -1,8 +1,14 @@
 # fracto-ui
 
-React and Vite user interface for exploring Fracto services, tiles, assets, studies, and administrative status. The development server listens on port 3006 and communicates directly with the backend services on ports 3002 through 3005.
+React and Vite user interface for exploring Fracto services, tiles, assets, studies, and administrative status. The standalone development UI defaults to port 3006 and discovers backend ports through admin. Compose development uses port 3106; proxied deployments use same-origin service routes.
 
 ## Development entry
+
+The [structured feature catalog](src/features/README.md) documents all current
+routes/sidebar destinations and checks them against source registrations. Run
+`npm run check:catalog` or `npm run test:catalog`; the check also runs before
+`npm run build`. The catalog is reference metadata for future AI seeding, not a
+runtime navigation replacement or a persisted knowledge bundle.
 
 The Compose development UI is at `http://localhost:3106/` (the standalone
 default is port 3006). In authentication bypass mode, click anywhere on the
@@ -12,7 +18,7 @@ failure. **tiles → transform** opens the mesh transforms workspace.
 
 ## Repository layout
 
-This is an independent Git repository expected at `fracto/servers/fracto-ui/`. Source files import `../../constants.js` and `../../config/network.json` from the root repository, so moving the UI outside that layout breaks both development and production builds.
+This is an independent Git repository expected at `fracto/servers/fracto-ui/`. Shared SDK imports and catalog source checks rely on the surrounding Fracto checkout and sibling services. Backend origins come from runtime service-port discovery rather than `config/network.json`.
 
 Commit UI files from this repository. Commit shared constants, network configuration, supervisor scripts, and SDK changes from the root repository.
 

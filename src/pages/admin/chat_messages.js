@@ -19,7 +19,24 @@ export const chat_message_content = (message) => {
 };
 
 /** Fit recent text history to the server contract without truncating a message. */
-export const prepare_chat_messages = (messages) => {
+export const prepare_chat_messages = (messages, mode = "chat") => {
+  if (mode === "app-reference") {
+    const latest = messages
+      .filter((message) => ["user", "assistant"].includes(message.role))
+      .at(-1);
+    if (!latest || latest.role !== "user")
+      throw new Error("INVALID_CHAT_REQUEST");
+    if (latest.attachments?.length) throw new Error("CHAT_REFERENCE_QUESTION");
+    const content = chat_message_content(latest).trim().replace(/\s+/g, " ");
+    if (
+      !content ||
+      content.length > 512 ||
+      new TextEncoder().encode(content).length > 1024 ||
+      Array.from(content).some((character) => character.charCodeAt(0) < 32)
+    )
+      throw new Error("CHAT_REFERENCE_QUESTION");
+    return [{ role: "user", content }];
+  }
   const history = messages
     .filter((message) => ["user", "assistant"].includes(message.role))
     .map((message) => {

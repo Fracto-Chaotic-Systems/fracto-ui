@@ -35,7 +35,7 @@ Calls the asset service (normally port 3003) to render an image, and the data se
 
 ### `TilesBackend.jsx`
 
-Calls the tile service (normally port 3004) for heat-map/canvas buffers, cache status, and tile coverage. `upload_points()` posts generated tile points to the configured `fracto-prod` endpoint from the root `config/network.json`; this is a remote write and should only be used with the intended environment.
+Calls the tile service (normally port 3004) for heat-map/canvas buffers, cache status, and tile coverage. The legacy `upload_points()` helper targets the build-time `VITE_FRACTO_PROD_URL` endpoint; it does not read `config/network.json`. It is a remote write and should only be used with the intended environment.
 
 ### `MinibrotBackend.jsx`
 

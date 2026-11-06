@@ -1,0 +1,2519 @@
+{
+  "contract_version": 1,
+  "catalog_id": "fracto-ui",
+  "catalog_version": "1.2.0",
+  "access_profiles": [
+    {
+      "id": "public-entry",
+      "description": "The home page displays entry/login state. Authentication mode and enabled-user checks decide whether the app can be entered.",
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/App.jsx"
+        },
+        {
+          "repository": "main",
+          "path": "handlers/auth.js"
+        }
+      ]
+    },
+    {
+      "id": "app-shell",
+      "description": "Visible after app entry: an enabled session in authenticated mode, or configured authentication bypass. Client-only panels do not imply permission to use protected service APIs.",
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/App.jsx"
+        }
+      ]
+    },
+    {
+      "id": "service-api",
+      "description": "App entry plus backing service checks: when FRACTO_AUTH_REQUIRED=true, enabled-user or internal-service authentication is required; mutations also validate the configured UI origin. Individual endpoints can impose stricter roles.",
+      "sources": [
+        {
+          "repository": "main",
+          "path": "utils/service_authorization.js"
+        },
+        {
+          "repository": "main",
+          "path": "utils/auth_request_origin.js"
+        }
+      ]
+    },
+    {
+      "id": "administrator",
+      "description": "Backed by administrative endpoints that require a current enabled administrator session. App navigation alone does not grant that access.",
+      "sources": [
+        {
+          "repository": "main",
+          "path": "utils/admin_authorization.js"
+        }
+      ]
+    },
+    {
+      "id": "admin-readonly",
+      "description": "Administrative endpoints normally require an enabled administrator. Explicit FRACTO_ADMIN_READONLY_BYPASS with auth mode none can open only the registered read-only GET views.",
+      "sources": [
+        {
+          "repository": "main",
+          "path": "utils/admin_authorization.js"
+        }
+      ]
+    },
+    {
+      "id": "admin-chat",
+      "description": "Requires an enabled administrator, or explicit FRACTO_ADMIN_CHAT_LAB_BYPASS with auth mode none and auth not required. The configured UI origin and server-held AI credential remain required.",
+      "sources": [
+        {
+          "repository": "admin",
+          "path": "handlers/chat.js"
+        },
+        {
+          "repository": "main",
+          "path": "utils/auth_request_origin.js"
+        }
+      ]
+    },
+    {
+      "id": "data-query",
+      "description": "Data-query reads follow the service authorization policy; the users table adds an administrator check. This catalog contains table descriptions, never actual records.",
+      "sources": [
+        {
+          "repository": "data",
+          "path": "index.js"
+        }
+      ]
+    }
+  ],
+  "areas": [
+    {
+      "id": "admin",
+      "route": "/admin",
+      "component": "src/pages/Admin.jsx",
+      "label": {
+        "key": "root/menu/admin",
+        "text": "admin",
+        "source": "src/text/RootText.jsx"
+      },
+      "selection_key": "admin/admin_section",
+      "settings_source": "src/settings/AdminSettings.jsx"
+    },
+    {
+      "id": "data",
+      "route": "/data",
+      "component": "src/pages/Data.jsx",
+      "label": {
+        "key": "root/menu/data",
+        "text": "data",
+        "source": "src/text/RootText.jsx"
+      },
+      "selection_key": "data/data_section",
+      "settings_source": "src/settings/DataSettings.jsx"
+    },
+    {
+      "id": "assets",
+      "route": "/assets",
+      "component": "src/pages/Assets.jsx",
+      "label": {
+        "key": "root/menu/assets",
+        "text": "artifacts",
+        "source": "src/text/RootText.jsx"
+      },
+      "selection_key": "assets/assets_section",
+      "settings_source": "src/settings/AssetsSettings.jsx"
+    },
+    {
+      "id": "tiles",
+      "route": "/tiles",
+      "component": "src/pages/Tiles.jsx",
+      "label": {
+        "key": "root/menu/tiles",
+        "text": "tiles",
+        "source": "src/text/RootText.jsx"
+      },
+      "selection_key": "tiles/tiles_section",
+      "settings_source": "src/settings/TilesSettings.jsx"
+    },
+    {
+      "id": "study",
+      "route": "/study",
+      "component": "src/pages/Study.jsx",
+      "label": {
+        "key": "root/menu/study",
+        "text": "study",
+        "source": "src/text/RootText.jsx"
+      },
+      "selection_key": "study/study_section",
+      "settings_source": "src/settings/StudySettings.jsx"
+    },
+    {
+      "id": "games",
+      "route": "/games",
+      "component": "src/pages/Games.jsx",
+      "label": {
+        "key": "root/menu/games",
+        "text": "games",
+        "source": "src/text/RootText.jsx"
+      },
+      "selection_key": "games/games_section",
+      "settings_source": "src/settings/GamesSettings.jsx"
+    },
+    {
+      "id": "home",
+      "route": "/",
+      "component": "src/pages/PageWelcome.jsx",
+      "label": {
+        "key": null,
+        "text": "home",
+        "source": "src/App.jsx"
+      },
+      "selection_key": null,
+      "settings_source": null
+    }
+  ],
+  "features": [
+    {
+      "id": "admin-overview",
+      "area": "admin",
+      "section": "admin_overview",
+      "component": "src/pages/admin/AdminOverview.jsx",
+      "label": {
+        "key": "root/sidebar/overview",
+        "text": "Overview",
+        "source": "src/text/RootText.jsx"
+      },
+      "title": {
+        "key": "admin/admin_overview",
+        "text": "admin overview",
+        "source": "src/text/AdminText.jsx"
+      },
+      "settings": [],
+      "availability": "placeholder",
+      "purpose": "An overview documentation scaffold with an empty document tree.",
+      "inputs": [],
+      "access": "app-shell",
+      "environment": [],
+      "limitations": ["The documentation tree is not populated."],
+      "related_features": ["admin-reference"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Admin.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/admin/AdminOverview.jsx"
+        }
+      ]
+    },
+    {
+      "id": "admin-accounts",
+      "area": "admin",
+      "section": "admin_accounts",
+      "component": "src/pages/admin/AdminAccounts.jsx",
+      "label": {
+        "key": "admin/accounts",
+        "text": "accounts",
+        "source": "src/text/AdminText.jsx"
+      },
+      "title": {
+        "key": "admin/accounts_title",
+        "text": "user accounts",
+        "source": "src/text/AdminText.jsx"
+      },
+      "settings": [],
+      "availability": "implemented",
+      "purpose": "List user allowlist records and enable or disable access.",
+      "inputs": ["Account enable/disable controls"],
+      "access": "administrator",
+      "environment": [],
+      "limitations": [
+        "Administrative actions require an enabled administrator session."
+      ],
+      "related_features": ["admin-logs"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Admin.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/admin/AdminAccounts.jsx"
+        }
+      ]
+    },
+    {
+      "id": "admin-reference",
+      "area": "admin",
+      "section": "admin_reference",
+      "component": "src/pages/admin/AdminReference.jsx",
+      "label": {
+        "key": "admin/reference",
+        "text": "Reference",
+        "source": "src/text/AdminText.jsx"
+      },
+      "title": {
+        "key": "admin/reference",
+        "text": "Reference",
+        "source": "src/text/AdminText.jsx"
+      },
+      "settings": [
+        {
+          "key": "admin/reference_document",
+          "source": "src/settings/AdminSettings.jsx"
+        },
+        {
+          "key": "admin/reference_expanded_folders",
+          "source": "src/settings/AdminSettings.jsx"
+        },
+        {
+          "key": "admin/reference_selection",
+          "source": "src/settings/AdminSettings.jsx"
+        }
+      ],
+      "availability": "implemented",
+      "purpose": "Browse tracked Markdown documentation across the approved repositories.",
+      "inputs": ["Repository and document selection"],
+      "access": "admin-readonly",
+      "environment": [],
+      "limitations": [
+        "Only tracked Markdown paths in the server allowlist are available."
+      ],
+      "related_features": ["admin-overview", "admin-commits"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Admin.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/admin/AdminReference.jsx"
+        }
+      ]
+    },
+    {
+      "id": "admin-commits",
+      "area": "admin",
+      "section": "admin_commits",
+      "component": "src/pages/admin/AdminCommits.jsx",
+      "label": {
+        "key": "admin/commits",
+        "text": "Commits",
+        "source": "src/text/AdminText.jsx"
+      },
+      "title": {
+        "key": "admin/admin_commits",
+        "text": "version control",
+        "source": "src/text/AdminText.jsx"
+      },
+      "settings": [
+        {
+          "key": "admin/commits_repository_visibility",
+          "source": "src/settings/AdminSettings.jsx"
+        }
+      ],
+      "availability": "implemented",
+      "purpose": "Inspect repository commits and grouped milestone tag events.",
+      "inputs": ["Repository visibility filters", "Commit and tag selection"],
+      "access": "admin-readonly",
+      "environment": [],
+      "limitations": [
+        "Production images can show packaged build history instead of live Git history."
+      ],
+      "related_features": ["admin-reference", "admin-status"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Admin.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/admin/AdminCommits.jsx"
+        }
+      ]
+    },
+    {
+      "id": "admin-social",
+      "area": "admin",
+      "section": "admin_social",
+      "component": "src/pages/admin/AdminSocial.jsx",
+      "label": {
+        "key": "admin/social",
+        "text": "social",
+        "source": "src/text/AdminText.jsx"
+      },
+      "title": {
+        "key": "admin/social_page_title",
+        "text": "social media",
+        "source": "src/text/AdminText.jsx"
+      },
+      "settings": [
+        {
+          "key": "admin/social_document",
+          "source": "src/settings/AdminSettings.jsx"
+        }
+      ],
+      "availability": "implemented",
+      "purpose": "Read the social communication documents and refresh their shared snapshot.",
+      "inputs": ["Document selection", "Refresh control"],
+      "access": "admin-readonly",
+      "environment": [],
+      "limitations": [
+        "Displayed content is a snapshot and may be stale when refresh fails."
+      ],
+      "related_features": ["admin-reference"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Admin.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/admin/AdminSocial.jsx"
+        }
+      ]
+    },
+    {
+      "id": "admin-servers",
+      "area": "admin",
+      "section": "admin_servers",
+      "component": "src/pages/admin/AdminServers.jsx",
+      "label": {
+        "key": "admin/servers",
+        "text": "servers",
+        "source": "src/text/AdminText.jsx"
+      },
+      "title": {
+        "key": "admin/servers_title",
+        "text": "server awareness",
+        "source": "src/text/AdminText.jsx"
+      },
+      "settings": [
+        {
+          "key": "admin/server_address_book",
+          "source": "src/settings/AdminSettings.jsx"
+        },
+        {
+          "key": "admin/server_roles",
+          "source": "src/settings/AdminSettings.jsx"
+        },
+        {
+          "key": "admin/server_titles",
+          "source": "src/settings/AdminSettings.jsx"
+        },
+        {
+          "key": "admin/servers_selection",
+          "source": "src/settings/AdminSettings.jsx"
+        }
+      ],
+      "availability": "implemented",
+      "purpose": "Inspect this server and saved server addresses, health, roles and local labels.",
+      "inputs": ["Server URL", "Browser-local title and role edits"],
+      "access": "admin-readonly",
+      "environment": [],
+      "limitations": [
+        "Saved labels and addresses are browser-local preferences; public health does not grant administrative access."
+      ],
+      "related_features": ["admin-status", "admin-chat"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Admin.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/admin/AdminServers.jsx"
+        }
+      ]
+    },
+    {
+      "id": "admin-chat",
+      "area": "admin",
+      "section": "admin_chat",
+      "component": "src/pages/admin/AdminChat.jsx",
+      "label": {
+        "key": "admin/chat",
+        "text": "chat",
+        "source": "src/text/AdminText.jsx"
+      },
+      "title": {
+        "key": "admin/chat_title",
+        "text": "fracto AI",
+        "source": "src/text/AdminText.jsx"
+      },
+      "settings": [],
+      "availability": "implemented",
+      "purpose": "Choose General chat for model replies with text-file attachments, or App reference for exact cited passages from the published app guide. Replies stream with Stop cancellation; switching modes starts a new conversation.",
+      "inputs": [
+        "Text messages",
+        "UTF-8 TXT, Markdown, JSON and CSV attachments"
+      ],
+      "access": "admin-chat",
+      "environment": [
+        {
+          "name": "FRACTO_ADMIN_CHAT_LAB_BYPASS",
+          "repository": "admin",
+          "path": "handlers/chat.js"
+        },
+        {
+          "name": "FRACTO_AI_MODEL",
+          "repository": "ai",
+          "path": "inference/runtime.js"
+        },
+        {
+          "name": "FRACTO_AI_MIN_FREE_MEMORY_MIB",
+          "repository": "ai",
+          "path": "inference/runtime.js"
+        },
+        {
+          "name": "FRACTO_AI_LAB_MIN_FREE_MEMORY_MIB",
+          "repository": "main",
+          "path": "compose.dev.yaml"
+        },
+        {
+          "name": "FRACTO_UI_ORIGIN",
+          "repository": "main",
+          "path": "utils/auth_request_origin.js"
+        },
+        {
+          "name": "FRACTO_AUTH_MODE",
+          "repository": "admin",
+          "path": "handlers/chat.js"
+        },
+        {
+          "name": "FRACTO_AUTH_REQUIRED",
+          "repository": "admin",
+          "path": "handlers/chat.js"
+        },
+        {
+          "name": "FRACTO_AI_MIN_FREE_DISK_MIB",
+          "repository": "ai",
+          "path": "inference/runtime.js"
+        },
+        {
+          "name": "FRACTO_AI_APP_REFERENCE_REFRESH",
+          "repository": "ai",
+          "path": "subject_providers/refresh.js"
+        }
+      ],
+      "limitations": [
+        "At most four files, 4096 bytes each, within an 8192-byte serialized message context budget.",
+        "App reference accepts a standalone question of at most 512 characters, 1024 UTF-8 bytes and 12 keywords, without files; it requires a published bundle and an enabled evaluated app-reference skill and performs no model calls or live checks.",
+        "Validated build bundles automatically seed at startup and refresh every minute unless FRACTO_AI_APP_REFERENCE_REFRESH is false. Operator-owned publications, edits and retirements are preserved.",
+        "PDFs, images, persistent transcripts and action execution are not implemented.",
+        "Model availability, memory and disk admission can block generation; replies can be incomplete after interruption."
+      ],
+      "related_features": ["admin-servers", "admin-reference"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Admin.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/admin/AdminChat.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/admin/chat_attachments.js"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/admin/chat_messages.js"
+        },
+        {
+          "repository": "admin",
+          "path": "handlers/chat.js"
+        },
+        {
+          "repository": "ai",
+          "path": "inference/service.js"
+        },
+        {
+          "repository": "ai",
+          "path": "app_reference/chat.js"
+        },
+        {
+          "repository": "ai",
+          "path": "app_reference/reference.js"
+        }
+      ]
+    },
+    {
+      "id": "admin-settings",
+      "area": "admin",
+      "section": "admin_settings",
+      "component": "src/pages/admin/AdminSettings.jsx",
+      "label": {
+        "key": "root/sidebar/settings",
+        "text": "Settings",
+        "source": "src/text/RootText.jsx"
+      },
+      "title": {
+        "key": "admin/admin_settings",
+        "text": "admin settings",
+        "source": "src/text/AdminText.jsx"
+      },
+      "settings": [],
+      "availability": "implemented",
+      "purpose": "Inspect the current browser AppSettings keys and values in a periodically refreshed table.",
+      "inputs": [],
+      "access": "app-shell",
+      "environment": [],
+      "limitations": [
+        "This is a browser-settings view, not a deployment configuration editor."
+      ],
+      "related_features": ["data-settings"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Admin.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/admin/AdminSettings.jsx"
+        }
+      ]
+    },
+    {
+      "id": "admin-status",
+      "area": "admin",
+      "section": "admin_status",
+      "component": "src/pages/admin/AdminStatus.jsx",
+      "label": {
+        "key": "root/sidebar/status",
+        "text": "Status",
+        "source": "src/text/RootText.jsx"
+      },
+      "title": {
+        "key": "admin/admin_status",
+        "text": "admin status",
+        "source": "src/text/AdminText.jsx"
+      },
+      "settings": [],
+      "availability": "implemented",
+      "purpose": "Show service health and build diagnostics, with refresh controls.",
+      "inputs": ["Refresh control"],
+      "access": "app-shell",
+      "environment": [],
+      "limitations": [
+        "Health describes reported service state, not proof that every feature or model is usable."
+      ],
+      "related_features": ["admin-servers", "admin-logs"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Admin.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/admin/AdminStatus.jsx"
+        }
+      ]
+    },
+    {
+      "id": "admin-logs",
+      "area": "admin",
+      "section": "admin_logs",
+      "component": "src/pages/admin/AdminLogs.jsx",
+      "label": {
+        "key": "root/sidebar/logs",
+        "text": "Logs",
+        "source": "src/text/RootText.jsx"
+      },
+      "title": {
+        "key": "admin/admin_logs",
+        "text": "admin logs",
+        "source": "src/text/AdminText.jsx"
+      },
+      "settings": [
+        {
+          "key": "admin/logs_show_timestamps",
+          "source": "src/settings/AdminSettings.jsx"
+        },
+        {
+          "key": "admin/splitter_pos_px",
+          "source": "src/settings/AdminSettings.jsx"
+        }
+      ],
+      "availability": "implemented",
+      "purpose": "Read and filter service logs from the admin workspace.",
+      "inputs": [
+        "Service selection",
+        "Search text",
+        "Timestamp and auto-scroll preferences"
+      ],
+      "access": "admin-readonly",
+      "environment": [],
+      "limitations": [
+        "Log access and retention depend on the backing service."
+      ],
+      "related_features": ["admin-status"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Admin.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/admin/AdminLogs.jsx"
+        }
+      ]
+    },
+    {
+      "id": "data-overview",
+      "area": "data",
+      "section": "data_overview",
+      "component": "src/pages/data/DataOverview.jsx",
+      "label": {
+        "key": "root/sidebar/overview",
+        "text": "Overview",
+        "source": "src/text/RootText.jsx"
+      },
+      "title": {
+        "key": "data/backups",
+        "text": "data backups",
+        "source": "src/text/DataText.jsx"
+      },
+      "settings": [],
+      "availability": "placeholder",
+      "purpose": "A legacy data-backups overview scaffold.",
+      "inputs": [],
+      "access": "app-shell",
+      "environment": [],
+      "limitations": [
+        "The displayed data-backups title and placeholder text do not implement a backup workflow."
+      ],
+      "related_features": ["data-queries"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Data.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/data/DataOverview.jsx"
+        }
+      ]
+    },
+    {
+      "id": "data-queries",
+      "area": "data",
+      "section": "data_queries",
+      "component": "src/pages/admin/AdminQueries.jsx",
+      "label": {
+        "key": "data/queries_section_title",
+        "text": "queries",
+        "source": "src/text/DataText.jsx"
+      },
+      "title": {
+        "key": "data/queries",
+        "text": "data queries",
+        "source": "src/text/DataText.jsx"
+      },
+      "settings": [
+        {
+          "key": "data/queries_tab",
+          "source": "src/settings/DataSettings.jsx"
+        },
+        {
+          "key": "data/splitter_pos_px",
+          "source": "src/settings/DataSettings.jsx"
+        }
+      ],
+      "availability": "implemented",
+      "purpose": "Browse bounded records from the registered data tables.",
+      "inputs": ["Table selection"],
+      "access": "data-query",
+      "environment": [],
+      "limitations": [
+        "Queries are table-specific and bounded to 1000 displayed records; arbitrary SQL is not exposed.",
+        "The users table requires administrator access."
+      ],
+      "related_features": ["data-settings"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Data.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/admin/AdminQueries.jsx"
+        }
+      ]
+    },
+    {
+      "id": "data-settings",
+      "area": "data",
+      "section": "data_settings",
+      "component": "src/pages/data/DataSettings.jsx",
+      "label": {
+        "key": "root/sidebar/settings",
+        "text": "Settings",
+        "source": "src/text/RootText.jsx"
+      },
+      "title": {
+        "key": "data/settings",
+        "text": "data settings",
+        "source": "src/text/DataText.jsx"
+      },
+      "settings": [],
+      "availability": "placeholder",
+      "purpose": "Display main-server, MySQL and cloud-connection forms backed by browser settings.",
+      "inputs": ["Connection form fields"],
+      "access": "app-shell",
+      "environment": [],
+      "limitations": [
+        "The connection-test labels do not run live connectivity checks.",
+        "This page is a legacy form scaffold; do not infer that it reconfigures running services."
+      ],
+      "related_features": ["admin-settings", "data-queries"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Data.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/data/DataSettings.jsx"
+        }
+      ]
+    },
+    {
+      "id": "data-status",
+      "area": "data",
+      "section": "data_status",
+      "component": "src/pages/data/DataStatus.jsx",
+      "label": {
+        "key": "root/sidebar/status",
+        "text": "Status",
+        "source": "src/text/RootText.jsx"
+      },
+      "title": {
+        "key": "data/status",
+        "text": "data status",
+        "source": "src/text/DataText.jsx"
+      },
+      "settings": [],
+      "availability": "placeholder",
+      "purpose": "A data-service status placeholder.",
+      "inputs": [],
+      "access": "app-shell",
+      "environment": [],
+      "limitations": [
+        "The panel displays placeholder content rather than live service diagnostics."
+      ],
+      "related_features": ["admin-status"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Data.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/data/DataStatus.jsx"
+        }
+      ]
+    },
+    {
+      "id": "data-logs",
+      "area": "data",
+      "section": "data_logs",
+      "component": "src/pages/data/DataLogs.jsx",
+      "label": {
+        "key": "root/sidebar/logs",
+        "text": "Logs",
+        "source": "src/text/RootText.jsx"
+      },
+      "title": {
+        "key": "data/logs",
+        "text": "data logs",
+        "source": "src/text/DataText.jsx"
+      },
+      "settings": [
+        {
+          "key": "data/logs_show_timestamps",
+          "source": "src/settings/DataSettings.jsx"
+        },
+        {
+          "key": "data/splitter_pos_px",
+          "source": "src/settings/DataSettings.jsx"
+        }
+      ],
+      "availability": "implemented",
+      "purpose": "View data-service logs with search and display preferences.",
+      "inputs": ["Search text", "Timestamp and auto-scroll preferences"],
+      "access": "service-api",
+      "environment": [],
+      "limitations": ["Requires the data log endpoint and retained log data."],
+      "related_features": ["data-queries", "admin-logs"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Data.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/data/DataLogs.jsx"
+        }
+      ]
+    },
+    {
+      "id": "assets-overview",
+      "area": "assets",
+      "section": "assets_overview",
+      "component": "src/pages/assets/AssetsOverview.jsx",
+      "label": {
+        "key": "root/sidebar/overview",
+        "text": "Overview",
+        "source": "src/text/RootText.jsx"
+      },
+      "title": {
+        "key": "assets/assets_overview",
+        "text": "assets overview",
+        "source": "src/text/AssetsText.jsx"
+      },
+      "settings": [],
+      "availability": "placeholder",
+      "purpose": "An artifacts overview placeholder.",
+      "inputs": [],
+      "access": "app-shell",
+      "environment": [],
+      "limitations": ["The panel displays placeholder content."],
+      "related_features": ["assets-gallery"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Assets.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/assets/AssetsOverview.jsx"
+        }
+      ]
+    },
+    {
+      "id": "video-generator",
+      "area": "assets",
+      "section": "video_generator",
+      "component": "src/pages/assets/AssetsVideoGenerator.jsx",
+      "label": {
+        "key": "assets/video/video_generator",
+        "text": "video",
+        "source": "src/text/AssetsText.jsx"
+      },
+      "title": {
+        "key": "assets/assets_video",
+        "text": "video generator",
+        "source": "src/text/AssetsText.jsx"
+      },
+      "settings": [
+        {
+          "key": "assets/video/current_video_id",
+          "source": "src/settings/AssetsSettings.jsx"
+        },
+        {
+          "key": "assets/video/frame_settings",
+          "source": "src/settings/AssetsSettings.jsx"
+        }
+      ],
+      "availability": "implemented",
+      "purpose": "Create and manage fractal video records and rendering jobs.",
+      "inputs": ["Video selections", "Navigator and video render controls"],
+      "access": "service-api",
+      "environment": [],
+      "limitations": [
+        "Rendering depends on the asset service and can take time; this is not text-prompt AI video generation."
+      ],
+      "related_features": ["assets-generator", "assets-gallery"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Assets.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/assets/AssetsVideoGenerator.jsx"
+        }
+      ]
+    },
+    {
+      "id": "assets-generator",
+      "area": "assets",
+      "section": "assets_generator",
+      "component": "src/pages/assets/AssetsImageGenerator.jsx",
+      "label": {
+        "key": "assets/assets_generator",
+        "text": "images",
+        "source": "src/text/AssetsText.jsx"
+      },
+      "title": {
+        "key": "assets/assets_generate",
+        "text": "image generator",
+        "source": "src/text/AssetsText.jsx"
+      },
+      "settings": [
+        {
+          "key": "assets/generator/frame_settings",
+          "source": "src/settings/AssetsSettings.jsx"
+        },
+        {
+          "key": "assets/generator/generator_resolution",
+          "source": "src/settings/AssetsSettings.jsx"
+        },
+        {
+          "key": "assets/generator/splitter_pos",
+          "source": "src/settings/AssetsSettings.jsx"
+        },
+        {
+          "key": "assets/splitter_pos_px",
+          "source": "src/settings/AssetsSettings.jsx"
+        }
+      ],
+      "availability": "implemented",
+      "purpose": "Render fractal image artifacts for the selected navigator frame.",
+      "inputs": ["Navigator frame", "Image rendering options"],
+      "access": "service-api",
+      "environment": [],
+      "limitations": [
+        "Image rendering uses the asset pipeline, not a text-to-image model."
+      ],
+      "related_features": ["assets-gallery", "video-generator"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Assets.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/assets/AssetsImageGenerator.jsx"
+        }
+      ]
+    },
+    {
+      "id": "assets-gallery",
+      "area": "assets",
+      "section": "assets_gallery",
+      "component": "src/pages/assets/AssetsImageGallery.jsx",
+      "label": {
+        "key": "assets/assets_gallery_sidebar",
+        "text": "gallery",
+        "source": "src/text/AssetsText.jsx"
+      },
+      "title": {
+        "key": "assets/assets_gallery",
+        "text": "gallery of artifacts",
+        "source": "src/text/AssetsText.jsx"
+      },
+      "settings": [
+        {
+          "key": "assets/gallery/render_splitter_pos_px",
+          "source": "src/settings/AssetsSettings.jsx"
+        },
+        {
+          "key": "assets/splitter_pos_px",
+          "source": "src/settings/AssetsSettings.jsx"
+        }
+      ],
+      "availability": "implemented",
+      "purpose": "Browse image artifacts and inspect selected items.",
+      "inputs": ["Gallery filters and selections"],
+      "access": "service-api",
+      "environment": [],
+      "limitations": [
+        "Displayed items depend on stored asset records and available media."
+      ],
+      "related_features": ["assets-generator"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Assets.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/assets/AssetsImageGallery.jsx"
+        }
+      ]
+    },
+    {
+      "id": "assets-detector",
+      "area": "assets",
+      "section": "assets_detector",
+      "component": "src/pages/assets/AssetsDetector.jsx",
+      "label": {
+        "key": "assets/assets_detector_sidebar",
+        "text": "detector",
+        "source": "src/text/AssetsText.jsx"
+      },
+      "title": {
+        "key": "assets/assets_detector",
+        "text": "artifact detector",
+        "source": "src/text/AssetsText.jsx"
+      },
+      "settings": [
+        {
+          "key": "assets/detector/frame_settings",
+          "source": "src/settings/AssetsSettings.jsx"
+        },
+        {
+          "key": "assets/detector/splitter_pos",
+          "source": "src/settings/AssetsSettings.jsx"
+        },
+        {
+          "key": "assets/detector_is_node",
+          "source": "src/settings/AssetsSettings.jsx"
+        },
+        {
+          "key": "assets/splitter_pos_px",
+          "source": "src/settings/AssetsSettings.jsx"
+        }
+      ],
+      "availability": "implemented",
+      "purpose": "Explore artifact detection through a navigator and detector workspace.",
+      "inputs": ["Navigator frame", "Detector controls"],
+      "access": "service-api",
+      "environment": [],
+      "limitations": [
+        "Detection availability depends on the required data and asset services."
+      ],
+      "related_features": ["study-detection", "assets-surveys"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Assets.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/assets/AssetsDetector.jsx"
+        }
+      ]
+    },
+    {
+      "id": "assets-simulator",
+      "area": "assets",
+      "section": "assets_simulator",
+      "component": "src/pages/assets/AssetsSimulator.jsx",
+      "label": {
+        "key": "assets/assets_simulator_sidebar",
+        "text": "simulator",
+        "source": "src/text/AssetsText.jsx"
+      },
+      "title": {
+        "key": "assets/assets_simulator",
+        "text": "flight simulator",
+        "source": "src/text/AssetsText.jsx"
+      },
+      "settings": [
+        {
+          "key": "assets/simulator/frame_settings",
+          "source": "src/settings/AssetsSettings.jsx"
+        },
+        {
+          "key": "assets/simulator/splitter_pos",
+          "source": "src/settings/AssetsSettings.jsx"
+        },
+        {
+          "key": "assets/splitter_pos_px",
+          "source": "src/settings/AssetsSettings.jsx"
+        }
+      ],
+      "availability": "implemented",
+      "purpose": "Explore cached terrain meshes in the flight simulator workspace.",
+      "inputs": [
+        "Navigator region",
+        "Camera orbit, pan and zoom",
+        "Lighting and wireframe controls"
+      ],
+      "access": "service-api",
+      "environment": [],
+      "limitations": [
+        "Missing or insufficient mesh tiles remain gaps; navigation does not build missing terrain on demand."
+      ],
+      "related_features": ["tiles-transform", "assets-surveys"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Assets.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/assets/AssetsSimulator.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/assets/README.md"
+        }
+      ]
+    },
+    {
+      "id": "assets-surveys",
+      "area": "assets",
+      "section": "assets_surveys",
+      "component": "src/pages/assets/AssetsSurveys.jsx",
+      "label": {
+        "key": "assets/seed_surveys_sidebar",
+        "text": "surveys",
+        "source": "src/text/AssetsText.jsx"
+      },
+      "title": {
+        "key": "assets/seed_surveys_title",
+        "text": "seed surveys",
+        "source": "src/text/AssetsText.jsx"
+      },
+      "settings": [
+        {
+          "key": "assets/splitter_pos_px",
+          "source": "src/settings/AssetsSettings.jsx"
+        },
+        {
+          "key": "assets/surveys/frame_settings",
+          "source": "src/settings/AssetsSettings.jsx"
+        },
+        {
+          "key": "assets/surveys/splitter_pos",
+          "source": "src/settings/AssetsSettings.jsx"
+        }
+      ],
+      "availability": "implemented",
+      "purpose": "Preview or render seed surveys and inspect orbital detection at the selected focal point.",
+      "inputs": [
+        "Navigator focal point",
+        "Preview/render mode",
+        "Half-span and iteration-limit controls"
+      ],
+      "access": "service-api",
+      "environment": [],
+      "limitations": [
+        "High-resolution surveys can take substantially longer than preview.",
+        "Changing tabs does not cancel server jobs already submitted."
+      ],
+      "related_features": ["assets-detector", "study-points"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Assets.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/assets/AssetsSurveys.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/assets/README.md"
+        }
+      ]
+    },
+    {
+      "id": "assets-lore",
+      "area": "assets",
+      "section": "assets_lore",
+      "component": "src/pages/assets/AssetsLore.jsx",
+      "label": {
+        "key": "assets/assets_lore_sidebar",
+        "text": "lore",
+        "source": "src/text/AssetsText.jsx"
+      },
+      "title": {
+        "key": "assets/assets_lore",
+        "text": "fracto lore",
+        "source": "src/text/AssetsText.jsx"
+      },
+      "settings": [
+        {
+          "key": "study/splitter_pos_px",
+          "source": "src/settings/StudySettings.jsx"
+        }
+      ],
+      "availability": "implemented",
+      "purpose": "Browse and edit lore categories and content.",
+      "inputs": ["Category/content selection", "Lore editing controls"],
+      "access": "service-api",
+      "environment": [],
+      "limitations": [
+        "Changes depend on data-service validation and available lore records."
+      ],
+      "related_features": ["assets-lore-styles"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Assets.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/assets/AssetsLore.jsx"
+        }
+      ]
+    },
+    {
+      "id": "assets-lore-styles",
+      "area": "assets",
+      "section": "assets_lore_styles",
+      "component": "src/pages/assets/AssetsLoreStyles.jsx",
+      "label": {
+        "key": "assets/assets_lore_styles_sidebar",
+        "text": "styles",
+        "source": "src/text/AssetsText.jsx"
+      },
+      "title": {
+        "key": "assets/assets_lore_styles",
+        "text": "lore styles",
+        "source": "src/text/AssetsText.jsx"
+      },
+      "settings": [
+        {
+          "key": "assets/lore/styles_lower_splitter_pos_px",
+          "source": "src/settings/AssetsSettings.jsx"
+        },
+        {
+          "key": "assets/lore/styles_splitter_pos_px",
+          "source": "src/settings/AssetsSettings.jsx"
+        },
+        {
+          "key": "assets/lore/styles_upper_right_splitter_pos_px",
+          "source": "src/settings/AssetsSettings.jsx"
+        },
+        {
+          "key": "assets/lore/styles_upper_splitter_pos_px",
+          "source": "src/settings/AssetsSettings.jsx"
+        },
+        {
+          "key": "study/splitter_pos_px",
+          "source": "src/settings/StudySettings.jsx"
+        }
+      ],
+      "availability": "implemented",
+      "purpose": "Browse and edit lore style catalogs, entries and inventory views.",
+      "inputs": ["Style selection", "Style editing controls"],
+      "access": "service-api",
+      "environment": [],
+      "limitations": [
+        "Style metadata is distinct from generated image or video output."
+      ],
+      "related_features": ["assets-lore", "assets-generator"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Assets.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/assets/AssetsLoreStyles.jsx"
+        }
+      ]
+    },
+    {
+      "id": "assets-settings",
+      "area": "assets",
+      "section": "assets_settings",
+      "component": "src/pages/assets/AssetsSettings.jsx",
+      "label": {
+        "key": "root/sidebar/settings",
+        "text": "Settings",
+        "source": "src/text/RootText.jsx"
+      },
+      "title": {
+        "key": "assets/assets_settings",
+        "text": "assets settings",
+        "source": "src/text/AssetsText.jsx"
+      },
+      "settings": [],
+      "availability": "placeholder",
+      "purpose": "An artifacts settings placeholder.",
+      "inputs": [],
+      "access": "app-shell",
+      "environment": [],
+      "limitations": [
+        "The panel does not provide implemented settings controls."
+      ],
+      "related_features": ["admin-settings"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Assets.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/assets/AssetsSettings.jsx"
+        }
+      ]
+    },
+    {
+      "id": "assets-status",
+      "area": "assets",
+      "section": "assets_status",
+      "component": "src/pages/assets/AssetsStatus.jsx",
+      "label": {
+        "key": "root/sidebar/status",
+        "text": "Status",
+        "source": "src/text/RootText.jsx"
+      },
+      "title": {
+        "key": "assets/assets_status",
+        "text": "assets status",
+        "source": "src/text/AssetsText.jsx"
+      },
+      "settings": [],
+      "availability": "placeholder",
+      "purpose": "An artifacts status placeholder.",
+      "inputs": [],
+      "access": "app-shell",
+      "environment": [],
+      "limitations": ["Use the admin status page for live service health."],
+      "related_features": ["admin-status"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Assets.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/assets/AssetsStatus.jsx"
+        }
+      ]
+    },
+    {
+      "id": "assets-logs",
+      "area": "assets",
+      "section": "assets_logs",
+      "component": "src/pages/assets/AssetsLogs.jsx",
+      "label": {
+        "key": "root/sidebar/logs",
+        "text": "Logs",
+        "source": "src/text/RootText.jsx"
+      },
+      "title": {
+        "key": "assets/assets_logs",
+        "text": "assets logs",
+        "source": "src/text/AssetsText.jsx"
+      },
+      "settings": [
+        {
+          "key": "assets/logs_show_timestamps",
+          "source": "src/settings/AssetsSettings.jsx"
+        },
+        {
+          "key": "assets/splitter_pos_px",
+          "source": "src/settings/AssetsSettings.jsx"
+        }
+      ],
+      "availability": "implemented",
+      "purpose": "View asset-service logs with search and display preferences.",
+      "inputs": ["Search text", "Timestamp and auto-scroll preferences"],
+      "access": "service-api",
+      "environment": [],
+      "limitations": ["Requires the asset log endpoint and retained log data."],
+      "related_features": ["admin-logs"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Assets.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/assets/AssetsLogs.jsx"
+        }
+      ]
+    },
+    {
+      "id": "tiles-overview",
+      "area": "tiles",
+      "section": "tiles_overview",
+      "component": "src/pages/tiles/TilesOverview.jsx",
+      "label": {
+        "key": "root/sidebar/overview",
+        "text": "Overview",
+        "source": "src/text/RootText.jsx"
+      },
+      "title": {
+        "key": "tiles/tiles_overview",
+        "text": "tiles overview",
+        "source": "src/text/TilesText.jsx"
+      },
+      "settings": [],
+      "availability": "placeholder",
+      "purpose": "A tiles overview placeholder.",
+      "inputs": [],
+      "access": "app-shell",
+      "environment": [],
+      "limitations": ["The panel displays placeholder content."],
+      "related_features": ["tiles-status"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Tiles.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/tiles/TilesOverview.jsx"
+        }
+      ]
+    },
+    {
+      "id": "tiles-generator",
+      "area": "tiles",
+      "section": "tiles_generator",
+      "component": "src/pages/tiles/TilesGenerator.jsx",
+      "label": {
+        "key": "tiles/tiles_generator",
+        "text": "generate",
+        "source": "src/text/TilesText.jsx"
+      },
+      "title": {
+        "key": "tiles/tiles_generate",
+        "text": "generate tiles",
+        "source": "src/text/TilesText.jsx"
+      },
+      "settings": [
+        {
+          "key": "tiles_generator/frame_settings",
+          "source": "src/settings/TilesSettings.jsx"
+        }
+      ],
+      "availability": "implemented",
+      "purpose": "Operate the tile-generation workspace and inspect active work and history.",
+      "inputs": ["Navigator context", "Generation and automation controls"],
+      "access": "service-api",
+      "environment": [
+        {
+          "name": "VITE_FRACTO_PROD_URL",
+          "repository": "ui",
+          "path": "src/backend/TilesBackend.jsx"
+        }
+      ],
+      "limitations": [
+        "Available operations depend on tile-service mode and storage configuration.",
+        "Legacy tile upload controls write to the build-time production target; select the intended environment before publishing."
+      ],
+      "related_features": ["tiles-status", "tiles-transform"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Tiles.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/tiles/TilesGenerator.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/tiles/generator/GeneratorInterface.jsx"
+        }
+      ]
+    },
+    {
+      "id": "tiles-transform",
+      "area": "tiles",
+      "section": "tiles_transform",
+      "component": "src/pages/tiles/TilesTransform.jsx",
+      "label": {
+        "key": "tiles/transform",
+        "text": "transform",
+        "source": "src/text/TilesText.jsx"
+      },
+      "title": {
+        "key": "tiles/mesh_transforms",
+        "text": "mesh transforms",
+        "source": "src/text/TilesText.jsx"
+      },
+      "settings": [
+        {
+          "key": "tiles/splitter_pos_px",
+          "source": "src/settings/TilesSettings.jsx"
+        },
+        {
+          "key": "tiles_transform/frame_settings",
+          "source": "src/settings/TilesSettings.jsx"
+        },
+        {
+          "key": "tiles_transform/splitter_pos",
+          "source": "src/settings/TilesSettings.jsx"
+        }
+      ],
+      "availability": "implemented",
+      "purpose": "Inspect mesh availability and operate registered mesh transforms in a navigator workspace.",
+      "inputs": [
+        "Navigator frame",
+        "Mesh selections",
+        "Transform and automation controls"
+      ],
+      "access": "service-api",
+      "environment": [],
+      "limitations": [
+        "Operations depend on existing mesh coverage and server validation."
+      ],
+      "related_features": ["assets-simulator", "tiles-generator"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Tiles.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/tiles/TilesTransform.jsx"
+        }
+      ]
+    },
+    {
+      "id": "tiles-inspector",
+      "area": "tiles",
+      "section": "tiles_inspector",
+      "component": "src/pages/tiles/TilesInspector.jsx",
+      "label": {
+        "key": "tiles/tiles_inspector",
+        "text": "inspect",
+        "source": "src/text/TilesText.jsx"
+      },
+      "title": null,
+      "settings": [],
+      "availability": "placeholder",
+      "purpose": "A tile-inspector placeholder displaying its component name.",
+      "inputs": [],
+      "access": "app-shell",
+      "environment": [],
+      "limitations": [
+        "No functional inspection controls are currently rendered."
+      ],
+      "related_features": ["tiles-status"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Tiles.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/tiles/TilesInspector.jsx"
+        }
+      ]
+    },
+    {
+      "id": "tiles-test",
+      "area": "tiles",
+      "section": "tiles_test",
+      "component": "src/pages/tiles/TilesTest.jsx",
+      "label": {
+        "key": "tiles/tiles_test",
+        "text": "test",
+        "source": "src/text/TilesText.jsx"
+      },
+      "title": {
+        "key": "tiles/test_harness",
+        "text": "test harness",
+        "source": "src/text/TilesText.jsx"
+      },
+      "settings": [
+        {
+          "key": "tiles/splitter_pos_px",
+          "source": "src/settings/TilesSettings.jsx"
+        },
+        {
+          "key": "tiles/test_tab",
+          "source": "src/settings/TilesSettings.jsx"
+        }
+      ],
+      "availability": "implemented",
+      "purpose": "Run the tile test workspace with animation and benchmark panels.",
+      "inputs": [
+        "Animation/benchmark tab selection",
+        "Panel-specific test controls"
+      ],
+      "access": "service-api",
+      "environment": [],
+      "limitations": [
+        "Test panels are diagnostic tools, not a guarantee of production rendering performance."
+      ],
+      "related_features": ["tiles-generator", "tiles-status"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Tiles.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/tiles/TilesTest.jsx"
+        }
+      ]
+    },
+    {
+      "id": "tiles-settings",
+      "area": "tiles",
+      "section": "tiles_settings",
+      "component": "src/pages/tiles/TilesSettings.jsx",
+      "label": {
+        "key": "root/sidebar/settings",
+        "text": "Settings",
+        "source": "src/text/RootText.jsx"
+      },
+      "title": {
+        "key": "tiles/tiles_settings",
+        "text": "tiles settings",
+        "source": "src/text/TilesText.jsx"
+      },
+      "settings": [],
+      "availability": "placeholder",
+      "purpose": "A tile settings placeholder.",
+      "inputs": [],
+      "access": "app-shell",
+      "environment": [],
+      "limitations": [
+        "The panel does not provide implemented settings controls."
+      ],
+      "related_features": ["admin-settings"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Tiles.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/tiles/TilesSettings.jsx"
+        }
+      ]
+    },
+    {
+      "id": "tiles-status",
+      "area": "tiles",
+      "section": "tiles_status",
+      "component": "src/pages/tiles/TilesStatus.jsx",
+      "label": {
+        "key": "root/sidebar/status",
+        "text": "Status",
+        "source": "src/text/RootText.jsx"
+      },
+      "title": {
+        "key": "tiles/tiles_status",
+        "text": "tiles status",
+        "source": "src/text/TilesText.jsx"
+      },
+      "settings": [
+        {
+          "key": "tiles/splitter_pos_px",
+          "source": "src/settings/TilesSettings.jsx"
+        }
+      ],
+      "availability": "implemented",
+      "purpose": "Inspect tile-cache statistics and effectiveness.",
+      "inputs": ["Status refresh/display controls"],
+      "access": "service-api",
+      "environment": [],
+      "limitations": [
+        "Statistics describe the configured tile source/cache mode and may differ in local-source deployments."
+      ],
+      "related_features": ["tiles-generator", "admin-status"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Tiles.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/tiles/TilesStatus.jsx"
+        }
+      ]
+    },
+    {
+      "id": "tiles-logs",
+      "area": "tiles",
+      "section": "tiles_logs",
+      "component": "src/pages/tiles/TilesLogs.jsx",
+      "label": {
+        "key": "tiles/sidebar_logs",
+        "text": "logs",
+        "source": "src/text/TilesText.jsx"
+      },
+      "title": {
+        "key": "tiles/tiles_logs",
+        "text": "tiles logs",
+        "source": "src/text/TilesText.jsx"
+      },
+      "settings": [
+        {
+          "key": "tiles/logs_show_timestamps",
+          "source": "src/settings/TilesSettings.jsx"
+        },
+        {
+          "key": "tiles/splitter_pos_px",
+          "source": "src/settings/TilesSettings.jsx"
+        }
+      ],
+      "availability": "implemented",
+      "purpose": "View tile-service logs with search and display preferences.",
+      "inputs": ["Search text", "Timestamp and auto-scroll preferences"],
+      "access": "service-api",
+      "environment": [],
+      "limitations": ["Requires the tile log endpoint and retained log data."],
+      "related_features": ["tiles-status", "admin-logs"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Tiles.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/tiles/TilesLogs.jsx"
+        }
+      ]
+    },
+    {
+      "id": "study-overview",
+      "area": "study",
+      "section": "study_overview",
+      "component": "src/pages/study/StudyOverview.jsx",
+      "label": {
+        "key": "root/sidebar/overview",
+        "text": "Overview",
+        "source": "src/text/RootText.jsx"
+      },
+      "title": {
+        "key": "study/study_overview",
+        "text": "study overview",
+        "source": "src/text/StudyText.jsx"
+      },
+      "settings": [],
+      "availability": "placeholder",
+      "purpose": "A title-only study overview scaffold.",
+      "inputs": [],
+      "access": "app-shell",
+      "environment": [],
+      "limitations": [
+        "No study overview content is currently rendered beneath the title."
+      ],
+      "related_features": ["study-points"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Study.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/study/StudyOverview.jsx"
+        }
+      ]
+    },
+    {
+      "id": "study-circuitry",
+      "area": "study",
+      "section": "study_circuitry",
+      "component": "src/pages/study/StudyCircuitry.jsx",
+      "label": {
+        "key": "study/circuitry_title",
+        "text": "circuitry",
+        "source": "src/text/StudyText.jsx"
+      },
+      "title": {
+        "key": "study/study_circuitry",
+        "text": "orbital circuitry",
+        "source": "src/text/StudyText.jsx"
+      },
+      "settings": [
+        {
+          "key": "root/viewport_dimensions",
+          "source": "src/settings/RootSettings.jsx"
+        },
+        {
+          "key": "study/circuitry/frame_settings",
+          "source": "src/settings/StudySettings.jsx"
+        },
+        {
+          "key": "study/circuitry/legend_splitter_pos",
+          "source": "src/settings/StudySettings.jsx"
+        },
+        {
+          "key": "study/circuitry/splitter_pos",
+          "source": "src/settings/StudySettings.jsx"
+        },
+        {
+          "key": "study/circuitry/steps_splitter_pos",
+          "source": "src/settings/StudySettings.jsx"
+        },
+        {
+          "key": "study/splitter_pos_px",
+          "source": "src/settings/StudySettings.jsx"
+        }
+      ],
+      "availability": "implemented",
+      "purpose": "Study orbital circuitry using navigator, chart and audio controls.",
+      "inputs": ["Navigator seed/frame", "Orbital and audio controls"],
+      "access": "service-api",
+      "environment": [],
+      "limitations": [
+        "Browser audio may require a user gesture before playback."
+      ],
+      "related_features": ["study-points", "study-detection"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Study.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/study/StudyCircuitry.jsx"
+        }
+      ]
+    },
+    {
+      "id": "study-detection",
+      "area": "study",
+      "section": "study_detection",
+      "component": "src/pages/study/StudyOrbitalDetector.jsx",
+      "label": {
+        "key": "study/study_detection_sidebar",
+        "text": "detection",
+        "source": "src/text/StudyText.jsx"
+      },
+      "title": {
+        "key": "study/study_detection",
+        "text": "orbital detector",
+        "source": "src/text/StudyText.jsx"
+      },
+      "settings": [
+        {
+          "key": "root/viewport_dimensions",
+          "source": "src/settings/RootSettings.jsx"
+        },
+        {
+          "key": "study/detection/frame_settings",
+          "source": "src/settings/StudySettings.jsx"
+        },
+        {
+          "key": "study/detection/legend_splitter_pos",
+          "source": "src/settings/StudySettings.jsx"
+        },
+        {
+          "key": "study/detection/splitter_pos",
+          "source": "src/settings/StudySettings.jsx"
+        },
+        {
+          "key": "study/detection/steps_splitter_pos",
+          "source": "src/settings/StudySettings.jsx"
+        },
+        {
+          "key": "study/splitter_pos_px",
+          "source": "src/settings/StudySettings.jsx"
+        }
+      ],
+      "availability": "implemented",
+      "purpose": "Investigate orbital detection at a selected navigator frame.",
+      "inputs": ["Navigator seed/frame", "Detection controls"],
+      "access": "service-api",
+      "environment": [],
+      "limitations": [
+        "Detection results depend on algorithm limits and the selected region."
+      ],
+      "related_features": ["assets-detector", "study-points"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Study.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/study/StudyOrbitalDetector.jsx"
+        }
+      ]
+    },
+    {
+      "id": "study-points",
+      "area": "study",
+      "section": "study_points",
+      "component": "src/pages/study/StudyPoints.jsx",
+      "label": {
+        "key": "study/points_title",
+        "text": "orbitals",
+        "source": "src/text/StudyText.jsx"
+      },
+      "title": {
+        "key": "study/study_points",
+        "text": "orbital points",
+        "source": "src/text/StudyText.jsx"
+      },
+      "settings": [
+        {
+          "key": "study/points/frame_settings",
+          "source": "src/settings/StudySettings.jsx"
+        },
+        {
+          "key": "study/points/legend_splitter_pos",
+          "source": "src/settings/StudySettings.jsx"
+        },
+        {
+          "key": "study/points/splitter_pos",
+          "source": "src/settings/StudySettings.jsx"
+        },
+        {
+          "key": "study/points/steps_splitter_pos",
+          "source": "src/settings/StudySettings.jsx"
+        },
+        {
+          "key": "study/splitter_pos_px",
+          "source": "src/settings/StudySettings.jsx"
+        }
+      ],
+      "availability": "implemented",
+      "purpose": "Inspect orbital points and their charts for a selected study context.",
+      "inputs": ["Navigator context", "Point and series selections"],
+      "access": "service-api",
+      "environment": [],
+      "limitations": [
+        "Calculation and chart availability depend on the selected data and computation limits."
+      ],
+      "related_features": ["study-circuitry", "study-meridians"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Study.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/study/StudyPoints.jsx"
+        }
+      ]
+    },
+    {
+      "id": "study-meridians",
+      "area": "study",
+      "section": "study_meridians",
+      "component": "src/pages/study/StudyMeridians.jsx",
+      "label": {
+        "key": "study/meridians_title",
+        "text": "meridians",
+        "source": "src/text/StudyText.jsx"
+      },
+      "title": {
+        "key": "study/study_meridians",
+        "text": "core meridians",
+        "source": "src/text/StudyText.jsx"
+      },
+      "settings": [
+        {
+          "key": "study/meridians/frame_settings",
+          "source": "src/settings/StudySettings.jsx"
+        },
+        {
+          "key": "study/meridians/legend_splitter_pos",
+          "source": "src/settings/StudySettings.jsx"
+        },
+        {
+          "key": "study/meridians/splitter_pos",
+          "source": "src/settings/StudySettings.jsx"
+        },
+        {
+          "key": "study/meridians/steps_splitter_pos",
+          "source": "src/settings/StudySettings.jsx"
+        },
+        {
+          "key": "study/splitter_pos_px",
+          "source": "src/settings/StudySettings.jsx"
+        }
+      ],
+      "availability": "implemented",
+      "purpose": "Explore core meridians using study charts and navigator controls.",
+      "inputs": ["Navigator context", "Meridian controls"],
+      "access": "service-api",
+      "environment": [],
+      "limitations": [
+        "Results depend on the selected region and available computation."
+      ],
+      "related_features": ["study-points"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Study.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/study/StudyMeridians.jsx"
+        }
+      ]
+    },
+    {
+      "id": "study-nodes",
+      "area": "study",
+      "section": "study_nodes",
+      "component": "src/pages/study/StudyNodes.jsx",
+      "label": {
+        "key": "study/nodes_title",
+        "text": "nodal",
+        "source": "src/text/StudyText.jsx"
+      },
+      "title": {
+        "key": "study/study_nodes",
+        "text": "nodal bailiwicks",
+        "source": "src/text/StudyText.jsx"
+      },
+      "settings": [
+        {
+          "key": "study/splitter_pos_px",
+          "source": "src/settings/StudySettings.jsx"
+        }
+      ],
+      "availability": "implemented",
+      "purpose": "Browse nodal bailiwicks through the shared minibrot study panels.",
+      "inputs": ["Bailiwick selection", "Detail-panel controls"],
+      "access": "service-api",
+      "environment": [],
+      "limitations": [
+        "The nodal filter selects a different bailiwick class from inline and freeform views."
+      ],
+      "related_features": ["study-inline", "study-minibrots"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Study.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/study/StudyNodes.jsx"
+        }
+      ]
+    },
+    {
+      "id": "study-inline",
+      "area": "study",
+      "section": "study_inline",
+      "component": "src/pages/study/StudyInline.jsx",
+      "label": {
+        "key": "study/inline_title",
+        "text": "inline",
+        "source": "src/text/StudyText.jsx"
+      },
+      "title": {
+        "key": "study/study_inlines",
+        "text": "inline bailiwicks",
+        "source": "src/text/StudyText.jsx"
+      },
+      "settings": [
+        {
+          "key": "study/splitter_pos_px",
+          "source": "src/settings/StudySettings.jsx"
+        }
+      ],
+      "availability": "implemented",
+      "purpose": "Browse inline bailiwicks through the shared minibrot study panels.",
+      "inputs": ["Bailiwick selection", "Detail-panel controls"],
+      "access": "service-api",
+      "environment": [],
+      "limitations": [
+        "The inline filter selects a different bailiwick class from nodal and freeform views."
+      ],
+      "related_features": ["study-nodes", "study-minibrots"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Study.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/study/StudyInline.jsx"
+        }
+      ]
+    },
+    {
+      "id": "study-minibrots",
+      "area": "study",
+      "section": "study_minibrots",
+      "component": "src/pages/study/StudyMinibrots.jsx",
+      "label": {
+        "key": "study/minibrots_title",
+        "text": "freeform",
+        "source": "src/text/StudyText.jsx"
+      },
+      "title": {
+        "key": "study/study_minibrots",
+        "text": "freeform bailiwicks",
+        "source": "src/text/StudyText.jsx"
+      },
+      "settings": [
+        {
+          "key": "study/splitter_pos_px",
+          "source": "src/settings/StudySettings.jsx"
+        }
+      ],
+      "availability": "implemented",
+      "purpose": "Browse freeform bailiwicks and their minibrot detail and study panels.",
+      "inputs": ["Bailiwick selection", "Detail and terrain controls"],
+      "access": "service-api",
+      "environment": [],
+      "limitations": [
+        "Terrain and ray views depend on the selected bailiwick and available cached data."
+      ],
+      "related_features": ["study-nodes", "study-inline", "tiles-transform"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Study.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/study/StudyMinibrots.jsx"
+        }
+      ]
+    },
+    {
+      "id": "study-full-map",
+      "area": "study",
+      "section": "study_full_map",
+      "component": "src/pages/study/StudyFullMap.jsx",
+      "label": {
+        "key": "study/full_map_title",
+        "text": "full map",
+        "source": "src/text/StudyText.jsx"
+      },
+      "title": {
+        "key": "study/logistic_map_title",
+        "text": "logistic map",
+        "source": "src/text/StudyText.jsx"
+      },
+      "settings": [],
+      "availability": "placeholder",
+      "purpose": "A title-only logistic-map scaffold under the full map sidebar item.",
+      "inputs": [],
+      "access": "app-shell",
+      "environment": [],
+      "limitations": [
+        "No interactive logistic-map calculation or visualization is implemented on this page."
+      ],
+      "related_features": ["study-overview"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Study.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/study/StudyFullMap.jsx"
+        }
+      ]
+    },
+    {
+      "id": "study-settings",
+      "area": "study",
+      "section": "study_settings",
+      "component": "src/pages/study/StudySettings.jsx",
+      "label": {
+        "key": "root/sidebar/settings",
+        "text": "Settings",
+        "source": "src/text/RootText.jsx"
+      },
+      "title": {
+        "key": "study/study_settings",
+        "text": "study settings",
+        "source": "src/text/StudyText.jsx"
+      },
+      "settings": [],
+      "availability": "placeholder",
+      "purpose": "A study settings placeholder.",
+      "inputs": [],
+      "access": "app-shell",
+      "environment": [],
+      "limitations": [
+        "The panel does not provide implemented settings controls."
+      ],
+      "related_features": ["admin-settings"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Study.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/study/StudySettings.jsx"
+        }
+      ]
+    },
+    {
+      "id": "study-status",
+      "area": "study",
+      "section": "study_status",
+      "component": "src/pages/study/StudyStatus.jsx",
+      "label": {
+        "key": "root/sidebar/status",
+        "text": "Status",
+        "source": "src/text/RootText.jsx"
+      },
+      "title": {
+        "key": "study/study_status",
+        "text": "study status",
+        "source": "src/text/StudyText.jsx"
+      },
+      "settings": [],
+      "availability": "placeholder",
+      "purpose": "A study status placeholder.",
+      "inputs": [],
+      "access": "app-shell",
+      "environment": [],
+      "limitations": ["The panel displays placeholder content."],
+      "related_features": ["admin-status"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Study.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/study/StudyStatus.jsx"
+        }
+      ]
+    },
+    {
+      "id": "games-overview",
+      "area": "games",
+      "section": "games_overview",
+      "component": null,
+      "label": {
+        "key": "root/sidebar/overview",
+        "text": "Overview",
+        "source": "src/text/RootText.jsx"
+      },
+      "title": null,
+      "settings": [],
+      "availability": "empty",
+      "purpose": "An empty games overview destination.",
+      "inputs": [],
+      "access": "app-shell",
+      "environment": [],
+      "limitations": [
+        "The sidebar entry currently renders no right-pane component."
+      ],
+      "related_features": ["games-worlds", "games-music"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Games.jsx"
+        }
+      ]
+    },
+    {
+      "id": "games-worlds",
+      "area": "games",
+      "section": "games_worlds",
+      "component": "src/pages/games/GamesWorlds.jsx",
+      "label": {
+        "key": "games/worlds",
+        "text": "worlds",
+        "source": "src/text/GamesText.jsx"
+      },
+      "title": {
+        "key": "games/worlds_title",
+        "text": "all worlds",
+        "source": "src/text/GamesText.jsx"
+      },
+      "settings": [],
+      "availability": "implemented",
+      "purpose": "Explore WordNet world mappings, contenders and editable notes.",
+      "inputs": ["Mapping and contender selections", "Notes in Markdown"],
+      "access": "service-api",
+      "environment": [],
+      "limitations": [
+        "Notes save through the data service with expected-value validation; failed saves retain retry controls."
+      ],
+      "related_features": ["games-wordnet"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Games.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/GamesWorlds.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/README.md"
+        }
+      ]
+    },
+    {
+      "id": "games-music",
+      "area": "games",
+      "section": "games_music",
+      "component": "src/pages/games/GamesMusic.jsx",
+      "label": {
+        "key": "games/music",
+        "text": "music",
+        "source": "src/text/GamesText.jsx"
+      },
+      "title": {
+        "key": "games/music_title",
+        "text": "All Music",
+        "source": "src/text/GamesText.jsx"
+      },
+      "settings": [],
+      "availability": "implemented",
+      "purpose": "Load and play MIDI in the All Music workspace with transport and track views.",
+      "inputs": ["Local MIDI files", "Playback and transport controls"],
+      "access": "service-api",
+      "environment": [],
+      "limitations": [
+        "Browser audio may require a user gesture; supported playback depends on MIDI compatibility and available instruments."
+      ],
+      "related_features": ["games-worlds"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Games.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/GamesMusic.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/README.md"
+        }
+      ]
+    },
+    {
+      "id": "games-wordnet",
+      "area": "games",
+      "section": "games_wordnet",
+      "component": "src/pages/games/GamesWordnet.jsx",
+      "label": {
+        "key": "games/wordnet",
+        "text": "wordnet",
+        "source": "src/text/GamesText.jsx"
+      },
+      "title": {
+        "key": "games/wordnet_title",
+        "text": "wordnet reference",
+        "source": "src/text/GamesText.jsx"
+      },
+      "settings": [
+        {
+          "key": "games/wordnet_splitter_pos_px",
+          "source": "src/settings/GamesSettings.jsx"
+        }
+      ],
+      "availability": "implemented",
+      "purpose": "Browse the abstract-noun WordNet tree and inspect synset definitions.",
+      "inputs": ["Tree/synset selection", "Synset deep-link parameters"],
+      "access": "app-shell",
+      "environment": [],
+      "limitations": [
+        "The bundled graph covers the selected WordNet abstraction subtree, not the full dictionary."
+      ],
+      "related_features": ["games-worlds"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Games.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/GamesWordnet.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/README.md"
+        }
+      ]
+    },
+    {
+      "id": "games-settings",
+      "area": "games",
+      "section": "games_settings",
+      "component": null,
+      "label": {
+        "key": "root/sidebar/settings",
+        "text": "Settings",
+        "source": "src/text/RootText.jsx"
+      },
+      "title": null,
+      "settings": [],
+      "availability": "empty",
+      "purpose": "An empty games settings destination.",
+      "inputs": [],
+      "access": "app-shell",
+      "environment": [],
+      "limitations": [
+        "The sidebar entry currently renders no right-pane component."
+      ],
+      "related_features": ["admin-settings"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Games.jsx"
+        }
+      ]
+    },
+    {
+      "id": "games-status",
+      "area": "games",
+      "section": "games_status",
+      "component": null,
+      "label": {
+        "key": "root/sidebar/status",
+        "text": "Status",
+        "source": "src/text/RootText.jsx"
+      },
+      "title": null,
+      "settings": [],
+      "availability": "empty",
+      "purpose": "An empty games status destination.",
+      "inputs": [],
+      "access": "app-shell",
+      "environment": [],
+      "limitations": [
+        "The sidebar entry currently renders no right-pane component."
+      ],
+      "related_features": ["admin-status"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Games.jsx"
+        }
+      ]
+    },
+    {
+      "id": "home",
+      "area": "home",
+      "section": null,
+      "component": "src/pages/PageWelcome.jsx",
+      "label": {
+        "key": null,
+        "text": "home",
+        "source": "src/App.jsx"
+      },
+      "title": {
+        "key": "welcome/title",
+        "text": "fracto",
+        "source": "src/text/WelcomeText.jsx"
+      },
+      "settings": [],
+      "availability": "implemented",
+      "purpose": "Show the title screen, reveal the entry panel, and enter the app according to its authentication state.",
+      "inputs": [
+        "Click the title screen to reveal the entry panel",
+        "Entry/login controls"
+      ],
+      "access": "public-entry",
+      "environment": [
+        {
+          "name": "FRACTO_AUTH_MODE",
+          "repository": "main",
+          "path": "utils/auth_config.js"
+        },
+        {
+          "name": "FRACTO_AUTH_REQUIRED",
+          "repository": "main",
+          "path": "utils/auth_config.js"
+        }
+      ],
+      "limitations": [
+        "A title screen without the entry panel is intentional; click it to reveal the controls.",
+        "Authentication bypass is deployment configuration, not a user-selected role."
+      ],
+      "related_features": ["study-points", "admin-chat"],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/App.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/PageWelcome.jsx"
+        }
+      ]
+    }
+  ]
+}

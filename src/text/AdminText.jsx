@@ -40,6 +40,11 @@ export const KEY_ADMIN_ACCOUNTS_ERROR = "admin/accounts_error";
 export const KEY_ADMIN_ACCOUNTS_EMPTY = "admin/accounts_empty";
 export const KEY_ADMIN_CHAT = "admin/chat";
 export const KEY_ADMIN_CHAT_STATUS = "admin/chat_status";
+export const KEY_ADMIN_CHAT_MODE = "admin/chat_mode";
+export const KEY_ADMIN_CHAT_GENERAL = "admin/chat_general";
+export const KEY_ADMIN_CHAT_REFERENCE = "admin/chat_reference";
+export const KEY_ADMIN_CHAT_REFERENCE_NOTE = "admin/chat_reference_note";
+export const KEY_ADMIN_CHAT_MODE_NOTE = "admin/chat_mode_note";
 export const KEY_ADMIN_CHAT_EMPTY_TITLE = "admin/chat_empty_title";
 export const KEY_ADMIN_CHAT_EMPTY_NOTE = "admin/chat_empty_note";
 export const KEY_ADMIN_CHAT_PLACEHOLDER = "admin/chat_placeholder";
@@ -226,6 +231,12 @@ export const APP_ADMIN_TEXT = {
   [KEY_ADMIN_ACCOUNTS_EMPTY]: "no user accounts found",
   [KEY_ADMIN_CHAT]: "chat",
   [KEY_ADMIN_CHAT_TITLE]: "fracto AI",
+  [KEY_ADMIN_CHAT_MODE]: "Answer mode",
+  [KEY_ADMIN_CHAT_GENERAL]: "General chat",
+  [KEY_ADMIN_CHAT_REFERENCE]: "App reference",
+  [KEY_ADMIN_CHAT_REFERENCE_NOTE]:
+    "Ask about the app in up to 512 characters. Answers quote the published app guide with citations; they do not check live state. Each question stands alone. Files are available in General chat.",
+  [KEY_ADMIN_CHAT_MODE_NOTE]: "Switching modes starts a new conversation.",
   [KEY_ADMIN_CHAT_STATUS]:
     "Chat uses the local AI server. Access requires an administrator login or the explicit private-lab chat setting. Attached file text is sent with your message; files and conversations are not saved.",
   [KEY_ADMIN_CHAT_EMPTY_TITLE]: "Start a conversation",
@@ -240,6 +251,10 @@ export const APP_ADMIN_TEXT = {
   [KEY_ADMIN_CHAT_ERROR]:
     "The response was interrupted or unavailable. Any text shown may be incomplete. Check your administrator login, message length, and AI server availability, then try again.",
   [KEY_ADMIN_CHAT_RESPONSE_ERRORS]: {
+    CHAT_REFERENCE_UNAVAILABLE:
+      "App reference is unavailable. An administrator must publish the app guide and enable its reference skill. You can still use General chat.",
+    CHAT_REFERENCE_QUESTION:
+      "Use a short app question with at most 512 characters and 12 keywords, without files.",
     CHAT_MEMORY_PRESSURE:
       "The AI server cannot start generation because available memory is below its configured reserve. Free memory or adjust the private-lab memory setting before retrying.",
     CHAT_DISK_PRESSURE:
@@ -260,6 +275,8 @@ export const APP_ADMIN_TEXT = {
   [KEY_ADMIN_CHAT_FILES_NOTE]:
     "Attach up to 4 UTF-8 TXT, Markdown, JSON or CSV files, 4 KiB each. Message and file text must fit within 8 KiB together. PDF and image support is not available yet.",
   [KEY_ADMIN_CHAT_FILE_ERRORS]: {
+    CHAT_REFERENCE_QUESTION:
+      "Use a short app question with at most 512 characters, without files.",
     CHAT_FILE_TYPE: "Choose a TXT, Markdown, JSON or CSV file.",
     CHAT_FILE_SIZE:
       "This file exceeds the 4 KiB limit. Use a smaller file or excerpt.",

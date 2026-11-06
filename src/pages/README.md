@@ -4,7 +4,7 @@ This directory contains the routed application areas and the feature components 
 
 ## Routed areas
 
-- `Admin.jsx` (`/admin`) - repository Reference documents, overview, commits, status, logs, and administrative settings.
+- `Admin.jsx` (`/admin`) - accounts, repository Reference documents, overview scaffold, commits, social documents, servers, AI chat, health/status, logs, and browser-settings inspection.
 - `Data.jsx` (`/data`) - data-service overview, queries, status, logs, and connection/settings forms.
 - `Assets.jsx` (`/assets`) - asset overview/status, image generation and gallery tools, lore content, video generation, a seed-survey navigator with an incremental preview pane, logs, and settings.
 - `Tiles.jsx` (`/tiles`) - tile overview/status, inspection, test harness, generation, logs, and settings.
@@ -12,6 +12,13 @@ This directory contains the routed application areas and the feature components 
 - `Study.jsx` (`/study`) - fractal studies including points, minibrots, nodes, inline studies, meridians, circuitry, fields, overview, status, and settings. The `full map` sidebar item opens a title-only page scaffold titled `logistic map`.
 
 Each top-level page follows the same broad pattern: read the selected section from `AppSettings`, resolve display labels through `AppText`, render a sidebar, and mount the selected child panel inside `SplitterLayout`.
+
+The [feature catalog](../features/README.md) records the exact current labels,
+page titles and implementation states. In particular, data Overview is a legacy
+data-backups placeholder; tile Inspector and several Settings/Status panels are
+placeholders; games Overview/Settings/Status render no right-pane component.
+The catalog distinguishes those destinations from completed workflows and is
+checked against the route/sidebar/settings registrations before npm builds.
 
 ## Directory guide
 

@@ -1,10 +1,14 @@
 import { defineConfig } from "vite";
 import plugin from "@vitejs/plugin-react";
-const FRACTO_UI_PORT = Number(process.env.VITE_FRACTO_UI_PORT || process.env.FRACTO_UI_PORT || 3006);
+import process from "node:process";
+import { knowledge_bundle_plugin } from "./scripts/knowledge_bundle_plugin.js";
+const FRACTO_UI_PORT = Number(
+  process.env.VITE_FRACTO_UI_PORT || process.env.FRACTO_UI_PORT || 3006,
+);
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [plugin()],
+  plugins: [plugin(), knowledge_bundle_plugin()],
   // The development container runs Vite as the `node` user while dependency
   // volumes are populated from root-owned image layers. Keep the optimizer
   // cache writable in development; production builds retain the default cache

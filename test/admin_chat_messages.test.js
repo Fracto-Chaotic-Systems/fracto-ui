@@ -7,6 +7,35 @@ import {
 } from "../src/pages/admin/chat_attachments.js";
 
 const message = (role, text) => ({ role, content: [{ type: "text", text }] });
+test("app-reference mode sends only a bounded standalone question and rejects attachments", () => {
+  assert.deepEqual(
+    prepare_chat_messages(
+      [
+        message("user", "old"),
+        message("assistant", "old response"),
+        message("user", " Where is\nchat? "),
+      ],
+      "app-reference",
+    ),
+    [{ role: "user", content: "Where is chat?" }],
+  );
+  assert.throws(
+    () =>
+      prepare_chat_messages(
+        [message("user", "x".repeat(513))],
+        "app-reference",
+      ),
+    /CHAT_REFERENCE_QUESTION/,
+  );
+  assert.throws(
+    () =>
+      prepare_chat_messages(
+        [{ ...message("user", "chat"), attachments: [{}] }],
+        "app-reference",
+      ),
+    /CHAT_REFERENCE_QUESTION/,
+  );
+});
 test("chat keeps recent conversation within count and UTF-8 byte budgets", () => {
   const history = Array.from({ length: 21 }, (_, i) =>
     message(i % 2 ? "assistant" : "user", `Message ${i}`),
