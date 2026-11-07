@@ -1,4 +1,69 @@
 const ADMIN_FOLDER = "admin";
+const SYNC_PEER_CONFIGURATION_ERROR =
+  "FRACTO_DATABASE_SYNC_PEERS must be a JSON object mapping server URLs to endpoint and token entries. Setting it to true does not configure a peer. Correct the setting and recreate the server container to load the new environment.";
+export const MESH_SYNC_TEXT = {
+  title: "Mesh file synchronization",
+  conflict_preview: "Showing conflict examples:",
+  note: "Share validated mesh files in both directions. Numerical tiles, database tables, and each server’s inventory journals stay local. Both servers must use the same mesh build profile and tile-source identity.",
+  setup:
+    "Configure this server as a trusted sync peer on both servers to share meshes.",
+  preview: "Preview mesh sync",
+  sync: "Sync mesh files",
+  working: "Working…",
+  conflict_note:
+    "These short codes have different mesh files. Choose which server’s files to keep for all conflicts. Files unique to either server will be shared.",
+  choose: "Choose mesh conflict preference",
+  local: "Keep this server’s conflicting meshes",
+  remote: "Keep selected server’s conflicting meshes",
+  conflict: "conflicts",
+  table: "Mesh level",
+  local_rows: "This server",
+  remote_rows: "Selected server",
+  merged_rows: "Shared meshes",
+  local_key: "This server’s checksum",
+  remote_key: "Selected server’s checksum",
+  changed: "Comparison",
+  locking:
+    "Mesh generation must be idle on both servers. It is blocked while sync holds each mesh store. Changes since this preview require a fresh preview.",
+  complete:
+    "Mesh sync complete. Both servers have matching validated mesh files, registered in their live inventories.",
+  partial:
+    "Some mesh files may already have been shared. Preview again and retry; files whose checksums already match will be skipped.",
+  files: "files",
+  bytes: "mesh bytes",
+  skipped: "Unusable or stale source files excluded from sharing:",
+  errors: {
+    invalid_sync_peer_configuration: SYNC_PEER_CONFIGURATION_ERROR,
+    mesh_source_mismatch:
+      "Mesh source identities or build profiles differ. Configure matching tile-source generations and rebuild profiles before sharing meshes.",
+    mesh_jobs_active:
+      "Mesh generation or another mesh sync is active. Wait for it to finish on both servers before previewing.",
+    mesh_sync_busy: "Another mesh sync is in progress. Wait for it to finish.",
+    mesh_snapshot_changed:
+      "Mesh files changed after the preview. Preview again before syncing.",
+    mesh_checksum_mismatch:
+      "A transferred mesh failed checksum validation. Preview again and retry.",
+    mesh_internal_token_missing:
+      "Configure the private internal service token so the admin service can contact its local mesh store.",
+    mesh_session_expired:
+      "The mesh store session expired or its service restarted. Preview again and retry.",
+    mesh_catalog_incompatible:
+      "The peer does not provide a compatible mesh inventory. Install matching sync code on both servers.",
+    mesh_catalog_limit:
+      "This mesh inventory exceeds the supported catalog size. No successful sync was reported.",
+    mesh_transfer_limit:
+      "The mesh catalog or file transfer exceeds the supported size. No files were silently skipped.",
+    mesh_file_limit:
+      "A mesh exceeds the supported transfer size. No file was silently skipped.",
+    unsafe_mesh_path:
+      "A mesh destination is not a regular file or directory. Repair the mesh store path before retrying.",
+    sync_peer_not_configured:
+      "This server is not configured as a trusted sync peer.",
+    sync_plan_expired: "The mesh preview expired. Run a fresh preview.",
+    default:
+      "Unable to share meshes. Check peer connectivity, mesh storage, and the sync configuration, then preview again.",
+  },
+};
 export const DATABASE_SYNC_TEXT = {
   title: "Database synchronization",
   note: "Merge this server’s database with the selected server. Tables and migration checksums must match. The tiles and automation tables stay local.",
@@ -27,6 +92,7 @@ export const DATABASE_SYNC_TEXT = {
   partial:
     "Synchronization did not complete on both servers. One server may already contain the merge. Preview again and retry to bring them together.",
   errors: {
+    invalid_sync_peer_configuration: SYNC_PEER_CONFIGURATION_ERROR,
     migration_version_mismatch:
       "The servers have different migration versions or checksums. Install identical migrations on both before syncing.",
     table_definitions_mismatch:

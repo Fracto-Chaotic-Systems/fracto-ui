@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { transformSync } from "esbuild";
 
-function harness(backend, stored = null) {
+function harness(backend, stored = null, kind = "database") {
   const source = readFileSync(
     new URL("../src/pages/admin/AdminDatabaseSync.jsx", import.meta.url),
     "utf8",
@@ -16,7 +16,16 @@ function harness(backend, stored = null) {
     );
   const prop = () => prop;
   prop.isRequired = prop;
-  const saved = new Map(stored ? [["database-sync:http://peer", stored]] : []);
+  const saved = new Map(
+    stored
+      ? [
+          [
+            `${kind === "meshes" ? "mesh" : "database"}-sync:http://peer`,
+            stored,
+          ],
+        ]
+      : [],
+  );
   const Sync = runInNewContext(
     transformSync(source, { loader: "jsx" }).code + ";AdminDatabaseSync",
     {
@@ -30,7 +39,18 @@ function harness(backend, stored = null) {
       },
       PropTypes: new Proxy({}, { get: () => prop }),
       AdminBackend: backend,
-      text: { errors: { default: "sync error" } },
+      text: {
+        errors: {
+          invalid_sync_peer_configuration: "Use a JSON peer map, not true",
+          default: "sync error",
+        },
+      },
+      MESH_SYNC_TEXT: {
+        errors: {
+          invalid_sync_peer_configuration: "Use a JSON peer map, not true",
+          default: "mesh sync error",
+        },
+      },
       sessionStorage: {
         getItem: (k) => saved.get(k),
         setItem: (k, v) => saved.set(k, v),
@@ -39,18 +59,72 @@ function harness(backend, stored = null) {
       clearInterval: () => {},
     },
   );
-  const component = new Sync({ server_url: "http://peer/" });
+  const component = new Sync({ server_url: "http://peer/", kind });
   return { component, saved };
 }
 const tick = () => new Promise((resolve) => setImmediate(resolve));
 
+test("invalid boolean configuration shows an actionable error in both sync panels", async () => {
+  for (const kind of ["database", "meshes"]) {
+    const prefix = kind === "meshes" ? "mesh_sync" : "database_sync";
+    const h = harness(
+      {
+        [`${prefix}_peers`]: async () => {
+          throw Error("HTTP 503: invalid_sync_peer_configuration");
+        },
+      },
+      null,
+      kind,
+    );
+    h.component.componentDidMount();
+    await tick();
+    assert.equal(h.component.state.error, "Use a JSON peer map, not true");
+    assert.equal(h.component.state.configured, false);
+    assert.equal(h.component.state.loading, false);
+    h.component.componentWillUnmount();
+  }
+});
+
+test("mesh controls use the separate file-sync endpoints and remember their own job", async () => {
+  const calls = [];
+  const h = harness(
+    {
+      mesh_sync_peers: async () => ({ peers: ["http://peer"] }),
+      mesh_sync_preview: async (url) => {
+        calls.push(["preview", url]);
+        return { id: "mesh-plan", status: "ready", conflicts: [] };
+      },
+      mesh_sync_apply: async (...args) => {
+        calls.push(["apply", ...args]);
+        return { id: "mesh-plan", status: "applying" };
+      },
+    },
+    null,
+    "meshes",
+  );
+  h.component.componentDidMount();
+  await tick();
+  await h.component.preview();
+  assert.equal(h.saved.get("mesh-sync:http://peer"), "mesh-plan");
+  assert.equal(h.saved.has("database-sync:http://peer"), false);
+  await h.component.apply();
+  assert.deepEqual(calls, [
+    ["preview", "http://peer/"],
+    ["apply", "mesh-plan", undefined],
+  ]);
+  h.component.componentWillUnmount();
+});
+
 test("a lost apply response reattaches to the server job instead of offering a duplicate apply", async () => {
   const h = harness({
     database_sync_peers: async () => ({ peers: ["http://peer"] }),
-    database_sync_apply: async () => { throw Error("lost response"); },
+    database_sync_apply: async () => {
+      throw Error("lost response");
+    },
     database_sync_job: async () => ({ id: "plan", status: "completed" }),
   });
-  h.component.componentDidMount(); await tick();
+  h.component.componentDidMount();
+  await tick();
   h.component.remember("plan");
   h.component.state.job = { id: "plan", status: "ready", conflicts: [] };
   await h.component.apply();

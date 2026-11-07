@@ -2,7 +2,10 @@ import { Component } from "react";
 import PropTypes from "prop-types";
 import AdminBackend from "../../backend/AdminBackend.jsx";
 import CoolButton from "../../utils/ui/CoolButton.jsx";
-import { DATABASE_SYNC_TEXT as text } from "../../text/AdminText.jsx";
+import {
+  DATABASE_SYNC_TEXT as text,
+  MESH_SYNC_TEXT,
+} from "../../text/AdminText.jsx";
 
 const normalize = (url) => url.replace(/\/+$/, "");
 const cell = {
@@ -10,13 +13,23 @@ const cell = {
   padding: "0.35rem 0.7rem",
   borderBottom: "1px solid #ddd",
 };
-const error_message = (error) =>
-  Object.entries(text.errors).find(
+const error_message = (error, copy = text) =>
+  Object.entries(copy.errors).find(
     ([code]) => code !== "default" && String(error).includes(code),
-  )?.[1] || text.errors.default;
+  )?.[1] || copy.errors.default;
 
 export default class AdminDatabaseSync extends Component {
-  static propTypes = { server_url: PropTypes.string.isRequired };
+  static propTypes = {
+    server_url: PropTypes.string.isRequired,
+    kind: PropTypes.oneOf(["database", "meshes"]),
+  };
+  get copy() {
+    return this.props.kind === "meshes" ? MESH_SYNC_TEXT : text;
+  }
+  api = (action, ...args) =>
+    AdminBackend[
+      `${this.props.kind === "meshes" ? "mesh_sync" : "database_sync"}_${action}`
+    ](...args);
   state = {
     configured: false,
     loading: true,
@@ -27,7 +40,7 @@ export default class AdminDatabaseSync extends Component {
   };
   componentDidMount() {
     this.active = true;
-    this.storage_key = `database-sync:${normalize(this.props.server_url)}`;
+    this.storage_key = `${this.props.kind === "meshes" ? "mesh-sync" : "database-sync"}:${normalize(this.props.server_url)}`;
     try {
       this.job_id = sessionStorage.getItem(this.storage_key);
     } catch {
@@ -51,7 +64,7 @@ export default class AdminDatabaseSync extends Component {
   };
   load_peers = async () => {
     try {
-      const result = await AdminBackend.database_sync_peers();
+      const result = await this.api("peers");
       if (this.active)
         this.setState({
           configured: result.peers.includes(normalize(this.props.server_url)),
@@ -59,7 +72,10 @@ export default class AdminDatabaseSync extends Component {
         });
     } catch (error) {
       if (this.active)
-        this.setState({ loading: false, error: error_message(error) });
+        this.setState({
+          loading: false,
+          error: error_message(error, this.copy),
+        });
     }
   };
   refresh = async () => {
@@ -74,13 +90,13 @@ export default class AdminDatabaseSync extends Component {
     this.polling = true;
     const id = this.job_id;
     try {
-      const job = await AdminBackend.database_sync_job(id);
+      const job = await this.api("job", id);
       if (this.active && this.job_id === id)
         this.setState({ job, error: null });
     } catch (error) {
       if (this.active && this.job_id === id)
         this.setState({
-          error: error_message(error),
+          error: error_message(error, this.copy),
           ...(String(error).includes("404")
             ? { job: { status: "failed" } }
             : {}),
@@ -96,16 +112,19 @@ export default class AdminDatabaseSync extends Component {
     )
       return;
     this.job_id = null;
-    try { sessionStorage.removeItem(this.storage_key); } catch { /* Storage is optional. */ }
+    try {
+      sessionStorage.removeItem(this.storage_key);
+    } catch {
+      /* Storage is optional. */
+    }
     this.setState({ pending: true, error: null, preferred: "", job: null });
     try {
-      const job = await AdminBackend.database_sync_preview(
-        this.props.server_url,
-      );
+      const job = await this.api("preview", this.props.server_url);
       this.remember(job.id);
       if (this.active) this.setState({ job });
     } catch (error) {
-      if (this.active) this.setState({ error: error_message(error) });
+      if (this.active)
+        this.setState({ error: error_message(error, this.copy) });
     } finally {
       if (this.active) this.setState({ pending: false });
     }
@@ -120,20 +139,22 @@ export default class AdminDatabaseSync extends Component {
       return;
     this.setState({ pending: true, error: null });
     try {
-      const updated = await AdminBackend.database_sync_apply(
-        job.id,
-        preferred || undefined,
-      );
+      const updated = await this.api("apply", job.id, preferred || undefined);
       if (this.active) this.setState({ job: updated });
     } catch (error) {
       // A lost POST response does not mean the server stopped applying it.
       // Poll the known job ID to recover its authoritative status.
-      if (this.active) this.setState({ error: error_message(error), job: { ...job, status: "checking", phase: text.working } });
+      if (this.active)
+        this.setState({
+          error: error_message(error, this.copy),
+          job: { ...job, status: "checking", phase: this.copy.working },
+        });
     } finally {
       if (this.active) this.setState({ pending: false });
     }
   };
   render() {
+    const text = this.copy;
     const { configured, loading, pending, job, preferred, error } = this.state;
     const busy = pending || ["checking", "applying"].includes(job?.status);
     return (
@@ -147,7 +168,7 @@ export default class AdminDatabaseSync extends Component {
       >
         <h2>{text.title}</h2>
         <p>{text.note}</p>
-        {!loading && !configured && <p>{text.setup}</p>}
+        {!loading && !configured && !error && <p>{text.setup}</p>}
         <CoolButton
           content={busy ? text.working : text.preview}
           on_click={this.preview}
@@ -155,14 +176,35 @@ export default class AdminDatabaseSync extends Component {
         />
         {busy && (
           <div role="status" aria-live="polite">
-            <progress aria-label={text.title} /> {job?.phase || text.working}
+            <progress
+              aria-label={text.title}
+              value={
+                job?.progress?.files_total
+                  ? job.progress.files_processed
+                  : undefined
+              }
+              max={job?.progress?.files_total || undefined}
+            />{" "}
+            {job?.phase || text.working}
           </div>
         )}
+        {job?.progress && (
+          <p aria-live="polite">
+            {job.progress.files_processed}/{job.progress.files_total}{" "}
+            {text.files} · {job.progress.bytes_transferred}/
+            {job.progress.bytes_total} {text.bytes}
+          </p>
+        )}
         {(error || job?.error) && (
-          <p role="alert">{error || error_message(job.error)}</p>
+          <p role="alert">{error || error_message(job.error, text)}</p>
         )}
         {job?.status === "partial" && <p role="alert">{text.partial}</p>}
         {job?.status === "completed" && <p role="status">{text.complete}</p>}
+        {!!job?.skipped && (
+          <p>
+            {text.skipped} {job.skipped}
+          </p>
+        )}
         {job?.status === "ready" && (
           <>
             <div
@@ -209,8 +251,15 @@ export default class AdminDatabaseSync extends Component {
             {!!job.conflicts.length && (
               <>
                 <p>
-                  {job.conflicts.length} {text.conflict}. {text.conflict_note}
+                  {job.conflict_count ?? job.conflicts.length} {text.conflict}.{" "}
+                  {text.conflict_note}
                 </p>
+                {job.conflict_count > job.conflicts.length && (
+                  <p>
+                    {text.conflict_preview} {job.conflicts.length}/
+                    {job.conflict_count}
+                  </p>
+                )}
                 <div style={{ overflow: "auto", maxHeight: "16rem" }}>
                   <table style={{ borderCollapse: "collapse" }}>
                     <thead>

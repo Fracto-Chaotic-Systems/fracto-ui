@@ -1,7 +1,7 @@
 {
   "contract_version": 1,
   "catalog_id": "fracto-ui",
-  "catalog_version": "1.2.8",
+  "catalog_version": "1.2.9",
   "access_profiles": [
     {
       "id": "public-entry",
@@ -408,11 +408,11 @@
         }
       ],
       "availability": "implemented",
-      "purpose": "Inspect server health, roles and local labels; preview and synchronize matching databases with a configured trusted peer, choosing which server keeps conflicting rows.",
+      "purpose": "Inspect server health, roles and local labels; preview and synchronize databases or mesh files with a trusted peer, choosing which server keeps conflicting rows or meshes.",
       "inputs": [
         "Server URL",
         "Browser-local title and role edits",
-        "Sync preview and conflict server preference"
+        "Database or mesh sync preview and conflict server preference"
       ],
       "access": "administrator",
       "environment": [
@@ -424,7 +424,8 @@
       ],
       "limitations": [
         "Saved labels and addresses are browser-local preferences; public health does not grant administrative access.",
-        "Sync requires identical migration history and table definitions, excludes tiles and automation, and temporarily locks included tables. Trusted peers must be configured on both servers. Conflicting rows require an explicit server preference; invalid references block application."
+        "Database sync requires identical migration history and table definitions, excludes tiles and automation, and temporarily locks included tables. Conflicting rows require an explicit server preference; invalid references block application.",
+        "Mesh sync shares validated gzip mesh assets only, requires matching source identities and mesh profiles, pauses mesh generation during each operation, and leaves numerical tiles, databases and local inventory journals untouched. Both servers need the sync code and trusted peer configuration."
       ],
       "related_features": ["admin-status", "admin-chat"],
       "sources": [

@@ -1,5 +1,11 @@
 # Admin pages
 
+Server Awareness also renders a separate mesh-file sync panel using the shared
+`AdminDatabaseSync.jsx` workflow with `kind="meshes"`. It uses `/mesh-sync` APIs,
+independent stored job IDs, per-level counts, checksum conflict selection, and
+file/byte progress. It shares validated mesh assets through the receiving tiles
+service; SQL data and numerical tiles are not included.
+
 The selected remote server now has an `AdminDatabaseSync.jsx` panel. It previews
 an administrator-authorized two-way database merge, displays row counts and
 conflicting keys/columns, requires a server preference when conflicts exist,

@@ -671,6 +671,9 @@ export class AdminServers extends Component {
               {selected_server && !is_local_server && (
                 <AdminDatabaseSync key={`sync:${selected_server}`} server_url={selected_server} />
               )}
+              {selected_server && !is_local_server && (
+                <AdminDatabaseSync key={`mesh-sync:${selected_server}`} server_url={selected_server} kind="meshes" />
+              )}
               {selected_server && (
                 <AdminServerClients
                   key={selected_server}
