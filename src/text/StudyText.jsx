@@ -26,11 +26,22 @@ export const KEY_STUDY_POINTS = `${STUDY_FOLDER}/study_points`;
 export const KEY_STUDY_POINTS_FREE_TAB = `${STUDY_FOLDER}/points_free_tab`;
 export const POINTS_ORBITAL_TEXT = {
   stale: "study/points_stored_stale",
+  resume: "study/points_resume",
+  resume_notice: "study/points_resume_notice",
+  cancel: "study/points_cancel",
   recalculate: "study/points_stored_recalculate",
   confirmation: "study/points_stored_confirmation",
   survey_progress: "study/points_survey_progress",
   scan_progress: "study/points_scan_progress",
   ray_progress: "study/points_ray_progress",
+  queued: "study/points_calculation_queued",
+  saving: "study/points_saving",
+  saving_rays: "study/points_saving_rays",
+  saving_progress: "study/points_saving_progress",
+  survey_stage: "study/points_survey_stage",
+  scan_stage: "study/points_scan_stage",
+  ray_stage: "study/points_ray_stage",
+  ray_preparing: "study/points_ray_preparing",
   title: "study/points_stored_title",
   select: "study/points_stored_select",
   empty: "study/points_stored_empty",
@@ -284,6 +295,10 @@ export const APP_STUDY_TEXT = {
   [KEY_STUDY_MAGNITUDES]: "orbital magnitudes",
   [KEY_STUDY_POINTS]: "orbital points",
   [KEY_STUDY_POINTS_FREE_TAB]: "free",
+  [POINTS_ORBITAL_TEXT.resume]: "Resume orbital calculation",
+  [POINTS_ORBITAL_TEXT.resume_notice]:
+    "This calculation stopped. Resume from its last saved checkpoint.",
+  [POINTS_ORBITAL_TEXT.cancel]: "Cancel calculation",
   [POINTS_ORBITAL_TEXT.title]: "stored orbitals",
   [POINTS_ORBITAL_TEXT.stale]:
     "Stored results use an earlier discovery method. Recalculate using the Seed Surveys method.",
@@ -296,7 +311,16 @@ export const APP_STUDY_TEXT = {
   [POINTS_ORBITAL_TEXT.scan_progress]:
     "Refining nonescaping seeds: {processed} / {total}",
   [POINTS_ORBITAL_TEXT.ray_progress]:
-    "Calculating Julia landing ratios: {processed} / {total} orbitals; {families} / {family_limit} angle families in the current search",
+    "{processed} / {total} orbitals finished. Testing angle families {families} / {family_limit} for orbital {current}.",
+  [POINTS_ORBITAL_TEXT.queued]: "Waiting to start the calculation…",
+  [POINTS_ORBITAL_TEXT.saving]: "Saving orbital results…",
+  [POINTS_ORBITAL_TEXT.saving_rays]: "Saving Julia landing ratios…",
+  [POINTS_ORBITAL_TEXT.saving_progress]: "{processed} / {total} orbitals saved",
+  [POINTS_ORBITAL_TEXT.survey_stage]: "Surveying Julia seeds",
+  [POINTS_ORBITAL_TEXT.scan_stage]: "Refining orbital candidates",
+  [POINTS_ORBITAL_TEXT.ray_stage]: "Tracing Julia landing rays",
+  [POINTS_ORBITAL_TEXT.ray_preparing]:
+    "{processed} / {total} orbitals finished. Preparing the landing-ray search for orbital {current}.",
   [POINTS_ORBITAL_TEXT.select]: "Select a bailiwick to view its orbitals.",
   [POINTS_ORBITAL_TEXT.empty]: "No stored orbitals for this core point.",
   [POINTS_ORBITAL_TEXT.calculate]: "Calculate orbitals for this focal point",

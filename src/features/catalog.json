@@ -1,7 +1,7 @@
 {
   "contract_version": 1,
   "catalog_id": "fracto-ui",
-  "catalog_version": "1.2.5",
+  "catalog_version": "1.2.7",
   "access_profiles": [
     {
       "id": "public-entry",
@@ -1938,7 +1938,7 @@
         }
       ],
       "availability": "placeholder",
-      "purpose": "Select a free, inline, or nodal bailiwick to view the latest Seed Surveys discovery results, confidence, ordered points, and Julia landing ratios at its core point; explicitly calculate one focal point when results are missing or use the earlier method.",
+      "purpose": "Select a free, inline, or nodal bailiwick to view ranked Seed Surveys discovery results, confidence, ordered points, and Julia landing ratios at its core point; calculate, cancel, or resume one focal point with saved progress.",
       "inputs": ["Splitter positions", "Bailiwick list tab", "Bailiwick selection", "Calculate selected core point"],
       "access": "service-api",
       "environment": [],

@@ -29,7 +29,11 @@ available to other features.
   Read errors offer reload rather than falsely claiming that nothing was calculated.
 - `PointsStoredOrbitalsView.jsx` renders the lower section's status, calculation
   link, and expandable progression lists with ordered coordinates and Julia
-  landing ratios. Full values wrap inside the existing scrollable lower section.
+  landing ratios. While calculating, a full-width native progress bar describes
+  the current survey, refinement, save, or landing-ray search. Queued/preparing
+  work is indeterminate; known counters show stage percentages, and ray progress
+  includes completed orbitals and current angle families. Full values wrap inside
+  the existing scrollable lower section.
 - `PointsMainPanel.jsx` fetches the zero-seed legacy iterative series and
   Newton result, then polls the FractoCardinality seeded survey job
   over `[-1.5, 1.5]` on both axes at 0.025 intervals. It adapts the orbital point
@@ -112,3 +116,9 @@ ray profile. Historical v1 records remain available through the data API; the
 page prompts an explicit recalculation when only old discovery results exist.
 It displays confirmation/discovery counts and survey, refinement and ray-family
 progress. Migration 009 stores per-run evidence. No backfill runs automatically.
+
+Interrupted, canceled, or failed checkpointed jobs expose a Resume action even
+when some results already exist. The page reattaches to active work after reload;
+selection alone never starts stopped work. Cancel preserves the last durable
+checkpoint. Resume targets the same job UUID through a trusted-origin route.
+See the data-service protocol for checkpoint units, ownership and compatibility.

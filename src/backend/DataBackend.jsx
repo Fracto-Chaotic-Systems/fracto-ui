@@ -36,6 +36,32 @@ export class DataBackend {
       },
     );
 
+  static bailiwick_orbital_job = (id, signal) =>
+    request_json(
+      `${DATA_ORIGIN()}/orbital-data/bailiwicks/${encodeURIComponent(id)}/discovery-job`,
+      { signal, cache: "no-store" },
+    );
+  static resume_bailiwick_orbitals = (id, job, signal) =>
+    request_json(
+      `${DATA_ORIGIN()}/orbital-data/bailiwicks/${encodeURIComponent(id)}/discovery-jobs/${encodeURIComponent(job)}/resume`,
+      {
+        method: "POST",
+        signal,
+        headers: { "Content-Type": "application/json" },
+        body: "{}",
+      },
+    );
+  static cancel_bailiwick_orbitals = (id, job, signal) =>
+    request_json(
+      `${DATA_ORIGIN()}/orbital-data/bailiwicks/${encodeURIComponent(id)}/discovery-jobs/${encodeURIComponent(job)}/cancel`,
+      {
+        method: "POST",
+        signal,
+        headers: { "Content-Type": "application/json" },
+        body: "{}",
+      },
+    );
+
   static orbital_discovery_job = (id, signal) =>
     request_json(
       `${DATA_ORIGIN()}/orbital-data/discovery-jobs/${encodeURIComponent(id)}`,

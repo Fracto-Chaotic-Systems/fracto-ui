@@ -51,4 +51,25 @@ test("stored orbital client preserves exact focal coordinates and uses only the 
   assert.deepEqual(Object.keys(calls[2].options.headers), ["Content-Type"]);
   await Backend.orbital_discovery_job("job-55", signal);
   assert.equal(calls[3].url.pathname, "/orbital-data/discovery-jobs/job-55");
+  await Backend.bailiwick_orbital_job("55", signal);
+  assert.equal(
+    calls[4].url.pathname,
+    "/orbital-data/bailiwicks/55/discovery-job",
+  );
+  await Backend.resume_bailiwick_orbitals("55", "job-55", signal);
+  await Backend.cancel_bailiwick_orbitals("55", "job-55", signal);
+  assert.equal(
+    calls[5].url.pathname,
+    "/orbital-data/bailiwicks/55/discovery-jobs/job-55/resume",
+  );
+  assert.equal(
+    calls[6].url.pathname,
+    "/orbital-data/bailiwicks/55/discovery-jobs/job-55/cancel",
+  );
+  for (const call of calls.slice(5)) {
+    assert.equal(call.options.method, "POST");
+    assert.equal(call.options.body, "{}");
+    assert.equal(call.options.signal, signal);
+    assert.deepEqual(Object.keys(call.options.headers), ["Content-Type"]);
+  }
 });
