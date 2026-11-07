@@ -1,4 +1,5 @@
 import AdminServerClients from "./AdminServerClients.jsx";
+import AdminDatabaseSync from "./AdminDatabaseSync.jsx";
 import AdminServerTime from "./AdminServerTime.jsx";
 import { server_times, format_server_uptime } from "./AdminServerTimes.js";
 import AdminServerRole from "./AdminServerRole.jsx";
@@ -666,6 +667,9 @@ export class AdminServers extends Component {
                 >
                   {markdown}
                 </MarkdownDocument>
+              )}
+              {selected_server && !is_local_server && (
+                <AdminDatabaseSync key={`sync:${selected_server}`} server_url={selected_server} />
               )}
               {selected_server && (
                 <AdminServerClients

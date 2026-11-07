@@ -3,6 +3,27 @@ import { request_json } from "./BackendUtils.jsx";
 import { stream_chat } from "./ChatStream.js";
 
 export class AdminBackend {
+  static database_sync_peers = () =>
+    request_json(`${service_origin("admin")}/database-sync/peers`);
+  static database_sync_preview = (server_url) =>
+    request_json(`${service_origin("admin")}/database-sync/jobs`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ server_url }),
+    });
+  static database_sync_job = (id) =>
+    request_json(
+      `${service_origin("admin")}/database-sync/jobs/${encodeURIComponent(id)}`,
+    );
+  static database_sync_apply = (id, preferred) =>
+    request_json(
+      `${service_origin("admin")}/database-sync/jobs/${encodeURIComponent(id)}/apply`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(preferred ? { preferred } : {}),
+      },
+    );
   static chat_stream = (messages, signal, mode = "chat") =>
     stream_chat(
       `${service_origin("admin")}/chat`,

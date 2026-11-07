@@ -1,4 +1,61 @@
 const ADMIN_FOLDER = "admin";
+export const DATABASE_SYNC_TEXT = {
+  title: "Database synchronization",
+  note: "Merge this server’s database with the selected server. Tables and migration checksums must match. The tiles and automation tables stay local.",
+  setup:
+    "This server is not configured as a trusted synchronization peer. Configure the peer connection on both servers to enable sync.",
+  preview: "Preview sync",
+  sync: "Sync both servers",
+  working: "Working…",
+  conflict_note:
+    "Conflicting rows have the same primary or unique key but different data. Choose which server’s rows to keep for all conflicts; rows unique to either server are retained.",
+  choose: "Choose conflict preference",
+  local: "Keep this server’s conflicting rows",
+  remote: "Keep selected server’s conflicting rows",
+  conflict: "conflicts",
+  table: "Table",
+  local_rows: "This server",
+  remote_rows: "Selected server",
+  merged_rows: "Merged rows (this server preferred)",
+  local_key: "This server’s key",
+  remote_key: "Selected server’s key",
+  changed: "Different columns",
+  locking:
+    "Sync temporarily blocks writes to the included tables on both servers. Pause job runs before applying. Data changes after this preview require a fresh preview.",
+  complete:
+    "Synchronization complete. Both servers have matching data in every included table.",
+  partial:
+    "Synchronization did not complete on both servers. One server may already contain the merge. Preview again and retry to bring them together.",
+  errors: {
+    migration_version_mismatch:
+      "The servers have different migration versions or checksums. Install identical migrations on both before syncing.",
+    table_definitions_mismatch:
+      "The installed tables or their definitions differ. Install and migrate matching tables on both servers first.",
+    migrations_not_installed:
+      "The migration history is missing. Install and migrate both databases first.",
+    sync_snapshot_changed:
+      "Data changed after the preview. Run a fresh preview before syncing.",
+    database_sync_busy:
+      "Another sync is holding this database. Wait for it to finish, then preview again.",
+    sync_snapshot_limit:
+      "The database exceeds this sync operation’s bounded transfer size. No successful sync has been reported.",
+    sync_peer_not_configured:
+      "This server is not configured as a trusted synchronization peer.",
+    foreign_key_conflict:
+      "The selected rows would leave broken references. Resolve the conflicting keys before trying again.",
+    sync_plan_expired: "This preview expired. Run a fresh preview.",
+    sync_plan_limit:
+      "Existing previews must expire before another can be created.",
+    sync_requires_primary_keys:
+      "Every included table must have a primary key before synchronization.",
+    sync_requires_innodb_tables:
+      "Every included table must be an InnoDB table before synchronization.",
+    sync_tables_have_triggers:
+      "Synchronization cannot safely copy tables with triggers. No data was synchronized.",
+    default:
+      "Unable to synchronize. Check peer connectivity and configuration, then preview again.",
+  },
+};
 export const KEY_ADMIN_SERVERS_AI_SERVER = `${ADMIN_FOLDER}/servers_ai_server`;
 export const KEY_ADMIN_REPOSITORY_AI = `${ADMIN_FOLDER}/repository_ai`;
 export const KEY_ADMIN_SERVERS_CLIENTS_TITLE = `${ADMIN_FOLDER}/servers_clients_title`;

@@ -1,7 +1,7 @@
 {
   "contract_version": 1,
   "catalog_id": "fracto-ui",
-  "catalog_version": "1.2.7",
+  "catalog_version": "1.2.8",
   "access_profiles": [
     {
       "id": "public-entry",
@@ -408,12 +408,23 @@
         }
       ],
       "availability": "implemented",
-      "purpose": "Inspect this server and saved server addresses, health, roles and local labels.",
-      "inputs": ["Server URL", "Browser-local title and role edits"],
-      "access": "admin-readonly",
-      "environment": [],
+      "purpose": "Inspect server health, roles and local labels; preview and synchronize matching databases with a configured trusted peer, choosing which server keeps conflicting rows.",
+      "inputs": [
+        "Server URL",
+        "Browser-local title and role edits",
+        "Sync preview and conflict server preference"
+      ],
+      "access": "administrator",
+      "environment": [
+        {
+          "name": "FRACTO_DATABASE_SYNC_PEERS",
+          "repository": "admin",
+          "path": "handlers/database_sync.js"
+        }
+      ],
       "limitations": [
-        "Saved labels and addresses are browser-local preferences; public health does not grant administrative access."
+        "Saved labels and addresses are browser-local preferences; public health does not grant administrative access.",
+        "Sync requires identical migration history and table definitions, excludes tiles and automation, and temporarily locks included tables. Trusted peers must be configured on both servers. Conflicting rows require an explicit server preference; invalid references block application."
       ],
       "related_features": ["admin-status", "admin-chat"],
       "sources": [
