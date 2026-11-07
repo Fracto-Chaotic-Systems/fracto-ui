@@ -1,10 +1,35 @@
 # Orbital points study
 
-This directory renders the orbit samples produced for the selected study focal
-point.
+This directory contains the active bailiwick list tabs and retained components
+for rendering orbit samples. `../StudyPoints.jsx` renders its title and three
+panes separated by two persistent splitters. The left pane has three equal
+sections; its middle section mounts `PointsMinibrotTabs.jsx` and its lower section
+mounts `PointsStoredOrbitals.jsx`. The page does not mount a navigator or the
+retained chart panels, or start their legacy calculations and survey polling.
+Shared rendering, backend, SDK, settings, and text code remains
+available to other features.
 
 ## Files
 
+- `PointsMinibrotTabs.jsx` owns the “free”, “inline”, and “nodal” tabs, defaulting
+  to “free”. An explicit dispatcher mounts `../minibrots/MinibrotList.jsx` with
+  `BAILIWICK_TYPE_FREEFORM`, `BAILIWICK_TYPE_INLINE`, or `BAILIWICK_TYPE_NODES`.
+  Each list is keyed by type so switching tabs loads the correct filtered data.
+  It retains the shared list's existing row-selection persistence and notifies
+  the page of selection. Switching tabs clears that selection and invalidates
+  callbacks from earlier lists. `CoolTabs`
+  fills the section height, and a ResizeObserver measures the scroll viewport
+  below the tab labels for the list's `height_px` prop.
+- `PointsStoredOrbitals.jsx` loads the latest v2 survey's ranked orbital headers at the selected
+  core point, then loads progression details in batches of four. Coordinates
+  remain decimal strings. Selection changes/unmount abort requests and polling
+  and invalidate late responses. Empty storage offers a link that starts only
+  that selected bailiwick's bounded discovery job. Polling ends at a terminal
+  result and reloads committed data; navigating away does not cancel server work.
+  Read errors offer reload rather than falsely claiming that nothing was calculated.
+- `PointsStoredOrbitalsView.jsx` renders the lower section's status, calculation
+  link, and expandable progression lists with ordered coordinates and Julia
+  landing ratios. Full values wrap inside the existing scrollable lower section.
 - `PointsMainPanel.jsx` fetches the zero-seed legacy iterative series and
   Newton result, then polls the FractoCardinality seeded survey job
   over `[-1.5, 1.5]` on both axes at 0.025 intervals. It adapts the orbital point
@@ -52,7 +77,8 @@ point.
   mathematical stability. Beneath the chart, it displays the range of per-
   orbit maximum distances from the sampled orbital points to the parameter's
   cardioid reference point `Q`.
-- `StudyPoints.jsx` composes this directory's panels into the Study page.
+- `../StudyPoints.jsx` is the Study page shell; only the list tabs above are
+  mounted, while the orbital chart panels remain disconnected.
 
 Visible labels are registered in `../../../text/StudyText.jsx` and rendered
 through `AppText` so the page remains ready for translation. The fallback
@@ -80,3 +106,9 @@ approximations caused by exponent-form comparisons and avoids constructing the
 saved cycle from the pre-update iterated point. The formerly reported six-point
 99.74% example now closes within tolerance after this correction; an insufficient
 iteration budget remains explicitly rejected.
+
+The orbital calculation now shares Seed Surveys' SDK scan and higher-accuracy
+ray profile. Historical v1 records remain available through the data API; the
+page prompts an explicit recalculation when only old discovery results exist.
+It displays confirmation/discovery counts and survey, refinement and ray-family
+progress. Migration 009 stores per-run evidence. No backfill runs automatically.

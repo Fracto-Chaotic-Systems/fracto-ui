@@ -13,15 +13,20 @@ import {
 } from "../../settings/TilesSettings.jsx";
 import AppText from "../../AppText.jsx";
 import { KEY_TILES_MESH_TRANSFORMS } from "../../text/TilesText.jsx";
-import { KEY_ASSETS_SIMULATOR } from "../../text/AssetsText.jsx";
+import {
+  KEY_ASSETS_SIMULATOR,
+  KEY_ASSETS_SURVEYS,
+} from "../../text/AssetsText.jsx";
 import {
   ASSETS_DETECTOR,
   ASSETS_GENERATOR,
   ASSETS_SIMULATOR,
+  ASSETS_SURVEYS,
   KEY_ASSETS_DETECTOR_FRAME_SETTINGS,
   KEY_ASSETS_GENERATOR_FRAME_SETTINGS,
   KEY_ASSETS_SECTION,
   KEY_ASSETS_SIMULATOR_FRAME_SETTINGS,
+  KEY_ASSETS_SURVEYS_FRAME_SETTINGS,
 } from "../../settings/AssetsSettings.jsx";
 import { copy_json } from "../../utils/Dom.jsx";
 import {
@@ -38,6 +43,7 @@ export const PAGE_LORE_IMAGE = 4;
 export const PAGE_STUDY_CIRCUITRY = 5;
 export const PAGE_TILES_TRANSFORM = 6;
 export const PAGE_ASSETS_SIMULATOR = 7;
+export const PAGE_ASSETS_SURVEYS = 8;
 
 export const send_to = (frame_settings, destination) => {
   let routing = null;
@@ -90,6 +96,14 @@ export const send_to = (frame_settings, destination) => {
       routing = "/assets";
       break;
 
+    case PAGE_ASSETS_SURVEYS:
+      AppSettings.on_settings_changed({
+        [KEY_ASSETS_SURVEYS_FRAME_SETTINGS]: frame_settings_copy,
+        [KEY_ASSETS_SECTION]: ASSETS_SURVEYS,
+      });
+      routing = "/assets";
+      break;
+
     case PAGE_STUDY_CIRCUITRY:
       console.log("it is study circuitry", frame_settings_copy);
       AppSettings.on_settings_changed({
@@ -121,6 +135,7 @@ const SEND_TO_OPTIONS = () => [
   { label: "images", value: PAGE_ASSETS_IMAGE_GENERATE, help: "generate" },
   { label: "detector", value: PAGE_ASSETS_DETECTOR, help: "artrifact" },
   { label: AppText.get(KEY_ASSETS_SIMULATOR), value: PAGE_ASSETS_SIMULATOR },
+  { label: AppText.get(KEY_ASSETS_SURVEYS), value: PAGE_ASSETS_SURVEYS },
   { label: "circuitry", value: PAGE_STUDY_CIRCUITRY, help: "of orbitals" },
 ];
 

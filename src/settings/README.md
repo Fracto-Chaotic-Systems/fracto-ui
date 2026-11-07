@@ -51,6 +51,9 @@ the generator settings. Its mode is persisted by `PageAutomation` under the
   magnitudes, points, meridians, fields, circuitry, detection, minibrots,
   nodes, and hyperplane views. It includes numeric controls, frame settings,
   splitter positions, animation speed, and selected rows.
+  Orbital points uses independent persistent vertical and right-panel horizontal
+  splitter offsets, each defaulting to 500px relative to its content area.
+  Legacy points navigator preferences remain registered for compatibility.
 - `TilesSettings.jsx` defines the Tiles page section, logs and layout, test
   options, and tile-generator frame and splitter settings.
 

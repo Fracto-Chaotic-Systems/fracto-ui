@@ -1,5 +1,21 @@
 # UI tests
 
+- `points_orbital_backend.test.js` verifies exact-coordinate lookup URLs,
+  abort signals, and the selected-ID-only browser calculation request.
+
+- `points_stored_orbitals.test.js` verifies exact-core lookups, explicit one-entry
+  calculations, bounded-job polling, post-save reload, stale-response rejection,
+  request/timer cleanup, and the lower panel's empty/error and progression views.
+
+- `points_minibrot_tabs.test.js` checks free/inline/nodal list types, keyed
+  remounts, selection callbacks, viewport resizing, and observer cleanup.
+  Run with `node --test test/points_minibrot_tabs.test.js`.
+
+- `study_points_layout.test.js` verifies the Orbital points divider defaults,
+  nested right-panel geometry, independent persistence through AppSettings,
+  reload restoration, small-screen bounds, and subscription/observer cleanup.
+  Run with `node --test test/study_points_layout.test.js`.
+
 - `minibrot_terrain_cache.test.js` verifies selected-ID job submission, polling,
   duplicate prevention, failure recovery and stale-result suppression on unmount.
 

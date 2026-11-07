@@ -7,6 +7,41 @@ const DATA_ORIGIN = () => service_origin("data");
 const MAX_DENOMINATOR = 128;
 
 export class DataBackend {
+  static stored_orbitals = (focal_point, signal, after) =>
+    request_json(
+      `${DATA_ORIGIN()}/orbital-data?${new URLSearchParams({
+        focal_re: String(focal_point.x),
+        focal_im: String(focal_point.y),
+        view: "survey",
+        limit: "100",
+        ...(after ? { after: String(after) } : {}),
+      })}`,
+      { signal, cache: "no-store" },
+    );
+
+  static stored_orbital = (id, signal) =>
+    request_json(`${DATA_ORIGIN()}/orbital-data/${encodeURIComponent(id)}`, {
+      signal,
+      cache: "no-store",
+    });
+
+  static calculate_bailiwick_orbitals = (id, signal) =>
+    request_json(
+      `${DATA_ORIGIN()}/orbital-data/bailiwicks/${encodeURIComponent(id)}/discovery-jobs`,
+      {
+        method: "POST",
+        signal,
+        headers: { "Content-Type": "application/json" },
+        body: "{}",
+      },
+    );
+
+  static orbital_discovery_job = (id, signal) =>
+    request_json(
+      `${DATA_ORIGIN()}/orbital-data/discovery-jobs/${encodeURIComponent(id)}`,
+      { signal, cache: "no-store" },
+    );
+
   static save_world_notes = (cardinality, notes, expected_notes) =>
     request_json(`${DATA_ORIGIN()}/wordnet_mappings/${cardinality}/notes`, {
       method: "PUT",

@@ -1,7 +1,7 @@
 {
   "contract_version": 1,
   "catalog_id": "fracto-ui",
-  "catalog_version": "1.2.0",
+  "catalog_version": "1.2.5",
   "access_profiles": [
     {
       "id": "public-entry",
@@ -1929,33 +1929,21 @@
       },
       "settings": [
         {
-          "key": "study/points/frame_settings",
+          "key": "study/points/horizontal_splitter_pos",
           "source": "src/settings/StudySettings.jsx"
         },
         {
-          "key": "study/points/legend_splitter_pos",
-          "source": "src/settings/StudySettings.jsx"
-        },
-        {
-          "key": "study/points/splitter_pos",
-          "source": "src/settings/StudySettings.jsx"
-        },
-        {
-          "key": "study/points/steps_splitter_pos",
-          "source": "src/settings/StudySettings.jsx"
-        },
-        {
-          "key": "study/splitter_pos_px",
+          "key": "study/points/vertical_splitter_pos",
           "source": "src/settings/StudySettings.jsx"
         }
       ],
-      "availability": "implemented",
-      "purpose": "Inspect orbital points and their charts for a selected study context.",
-      "inputs": ["Navigator context", "Point and series selections"],
+      "availability": "placeholder",
+      "purpose": "Select a free, inline, or nodal bailiwick to view the latest Seed Surveys discovery results, confidence, ordered points, and Julia landing ratios at its core point; explicitly calculate one focal point when results are missing or use the earlier method.",
+      "inputs": ["Splitter positions", "Bailiwick list tab", "Bailiwick selection", "Calculate selected core point"],
       "access": "service-api",
       "environment": [],
       "limitations": [
-        "Calculation and chart availability depend on the selected data and computation limits."
+        "Discovery and ray calculations are bounded; results do not establish that every orbital or ray was found. The top-left and right panes remain empty."
       ],
       "related_features": ["study-circuitry", "study-meridians"],
       "sources": [

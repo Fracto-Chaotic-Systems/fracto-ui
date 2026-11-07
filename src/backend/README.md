@@ -21,6 +21,12 @@ DataBackend.get_orbitals({ x: -0.75, y: 0.1 }, 200, (data) => {
 
 ### `DataBackend.jsx`
 
+`stored_orbitals(core, signal, after)`, `stored_orbital(id, signal)`, and
+`orbital_discovery_job(id, signal)` provide abortable persistent-orbital reads.
+`calculate_bailiwick_orbitals(id, signal)` calls the narrow browser route with
+an empty body: the server loads that table entry's core and sets bounded search
+settings. It never sends an internal service credential to the browser.
+
 Calls the data service (normally port 3002) for minibrot listings, orbital data, lore listings/content, Farey sequences, backups, and query-table records. Most query methods use callbacks and defer the request by 250 ms. `get_orbitals()` receives the legacy series and survey job ID; `start_seed_survey()` starts only the worker-backed survey for a focal point, and `get_seed_survey_job()` polls cumulative progress or the final result. `get_farey_sequence()` is asynchronous and caches its filtered result in `DataBackend.FAREY_SEQUENCE`; it keeps positive terms with denominators up to 128. `lore_storage()` sends a JSON `PUT` and does not return the saved record.
 
 `start_seed_survey(focal_point, grid_size, half_span, iteration_limit, callback,

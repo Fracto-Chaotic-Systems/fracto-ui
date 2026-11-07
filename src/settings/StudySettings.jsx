@@ -31,6 +31,8 @@ export const KEY_STUDY_POINTS_FRAME_SETTINGS = `${POINTS_FOLDER}/frame_settings`
 export const KEY_STUDY_POINTS_SPLITTER_POS = `${POINTS_FOLDER}/splitter_pos`;
 export const KEY_STUDY_POINTS_LEGEND_SPLITTER_POS = `${POINTS_FOLDER}/legend_splitter_pos`;
 export const KEY_STUDY_POINTS_STEPS_SPLITTER_POS = `${POINTS_FOLDER}/steps_splitter_pos`;
+export const KEY_STUDY_POINTS_VERTICAL_SPLITTER_POS = `${POINTS_FOLDER}/vertical_splitter_pos`;
+export const KEY_STUDY_POINTS_HORIZONTAL_SPLITTER_POS = `${POINTS_FOLDER}/horizontal_splitter_pos`;
 
 export const KEY_STUDY_MERIDIANS_FRAME_SETTINGS = `${MERIDIANS_FOLDER}/frame_settings`;
 export const KEY_STUDY_MERIDIANS_SPLITTER_POS = `${MERIDIANS_FOLDER}/splitter_pos`;
@@ -147,6 +149,20 @@ export const APP_STUDY_SETTINGS = {
     data_type: TYPE_OBJECT,
     default_value: DEFAULT_FRAME_SETTINGS,
     description: "Frame settings of the study points page",
+    persist: true,
+  },
+  [KEY_STUDY_POINTS_VERTICAL_SPLITTER_POS]: {
+    data_type: TYPE_NUMBER,
+    default_value: 500,
+    description:
+      "Orbital points vertical divider offset from the content left edge in pixels",
+    persist: true,
+  },
+  [KEY_STUDY_POINTS_HORIZONTAL_SPLITTER_POS]: {
+    data_type: TYPE_NUMBER,
+    default_value: 500,
+    description:
+      "Orbital points right-panel horizontal divider offset from the content top in pixels",
     persist: true,
   },
   [KEY_STUDY_POINTS_SPLITTER_POS]: {

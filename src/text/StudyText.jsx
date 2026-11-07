@@ -3,12 +3,18 @@ export const KEY_STUDY_MINIBROT_ORBITAL_TAB = "study/minibrot_orbital_tab";
 export const KEY_STUDY_MINIBROT_RAY_PATHS_TAB = "study/minibrot_ray_paths_tab";
 const STUDY_FOLDER = "study";
 export const TERRAIN_CACHE_TEXT = {
-  run: "study/terrain_cache_run", starting: "study/terrain_cache_starting",
-  queued: "study/terrain_cache_queued", running: "study/terrain_cache_running",
-  completed: "study/terrain_cache_completed", partial: "study/terrain_cache_partial",
-  failed: "study/terrain_cache_failed", tiles: "study/terrain_cache_tiles",
-  level: "study/terrain_cache_level", created: "study/terrain_cache_created",
-  reused: "study/terrain_cache_reused", missing: "study/terrain_cache_missing",
+  run: "study/terrain_cache_run",
+  starting: "study/terrain_cache_starting",
+  queued: "study/terrain_cache_queued",
+  running: "study/terrain_cache_running",
+  completed: "study/terrain_cache_completed",
+  partial: "study/terrain_cache_partial",
+  failed: "study/terrain_cache_failed",
+  tiles: "study/terrain_cache_tiles",
+  level: "study/terrain_cache_level",
+  created: "study/terrain_cache_created",
+  reused: "study/terrain_cache_reused",
+  missing: "study/terrain_cache_missing",
   manifest: "study/terrain_cache_manifest",
 };
 
@@ -17,6 +23,32 @@ export const KEY_STUDY_SETTINGS = `${STUDY_FOLDER}/study_settings`;
 export const KEY_STUDY_STATUS = `${STUDY_FOLDER}/study_status`;
 export const KEY_STUDY_MAGNITUDES = `${STUDY_FOLDER}/study_magnitudes`;
 export const KEY_STUDY_POINTS = `${STUDY_FOLDER}/study_points`;
+export const KEY_STUDY_POINTS_FREE_TAB = `${STUDY_FOLDER}/points_free_tab`;
+export const POINTS_ORBITAL_TEXT = {
+  stale: "study/points_stored_stale",
+  recalculate: "study/points_stored_recalculate",
+  confirmation: "study/points_stored_confirmation",
+  survey_progress: "study/points_survey_progress",
+  scan_progress: "study/points_scan_progress",
+  ray_progress: "study/points_ray_progress",
+  title: "study/points_stored_title",
+  select: "study/points_stored_select",
+  empty: "study/points_stored_empty",
+  calculate: "study/points_stored_calculate",
+  loading: "study/points_stored_loading",
+  calculating: "study/points_stored_calculating",
+  load_error: "study/points_stored_load_error",
+  calculate_error: "study/points_stored_calculate_error",
+  reload: "study/points_stored_reload",
+  invalid_core: "study/points_stored_invalid_core",
+  partial: "study/points_stored_partial",
+  core: "study/points_stored_core",
+  summary: "study/points_stored_summary",
+  point: "study/points_stored_point",
+  real: "study/points_stored_real",
+  imaginary: "study/points_stored_imaginary",
+  ratios: "study/points_stored_ratios",
+};
 export const KEY_STUDY_MERIDIANS = `${STUDY_FOLDER}/study_meridians`;
 export const KEY_STUDY_HYPERPLANE = `${STUDY_FOLDER}/study_hyperplane`;
 export const KEY_STUDY_NODES = `${STUDY_FOLDER}/study_nodes`;
@@ -155,12 +187,16 @@ export const MINIBROT_RAY_TEXT = {
 
 export const APP_STUDY_TEXT = {
   [TERRAIN_CACHE_TEXT.run]: "test terrain mesh cache",
-  [TERRAIN_CACHE_TEXT.starting]: "Planning tiles from the saved display region…",
+  [TERRAIN_CACHE_TEXT.starting]:
+    "Planning tiles from the saved display region…",
   [TERRAIN_CACHE_TEXT.queued]: "Terrain cache test queued…",
   [TERRAIN_CACHE_TEXT.running]: "Constructing and caching tile meshes…",
-  [TERRAIN_CACHE_TEXT.completed]: "Terrain tile meshes cached for later assembly.",
-  [TERRAIN_CACHE_TEXT.partial]: "Meshes cached with missing coverage; edge stitching is deferred.",
-  [TERRAIN_CACHE_TEXT.failed]: "Terrain cache test failed. Retry after checking tile/data services.",
+  [TERRAIN_CACHE_TEXT.completed]:
+    "Terrain tile meshes cached for later assembly.",
+  [TERRAIN_CACHE_TEXT.partial]:
+    "Meshes cached with missing coverage; edge stitching is deferred.",
+  [TERRAIN_CACHE_TEXT.failed]:
+    "Terrain cache test failed. Retry after checking tile/data services.",
   [TERRAIN_CACHE_TEXT.tiles]: "tiles",
   [TERRAIN_CACHE_TEXT.level]: "level",
   [TERRAIN_CACHE_TEXT.created]: "created",
@@ -247,6 +283,37 @@ export const APP_STUDY_TEXT = {
   [KEY_STUDY_STATUS]: "study status",
   [KEY_STUDY_MAGNITUDES]: "orbital magnitudes",
   [KEY_STUDY_POINTS]: "orbital points",
+  [KEY_STUDY_POINTS_FREE_TAB]: "free",
+  [POINTS_ORBITAL_TEXT.title]: "stored orbitals",
+  [POINTS_ORBITAL_TEXT.stale]:
+    "Stored results use an earlier discovery method. Recalculate using the Seed Surveys method.",
+  [POINTS_ORBITAL_TEXT.recalculate]:
+    "Recalculate orbitals for this focal point",
+  [POINTS_ORBITAL_TEXT.confirmation]:
+    "Confidence: {confidence}% · discoveries: {discoveries}",
+  [POINTS_ORBITAL_TEXT.survey_progress]:
+    "Surveying seeds: {processed} / {total}",
+  [POINTS_ORBITAL_TEXT.scan_progress]:
+    "Refining nonescaping seeds: {processed} / {total}",
+  [POINTS_ORBITAL_TEXT.ray_progress]:
+    "Calculating Julia landing ratios: {processed} / {total} orbitals; {families} / {family_limit} angle families in the current search",
+  [POINTS_ORBITAL_TEXT.select]: "Select a bailiwick to view its orbitals.",
+  [POINTS_ORBITAL_TEXT.empty]: "No stored orbitals for this core point.",
+  [POINTS_ORBITAL_TEXT.calculate]: "Calculate orbitals for this focal point",
+  [POINTS_ORBITAL_TEXT.loading]: "Loading stored orbitals…",
+  [POINTS_ORBITAL_TEXT.calculating]: "Calculating orbitals…",
+  [POINTS_ORBITAL_TEXT.load_error]: "Unable to load stored orbitals.",
+  [POINTS_ORBITAL_TEXT.calculate_error]: "Unable to finish the calculation.",
+  [POINTS_ORBITAL_TEXT.reload]: "Reload stored orbitals",
+  [POINTS_ORBITAL_TEXT.invalid_core]: "This bailiwick has no valid core point.",
+  [POINTS_ORBITAL_TEXT.partial]: "Calculation finished with partial results.",
+  [POINTS_ORBITAL_TEXT.core]: "Core point",
+  [POINTS_ORBITAL_TEXT.summary]:
+    "Orbital #{id} · period {period} · {ratios} landing ratios",
+  [POINTS_ORBITAL_TEXT.point]: "point",
+  [POINTS_ORBITAL_TEXT.real]: "real",
+  [POINTS_ORBITAL_TEXT.imaginary]: "imaginary",
+  [POINTS_ORBITAL_TEXT.ratios]: "Julia landing ratios",
   [KEY_STUDY_MERIDIANS]: "core meridians",
   [KEY_STUDY_HYPERPLANE]: "hyper-logistic plane",
   [KEY_STUDY_NODES]: "nodal bailiwicks",

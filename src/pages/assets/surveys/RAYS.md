@@ -70,7 +70,7 @@ The published basis is [Milnor (2000), §2](https://numdam.org/item/AST_2000__26
 
 For selected orbital period `p`, the worker first tests angle period `p`, then
 multiples of `p` if none match, to allow multiple rays at one orbital point.
-It completes the first matching angle period, up to a default budget of 256
+It completes the first matching angle period, up to a shared survey budget of 1,024
 families and maximum angle period 24. Fractions alone describe distinct angle
 cycles, not necessarily distinct spatial orbitals or attracting cycles. Each
 family must pass the same closure, landing, precision, and dynamics validation.
@@ -102,3 +102,8 @@ reasons. The guide also details all result statuses, exact numerical thresholds,
 progress counters, and the distinction between reaching a finite potential and
 establishing a landing point. Its theoretical basis is the published works
 cited above; finite numerical checks are not rigorous landing certificates.
+
+Both survey views use the shared SDK profile: tolerance 1e-6, depth 128–512,
+16,000 points per trace and 256-digit terminal verification. Geometry remains
+native; see the SDK ray guide for arithmetic limitations. Other SDK callers
+retain their default budgets.

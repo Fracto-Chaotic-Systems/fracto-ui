@@ -34,27 +34,26 @@ test("real seeded Newton accepts the stable period-two cycle at c=-1", () => {
   assert.equal(refine_seed(survey,{x:2,y:2}),null);
 });
 
-test("scan ranks the best ten, accepts lower confidence and replaces weaker duplicate configurations", async () => {
-  const size=8;
-  const grid=Array.from({length:size},(_,column)=>Array.from({length:size},()=>[column%2 ? 2 : 0,9]));
-  let visits=0;
-  const updates=[];
-  const result=await scan_orbitals({...survey,canvas_buffer:grid}, {
+test("scan ranks the best 100, accepts lower confidence and replaces weaker duplicate configurations", async () => {
+  const size = 32;
+  const grid = Array.from({length:size}, (_, column) => Array.from({length:size}, () => [column % 2 ? 2 : 0, 9]));
+  let visits = 0;
+  const updates = [];
+  const result = await scan_orbitals({...survey, canvas_buffer:grid}, {
     pause:async()=>{},
     on_result:list=>updates.push(list),
     refine:()=> {
-      const index=visits++;
-      // First 16 configurations, then rediscover them with higher scores.
-      return {points:[{x:index%16,y:0}],confidence:index/32,seed:{x:index,y:0}};
+      const index = visits++;
+      return {points:[{x:index % 256,y:0}], confidence:index / 512, seed:{x:index,y:0}};
     },
   });
-  assert.equal(visits,32,"continues scanning after ten candidates");
-  assert.equal(result.length,10);
-  assert.deepEqual(result.map(x=>x.confidence),Array.from({length:10},(_,i)=>(16+i)/32));
-  assert.equal(new Set(result.map(x=>x.points[0].x)).size,10);
-  assert.ok(result.every(x=>x.discovery_count===2), "counts survive falling out of the top ten");
-  assert.equal(updates[0][0].discovery_count,1, "prior snapshots remain unchanged");
-  assert.ok(updates.every(list=>list.length<=10));
+  assert.equal(visits, 512, "continues scanning beyond 100 candidates");
+  assert.equal(result.length, 100);
+  assert.deepEqual(result.map(x=>x.confidence), Array.from({length:100},(_,i)=>(256+i)/512));
+  assert.equal(new Set(result.map(x=>x.points[0].x)).size, 100);
+  assert.ok(result.every(x=>x.discovery_count === 2), "counts survive falling out of the top 100");
+  assert.equal(updates[0][0].discovery_count, 1, "prior snapshots remain unchanged");
+  assert.ok(updates.every(list=>list.length <= 100));
 });
 
 test("corrected Newton scan accepts the reported configuration only after it closes", async () => {
@@ -176,11 +175,11 @@ test("membership favors discoveries over confidence and confidence does not brea
       return {points:[{x:index<12 ? index : 999,y:0}],confidence:index<12 ? 0.99 : 0.1};
     },
   });
-  assert.equal(result.length,10);
+  assert.equal(result.length,13);
   assert.equal(result[0].points[0].x,999);
   assert.equal(result[0].discovery_count,20);
   assert.equal(result[0].confidence,0.1);
-  assert.deepEqual(result.slice(1).map(x=>x.points[0].x),Array.from({length:9},(_,i)=>i));
+  assert.deepEqual(result.slice(1).map(x=>x.points[0].x),Array.from({length:12},(_,i)=>i));
 });
 
 test("reported six-point case closes after best-iterate correction", () => {

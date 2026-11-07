@@ -1,120 +1,205 @@
 import React, { Component } from "react";
+import styled from "styled-components";
 
-import { MainStyles as styles, MARGIN_PX } from "../../styles/MainStyles.jsx";
-import AppSettings from "../../AppSettings.jsx";
-import { update_dimensions } from "../PageUtils.jsx";
-import {
-  KEY_STUDY_POINTS_FRAME_SETTINGS,
-  KEY_STUDY_POINTS_LEGEND_SPLITTER_POS,
-  KEY_STUDY_POINTS_SPLITTER_POS,
-  KEY_STUDY_POINTS_STEPS_SPLITTER_POS,
-  KEY_STUDY_SPLITTER_POS_PX,
-} from "../../settings/StudySettings.jsx";
+import { MainStyles as styles } from "../../styles/MainStyles.jsx";
 import AppText from "../../AppText.jsx";
+import AppSettings from "../../AppSettings.jsx";
+import { SPLITTER_WIDTH_PX } from "../../constants.jsx";
+import {
+  KEY_STUDY_POINTS_VERTICAL_SPLITTER_POS,
+  KEY_STUDY_POINTS_HORIZONTAL_SPLITTER_POS,
+} from "../../settings/StudySettings.jsx";
+import CoolSplitter, {
+  SPLITTER_TYPE_VERTICAL,
+  SPLITTER_TYPE_HORIZONTAL,
+} from "../../utils/ui/CoolSplitter.jsx";
 
-import NavigatorSplitterLayout from "../../navigator/NavigatorSplitterLayout.jsx";
 import { KEY_STUDY_POINTS } from "../../text/StudyText.jsx";
-import PointsMainPanel from "./points/PointsMainPanel.jsx";
+import PointsMinibrotTabs from "./points/PointsMinibrotTabs.jsx";
+import PointsStoredOrbitals from "./points/PointsStoredOrbitals.jsx";
 
-const UPDATE_INTERVAL_MS = 1000;
+const Layout = styled.div`
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+`;
+
+const Pane = styled.div`
+  position: absolute;
+  overflow: auto;
+`;
+
+const LeftSections = styled.div`
+  position: absolute;
+  display: grid;
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  overflow: hidden;
+
+  > div {
+    min-height: 0;
+    overflow: auto;
+    box-sizing: border-box;
+  }
+
+  > div + div {
+    border-top: 1px solid #cccccc;
+  }
+`;
+
+const SPLITTER_KEYS = [
+  KEY_STUDY_POINTS_VERTICAL_SPLITTER_POS,
+  KEY_STUDY_POINTS_HORIZONTAL_SPLITTER_POS,
+];
 
 export class StudyPoints extends Component {
+  container_ref = React.createRef();
+  subscriptions = [];
+
   state = {
-    rendered_width: 0,
-    rendered_height: 0,
-    interval: null,
-    container_ref: React.createRef(),
-    bounding_rect: {},
-    frame_settings: {},
-    subscription: null,
+    width: 0,
+    height: 0,
+    vertical: 500,
+    horizontal: 500,
+    selected_minibrot: null,
   };
 
+  on_select_minibrot = (selected_minibrot) =>
+    this.setState({ selected_minibrot });
+
   componentDidMount() {
+    this.read_positions();
+    this.subscriptions = SPLITTER_KEYS.map((key) =>
+      AppSettings.subscribe(key, this.read_positions),
+    );
+    this.resize_observer = new ResizeObserver(this.update_dimensions);
+    this.resize_observer.observe(this.container_ref.current);
+    window.addEventListener("resize", this.update_dimensions);
     this.update_dimensions();
-    this.setState({
-      interval: setInterval(this.update_dimensions, UPDATE_INTERVAL_MS),
-      frame_settings: AppSettings.get(KEY_STUDY_POINTS_FRAME_SETTINGS),
-      subscription: AppSettings.subscribe(
-        KEY_STUDY_POINTS_FRAME_SETTINGS,
-        this.on_frame_settings_changed,
-      ),
-    });
   }
 
   componentWillUnmount() {
-    const { interval, subscription } = this.state;
-    if (interval) {
-      clearInterval(interval);
-    }
-    if (subscription) {
-      AppSettings.unsubscribe(subscription);
-    }
+    this.resize_observer.disconnect();
+    window.removeEventListener("resize", this.update_dimensions);
+    this.subscriptions.forEach((subscription) =>
+      AppSettings.unsubscribe(subscription),
+    );
   }
 
+  read_positions = () => {
+    const position = (key) => {
+      const value = AppSettings.get(key);
+      return Number.isFinite(value) ? value : 500;
+    };
+    this.setState({
+      vertical: position(KEY_STUDY_POINTS_VERTICAL_SPLITTER_POS),
+      horizontal: position(KEY_STUDY_POINTS_HORIZONTAL_SPLITTER_POS),
+    });
+  };
+
   update_dimensions = () => {
-    const { rendered_width, rendered_height } = this.state;
-    const new_values = update_dimensions(
-      rendered_width,
-      rendered_height,
-      KEY_STUDY_SPLITTER_POS_PX,
-    );
-    if (new_values) {
-      this.setState(new_values);
+    const bounds = this.container_ref.current.getBoundingClientRect();
+    const width = Math.max(0, bounds.width);
+    const height = Math.max(0, window.innerHeight - bounds.top);
+    if (width !== this.state.width || height !== this.state.height) {
+      this.setState({ width, height });
     }
   };
 
-  on_frame_settings_changed = (key, value) => {
-    // console.log('on_frame_settings_changed', value)
-    this.setState({ frame_settings: value });
+  move_vertical = (position) => {
+    AppSettings.on_settings_changed({
+      [KEY_STUDY_POINTS_VERTICAL_SPLITTER_POS]: position,
+    });
   };
 
-  render_content = () => {
-    return <PointsMainPanel />;
+  move_horizontal = (position) => {
+    AppSettings.on_settings_changed({
+      [KEY_STUDY_POINTS_HORIZONTAL_SPLITTER_POS]: position,
+    });
   };
 
   render() {
-    const { container_ref, rendered_height, rendered_width, frame_settings } =
-      this.state;
-    let top = 0;
-    let left = 0;
-    if (container_ref.current) {
-      const container_bounds = container_ref.current.getBoundingClientRect();
-      top = container_bounds.top;
-      left = container_bounds.left;
-    }
-    const bounding_rect = {
-      top,
-      left,
-      width: rendered_width,
-      height: rendered_height,
-    };
-    const splitter_keys = {
-      legend_key: KEY_STUDY_POINTS_LEGEND_SPLITTER_POS,
-      main_key: KEY_STUDY_POINTS_SPLITTER_POS,
-      steps_key: KEY_STUDY_POINTS_STEPS_SPLITTER_POS,
-      section_key: KEY_STUDY_SPLITTER_POS_PX,
-    };
-    const splitter_pos = AppSettings.get(splitter_keys.main_key);
-    const result_block_style = {
-      left: `${splitter_pos + MARGIN_PX}px`,
-      top: `${top}px`,
-    };
-    return [
-      <styles.SectionTitle key={"study-overview-title"}>
-        {AppText.get(KEY_STUDY_POINTS)}
-      </styles.SectionTitle>,
-      <styles.TightCenteredBlock ref={container_ref} key={"generator-content"}>
-        <NavigatorSplitterLayout
-          bounding_rect={bounding_rect}
-          frame_settings={frame_settings}
-          frame_settings_key={KEY_STUDY_POINTS_FRAME_SETTINGS}
-          splitter_keys={splitter_keys}
-        />
-      </styles.TightCenteredBlock>,
-      <styles.FixedInlineBlock style={result_block_style}>
-        {this.render_content()}
-      </styles.FixedInlineBlock>,
-    ];
+    const { width, height, vertical, horizontal } = this.state;
+    const half_bar = SPLITTER_WIDTH_PX / 2;
+    // Clamp only the displayed geometry; resizing must not overwrite saved offsets.
+    const x = Math.max(0, Math.min(vertical, width - half_bar));
+    const y = Math.max(0, Math.min(horizontal, height - half_bar));
+    const right_left = Math.min(width, x + half_bar);
+    const right_width = width - right_left;
+    const bottom_top = Math.min(height, y + half_bar);
+    return (
+      <>
+        <styles.SectionTitle key={"study-overview-title"}>
+          {AppText.get(KEY_STUDY_POINTS)}
+        </styles.SectionTitle>
+        <Layout ref={this.container_ref} style={{ height }}>
+          <LeftSections
+            style={{
+              left: 0,
+              top: 0,
+              width: Math.max(0, x - half_bar),
+              height,
+            }}
+          >
+            <div />
+            <div>
+              <PointsMinibrotTabs
+                on_select_minibrot={this.on_select_minibrot}
+              />
+            </div>
+            <div>
+              <PointsStoredOrbitals
+                selected_minibrot={this.state.selected_minibrot}
+              />
+            </div>
+          </LeftSections>
+          <Pane
+            style={{
+              left: right_left,
+              top: 0,
+              width: right_width,
+              height: Math.max(0, y - half_bar),
+            }}
+          />
+          <Pane
+            style={{
+              left: right_left,
+              top: bottom_top,
+              width: right_width,
+              height: height - bottom_top,
+            }}
+          />
+          {width > 0 && height > 0 && (
+            <>
+              <CoolSplitter
+                type={SPLITTER_TYPE_VERTICAL}
+                name={KEY_STUDY_POINTS_VERTICAL_SPLITTER_POS}
+                bar_width_px={SPLITTER_WIDTH_PX}
+                container_bounds={{ left: 0, top: 0, width, height }}
+                position={x}
+                min_position={0}
+                max_position={Math.max(0, width - half_bar)}
+                on_change={this.move_vertical}
+              />
+              <CoolSplitter
+                type={SPLITTER_TYPE_HORIZONTAL}
+                name={KEY_STUDY_POINTS_HORIZONTAL_SPLITTER_POS}
+                bar_width_px={SPLITTER_WIDTH_PX}
+                container_bounds={{
+                  left: right_left,
+                  top: 0,
+                  width: right_width,
+                  height,
+                }}
+                position={y}
+                min_position={0}
+                max_position={Math.max(0, height - half_bar)}
+                on_change={this.move_horizontal}
+              />
+            </>
+          )}
+        </Layout>
+      </>
+    );
   }
 }
 

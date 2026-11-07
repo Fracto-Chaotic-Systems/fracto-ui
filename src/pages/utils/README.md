@@ -33,12 +33,13 @@ multiple application areas. It sits between the general UI building blocks in
   and polar-coordinate data for Study visualizations.
 - `SendTo.jsx` lets a user route the current frame settings to another
   supported feature: tile generation, mesh transforms, image generation,
-  detector, flight simulator, or Study circuitry. It updates that destination's settings and
+  detector, flight simulator, seed surveys, or Study circuitry. It updates that destination's settings and
   selected section. Mesh transforms uses its independent
   `tiles_transform/frame_settings` preference and selects `tiles_transform`
   before routing to `/tiles`. Flight simulator updates
   `assets/simulator/frame_settings`, selects `assets_simulator`, and routes to
-  `/assets`. Frame transfer preserves focal point, scope and
+  `/assets`. Seed surveys updates `assets/surveys/frame_settings`, selects
+  `assets_surveys`, and routes to `/assets`. Frame transfer preserves focal point, scope and
   aspect ratio, while removing canvas buffers, contexts and source canvas width.
   Destination labels are resolved during rendering so the shared AppText
   catalog is initialized before the mesh-transforms label is read.

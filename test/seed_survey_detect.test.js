@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
+import { SEED_SURVEY_DISCOVERY_OPTIONS } from "../src/pages/assets/surveys/SeedSurveyScan.js";
 import {
   orbital_confirmation,
   orbital_closure_error,
@@ -49,6 +50,7 @@ const harness = (Q = { x: 0, y: 0 }) => {
     orbital_confirmation,
     orbital_closure_error,
     ORBIT_CLOSURE_TOLERANCE,
+    SEED_SURVEY_DISCOVERY_OPTIONS,
     IMAGE_FRAME_STYLE: {},
     FractoFastCalc: {
       calc_from_seed: (...args) => {

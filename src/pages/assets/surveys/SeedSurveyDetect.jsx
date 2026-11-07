@@ -13,6 +13,7 @@ import AppText from "../../../AppText.jsx";
 import SeedSurveyCanvas from "./SeedSurveyCanvas.jsx";
 import SeedSurveyOrbitals from "./SeedSurveyOrbitals.jsx";
 import SeedSurveyRays from "./SeedSurveyRays.jsx";
+import { SEED_SURVEY_DISCOVERY_OPTIONS } from "./SeedSurveyScan.js";
 import { paint_survey_rays } from "./SeedSurveyRayOverlay.js";
 import {
   orbital_confirmation,
@@ -35,8 +36,8 @@ import {
   KEY_ASSETS_SURVEYS_CLOSURE_FAIL,
 } from "../../../text/AssetsText.jsx";
 
-const HALF_SPAN = 1.5;
-const ITERATION_LIMIT = 100000;
+const HALF_SPAN = SEED_SURVEY_DISCOVERY_OPTIONS.half_span;
+const ITERATION_LIMIT = SEED_SURVEY_DISCOVERY_OPTIONS.iteration_limit;
 const MAX_CHART_SIZE_PX = 550;
 const MIN_CHART_SIZE_PX = 250;
 
@@ -320,7 +321,7 @@ export class SeedSurveyDetect extends Component {
           <SeedSurveyCanvas
             focal_point={focal_point}
             size_px={chart_size}
-            source_size_px={250}
+            source_size_px={SEED_SURVEY_DISCOVERY_OPTIONS.grid_size}
             half_span={HALF_SPAN}
             iteration_limit={ITERATION_LIMIT}
             aria_label={AppText.get(KEY_ASSETS_SURVEYS_CANVAS_DETECT)}

@@ -137,7 +137,7 @@ was stale; the current Newton budget is 80.
 
 The scan keeps the 10 unique configurations with the highest discovery counts
 and displays each actual confidence percentage. There is no
-100% confidence cutoff. All nonescaping samples are examined, even after ten results
+100% confidence cutoff. All nonescaping samples are examined, even after 100 results
 are found; a higher-confidence rediscovery replaces the retained version of the
 same cycle. The list updates as better candidates arrive.
 
@@ -145,11 +145,11 @@ Each result includes `discoveries`, the number of matching distinct nonescaping 
 encountered during this survey (including the first). Lower-confidence matches
 increment the count while preserving the best result. The scan retains records
 for all unique configurations so counts remain accurate even if a configuration
-leaves and later reenters the displayed top ten. Counts reset with each survey.
+leaves and later reenters the displayed top 100. Counts reset with each survey.
 
 The scan processes each available nonescaping grid location exactly once across all batches.
 There are no separate horizontal/vertical boundary passes or repeated pixel
-checks. Discovery counts and the top-ten ranking include all qualifying sampled
+checks. Discovery counts and the top-100 ranking include all qualifying sampled
 locations, not just boundaries.
 
 Scan results use the shared selectable `CoolTable` with columns pattern,
@@ -246,3 +246,10 @@ both displayed images shrink together to fit narrower hosts without wrapping.
 The 250×250 data grid is independent of display size. Below the combined minimum
 width the existing container scrolls horizontally, keeping both columns on one
 row; vertical scrolling remains available for the table and metadata.
+
+The scan and confirmation implementations live in the shared SDK modules
+`FractoSeedSurveyScan.js` and `FractoSeedSurveyConfirmation.js`; the local
+files re-export them. Detect and persistent orbital discovery therefore share
+sampling defaults, refinement, acceptance, grouping and rankings. The rays
+worker uses the shared higher-accuracy `SEED_SURVEY_RAY_OPTIONS` profile;
+see the SDK ray guide for its bounds and arithmetic limitations.
