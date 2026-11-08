@@ -18,7 +18,7 @@ import { KEY_STUDY_POINTS } from "../../text/StudyText.jsx";
 import PointsMinibrotTabs from "./points/PointsMinibrotTabs.jsx";
 import PointsStoredOrbitals from "./points/PointsStoredOrbitals.jsx";
 import PointsSelectedPreview from "./points/PointsSelectedPreview.jsx";
-import PointsJuliaSet from "./points/PointsJuliaSet.jsx";
+import PointsOrbitalPanel from "./points/PointsOrbitalPanel.jsx";
 
 const Layout = styled.div`
   position: relative;
@@ -179,9 +179,10 @@ export class StudyPoints extends Component {
               height: Math.max(0, y - half_bar),
             }}
           >
-            <PointsJuliaSet
+            <PointsOrbitalPanel
               selected_minibrot={this.state.selected_minibrot}
               selected_orbital={this.state.selected_orbital}
+              width_px={right_width}
             />
           </Pane>
           <Pane

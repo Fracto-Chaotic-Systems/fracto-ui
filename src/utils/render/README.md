@@ -30,9 +30,10 @@ paints the selected group with labels enabled. Other callers keep their
 existing labels. Hiding labels suppresses both text and boxes while retaining
 outlined paths and restoring the drawing context.
 
-The seventh argument, `outline_width`, defaults to 2px. The shared Julia/Seed
-Surveys wrapper uses a 1.6px outline and raises the pattern color's HSL lightness
-by eight percentage points for a softer ray stroke.
+The seventh argument, `outline_width`, defaults to 2px; the eighth,
+`outline_color`, defaults to black. The shared Julia/Seed Surveys wrapper uses
+a 1.6px grey outline and raises the pattern color's HSL lightness by fourteen
+percentage points. The colored ray stroke remains 1.25px wide.
 
 An optional per-ray `display_label` overrides the fraction text without changing
 `angle.key` or geometry. Minibrot callers use exact exponential-denominator

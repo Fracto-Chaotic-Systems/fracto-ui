@@ -6,6 +6,8 @@ import {
 
 const DEFAULT_FREQUENCY_HZ = 440;
 const DEFAULT_DURATION_SECONDS = 10;
+// Keep normalized waveforms at a comfortable playback level (about -16.5 dB).
+export const DEFAULT_PLAYBACK_VOLUME = 0.15;
 /** Replace the active source immediately before starting playback. */
 export const AUDIO_TRANSITION_REPLACE = "replace";
 /** Cross-fade the active source into the replacement source. */
@@ -106,6 +108,8 @@ export class CircuitryAudioController {
   audio_context = null;
   audio_source = null;
   audio_gain = null;
+  master_gain = null;
+  volume = DEFAULT_PLAYBACK_VOLUME;
   // Invalidates play requests that are still awaiting AudioContext.resume().
   play_generation = 0;
   disposed = false;
@@ -120,6 +124,25 @@ export class CircuitryAudioController {
 
   notify_playing = (playing) => {
     this.on_playing_changed?.(playing);
+  };
+
+  /** Adjust all active sources smoothly without changing their waveforms. */
+  set_volume = (volume) => {
+    if (!Number.isFinite(volume)) {
+      return;
+    }
+    this.volume = Math.min(1, Math.max(0, volume));
+    if (this.master_gain && this.audio_context) {
+      const now = this.audio_context.currentTime;
+      const gain = this.master_gain.gain;
+      if (typeof gain.cancelAndHoldAtTime === "function") {
+        gain.cancelAndHoldAtTime(now);
+      } else {
+        gain.cancelScheduledValues(now);
+        gain.setValueAtTime(gain.value, now);
+      }
+      gain.linearRampToValueAtTime(this.volume, now + 0.02);
+    }
   };
 
   finish_audio = (audio_source, audio_gain) => {
@@ -222,7 +245,7 @@ export class CircuitryAudioController {
    * started or owned by the controller until `play()` adopts them, allowing a
    * later cross-fade implementation to prepare a replacement source first.
    *
-   * @param {Array<{unwrapped_t:number,audio_value:number}>} profile Waveform.
+   * @param {Array<{phase:number,audio_value:number}>} profile Chart waveform.
    * @param {BaseAudioContext} audio_context Context that will own the nodes.
    * @param {{frequency_hz:number,duration_seconds:number,fade_seconds:number}}
    *   playback_options
@@ -270,13 +293,13 @@ export class CircuitryAudioController {
       1,
     );
     audio_source.connect(audio_gain);
-    audio_gain.connect(audio_context.destination);
+    audio_gain.connect(this.master_gain);
     return { audio_source, audio_gain, duration_seconds };
   };
 
   /**
    * Play a normalized waveform profile once at the requested tone.
-   * @param {Array<{unwrapped_t:number,audio_value:number}>} profile Waveform.
+   * @param {Array<{phase:number,audio_value:number}>} profile Chart waveform.
    * @param {{frequency_hz?:number,duration_seconds?:number,
    *   fade_seconds?:number,
    *   transition?:"replace"|"crossfade"}} [options] Audio playback settings.
@@ -303,6 +326,9 @@ export class CircuitryAudioController {
     if (!audio_context || audio_context.state === "closed") {
       audio_context = new AudioContextClass();
       this.audio_context = audio_context;
+      this.master_gain = audio_context.createGain();
+      this.master_gain.gain.setValueAtTime(this.volume, audio_context.currentTime);
+      this.master_gain.connect(audio_context.destination);
     }
     try {
       await audio_context.resume();
@@ -371,6 +397,8 @@ export class CircuitryAudioController {
       this.audio_context.close();
       this.audio_context = null;
     }
+    this.master_gain?.disconnect();
+    this.master_gain = null;
     this.on_playing_changed = null;
   };
 }

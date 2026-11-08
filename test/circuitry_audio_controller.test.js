@@ -141,3 +141,33 @@ test("stop invalidates a play request waiting for resume", async () => {
   controller.dispose();
   delete globalThis.window;
 });
+
+test("volume defaults to 15 percent and adjusts active and future playback", async () => {
+  globalThis.window = { AudioContext: FakeAudioContext };
+  const controller = new CircuitryAudioController();
+  try {
+    await controller.play(profile);
+    const master_gain = controller.master_gain;
+    assert.equal(master_gain.gain.value, 0.15);
+    assert.equal(controller.audio_gain.connected_to, master_gain);
+    assert.equal(master_gain.connected_to, controller.audio_context.destination);
+    const source = controller.audio_source;
+    controller.set_volume(0.4);
+    assert.equal(master_gain.gain.value, 0.4);
+    assert.equal(controller.audio_source, source);
+    controller.set_volume(0);
+    assert.equal(master_gain.gain.value, 0);
+    await controller.play(profile, { transition: AUDIO_TRANSITION_CROSSFADE });
+    assert.equal(controller.audio_gain.connected_to, master_gain);
+    assert.equal(master_gain.gain.value, 0);
+    controller.set_volume(2);
+    assert.equal(master_gain.gain.value, 1);
+    controller.set_volume(-1);
+    assert.equal(master_gain.gain.value, 0);
+    controller.set_volume(NaN);
+    assert.equal(master_gain.gain.value, 0);
+  } finally {
+    controller.dispose();
+    delete globalThis.window;
+  }
+});

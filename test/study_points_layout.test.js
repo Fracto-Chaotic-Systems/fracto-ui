@@ -72,6 +72,52 @@ test("Julia pane shares the survey canvas at fixed size and scope for the select
   assert.equal(next.children[0].props.focal_point.x, 0.2);
 });
 
+test("Julia and shared circuitry remain side by side with matching height and remaining width", () => {
+  const Panel = vm.runInNewContext(
+    transformSync(
+      source("../src/pages/study/points/PointsOrbitalPanel.jsx").replace(
+        "default function", "function",
+      ),
+      { loader: "jsx" },
+    ).code + ";PointsOrbitalPanel",
+    {
+      React: { createElement: (type, props, ...children) => ({ type, props, children }) },
+      CircuitryChart: "circuitry", PointsJuliaSet: "julia",
+      selected_core_point: (selected) => JSON.parse(selected.core_point),
+    },
+  );
+  const selected_minibrot = {
+    id: 55, pattern: 3,
+    core_point: '{"x":"-0.12","y":"0.74"}',
+    display_settings: '{"scope":"0.05","focal_point":{"x":0,"y":0}}',
+  };
+  const selected_orbital = { orbital_id: "7" };
+  const panel = Panel({ selected_minibrot, selected_orbital, width_px: 1400 });
+  assert.equal(panel.props.style.display, "flex");
+  assert.equal(panel.props.style.alignItems, "flex-start");
+  assert.equal(panel.props.style.width, "100%");
+  const julia = panel.children[0].children[0];
+  assert.equal(julia.type, "julia");
+  assert.equal(julia.props.selected_orbital, selected_orbital);
+  const chart = panel.children[1].children[0];
+  assert.equal(chart.type, "circuitry");
+  assert.equal(chart.props.height_px, 500);
+  assert.equal(panel.children[1].props.style.height, 500);
+  assert.equal(chart.props.width_px, 888);
+  assert.equal(chart.props.focal_point.x, -0.12);
+  assert.equal(chart.props.focal_point.y, 0.74);
+  assert.equal(chart.props.scope, 0.05);
+  assert.equal(chart.props.selected_orbital, selected_orbital);
+  const narrow = Panel({ selected_minibrot, width_px: 900 });
+  assert.equal(narrow.children[1].children[0].props.width_px, 500);
+  assert.equal(narrow.children[1].children[0].props.selected_orbital, null);
+  assert.equal(narrow.props.style.minWidth, 1012);
+  const resized = Panel({ selected_minibrot, width_px: 1800 });
+  assert.equal(resized.children[1].children[0].props.width_px, 1288);
+  assert.equal(resized.children[1].children[0].props.key, chart.props.key);
+  assert.equal(Panel({ selected_minibrot: null, width_px: 1400 }), null);
+});
+
 test("selected preview uses saved display settings and fits the available panel", () => {
   const Preview = vm.runInNewContext(
     transformSync(
@@ -163,7 +209,7 @@ test("orbital points splitters nest correctly and persist independent offsets ac
       PointsMinibrotTabs: "minibrot-tabs",
       PointsStoredOrbitals: "stored-orbitals",
       PointsSelectedPreview: "selected-preview",
-      PointsJuliaSet: "julia-set",
+      PointsOrbitalPanel: "orbital-panel",
       SPLITTER_TYPE_VERTICAL: "vertical",
       SPLITTER_TYPE_HORIZONTAL: "horizontal",
       ResizeObserver: class {
@@ -200,7 +246,8 @@ test("orbital points splitters nest correctly and persist independent offsets ac
   const selected = { id: 55, core_point: '{"x":0,"y":0}' };
   left_sections[1].children[0].props.on_select_minibrot(selected);
   const julia = page.render().children[1].children[1].children[0];
-  assert.equal(julia.type, "julia-set");
+  assert.equal(julia.type, "orbital-panel");
+  assert.equal(julia.props.width_px, 1097);
   assert.equal(julia.props.selected_minibrot, selected);
   const orbital = { orbital_id: "1", points: [] };
   page.render().children[1].children[0].children[2].children[0].props

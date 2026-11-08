@@ -1,9 +1,9 @@
 const FULL_TURN = 2 * Math.PI;
+export const DISTANCE_CHART_SAMPLE_COUNT = 10;
 
 /**
  * Build the complete waveform profile from circuitry interpolation samples.
- * This is intentionally separate from the reduced ten-sample visualization
- * profile used by the metadata chart.
+ * The shared chart/audio profile selects its vertices from this complete curve.
  *
  * @param {Array<{t:number,C:{re:number,im:number}}>|object|null} curve_samples
  *   Full interpolated curve samples, or a legacy circuitry response object.
@@ -31,6 +31,31 @@ export const build_waveform_profile = (curve_samples, Q) => {
   }));
 };
 
+/** The exact distance-chart vertices, equally spaced within each orbital interval.
+ * Phase is measured in audio cycles; sweep angles do not control playback time.
+ */
+export const build_chart_waveform_profile = (curve_samples, Q, cardinality) => {
+  const profile = build_waveform_profile(curve_samples, Q);
+  const intervals = Number(cardinality);
+  if (!profile.length || !Number.isInteger(intervals) || intervals < 1)
+    return [];
+  if (profile.length === 1) return [{ ...profile[0], phase: 0 }];
+  const subdivisions = intervals * DISTANCE_CHART_SAMPLE_COUNT;
+  const samples_per_interval = (profile.length - 1) / intervals;
+  return Array.from({ length: subdivisions + 1 }, (_, index) => {
+    const source_index =
+      index === subdivisions
+        ? profile.length - 1
+        : Math.round(
+            Math.floor(index / DISTANCE_CHART_SAMPLE_COUNT) *
+              samples_per_interval +
+              ((index % DISTANCE_CHART_SAMPLE_COUNT) * samples_per_interval) /
+                DISTANCE_CHART_SAMPLE_COUNT,
+          );
+    return { ...profile[source_index], phase: index / subdivisions };
+  });
+};
+
 /**
  * Remove DC offset and normalize a waveform profile for audio playback.
  * The original distance value remains available as `value`; `audio_value`
@@ -45,13 +70,18 @@ export const normalize_waveform_profile = (profile) => {
   if (profile.length === 0) {
     return [];
   }
+  const cycle = profile.length > 1 ? profile.slice(0, -1) : profile;
   const mean =
-    profile.reduce((sum, sample) => sum + sample.value, 0) / profile.length;
+    cycle.reduce((sum, sample) => sum + sample.value, 0) / cycle.length;
   const centered_values = profile.map((sample) => sample.value - mean);
   const peak = Math.max(...centered_values.map((value) => Math.abs(value)));
+  const noise_floor =
+    Number.EPSILON *
+    32 *
+    Math.max(...profile.map((sample) => Math.abs(sample.value)));
   return profile.map((sample, index) => ({
     ...sample,
-    audio_value: peak > 0 ? centered_values[index] / peak : 0,
+    audio_value: peak > noise_floor ? centered_values[index] / peak : 0,
   }));
 };
 
@@ -84,13 +114,13 @@ export const unwrap_waveform_profile = (profile) => {
 };
 
 /**
- * Create a periodic interpolator for an audio-ready waveform profile.
+ * Interpolate the same straight segments as the distance chart (tension: 0).
  * The final profile sample closes the circuit and is not treated as a second
  * independent cycle boundary.
  *
- * @param {Array<{unwrapped_t:number,audio_value:number}>} profile Complete
- *   profile with continuous parameter values and normalized amplitudes.
- * @returns {(unwrapped_t:number) => number} Interpolated waveform function.
+ * @param {Array<{audio_value:number}>} profile Equally timed chart vertices,
+ *   including the closing sample, with normalized amplitudes.
+ * @returns {(phase:number) => number} Waveform evaluated in cycles.
  */
 export const create_periodic_waveform_interpolator = (profile) => {
   if (profile.length === 0) {
@@ -99,62 +129,24 @@ export const create_periodic_waveform_interpolator = (profile) => {
   if (profile.length === 1) {
     return () => profile[0].audio_value;
   }
-  const start_t = profile[0].unwrapped_t;
-  const end_t = profile[profile.length - 1].unwrapped_t;
-  const period = end_t - start_t;
   const cycle_length = profile.length - 1;
-  if (!Number.isFinite(period) || period <= 0) {
-    return () => profile[0].audio_value;
-  }
-  return (requested_t) => {
-    if (!Number.isFinite(requested_t)) {
+  return (phase) => {
+    if (!Number.isFinite(phase)) {
       return profile[0].audio_value;
     }
-    const offset =
-      ((requested_t - start_t) % period + period) % period;
-    const t = start_t + offset;
-    let upper_index = 1;
-    while (
-      upper_index < profile.length - 1 &&
-      profile[upper_index].unwrapped_t < t
-    ) {
-      upper_index += 1;
-    }
-    const lower = profile[upper_index - 1];
-    const upper = profile[upper_index];
-    const span = upper.unwrapped_t - lower.unwrapped_t;
-    if (!Number.isFinite(span) || span <= 0) {
-      return lower.audio_value;
-    }
-    const fraction = (t - lower.unwrapped_t) / span;
-    const lower_index = upper_index - 1;
-    const point_before =
-      profile[(lower_index - 1 + cycle_length) % cycle_length];
-    const point_after = profile[(upper_index + 1) % cycle_length];
-    const fraction_squared = fraction * fraction;
-    const fraction_cubed = fraction_squared * fraction;
-    const interpolated_value =
-      0.5 *
-      ((2 * lower.audio_value +
-        (-point_before.audio_value + upper.audio_value) * fraction +
-        (2 * point_before.audio_value -
-          5 * lower.audio_value +
-          4 * upper.audio_value -
-          point_after.audio_value) *
-          fraction_squared +
-        (-point_before.audio_value +
-          3 * lower.audio_value -
-          3 * upper.audio_value +
-          point_after.audio_value) *
-          fraction_cubed));
-    return Math.max(-1, Math.min(1, interpolated_value));
+    const position = (((phase % 1) + 1) % 1) * cycle_length;
+    const lower_index = Math.min(cycle_length - 1, Math.floor(position));
+    const fraction = position - lower_index;
+    const lower = profile[lower_index].audio_value;
+    const upper = profile[lower_index + 1].audio_value;
+    return lower + (upper - lower) * fraction;
   };
 };
 
 /**
  * Measure continuity at the periodic waveform boundary.
  *
- * @param {Array<{unwrapped_t:number,audio_value:number}>} profile Complete
+ * @param {Array<{audio_value:number}>} profile Complete equally timed
  *   waveform profile with a closing sample.
  * @returns {{value_gap:number,slope_gap:number,continuous:boolean}} Boundary
  *   continuity diagnostics.
@@ -171,12 +163,10 @@ export const validate_waveform_continuity = (profile) => {
   const second = profile[1];
   const penultimate = profile[profile.length - 2];
   const last = profile[profile.length - 1];
-  const first_span = second.unwrapped_t - first.unwrapped_t;
-  const last_span = last.unwrapped_t - penultimate.unwrapped_t;
+  const first_span = 1 / (profile.length - 1);
+  const last_span = first_span;
   const first_slope =
-    first_span > 0
-      ? (second.audio_value - first.audio_value) / first_span
-      : 0;
+    first_span > 0 ? (second.audio_value - first.audio_value) / first_span : 0;
   const last_slope =
     last_span > 0
       ? (last.audio_value - penultimate.audio_value) / last_span
@@ -220,15 +210,13 @@ export const create_phase_accumulator = (
     : 0;
   const next_phase = () => {
     const current_phase = phase;
-    phase = ((phase + phase_increment) % 1 + 1) % 1;
+    phase = (((phase + phase_increment) % 1) + 1) % 1;
     return current_phase;
   };
   const get_phase = () => phase;
   const reset = (next_phase_value = 0) => {
     const numeric_phase = Number(next_phase_value);
-    phase = Number.isFinite(numeric_phase)
-      ? ((numeric_phase % 1) + 1) % 1
-      : 0;
+    phase = Number.isFinite(numeric_phase) ? ((numeric_phase % 1) + 1) % 1 : 0;
   };
   return { next_phase, get_phase, reset, phase_increment };
 };
@@ -238,7 +226,7 @@ export const create_phase_accumulator = (
  * Successive calls with the same accumulator continue exactly where the
  * previous block ended, regardless of block or animation-frame boundaries.
  *
- * @param {Array<{unwrapped_t:number,audio_value:number}>} profile Normalized
+ * @param {Array<{audio_value:number}>} profile Normalized
  *   periodic waveform profile.
  * @param {{next_phase:function():number}} phase_accumulator Tone phase state.
  * @param {number} sample_count Number of samples to render.
@@ -255,14 +243,9 @@ export const render_waveform_samples = (
     return output;
   }
   const interpolate = create_periodic_waveform_interpolator(profile);
-  const start_t = profile[0].unwrapped_t;
-  const period = profile[profile.length - 1].unwrapped_t - start_t;
-  if (!Number.isFinite(period) || period <= 0) {
-    return output;
-  }
   for (let index = 0; index < count; index += 1) {
     const phase = phase_accumulator.next_phase();
-    output[index] = interpolate(start_t + phase * period);
+    output[index] = interpolate(phase);
   }
   return output;
 };

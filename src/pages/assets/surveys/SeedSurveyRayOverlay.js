@@ -16,8 +16,9 @@ export const paint_survey_rays = (
     canvas,
     rays,
     half_span,
-    `hsl(${hue}, ${saturation}%, ${Math.min(100, lightness + 8)}%)`,
+    `hsl(${hue}, ${saturation}%, ${Math.min(100, lightness + 14)}%)`,
     true,
     1.6,
+    "#555555",
   );
 };

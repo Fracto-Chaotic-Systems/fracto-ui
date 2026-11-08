@@ -12,6 +12,20 @@ their interpolated circuitry curves.
 - `CircuitryAudioUtils.js` builds and validates waveform profiles from the
   interpolated curve data.
 
+The distance chart and sound share `build_chart_waveform_profile`: ten vertices
+per orbital interval plus the closing vertex, positioned uniformly in time.
+The chart draws straight segments (`tension: 0`), and audio evaluates those same
+segments with linear interpolation in cycle phase. Sweep angles remain geometry
+metadata and do not stretch playback time. The chart retains raw distance values;
+audio removes the cycle's DC offset and scales amplitude uniformly. There is no
+extra cubic interpolation or hard clipping. Roundoff-sized variations in a flat
+profile produce silence rather than a normalized noise waveform. Main-path
+animation still uses the complete original circuitry samples.
+
+The volume slider beside audio playback defaults to 15% and ranges from mute
+to 100%. A shared master gain applies changes to active and replacement sources
+with a 20 ms ramp, preserving the waveform and existing playback fades.
+
 When the main-cardioid detector reports candidate cardinality 2, the data
 server automatically runs the experimental `FractoFastCalc`-cardinality →
 BigComplex-Newton fallback. The page continues to render the returned

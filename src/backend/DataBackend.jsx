@@ -335,6 +335,7 @@ export class DataBackend {
     cb,
     optimize_polarity = false,
     interpolation = "hermite",
+    orbital_id,
   ) => {
     setTimeout(async () => {
       const params = new URLSearchParams({
@@ -348,7 +349,10 @@ export class DataBackend {
         params.set("interpolation", interpolation);
       }
       try {
-        const response = await fetch(`${DATA_ORIGIN()}/circuitry?${params}`, {
+        const endpoint = orbital_id == null
+          ? "/circuitry"
+          : `/orbital-data/${encodeURIComponent(orbital_id)}/circuitry`;
+        const response = await fetch(`${DATA_ORIGIN()}${endpoint}?${params}`, {
           credentials: "include",
           headers: FETCH_JSON_HEADERS,
         });

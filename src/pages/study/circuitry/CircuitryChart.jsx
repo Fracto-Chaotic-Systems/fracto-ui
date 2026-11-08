@@ -12,13 +12,14 @@ import DataBackend from "../../../backend/DataBackend.jsx";
 import AppText from "../../../AppText.jsx";
 import { render_pattern_block } from "../StudyUtils.jsx";
 import {
-  build_waveform_profile,
+  build_chart_waveform_profile,
+  DISTANCE_CHART_SAMPLE_COUNT,
   normalize_waveform_profile,
   validate_waveform_continuity,
-  unwrap_waveform_profile,
 } from "./CircuitryAudioUtils.js";
 import {
   CircuitryAudioController,
+  DEFAULT_PLAYBACK_VOLUME,
   AUDIO_TRANSITION_CROSSFADE,
 } from "./CircuitryAudioController.js";
 import {
@@ -63,7 +64,6 @@ const TRANSPORT_OPERATIONS = [
 const TRANSPORT_BUTTON_SIZE_PX = 35;
 const PATH_ANIMATION_RATE_FPS = 100; // Former 20 FPS base at the maximum 5× speed.
 const GOLDEN_RATIO = 1.618;
-const DISTANCE_CHART_SAMPLE_COUNT = 10;
 const FREQUENCY_PER_CARDINALITY_HZ = 27.5;
 const ORBITAL_POINT_COLUMNS = [
   {
@@ -76,6 +76,7 @@ const ORBITAL_POINT_COLUMNS = [
 export class CircuitryChart extends Component {
   static propTypes = {
     focal_point: PropTypes.object,
+    selected_orbital: PropTypes.object,
     scope: PropTypes.number,
     height_px: PropTypes.number.isRequired,
     width_px: PropTypes.number.isRequired,
@@ -91,6 +92,7 @@ export class CircuitryChart extends Component {
     animation_playing: false,
     animation_timer: null,
     audio_playing: false,
+    audio_volume: DEFAULT_PLAYBACK_VOLUME,
   };
 
   audio_controller = new CircuitryAudioController({
@@ -121,6 +123,7 @@ export class CircuitryChart extends Component {
       return;
     }
     if (
+      prevProps.selected_orbital !== this.props.selected_orbital ||
       !this.has_focal_point(previous_focal_point) ||
       focal_point.x !== previous_focal_point.x ||
       focal_point.y !== previous_focal_point.y
@@ -169,8 +172,31 @@ export class CircuitryChart extends Component {
     }
   };
 
+  on_volume_change = (event) => {
+    const audio_volume = Number(event.target.value) / 100;
+    this.audio_controller.set_volume(audio_volume);
+    this.setState({ audio_volume });
+  };
+
   load_circuitry = (focal_point) => {
     const request_generation = ++this.circuitry_request_generation;
+    // An explicit selection (including null) opts out of focal-point detection.
+    if (this.props.selected_orbital !== undefined) {
+      this.clear_animation_timer();
+      this.setState({
+        circuitry_data: null,
+        error: null,
+        animation_index: 0,
+        selected_orbital_row: -1,
+        selected_orbital_point: null,
+        animation_playing: false,
+      });
+      if (!this.props.selected_orbital?.orbital_id) {
+        this.audio_resume_generation++;
+        this.stop_audio(true);
+        return;
+      }
+    }
     const resume_audio = this.state.audio_playing;
     const resume_generation = ++this.audio_resume_generation;
     // Keep the current waveform audible while the replacement is fetched.
@@ -195,8 +221,10 @@ export class CircuitryChart extends Component {
         }
         const rotated_response = this.rotate_circuitry_to_origin(response);
         const waveform_profile = normalize_waveform_profile(
-          unwrap_waveform_profile(
-            build_waveform_profile(rotated_response.result, rotated_response.Q),
+          build_chart_waveform_profile(
+            rotated_response.result,
+            rotated_response.Q,
+            rotated_response.cardinality,
           ),
         );
         const waveform_continuity =
@@ -226,6 +254,7 @@ export class CircuitryChart extends Component {
       },
       true,
       this.state.radial_sweep ? "radial_sweep" : "hermite",
+      this.props.selected_orbital?.orbital_id,
     );
   };
 
@@ -473,17 +502,24 @@ export class CircuitryChart extends Component {
     const single_point_orbit =
       circuitry_data?.cardinality === 1 &&
       circuitry_data?.orbital_points?.length === 1;
+    const view_center =
+      single_point_orbit && this.props.selected_orbital
+        ? {
+            x: circuitry_data.orbital_points[0].re,
+            y: circuitry_data.orbital_points[0].im,
+          }
+        : focal_point;
     const navigator_bounds =
       single_point_orbit &&
       Number.isFinite(Number(scope)) &&
       Number(scope) > 0 &&
-      Number.isFinite(Number(focal_point?.x)) &&
-      Number.isFinite(Number(focal_point?.y))
+      Number.isFinite(Number(view_center?.x)) &&
+      Number.isFinite(Number(view_center?.y))
         ? {
-            min_x: Number(focal_point.x) - Number(scope) / 2,
-            max_x: Number(focal_point.x) + Number(scope) / 2,
-            min_y: Number(focal_point.y) - Number(scope) / 2,
-            max_y: Number(focal_point.y) + Number(scope) / 2,
+            min_x: Number(view_center.x) - Number(scope) / 2,
+            max_x: Number(view_center.x) + Number(scope) / 2,
+            min_y: Number(view_center.y) - Number(scope) / 2,
+            max_y: Number(view_center.y) + Number(scope) / 2,
           }
         : null;
     const orbital_points = (circuitry_data?.result || [])
@@ -513,43 +549,21 @@ export class CircuitryChart extends Component {
         : null;
     const waveform_profile =
       circuitry_data?.waveform_profile ||
-      build_waveform_profile(circuitry_data?.result, circuitry_data?.Q);
-    const interpolated_points = waveform_profile;
+      build_chart_waveform_profile(
+        circuitry_data?.result,
+        circuitry_data?.Q,
+        circuitry_data?.cardinality,
+      );
+    const interpolated_points = circuitry_data?.result || [];
     const interval_count = circuitry_data?.orbital_points?.length || 0;
     const source_samples_per_interval =
       interval_count > 0 && interpolated_points.length > 1
         ? (interpolated_points.length - 1) / interval_count
         : 0;
-    const distance_sample_count =
-      interval_count > 0 && source_samples_per_interval > 0
-        ? interval_count * DISTANCE_CHART_SAMPLE_COUNT + 1
-        : 0;
-    const distance_chart_data =
-      circuitry_data?.Q && distance_sample_count > 0
-        ? Array.from({ length: distance_sample_count }, (_, sample_index) => {
-            const is_closing_sample =
-              sample_index === distance_sample_count - 1;
-            const result_index = is_closing_sample
-              ? interpolated_points.length - 1
-              : Math.round(
-                  Math.floor(sample_index / DISTANCE_CHART_SAMPLE_COUNT) *
-                    source_samples_per_interval +
-                    (sample_index % DISTANCE_CHART_SAMPLE_COUNT) *
-                      (source_samples_per_interval /
-                        DISTANCE_CHART_SAMPLE_COUNT),
-                );
-            const point = interpolated_points[result_index]?.C;
-            return {
-              x: sample_index / DISTANCE_CHART_SAMPLE_COUNT,
-              y: point
-                ? Math.hypot(
-                    point.re - circuitry_data.Q.re,
-                    point.im - circuitry_data.Q.im,
-                  )
-                : 0,
-            };
-          })
-        : [];
+    const distance_chart_data = waveform_profile.map((sample) => ({
+      x: sample.phase * interval_count,
+      y: sample.value,
+    }));
     const distance_chart_point_radii = distance_chart_data.map(
       (_, sample_index) =>
         sample_index % DISTANCE_CHART_SAMPLE_COUNT === 0 ||
@@ -905,12 +919,16 @@ export class CircuitryChart extends Component {
               display: "flex",
               alignItems: "center",
               marginTop: "0.5rem",
+              flexWrap: "wrap",
+              columnGap: "1rem",
+              rowGap: "0.5rem",
             }}
           >
             <div
               style={{
                 display: "inline-block",
                 verticalAlign: "top",
+                flexShrink: 0,
               }}
             >
               <CoolMediaTransport
@@ -923,8 +941,11 @@ export class CircuitryChart extends Component {
             </div>
             <div
               style={{
-                marginLeft: "1rem",
                 alignSelf: "flex-start",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                flexShrink: 0,
               }}
             >
               <transport_styles.GenericButton
@@ -945,6 +966,20 @@ export class CircuitryChart extends Component {
               >
                 {audio_playing ? sound_off_icon : sound_on_icon}
               </transport_styles.GenericButton>
+              <input
+                type="range"
+                aria-label="Playback volume"
+                min="0"
+                max="100"
+                step="1"
+                value={Math.round(this.state.audio_volume * 100)}
+                onChange={this.on_volume_change}
+                title={`Volume: ${Math.round(this.state.audio_volume * 100)}%`}
+                style={{ width: "80px", margin: 0 }}
+              />
+              <span style={{ fontSize: "0.75rem", minWidth: "3ch" }}>
+                {Math.round(this.state.audio_volume * 100)}%
+              </span>
             </div>
           </div>
           <div

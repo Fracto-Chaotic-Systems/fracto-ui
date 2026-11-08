@@ -17,6 +17,18 @@ streamed survey loading, painting, progress, and stale-response cleanup. The
 left-aligned canvas is fixed at 500×500, sampled on a 500×500 grid with Detect's
 iteration limit, and covers scope 4.0 (`[-2, 2]` on both Julia axes). The pane
 scrolls when there is insufficient room; it never scales the canvas to fit.
+`PointsOrbitalPanel.jsx` places this Julia view beside the same `CircuitryChart`
+used by the freeform bailiwick's orbital tab. Both start at the top of the pane;
+the circuitry viewport is 500px high and fills the remaining width after the
+fixed Julia column and 8px gap. It uses the selected core and saved display
+scope. Narrow panes scroll horizontally to preserve both views and the
+circuitry controls' existing minimum width.
+The lower-left orbital selection is passed to `CircuitryChart` explicitly.
+Its curve comes from the selected stored points through
+`GET /orbital-data/:id/circuitry`, rather than detecting another orbit at the
+same focal point. Selection changes clear the old curve and invalidate pending
+responses; an empty selection stays empty. Both radial sweep and Hermite modes
+use the selected record, and one-point views center on that orbital point.
 The Julia canvas keeps loading progress visible and hides the sample-count
 completion message once rendering finishes.
 Completed responses containing the full image bypass redundant row downloads,
