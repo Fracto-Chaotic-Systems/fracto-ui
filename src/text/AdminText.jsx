@@ -34,6 +34,10 @@ export const MESH_SYNC_TEXT = {
   skipped: "Unusable or stale source files excluded from sharing:",
   errors: {
     invalid_sync_peer_configuration: SYNC_PEER_CONFIGURATION_ERROR,
+    "HTTP 401":
+      "An administrator login is required. For an isolated anonymous lab, enable FRACTO_ADMIN_SYNC_LAB_BYPASS with the exact UI origin on that server.",
+    "Untrusted request origin":
+      "This page’s address does not match FRACTO_UI_ORIGIN. Open the configured UI address or update that setting and recreate the container.",
     mesh_source_mismatch:
       "Mesh source identities or build profiles differ. Configure matching tile-source generations and rebuild profiles before sharing meshes.",
     mesh_jobs_active:
@@ -65,6 +69,7 @@ export const MESH_SYNC_TEXT = {
   },
 };
 export const DATABASE_SYNC_TEXT = {
+  conflict_preview: "Showing conflict examples:",
   title: "Database synchronization",
   note: "Merge this server’s database with the selected server. Tables and migration checksums must match. The tiles and automation tables stay local.",
   setup:
@@ -93,8 +98,14 @@ export const DATABASE_SYNC_TEXT = {
     "Synchronization did not complete on both servers. One server may already contain the merge. Preview again and retry to bring them together.",
   errors: {
     invalid_sync_peer_configuration: SYNC_PEER_CONFIGURATION_ERROR,
+    "HTTP 401":
+      "An administrator login is required. For an isolated anonymous lab, enable FRACTO_ADMIN_SYNC_LAB_BYPASS with the exact UI origin on that server.",
+    "Untrusted request origin":
+      "This page’s address does not match FRACTO_UI_ORIGIN. Open the configured UI address or update that setting and recreate the container.",
     migration_version_mismatch:
       "The servers have different migration versions or checksums. Install identical migrations on both before syncing.",
+    sync_protocol_mismatch:
+      "The servers use different database sync protocol versions. Update the sync code on both servers before previewing.",
     table_definitions_mismatch:
       "The installed tables or their definitions differ. Install and migrate matching tables on both servers first.",
     migrations_not_installed:

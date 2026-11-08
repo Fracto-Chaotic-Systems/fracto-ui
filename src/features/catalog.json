@@ -1,7 +1,7 @@
 {
   "contract_version": 1,
   "catalog_id": "fracto-ui",
-  "catalog_version": "1.2.9",
+  "catalog_version": "1.2.10",
   "access_profiles": [
     {
       "id": "public-entry",
@@ -420,12 +420,18 @@
           "name": "FRACTO_DATABASE_SYNC_PEERS",
           "repository": "admin",
           "path": "handlers/database_sync.js"
+        },
+        {
+          "name": "FRACTO_ADMIN_SYNC_LAB_BYPASS",
+          "repository": "admin",
+          "path": "handlers/sync_authorization.js"
         }
       ],
       "limitations": [
         "Saved labels and addresses are browser-local preferences; public health does not grant administrative access.",
         "Database sync requires identical migration history and table definitions, excludes tiles and automation, and temporarily locks included tables. Conflicting rows require an explicit server preference; invalid references block application.",
-        "Mesh sync shares validated gzip mesh assets only, requires matching source identities and mesh profiles, pauses mesh generation during each operation, and leaves numerical tiles, databases and local inventory journals untouched. Both servers need the sync code and trusted peer configuration."
+        "Mesh sync shares validated gzip mesh assets only, requires matching source identities and mesh profiles, pauses mesh generation during each operation, and leaves numerical tiles, databases and local inventory journals untouched. Both servers need the sync code and trusted peer configuration.",
+        "Anonymous labs can explicitly opt in to sync access using FRACTO_ADMIN_SYNC_LAB_BYPASS; the exact configured UI origin is required, and other administrator routes remain protected."
       ],
       "related_features": ["admin-status", "admin-chat"],
       "sources": [
