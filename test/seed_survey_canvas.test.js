@@ -227,6 +227,30 @@ test("canvas accumulates decoded rows and drains completed jobs using its own cu
   assert.equal(h.timers.size, 0);
 });
 
+test("completed full images skip redundant row downloads and finish progress immediately", () => {
+  for (const nested of [false, true]) {
+    const h = harness({ show_completion: false });
+    const canvas_buffer = Array.from({ length: 3 }, () =>
+      Array.from({ length: 3 }, () => [0, 17]),
+    );
+    h.starts[0][4]({ result: {
+      job_id: "cached",
+      status: "completed",
+      preview_rows_completed: 3,
+      ...(nested ? { result: { canvas_buffer } } : { canvas_buffer }),
+      canvas_buffer_batch: {
+        row_start: 0, row_count: 1,
+        rows: [{ row_index: 0, values: [[0, 17]] }],
+      },
+    } });
+    assert.equal(h.component.state.after_row, 3);
+    assert.equal(h.component.canvas_buffer_cache.canvas_buffer, canvas_buffer);
+    assert.equal(h.timers.size, 0);
+    assert.equal(h.polls.length, 0);
+    assert.equal(find_progress(h.component.render()), undefined);
+  }
+});
+
 test("canvas accumulates packed batches with no mode or size assumptions", () => {
   const h = harness();
   h.starts[0][4]({ result: { job_id: "job", status: "queued" } });
@@ -298,6 +322,8 @@ test("loading uses an image-width progress bar and completion waits for remainin
     progress: { completed: 4, total: 9 },
   };
   assert.equal(find_progress(h.component.render()).props.value, 4);
+  h.component.props.show_completion = false;
+  assert.equal(find_progress(h.component.render()).props.value, 4);
   h.component.state = {
     ...h.component.state,
     after_row: 1,
@@ -312,6 +338,9 @@ test("loading uses an image-width progress bar and completion waits for remainin
   h.component.state.after_row = 3;
   tree = h.component.render();
   assert.equal(find_progress(tree), undefined);
+  assert.equal(tree.children[1].children[0], null);
+  h.component.props.show_completion = true;
+  tree = h.component.render();
   assert.equal(tree.children[1].children[0], "9 samples complete");
   h.component.state.survey = { status: "failed", error: "offline" };
   tree = h.component.render();

@@ -3,6 +3,7 @@ import test from "node:test";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import { transformSync } from "esbuild";
+import { build_orbital_trace_request } from "../src/pages/study/points/PointsOrbitalTraceRequest.js";
 
 const source = (path) =>
   readFileSync(new URL(path, import.meta.url), "utf8")
@@ -22,6 +23,54 @@ const definitions = vm.runInNewContext(
 );
 const vertical_key = "study/points/vertical_splitter_pos";
 const horizontal_key = "study/points/horizontal_splitter_pos";
+
+test("Julia pane shares the survey canvas at fixed size and scope for the selected core", () => {
+  const Julia = vm.runInNewContext(
+    transformSync(
+      source("../src/pages/study/points/PointsJuliaSet.jsx").replace(
+        "default function", "function",
+      ),
+      { loader: "jsx" },
+    ).code + ";PointsJuliaSet",
+    {
+      React: { createElement: (type, props, ...children) => ({ type, props, children }) },
+      PointsJuliaCanvas: "survey-canvas",
+      build_orbital_trace_request,
+      SEED_SURVEY_DISCOVERY_OPTIONS: { iteration_limit: 100000 },
+      POINTS_ORBITAL_TEXT: { julia_canvas: "julia" },
+      AppText: { get: () => "Julia set" },
+      selected_core_point: (selected) => JSON.parse(selected.core_point),
+    },
+  );
+  const selected = {
+    id: 55,
+    core_point: '{"x":"-0.75","y":"0.1"}',
+    display_settings: '{"scope":0.01,"focal_point":{"x":0,"y":0}}',
+  };
+  const view = Julia({ selected_minibrot: selected });
+  const canvas = view.children[0];
+  assert.equal(view.props.style.marginRight, "auto");
+  assert.equal(canvas.type, "survey-canvas");
+  assert.equal(canvas.props.size_px, 500);
+  assert.equal(canvas.props.source_size_px, 500);
+  assert.equal(canvas.props.half_span * 2, 4.0);
+  assert.equal(canvas.props.iteration_limit, 100000);
+  assert.equal(canvas.props.focal_point.x, -0.75);
+  assert.equal(canvas.props.focal_point.y, 0.1);
+  assert.equal(canvas.props.trace_request, null);
+  const orbital = {
+    orbital_id: "7", period: 1,
+    points: [{ point_index: 0, point: { re: "0.3", im: "0.4" },
+      landing_ratios: [{ numerator: "1", denominator: "7" }] }],
+  };
+  const requested = Julia({ selected_minibrot: selected, selected_orbital: orbital });
+  assert.equal(requested.children[0].props.trace_request.requests[0].angle.key, "1/7");
+  assert.equal(requested.children[0].props.trace_request.focal_point.x, "-0.75");
+  assert.equal(Julia({ selected_minibrot: null }), null);
+  assert.equal(Julia({ selected_minibrot: { core_point: "invalid" } }), null);
+  const next = Julia({ selected_minibrot: { core_point: '{"x":0.2,"y":0.3}' } });
+  assert.equal(next.children[0].props.focal_point.x, 0.2);
+});
 
 test("selected preview uses saved display settings and fits the available panel", () => {
   const Preview = vm.runInNewContext(
@@ -114,6 +163,7 @@ test("orbital points splitters nest correctly and persist independent offsets ac
       PointsMinibrotTabs: "minibrot-tabs",
       PointsStoredOrbitals: "stored-orbitals",
       PointsSelectedPreview: "selected-preview",
+      PointsJuliaSet: "julia-set",
       SPLITTER_TYPE_VERTICAL: "vertical",
       SPLITTER_TYPE_HORIZONTAL: "horizontal",
       ResizeObserver: class {
@@ -149,6 +199,18 @@ test("orbital points splitters nest correctly and persist independent offsets ac
   assert.equal(left_sections[2].children[0].type, "stored-orbitals");
   const selected = { id: 55, core_point: '{"x":0,"y":0}' };
   left_sections[1].children[0].props.on_select_minibrot(selected);
+  const julia = page.render().children[1].children[1].children[0];
+  assert.equal(julia.type, "julia-set");
+  assert.equal(julia.props.selected_minibrot, selected);
+  const orbital = { orbital_id: "1", points: [] };
+  page.render().children[1].children[0].children[2].children[0].props
+    .on_select_orbital(orbital);
+  assert.equal(
+    page.render().children[1].children[1].children[0].props.selected_orbital,
+    orbital,
+  );
+  page.on_select_minibrot(selected);
+  assert.equal(page.state.selected_orbital, null);
   assert.equal(
     page.render().children[1].children[0].children[0].children[0].props
       .selected_minibrot,

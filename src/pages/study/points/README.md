@@ -11,6 +11,99 @@ retained chart panels, or start their legacy calculations and survey polling.
 Shared rendering, backend, SDK, settings, and text code remains
 available to other features.
 
+The upper-right pane mounts `PointsJuliaSet.jsx` for the selected object's core
+point. It shares `SeedSurveyCanvas` with Seed Surveys' Detect tab, including
+streamed survey loading, painting, progress, and stale-response cleanup. The
+left-aligned canvas is fixed at 500×500, sampled on a 500×500 grid with Detect's
+iteration limit, and covers scope 4.0 (`[-2, 2]` on both Julia axes). The pane
+scrolls when there is insufficient room; it never scales the canvas to fit.
+The Julia canvas keeps loading progress visible and hides the sample-count
+completion message once rendering finishes.
+Completed responses containing the full image bypass redundant row downloads,
+so loading ends as soon as that image is available. Partial images continue to
+drain their remaining batches before loading finishes.
+`PointsStoredOrbitals` selects the first loaded orbital and publishes subsequent
+row selections to the page. `PointsJuliaCanvas` overlays that orbital's stored
+points using the same white dots and 6×6 black squares as Seed Surveys Detect,
+through `SeedSurveyOrbitalOverlay.js`. It restores a clean Julia-image snapshot
+before replacing markers and reapplies the selection after streamed paints.
+Changing the middle list's selection clears the old orbital immediately.
+
+`PointsOrbitalTraceRequest.js` prepares the selected orbital's known accesses
+for future ray tracing. `PointsJuliaSet` passes the batch as `trace_request` to
+`PointsJuliaCanvas`; it is not forwarded to the Julia image survey. Each batch
+contains the orbital ID, period, exact focal-point strings, and one request per
+stored ratio with its point index, exact landing coordinates, reduced rational
+angle, and available family/validation metadata. Equivalent ratios at the same
+point are deduplicated. Invalid entries are recorded in `rejected`; no ratios
+means an empty request list and leaves the point-marker overlay intact. This
+builder does not enumerate candidate angles or read/write a cache.
+
+`PointsOrbitalRays` submits nonempty request batches to a selection-owned worker.
+The SDK's `trace_known_dynamic_rays` groups only supplied angles by exact doubling
+and reuses `trace_ray_family` for complete known families. Existing convergence,
+precision, and endpoint-dynamics checks apply; each ray must also land at its
+recorded coordinates and point index within the shared accuracy tolerance.
+Missing partners, failed traces, and mismatched endpoints remain unresolved.
+Validated families stream into the Julia overlay with Seed Surveys' ray strokes
+and ratio labels, beneath the orbital squares. Path-count progress is visible
+only during tracing. Selection changes/unmount terminate the worker and invalidate
+late results.
+
+`PointsOrbitalRayProgress` aligns the path-count bar and controls with the Julia
+image. Cache lookup uses a short text status; the progress bar and Cancel tracing
+button appear only during tracing. Completion removes the status and bar.
+Cancellation retains validated paths and queued saves; canceled, partial, or
+failed attempts offer Trace remaining paths, reusing the same cache-first flow.
+The overlay is bound to its exact request identity, so obsolete selection
+callbacks cannot restore old paths. Each paint restores the Julia image, draws
+the shared Seed Surveys paths and fraction labels, then draws orbital squares
+last. Streamed Julia image updates reapply that same layer order.
+
+`OrbitalRayStorage` loads validated geometry lazily through
+`GET /orbital-data/:id/ray-paths` before starting a worker. Complete compatible
+caches skip tracing. Partial cached families appear immediately, and only missing
+or insufficiently accurate families are sent to the worker. The worker retains
+the full orbital coordinates for endpoint/dynamics validation, while its access
+list and progress total contain only the remaining work. Cache eligibility keeps
+whole doubling families together, so refinement never drops a required partner.
+Each newly validated family queues a save through the matching PUT route.
+Queued saves retain their original record identity after selection changes or
+unmount. A bounded eight-entry/32-MiB memory cache speeds repeat selections.
+Read failures fall back to tracing; save failures leave paths visible and show
+a short notice. No failed trace is persisted as a successful path.
+
+The shared SDK `FractoOrbitalRayCache.js` owns the solver version, exact decimal
+identity, geometry checks, accuracy eligibility, and quality-preserving merges.
+Migration `012_orbital-ray-paths.sql` adds the separate `orbital_ray_paths` table;
+parameter-ray storage is unchanged. Server writes lock the orbital row, compare
+the current focal point, period, points, and ratios, then merge and save paths
+transactionally. Stale identities return 409. Geometry is excluded from list
+and progression responses, and large documents reuse the existing compressed
+ray-cache codec. UI layout and colors do not invalidate geometry.
+
+## Verification and benchmark
+
+From the Fracto root, `node scripts/benchmark_orbital_ray_paths.js --database
+--runs 3` measures known-ray tracing, memory reuse, serialized cache decoding,
+and MySQL reads. It writes `benchmarks/known-orbital-rays-latest.json`. Omitting
+`--database` avoids database access; the database mode uses connection-local
+temporary tables and never changes real orbital/cache records.
+
+The 2026-11-08 run validated all 15 rays across fixed, period-two, period-seven,
+rabbit, and basilica fixtures. Uncached trace medians were 100–894 ms; MySQL
+cache read plus validation medians were 6–27 ms; in-memory validation medians
+were 0.03–0.25 ms. Each uncached sample recomputes geometry, but the process/JIT
+remains warm. These Node timings exclude HTTP, browser worker startup, painting,
+and the production orbital-metadata join; they are not end-to-end UI timings.
+
+Verification passed 106 regression tests covering SDK numerics, cache quality
+and invalidation, concurrent/stale writes, selection races, cancel/retry,
+remaining-work progress, marker/label layer order, and image-batch repainting.
+The separately enabled MySQL integration test also passed using temporary tables.
+Run the focused suite with `npm run test:orbital-rays`; set
+`FRACTO_DB_INTEGRATION=1` to include that optional live database check.
+
 ## Files
 
 - `PointsMinibrotTabs.jsx` owns the “free”, “inline”, and “nodal” tabs, defaulting

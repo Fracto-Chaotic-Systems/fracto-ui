@@ -8,11 +8,16 @@ export const paint_survey_rays = (
   rays,
   half_span,
   cardinality = 0,
-) =>
+) => {
+  const [hue, saturation, lightness] =
+    FractoUtil.fracto_pattern_color_hsl(cardinality);
   paint_canvas_rays(
     context,
     canvas,
     rays,
     half_span,
-    FractoUtil.fracto_pattern_color(cardinality),
+    `hsl(${hue}, ${saturation}%, ${Math.min(100, lightness + 8)}%)`,
+    true,
+    1.6,
   );
+};

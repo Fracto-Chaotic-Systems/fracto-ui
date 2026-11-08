@@ -20,6 +20,7 @@ export class SeedSurveyCanvas extends Component {
     source_size_px: PropTypes.number.isRequired,
     size_px: PropTypes.number.isRequired,
     aria_label: PropTypes.string.isRequired,
+    show_completion: PropTypes.bool,
     on_seed_hover: PropTypes.func,
     on_seed_leave: PropTypes.func,
     on_canvas_rendered: PropTypes.func,
@@ -117,12 +118,27 @@ export class SeedSurveyCanvas extends Component {
   };
 
   accept_job = (job, request_id) => {
+    const full_buffer = job.canvas_buffer || job.result?.canvas_buffer;
+    const size = this.props.source_size_px;
+    const has_complete_buffer =
+      job.status === "completed" &&
+      Array.isArray(full_buffer) &&
+      full_buffer.length === size &&
+      full_buffer.every(
+        (column) =>
+          Array.isArray(column) &&
+          column.length === size &&
+          column.every(Array.isArray),
+      );
     const batch = job.render_batch?.row_count
       ? job.render_batch
       : job.canvas_buffer_batch;
-    const after_row = batch?.row_count
-      ? batch.row_start + batch.row_count
-      : this.state.after_row;
+    // Completed previews may already include every cell; do not fetch them again.
+    const after_row = has_complete_buffer
+      ? size
+      : batch?.row_count
+        ? batch.row_start + batch.row_count
+        : this.state.after_row;
     this.setState(
       (state) => ({
         after_row,
@@ -253,7 +269,7 @@ export class SeedSurveyCanvas extends Component {
     let status_content = null;
     if (survey.status === "failed") {
       status_content = `${AppText.get(KEY_ASSETS_SURVEYS_FAILED)}: ${survey.error || "unknown error"}`;
-    } else if (complete) {
+    } else if (complete && this.props.show_completion !== false) {
       status_content = AppText.get(KEY_ASSETS_SURVEYS_COMPLETE).replace(
         "${total_samples}",
         String(total_samples),

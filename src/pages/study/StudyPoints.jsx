@@ -18,6 +18,7 @@ import { KEY_STUDY_POINTS } from "../../text/StudyText.jsx";
 import PointsMinibrotTabs from "./points/PointsMinibrotTabs.jsx";
 import PointsStoredOrbitals from "./points/PointsStoredOrbitals.jsx";
 import PointsSelectedPreview from "./points/PointsSelectedPreview.jsx";
+import PointsJuliaSet from "./points/PointsJuliaSet.jsx";
 
 const Layout = styled.div`
   position: relative;
@@ -64,10 +65,13 @@ export class StudyPoints extends Component {
     vertical: 500,
     horizontal: 500,
     selected_minibrot: null,
+    selected_orbital: null,
   };
 
   on_select_minibrot = (selected_minibrot) =>
-    this.setState({ selected_minibrot });
+    this.setState({ selected_minibrot, selected_orbital: null });
+
+  on_select_orbital = (selected_orbital) => this.setState({ selected_orbital });
 
   componentDidMount() {
     this.read_positions();
@@ -163,6 +167,7 @@ export class StudyPoints extends Component {
             <div>
               <PointsStoredOrbitals
                 selected_minibrot={this.state.selected_minibrot}
+                on_select_orbital={this.on_select_orbital}
               />
             </div>
           </LeftSections>
@@ -173,7 +178,12 @@ export class StudyPoints extends Component {
               width: right_width,
               height: Math.max(0, y - half_bar),
             }}
-          />
+          >
+            <PointsJuliaSet
+              selected_minibrot={this.state.selected_minibrot}
+              selected_orbital={this.state.selected_orbital}
+            />
+          </Pane>
           <Pane
             style={{
               left: right_left,

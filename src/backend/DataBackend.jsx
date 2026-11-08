@@ -25,6 +25,18 @@ export class DataBackend {
       cache: "no-store",
     });
 
+  static get_orbital_ray_paths = (id, signal) =>
+    request_json(`${DATA_ORIGIN()}/orbital-data/${encodeURIComponent(id)}/ray-paths`, {
+      signal, cache: "no-store",
+    });
+
+  static save_orbital_ray_paths = (id, payload) =>
+    request_json(`${DATA_ORIGIN()}/orbital-data/${encodeURIComponent(id)}/ray-paths`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
   static calculate_bailiwick_orbitals = (id, signal) =>
     request_json(
       `${DATA_ORIGIN()}/orbital-data/bailiwicks/${encodeURIComponent(id)}/discovery-jobs`,

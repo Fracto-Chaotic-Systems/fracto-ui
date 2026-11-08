@@ -32,6 +32,7 @@ export default class PointsStoredOrbitals extends Component {
   state = {
     status: "idle",
     orbitals: [],
+    selected_orbital: null,
     focal_point: null,
     notice: null,
     stale: false,
@@ -62,8 +63,10 @@ export default class PointsStoredOrbitals extends Component {
     clearTimeout(this.poll_timer);
     this.in_calculation = false;
     this.controller = new AbortController();
+    this.props.on_select_orbital?.(null);
     this.setState({
       orbitals: [],
+      selected_orbital: null,
       notice,
       focal_point: null,
       status: "idle",
@@ -116,7 +119,9 @@ export default class PointsStoredOrbitals extends Component {
         );
       }
       if (this.current(generation)) {
-        this.setState({ status: "ready", orbitals });
+        const selected_orbital = orbitals[0] || null;
+        this.setState({ status: "ready", orbitals, selected_orbital });
+        this.props.on_select_orbital?.(selected_orbital);
         if (job && ["queued", "running"].includes(job.status)) {
           this.in_calculation = true;
           this.setState({ status: "calculating", job_id: job.id });
@@ -223,10 +228,16 @@ export default class PointsStoredOrbitals extends Component {
       this.calculation_failed(error, generation);
     }
   };
+  select_orbital = (orbital) => {
+    this.setState({ selected_orbital: orbital });
+    this.props.on_select_orbital?.(orbital);
+  };
+
   render() {
     return (
       <PointsStoredOrbitalsView
         {...this.state}
+        on_select_orbital={this.select_orbital}
         on_calculate={this.calculate}
         on_cancel={this.cancel}
         on_reload={() => this.load()}

@@ -25,6 +25,16 @@ export const KEY_STUDY_MAGNITUDES = `${STUDY_FOLDER}/study_magnitudes`;
 export const KEY_STUDY_POINTS = `${STUDY_FOLDER}/study_points`;
 export const KEY_STUDY_POINTS_FREE_TAB = `${STUDY_FOLDER}/points_free_tab`;
 export const POINTS_ORBITAL_TEXT = {
+  known_ray_cancel: "study/points_known_ray_cancel",
+  known_ray_cancelled: "study/points_known_ray_cancelled",
+  known_ray_retry: "study/points_known_ray_retry",
+  known_ray_failed: "study/points_known_ray_failed",
+  known_ray_cache_loading: "study/points_known_ray_cache_loading",
+  known_ray_cache_failed: "study/points_known_ray_cache_failed",
+  known_ray_progress: "study/points_known_ray_progress",
+  known_ray_loading: "study/points_known_ray_loading",
+  known_ray_unresolved: "study/points_known_ray_unresolved",
+  julia_canvas: "study/points_julia_canvas",
   stale: "study/points_stored_stale",
   resume: "study/points_resume",
   resume_notice: "study/points_resume_notice",
@@ -300,6 +310,16 @@ export const APP_STUDY_TEXT = {
     "This calculation stopped. Resume from its last saved checkpoint.",
   [POINTS_ORBITAL_TEXT.cancel]: "Cancel calculation",
   [POINTS_ORBITAL_TEXT.title]: "stored orbitals",
+  [POINTS_ORBITAL_TEXT.known_ray_cancel]: "Cancel tracing",
+  [POINTS_ORBITAL_TEXT.known_ray_cancelled]: "Path tracing canceled.",
+  [POINTS_ORBITAL_TEXT.known_ray_retry]: "Trace remaining paths",
+  [POINTS_ORBITAL_TEXT.known_ray_failed]: "Unable to trace ray paths.",
+  [POINTS_ORBITAL_TEXT.known_ray_cache_loading]: "Loading saved ray paths…",
+  [POINTS_ORBITAL_TEXT.known_ray_cache_failed]: "Paths could not be saved for later.",
+  [POINTS_ORBITAL_TEXT.known_ray_progress]: "Tracing paths: {processed} of {total}",
+  [POINTS_ORBITAL_TEXT.known_ray_loading]: "Tracing known landing rays",
+  [POINTS_ORBITAL_TEXT.known_ray_unresolved]: "Some ray paths could not be verified.",
+  [POINTS_ORBITAL_TEXT.julia_canvas]: "Julia set for the selected core point",
   [POINTS_ORBITAL_TEXT.stale]:
     "Stored results use an earlier discovery method. Recalculate using the Seed Surveys method.",
   [POINTS_ORBITAL_TEXT.recalculate]:

@@ -57,6 +57,7 @@ export const paint_canvas_rays = (
   half_span,
   ray_color = "#ffffff",
   show_labels = true,
+  outline_width = 2,
 ) => {
   if (!rays?.length) return;
   context.save();
@@ -74,7 +75,7 @@ export const paint_canvas_rays = (
       else context.lineTo(x, y);
     });
     context.strokeStyle = "#000000";
-    context.lineWidth = 2;
+    context.lineWidth = outline_width;
     context.stroke();
     context.strokeStyle = ray_color;
     context.lineWidth = 1.25;

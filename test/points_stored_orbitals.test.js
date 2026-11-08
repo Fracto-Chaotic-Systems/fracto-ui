@@ -245,6 +245,28 @@ test("unmount aborts reads and removes pending job polling", async () => {
   assert.equal(signal.aborted, true);
 });
 
+test("orbital selection defaults to the first result, propagates changes, and clears on reload", async () => {
+  const second = { ...orbital, orbital_id: "2" };
+  const h = harness({
+    stored_orbitals: async () => ({ result: [{ id: "1" }, { id: "2" }] }),
+    stored_orbital: async (id) => ({ result: id === "1" ? orbital : second }),
+  });
+  const selections = [];
+  h.panel.props.on_select_orbital = (orbital) => selections.push(orbital);
+  await h.panel.load();
+  assert.equal(selections[0], null);
+  assert.equal(h.panel.state.selected_orbital.orbital_id, "1");
+  assert.equal(selections.at(-1).orbital_id, "1");
+  h.panel.render().props.on_select_orbital(second);
+  assert.equal(h.panel.state.selected_orbital, second);
+  assert.equal(selections.at(-1), second);
+  h.panel.props.selected_minibrot = null;
+  await h.panel.load();
+  assert.equal(h.panel.state.selected_orbital, null);
+  assert.equal(selections.at(-1), null);
+  h.panel.componentWillUnmount();
+});
+
 test("stored view shows exact progression coordinates and ratios, and only empty state offers calculation", () => {
   const text_keys = [
     "title",

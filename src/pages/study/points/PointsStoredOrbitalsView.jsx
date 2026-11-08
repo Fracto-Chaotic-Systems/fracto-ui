@@ -151,6 +151,8 @@ const calculation_progress = (progress = {}) => {
 export default function PointsStoredOrbitalsView({
   status,
   orbitals,
+  selected_orbital: selection,
+  on_select_orbital,
   error_kind,
   notice,
   stale = false,
@@ -161,9 +163,7 @@ export default function PointsStoredOrbitalsView({
   on_cancel,
   on_reload,
 }) {
-  const [selected_id, select_orbital] = React.useState(null);
-  const selected_orbital =
-    orbitals.find((orbital) => orbital.orbital_id === selected_id) || orbitals[0];
+  const selected_orbital = selection || orbitals[0];
   const metric = calculation_progress(progress || {});
   const determinate = Number.isFinite(metric.total) && metric.total > 0;
   const value = Math.min(
@@ -242,7 +242,7 @@ export default function PointsStoredOrbitalsView({
                 type="button"
                 className="orbital-row"
                 aria-pressed={orbital === selected_orbital}
-                onClick={() => select_orbital(orbital.orbital_id)}
+                onClick={() => on_select_orbital?.(orbital)}
               >
                 <span className="orbital-pattern">
                   {render_pattern_block(orbital.period)}

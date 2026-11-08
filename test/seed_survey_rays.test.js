@@ -355,9 +355,10 @@ test("orbital-colored rays have thin outlines and black fractions in bordered wh
     1.5,
     3,
   );
-  const orbital_color = FractoUtil.fracto_pattern_color(3);
+  const [hue, saturation, lightness] = FractoUtil.fracto_pattern_color_hsl(3);
+  const orbital_color = `hsl(${hue}, ${saturation}%, ${lightness + 8}%)`;
   assert.deepEqual(strokes, [
-    ["#000000", 2],
+    ["#000000", 1.6],
     [orbital_color, 1.25],
   ]);
   assert.deepEqual(labels, [

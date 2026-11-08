@@ -15,6 +15,7 @@ import SeedSurveyOrbitals from "./SeedSurveyOrbitals.jsx";
 import SeedSurveyRays from "./SeedSurveyRays.jsx";
 import { SEED_SURVEY_DISCOVERY_OPTIONS } from "./SeedSurveyScan.js";
 import { paint_survey_rays } from "./SeedSurveyRayOverlay.js";
+import { paint_survey_orbital_points } from "./SeedSurveyOrbitalOverlay.js";
 import {
   orbital_confirmation,
   orbital_closure_error,
@@ -149,18 +150,12 @@ export class SeedSurveyDetect extends Component {
     context.save();
     context.fillStyle = "#ffffff";
     if (this.hovering || this.state.selected_orbital) {
-      for (const point of this.orbital_details().points) {
-        const point_x =
-          ((point.x + HALF_SPAN) / (2 * HALF_SPAN)) * canvas.width;
-        const point_y =
-          ((HALF_SPAN - point.y) / (2 * HALF_SPAN)) * canvas.height;
-        context.beginPath();
-        context.arc(point_x, point_y, 1.5, 0, 2 * Math.PI);
-        context.fill();
-        context.strokeStyle = "#000000";
-        context.lineWidth = 1;
-        context.strokeRect(point_x - 3, point_y - 3, 6, 6);
-      }
+      paint_survey_orbital_points(
+        context,
+        canvas,
+        this.orbital_details().points,
+        HALF_SPAN,
+      );
     }
     context.fillStyle = "#ffffff";
     context.beginPath();

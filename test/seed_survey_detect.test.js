@@ -9,6 +9,7 @@ import {
   ORBIT_CLOSURE_TOLERANCE,
 } from "../src/pages/assets/surveys/SeedSurveyOrbitConfirmation.js";
 import { transformSync } from "esbuild";
+import { paint_survey_orbital_points } from "../src/pages/assets/surveys/SeedSurveyOrbitalOverlay.js";
 
 const harness = (Q = { x: 0, y: 0 }) => {
   const calls = [],
@@ -91,6 +92,7 @@ const harness = (Q = { x: 0, y: 0 }) => {
     SeedSurveyOrbitals: "orbitals",
     SeedSurveyRays: "rays",
     paint_survey_rays: (...args) => ray_paints.push(args),
+    paint_survey_orbital_points,
     AppText: { get: (key) => key },
     KEY_ASSETS_SURVEYS_DETECT: "detect",
     KEY_ASSETS_SURVEYS_CANVAS_DETECT: "detect-canvas",
