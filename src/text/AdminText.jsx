@@ -53,6 +53,12 @@ export const MESH_SYNC_TEXT = {
       "Configure the private internal service token so the admin service can contact its local mesh store.",
     mesh_session_expired:
       "The mesh store session expired or its service restarted. Preview again and retry.",
+    mesh_inventory_timeout:
+      "Mesh inventory verification took over an hour. Let the current scan finish, then preview again; completed file checks are retained.",
+    mesh_invalid_response:
+      "A mesh service returned an unexpected response. Check the proxy routes and matching mesh-sync code on both servers.",
+    mesh_sync_storage_failed:
+      "The tiles service could not verify its mesh storage. Check its mesh volume and service logs, then preview again.",
     mesh_catalog_incompatible:
       "The peer does not provide a compatible mesh inventory. Install matching sync code on both servers.",
     mesh_catalog_limit:
