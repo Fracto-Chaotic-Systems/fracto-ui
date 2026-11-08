@@ -17,6 +17,8 @@ stale job ID and asks for a fresh preview instead of reporting a connectivity
 failure. It does not automatically apply or select a conflict preference.
 Installed tables and migration fingerprints must match. `tiles` and `automation`
 remain local.
+Rejected peer credentials now report the specific token/configuration correction
+in both database and mesh panels, instead of the generic synchronization error.
 See the admin service's `DATABASE_SYNC.md` for configuration and recovery.
 
 Status and server-awareness views include the AI service. Commits includes its

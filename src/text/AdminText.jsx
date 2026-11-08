@@ -3,6 +3,8 @@ const SYNC_PEER_CONFIGURATION_ERROR =
   "FRACTO_DATABASE_SYNC_PEERS must be a JSON object mapping server URLs to endpoint and token entries. Setting it to true does not configure a peer. Correct the setting and recreate the server container to load the new environment.";
 const SYNC_JOB_MISSING_ERROR =
   "This preview is no longer available, usually because the admin service restarted or the preview expired. Run a fresh preview before syncing.";
+const SYNC_PEER_AUTHORIZATION_ERROR =
+  "The selected server rejected this server’s sync token. Configure the same pair-specific token in FRACTO_DATABASE_SYNC_PEERS on both servers, then recreate the affected containers to load it.";
 export const MESH_SYNC_TEXT = {
   title: "Mesh file synchronization",
   conflict_preview: "Showing conflict examples:",
@@ -35,6 +37,7 @@ export const MESH_SYNC_TEXT = {
   bytes: "mesh bytes",
   skipped: "Unusable or stale source files excluded from sharing:",
   errors: {
+    sync_peer_unauthorized: SYNC_PEER_AUTHORIZATION_ERROR,
     invalid_sync_peer_configuration: SYNC_PEER_CONFIGURATION_ERROR,
     "HTTP 401":
       "An administrator login is required. For an isolated anonymous lab, enable FRACTO_ADMIN_SYNC_LAB_BYPASS with the exact UI origin on that server.",
@@ -106,6 +109,7 @@ export const DATABASE_SYNC_TEXT = {
   partial:
     "Synchronization did not complete on both servers. One server may already contain the merge. Preview again and retry to bring them together.",
   errors: {
+    sync_peer_unauthorized: SYNC_PEER_AUTHORIZATION_ERROR,
     invalid_sync_peer_configuration: SYNC_PEER_CONFIGURATION_ERROR,
     "HTTP 401":
       "An administrator login is required. For an isolated anonymous lab, enable FRACTO_ADMIN_SYNC_LAB_BYPASS with the exact UI origin on that server.",

@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import { transformSync } from "esbuild";
 
-function harness(backend, stored = null, kind = "database") {
+function harness(backend, stored = null, kind = "database", catalogs = null) {
   const source = readFileSync(
     new URL("../src/pages/admin/AdminDatabaseSync.jsx", import.meta.url),
     "utf8",
@@ -39,14 +39,14 @@ function harness(backend, stored = null, kind = "database") {
       },
       PropTypes: new Proxy({}, { get: () => prop }),
       AdminBackend: backend,
-      text: {
+      text: catalogs?.database || {
         errors: {
           invalid_sync_peer_configuration: "Use a JSON peer map, not true",
           sync_job_not_found: "Run a fresh preview",
           default: "sync error",
         },
       },
-      MESH_SYNC_TEXT: {
+      MESH_SYNC_TEXT: catalogs?.meshes || {
         errors: {
           invalid_sync_peer_configuration: "Use a JSON peer map, not true",
           sync_job_not_found: "Run a fresh preview",
@@ -66,6 +66,38 @@ function harness(backend, stored = null, kind = "database") {
   return { component, saved };
 }
 const tick = () => new Promise((resolve) => setImmediate(resolve));
+
+test("rejected sync peer credentials use the real actionable text in both panels", async () => {
+  const source = readFileSync(
+    new URL("../src/text/AdminText.jsx", import.meta.url),
+    "utf8",
+  ).replace(/^export /gm, "");
+  const catalogs = runInNewContext(
+    source + ";({database:DATABASE_SYNC_TEXT,meshes:MESH_SYNC_TEXT})",
+  );
+  for (const kind of ["database", "meshes"]) {
+    const prefix = kind === "meshes" ? "mesh_sync" : "database_sync";
+    const h = harness(
+      {
+        [`${prefix}_peers`]: async () => {
+          throw Error("HTTP 403: sync_peer_unauthorized");
+        },
+      },
+      null,
+      kind,
+      catalogs,
+    );
+    h.component.componentDidMount();
+    await tick();
+    assert.equal(
+      h.component.state.error,
+      catalogs[kind].errors.sync_peer_unauthorized,
+    );
+    assert.match(h.component.state.error, /FRACTO_DATABASE_SYNC_PEERS/);
+    assert.match(h.component.state.error, /recreate/);
+    h.component.componentWillUnmount();
+  }
+});
 
 test("a remembered job lost after restart is cleared and requests a fresh preview in both panels", async () => {
   for (const kind of ["database", "meshes"]) {
