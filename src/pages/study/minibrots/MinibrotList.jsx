@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
+import styled from "styled-components";
 
 import CoolTable from "../../../utils/ui/CoolTable.jsx";
 import { render_magnitude, render_pattern_block } from "../StudyUtils.jsx";
@@ -44,12 +45,55 @@ const TABLE_COLUMNS = [
   },
 ];
 
+const SelectableList = styled.ul`
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0.5rem;
+  list-style: none;
+  font-size: 0.8rem;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    min-width: 0;
+    padding: 0.4rem;
+    border: 0;
+    border-bottom: 1px solid #ddd;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  button[aria-pressed="true"] {
+    background: #e4eef6;
+  }
+  button:focus-visible {
+    outline: 2px solid #286090;
+    outline-offset: -2px;
+  }
+  .minibrot-pattern {
+    flex: 0 0 auto;
+  }
+  .minibrot-magnitude {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+`;
+
 export class MinibrotList extends Component {
   static propTypes = {
     bailiwick_type: PropTypes.string.isRequired,
     height_px: PropTypes.number.isRequired,
     on_select_minibrot: PropTypes.func.isRequired,
     ready: PropTypes.bool.isRequired,
+    selectable_list: PropTypes.bool,
   };
 
   state = {
@@ -102,7 +146,30 @@ export class MinibrotList extends Component {
 
   render() {
     const { minibrot_list, selected_row } = this.state;
-    const { height_px, ready } = this.props;
+    const { height_px, ready, selectable_list } = this.props;
+    if (selectable_list) {
+      return (
+        <SelectableList>
+          {minibrot_list.map((row, index) => (
+            <li key={row.id}>
+              <button
+                type="button"
+                aria-pressed={index === selected_row}
+                onClick={() => this.on_select_row(index)}
+                disabled={!ready}
+              >
+                <span className="minibrot-pattern">
+                  {render_pattern_block(row.pattern)}
+                </span>
+                <span className="minibrot-magnitude">
+                  {render_magnitude(row.magnitude)}
+                </span>
+              </button>
+            </li>
+          ))}
+        </SelectableList>
+      );
+    }
     const table_data = minibrot_list.map((row, index) => {
       return {
         cardinality: [render_pattern_block, row.pattern],

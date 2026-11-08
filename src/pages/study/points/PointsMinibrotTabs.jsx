@@ -77,6 +77,7 @@ export default class PointsMinibrotTabs extends Component {
             this.on_select_minibrot(selected);
         }}
         ready={true}
+        selectable_list={true}
       />
     );
   };

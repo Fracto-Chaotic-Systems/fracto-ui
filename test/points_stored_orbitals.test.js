@@ -294,6 +294,8 @@ test("stored view shows exact progression coordinates and ratios, and only empty
     {
       React,
       styled: { div: () => "div" },
+      render_pattern_block: (period) =>
+        React.createElement("span", { "data-pattern": period }, period),
       POINTS_ORBITAL_TEXT: keys,
       AppText: {
         get: (key) =>
@@ -314,7 +316,36 @@ test("stored view shows exact progression coordinates and ratios, and only empty
     on_reload() {},
   };
   const stored = renderToStaticMarkup(React.createElement(View, props));
-  assert.match(stored, /Orbital #1 period 1 ratios 1/);
+  assert.match(stored, /data-pattern="1"/);
+  assert.match(stored, /aria-pressed="true"/);
+  assert.match(stored, /class="orbital-ratios" title="1\/7"/);
+  const multiple = renderToStaticMarkup(
+    React.createElement(View, {
+      ...props,
+      orbitals: [orbital, {
+        ...orbital,
+        orbital_id: "2",
+        period: 2,
+        points: [
+          {
+            ...orbital.points[0],
+            landing_ratios: [
+              { numerator: "1", denominator: "7" },
+              { numerator: "2", denominator: "7" },
+            ],
+          },
+          {
+            ...orbital.points[0],
+            point_index: 1,
+            landing_ratios: [{ numerator: "4", denominator: "7" }],
+          },
+        ],
+      }],
+    }),
+  );
+  assert.match(multiple, /data-pattern="2"/);
+  assert.match(multiple, /aria-pressed="false"/);
+  assert.match(multiple, /title="1\/7, 2\/7; 4\/7">1\/7, 2\/7; 4\/7<\/span>/);
   assert.match(stored, /0\.1234567890123456789012345/);
   assert.match(stored, /1\/7/);
   assert.doesNotMatch(stored, /<a/);

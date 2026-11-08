@@ -3,7 +3,9 @@
 This directory contains the active bailiwick list tabs and retained components
 for rendering orbit samples. `../StudyPoints.jsx` renders its title and three
 panes separated by two persistent splitters. The left pane has three equal
-sections; its middle section mounts `PointsMinibrotTabs.jsx` and its lower section
+sections; its top section renders the selected object's saved display focal point
+and scope through `PointsSelectedPreview.jsx`, fitting a square image within the
+available width and height. Its middle section mounts `PointsMinibrotTabs.jsx` and its lower section
 mounts `PointsStoredOrbitals.jsx`. The page does not mount a navigator or the
 retained chart panels, or start their legacy calculations and survey polling.
 Shared rendering, backend, SDK, settings, and text code remains
@@ -15,6 +17,9 @@ available to other features.
   to “free”. An explicit dispatcher mounts `../minibrots/MinibrotList.jsx` with
   `BAILIWICK_TYPE_FREEFORM`, `BAILIWICK_TYPE_INLINE`, or `BAILIWICK_TYPE_NODES`.
   Each list is keyed by type so switching tabs loads the correct filtered data.
+  Lists use full-width selectable rows with pattern blocks and magnitudes,
+  matching the lower orbital list's spacing, separators, selection color, and
+  keyboard focus outline.
   It retains the shared list's existing row-selection persistence and notifies
   the page of selection. Switching tabs clears that selection and invalidates
   callbacks from earlier lists. `CoolTabs`
@@ -28,8 +33,12 @@ available to other features.
   result and reloads committed data; navigating away does not cancel server work.
   Read errors offer reload rather than falsely claiming that nothing was calculated.
 - `PointsStoredOrbitalsView.jsx` renders the lower section's status, calculation
-  link, and expandable progression lists with ordered coordinates and Julia
-  landing ratios. While calculating, a full-width native progress bar describes
+  link, and selectable orbital rows. Each row shows the period pattern block
+  followed by Julia landing ratios: semicolons separate points and commas
+  separate ratios at one point. Ratio text truncates with an ellipsis and its
+  tooltip contains the complete list. The first orbital is selected initially;
+  selecting another row shows its ordered coordinates and landing ratios below.
+  While calculating, a full-width native progress bar describes
   the current survey, refinement, save, or landing-ray search. Queued/preparing
   work is indeterminate; known counters show stage percentages, and ray progress
   includes completed orbitals and current angle families. Full values wrap inside

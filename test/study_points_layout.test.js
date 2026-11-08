@@ -23,6 +23,41 @@ const definitions = vm.runInNewContext(
 const vertical_key = "study/points/vertical_splitter_pos";
 const horizontal_key = "study/points/horizontal_splitter_pos";
 
+test("selected preview uses saved display settings and fits the available panel", () => {
+  const Preview = vm.runInNewContext(
+    transformSync(
+      source("../src/pages/study/points/PointsSelectedPreview.jsx").replace(
+        "default function", "function",
+      ),
+      { loader: "jsx" },
+    ).code + ";PointsSelectedPreview",
+    {
+      React: { createElement: (type, props, ...children) => ({ type, props, children }) },
+      FractoRasterImage: "raster",
+    },
+  );
+  const settings = { focal_point: { x: -0.75, y: 0.1 }, scope: 0.02 };
+  const props = {
+    selected_minibrot: {
+      id: 55,
+      core_point: '{"x":0,"y":0}',
+      display_settings: JSON.stringify(settings),
+    },
+    width_px: 297,
+    height_px: 200,
+  };
+  const image = Preview(props).children[0];
+  assert.equal(image.type, "raster");
+  assert.equal(image.props.width_px, 200);
+  assert.equal(image.props.focal_point.x, -0.75);
+  assert.equal(image.props.focal_point.y, 0.1);
+  assert.equal(image.props.scope, 0.02);
+  assert.equal(Preview({ ...props, selected_minibrot: null }), null);
+  assert.equal(Preview({ ...props, selected_minibrot: { display_settings: "invalid" } }), null);
+  assert.equal(Preview({ ...props, width_px: 0 }), null);
+  assert.equal(Preview({ ...props, selected_minibrot: { id: 56, display_settings: settings } }).children[0].props.scope, 0.02);
+});
+
 test("orbital points splitters nest correctly and persist independent offsets across reloads", () => {
   const storage = new Map();
   let id = 0;
@@ -78,6 +113,7 @@ test("orbital points splitters nest correctly and persist independent offsets ac
       CoolSplitter: "splitter",
       PointsMinibrotTabs: "minibrot-tabs",
       PointsStoredOrbitals: "stored-orbitals",
+      PointsSelectedPreview: "selected-preview",
       SPLITTER_TYPE_VERTICAL: "vertical",
       SPLITTER_TYPE_HORIZONTAL: "horizontal",
       ResizeObserver: class {
@@ -107,31 +143,44 @@ test("orbital points splitters nest correctly and persist independent offsets ac
   const left_sections = page.render().children[1].children[0].children;
   assert.equal(left_sections.length, 3);
   assert.equal(left_sections[1].children[0].type, "minibrot-tabs");
-  assert.equal(left_sections[0].children.length, 0);
+  assert.equal(left_sections[0].children[0].type, "selected-preview");
+  assert.equal(left_sections[0].children[0].props.width_px, 297);
+  assert.equal(left_sections[0].children[0].props.height_px, 300);
   assert.equal(left_sections[2].children[0].type, "stored-orbitals");
   const selected = { id: 55, core_point: '{"x":0,"y":0}' };
   left_sections[1].children[0].props.on_select_minibrot(selected);
+  assert.equal(
+    page.render().children[1].children[0].children[0].children[0].props
+      .selected_minibrot,
+    selected,
+  );
   assert.equal(
     page.render().children[1].children[0].children[2].children[0].props
       .selected_minibrot,
     selected,
   );
   let [vertical, horizontal] = splitters(page);
-  assert.equal(vertical.props.position, 500);
+  assert.equal(vertical.props.position, 300);
+  assert.equal(vertical.props.min_position, 100);
+  assert.equal(vertical.props.max_position, 300);
   assert.equal(horizontal.props.position, 500);
   assert.equal(vertical.props.container_bounds.height, 900);
-  assert.equal(horizontal.props.container_bounds.left, 503);
-  assert.equal(horizontal.props.container_bounds.width, 897);
+  assert.equal(horizontal.props.container_bounds.left, 303);
+  assert.equal(horizontal.props.container_bounds.width, 1097);
   vertical.props.on_change(650);
   horizontal.props.on_change(350);
-  assert.equal(storage.get(vertical_key), "650");
+  assert.equal(storage.get(vertical_key), "300");
+  vertical.props.on_change(50);
+  assert.equal(storage.get(vertical_key), "100");
+  assert.equal(splitters(page)[0].props.position, 100);
+  vertical.props.on_change(250);
   assert.equal(storage.get(horizontal_key), "350");
-  width = 300;
+  width = 200;
   window_handlers.get("resize")();
   [vertical, horizontal] = splitters(page);
-  assert.equal(vertical.props.position, 297);
+  assert.equal(vertical.props.position, 197);
   assert.equal(horizontal.props.container_bounds.width, 0);
-  assert.equal(storage.get(vertical_key), "650");
+  assert.equal(storage.get(vertical_key), "250");
   page.componentWillUnmount();
   assert.equal(observer_disconnected, true);
   assert.equal(window_handlers.size, 0);
@@ -140,8 +189,8 @@ test("orbital points splitters nest correctly and persist independent offsets ac
   width = 1400;
   const restored = mount();
   [vertical, horizontal] = splitters(restored);
-  assert.equal(vertical.props.position, 650);
+  assert.equal(vertical.props.position, 250);
   assert.equal(horizontal.props.position, 350);
-  assert.equal(horizontal.props.container_bounds.left, 653);
+  assert.equal(horizontal.props.container_bounds.left, 253);
   restored.componentWillUnmount();
 });

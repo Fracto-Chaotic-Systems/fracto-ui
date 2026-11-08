@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import AppText from "../../../AppText.jsx";
 import { POINTS_ORBITAL_TEXT } from "../../../text/StudyText.jsx";
+import { render_pattern_block } from "../StudyUtils.jsx";
 
 const Panel = styled.div`
   padding: 0.5rem;
@@ -16,12 +17,42 @@ const Panel = styled.div`
     accent-color: #286090;
     margin: 0.5rem 0;
   }
-  details {
-    padding: 0.4rem 0;
-    border-top: 1px solid #ddd;
+  min-width: 0;
+  .orbital-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
   }
-  summary {
+  .orbital-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    min-width: 0;
+    padding: 0.4rem;
+    border: 0;
+    border-bottom: 1px solid #ddd;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
     cursor: pointer;
+  }
+  .orbital-row[aria-pressed="true"] {
+    background: #e4eef6;
+  }
+  .orbital-row:focus-visible {
+    outline: 2px solid #286090;
+    outline-offset: -2px;
+  }
+  .orbital-pattern {
+    flex: 0 0 auto;
+  }
+  .orbital-ratios {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   table {
     width: 100%;
@@ -130,6 +161,9 @@ export default function PointsStoredOrbitalsView({
   on_cancel,
   on_reload,
 }) {
+  const [selected_id, select_orbital] = React.useState(null);
+  const selected_orbital =
+    orbitals.find((orbital) => orbital.orbital_id === selected_id) || orbitals[0];
   const metric = calculation_progress(progress || {});
   const determinate = Number.isFinite(metric.total) && metric.total > 0;
   const value = Math.min(
@@ -192,30 +226,49 @@ export default function PointsStoredOrbitalsView({
             <p>{action(stale ? "recalculate" : "calculate", on_calculate)}</p>
           </>
         )}
-      {orbitals.map((orbital) => (
-        <details key={orbital.orbital_id}>
-          <summary>
-            {text("summary")
-              .replace("{id}", orbital.orbital_id)
-              .replace("{period}", orbital.period)
-              .replace(
-                "{ratios}",
-                orbital.points.reduce(
-                  (n, point) => n + point.landing_ratios.length,
-                  0,
-                ),
-              )}
-          </summary>
-          {orbital.discovery_metadata?.confidence != null && (
+      <ul className="orbital-list">
+        {orbitals.map((orbital) => {
+          const ratios = orbital.points
+            .map(
+              (point) =>
+                point.landing_ratios
+                  .map((ratio) => `${ratio.numerator}/${ratio.denominator}`)
+                  .join(", ") || "—",
+            )
+            .join("; ");
+          return (
+            <li key={orbital.orbital_id}>
+              <button
+                type="button"
+                className="orbital-row"
+                aria-pressed={orbital === selected_orbital}
+                onClick={() => select_orbital(orbital.orbital_id)}
+              >
+                <span className="orbital-pattern">
+                  {render_pattern_block(orbital.period)}
+                </span>
+                <span className="orbital-ratios" title={ratios}>
+                  {ratios}
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      {selected_orbital && (
+        <div key={selected_orbital.orbital_id}>
+          {selected_orbital.discovery_metadata?.confidence != null && (
             <p>
               {text("confirmation")
                 .replace(
                   "{confidence}",
-                  (100 * orbital.discovery_metadata.confidence).toFixed(2),
+                  (100 * selected_orbital.discovery_metadata.confidence).toFixed(
+                    2,
+                  ),
                 )
                 .replace(
                   "{discoveries}",
-                  orbital.discovery_metadata.discovery_count,
+                  selected_orbital.discovery_metadata.discovery_count,
                 )}
             </p>
           )}
@@ -229,7 +282,7 @@ export default function PointsStoredOrbitalsView({
               </tr>
             </thead>
             <tbody>
-              {orbital.points.map((point) => (
+              {selected_orbital.points.map((point) => (
                 <tr key={point.point_index}>
                   <td>{point.point_index + 1}</td>
                   <td>
@@ -251,8 +304,8 @@ export default function PointsStoredOrbitalsView({
               ))}
             </tbody>
           </table>
-        </details>
-      ))}
+        </div>
+      )}
     </Panel>
   );
 }

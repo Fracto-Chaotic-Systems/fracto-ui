@@ -17,6 +17,7 @@ import CoolSplitter, {
 import { KEY_STUDY_POINTS } from "../../text/StudyText.jsx";
 import PointsMinibrotTabs from "./points/PointsMinibrotTabs.jsx";
 import PointsStoredOrbitals from "./points/PointsStoredOrbitals.jsx";
+import PointsSelectedPreview from "./points/PointsSelectedPreview.jsx";
 
 const Layout = styled.div`
   position: relative;
@@ -50,6 +51,8 @@ const SPLITTER_KEYS = [
   KEY_STUDY_POINTS_VERTICAL_SPLITTER_POS,
   KEY_STUDY_POINTS_HORIZONTAL_SPLITTER_POS,
 ];
+const VERTICAL_MIN_PX = 100;
+const VERTICAL_MAX_PX = 300;
 
 export class StudyPoints extends Component {
   container_ref = React.createRef();
@@ -107,7 +110,10 @@ export class StudyPoints extends Component {
 
   move_vertical = (position) => {
     AppSettings.on_settings_changed({
-      [KEY_STUDY_POINTS_VERTICAL_SPLITTER_POS]: position,
+      [KEY_STUDY_POINTS_VERTICAL_SPLITTER_POS]: Math.min(
+        VERTICAL_MAX_PX,
+        Math.max(VERTICAL_MIN_PX, position),
+      ),
     });
   };
 
@@ -121,7 +127,9 @@ export class StudyPoints extends Component {
     const { width, height, vertical, horizontal } = this.state;
     const half_bar = SPLITTER_WIDTH_PX / 2;
     // Clamp only the displayed geometry; resizing must not overwrite saved offsets.
-    const x = Math.max(0, Math.min(vertical, width - half_bar));
+    const vertical_max = Math.max(0, Math.min(VERTICAL_MAX_PX, width - half_bar));
+    const vertical_min = Math.min(VERTICAL_MIN_PX, vertical_max);
+    const x = Math.max(vertical_min, Math.min(vertical, vertical_max));
     const y = Math.max(0, Math.min(horizontal, height - half_bar));
     const right_left = Math.min(width, x + half_bar);
     const right_width = width - right_left;
@@ -140,7 +148,13 @@ export class StudyPoints extends Component {
               height,
             }}
           >
-            <div />
+            <div>
+              <PointsSelectedPreview
+                selected_minibrot={this.state.selected_minibrot}
+                width_px={Math.max(0, x - half_bar)}
+                height_px={height / 3}
+              />
+            </div>
             <div>
               <PointsMinibrotTabs
                 on_select_minibrot={this.on_select_minibrot}
@@ -176,8 +190,8 @@ export class StudyPoints extends Component {
                 bar_width_px={SPLITTER_WIDTH_PX}
                 container_bounds={{ left: 0, top: 0, width, height }}
                 position={x}
-                min_position={0}
-                max_position={Math.max(0, width - half_bar)}
+                min_position={vertical_min}
+                max_position={vertical_max}
                 on_change={this.move_vertical}
               />
               <CoolSplitter
