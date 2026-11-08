@@ -42,18 +42,21 @@ function harness(backend, stored = null, kind = "database") {
       text: {
         errors: {
           invalid_sync_peer_configuration: "Use a JSON peer map, not true",
+          sync_job_not_found: "Run a fresh preview",
           default: "sync error",
         },
       },
       MESH_SYNC_TEXT: {
         errors: {
           invalid_sync_peer_configuration: "Use a JSON peer map, not true",
+          sync_job_not_found: "Run a fresh preview",
           default: "mesh sync error",
         },
       },
       sessionStorage: {
         getItem: (k) => saved.get(k),
         setItem: (k, v) => saved.set(k, v),
+        removeItem: (k) => saved.delete(k),
       },
       setInterval: () => 1,
       clearInterval: () => {},
@@ -63,6 +66,61 @@ function harness(backend, stored = null, kind = "database") {
   return { component, saved };
 }
 const tick = () => new Promise((resolve) => setImmediate(resolve));
+
+test("a remembered job lost after restart is cleared and requests a fresh preview in both panels", async () => {
+  for (const kind of ["database", "meshes"]) {
+    const prefix = kind === "meshes" ? "mesh_sync" : "database_sync";
+    let polls = 0;
+    const h = harness(
+      {
+        [`${prefix}_peers`]: async () => ({ peers: ["http://peer"] }),
+        [`${prefix}_job`]: async () => {
+          polls++;
+          throw Error("HTTP 404: sync_job_not_found");
+        },
+        [`${prefix}_preview`]: async () => ({
+          id: "fresh",
+          status: "checking",
+        }),
+      },
+      "old",
+      kind,
+    );
+    h.component.componentDidMount();
+    await tick();
+    assert.equal(h.component.state.error, "Run a fresh preview");
+    assert.equal(h.component.state.job, null);
+    assert.equal(h.component.job_id, null);
+    assert.equal(h.saved.size, 0);
+    await h.component.refresh();
+    assert.equal(polls, 1);
+    await h.component.preview();
+    assert.equal(h.component.job_id, "fresh");
+    assert.equal(h.component.state.error, null);
+    h.component.componentWillUnmount();
+  }
+});
+
+test("a temporary status request failure retains the job so polling can recover", async () => {
+  let polls = 0;
+  const h = harness(
+    {
+      database_sync_peers: async () => ({ peers: ["http://peer"] }),
+      database_sync_job: async () => {
+        if (++polls === 1) throw Error("HTTP 502");
+        return { id: "active", status: "ready", conflicts: [] };
+      },
+    },
+    "active",
+  );
+  h.component.componentDidMount();
+  await tick();
+  assert.equal(h.component.job_id, "active");
+  await h.component.refresh();
+  assert.equal(h.component.state.job.status, "ready");
+  assert.equal(h.component.state.error, null);
+  h.component.componentWillUnmount();
+});
 
 test("invalid boolean configuration shows an actionable error in both sync panels", async () => {
   for (const kind of ["database", "meshes"]) {

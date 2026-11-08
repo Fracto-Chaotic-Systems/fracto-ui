@@ -1,6 +1,8 @@
 const ADMIN_FOLDER = "admin";
 const SYNC_PEER_CONFIGURATION_ERROR =
   "FRACTO_DATABASE_SYNC_PEERS must be a JSON object mapping server URLs to endpoint and token entries. Setting it to true does not configure a peer. Correct the setting and recreate the server container to load the new environment.";
+const SYNC_JOB_MISSING_ERROR =
+  "This preview is no longer available, usually because the admin service restarted or the preview expired. Run a fresh preview before syncing.";
 export const MESH_SYNC_TEXT = {
   title: "Mesh file synchronization",
   conflict_preview: "Showing conflict examples:",
@@ -64,6 +66,7 @@ export const MESH_SYNC_TEXT = {
     sync_peer_not_configured:
       "This server is not configured as a trusted sync peer.",
     sync_plan_expired: "The mesh preview expired. Run a fresh preview.",
+    sync_job_not_found: SYNC_JOB_MISSING_ERROR,
     default:
       "Unable to share meshes. Check peer connectivity, mesh storage, and the sync configuration, then preview again.",
   },
@@ -112,6 +115,12 @@ export const DATABASE_SYNC_TEXT = {
       "The migration history is missing. Install and migrate both databases first.",
     sync_snapshot_changed:
       "Data changed after the preview. Run a fresh preview before syncing.",
+    prepared_data_mismatch:
+      "The prepared database did not exactly preserve the snapshot. Synchronization stopped before committing; check the database sync code on both servers.",
+    sync_json_precision_unsupported:
+      "A JSON number could not be transferred exactly. Synchronization stopped before committing; update the database sync code on both servers.",
+    sync_verification_failed:
+      "The servers did not return matching data after committing. Preview again to inspect and reconcile the remaining differences.",
     database_sync_busy:
       "Another sync is holding this database. Wait for it to finish, then preview again.",
     sync_snapshot_limit:
@@ -121,6 +130,7 @@ export const DATABASE_SYNC_TEXT = {
     foreign_key_conflict:
       "The selected rows would leave broken references. Resolve the conflicting keys before trying again.",
     sync_plan_expired: "This preview expired. Run a fresh preview.",
+    sync_job_not_found: SYNC_JOB_MISSING_ERROR,
     sync_plan_limit:
       "Existing previews must expire before another can be created.",
     sync_requires_primary_keys:

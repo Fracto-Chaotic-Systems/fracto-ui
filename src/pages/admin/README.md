@@ -11,8 +11,12 @@ an administrator-authorized two-way database merge, displays row counts and
 conflicting keys/columns, requires a server preference when conflicts exist,
 and polls progress through final equality verification. Job IDs are remembered
 per peer in session storage. Only configured trusted peers can synchronize;
-public health/address-book entries grant no database access. Installed tables
-and migration checksums must match. `tiles` and `automation` remain local.
+public health/address-book entries grant no database access.
+If the admin service restarts or evicts a remembered job, the panel clears its
+stale job ID and asks for a fresh preview instead of reporting a connectivity
+failure. It does not automatically apply or select a conflict preference.
+Installed tables and migration fingerprints must match. `tiles` and `automation`
+remain local.
 See the admin service's `DATABASE_SYNC.md` for configuration and recovery.
 
 Status and server-awareness views include the AI service. Commits includes its

@@ -94,13 +94,21 @@ export default class AdminDatabaseSync extends Component {
       if (this.active && this.job_id === id)
         this.setState({ job, error: null });
     } catch (error) {
-      if (this.active && this.job_id === id)
+      if (this.active && this.job_id === id) {
+        const missing = String(error).includes("sync_job_not_found");
+        if (missing) {
+          this.job_id = null;
+          try {
+            sessionStorage.removeItem(this.storage_key);
+          } catch {
+            /* Storage may be unavailable. */
+          }
+        }
         this.setState({
           error: error_message(error, this.copy),
-          ...(String(error).includes("404")
-            ? { job: { status: "failed" } }
-            : {}),
+          ...(missing ? { job: null, preferred: "" } : {}),
         });
+      }
     } finally {
       this.polling = false;
     }
