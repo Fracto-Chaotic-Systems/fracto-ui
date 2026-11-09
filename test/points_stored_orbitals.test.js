@@ -267,7 +267,7 @@ test("orbital selection defaults to the first result, propagates changes, and cl
   h.panel.componentWillUnmount();
 });
 
-test("stored view shows exact progression coordinates and ratios, and only empty state offers calculation", () => {
+test("stored view shows orbital summaries without duplicate point details, and only empty state offers calculation", () => {
   const text_keys = [
     "title",
     "select",
@@ -368,7 +368,7 @@ test("stored view shows exact progression coordinates and ratios, and only empty
   assert.match(multiple, /data-pattern="2"/);
   assert.match(multiple, /aria-pressed="false"/);
   assert.match(multiple, /title="1\/7, 2\/7; 4\/7">1\/7, 2\/7; 4\/7<\/span>/);
-  assert.match(stored, /0\.1234567890123456789012345/);
+  assert.doesNotMatch(stored, /0\.1234567890123456789012345|<table/);
   assert.match(stored, /1\/7/);
   assert.doesNotMatch(stored, /<a/);
   assert.match(
@@ -400,7 +400,7 @@ test("stored view shows exact progression coordinates and ratios, and only empty
       ],
     }),
   );
-  assert.match(confirmed, /Confidence 100.00% discoveries 49/);
+  assert.doesNotMatch(confirmed, /Confidence|discoveries/);
   const progress = renderToStaticMarkup(
     React.createElement(View, {
       ...props,

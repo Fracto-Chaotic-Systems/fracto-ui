@@ -29,7 +29,7 @@ const Panel = styled.div`
     gap: 0.5rem;
     width: 100%;
     min-width: 0;
-    padding: 0.4rem;
+    padding: 0.2rem;
     border: 0;
     border-bottom: 1px solid #ddd;
     background: transparent;
@@ -53,22 +53,6 @@ const Panel = styled.div`
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 0.5rem;
-  }
-  th,
-  td {
-    text-align: left;
-    vertical-align: top;
-    padding: 0.25rem;
-    border-bottom: 1px solid #eee;
-  }
-  code {
-    overflow-wrap: anywhere;
-    white-space: normal;
   }
   a {
     color: #286090;
@@ -245,7 +229,7 @@ export default function PointsStoredOrbitalsView({
                 onClick={() => on_select_orbital?.(orbital)}
               >
                 <span className="orbital-pattern">
-                  {render_pattern_block(orbital.period)}
+                  {render_pattern_block(orbital.period, 16, true)}
                 </span>
                 <span className="orbital-ratios" title={ratios}>
                   {ratios}
@@ -255,57 +239,6 @@ export default function PointsStoredOrbitalsView({
           );
         })}
       </ul>
-      {selected_orbital && (
-        <div key={selected_orbital.orbital_id}>
-          {selected_orbital.discovery_metadata?.confidence != null && (
-            <p>
-              {text("confirmation")
-                .replace(
-                  "{confidence}",
-                  (100 * selected_orbital.discovery_metadata.confidence).toFixed(
-                    2,
-                  ),
-                )
-                .replace(
-                  "{discoveries}",
-                  selected_orbital.discovery_metadata.discovery_count,
-                )}
-            </p>
-          )}
-          <table>
-            <thead>
-              <tr>
-                <th>{text("point")}</th>
-                <th>{text("real")}</th>
-                <th>{text("imaginary")}</th>
-                <th>{text("ratios")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {selected_orbital.points.map((point) => (
-                <tr key={point.point_index}>
-                  <td>{point.point_index + 1}</td>
-                  <td>
-                    <code>{point.point.re}</code>
-                  </td>
-                  <td>
-                    <code>{point.point.im}</code>
-                  </td>
-                  <td>
-                    <code>
-                      {point.landing_ratios
-                        .map(
-                          (ratio) => `${ratio.numerator}/${ratio.denominator}`,
-                        )
-                        .join(", ") || "—"}
-                    </code>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
     </Panel>
   );
 }

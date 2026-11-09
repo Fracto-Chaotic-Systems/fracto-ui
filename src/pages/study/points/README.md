@@ -24,10 +24,32 @@ fixed Julia column and 8px gap. It uses the selected core and saved display
 scope. Narrow panes scroll horizontally to preserve both views and the
 circuitry controls' existing minimum width.
 The lower-left orbital selection is passed to `CircuitryChart` explicitly.
+The lower-right pane lists that orbital's stored points, with comma-separated
+landing ratios in a centered column followed by separate left-aligned real and
+imaginary coordinate columns at 32 decimal places.
+`PointsOrbitalPointFormat.js` formats the decimal strings without a native-number
+conversion. `CircuitryChart` publishes the active stored point index through
+`PointsOrbitalPanel` to the page; rotation preserves original point indices.
+The lower-right table follows the animation row and scrolls the highlight into
+view, including reverse playback and the closing sample. The circuitry control
+does not repeat the point list. Changing selections
+clears the old highlight.
+While animation runs, Julia ray paths and ratio boxes for inactive stored point
+indices are hidden. Tracking changes crossfade outgoing and incoming overlays
+over 120 ms using a smooth easing curve. Intermediate opacity is retained if
+another point is tracked before a fade completes. Pausing or stopping cancels
+the fade and repaints all overlays at their original
+opacity from the saved Julia image, without reloading the image or tracing rays.
+The tracked point's square grows from 6×6 to 10×10 pixels during animation;
+all squares return to 6×6 when animation stops.
 Its curve comes from the selected stored points through
 `GET /orbital-data/:id/circuitry`, rather than detecting another orbit at the
 same focal point. Selection changes clear the old curve and invalidate pending
-responses; an empty selection stays empty. Both radial sweep and Hermite modes
+responses; an empty selection stays empty. During animation, the current curve
+and timer continue while the new selection loads. Matching periods retain the
+live interval position; different periods start at the first point. Direction
+and timer cadence persist, and pausing while loading prevents any automatic
+restart. Both radial sweep and Hermite modes
 use the selected record, and one-point views center on that orbital point.
 The Julia canvas keeps loading progress visible and hides the sample-count
 completion message once rendering finishes.
@@ -138,11 +160,13 @@ Run the focused suite with `npm run test:orbital-rays`; set
   result and reloads committed data; navigating away does not cancel server work.
   Read errors offer reload rather than falsely claiming that nothing was calculated.
 - `PointsStoredOrbitalsView.jsx` renders the lower section's status, calculation
-  link, and selectable orbital rows. Each row shows the period pattern block
+  link, and selectable orbital rows. Each row shows a smaller circular period
+  badge with the pattern's existing foreground and background colors
   followed by Julia landing ratios: semicolons separate points and commas
   separate ratios at one point. Ratio text truncates with an ellipsis and its
   tooltip contains the complete list. The first orbital is selected initially;
-  selecting another row shows its ordered coordinates and landing ratios below.
+  selecting another row updates the Julia view, circuitry, and lower-right point
+  table. Point details, confidence, and discovery counts are not repeated here.
   While calculating, a full-width native progress bar describes
   the current survey, refinement, save, or landing-ray search. Queued/preparing
   work is indeterminate; known counters show stage percentages, and ray progress

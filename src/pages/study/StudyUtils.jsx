@@ -130,7 +130,7 @@ export const render_magnitude = (magnitude, is_pico = false) => {
   );
 };
 
-export const render_pattern_block = (pattern, font_size_px = 18) => {
+export const render_pattern_block = (pattern, font_size_px = 18, circular = false) => {
   const pattern_color = FractoUIColors.pattern_color(pattern);
   // console.log('pattern_color', pattern_color)
   const padding_top = Math.min(2 + font_size_px / 30, 4);
@@ -143,6 +143,20 @@ export const render_pattern_block = (pattern, font_size_px = 18) => {
     fontSize: `${font_size_px}px`,
     lineHeight: `${font_size_px}px`,
   };
+  if (circular) {
+    const width = 20 + Math.max(0, String(pattern).length - 1) * 8;
+    Object.assign(block_style, {
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      width: `${width}px`,
+      height: "18px",
+      lineHeight: "24px",
+      padding: 0,
+      borderRadius: "50%",
+      boxSizing: "border-box",
+    });
+  }
   return (
     <styles.PatternBlock style={block_style}>{pattern}</styles.PatternBlock>
   );

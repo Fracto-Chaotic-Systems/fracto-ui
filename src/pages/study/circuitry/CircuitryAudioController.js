@@ -8,6 +8,21 @@ const DEFAULT_FREQUENCY_HZ = 440;
 const DEFAULT_DURATION_SECONDS = 10;
 // Keep normalized waveforms at a comfortable playback level (about -16.5 dB).
 export const DEFAULT_PLAYBACK_VOLUME = 0.15;
+export const MIN_PLAYBACK_VOLUME = 0.05;
+export const MAX_PLAYBACK_VOLUME = 0.2;
+const VOLUME_STORAGE_KEY = "fracto.circuitry.playback_volume";
+const clamp_volume = (volume) =>
+  Math.min(MAX_PLAYBACK_VOLUME, Math.max(MIN_PLAYBACK_VOLUME, volume));
+
+export const load_playback_volume = () => {
+  try {
+    const saved = window.localStorage.getItem(VOLUME_STORAGE_KEY);
+    const volume = saved === null || saved.trim() === "" ? NaN : Number(saved);
+    return Number.isFinite(volume) ? clamp_volume(volume) : DEFAULT_PLAYBACK_VOLUME;
+  } catch {
+    return DEFAULT_PLAYBACK_VOLUME;
+  }
+};
 /** Replace the active source immediately before starting playback. */
 export const AUDIO_TRANSITION_REPLACE = "replace";
 /** Cross-fade the active source into the replacement source. */
@@ -109,7 +124,7 @@ export class CircuitryAudioController {
   audio_source = null;
   audio_gain = null;
   master_gain = null;
-  volume = DEFAULT_PLAYBACK_VOLUME;
+  volume = load_playback_volume();
   // Invalidates play requests that are still awaiting AudioContext.resume().
   play_generation = 0;
   disposed = false;
@@ -131,7 +146,12 @@ export class CircuitryAudioController {
     if (!Number.isFinite(volume)) {
       return;
     }
-    this.volume = Math.min(1, Math.max(0, volume));
+    this.volume = clamp_volume(volume);
+    try {
+      window.localStorage.setItem(VOLUME_STORAGE_KEY, String(this.volume));
+    } catch {
+      // Playback still works when browser storage is unavailable.
+    }
     if (this.master_gain && this.audio_context) {
       const now = this.audio_context.currentTime;
       const gain = this.master_gain.gain;

@@ -13,6 +13,9 @@ export default function PointsOrbitalPanel({
   selected_minibrot,
   selected_orbital,
   width_px,
+  on_active_point_changed,
+  active_point_index,
+  animation_playing,
 }) {
   let focal_point;
   try {
@@ -50,6 +53,8 @@ export default function PointsOrbitalPanel({
         <PointsJuliaSet
           selected_minibrot={selected_minibrot}
           selected_orbital={selected_orbital}
+          active_point_index={active_point_index}
+          animation_playing={animation_playing}
         />
       </div>
       <div
@@ -67,6 +72,7 @@ export default function PointsOrbitalPanel({
           scope={scope}
           width_px={circuitry_width}
           height_px={HEIGHT_PX}
+          on_active_point_changed={on_active_point_changed}
         />
       </div>
     </div>

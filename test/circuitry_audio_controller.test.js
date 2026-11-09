@@ -5,6 +5,7 @@ import {
   AUDIO_TRANSITIONS,
   AUDIO_TRANSITION_CROSSFADE,
   CircuitryAudioController,
+  load_playback_volume,
 } from "../src/pages/study/circuitry/CircuitryAudioController.js";
 
 class FakeAudioParam {
@@ -152,22 +153,59 @@ test("volume defaults to 15 percent and adjusts active and future playback", asy
     assert.equal(controller.audio_gain.connected_to, master_gain);
     assert.equal(master_gain.connected_to, controller.audio_context.destination);
     const source = controller.audio_source;
-    controller.set_volume(0.4);
-    assert.equal(master_gain.gain.value, 0.4);
+    controller.set_volume(0.12);
+    assert.equal(master_gain.gain.value, 0.12);
     assert.equal(controller.audio_source, source);
     controller.set_volume(0);
-    assert.equal(master_gain.gain.value, 0);
+    assert.equal(master_gain.gain.value, 0.05);
     await controller.play(profile, { transition: AUDIO_TRANSITION_CROSSFADE });
     assert.equal(controller.audio_gain.connected_to, master_gain);
-    assert.equal(master_gain.gain.value, 0);
+    assert.equal(master_gain.gain.value, 0.05);
     controller.set_volume(2);
-    assert.equal(master_gain.gain.value, 1);
+    assert.equal(master_gain.gain.value, 0.2);
     controller.set_volume(-1);
-    assert.equal(master_gain.gain.value, 0);
+    assert.equal(master_gain.gain.value, 0.05);
     controller.set_volume(NaN);
-    assert.equal(master_gain.gain.value, 0);
+    assert.equal(master_gain.gain.value, 0.05);
   } finally {
     controller.dispose();
+    delete globalThis.window;
+  }
+});
+
+test("volume survives controller recreation and safely handles missing or invalid storage", () => {
+  const saved = new Map();
+  globalThis.window = {
+    localStorage: {
+      getItem: (key) => saved.get(key) ?? null,
+      setItem: (key, value) => saved.set(key, value),
+    },
+  };
+  try {
+    assert.equal(load_playback_volume(), 0.15);
+    const controller = new CircuitryAudioController();
+    controller.set_volume(0.09);
+    controller.dispose();
+    const restored = new CircuitryAudioController();
+    assert.equal(restored.volume, 0.09);
+    restored.dispose();
+    const key = [...saved.keys()][0];
+    for (const value of ["", " ", "invalid", "Infinity"]) {
+      saved.set(key, value);
+      assert.equal(load_playback_volume(), 0.15);
+    }
+    saved.set(key, "0.9");
+    assert.equal(load_playback_volume(), 0.2);
+    saved.set(key, "0");
+    assert.equal(load_playback_volume(), 0.05);
+    window.localStorage.getItem = () => { throw new Error("Storage blocked"); };
+    window.localStorage.setItem = () => { throw new Error("Storage blocked"); };
+    assert.equal(load_playback_volume(), 0.15);
+    const blocked = new CircuitryAudioController();
+    blocked.set_volume(0.1);
+    assert.equal(blocked.volume, 0.1);
+    blocked.dispose();
+  } finally {
     delete globalThis.window;
   }
 });

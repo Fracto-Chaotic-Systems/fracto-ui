@@ -19,6 +19,7 @@ import PointsMinibrotTabs from "./points/PointsMinibrotTabs.jsx";
 import PointsStoredOrbitals from "./points/PointsStoredOrbitals.jsx";
 import PointsSelectedPreview from "./points/PointsSelectedPreview.jsx";
 import PointsOrbitalPanel from "./points/PointsOrbitalPanel.jsx";
+import PointsOrbitalPointList from "./points/PointsOrbitalPointList.jsx";
 
 const Layout = styled.div`
   position: relative;
@@ -66,12 +67,22 @@ export class StudyPoints extends Component {
     horizontal: 500,
     selected_minibrot: null,
     selected_orbital: null,
+    active_point_index: -1,
+    animation_playing: false,
   };
 
   on_select_minibrot = (selected_minibrot) =>
-    this.setState({ selected_minibrot, selected_orbital: null });
+    this.setState({ selected_minibrot, selected_orbital: null, active_point_index: -1, animation_playing: false });
 
-  on_select_orbital = (selected_orbital) => this.setState({ selected_orbital });
+  on_select_orbital = (selected_orbital) => this.setState({ selected_orbital, active_point_index: -1 });
+
+  on_active_point_changed = (orbital_id, active_point_index, animation_playing = false) => {
+    if (orbital_id === this.state.selected_orbital?.orbital_id &&
+        (active_point_index !== this.state.active_point_index ||
+         animation_playing !== this.state.animation_playing)) {
+      this.setState({ active_point_index, animation_playing });
+    }
+  };
 
   componentDidMount() {
     this.read_positions();
@@ -183,6 +194,9 @@ export class StudyPoints extends Component {
               selected_minibrot={this.state.selected_minibrot}
               selected_orbital={this.state.selected_orbital}
               width_px={right_width}
+              on_active_point_changed={this.on_active_point_changed}
+              active_point_index={this.state.active_point_index}
+              animation_playing={this.state.animation_playing}
             />
           </Pane>
           <Pane
@@ -192,7 +206,12 @@ export class StudyPoints extends Component {
               width: right_width,
               height: height - bottom_top,
             }}
-          />
+          >
+            <PointsOrbitalPointList
+              selected_orbital={this.state.selected_orbital}
+              active_point_index={this.state.active_point_index}
+            />
+          </Pane>
           {width > 0 && height > 0 && (
             <>
               <CoolSplitter

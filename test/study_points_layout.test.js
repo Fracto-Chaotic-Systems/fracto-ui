@@ -210,6 +210,7 @@ test("orbital points splitters nest correctly and persist independent offsets ac
       PointsStoredOrbitals: "stored-orbitals",
       PointsSelectedPreview: "selected-preview",
       PointsOrbitalPanel: "orbital-panel",
+      PointsOrbitalPointList: "orbital-point-list",
       SPLITTER_TYPE_VERTICAL: "vertical",
       SPLITTER_TYPE_HORIZONTAL: "horizontal",
       ResizeObserver: class {
@@ -256,7 +257,15 @@ test("orbital points splitters nest correctly and persist independent offsets ac
     page.render().children[1].children[1].children[0].props.selected_orbital,
     orbital,
   );
+  julia.props.on_active_point_changed("1", 2);
+  const lower_list = page.render().children[1].children[2].children[0];
+  assert.equal(lower_list.type, "orbital-point-list");
+  assert.equal(lower_list.props.selected_orbital, orbital);
+  assert.equal(lower_list.props.active_point_index, 2);
+  julia.props.on_active_point_changed("previous-orbital", 3);
+  assert.equal(page.state.active_point_index, 2);
   page.on_select_minibrot(selected);
+  assert.equal(page.state.active_point_index, -1);
   assert.equal(page.state.selected_orbital, null);
   assert.equal(
     page.render().children[1].children[0].children[0].children[0].props

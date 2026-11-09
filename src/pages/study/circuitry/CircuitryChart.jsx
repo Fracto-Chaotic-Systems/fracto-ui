@@ -19,12 +19,13 @@ import {
 } from "./CircuitryAudioUtils.js";
 import {
   CircuitryAudioController,
-  DEFAULT_PLAYBACK_VOLUME,
+  load_playback_volume,
+  MIN_PLAYBACK_VOLUME,
+  MAX_PLAYBACK_VOLUME,
   AUDIO_TRANSITION_CROSSFADE,
 } from "./CircuitryAudioController.js";
 import {
   KEY_STUDY_CIRCUITRY_NO_ORBITAL,
-  KEY_STUDY_CIRCUITRY_ORBITAL_COORDINATES,
   KEY_STUDY_CIRCUITRY_ORBITAL_DESCRIPTION,
   KEY_STUDY_CIRCUITRY_ORBITAL_PROGRESS,
   KEY_STUDY_CIRCUITRY_CLOCKWISE,
@@ -34,18 +35,10 @@ import {
   KEY_STUDY_CIRCUITRY_PLAY,
   KEY_STUDY_CIRCUITRY_STOP,
 } from "../../../text/StudyText.jsx";
-import { render_coordinates } from "../../../utils/Dom.jsx";
 import { click_point_chart } from "../../../utils/render/PatternsUtils.jsx";
-import {
-  CELL_TYPE_CALLBACK,
-  TABLE_CAN_SELECT,
-  TABLE_NO_BORDER,
-  TABLE_NO_HEADER,
-} from "../../../utils/ui/styles/CoolTableStyles.jsx";
 import { CoolTransportStyles as transport_styles } from "../../../utils/ui/styles/CoolTransportStyles.jsx";
 import { sound_off_icon, sound_on_icon } from "../../../utils/ui/CoolIcons.jsx";
 import { IMAGE_FRAME_STYLE } from "../../../utils/render/ImageFrameStyle.jsx";
-import CoolTable from "../../../utils/ui/CoolTable.jsx";
 import CoolMediaTransport, {
   TRANSPORT_BEGIN,
   TRANSPORT_END,
@@ -63,20 +56,29 @@ const TRANSPORT_OPERATIONS = [
 ];
 const TRANSPORT_BUTTON_SIZE_PX = 35;
 const PATH_ANIMATION_RATE_FPS = 100; // Former 20 FPS base at the maximum 5× speed.
+const MIN_ANIMATION_SPEED = 0.125;
+const MAX_ANIMATION_SPEED = 1;
+const DEFAULT_ANIMATION_SPEED = 0.625;
+const ANIMATION_SPEED_STORAGE_KEY = "fracto.circuitry.animation_speed";
+const load_animation_speed = () => {
+  try {
+    const saved = window.localStorage.getItem(ANIMATION_SPEED_STORAGE_KEY);
+    const value = saved === null || saved.trim() === "" ? NaN : Number(saved);
+    return Number.isFinite(value)
+      ? Math.min(MAX_ANIMATION_SPEED, Math.max(MIN_ANIMATION_SPEED, value))
+      : DEFAULT_ANIMATION_SPEED;
+  } catch {
+    return DEFAULT_ANIMATION_SPEED;
+  }
+};
 const GOLDEN_RATIO = 1.618;
 const FREQUENCY_PER_CARDINALITY_HZ = 27.5;
-const ORBITAL_POINT_COLUMNS = [
-  {
-    id: "coordinates",
-    label_key: KEY_STUDY_CIRCUITRY_ORBITAL_COORDINATES,
-    type: CELL_TYPE_CALLBACK,
-  },
-];
 
 export class CircuitryChart extends Component {
   static propTypes = {
     focal_point: PropTypes.object,
     selected_orbital: PropTypes.object,
+    on_active_point_changed: PropTypes.func,
     scope: PropTypes.number,
     height_px: PropTypes.number.isRequired,
     width_px: PropTypes.number.isRequired,
@@ -90,9 +92,10 @@ export class CircuitryChart extends Component {
     selected_orbital_row: -1,
     selected_orbital_point: null,
     animation_playing: false,
+    animation_speed: load_animation_speed(),
     animation_timer: null,
     audio_playing: false,
-    audio_volume: DEFAULT_PLAYBACK_VOLUME,
+    audio_volume: load_playback_volume(),
   };
 
   audio_controller = new CircuitryAudioController({
@@ -117,6 +120,19 @@ export class CircuitryChart extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
+    if (prevState.selected_orbital_row !== this.state.selected_orbital_row ||
+        prevState.animation_playing !== this.state.animation_playing ||
+        prevState.circuitry_data !== this.state.circuitry_data) {
+      const row = this.state.selected_orbital_row;
+      const source_row = this.state.circuitry_data?.orbital_point_indices?.[row] ?? row;
+      const point_index = this.props.selected_orbital?.points?.[source_row]?.point_index ?? -1;
+      // A replacement can be loading while the previous curve keeps moving.
+      // Its indices must not highlight points in the newly selected orbital.
+      if (!this.state.circuitry_data?.orbital_id ||
+          this.state.circuitry_data.orbital_id === this.props.selected_orbital?.orbital_id) {
+        this.props.on_active_point_changed?.(this.props.selected_orbital?.orbital_id, point_index, this.state.animation_playing);
+      }
+    }
     const { focal_point } = this.props;
     const previous_focal_point = prevProps.focal_point;
     if (!this.has_focal_point(focal_point)) {
@@ -178,19 +194,38 @@ export class CircuitryChart extends Component {
     this.setState({ audio_volume });
   };
 
+  on_animation_speed_change = (event) => {
+    const value = Number(event.target.value) / 100;
+    if (!Number.isFinite(value)) return;
+    const animation_speed = Math.min(MAX_ANIMATION_SPEED, Math.max(MIN_ANIMATION_SPEED, value));
+    try {
+      window.localStorage.setItem(ANIMATION_SPEED_STORAGE_KEY, String(animation_speed));
+    } catch {
+      // Changing the speed still works when browser storage is unavailable.
+    }
+    this.setState({ animation_speed });
+    if (this.animation_timer_handle) {
+      this.start_animation(this.state.animation_direction, animation_speed);
+    }
+  };
+
   load_circuitry = (focal_point) => {
     const request_generation = ++this.circuitry_request_generation;
     // An explicit selection (including null) opts out of focal-point detection.
     if (this.props.selected_orbital !== undefined) {
-      this.clear_animation_timer();
-      this.setState({
-        circuitry_data: null,
-        error: null,
-        animation_index: 0,
-        selected_orbital_row: -1,
-        selected_orbital_point: null,
-        animation_playing: false,
-      });
+      // Leave the timer and current curve running until their replacement is
+      // ready. An empty selection still releases the animation immediately.
+      if (!this.animation_timer_handle || !this.props.selected_orbital?.orbital_id) {
+        this.clear_animation_timer();
+        this.setState({
+          circuitry_data: null,
+          error: null,
+          animation_index: 0,
+          selected_orbital_row: -1,
+          selected_orbital_point: null,
+          animation_playing: false,
+        });
+      }
       if (!this.props.selected_orbital?.orbital_id) {
         this.audio_resume_generation++;
         this.stop_audio(true);
@@ -229,17 +264,29 @@ export class CircuitryChart extends Component {
         );
         const waveform_continuity =
           validate_waveform_continuity(waveform_profile);
+        const circuitry_data = {
+          ...rotated_response,
+          waveform_profile,
+          waveform_continuity,
+        };
         this.setState(
-          {
-            circuitry_data: {
-              ...rotated_response,
-              waveform_profile,
-              waveform_continuity,
-            },
-            error: null,
-            animation_index: 0,
-            selected_orbital_row: -1,
-            selected_orbital_point: null,
+          (previous) => {
+            const animating = !!this.animation_timer_handle;
+            const same_period = previous.circuitry_data?.cardinality === circuitry_data.cardinality;
+            const old_extent = previous.circuitry_data?.result?.length - 1;
+            const new_extent = Math.max(0, (circuitry_data.result?.length || 1) - 1);
+            const animation_index = animating && same_period && old_extent > 0
+              ? Math.min(new_extent, Math.round(previous.animation_index * new_extent / old_extent))
+              : 0;
+            return {
+              circuitry_data,
+              error: null,
+              animation_index,
+              selected_orbital_row: animating
+                ? this.get_animation_orbital_row(animation_index, circuitry_data)
+                : -1,
+              selected_orbital_point: null,
+            };
           },
           () => {
             if (
@@ -297,6 +344,7 @@ export class CircuitryChart extends Component {
     const normalized_response = {
       ...response,
       orbital_points,
+      orbital_point_indices: orbital_points.map((_, index) => index),
     };
     let nearest_index = 0;
     let nearest_distance = Number.POSITIVE_INFINITY;
@@ -323,6 +371,7 @@ export class CircuitryChart extends Component {
     return {
       ...normalized_response,
       orbital_points: rotated_orbital_points,
+      orbital_point_indices: rotate(normalized_response.orbital_point_indices, nearest_index),
       result: [...rotated_sample_cycle, { ...rotated_sample_cycle[0] }],
     };
   };
@@ -366,48 +415,22 @@ export class CircuitryChart extends Component {
     }
   };
 
-  get_animation_orbital_row = (t) => {
-    const orbital_points = this.state.circuitry_data?.orbital_points || [];
-    const samples = this.state.circuitry_data?.result || [];
+  get_animation_orbital_row = (sample_index, circuitry_data = this.state.circuitry_data) => {
+    const orbital_points = circuitry_data?.orbital_points || [];
+    const samples = circuitry_data?.result || [];
     if (
-      !Number.isFinite(t) ||
+      !Number.isFinite(sample_index) ||
       orbital_points.length === 0 ||
       samples.length === 0
     ) {
       return -1;
     }
-    const radial = this.state.radial_sweep;
-    // Radial-sweep samples include both endpoints, so the number of samples
-    // per orbital interval is based on the number of intervals (one fewer
-    // than the point count). This keeps the t mapping exact at every point,
-    // including the closing point.
-    const interval_width =
-      radial && orbital_points.length > 1
-        ? (samples.length - 1) / (orbital_points.length - 1)
-        : 1;
-    const orbital_t = orbital_points.map((_, row) =>
-      radial ? samples[Math.round(row * interval_width)]?.t : row,
-    );
-    if (orbital_t.some((value) => !Number.isFinite(value))) return -1;
-    let nearest_row = -1;
-    let nearest_delta = Number.POSITIVE_INFINITY;
-    orbital_t.forEach((target_t, row) => {
-      const delta = Math.abs(t - target_t);
-      if (delta < nearest_delta) {
-        nearest_delta = delta;
-        nearest_row = row;
-      }
-    });
-    const previous_gap =
-      nearest_row > 0
-        ? Math.abs(orbital_t[nearest_row] - orbital_t[nearest_row - 1])
-        : Number.POSITIVE_INFINITY;
-    const next_gap =
-      nearest_row < orbital_t.length - 1
-        ? Math.abs(orbital_t[nearest_row + 1] - orbital_t[nearest_row])
-        : Number.POSITIVE_INFINITY;
-    const threshold = Math.min(previous_gap, next_gap) / 2;
-    return nearest_delta <= threshold ? nearest_row : -1;
+    if (orbital_points.length === 1) return 0;
+    // Both interpolators sample each interval uniformly, including a closing
+    // sample. Index-based tracking survives rotation and uneven sweep angles.
+    const interval_width = (samples.length - 1) / orbital_points.length;
+    if (interval_width <= 0) return -1;
+    return Math.round(sample_index / interval_width) % orbital_points.length;
   };
 
   advance_animation = (direction) => {
@@ -416,8 +439,7 @@ export class CircuitryChart extends Component {
     let next_index = this.state.animation_index + direction;
     if (next_index >= point_count) next_index = 0;
     if (next_index < 0) next_index = point_count - 1;
-    const frame_t = this.state.circuitry_data?.result?.[next_index]?.t;
-    const selected_orbital_row = this.get_animation_orbital_row(frame_t);
+    const selected_orbital_row = this.get_animation_orbital_row(next_index);
     this.setState({
       animation_index: next_index,
       selected_orbital_row,
@@ -425,11 +447,11 @@ export class CircuitryChart extends Component {
     });
   };
 
-  start_animation = (direction) => {
+  start_animation = (direction, speed = this.state.animation_speed) => {
     this.clear_animation_timer();
     this.animation_timer_handle = setInterval(
       () => this.advance_animation(direction),
-      1000 / PATH_ANIMATION_RATE_FPS,
+      1000 / (PATH_ANIMATION_RATE_FPS * speed),
     );
     this.setState({
       animation_direction: direction,
@@ -445,6 +467,7 @@ export class CircuitryChart extends Component {
       this.setState({
         animation_index: 0,
         animation_playing: false,
+        selected_orbital_row: this.get_animation_orbital_row(0),
         selected_orbital_point: null,
       });
     }
@@ -454,6 +477,7 @@ export class CircuitryChart extends Component {
       this.setState({
         animation_index: point_count - 1,
         animation_playing: false,
+        selected_orbital_row: this.get_animation_orbital_row(point_count - 1),
         selected_orbital_point: null,
       });
     }
@@ -483,16 +507,10 @@ export class CircuitryChart extends Component {
       distance_chart_width,
       distance_chart_height,
     } = circuitry_layout(width_px, height_px);
-    const points_list_height = Math.floor(Math.max(0, height_px) / 3);
     const points = (circuitry_data?.result || []).map(({ C }) => ({
       x: C.re,
       y: C.im,
     }));
-    const orbital_table_data = (circuitry_data?.orbital_points || []).map(
-      (point) => ({
-        coordinates: [render_coordinates, { x: point.re, y: point.im }],
-      }),
-    );
     const radial_samples_per_interval =
       circuitry_data?.cardinality > 0
         ? (points.length - 1) / circuitry_data.cardinality
@@ -926,18 +944,21 @@ export class CircuitryChart extends Component {
           >
             <div
               style={{
-                display: "inline-block",
+                display: "inline-flex",
+                flexDirection: "column",
                 verticalAlign: "top",
                 flexShrink: 0,
               }}
             >
-              <CoolMediaTransport
+              <div>
+                <CoolMediaTransport
                 width_px={controls_width}
                 button_size_px={TRANSPORT_BUTTON_SIZE_PX}
                 operations={TRANSPORT_OPERATIONS}
                 on_operation={this.on_transport_operation}
                 disabled={points.length === 0}
-              />
+                />
+              </div>
             </div>
             <div
               style={{
@@ -966,38 +987,37 @@ export class CircuitryChart extends Component {
               >
                 {audio_playing ? sound_off_icon : sound_on_icon}
               </transport_styles.GenericButton>
+            </div>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginTop: "0.5rem", fontSize: "0.75rem", width: "100%", maxWidth: "320px" }}>
+            <label style={{ display: "flex", alignItems: "center", gap: "0.25rem", flex: 1, minWidth: 0 }}>
+              Speed
+              <input
+                type="range"
+                aria-label="Animation speed"
+                min={MIN_ANIMATION_SPEED * 100}
+                max={MAX_ANIMATION_SPEED * 100}
+                step="0.5"
+                value={this.state.animation_speed * 100}
+                onChange={this.on_animation_speed_change}
+                title={`Animation speed: ${this.state.animation_speed * 100}%`}
+                style={{ width: "90px", minWidth: 0, flex: 1, margin: 0 }}
+              />
+            </label>
+            <label style={{ display: "flex", alignItems: "center", gap: "0.25rem", flex: 1, minWidth: 0 }}>
+              Volume
               <input
                 type="range"
                 aria-label="Playback volume"
-                min="0"
-                max="100"
+                min={MIN_PLAYBACK_VOLUME * 100}
+                max={MAX_PLAYBACK_VOLUME * 100}
                 step="1"
                 value={Math.round(this.state.audio_volume * 100)}
                 onChange={this.on_volume_change}
                 title={`Volume: ${Math.round(this.state.audio_volume * 100)}%`}
-                style={{ width: "80px", margin: 0 }}
+                style={{ width: "80px", minWidth: 0, flex: 1, margin: 0 }}
               />
-              <span style={{ fontSize: "0.75rem", minWidth: "3ch" }}>
-                {Math.round(this.state.audio_volume * 100)}%
-              </span>
-            </div>
-          </div>
-          <div
-            style={{
-              height: `${points_list_height}px`,
-              marginTop: "0.5rem",
-              overflowY: "auto",
-              overflowX: "hidden",
-            }}
-          >
-            <CoolTable
-              columns={ORBITAL_POINT_COLUMNS}
-              data={orbital_table_data}
-              on_select_row={this.on_orbital_point_selected}
-              options={[TABLE_CAN_SELECT, TABLE_NO_BORDER, TABLE_NO_HEADER]}
-              selected_row={selected_orbital_row}
-              scroll_selected_row
-            />
+            </label>
           </div>
         </styles.ContentWrapper>
       </div>

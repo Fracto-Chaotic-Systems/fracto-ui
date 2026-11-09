@@ -22,9 +22,18 @@ extra cubic interpolation or hard clipping. Roundoff-sized variations in a flat
 profile produce silence rather than a normalized noise waveform. Main-path
 animation still uses the complete original circuitry samples.
 
-The volume slider beside audio playback defaults to 15% and ranges from mute
-to 100%. A shared master gain applies changes to active and replacement sources
+The labeled volume slider beside the speed slider defaults to 15% and ranges from 5%
+to 20%. Its setting persists in local storage across page reloads; missing or
+invalid settings use the default, and out-of-range settings are clamped.
+A shared master gain applies changes to active and replacement sources
 with a 20 ms ramp, preserving the waveform and existing playback fades.
+
+The speed slider under the animation transport ranges from 12.5% to 100% of the
+original 100 samples per second, defaulting to 62.5%. Changes
+update the active timer without changing its direction or current sample.
+The speed remains selected when switching orbitals or pausing and resuming.
+It is saved in local storage across page reloads. Missing or invalid settings
+use 62.5%; saved values outside the slider range are clamped to 12.5–100%.
 
 When the main-cardioid detector reports candidate cardinality 2, the data
 server automatically runs the experimental `FractoFastCalc`-cardinality →
