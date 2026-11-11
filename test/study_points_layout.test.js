@@ -28,12 +28,19 @@ test("Julia pane shares the survey canvas at fixed size and scope for the select
   const Julia = vm.runInNewContext(
     transformSync(
       source("../src/pages/study/points/PointsJuliaSet.jsx").replace(
-        "default function", "function",
+        "default function",
+        "function",
       ),
       { loader: "jsx" },
     ).code + ";PointsJuliaSet",
     {
-      React: { createElement: (type, props, ...children) => ({ type, props, children }) },
+      React: {
+        createElement: (type, props, ...children) => ({
+          type,
+          props,
+          children,
+        }),
+      },
       PointsJuliaCanvas: "survey-canvas",
       build_orbital_trace_request,
       SEED_SURVEY_DISCOVERY_OPTIONS: { iteration_limit: 100000 },
@@ -59,16 +66,33 @@ test("Julia pane shares the survey canvas at fixed size and scope for the select
   assert.equal(canvas.props.focal_point.y, 0.1);
   assert.equal(canvas.props.trace_request, null);
   const orbital = {
-    orbital_id: "7", period: 1,
-    points: [{ point_index: 0, point: { re: "0.3", im: "0.4" },
-      landing_ratios: [{ numerator: "1", denominator: "7" }] }],
+    orbital_id: "7",
+    period: 1,
+    points: [
+      {
+        point_index: 0,
+        point: { re: "0.3", im: "0.4" },
+        landing_ratios: [{ numerator: "1", denominator: "7" }],
+      },
+    ],
   };
-  const requested = Julia({ selected_minibrot: selected, selected_orbital: orbital });
-  assert.equal(requested.children[0].props.trace_request.requests[0].angle.key, "1/7");
-  assert.equal(requested.children[0].props.trace_request.focal_point.x, "-0.75");
+  const requested = Julia({
+    selected_minibrot: selected,
+    selected_orbital: orbital,
+  });
+  assert.equal(
+    requested.children[0].props.trace_request.requests[0].angle.key,
+    "1/7",
+  );
+  assert.equal(
+    requested.children[0].props.trace_request.focal_point.x,
+    "-0.75",
+  );
   assert.equal(Julia({ selected_minibrot: null }), null);
   assert.equal(Julia({ selected_minibrot: { core_point: "invalid" } }), null);
-  const next = Julia({ selected_minibrot: { core_point: '{"x":0.2,"y":0.3}' } });
+  const next = Julia({
+    selected_minibrot: { core_point: '{"x":0.2,"y":0.3}' },
+  });
   assert.equal(next.children[0].props.focal_point.x, 0.2);
 });
 
@@ -76,18 +100,27 @@ test("Julia and shared circuitry remain side by side with matching height and re
   const Panel = vm.runInNewContext(
     transformSync(
       source("../src/pages/study/points/PointsOrbitalPanel.jsx").replace(
-        "default function", "function",
+        "default function",
+        "function",
       ),
       { loader: "jsx" },
     ).code + ";PointsOrbitalPanel",
     {
-      React: { createElement: (type, props, ...children) => ({ type, props, children }) },
-      CircuitryChart: "circuitry", PointsJuliaSet: "julia",
+      React: {
+        createElement: (type, props, ...children) => ({
+          type,
+          props,
+          children,
+        }),
+      },
+      CircuitryChart: "circuitry",
+      PointsJuliaSet: "julia",
       selected_core_point: (selected) => JSON.parse(selected.core_point),
     },
   );
   const selected_minibrot = {
-    id: 55, pattern: 3,
+    id: 55,
+    pattern: 3,
     core_point: '{"x":"-0.12","y":"0.74"}',
     display_settings: '{"scope":"0.05","focal_point":{"x":0,"y":0}}',
   };
@@ -122,12 +155,19 @@ test("selected preview uses saved display settings and fits the available panel"
   const Preview = vm.runInNewContext(
     transformSync(
       source("../src/pages/study/points/PointsSelectedPreview.jsx").replace(
-        "default function", "function",
+        "default function",
+        "function",
       ),
       { loader: "jsx" },
     ).code + ";PointsSelectedPreview",
     {
-      React: { createElement: (type, props, ...children) => ({ type, props, children }) },
+      React: {
+        createElement: (type, props, ...children) => ({
+          type,
+          props,
+          children,
+        }),
+      },
       FractoRasterImage: "raster",
     },
   );
@@ -148,9 +188,18 @@ test("selected preview uses saved display settings and fits the available panel"
   assert.equal(image.props.focal_point.y, 0.1);
   assert.equal(image.props.scope, 0.02);
   assert.equal(Preview({ ...props, selected_minibrot: null }), null);
-  assert.equal(Preview({ ...props, selected_minibrot: { display_settings: "invalid" } }), null);
+  assert.equal(
+    Preview({ ...props, selected_minibrot: { display_settings: "invalid" } }),
+    null,
+  );
   assert.equal(Preview({ ...props, width_px: 0 }), null);
-  assert.equal(Preview({ ...props, selected_minibrot: { id: 56, display_settings: settings } }).children[0].props.scope, 0.02);
+  assert.equal(
+    Preview({
+      ...props,
+      selected_minibrot: { id: 56, display_settings: settings },
+    }).children[0].props.scope,
+    0.02,
+  );
 });
 
 test("orbital points splitters nest correctly and persist independent offsets across reloads", () => {
@@ -250,9 +299,12 @@ test("orbital points splitters nest correctly and persist independent offsets ac
   assert.equal(julia.type, "orbital-panel");
   assert.equal(julia.props.width_px, 1097);
   assert.equal(julia.props.selected_minibrot, selected);
-  const orbital = { orbital_id: "1", points: [] };
-  page.render().children[1].children[0].children[2].children[0].props
-    .on_select_orbital(orbital);
+  const orbital = { orbital_id: "1", points: [{ point_index: 2 }] };
+  page
+    .render()
+    .children[1].children[0].children[2].children[0].props.on_select_orbital(
+      orbital,
+    );
   assert.equal(
     page.render().children[1].children[1].children[0].props.selected_orbital,
     orbital,
@@ -262,6 +314,25 @@ test("orbital points splitters nest correctly and persist independent offsets ac
   assert.equal(lower_list.type, "orbital-point-list");
   assert.equal(lower_list.props.selected_orbital, orbital);
   assert.equal(lower_list.props.active_point_index, 2);
+  lower_list.props.on_select_point(2);
+  assert.equal(page.state.point_selection_request.orbital_id, "1");
+  assert.equal(page.state.point_selection_request.point_index, 2);
+  const point_request = page.state.point_selection_request;
+  page.on_select_orbital({
+    ...orbital,
+    lifecycle_state: { orbital: "validated", assignments: "verified" },
+  });
+  assert.equal(
+    page.state.active_point_index,
+    2,
+    "live metadata updates preserve the tracked point",
+  );
+  assert.equal(page.state.point_selection_request, point_request);
+  assert.equal(
+    page.render().children[1].children[1].children[0].props
+      .point_selection_request,
+    page.state.point_selection_request,
+  );
   julia.props.on_active_point_changed("previous-orbital", 3);
   assert.equal(page.state.active_point_index, 2);
   page.on_select_minibrot(selected);

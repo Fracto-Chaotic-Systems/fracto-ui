@@ -5,6 +5,10 @@ import { runInNewContext } from "node:vm";
 import { transformSync } from "esbuild";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import {
+  orbital_selectable,
+  orbital_ratio_label,
+} from "../src/pages/study/points/PointsOrbitalState.js";
 
 const selected = (id) => ({
   id,
@@ -61,6 +65,7 @@ function harness(backend = {}, selection = selected(55)) {
         ...backend,
       },
       PointsStoredOrbitalsView: "view",
+      orbital_selectable,
       AbortController,
       setTimeout: (fn) => {
         timers.set(++timer_id, fn);
@@ -269,6 +274,16 @@ test("orbital selection defaults to the first result, propagates changes, and cl
 
 test("stored view shows orbital summaries without duplicate point details, and only empty state offers calculation", () => {
   const text_keys = [
+    "catalog_intro",
+    "catalog_results",
+    "catalog_partial",
+    "catalog_resume_notice",
+    "paths_on_selection",
+    "orbital_available",
+    "orbital_pending",
+    "ratios_pending",
+    "ratios_unresolved",
+    "ratios_not_applicable",
     "title",
     "select",
     "core",
@@ -303,6 +318,19 @@ test("stored view shows orbital summaries without duplicate point details, and o
     "scan_stage",
     "ray_stage",
     "ray_preparing",
+    "catalog_stage",
+    "catalog_progress",
+    "coverage_title",
+    "coverage_range",
+    "coverage_none",
+    "coverage_counts",
+    "coverage_scope",
+    "coverage_details",
+    "coverage_denominator",
+    "coverage_investigated",
+    "coverage_periods",
+    "coverage_unresolved",
+    "coverage_unknown",
   ];
   const keys = Object.fromEntries(text_keys.map((key) => [key, key]));
   const View = runInNewContext(
@@ -319,6 +347,8 @@ test("stored view shows orbital summaries without duplicate point details, and o
       render_pattern_block: (period) =>
         React.createElement("span", { "data-pattern": period }, period),
       POINTS_ORBITAL_TEXT: keys,
+      orbital_selectable,
+      orbital_ratio_label,
       AppText: {
         get: (key) =>
           key === "summary"
@@ -344,25 +374,28 @@ test("stored view shows orbital summaries without duplicate point details, and o
   const multiple = renderToStaticMarkup(
     React.createElement(View, {
       ...props,
-      orbitals: [orbital, {
-        ...orbital,
-        orbital_id: "2",
-        period: 2,
-        points: [
-          {
-            ...orbital.points[0],
-            landing_ratios: [
-              { numerator: "1", denominator: "7" },
-              { numerator: "2", denominator: "7" },
-            ],
-          },
-          {
-            ...orbital.points[0],
-            point_index: 1,
-            landing_ratios: [{ numerator: "4", denominator: "7" }],
-          },
-        ],
-      }],
+      orbitals: [
+        orbital,
+        {
+          ...orbital,
+          orbital_id: "2",
+          period: 2,
+          points: [
+            {
+              ...orbital.points[0],
+              landing_ratios: [
+                { numerator: "1", denominator: "7" },
+                { numerator: "2", denominator: "7" },
+              ],
+            },
+            {
+              ...orbital.points[0],
+              point_index: 1,
+              landing_ratios: [{ numerator: "4", denominator: "7" }],
+            },
+          ],
+        },
+      ],
     }),
   );
   assert.match(multiple, /data-pattern="2"/);
@@ -492,6 +525,69 @@ test("stored view shows orbital summaries without duplicate point details, and o
   assert.match(resumable, />resume<\/a>/);
   assert.match(resumable, /resume_notice/);
   assert.doesNotMatch(resumable, />calculate<\/a>/);
+  const coverage = {
+    max_denominator: 7,
+    investigated_families: 4,
+    total_families: 5,
+    validated_families: 3,
+    unresolved_families: 1,
+    uninvestigated_families: 1,
+    cache_hits: 2,
+    tested_through_denominator: 5,
+    denominators: [
+      {
+        denominator: "7",
+        investigated_families: 1,
+        total_families: 2,
+        candidate_orbital_periods: [1, 3],
+      },
+    ],
+    unresolved_details: [{ family_key: "1/7", reason: "landing_mismatch" }],
+  };
+  const report = renderToStaticMarkup(
+    React.createElement(View, { ...props, coverage }),
+  );
+  assert.match(report, /coverage_title/);
+  assert.match(report, /<td>7<\/td><td>1 \/ 2<\/td><td>1, 3<\/td>/);
+  assert.match(report, /1\/7: landing mismatch/);
+  assert.match(report, /coverage_scope/);
+  assert.doesNotMatch(report, /<progress/);
+  const catalog_progress = calculating({
+    phase: "catalog",
+    stage: "persisting",
+    catalog_processed: 4,
+    catalog_total: 5,
+    catalog_coverage: coverage,
+  });
+  assert.match(catalog_progress, /aria-label="catalog_stage"/);
+  assert.match(catalog_progress, /max="5" value="4"/);
+  assert.match(catalog_progress, /coverage_details/);
+});
+
+test("saved coverage survives reload and active job coverage takes precedence", async () => {
+  let active = false;
+  const saved = { max_denominator: 7 },
+    current = { max_denominator: 15 };
+  const h = harness({
+    stored_orbitals: async () => ({ result: [], coverage: saved }),
+    bailiwick_orbital_job: async () => ({
+      result: active
+        ? {
+            id: "interrupted",
+            status: "partial",
+            resumable: true,
+            progress: { catalog_coverage: current },
+          }
+        : null,
+    }),
+  });
+  await h.panel.load();
+  assert.equal(h.panel.state.coverage, saved);
+  active = true;
+  await h.panel.load();
+  assert.equal(h.panel.state.coverage, current);
+  assert.equal(h.panel.state.resumable, true);
+  h.panel.componentWillUnmount();
 });
 
 test("selection reattaches to an active job without starting another calculation", async () => {
@@ -524,6 +620,99 @@ test("selection reattaches to an active job without starting another calculation
   assert.equal(h.panel.state.job_id, "existing");
   assert.equal(h.panel.state.progress.ray_orbitals_processed, 3);
   assert.equal(polls, 1);
+  h.panel.componentWillUnmount();
+});
+
+test("catalog jobs publish selectable pending orbitals live and preserve selection through progress and completion", async () => {
+  let counter = 1,
+    status = "running",
+    reads = 0;
+  const invalid = {
+    ...orbital,
+    orbital_id: "0",
+    selectable: false,
+    lifecycle_state: { orbital: "pending", assignments: "pending" },
+  };
+  let pending = {
+    ...orbital,
+    orbital_id: "2",
+    selectable: true,
+    lifecycle_state: { orbital: "validated", assignments: "pending" },
+    points: orbital.points.map((point) => ({ ...point, landing_ratios: [] })),
+  };
+  const third = {
+    ...orbital,
+    orbital_id: "3",
+    selectable: true,
+    lifecycle_state: { orbital: "validated", assignments: "verified" },
+  };
+  let details = [invalid, pending];
+  const job = () => ({
+    id: "catalog-job",
+    status,
+    stage: "discovering",
+    discovery_strategy: "catalog-representative-rays-v1",
+    progress: {
+      phase: "catalog",
+      catalog_processed: counter,
+      catalog_total: 5,
+    },
+    results: details.map((row) => ({
+      orbital_id: row.orbital_id,
+      discovery_metadata: { catalog: { family_keys: [row.orbital_id] } },
+    })),
+  });
+  const h = harness({
+    bailiwick_orbital_job: async () => ({ result: job() }),
+    orbital_discovery_job: async () => ({ result: job() }),
+    stored_orbitals: async () => ({
+      result: details.map((row) => ({ id: row.orbital_id })),
+    }),
+    stored_orbital: async (id) => {
+      reads++;
+      return { result: details.find((row) => row.orbital_id === id) };
+    },
+  });
+  const selections = [];
+  h.panel.props.on_select_orbital = (selected) => selections.push(selected);
+  await h.panel.load();
+  assert.equal(h.panel.state.status, "calculating");
+  assert.equal(h.panel.state.orbitals.length, 2);
+  assert.equal(h.panel.state.selected_orbital.orbital_id, "2");
+  assert.equal(reads, 2, "unchanged poll reuses details");
+  h.panel.select_orbital(invalid);
+  assert.equal(h.panel.state.selected_orbital.orbital_id, "2");
+  pending = {
+    ...pending,
+    lifecycle_state: { orbital: "validated", assignments: "verified" },
+    points: orbital.points,
+  };
+  details = [invalid, pending, third];
+  counter++;
+  await h.tick();
+  assert.equal(h.panel.state.orbitals.length, 3);
+  assert.equal(h.panel.state.selected_orbital.orbital_id, "2");
+  assert.equal(
+    h.panel.state.selected_orbital.lifecycle_state.assignments,
+    "verified",
+  );
+  const before = selections.length,
+    same = h.panel.state.selected_orbital;
+  await h.tick();
+  assert.equal(h.panel.state.selected_orbital, same);
+  assert.equal(
+    selections.length,
+    before,
+    "unchanged results do not restart overlays or animation",
+  );
+  status = "completed";
+  await h.tick();
+  assert.equal(h.panel.state.status, "ready");
+  assert.equal(h.panel.state.selected_orbital.orbital_id, "2");
+  assert.ok(
+    selections.slice(1).every(Boolean),
+    "completion does not clear the active orbital",
+  );
   h.panel.componentWillUnmount();
 });
 

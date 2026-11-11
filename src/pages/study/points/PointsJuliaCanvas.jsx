@@ -21,13 +21,16 @@ export default class PointsJuliaCanvas extends Component {
   };
 
   componentDidUpdate(previous) {
-    if (previous.selected_orbital !== this.props.selected_orbital ||
-        previous.active_point_index !== this.props.active_point_index ||
-        previous.animation_playing !== this.props.animation_playing) {
+    if (
+      previous.selected_orbital !== this.props.selected_orbital ||
+      previous.active_point_index !== this.props.active_point_index ||
+      previous.animation_playing !== this.props.animation_playing
+    ) {
       this.cancel_ray_frame();
       if (this.props.animation_playing) {
         this.update_ray_opacities();
-        if (previous.selected_orbital !== this.props.selected_orbital) this.ray_opacities = new Map();
+        if (previous.selected_orbital !== this.props.selected_orbital)
+          this.ray_opacities = new Map();
         this.ray_fade = {
           from: new Map(this.ray_opacities),
           target: this.props.active_point_index,
@@ -54,12 +57,16 @@ export default class PointsJuliaCanvas extends Component {
   update_ray_opacities = () => {
     if (!this.ray_fade) return;
     const { from, target, start } = this.ray_fade;
-    const progress = Math.min(1, Math.max(0, (performance.now() - start) / RAY_FADE_MS));
+    const progress = Math.min(
+      1,
+      Math.max(0, (performance.now() - start) / RAY_FADE_MS),
+    );
     const blend = progress * progress * (3 - 2 * progress);
     this.ray_opacities = new Map();
     for (const index of new Set([...from.keys(), target])) {
       if (!Number.isInteger(index) || index < 0) continue;
-      const opacity = (from.get(index) || 0) * (1 - blend) + (index === target ? blend : 0);
+      const opacity =
+        (from.get(index) || 0) * (1 - blend) + (index === target ? blend : 0);
       if (opacity > 0) this.ray_opacities.set(index, opacity);
     }
     if (progress === 1) this.ray_fade = null;
@@ -70,7 +77,8 @@ export default class PointsJuliaCanvas extends Component {
       this.fade_frame = null;
       this.update_ray_opacities();
       this.paint_overlay();
-      if (this.ray_fade && this.props.animation_playing) this.schedule_ray_frame();
+      if (this.ray_fade && this.props.animation_playing)
+        this.schedule_ray_frame();
     });
   };
 
@@ -107,11 +115,22 @@ export default class PointsJuliaCanvas extends Component {
             (point) => point.point_index === this.props.active_point_index,
           )
         : -1,
+      !this.props.animation_playing
+        ? (this.props.selected_orbital?.points || []).findIndex(
+            (point) => point.point_index === this.props.active_point_index,
+          )
+        : -1,
     );
   };
 
   render() {
-    const { selected_orbital, trace_request, active_point_index, animation_playing, ...canvas_props } = this.props;
+    const {
+      selected_orbital,
+      trace_request,
+      active_point_index,
+      animation_playing,
+      ...canvas_props
+    } = this.props;
     const selection = this.selection_key();
     return (
       <div>
@@ -121,6 +140,7 @@ export default class PointsJuliaCanvas extends Component {
           on_canvas_rendered={this.on_canvas_rendered}
         />
         <PointsOrbitalRays
+          selected_orbital={selected_orbital}
           trace_request={trace_request}
           on_rays={(rays) => this.on_rays(rays, selection)}
         />

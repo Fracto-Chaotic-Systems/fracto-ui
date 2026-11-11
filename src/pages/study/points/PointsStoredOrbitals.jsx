@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import DataBackend from "../../../backend/DataBackend.jsx";
 import PointsStoredOrbitalsView from "./PointsStoredOrbitalsView.jsx";
+import { orbital_selectable } from "./PointsOrbitalState.js";
 
 const selection_key = (props) =>
   JSON.stringify([
@@ -37,8 +38,11 @@ export default class PointsStoredOrbitals extends Component {
     notice: null,
     stale: false,
     progress: null,
+    coverage: null,
     resumable: false,
     job_id: null,
+    discovery_strategy: null,
+    confirmation_repair_available: false,
   };
   generation = 0;
   in_calculation = false;
@@ -57,24 +61,31 @@ export default class PointsStoredOrbitals extends Component {
   }
   current = (generation) => this.is_mounted && generation === this.generation;
 
-  load = async (notice = null) => {
+  load = async (notice = null, preserve_selection = false) => {
+    const previous_selection = preserve_selection
+      ? this.state.selected_orbital
+      : null;
     const generation = ++this.generation;
     this.controller?.abort();
     clearTimeout(this.poll_timer);
     this.in_calculation = false;
+    this.job_details = new Map();
     this.controller = new AbortController();
-    this.props.on_select_orbital?.(null);
+    if (!preserve_selection) this.props.on_select_orbital?.(null);
     this.setState({
-      orbitals: [],
-      selected_orbital: null,
+      orbitals: preserve_selection ? this.state.orbitals : [],
+      selected_orbital: previous_selection,
       notice,
       focal_point: null,
       status: "idle",
       error_kind: null,
       stale: false,
       progress: null,
+      coverage: null,
       resumable: false,
       job_id: null,
+      discovery_strategy: null,
+      confirmation_repair_available: false,
     });
     if (!this.props.selected_minibrot?.id) return;
     let focal_point;
@@ -92,12 +103,42 @@ export default class PointsStoredOrbitals extends Component {
         signal,
       );
       if (!this.current(generation)) return;
+      this.setState({
+        discovery_strategy: job?.discovery_strategy || null,
+        confirmation_repair_available: !!job?.confirmation_repair_available,
+      });
       if (job?.resumable) this.setState({ resumable: true, job_id: job.id });
+      if (
+        job &&
+        ["queued", "running", "cancelled", "interrupted", "failed"].includes(
+          job.status,
+        ) &&
+        Array.isArray(job.results)
+      ) {
+        await this.sync_job_orbitals(job, generation);
+        if (!this.current(generation)) return;
+        this.setState({
+          status: "ready",
+          coverage: job.progress?.catalog_coverage || null,
+          progress: {
+            ...job.progress,
+            stage: job.stage,
+            job_status: job.status,
+          },
+        });
+        if (["queued", "running"].includes(job.status)) {
+          this.in_calculation = true;
+          this.setState({ status: "calculating", job_id: job.id });
+          await this.poll(job.id, generation);
+        }
+        return;
+      }
       // The survey view returns the complete ranked membership, including 100 results.
-      const { result: headers, stale } = await DataBackend.stored_orbitals(
-        focal_point,
-        signal,
-      );
+      const {
+        result: headers,
+        stale,
+        coverage,
+      } = await DataBackend.stored_orbitals(focal_point, signal);
       if (!this.current(generation)) return;
       if (stale) this.setState({ stale: true });
       const orbitals = [];
@@ -119,8 +160,23 @@ export default class PointsStoredOrbitals extends Component {
         );
       }
       if (this.current(generation)) {
-        const selected_orbital = orbitals[0] || null;
-        this.setState({ status: "ready", orbitals, selected_orbital });
+        const selected_orbital =
+          orbitals.find(
+            (orbital) =>
+              orbital.orbital_id === previous_selection?.orbital_id &&
+              orbital_selectable(orbital),
+          ) ||
+          orbitals.find(orbital_selectable) ||
+          null;
+        this.setState({
+          status: "ready",
+          orbitals,
+          selected_orbital,
+          coverage: job?.progress?.catalog_coverage || coverage || null,
+          progress: job?.progress
+            ? { ...job.progress, stage: job.stage, job_status: job.status }
+            : null,
+        });
         this.props.on_select_orbital?.(selected_orbital);
         if (job && ["queued", "running"].includes(job.status)) {
           this.in_calculation = true;
@@ -132,6 +188,70 @@ export default class PointsStoredOrbitals extends Component {
       if (this.current(generation) && error.name !== "AbortError")
         this.setState({ status: "error", error_kind: "load" });
     }
+  };
+
+  // Refresh only new/changed memberships and one post-commit snapshot. A family
+  // can publish its orbital just before its ratios and checkpoint commit.
+  sync_job_orbitals = async (job, generation) => {
+    if (!Array.isArray(job.results)) return;
+    const counter = job.progress?.catalog_processed ?? 0;
+    this.job_details ||= new Map();
+    const orbitals = [];
+    for (let start = 0; start < job.results.length; start += 4) {
+      const batch = await Promise.all(
+        job.results.slice(start, start + 4).map(async (row) => {
+          const id = String(row.orbital_id),
+            key = JSON.stringify(row),
+            prior = this.job_details.get(id);
+          if (
+            prior?.key === key &&
+            (prior.settled || prior.counter === counter)
+          )
+            return prior.orbital;
+          const { result } = await DataBackend.stored_orbital(
+            id,
+            this.controller.signal,
+          );
+          const next = {
+            ...result,
+            discovery_metadata:
+              row.discovery_metadata ?? result.discovery_metadata,
+          };
+          const orbital =
+            prior && JSON.stringify(prior.orbital) === JSON.stringify(next)
+              ? prior.orbital
+              : next;
+          if (this.current(generation))
+            this.job_details.set(id, {
+              key,
+              counter,
+              settled: prior?.key === key,
+              orbital,
+            });
+          return orbital;
+        }),
+      );
+      if (!this.current(generation)) return;
+      orbitals.push(...batch);
+    }
+    if (!this.current(generation)) return;
+    orbitals.sort(
+      (a, b) =>
+        (a.discovery_metadata?.rank ?? Infinity) -
+        (b.discovery_metadata?.rank ?? Infinity),
+    );
+    const previous = this.state.selected_orbital;
+    const selected_orbital =
+      orbitals.find(
+        (orbital) =>
+          orbital.orbital_id === previous?.orbital_id &&
+          orbital_selectable(orbital),
+      ) ||
+      orbitals.find(orbital_selectable) ||
+      null;
+    this.setState({ orbitals, selected_orbital });
+    if (selected_orbital !== previous)
+      this.props.on_select_orbital?.(selected_orbital);
   };
 
   calculate = async () => {
@@ -149,7 +269,9 @@ export default class PointsStoredOrbitals extends Component {
       status: "calculating",
       notice: null,
       progress: null,
+      coverage: null,
       job_id: null,
+      confirmation_repair_available: false,
     });
     try {
       const { result } = resume_id
@@ -163,7 +285,12 @@ export default class PointsStoredOrbitals extends Component {
             this.controller.signal,
           );
       if (this.current(generation)) {
-        this.setState({ job_id: result.id, resumable: false });
+        this.setState({
+          job_id: result.id,
+          resumable: false,
+          discovery_strategy:
+            result.discovery_strategy || this.state.discovery_strategy,
+        });
         await this.poll(result.id, generation);
       }
     } catch (error) {
@@ -207,7 +334,11 @@ export default class PointsStoredOrbitals extends Component {
       );
       if (!this.current(generation)) return;
       if (["queued", "running"].includes(result.status)) {
+        await this.sync_job_orbitals(result, generation);
+        if (!this.current(generation)) return;
         this.setState({
+          discovery_strategy:
+            result.discovery_strategy || this.state.discovery_strategy,
           progress: {
             ...(result.progress || {}),
             stage: result.stage,
@@ -219,7 +350,7 @@ export default class PointsStoredOrbitals extends Component {
         ["completed", "partial"].includes(result.status) ||
         result.results?.length
       ) {
-        await this.load(result.status === "completed" ? null : "partial");
+        await this.load(result.status === "completed" ? null : "partial", true);
       } else {
         if (result.resumable) await this.load();
         else this.calculation_failed(Error("calculation_failed"), generation);
@@ -229,6 +360,7 @@ export default class PointsStoredOrbitals extends Component {
     }
   };
   select_orbital = (orbital) => {
+    if (!orbital_selectable(orbital)) return;
     this.setState({ selected_orbital: orbital });
     this.props.on_select_orbital?.(orbital);
   };

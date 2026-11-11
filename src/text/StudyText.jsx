@@ -25,6 +25,32 @@ export const KEY_STUDY_MAGNITUDES = `${STUDY_FOLDER}/study_magnitudes`;
 export const KEY_STUDY_POINTS = `${STUDY_FOLDER}/study_points`;
 export const KEY_STUDY_POINTS_FREE_TAB = `${STUDY_FOLDER}/points_free_tab`;
 export const POINTS_ORBITAL_TEXT = {
+  confirmation_retry_stage: "study/points_confirmation_retry_stage",
+  confirmation_retry_progress: "study/points_confirmation_retry_progress",
+  confirmation_repair_notice: "study/points_confirmation_repair_notice",
+  catalog_intro: "study/points_catalog_intro",
+  catalog_results: "study/points_catalog_results",
+  catalog_partial: "study/points_catalog_partial",
+  catalog_resume_notice: "study/points_catalog_resume_notice",
+  paths_on_selection: "study/points_paths_on_selection",
+  orbital_available: "study/points_orbital_available",
+  orbital_pending: "study/points_orbital_pending",
+  ratios_pending: "study/points_ratios_pending",
+  ratios_unresolved: "study/points_ratios_unresolved",
+  ratios_not_applicable: "study/points_ratios_not_applicable",
+  catalog_stage: "study/points_catalog_stage",
+  catalog_progress: "study/points_catalog_progress",
+  coverage_title: "study/points_coverage_title",
+  coverage_range: "study/points_coverage_range",
+  coverage_none: "study/points_coverage_none",
+  coverage_counts: "study/points_coverage_counts",
+  coverage_scope: "study/points_coverage_scope",
+  coverage_details: "study/points_coverage_details",
+  coverage_denominator: "study/points_coverage_denominator",
+  coverage_investigated: "study/points_coverage_investigated",
+  coverage_periods: "study/points_coverage_periods",
+  coverage_unresolved: "study/points_coverage_unresolved",
+  coverage_unknown: "study/points_coverage_unknown",
   known_ray_cancel: "study/points_known_ray_cancel",
   known_ray_cancelled: "study/points_known_ray_cancelled",
   known_ray_retry: "study/points_known_ray_retry",
@@ -305,23 +331,68 @@ export const APP_STUDY_TEXT = {
   [KEY_STUDY_MAGNITUDES]: "orbital magnitudes",
   [KEY_STUDY_POINTS]: "orbital points",
   [KEY_STUDY_POINTS_FREE_TAB]: "free",
-  [POINTS_ORBITAL_TEXT.resume]: "Resume orbital calculation",
+  [POINTS_ORBITAL_TEXT.catalog_stage]: "Investigating denominator families",
+  [POINTS_ORBITAL_TEXT.confirmation_retry_stage]:
+    "Retrying numerical confirmations",
+  [POINTS_ORBITAL_TEXT.confirmation_repair_notice]:
+    "Previously limited families can now be retried. Verified orbitals will be reused.",
+  [POINTS_ORBITAL_TEXT.confirmation_retry_progress]:
+    "{processed} / {total} previously limited families retried",
+  [POINTS_ORBITAL_TEXT.catalog_intro]:
+    "Discover orbitals by investigating denominator families. Ray paths load when you select an orbital.",
+  [POINTS_ORBITAL_TEXT.catalog_results]:
+    "Orbitals: {orbitals} · Ratio families verified: {verified} · Unresolved: {unresolved} · Reused: {cached}",
+  [POINTS_ORBITAL_TEXT.catalog_partial]:
+    "Some catalog families remain unresolved or uninvestigated.",
+  [POINTS_ORBITAL_TEXT.catalog_resume_notice]:
+    "Discovery stopped. Resume from the last saved family.",
+  [POINTS_ORBITAL_TEXT.paths_on_selection]:
+    "Orbitals are available as they are found. Ray paths load for the selected orbital only.",
+  [POINTS_ORBITAL_TEXT.orbital_available]:
+    "Validated orbital. Select to view its points and available ray paths.",
+  [POINTS_ORBITAL_TEXT.orbital_pending]: "Orbital validation pending",
+  [POINTS_ORBITAL_TEXT.ratios_pending]: "Landing ratios pending",
+  [POINTS_ORBITAL_TEXT.ratios_unresolved]:
+    "No verified landing ratios available",
+  [POINTS_ORBITAL_TEXT.ratios_not_applicable]:
+    "No landing rays for this orbital",
+  [POINTS_ORBITAL_TEXT.catalog_progress]:
+    "{processed} / {total} families in this job’s budget",
+  [POINTS_ORBITAL_TEXT.coverage_title]: "Denominator coverage ≤ {bound}",
+  [POINTS_ORBITAL_TEXT.coverage_range]:
+    "Fully investigated through denominator {denominator}.",
+  [POINTS_ORBITAL_TEXT.coverage_none]: "No denominator fully investigated yet.",
+  [POINTS_ORBITAL_TEXT.coverage_counts]:
+    "{investigated} / {total} families investigated · {validated} families verified · {unresolved} unresolved · {untested} uninvestigated · {cached} reused",
+  [POINTS_ORBITAL_TEXT.coverage_scope]:
+    "Reduced odd denominators only. Unresolved families remain possible; this bound does not establish that all orbitals are known.",
+  [POINTS_ORBITAL_TEXT.coverage_details]: "Coverage details",
+  [POINTS_ORBITAL_TEXT.coverage_denominator]: "Denominator",
+  [POINTS_ORBITAL_TEXT.coverage_investigated]: "Families investigated",
+  [POINTS_ORBITAL_TEXT.coverage_periods]: "Candidate periods",
+  [POINTS_ORBITAL_TEXT.coverage_unresolved]: "Unresolved families",
+  [POINTS_ORBITAL_TEXT.coverage_unknown]:
+    "Denominator coverage was not recorded for these results.",
+  [POINTS_ORBITAL_TEXT.resume]: "Resume discovery",
   [POINTS_ORBITAL_TEXT.resume_notice]:
     "This calculation stopped. Resume from its last saved checkpoint.",
-  [POINTS_ORBITAL_TEXT.cancel]: "Cancel calculation",
+  [POINTS_ORBITAL_TEXT.cancel]: "Cancel discovery",
   [POINTS_ORBITAL_TEXT.title]: "stored orbitals",
   [POINTS_ORBITAL_TEXT.known_ray_cancel]: "Cancel tracing",
   [POINTS_ORBITAL_TEXT.known_ray_cancelled]: "Path tracing canceled.",
   [POINTS_ORBITAL_TEXT.known_ray_retry]: "Trace remaining paths",
   [POINTS_ORBITAL_TEXT.known_ray_failed]: "Unable to trace ray paths.",
   [POINTS_ORBITAL_TEXT.known_ray_cache_loading]: "Loading saved ray paths…",
-  [POINTS_ORBITAL_TEXT.known_ray_cache_failed]: "Paths could not be saved for later.",
-  [POINTS_ORBITAL_TEXT.known_ray_progress]: "Tracing paths: {processed} of {total}",
+  [POINTS_ORBITAL_TEXT.known_ray_cache_failed]:
+    "Paths could not be saved for later.",
+  [POINTS_ORBITAL_TEXT.known_ray_progress]:
+    "Tracing paths: {processed} of {total}",
   [POINTS_ORBITAL_TEXT.known_ray_loading]: "Tracing known landing rays",
-  [POINTS_ORBITAL_TEXT.known_ray_unresolved]: "Some ray paths could not be verified.",
+  [POINTS_ORBITAL_TEXT.known_ray_unresolved]:
+    "Some ray paths could not be verified.",
   [POINTS_ORBITAL_TEXT.julia_canvas]: "Julia set for the selected core point",
   [POINTS_ORBITAL_TEXT.stale]:
-    "Stored results use an earlier discovery method. Recalculate using the Seed Surveys method.",
+    "Stored results use an earlier discovery method. Investigate denominator families to update them.",
   [POINTS_ORBITAL_TEXT.recalculate]:
     "Recalculate orbitals for this focal point",
   [POINTS_ORBITAL_TEXT.confirmation]:
@@ -343,7 +414,7 @@ export const APP_STUDY_TEXT = {
     "{processed} / {total} orbitals finished. Preparing the landing-ray search for orbital {current}.",
   [POINTS_ORBITAL_TEXT.select]: "Select a bailiwick to view its orbitals.",
   [POINTS_ORBITAL_TEXT.empty]: "No stored orbitals for this core point.",
-  [POINTS_ORBITAL_TEXT.calculate]: "Calculate orbitals for this focal point",
+  [POINTS_ORBITAL_TEXT.calculate]: "Discover orbitals for this focal point",
   [POINTS_ORBITAL_TEXT.loading]: "Loading stored orbitals…",
   [POINTS_ORBITAL_TEXT.calculating]: "Calculating orbitals…",
   [POINTS_ORBITAL_TEXT.load_error]: "Unable to load stored orbitals.",

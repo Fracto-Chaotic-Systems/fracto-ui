@@ -3,6 +3,10 @@ import styled from "styled-components";
 import AppText from "../../../AppText.jsx";
 import { POINTS_ORBITAL_TEXT } from "../../../text/StudyText.jsx";
 import { render_pattern_block } from "../StudyUtils.jsx";
+import {
+  orbital_selectable,
+  orbital_ratio_label,
+} from "./PointsOrbitalState.js";
 
 const Panel = styled.div`
   padding: 0.5rem;
@@ -18,6 +22,28 @@ const Panel = styled.div`
     margin: 0.5rem 0;
   }
   min-width: 0;
+  .denominator-coverage {
+    border-top: 1px solid #ddd;
+    margin-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    overflow-wrap: anywhere;
+  }
+  .coverage-details {
+    max-height: 14rem;
+    overflow: auto;
+  }
+  .coverage-details table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .coverage-details th,
+  .coverage-details td {
+    text-align: left;
+    padding: 0.2rem;
+  }
+  summary {
+    cursor: pointer;
+  }
   .orbital-list {
     list-style: none;
     margin: 0;
@@ -44,6 +70,10 @@ const Panel = styled.div`
   .orbital-row:focus-visible {
     outline: 2px solid #286090;
     outline-offset: -2px;
+  }
+  .orbital-row:disabled {
+    opacity: 0.55;
+    cursor: default;
   }
   .orbital-pattern {
     flex: 0 0 auto;
@@ -83,6 +113,30 @@ const format = (key, values) =>
 const calculation_progress = (progress = {}) => {
   if (progress.stage === "queued" || progress.job_status === "queued")
     return { label: text("queued") };
+  if (
+    progress.phase === "catalog" &&
+    progress.catalog_confirmation_retry_total >
+      (progress.catalog_confirmation_retries || 0)
+  )
+    return {
+      label: text("confirmation_retry_stage"),
+      value: progress.catalog_confirmation_retries || 0,
+      total: progress.catalog_confirmation_retry_total,
+      description: format("confirmation_retry_progress", {
+        processed: progress.catalog_confirmation_retries || 0,
+        total: progress.catalog_confirmation_retry_total,
+      }),
+    };
+  if (progress.phase === "catalog")
+    return {
+      label: text("catalog_stage"),
+      value: progress.catalog_processed,
+      total: progress.catalog_total,
+      description: format("catalog_progress", {
+        processed: progress.catalog_processed ?? 0,
+        total: progress.catalog_total ?? 0,
+      }),
+    };
   if (progress.stage === "persisting") {
     if (progress.phase === "rays") return { label: text("saving_rays") };
     return {
@@ -143,11 +197,18 @@ export default function PointsStoredOrbitalsView({
   resumable = false,
   job_id,
   progress,
+  coverage,
+  discovery_strategy,
+  confirmation_repair_available,
   on_calculate,
   on_cancel,
   on_reload,
 }) {
-  const selected_orbital = selection || orbitals[0];
+  const selected_orbital = orbital_selectable(selection)
+    ? selection
+    : orbitals.find(orbital_selectable);
+  const catalog_only = discovery_strategy === "catalog-representative-rays-v1";
+  const report = progress?.catalog_coverage || coverage;
   const metric = calculation_progress(progress || {});
   const determinate = Number.isFinite(metric.total) && metric.total > 0;
   const value = Math.min(
@@ -175,9 +236,22 @@ export default function PointsStoredOrbitalsView({
               value={determinate ? value : undefined}
             />
             {metric.description && <p>{metric.description}</p>}
+            {catalog_only && (
+              <p>
+                {format("catalog_results", {
+                  orbitals: progress?.orbital_count ?? orbitals.length,
+                  verified: progress?.catalog_accepted ?? 0,
+                  unresolved: progress?.catalog_unresolved ?? 0,
+                  cached: progress?.catalog_cache_hits ?? 0,
+                })}
+              </p>
+            )}
+            {catalog_only && <p>{text("paths_on_selection")}</p>}
           </>
         )}
-        {notice === "partial" && <p>{text("partial")}</p>}
+        {notice === "partial" && (
+          <p>{text(catalog_only ? "catalog_partial" : "partial")}</p>
+        )}
         {status === "error" && (
           <p>
             {text(
@@ -190,12 +264,95 @@ export default function PointsStoredOrbitalsView({
           </p>
         )}
       </div>
+      {report && (
+        <section
+          className="denominator-coverage"
+          aria-label={format("coverage_title", {
+            bound: report.max_denominator,
+          })}
+        >
+          <p>
+            <strong>
+              {format("coverage_title", { bound: report.max_denominator })}
+            </strong>
+          </p>
+          <p>
+            {report.tested_through_denominator > 0
+              ? format("coverage_range", {
+                  denominator: report.tested_through_denominator,
+                })
+              : text("coverage_none")}
+          </p>
+          <p>
+            {format("coverage_counts", {
+              investigated: report.investigated_families,
+              total: report.total_families,
+              validated: report.validated_families,
+              unresolved: report.unresolved_families,
+              untested: report.uninvestigated_families,
+              cached: report.cache_hits,
+            })}
+          </p>
+          <details>
+            <summary>{text("coverage_details")}</summary>
+            <div className="coverage-details">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">{text("coverage_denominator")}</th>
+                    <th scope="col">{text("coverage_investigated")}</th>
+                    <th scope="col">{text("coverage_periods")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {report.denominators.map((entry) => (
+                    <tr key={entry.denominator}>
+                      <td>{entry.denominator}</td>
+                      <td>
+                        {entry.investigated_families} / {entry.total_families}
+                      </td>
+                      <td>{entry.candidate_orbital_periods.join(", ")}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {!!report.unresolved_details?.length && (
+                <>
+                  <p>
+                    <strong>{text("coverage_unresolved")}</strong>
+                  </p>
+                  <ul>
+                    {report.unresolved_details.map((family) => (
+                      <li key={family.family_key}>
+                        {family.family_key}:{" "}
+                        {family.reason.replaceAll("_", " ")}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </div>
+          </details>
+          <p>{text("coverage_scope")}</p>
+        </section>
+      )}
+      {!report && status === "ready" && orbitals.length > 0 && (
+        <p>{text("coverage_unknown")}</p>
+      )}
       {status === "calculating" && job_id && (
         <p>{action("cancel", on_cancel)}</p>
       )}
       {resumable && status !== "calculating" && (
         <>
-          <p>{text("resume_notice")}</p>
+          <p>
+            {text(
+              confirmation_repair_available
+                ? "confirmation_repair_notice"
+                : catalog_only
+                  ? "catalog_resume_notice"
+                  : "resume_notice",
+            )}
+          </p>
           <p>{action("resume", on_calculate)}</p>
         </>
       )}
@@ -207,25 +364,37 @@ export default function PointsStoredOrbitalsView({
           (status === "error" && error_kind === "calculate")) && (
           <>
             <p>{text(stale ? "stale" : "empty")}</p>
+            <p>{text("catalog_intro")}</p>
             <p>{action(stale ? "recalculate" : "calculate", on_calculate)}</p>
           </>
         )}
       <ul className="orbital-list">
         {orbitals.map((orbital) => {
-          const ratios = orbital.points
-            .map(
-              (point) =>
-                point.landing_ratios
-                  .map((ratio) => `${ratio.numerator}/${ratio.denominator}`)
-                  .join(", ") || "—",
-            )
-            .join("; ");
+          const has_ratios = orbital.points.some(
+            (point) => point.landing_ratios?.length,
+          );
+          const ratios = has_ratios
+            ? orbital.points
+                .map(
+                  (point) =>
+                    (point.landing_ratios || [])
+                      .map((ratio) => `${ratio.numerator}/${ratio.denominator}`)
+                      .join(", ") || "—",
+                )
+                .join("; ")
+            : text(orbital_ratio_label(orbital));
           return (
             <li key={orbital.orbital_id}>
               <button
                 type="button"
                 className="orbital-row"
                 aria-pressed={orbital === selected_orbital}
+                disabled={!orbital_selectable(orbital)}
+                title={text(
+                  orbital_selectable(orbital)
+                    ? "orbital_available"
+                    : "orbital_pending",
+                )}
                 onClick={() => on_select_orbital?.(orbital)}
               >
                 <span className="orbital-pattern">

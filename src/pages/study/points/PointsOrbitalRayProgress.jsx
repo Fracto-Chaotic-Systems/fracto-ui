@@ -12,24 +12,29 @@ export default function PointsOrbitalRayProgress({
   processed,
   total,
   status,
+  assignment_notice,
   on_cancel,
   on_retry,
 }) {
   const progress = text("known_ray_progress")
     .replace("{processed}", processed)
     .replace("{total}", total);
-  const retry = !running && ["failed", "partial", "cancelled"].includes(status);
-  const message = loading_cache
-    ? text("known_ray_cache_loading")
-    : running
-      ? progress
-      : status === "cancelled"
-        ? text("known_ray_cancelled")
-        : status === "failed"
-          ? text("known_ray_failed")
-          : status && status !== "rays_found"
-            ? text("known_ray_unresolved")
-            : null;
+  const retry =
+    !running &&
+    (cache_error || ["failed", "partial", "cancelled"].includes(status));
+  const message = assignment_notice
+    ? text(assignment_notice)
+    : loading_cache
+      ? text("known_ray_cache_loading")
+      : running
+        ? progress
+        : status === "cancelled"
+          ? text("known_ray_cancelled")
+          : status === "failed"
+            ? text("known_ray_failed")
+            : status && status !== "rays_found"
+              ? text("known_ray_unresolved")
+              : null;
   if (!message && !cache_error) return null;
   return (
     <div

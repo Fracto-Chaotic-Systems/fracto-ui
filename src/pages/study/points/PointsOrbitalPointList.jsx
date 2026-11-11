@@ -6,6 +6,7 @@ import {
   CELL_ALIGN_LEFT,
   TABLE_NO_BORDER,
   TABLE_NO_HEADER,
+  TABLE_CAN_SELECT,
 } from "../../../utils/ui/styles/CoolTableStyles.jsx";
 import { format_orbital_point } from "./PointsOrbitalPointFormat.js";
 
@@ -22,7 +23,7 @@ const render_coordinate = (text, width) => (
   </code>
 );
 
-export default function PointsOrbitalPointList({ selected_orbital, active_point_index }) {
+export default function PointsOrbitalPointList({ selected_orbital, active_point_index, on_select_point }) {
   const points = selected_orbital?.points || EMPTY_POINTS;
   const data = useMemo(() => {
     const formatted = points.map(format_orbital_point);
@@ -40,7 +41,11 @@ export default function PointsOrbitalPointList({ selected_orbital, active_point_
       <CoolTable
         columns={COLUMNS}
         data={data}
-        options={[TABLE_NO_BORDER, TABLE_NO_HEADER]}
+        options={[TABLE_NO_BORDER, TABLE_NO_HEADER, TABLE_CAN_SELECT]}
+        on_select_row={(row) => {
+          const point = points[row];
+          if (point) on_select_point?.(point.point_index);
+        }}
         selected_row={points.findIndex((point) => point.point_index === active_point_index)}
         scroll_selected_row
       />

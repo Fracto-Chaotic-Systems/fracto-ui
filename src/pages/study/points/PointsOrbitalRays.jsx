@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import OrbitalRayStorage from "./OrbitalRayStorage.js";
 import { cached_orbital_rays } from "@fracto/sdk/orbitals/FractoOrbitalRayCache.js";
 import PointsOrbitalRayProgress from "./PointsOrbitalRayProgress.jsx";
+import { orbital_ratio_label } from "./PointsOrbitalState.js";
 
 const request_key = (props) => JSON.stringify(props.trace_request);
 
@@ -34,7 +35,11 @@ export default class PointsOrbitalRays extends Component {
   };
   cancel = () => {
     this.stop();
-    this.setState({ running: false, loading_cache: false, status: "cancelled" });
+    this.setState({
+      running: false,
+      loading_cache: false,
+      status: "cancelled",
+    });
   };
   trace = async () => {
     this.stop();
@@ -80,19 +85,23 @@ export default class PointsOrbitalRays extends Component {
     // accesses can be traced and validated without recalculating saved partners.
     const remaining = {
       ...request,
-      requests: request.requests.filter((access) => !saved.has(access.angle.key)),
+      requests: request.requests.filter(
+        (access) => !saved.has(access.angle.key),
+      ),
     };
     this.setState({ processed: 0, total: remaining.requests.length });
     const persist = (rays) => {
-      if (!storage || !rays.some((ray) => !saved.has(ray.angle.key))) return;
-      for (const ray of rays) saved.add(ray.angle.key);
+      const fresh = rays.filter((ray) => !saved.has(ray.angle.key));
+      if (!storage || !fresh.length) return;
+      for (const ray of fresh) saved.add(ray.angle.key);
       storage
-        .save(rays)
+        .save(fresh)
         .then(() => {
           if (this.is_mounted && request_key(this.props) === key)
             this.setState({ cache_error: false });
         })
         .catch(() => {
+          for (const ray of fresh) saved.delete(ray.angle.key);
           if (this.is_mounted && request_key(this.props) === key)
             this.setState({ cache_error: true });
         });
@@ -118,8 +127,10 @@ export default class PointsOrbitalRays extends Component {
             processed: data.progress.processed,
             total: data.progress.total,
           });
-          publish(data.progress.rays);
-          persist(data.progress.rays);
+          if (data.progress.rays.length) {
+            publish(data.progress.rays);
+            persist(data.progress.rays);
+          }
         }
         if (data.result) {
           persist(data.result.rays);
@@ -137,6 +148,12 @@ export default class PointsOrbitalRays extends Component {
   render() {
     const { running, loading_cache, cache_error, processed, total, status } =
       this.state;
+    if (!total && this.props.selected_orbital)
+      return (
+        <PointsOrbitalRayProgress
+          assignment_notice={orbital_ratio_label(this.props.selected_orbital)}
+        />
+      );
     if (!running && !cache_error && (!status || status === "rays_found"))
       return null;
     return (

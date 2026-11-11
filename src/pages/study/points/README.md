@@ -34,6 +34,11 @@ The lower-right table follows the animation row and scrolls the highlight into
 view, including reverse playback and the closing sample. The circuitry control
 does not repeat the point list. Changing selections
 clears the old highlight.
+Clicking a point row highlights its Julia square in gold while paused and seeks
+the circuitry cursor to the exact stored point. Running animation continues
+from that location with its existing speed and direction. Selection requests
+retain stored point indices through curve rotation and wait for matching data
+if the selected orbital is still loading.
 While animation runs, Julia ray paths and ratio boxes for inactive stored point
 indices are hidden. Tracking changes crossfade outgoing and incoming overlays
 over 120 ms using a smooth easing curve. Intermediate opacity is retained if
@@ -64,7 +69,7 @@ before replacing markers and reapplies the selection after streamed paints.
 Changing the middle list's selection clears the old orbital immediately.
 
 `PointsOrbitalTraceRequest.js` prepares the selected orbital's known accesses
-for future ray tracing. `PointsJuliaSet` passes the batch as `trace_request` to
+for selection-time ray tracing. `PointsJuliaSet` passes the batch as `trace_request` to
 `PointsJuliaCanvas`; it is not forwarded to the Julia image survey. Each batch
 contains the orbital ID, period, exact focal-point strings, and one request per
 stored ratio with its point index, exact landing coordinates, reduced rational
@@ -79,6 +84,12 @@ and reuses `trace_ray_family` for complete known families. Existing convergence,
 precision, and endpoint-dynamics checks apply; each ray must also land at its
 recorded coordinates and point index within the shared accuracy tolerance.
 Missing partners, failed traces, and mismatched endpoints remain unresolved.
+Known catalog families are not restricted by the legacy period-24 enumeration
+cap. The tracer independently rechecks stored Decimal cycles, retaining their
+branch instead of re-solving long cycles from rounded coordinates. It traces
+only the supplied complete doubling families, to at least angle period + 40
+levels within the shared depth/point limits. Ray-by-ray progress advances during
+long families; geometry is published only after the complete family validates.
 Validated families stream into the Julia overlay with Seed Surveys' ray strokes
 and ratio labels, beneath the orbital squares. Path-count progress is visible
 only during tracing. Selection changes/unmount terminate the worker and invalidate
@@ -115,8 +126,44 @@ the current focal point, period, points, and ratios, then merge and save paths
 transactionally. Stale identities return 409. Geometry is excluded from list
 and progression responses, and large documents reuse the existing compressed
 ray-cache codec. UI layout and colors do not invalidate geometry.
+The selected-path PUT accepts up to 96 MiB by default (an explicit
+`FRACTO_JSON_BODY_LIMIT` still applies), matching the bounded chunk-backed cache.
+Other JSON endpoints retain their existing limit. Worker messages and queued
+saves carry each newly completed family once, avoiding repeated full geometry.
+New catalog-only discovery jobs never generate paths for unselected orbitals.
 
 ## Verification and benchmark
+
+Catalog-only jobs show family investigation progress, verified ratio-family and
+orbital counts, unresolved families, and cache reuse separately from path tracing.
+The discovery action explains that paths load only for a selection. Existing
+survey jobs retain their survey/refinement/ray stages when resumed.
+
+Older confirmation-depth failures expose a targeted Resume discovery action.
+The notice explains that verified orbitals will be reused. During repair, the
+progress bar counts the retry queue rather than showing a completed 412/412
+catalog bar while numerical work is still running. New orbitals and ratios
+arrive through the existing selection-preserving polling flow.
+
+Active or stopped jobs expose their own published membership instead of waiting
+for the latest terminal survey. The controller polls new or changed membership
+details in batches of four, with one post-checkpoint refresh to pick up ratio
+publication. Unchanged details keep their object identity; current selection is
+retained when more orbitals arrive and when discovery finishes. Updates to the
+same selected orbital preserve its tracked point and animation position.
+
+`PointsOrbitalState.js` keeps orbital selectability independent of assignment
+and path states. Validated orbitals with pending or unresolved ratios are
+selectable; unvalidated entries are disabled. Empty ratio lists display a brief
+pending/unavailable label instead of a repeated list of dashes. The same state
+appears below the Julia set when only point boxes are available, with no loading
+bar or worker until verified ratios exist. Path lookup, tracing, cancellation,
+retry, and cache-failure notices remain selection-scoped; successful completion
+leaves no lingering progress message.
+
+`npm run test:orbital-discovery` from the UI checks live catalog publication,
+selection stability, pending/unresolved states, path notices and the retained
+legacy progress stages without starting an application discovery job.
 
 From the Fracto root, `node scripts/benchmark_orbital_ray_paths.js --database
 --runs 3` measures known-ray tracing, memory reuse, serialized cache decoding,
@@ -172,6 +219,14 @@ Run the focused suite with `npm run test:orbital-rays`; set
   work is indeterminate; known counters show stage percentages, and ray progress
   includes completed orbitals and current angle families. Full values wrap inside
   the existing scrollable lower section.
+  Denominator-catalog jobs show family-budget progress and a coverage summary:
+  inclusive bound, fully investigated denominator range, validated/unresolved/
+  uninvestigated families, and reused outcomes. Expandable details show each
+  reduced odd denominator, investigated/total families, divisor candidate periods,
+  and unresolved family reasons. The report distinguishes investigated families
+  from validated landings and never asserts that all orbitals are known.
+  Terminal survey reads include the persisted report; interrupted job coverage
+  takes precedence while resuming. Old results explicitly report missing coverage.
 - `PointsMainPanel.jsx` fetches the zero-seed legacy iterative series and
   Newton result, then polls the FractoCardinality seeded survey job
   over `[-1.5, 1.5]` on both axes at 0.025 intervals. It adapts the orbital point

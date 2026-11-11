@@ -39,7 +39,7 @@ export default class OrbitalRayStorage {
     }
     const { result } = await DataBackend.get_orbital_ray_paths(
       this.request.orbital_id,
-      AbortSignal.timeout(5000),
+      AbortSignal.timeout(30000),
     );
     if (orbital_ray_cache_matches(result, this.request)) {
       this.cache = result;

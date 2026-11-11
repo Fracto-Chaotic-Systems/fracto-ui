@@ -28,10 +28,17 @@ test("point list preserves stored decimal digits and tracks original point indic
     format_orbital_point,
     CoolTable: "table", CELL_TYPE_CALLBACK: "callback", TABLE_NO_BORDER: "no-border",
     TABLE_NO_HEADER: "no-header",
+    TABLE_CAN_SELECT: "selectable",
     CELL_ALIGN_CENTER: "center", CELL_ALIGN_LEFT: "left",
   });
   const selected_orbital = { points: [{ ...point, point_index: 0 }, point] };
-  const table = List({ selected_orbital, active_point_index: 4 }).children[0];
+  const selections = [];
+  const table = List({ selected_orbital, active_point_index: 4, on_select_point: (index) => selections.push(index) }).children[0];
+  assert.ok(table.props.options.includes("selectable"));
+  table.props.on_select_row(1);
+  table.props.on_select_row(0);
+  table.props.on_select_row(-1);
+  assert.deepEqual(selections, [4, 0]);
   assert.equal(table.props.selected_row, 1);
   assert.equal(table.props.scroll_selected_row, true);
   for (const column of ["ratios", "real", "imaginary"]) {

@@ -69,17 +69,50 @@ export class StudyPoints extends Component {
     selected_orbital: null,
     active_point_index: -1,
     animation_playing: false,
+    point_selection_request: null,
   };
 
   on_select_minibrot = (selected_minibrot) =>
-    this.setState({ selected_minibrot, selected_orbital: null, active_point_index: -1, animation_playing: false });
+    this.setState({
+      selected_minibrot,
+      selected_orbital: null,
+      active_point_index: -1,
+      animation_playing: false,
+      point_selection_request: null,
+    });
 
-  on_select_orbital = (selected_orbital) => this.setState({ selected_orbital, active_point_index: -1 });
+  on_select_orbital = (selected_orbital) =>
+    this.setState(
+      selected_orbital &&
+        selected_orbital.orbital_id === this.state.selected_orbital?.orbital_id
+        ? { selected_orbital }
+        : {
+            selected_orbital,
+            active_point_index: -1,
+            point_selection_request: null,
+          },
+    );
 
-  on_active_point_changed = (orbital_id, active_point_index, animation_playing = false) => {
-    if (orbital_id === this.state.selected_orbital?.orbital_id &&
-        (active_point_index !== this.state.active_point_index ||
-         animation_playing !== this.state.animation_playing)) {
+  on_select_point = (point_index) => {
+    const orbital = this.state.selected_orbital;
+    if (!orbital?.points?.some((point) => point.point_index === point_index))
+      return;
+    this.setState({
+      active_point_index: point_index,
+      point_selection_request: { orbital_id: orbital.orbital_id, point_index },
+    });
+  };
+
+  on_active_point_changed = (
+    orbital_id,
+    active_point_index,
+    animation_playing = false,
+  ) => {
+    if (
+      orbital_id === this.state.selected_orbital?.orbital_id &&
+      (active_point_index !== this.state.active_point_index ||
+        animation_playing !== this.state.animation_playing)
+    ) {
       this.setState({ active_point_index, animation_playing });
     }
   };
@@ -142,7 +175,10 @@ export class StudyPoints extends Component {
     const { width, height, vertical, horizontal } = this.state;
     const half_bar = SPLITTER_WIDTH_PX / 2;
     // Clamp only the displayed geometry; resizing must not overwrite saved offsets.
-    const vertical_max = Math.max(0, Math.min(VERTICAL_MAX_PX, width - half_bar));
+    const vertical_max = Math.max(
+      0,
+      Math.min(VERTICAL_MAX_PX, width - half_bar),
+    );
     const vertical_min = Math.min(VERTICAL_MIN_PX, vertical_max);
     const x = Math.max(vertical_min, Math.min(vertical, vertical_max));
     const y = Math.max(0, Math.min(horizontal, height - half_bar));
@@ -197,6 +233,7 @@ export class StudyPoints extends Component {
               on_active_point_changed={this.on_active_point_changed}
               active_point_index={this.state.active_point_index}
               animation_playing={this.state.animation_playing}
+              point_selection_request={this.state.point_selection_request}
             />
           </Pane>
           <Pane
@@ -210,6 +247,7 @@ export class StudyPoints extends Component {
             <PointsOrbitalPointList
               selected_orbital={this.state.selected_orbital}
               active_point_index={this.state.active_point_index}
+              on_select_point={this.on_select_point}
             />
           </Pane>
           {width > 0 && height > 0 && (

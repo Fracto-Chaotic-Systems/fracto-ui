@@ -79,6 +79,7 @@ export class CircuitryChart extends Component {
     focal_point: PropTypes.object,
     selected_orbital: PropTypes.object,
     on_active_point_changed: PropTypes.func,
+    point_selection_request: PropTypes.object,
     scope: PropTypes.number,
     height_px: PropTypes.number.isRequired,
     width_px: PropTypes.number.isRequired,
@@ -150,7 +151,27 @@ export class CircuitryChart extends Component {
     if (prevState.radial_sweep !== this.state.radial_sweep) {
       this.load_circuitry(focal_point);
     }
+    this.apply_point_selection();
   }
+
+  applied_point_selection = null;
+
+  apply_point_selection = () => {
+    const request = this.props.point_selection_request;
+    const data = this.state.circuitry_data;
+    if (!request || request === this.applied_point_selection ||
+        request.orbital_id !== this.props.selected_orbital?.orbital_id ||
+        request.orbital_id !== data?.orbital_id) return;
+    const source_row = this.props.selected_orbital.points.findIndex(
+      (point) => point.point_index === request.point_index,
+    );
+    const row = data.orbital_point_indices
+      ? data.orbital_point_indices.indexOf(source_row)
+      : source_row;
+    if (row < 0 || !data.orbital_points?.[row] || !data.result?.length) return;
+    this.applied_point_selection = request;
+    this.on_orbital_point_selected(row);
+  };
 
   componentWillUnmount() {
     this.is_unmounted = true;
@@ -382,16 +403,10 @@ export class CircuitryChart extends Component {
     if (!orbital_point || samples.length === 0) {
       return;
     }
-    let nearest_index = 0;
-    let nearest_distance = Number.POSITIVE_INFINITY;
-    samples.forEach(({ C }, index) => {
-      const distance =
-        (C.re - orbital_point.re) ** 2 + (C.im - orbital_point.im) ** 2;
-      if (distance < nearest_distance) {
-        nearest_distance = distance;
-        nearest_index = index;
-      }
-    });
+    // Each stored point starts a sampled interval. Use its index rather than
+    // comparing rounded coordinates, which can coincide for nearby points.
+    const interval_width = (samples.length - 1) / this.state.circuitry_data.orbital_points.length;
+    const nearest_index = Math.round(row * interval_width);
     this.setState({
       animation_index: nearest_index,
       selected_orbital_row: row,

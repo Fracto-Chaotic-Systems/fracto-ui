@@ -245,6 +245,47 @@ test("existing focal-only circuitry callers retain their detector request", () =
   h.chart.componentWillUnmount();
 });
 
+test("table point requests seek through rotated indices without restarting playback", () => {
+  const h = harness({
+    focal_point: { x: 0, y: 0 },
+    selected_orbital: { orbital_id: "7", points: [0, 1, 2].map((point_index) => ({ point_index })) },
+  });
+  h.chart.componentDidMount();
+  const old_props = h.chart.props;
+  h.chart.props = { ...old_props, point_selection_request: { orbital_id: "7", point_index: 0 } };
+  h.chart.componentDidUpdate(old_props, { ...h.chart.state });
+  assert.equal(h.chart.applied_point_selection, null);
+  const response = animation_response("7", 3);
+  response.orbital_points = [{ re: 4, im: 0 }, { re: 2, im: 0 }, { re: 3, im: 0 }];
+  response.result = Array.from({ length: 13 }, (_, index) => ({ t: index / 4, C: response.orbital_points[Math.floor(index / 4) % 3] }));
+  const previous = { ...h.chart.state };
+  h.calls[0][1](response);
+  h.chart.componentDidUpdate(h.chart.props, previous);
+  assert.equal(h.chart.state.selected_orbital_row, 2);
+  assert.equal(h.chart.state.animation_index, 8);
+  assert.equal(h.chart.state.animation_playing, false);
+  assert.equal(h.chart.state.selected_orbital_point.x, 4);
+  h.chart.start_animation(-1);
+  const timer = h.chart.animation_timer_handle;
+  const before = h.chart.props;
+  h.chart.props = { ...before, point_selection_request: { orbital_id: "7", point_index: 2 } };
+  h.chart.componentDidUpdate(before, { ...h.chart.state });
+  assert.equal(h.chart.state.animation_index, 4);
+  assert.equal(h.chart.state.selected_orbital_row, 1);
+  assert.equal(h.chart.animation_timer_handle, timer);
+  h.chart.advance_animation(-1);
+  h.chart.componentDidUpdate(h.chart.props, { ...h.chart.state });
+  assert.equal(h.chart.state.animation_index, 3);
+  // The same row can be clicked again as a new request.
+  h.chart.props = { ...h.chart.props, point_selection_request: { orbital_id: "7", point_index: 2 } };
+  h.chart.apply_point_selection();
+  assert.equal(h.chart.state.animation_index, 4);
+  h.chart.props = { ...h.chart.props, point_selection_request: { orbital_id: "previous", point_index: 0 } };
+  h.chart.apply_point_selection();
+  assert.equal(h.chart.state.animation_index, 4);
+  h.chart.componentWillUnmount();
+});
+
 test("animation reports stored point identities after circuitry rotation", () => {
   const updates = [];
   const h = harness({

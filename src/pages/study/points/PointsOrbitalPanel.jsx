@@ -16,6 +16,7 @@ export default function PointsOrbitalPanel({
   on_active_point_changed,
   active_point_index,
   animation_playing,
+  point_selection_request,
 }) {
   let focal_point;
   try {
@@ -73,6 +74,7 @@ export default function PointsOrbitalPanel({
           width_px={circuitry_width}
           height_px={HEIGHT_PX}
           on_active_point_changed={on_active_point_changed}
+          point_selection_request={point_selection_request}
         />
       </div>
     </div>
