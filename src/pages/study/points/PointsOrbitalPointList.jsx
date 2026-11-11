@@ -9,6 +9,7 @@ import {
   TABLE_CAN_SELECT,
 } from "../../../utils/ui/styles/CoolTableStyles.jsx";
 import { format_orbital_point } from "./PointsOrbitalPointFormat.js";
+import { ordered_orbital_points } from "./PointsOrbitalOrder.js";
 
 const COLUMNS = [
   { id: "ratios", label: "Ratios", type: CELL_TYPE_CALLBACK, align: CELL_ALIGN_CENTER, style: { padding: "4px 12px" } },
@@ -24,7 +25,7 @@ const render_coordinate = (text, width) => (
 );
 
 export default function PointsOrbitalPointList({ selected_orbital, active_point_index, on_select_point }) {
-  const points = selected_orbital?.points || EMPTY_POINTS;
+  const points = useMemo(() => selected_orbital ? ordered_orbital_points(selected_orbital) : EMPTY_POINTS, [selected_orbital]);
   const data = useMemo(() => {
     const formatted = points.map(format_orbital_point);
     const real_width = Math.max(0, ...formatted.map(({ real }) => real.length));

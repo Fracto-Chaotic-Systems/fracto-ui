@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import DataBackend from "../../../backend/DataBackend.jsx";
 import PointsStoredOrbitalsView from "./PointsStoredOrbitalsView.jsx";
 import { orbital_selectable } from "./PointsOrbitalState.js";
+import { compare_orbitals } from "./PointsOrbitalOrder.js";
 
 const selection_key = (props) =>
   JSON.stringify([
@@ -69,6 +70,7 @@ export default class PointsStoredOrbitals extends Component {
     this.controller?.abort();
     clearTimeout(this.poll_timer);
     this.in_calculation = false;
+    this.rediscovering = false;
     this.job_details = new Map();
     this.controller = new AbortController();
     if (!preserve_selection) this.props.on_select_orbital?.(null);
@@ -160,6 +162,7 @@ export default class PointsStoredOrbitals extends Component {
         );
       }
       if (this.current(generation)) {
+        orbitals.sort(compare_orbitals);
         const selected_orbital =
           orbitals.find(
             (orbital) =>
@@ -235,11 +238,15 @@ export default class PointsStoredOrbitals extends Component {
       orbitals.push(...batch);
     }
     if (!this.current(generation)) return;
-    orbitals.sort(
-      (a, b) =>
-        (a.discovery_metadata?.rank ?? Infinity) -
-        (b.discovery_metadata?.rank ?? Infinity),
-    );
+    if (this.rediscovering) {
+      const ids = new Set(orbitals.map((orbital) => orbital.orbital_id));
+      orbitals.push(
+        ...this.state.orbitals.filter(
+          (orbital) => !ids.has(orbital.orbital_id),
+        ),
+      );
+    }
+    orbitals.sort(compare_orbitals);
     const previous = this.state.selected_orbital;
     const selected_orbital =
       orbitals.find(
@@ -254,7 +261,8 @@ export default class PointsStoredOrbitals extends Component {
       this.props.on_select_orbital?.(selected_orbital);
   };
 
-  calculate = async () => {
+  rediscover = () => this.calculate(true);
+  calculate = async (fresh = false) => {
     if (
       !this.is_mounted ||
       this.in_calculation ||
@@ -263,8 +271,10 @@ export default class PointsStoredOrbitals extends Component {
     )
       return;
     this.in_calculation = true;
+    this.rediscovering = fresh;
+    if (fresh) this.job_details = new Map();
     const generation = this.generation;
-    const resume_id = this.state.resumable ? this.state.job_id : null;
+    const resume_id = !fresh && this.state.resumable ? this.state.job_id : null;
     this.setState({
       status: "calculating",
       notice: null,
@@ -274,16 +284,21 @@ export default class PointsStoredOrbitals extends Component {
       confirmation_repair_available: false,
     });
     try {
-      const { result } = resume_id
-        ? await DataBackend.resume_bailiwick_orbitals(
+      const { result } = fresh
+        ? await DataBackend.rediscover_bailiwick_orbitals(
             this.props.selected_minibrot.id,
-            resume_id,
             this.controller.signal,
           )
-        : await DataBackend.calculate_bailiwick_orbitals(
-            this.props.selected_minibrot.id,
-            this.controller.signal,
-          );
+        : resume_id
+          ? await DataBackend.resume_bailiwick_orbitals(
+              this.props.selected_minibrot.id,
+              resume_id,
+              this.controller.signal,
+            )
+          : await DataBackend.calculate_bailiwick_orbitals(
+              this.props.selected_minibrot.id,
+              this.controller.signal,
+            );
       if (this.current(generation)) {
         this.setState({
           job_id: result.id,
@@ -322,6 +337,7 @@ export default class PointsStoredOrbitals extends Component {
   calculation_failed = (error, generation) => {
     if (this.current(generation) && error.name !== "AbortError") {
       this.in_calculation = false;
+      this.rediscovering = false;
       this.setState({ status: "error", error_kind: "calculate" });
     }
   };
@@ -371,6 +387,7 @@ export default class PointsStoredOrbitals extends Component {
         {...this.state}
         on_select_orbital={this.select_orbital}
         on_calculate={this.calculate}
+        on_rediscover={this.rediscover}
         on_cancel={this.cancel}
         on_reload={() => this.load()}
       />

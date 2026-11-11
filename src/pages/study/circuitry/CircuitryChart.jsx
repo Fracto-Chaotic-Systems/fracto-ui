@@ -1,4 +1,5 @@
 import { circuitry_layout } from "./CircuitryLayout.js";
+import { orbital_start_index } from "../points/PointsOrbitalOrder.js";
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { Line } from "react-chartjs-2";
@@ -327,7 +328,8 @@ export class CircuitryChart extends Component {
   };
 
   /**
-   * Rotate the orbit so its point nearest the origin is first. The
+   * For a selected stored orbit, start at the lowest landing numerator.
+   * Detected orbits without an explicit selection start nearest the origin. The
    * interpolated radial-sweep samples are rotated by the same whole-interval
    * offset, keeping the chart, distance chart, and point table synchronized.
    *
@@ -376,6 +378,9 @@ export class CircuitryChart extends Component {
         nearest_index = index;
       }
     });
+    if (this.props.selected_orbital) {
+      nearest_index = orbital_start_index(this.props.selected_orbital);
+    }
     if (nearest_index === 0) {
       return normalized_response;
     }

@@ -1,4 +1,5 @@
 import test from "node:test";
+import { orbital_start_index } from "../src/pages/study/points/PointsOrbitalOrder.js";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
@@ -33,6 +34,7 @@ const harness = (props, storage) => {
       PropTypes: { object: type, number: type },
       ChartJS: { register() {} },
       registerables: [],
+      orbital_start_index,
       TRANSPORT_BEGIN: "begin",
       TRANSPORT_END: "end",
       TRANSPORT_PAUSE: "pause",
@@ -248,7 +250,7 @@ test("existing focal-only circuitry callers retain their detector request", () =
 test("table point requests seek through rotated indices without restarting playback", () => {
   const h = harness({
     focal_point: { x: 0, y: 0 },
-    selected_orbital: { orbital_id: "7", points: [0, 1, 2].map((point_index) => ({ point_index })) },
+    selected_orbital: { orbital_id: "7", points: [0, 1, 2].map((point_index) => ({ point_index, landing_ratios: [{numerator: ["4", "1", "2"][point_index]}] })) },
   });
   h.chart.componentDidMount();
   const old_props = h.chart.props;
@@ -291,7 +293,7 @@ test("animation reports stored point identities after circuitry rotation", () =>
   const h = harness({
     focal_point: { x: 0, y: 0 },
     selected_orbital: { orbital_id: "7", points: [
-      { point_index: 0 }, { point_index: 1 }, { point_index: 2 },
+      { point_index: 0, landing_ratios: [{numerator:"4"}] }, { point_index: 1, landing_ratios: [{numerator:"1"}] }, { point_index: 2, landing_ratios: [{numerator:"2"}] },
     ] },
     on_active_point_changed: (...args) => updates.push(args),
   });

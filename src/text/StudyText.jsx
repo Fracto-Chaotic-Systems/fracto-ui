@@ -25,6 +25,7 @@ export const KEY_STUDY_MAGNITUDES = `${STUDY_FOLDER}/study_magnitudes`;
 export const KEY_STUDY_POINTS = `${STUDY_FOLDER}/study_points`;
 export const KEY_STUDY_POINTS_FREE_TAB = `${STUDY_FOLDER}/points_free_tab`;
 export const POINTS_ORBITAL_TEXT = {
+  rediscover: "study/points_rediscover",
   confirmation_retry_stage: "study/points_confirmation_retry_stage",
   confirmation_retry_progress: "study/points_confirmation_retry_progress",
   confirmation_repair_notice: "study/points_confirmation_repair_notice",
@@ -332,6 +333,7 @@ export const APP_STUDY_TEXT = {
   [KEY_STUDY_POINTS]: "orbital points",
   [KEY_STUDY_POINTS_FREE_TAB]: "free",
   [POINTS_ORBITAL_TEXT.catalog_stage]: "Investigating denominator families",
+  [POINTS_ORBITAL_TEXT.rediscover]: "Re-discover orbitals",
   [POINTS_ORBITAL_TEXT.confirmation_retry_stage]:
     "Retrying numerical confirmations",
   [POINTS_ORBITAL_TEXT.confirmation_repair_notice]:

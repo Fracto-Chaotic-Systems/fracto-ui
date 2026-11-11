@@ -53,6 +53,16 @@ export class DataBackend {
       `${DATA_ORIGIN()}/orbital-data/bailiwicks/${encodeURIComponent(id)}/discovery-job`,
       { signal, cache: "no-store" },
     );
+  static rediscover_bailiwick_orbitals = (id, signal) =>
+    request_json(
+      `${DATA_ORIGIN()}/orbital-data/bailiwicks/${encodeURIComponent(id)}/discovery-jobs/rediscover`,
+      {
+        method: "POST",
+        signal,
+        headers: { "Content-Type": "application/json" },
+        body: "{}",
+      },
+    );
   static resume_bailiwick_orbitals = (id, job, signal) =>
     request_json(
       `${DATA_ORIGIN()}/orbital-data/bailiwicks/${encodeURIComponent(id)}/discovery-jobs/${encodeURIComponent(job)}/resume`,

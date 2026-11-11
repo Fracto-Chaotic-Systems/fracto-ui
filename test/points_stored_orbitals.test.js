@@ -1,4 +1,9 @@
 import assert from "node:assert/strict";
+import {
+  ordered_orbital_points,
+  compare_orbitals,
+  format_landing_ratios,
+} from "../src/pages/study/points/PointsOrbitalOrder.js";
 import test from "node:test";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
@@ -66,6 +71,8 @@ function harness(backend = {}, selection = selected(55)) {
       },
       PointsStoredOrbitalsView: "view",
       orbital_selectable,
+      ordered_orbital_points,
+      compare_orbitals,
       AbortController,
       setTimeout: (fn) => {
         timers.set(++timer_id, fn);
@@ -108,6 +115,55 @@ test("selection loads stored progressions using exact core coordinates and no au
     h.panel.state.orbitals[0].points[0].point.re,
     orbital.points[0].point.re,
   );
+  h.panel.componentWillUnmount();
+});
+
+test("stored and live orbital lists sort by period then numerator and preserve selection", async () => {
+  const rows = [
+    { ...orbital, orbital_id: "long", period: 5 },
+    {
+      ...orbital,
+      orbital_id: "higher",
+      period: 3,
+      points: [
+        {
+          ...orbital.points[0],
+          landing_ratios: [{ numerator: "4", denominator: "7" }],
+        },
+      ],
+    },
+    { ...orbital, orbital_id: "lower", period: 3 },
+  ];
+  const h = harness({
+    stored_orbitals: async () => ({
+      result: rows.map((row) => ({ id: row.orbital_id })),
+    }),
+    stored_orbital: async (id) => ({
+      result: rows.find((row) => row.orbital_id === id),
+    }),
+  });
+  await h.panel.load();
+  assert.deepEqual(
+    Array.from(h.panel.state.orbitals, (row) => row.orbital_id),
+    ["lower", "higher", "long"],
+  );
+  assert.equal(h.panel.state.selected_orbital.orbital_id, "lower");
+  h.panel.select_orbital(h.panel.state.orbitals[1]);
+  await h.panel.sync_job_orbitals(
+    {
+      results: rows.map((row, rank) => ({
+        orbital_id: row.orbital_id,
+        discovery_metadata: { rank },
+      })),
+      progress: {},
+    },
+    h.panel.generation,
+  );
+  assert.deepEqual(
+    Array.from(h.panel.state.orbitals, (row) => row.orbital_id),
+    ["lower", "higher", "long"],
+  );
+  assert.equal(h.panel.state.selected_orbital.orbital_id, "higher");
   h.panel.componentWillUnmount();
 });
 
@@ -274,6 +330,7 @@ test("orbital selection defaults to the first result, propagates changes, and cl
 
 test("stored view shows orbital summaries without duplicate point details, and only empty state offers calculation", () => {
   const text_keys = [
+    "rediscover",
     "catalog_intro",
     "catalog_results",
     "catalog_partial",
@@ -348,7 +405,9 @@ test("stored view shows orbital summaries without duplicate point details, and o
         React.createElement("span", { "data-pattern": period }, period),
       POINTS_ORBITAL_TEXT: keys,
       orbital_selectable,
+      ordered_orbital_points,
       orbital_ratio_label,
+      format_landing_ratios,
       AppText: {
         get: (key) =>
           key === "summary"
@@ -403,7 +462,8 @@ test("stored view shows orbital summaries without duplicate point details, and o
   assert.match(multiple, /title="1\/7, 2\/7; 4\/7">1\/7, 2\/7; 4\/7<\/span>/);
   assert.doesNotMatch(stored, /0\.1234567890123456789012345|<table/);
   assert.match(stored, /1\/7/);
-  assert.doesNotMatch(stored, /<a/);
+  assert.match(stored, />rediscover<\/a>/);
+  assert.doesNotMatch(stored, />calculate<\/a>/);
   assert.match(
     renderToStaticMarkup(React.createElement(View, { ...props, orbitals: [] })),
     />calculate<\/a>/,
@@ -548,9 +608,14 @@ test("stored view shows orbital summaries without duplicate point details, and o
     React.createElement(View, { ...props, coverage }),
   );
   assert.match(report, /coverage_title/);
-  assert.match(report, /<td>7<\/td><td>1 \/ 2<\/td><td>1, 3<\/td>/);
-  assert.match(report, /1\/7: landing mismatch/);
-  assert.match(report, /coverage_scope/);
+  assert.match(report, /<p>coverage_range<\/p>/);
+  assert.doesNotMatch(report, /<strong>|<details>|coverage_counts|coverage_scope/);
+  const partial_report = renderToStaticMarkup(
+    React.createElement(View, { ...props, coverage, resumable: true }),
+  );
+  assert.match(partial_report, /<td>7<\/td><td>1 \/ 2<\/td><td>1, 3<\/td>/);
+  assert.match(partial_report, /1\/7: landing mismatch/);
+  assert.match(partial_report, /coverage_scope/);
   assert.doesNotMatch(report, /<progress/);
   const catalog_progress = calculating({
     phase: "catalog",
@@ -620,6 +685,73 @@ test("selection reattaches to an active job without starting another calculation
   assert.equal(h.panel.state.job_id, "existing");
   assert.equal(h.panel.state.progress.ray_orbitals_processed, 3);
   assert.equal(polls, 1);
+  h.panel.componentWillUnmount();
+});
+
+test("rediscovery starts a fresh job once and retains the existing list and selection while new results arrive", async () => {
+  const request = deferred();
+  let starts = 0,
+    status = "running",
+    members = [];
+  const second = { ...orbital, orbital_id: "2" },
+    third = { ...orbital, orbital_id: "3" };
+  let details = [orbital, second];
+  const h = harness({
+    stored_orbitals: async () => ({
+      result: details.map((row) => ({ id: row.orbital_id })),
+    }),
+    stored_orbital: async (id) => ({
+      result: details.find((row) => row.orbital_id === id),
+    }),
+    calculate_bailiwick_orbitals: () =>
+      assert.fail("rediscovery must bypass the reusable start action"),
+    resume_bailiwick_orbitals: () =>
+      assert.fail("rediscovery must not resume an old job"),
+    rediscover_bailiwick_orbitals: async (id) => {
+      assert.equal(id, 55);
+      starts++;
+      return request.promise;
+    },
+    orbital_discovery_job: async (id) => ({
+      result: {
+        id,
+        status,
+        stage: "discovering",
+        progress: {
+          phase: "catalog",
+          catalog_processed: members.length,
+          catalog_total: 5,
+        },
+        results: members,
+      },
+    }),
+  });
+  await h.panel.load();
+  const selected_second = h.panel.state.orbitals[1];
+  h.panel.select_orbital(selected_second);
+  const selections = [];
+  h.panel.props.on_select_orbital = (row) => selections.push(row);
+  const fresh = h.panel.rediscover();
+  await h.panel.rediscover();
+  assert.equal(starts, 1);
+  assert.equal(h.panel.state.selected_orbital, selected_second);
+  request.resolve({ result: { id: "fresh" } });
+  await fresh;
+  assert.equal(h.panel.state.job_id, "fresh");
+  assert.equal(h.panel.state.orbitals.length, 2);
+  members = [{ orbital_id: "1" }];
+  await h.tick();
+  assert.equal(h.panel.state.selected_orbital, selected_second);
+  details = [orbital, second, third];
+  members = [{ orbital_id: "1" }, { orbital_id: "2" }, { orbital_id: "3" }];
+  await h.tick();
+  assert.equal(h.panel.state.orbitals.length, 3);
+  assert.equal(h.panel.state.selected_orbital.orbital_id, "2");
+  status = "completed";
+  await h.tick();
+  assert.equal(h.panel.state.status, "ready");
+  assert.equal(h.panel.state.selected_orbital.orbital_id, "2");
+  assert.ok(selections.every(Boolean));
   h.panel.componentWillUnmount();
 });
 

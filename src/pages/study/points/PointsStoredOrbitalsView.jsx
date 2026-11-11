@@ -1,4 +1,8 @@
 import React from "react";
+import {
+  ordered_orbital_points,
+  format_landing_ratios,
+} from "./PointsOrbitalOrder.js";
 import styled from "styled-components";
 import AppText from "../../../AppText.jsx";
 import { POINTS_ORBITAL_TEXT } from "../../../text/StudyText.jsx";
@@ -201,6 +205,7 @@ export default function PointsStoredOrbitalsView({
   discovery_strategy,
   confirmation_repair_available,
   on_calculate,
+  on_rediscover,
   on_cancel,
   on_reload,
 }) {
@@ -209,6 +214,11 @@ export default function PointsStoredOrbitalsView({
     : orbitals.find(orbital_selectable);
   const catalog_only = discovery_strategy === "catalog-representative-rays-v1";
   const report = progress?.catalog_coverage || coverage;
+  const completed =
+    status === "ready" &&
+    orbitals.length > 0 &&
+    !resumable &&
+    notice !== "partial";
   const metric = calculation_progress(progress || {});
   const determinate = Number.isFinite(metric.total) && metric.total > 0;
   const value = Math.min(
@@ -264,6 +274,9 @@ export default function PointsStoredOrbitalsView({
           </p>
         )}
       </div>
+      {status === "ready" && orbitals.length > 0 && (
+        <p>{action("rediscover", on_rediscover)}</p>
+      )}
       {report && (
         <section
           className="denominator-coverage"
@@ -271,11 +284,13 @@ export default function PointsStoredOrbitalsView({
             bound: report.max_denominator,
           })}
         >
-          <p>
-            <strong>
-              {format("coverage_title", { bound: report.max_denominator })}
-            </strong>
-          </p>
+          {!completed && (
+            <p>
+              <strong>
+                {format("coverage_title", { bound: report.max_denominator })}
+              </strong>
+            </p>
+          )}
           <p>
             {report.tested_through_denominator > 0
               ? format("coverage_range", {
@@ -283,60 +298,65 @@ export default function PointsStoredOrbitalsView({
                 })
               : text("coverage_none")}
           </p>
-          <p>
-            {format("coverage_counts", {
-              investigated: report.investigated_families,
-              total: report.total_families,
-              validated: report.validated_families,
-              unresolved: report.unresolved_families,
-              untested: report.uninvestigated_families,
-              cached: report.cache_hits,
-            })}
-          </p>
-          <details>
-            <summary>{text("coverage_details")}</summary>
-            <div className="coverage-details">
-              <table>
-                <thead>
-                  <tr>
-                    <th scope="col">{text("coverage_denominator")}</th>
-                    <th scope="col">{text("coverage_investigated")}</th>
-                    <th scope="col">{text("coverage_periods")}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {report.denominators.map((entry) => (
-                    <tr key={entry.denominator}>
-                      <td>{entry.denominator}</td>
-                      <td>
-                        {entry.investigated_families} / {entry.total_families}
-                      </td>
-                      <td>{entry.candidate_orbital_periods.join(", ")}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {!!report.unresolved_details?.length && (
-                <>
-                  <p>
-                    <strong>{text("coverage_unresolved")}</strong>
-                  </p>
-                  <ul>
-                    {report.unresolved_details.map((family) => (
-                      <li key={family.family_key}>
-                        {family.family_key}:{" "}
-                        {family.reason.replaceAll("_", " ")}
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              )}
-            </div>
-          </details>
-          <p>{text("coverage_scope")}</p>
+          {!completed && (
+            <>
+              <p>
+                {format("coverage_counts", {
+                  investigated: report.investigated_families,
+                  total: report.total_families,
+                  validated: report.validated_families,
+                  unresolved: report.unresolved_families,
+                  untested: report.uninvestigated_families,
+                  cached: report.cache_hits,
+                })}
+              </p>
+              <details>
+                <summary>{text("coverage_details")}</summary>
+                <div className="coverage-details">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th scope="col">{text("coverage_denominator")}</th>
+                        <th scope="col">{text("coverage_investigated")}</th>
+                        <th scope="col">{text("coverage_periods")}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {report.denominators.map((entry) => (
+                        <tr key={entry.denominator}>
+                          <td>{entry.denominator}</td>
+                          <td>
+                            {entry.investigated_families} /{" "}
+                            {entry.total_families}
+                          </td>
+                          <td>{entry.candidate_orbital_periods.join(", ")}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {!!report.unresolved_details?.length && (
+                    <>
+                      <p>
+                        <strong>{text("coverage_unresolved")}</strong>
+                      </p>
+                      <ul>
+                        {report.unresolved_details.map((family) => (
+                          <li key={family.family_key}>
+                            {family.family_key}:{" "}
+                            {family.reason.replaceAll("_", " ")}
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                </div>
+              </details>
+              <p>{text("coverage_scope")}</p>
+            </>
+          )}
         </section>
       )}
-      {!report && status === "ready" && orbitals.length > 0 && (
+      {!report && !completed && status === "ready" && orbitals.length > 0 && (
         <p>{text("coverage_unknown")}</p>
       )}
       {status === "calculating" && job_id && (
@@ -360,7 +380,8 @@ export default function PointsStoredOrbitalsView({
         <p>{action("reload", on_reload)}</p>
       )}
       {!resumable &&
-        ((status === "ready" && !orbitals.length) ||
+        !orbitals.length &&
+        (status === "ready" ||
           (status === "error" && error_kind === "calculate")) && (
           <>
             <p>{text(stale ? "stale" : "empty")}</p>
@@ -374,13 +395,8 @@ export default function PointsStoredOrbitalsView({
             (point) => point.landing_ratios?.length,
           );
           const ratios = has_ratios
-            ? orbital.points
-                .map(
-                  (point) =>
-                    (point.landing_ratios || [])
-                      .map((ratio) => `${ratio.numerator}/${ratio.denominator}`)
-                      .join(", ") || "—",
-                )
+            ? ordered_orbital_points(orbital)
+                .map((point) => format_landing_ratios(point.landing_ratios))
                 .join("; ")
             : text(orbital_ratio_label(orbital));
           return (

@@ -1,4 +1,8 @@
 import test from "node:test";
+import {
+  ordered_orbital_points,
+  format_landing_ratios,
+} from "../src/pages/study/points/PointsOrbitalOrder.js";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
@@ -16,6 +20,8 @@ const { POINTS_ORBITAL_TEXT, APP_STUDY_TEXT } = runInNewContext(
 );
 const scope = {
   React,
+  ordered_orbital_points,
+  format_landing_ratios,
   orbital_selectable,
   orbital_ratio_label,
   POINTS_ORBITAL_TEXT,
@@ -55,6 +61,19 @@ const pending = {
   lifecycle_state: { orbital: "validated", assignments: "pending" },
   points: [{ point_index: 0, point: { re: "1", im: "0" }, landing_ratios: [] }],
 };
+
+test("orbital ratio summaries rotate point groups and preserve cycle progression", () => {
+  const points = ["8", "1", "4", "2"].map((numerator, point_index) => ({
+    point_index,
+    landing_ratios: [{ numerator, denominator: "15" }],
+  }));
+  points[1].landing_ratios.unshift({ numerator: "7", denominator: "15" });
+  const html = render(View, {
+    status: "ready",
+    orbitals: [{ ...pending, points }],
+  });
+  assert.match(html, /1\/15, 7\/15; 4\/15; 2\/15; 8\/15/);
+});
 test("catalog discovery reports families separately from paths and keeps pending assignments selectable", () => {
   const html = render(View, {
     status: "calculating",
@@ -166,4 +185,30 @@ test("confirmation repair progress counts its retry queue instead of showing a f
   assert.match(html, /3 \/ 10 previously limited families retried/);
   assert.match(html, /max="10" value="3"/);
   assert.doesNotMatch(html, /100%/);
+});
+
+test("generated lists offer re-discovery alongside resume while active jobs retain their own controls", () => {
+  const ready = render(View, { status: "ready", orbitals: [pending] });
+  assert.match(ready, />Re-discover orbitals<\/a>/);
+  assert.match(
+    render(View, { status: "ready", orbitals: [pending], resumable: true }),
+    />Re-discover orbitals<\/a>/,
+  );
+  for (const props of [
+    { status: "loading" },
+    { status: "calculating" },
+    { status: "ready", orbitals: [] },
+  ]) {
+    assert.doesNotMatch(
+      render(View, { status: "ready", orbitals: [pending], ...props }),
+      />Re-discover orbitals<\/a>/,
+    );
+  }
+  const failed = render(View, {
+    status: "error",
+    error_kind: "calculate",
+    orbitals: [pending],
+  });
+  assert.match(failed, /Unable to finish the calculation/);
+  assert.doesNotMatch(failed, /No stored orbitals/);
 });

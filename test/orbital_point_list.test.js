@@ -1,4 +1,5 @@
 import test from "node:test";
+import { ordered_orbital_points } from "../src/pages/study/points/PointsOrbitalOrder.js";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
@@ -9,7 +10,7 @@ test("point list preserves stored decimal digits and tracks original point indic
   const point = {
     point_index: 4,
     point: { re: "-0.12345678901234567890123456789012", im: "1e-32" },
-    landing_ratios: [{ numerator: "1", denominator: "7" }, { numerator: "2", denominator: "7" }],
+    landing_ratios: [{ numerator: "2", denominator: "7" }, { numerator: "1", denominator: "7" }],
   };
   assert.deepEqual(format_orbital_point(point), {
     ratios: "1/7, 2/7", real: "-0.12345678901234567890123456789012",
@@ -26,6 +27,7 @@ test("point list preserves stored decimal digits and tracks original point indic
     React: { createElement: (type, props, ...children) => ({ type, props, children }) },
     useMemo: (callback) => callback(),
     format_orbital_point,
+    ordered_orbital_points,
     CoolTable: "table", CELL_TYPE_CALLBACK: "callback", TABLE_NO_BORDER: "no-border",
     TABLE_NO_HEADER: "no-header",
     TABLE_CAN_SELECT: "selectable",
@@ -47,4 +49,13 @@ test("point list preserves stored decimal digits and tracks original point indic
   assert.deepEqual(Array.from(table.props.columns, (column) => column.align), ["center", "left", "left"]);
   assert.equal(List({ selected_orbital: null }), null);
   assert.equal(List({ selected_orbital, active_point_index: -1 }).children[0].props.selected_row, -1);
+  const rotated = List({
+    selected_orbital: {points: [{...point, point_index:0, landing_ratios:[{numerator:"3",denominator:"7"}]}, point]},
+    active_point_index:4,
+    on_select_point:index=>selections.push(index),
+  }).children[0];
+  assert.equal(rotated.props.selected_row,0);
+  assert.equal(rotated.props.data[0].ratios[1],"1/7, 2/7");
+  rotated.props.on_select_row(0);
+  assert.equal(selections.at(-1),4,"rotated rows retain the stored point identity");
 });

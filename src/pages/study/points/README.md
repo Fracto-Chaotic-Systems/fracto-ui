@@ -24,6 +24,17 @@ fixed Julia column and 8px gap. It uses the selected core and saved display
 scope. Narrow panes scroll horizontally to preserve both views and the
 circuitry controls' existing minimum width.
 The lower-left orbital selection is passed to `CircuitryChart` explicitly.
+`PointsOrbitalOrder.js` rotates each displayed cycle to the point group containing
+the lowest landing numerator. The lower-left ratio summary, lower-right point
+table and circuitry waveform use that same origin and retain the actual orbital
+progression. Stored point IDs, tracing requests and cached ray paths are unchanged.
+Orbitals without landing ratios retain their stored order.
+The orbital list sorts by ascending period, then ascending lowest numerator,
+on both initial load and discovery updates. Within a period, orbitals without
+known ratios follow those with known numerators; equal keys retain their order.
+Ratios within each point's group appear in ascending fraction value in both the
+orbital summary (including its tooltip) and points table, using exact integer
+comparison even when denominators differ.
 The lower-right pane lists that orbital's stored points, with comma-separated
 landing ratios in a centered column followed by separate left-aligned real and
 imaginary coordinate columns at 32 decimal places.
@@ -315,3 +326,11 @@ when some results already exist. The page reattaches to active work after reload
 selection alone never starts stopped work. Cancel preserves the last durable
 checkpoint. Resume targets the same job UUID through a trusted-origin route.
 See the data-service protocol for checkpoint units, ownership and compatibility.
+
+Generated lists offer **Re-discover orbitals** in the lower-left panel. This
+starts a fresh catalog-only job, reuses verified family evidence and retries
+unresolved families. The existing list and selection stay available while new
+results arrive. The link is hidden during active work; Resume remains available
+alongside it for stopped jobs. Cached ray paths are retained.
+Completed lists show only the fully investigated denominator line beneath the
+re-discovery link. Active and resumable jobs retain their detailed coverage.
