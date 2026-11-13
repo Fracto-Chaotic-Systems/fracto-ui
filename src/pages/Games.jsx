@@ -11,6 +11,7 @@ import {
   GAMES_WORDNET,
   GAMES_WORLDS,
   GAMES_MUSIC,
+  GAMES_PLAY,
   GAMES_SETTINGS,
   GAMES_STATUS,
   KEY_GAMES_SECTION,
@@ -27,8 +28,10 @@ import {
 import GamesWordnet from "./games/GamesWordnet.jsx";
 import GamesWorlds from "./games/GamesWorlds.jsx";
 import GamesMusic from "./games/GamesMusic.jsx";
+import GamesPlay from "./games/GamesPlay.jsx";
 import {
   KEY_GAMES_MUSIC,
+  KEY_GAMES_PLAY,
   KEY_GAMES_WORDNET,
   KEY_GAMES_WORLDS,
 } from "../text/GamesText.jsx";
@@ -49,6 +52,11 @@ const SIDEBAR_LIST = [
     title_key: KEY_GAMES_MUSIC,
     section_code: GAMES_MUSIC,
     right_pane: <GamesMusic />,
+  },
+  {
+    title_key: KEY_GAMES_PLAY,
+    section_code: GAMES_PLAY,
+    right_pane: <GamesPlay />,
   },
   { section_code: SIDEBAR_BREAKER },
   {

@@ -2,7 +2,7 @@
 
 `catalog.json` is reviewed application reference data for future AI knowledge
 seeding. It covers the home entry page and every current sidebar destination:
-seven areas and 53 destinations. It contains no user records, settings values,
+seven areas and 54 destinations. It contains no user records, settings values,
 credentials, conversations, runtime observations or deployment-specific URLs.
 The UI does not load this catalog at runtime. Navigation still belongs to
 `App.jsx` and the area's `SIDEBAR_LIST` registrations.

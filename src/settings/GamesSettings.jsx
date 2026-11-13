@@ -13,6 +13,7 @@ export const KEY_GAMES_WORLD_MAPPING = `${GAMES_FOLDER}/world_mapping`;
 export const GAMES_OVERVIEW = "games_overview";
 export const GAMES_WORLDS = "games_worlds";
 export const GAMES_MUSIC = "games_music";
+export const GAMES_PLAY = "games_play";
 export const GAMES_WORDNET = "games_wordnet";
 export const GAMES_SETTINGS = "games_settings";
 export const GAMES_STATUS = "games_status";

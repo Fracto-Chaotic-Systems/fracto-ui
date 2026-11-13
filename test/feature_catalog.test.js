@@ -23,10 +23,10 @@ const patched = (file, before, after) => (requested) => {
 };
 
 test("catalog covers every route and sidebar destination with valid source/settings references", () => {
-  assert.deepEqual(check_catalog(original), { areas: 7, features: 53 });
+  assert.deepEqual(check_catalog(original), { areas: 7, features: 54 });
   assert.equal(
     original.features.filter((feature) => feature.section !== null).length,
-    52,
+    53,
   );
 });
 

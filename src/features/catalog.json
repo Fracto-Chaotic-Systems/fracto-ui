@@ -1,7 +1,7 @@
 {
   "contract_version": 1,
   "catalog_id": "fracto-ui",
-  "catalog_version": "1.2.10",
+  "catalog_version": "1.2.11",
   "access_profiles": [
     {
       "id": "public-entry",
@@ -2362,6 +2362,44 @@
         {
           "repository": "ui",
           "path": "src/pages/games/GamesMusic.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/README.md"
+        }
+      ]
+    },
+    {
+      "id": "games-play",
+      "area": "games",
+      "section": "games_play",
+      "component": "src/pages/games/GamesPlay.jsx",
+      "label": {
+        "key": "games/play",
+        "text": "play",
+        "source": "src/text/GamesText.jsx"
+      },
+      "title": {
+        "key": "games/play_title",
+        "text": "game play",
+        "source": "src/text/GamesText.jsx"
+      },
+      "settings": [],
+      "availability": "placeholder",
+      "purpose": "A blank game play page with a title.",
+      "inputs": [],
+      "access": "app-shell",
+      "environment": [],
+      "limitations": ["Only the page title is displayed."],
+      "related_features": [],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/Games.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/GamesPlay.jsx"
         },
         {
           "repository": "ui",

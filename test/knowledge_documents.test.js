@@ -34,7 +34,7 @@ test("UI extractor emits seven bounded area documents covering all feature state
         total + (document.text.match(/^### .*\([^\n]+\)$/gm) || []).length,
       0,
     ),
-    53,
+    54,
   );
   const admin = documents.find((document) => document.id === "admin").text;
   assert.ok(admin.includes("fracto AI"));

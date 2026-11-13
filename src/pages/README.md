@@ -73,5 +73,7 @@ For page changes, manually check the affected route, sidebar selection, browser 
 Games wraps its sidebar controller with router search parameters so theme synset
 links can open the WordNet reference directly. See games/README.md for details.
 
+The `play` sidebar item below `music` opens a blank panel titled `game play`.
+
 Games also accepts `?card=N` to open all worlds and reveal its requested row
 after the database mappings load.

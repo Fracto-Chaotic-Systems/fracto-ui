@@ -1,8 +1,10 @@
 # Games panels
 
 The parent ../Games.jsx owns sidebar selection and the persisted splitter.
-Sidebar order is Overview, separator, worlds, music, separator, wordnet, Settings, Status.
+Sidebar order is Overview, separator, worlds, music, play, separator, wordnet, Settings, Status.
 Overview, Settings, and Status intentionally remain blank.
+
+- GamesPlay.jsx renders only the **game play** title; the rest of the panel is blank.
 
 - GamesMusic.jsx renders **All Music** with Open MIDI, Play, Stop, filename,
   playback position, status, errors, file warnings, and a zoomable track/channel
