@@ -27,6 +27,23 @@ Overview, Settings, and Status intentionally remain blank.
   default/bounds calculations.
   The close icon or Escape while focus is inside the drawer dismisses it and
   restores focus to the gear. GamesPlay owns the drawer's open state.
+- GamesPlaySettings.jsx owns the drawer's collapsible settings sections. The
+  first section, **display**, starts collapsed and reveals a **full screen**
+  switch when expanded.
+  The section title and toggle label share a 1.25rem indent, reserving space for
+  the section's disclosure chevron and keeping their text aligned. The chevron
+  points right when collapsed and down (v-shaped) when expanded.
+  GamesPlay passes a ref to the game area (right of the sidebar splitter and below
+  the title) as the Fullscreen API target. Only that area fills the screen;
+  navigation, sidebar, and page title remain outside fullscreen. The game area's
+  `:fullscreen` styles fill the viewport, while normal styles resume on exit.
+  Settings stay inside the fullscreen target so the toggle remains available.
+  The switch reflects this target's actual state, including exits with Escape, and
+  records confirmed changes through AppSettings (`games/play_full_screen`). A saved
+  true value does not automatically re-enter fullscreen after reload because the
+  browser requires a user gesture. Requests disable the switch until settled;
+  unsupported browsers and rejected requests show localized status text. The
+  fullscreenchange listener is removed when the settings component unmounts.
 
 - GamesMusic.jsx renders **All Music** with Open MIDI, Play, Stop, filename,
   playback position, status, errors, file warnings, and a zoomable track/channel

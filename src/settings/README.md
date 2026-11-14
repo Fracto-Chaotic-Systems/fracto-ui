@@ -13,6 +13,11 @@ the generator settings. Its mode is persisted by `PageAutomation` under the
 
 ## Files
 
+- `games/play_full_screen` in `GamesSettings.jsx` records the game play display
+  section's confirmed game-area fullscreen state (default off). The toggle and
+  setting follow the Fullscreen API, including Escape exits. Stored true values
+  do not trigger fullscreen automatically on reload; entry requires a user gesture.
+
 - `AdminSettings.jsx` defines admin-page navigation and layout preferences,
   log timestamp visibility, commit-repository visibility, and the selected
   Social and Reference documents. Reference selection and expanded folders,

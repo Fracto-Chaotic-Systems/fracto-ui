@@ -8,6 +8,10 @@ export const KEY_GAMES_PLAY_SETTINGS = `${GAMES_FOLDER}/play_settings`;
 export const KEY_GAMES_PLAY_SETTINGS_TITLE = `${GAMES_FOLDER}/play_settings_title`;
 export const KEY_GAMES_PLAY_SETTINGS_CLOSE = `${GAMES_FOLDER}/play_settings_close`;
 export const KEY_GAMES_PLAY_SETTINGS_RESIZE = `${GAMES_FOLDER}/play_settings_resize`;
+export const KEY_GAMES_PLAY_DISPLAY = `${GAMES_FOLDER}/play_display`;
+export const KEY_GAMES_PLAY_FULL_SCREEN_LABEL = `${GAMES_FOLDER}/play_full_screen_label`;
+export const KEY_GAMES_PLAY_FULL_SCREEN_ERROR = `${GAMES_FOLDER}/play_full_screen_error`;
+export const KEY_GAMES_PLAY_FULL_SCREEN_UNAVAILABLE = `${GAMES_FOLDER}/play_full_screen_unavailable`;
 
 export const KEY_GAMES_WORLDS = `${GAMES_FOLDER}/worlds`;
 export const KEY_GAMES_WORLDS_TITLE = `${GAMES_FOLDER}/worlds_title`;
@@ -322,6 +326,11 @@ export const APP_GAMES_TEXT = {
   [KEY_GAMES_PLAY_SETTINGS_TITLE]: "Settings",
   [KEY_GAMES_PLAY_SETTINGS_CLOSE]: "Close settings",
   [KEY_GAMES_PLAY_SETTINGS_RESIZE]: "Resize settings panel",
+  [KEY_GAMES_PLAY_DISPLAY]: "display",
+  [KEY_GAMES_PLAY_FULL_SCREEN_LABEL]: "full screen",
+  [KEY_GAMES_PLAY_FULL_SCREEN_ERROR]: "Unable to change full screen mode. Try again.",
+  [KEY_GAMES_PLAY_FULL_SCREEN_UNAVAILABLE]:
+    "Full screen mode is unavailable in this browser.",
   [WORLDS_TEXT.show_card]: "show card",
   [WORLDS_TEXT.refresh]: "refresh worlds",
   [WORLDS_TEXT.download_csv]: "download CSV",

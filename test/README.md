@@ -1,5 +1,8 @@
 # UI tests
 
+- `games_play_fullscreen.test.js` verifies fullscreen entry/exit, browser Escape
+  synchronization, rejection recovery, unsupported browsers, and listener cleanup.
+
 - `games_play_settings_layout.test.js` checks the Settings drawer's initial width,
   content-relative splitter bounds, restored positions, and resize behavior.
 

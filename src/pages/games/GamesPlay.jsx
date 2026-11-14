@@ -12,6 +12,7 @@ import CoolSplitter, {
 } from "../../utils/ui/CoolSplitter.jsx";
 import { SPLITTER_WIDTH_PX } from "../../constants.jsx";
 import { KEY_GAMES_PLAY_SETTINGS_POSITION } from "../../settings/GamesSettings.jsx";
+import GamesPlaySettings from "./GamesPlaySettings.jsx";
 import {
   MAX_SETTINGS_POSITION,
   MIN_SETTINGS_POSITION,
@@ -41,6 +42,16 @@ const PlayContent = styled.div`
   flex: 1;
   min-height: 0;
   overflow: hidden;
+
+  &:fullscreen {
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    flex: none;
+    background: #f4f4f4;
+  }
 `;
 
 const SettingsIcon = styled.button`
@@ -204,6 +215,7 @@ export default function GamesPlay() {
             <SettingsHeading id={heading_id}>
               {AppText.get(KEY_GAMES_PLAY_SETTINGS_TITLE)}
             </SettingsHeading>
+            <GamesPlaySettings fullscreen_target_ref={content_ref} />
           </SettingsContent>
         </Drawer>
       </PlayContent>
