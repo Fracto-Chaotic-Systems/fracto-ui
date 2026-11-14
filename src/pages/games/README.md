@@ -1,10 +1,32 @@
 # Games panels
 
 The parent ../Games.jsx owns sidebar selection and the persisted splitter.
+It gives the play pane full height so GamesPlay's flex content area can fill the
+space below the title without clipping the gear or drawer to a zero-height box.
 Sidebar order is Overview, separator, worlds, music, play, separator, wordnet, Settings, Status.
 Overview, Settings, and Status intentionally remain blank.
 
-- GamesPlay.jsx renders only the **game play** title; the rest of the panel is blank.
+- GamesPlay.jsx renders the **game play** title above a flex content area, with a
+  gear icon in that area's upper-right corner and the tooltip **settings**.
+  Clicking it toggles a persistent Material UI drawer that slides in from the right
+  with a **Settings** heading. The same button stays above the drawer and changes
+  to an **×** with a **Close settings** tooltip while open. The drawer is positioned
+  within the content area
+  below the title bar. It has no backdrop or focus trap, so the rest of the page
+  stays undimmed and interactive.
+  Its left edge uses the standard vertical CoolSplitter in flow layout, beside
+  the Settings content inside the drawer, which has 0.5rem padding. It constrains the drawer width to
+  5%–50% of the content width, with a default width of 30%. CoolSplitter owns mouse
+  dragging and drag feedback; GamesPlay converts its pixel position to a fraction.
+  GamesPlay measures the content with ResizeObserver and persists the splitter
+  fraction in AppSettings under `games/play_settings_position`, so resizing the
+  content retains the selected proportion. The stored fraction measures the left
+  edge from the content area's left side (0.5–0.95, default 0.7). Existing saved
+  positions are restored within these bounds; legacy -1 values use the new default.
+  GamesPlaySettingsLayout.js owns the pure
+  default/bounds calculations.
+  The close icon or Escape while focus is inside the drawer dismisses it and
+  restores focus to the gear. GamesPlay owns the drawer's open state.
 
 - GamesMusic.jsx renders **All Music** with Open MIDI, Play, Stop, filename,
   playback position, status, errors, file warnings, and a zoomable track/channel

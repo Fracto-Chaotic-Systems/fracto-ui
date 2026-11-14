@@ -4,6 +4,10 @@ export const KEY_GAMES_MUSIC = `${GAMES_FOLDER}/music`;
 export const KEY_GAMES_MUSIC_TITLE = `${GAMES_FOLDER}/music_title`;
 export const KEY_GAMES_PLAY = `${GAMES_FOLDER}/play`;
 export const KEY_GAMES_PLAY_TITLE = `${GAMES_FOLDER}/play_title`;
+export const KEY_GAMES_PLAY_SETTINGS = `${GAMES_FOLDER}/play_settings`;
+export const KEY_GAMES_PLAY_SETTINGS_TITLE = `${GAMES_FOLDER}/play_settings_title`;
+export const KEY_GAMES_PLAY_SETTINGS_CLOSE = `${GAMES_FOLDER}/play_settings_close`;
+export const KEY_GAMES_PLAY_SETTINGS_RESIZE = `${GAMES_FOLDER}/play_settings_resize`;
 
 export const KEY_GAMES_WORLDS = `${GAMES_FOLDER}/worlds`;
 export const KEY_GAMES_WORLDS_TITLE = `${GAMES_FOLDER}/worlds_title`;
@@ -314,6 +318,10 @@ export const APP_GAMES_TEXT = {
   [KEY_GAMES_MUSIC_TITLE]: "All Music",
   [KEY_GAMES_PLAY]: "play",
   [KEY_GAMES_PLAY_TITLE]: "game play",
+  [KEY_GAMES_PLAY_SETTINGS]: "settings",
+  [KEY_GAMES_PLAY_SETTINGS_TITLE]: "Settings",
+  [KEY_GAMES_PLAY_SETTINGS_CLOSE]: "Close settings",
+  [KEY_GAMES_PLAY_SETTINGS_RESIZE]: "Resize settings panel",
   [WORLDS_TEXT.show_card]: "show card",
   [WORLDS_TEXT.refresh]: "refresh worlds",
   [WORLDS_TEXT.download_csv]: "download CSV",

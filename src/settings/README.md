@@ -37,7 +37,7 @@ the generator settings. Its mode is persisted by `PageAutomation` under the
   its independent fixed 4,096-iteration horizon.
 - `DataSettings.jsx` defines the Data page section, splitters, log display,
   selected query tab, and data-service connection fields.
-- `GamesSettings.jsx` defines the Games sections (including music) and persisted sidebar/reference splitter widths. Legacy mapping/proposal settings remain for compatibility, but current mappings and notes come from the database. Notes are not AppSettings preferences.
+- `GamesSettings.jsx` defines the Games sections (including music) and persisted sidebar/reference splitter widths. `games/play_settings_position` stores the Settings drawer's left-edge fraction of the game play content width, constrained to 0.5–0.95 (drawer width 5%–50%). Its default 0.7 gives a 30% drawer width. Legacy -1 values also use this default. Legacy mapping/proposal settings remain for compatibility, but current mappings and notes come from the database. Notes are not AppSettings preferences.
 - `NavigatorSettings.jsx` defines the canvas navigator's rendering strategy,
   crosshair visibility, hover/client coordinates, and temporary disabled
   state. The pointer and disabled values are runtime-only; the strategy is

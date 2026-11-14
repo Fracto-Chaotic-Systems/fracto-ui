@@ -1,11 +1,212 @@
+import { useEffect, useId, useRef, useState } from "react";
+import styled from "styled-components";
+import Drawer from "@mui/material/Drawer";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faGear, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { MainStyles as styles } from "../../styles/MainStyles.jsx";
 import AppText from "../../AppText.jsx";
-import { KEY_GAMES_PLAY_TITLE } from "../../text/GamesText.jsx";
+import AppSettings from "../../AppSettings.jsx";
+import CoolSplitter, {
+  SPLITTER_LAYOUT_FLOW,
+  SPLITTER_TYPE_VERTICAL,
+} from "../../utils/ui/CoolSplitter.jsx";
+import { SPLITTER_WIDTH_PX } from "../../constants.jsx";
+import { KEY_GAMES_PLAY_SETTINGS_POSITION } from "../../settings/GamesSettings.jsx";
+import {
+  MAX_SETTINGS_POSITION,
+  MIN_SETTINGS_POSITION,
+  settings_drawer_layout,
+} from "./GamesPlaySettingsLayout.js";
+import {
+  KEY_GAMES_PLAY_TITLE,
+  KEY_GAMES_PLAY_SETTINGS,
+  KEY_GAMES_PLAY_SETTINGS_TITLE,
+  KEY_GAMES_PLAY_SETTINGS_CLOSE,
+} from "../../text/GamesText.jsx";
+
+const PlayPanel = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+
+  > ${styles.SectionTitle} {
+    flex-shrink: 0;
+  }
+`;
+
+const PlayContent = styled.div`
+  position: relative;
+  isolation: isolate;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+`;
+
+const SettingsIcon = styled.button`
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0.25rem;
+  background: transparent;
+  color: #666666;
+  font-size: 1.25rem;
+
+  &:hover,
+  &:focus-visible {
+    background: #eeeeee;
+    color: #444444;
+  }
+`;
+
+const SettingsToggle = styled(SettingsIcon)`
+  z-index: 1;
+`;
+
+const SettingsContent = styled.div`
+  position: relative;
+  box-sizing: border-box;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  overflow: auto;
+  padding: 0.5rem;
+  color: #444444;
+`;
+
+const SettingsHeading = styled.h2`
+  margin: 0;
+  padding-right: 2rem;
+`;
 
 export default function GamesPlay() {
+  const [settings_open, set_settings_open] = useState(false);
+  const content_ref = useRef(null);
+  const gear_ref = useRef(null);
+  const [content_bounds, set_content_bounds] = useState({
+    width: 0,
+    height: 0,
+  });
+  const [saved_position, set_saved_position] = useState(() =>
+    AppSettings.get(KEY_GAMES_PLAY_SETTINGS_POSITION),
+  );
+  useEffect(() => {
+    const observer = new ResizeObserver(([entry]) => {
+      set_content_bounds({
+        width: entry.contentRect.width,
+        height: entry.contentRect.height,
+      });
+    });
+    observer.observe(content_ref.current);
+    return () => observer.disconnect();
+  }, []);
+  const layout = settings_drawer_layout(content_bounds.width, saved_position);
+  const resize_settings = (position) => {
+    if (!Number.isFinite(position)) return;
+    const bounded = Math.min(
+      MAX_SETTINGS_POSITION,
+      Math.max(MIN_SETTINGS_POSITION, position),
+    );
+    set_saved_position(bounded);
+    AppSettings.on_settings_changed({
+      [KEY_GAMES_PLAY_SETTINGS_POSITION]: bounded,
+    });
+  };
+  const drawer_id = useId();
+  const heading_id = useId();
+  const close_settings = () => {
+    set_settings_open(false);
+    gear_ref.current?.focus();
+  };
+
   return (
-    <styles.SectionTitle>
-      {AppText.get(KEY_GAMES_PLAY_TITLE)}
-    </styles.SectionTitle>
+    <PlayPanel>
+      <styles.SectionTitle>
+        {AppText.get(KEY_GAMES_PLAY_TITLE)}
+      </styles.SectionTitle>
+      <PlayContent ref={content_ref}>
+        <SettingsToggle
+          ref={gear_ref}
+          type="button"
+          title={AppText.get(
+            settings_open
+              ? KEY_GAMES_PLAY_SETTINGS_CLOSE
+              : KEY_GAMES_PLAY_SETTINGS,
+          )}
+          aria-label={AppText.get(
+            settings_open
+              ? KEY_GAMES_PLAY_SETTINGS_CLOSE
+              : KEY_GAMES_PLAY_SETTINGS,
+          )}
+          aria-expanded={settings_open}
+          aria-controls={settings_open ? drawer_id : undefined}
+          aria-haspopup="dialog"
+          onClick={() => set_settings_open((open) => !open)}
+        >
+          <FontAwesomeIcon icon={settings_open ? faXmark : faGear} />
+        </SettingsToggle>
+        <Drawer
+          variant="persistent"
+          anchor="right"
+          open={settings_open}
+          sx={{
+            position: "absolute",
+            inset: 0,
+            pointerEvents: "none",
+            zIndex: 0,
+          }}
+          onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              event.stopPropagation();
+              close_settings();
+            }
+          }}
+          slotProps={{
+            paper: {
+              id: drawer_id,
+              role: "dialog",
+              "aria-labelledby": heading_id,
+              style: {
+                position: "absolute",
+                width: layout.width,
+                maxWidth: "100%",
+                height: "100%",
+                flexDirection: "row",
+                overflow: "hidden",
+                pointerEvents: "auto",
+              },
+            },
+          }}
+        >
+          {settings_open && content_bounds.width > 0 && (
+            <CoolSplitter
+              type={SPLITTER_TYPE_VERTICAL}
+              layout={SPLITTER_LAYOUT_FLOW}
+              name={KEY_GAMES_PLAY_SETTINGS_POSITION}
+              bar_width_px={SPLITTER_WIDTH_PX}
+              container_bounds={content_bounds}
+              position={layout.position * content_bounds.width}
+              min_position={MIN_SETTINGS_POSITION * content_bounds.width}
+              max_position={MAX_SETTINGS_POSITION * content_bounds.width}
+              on_change={(position) =>
+                resize_settings(position / content_bounds.width)
+              }
+            />
+          )}
+          <SettingsContent>
+            <SettingsHeading id={heading_id}>
+              {AppText.get(KEY_GAMES_PLAY_SETTINGS_TITLE)}
+            </SettingsHeading>
+          </SettingsContent>
+        </Drawer>
+      </PlayContent>
+    </PlayPanel>
   );
 }

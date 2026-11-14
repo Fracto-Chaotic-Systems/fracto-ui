@@ -132,7 +132,11 @@ export class Games extends Component {
     );
     return (
       <styles.PaneWrapper
-        style={section_code === GAMES_MUSIC ? { height: "100%" } : undefined}
+        style={
+          section_code === GAMES_MUSIC || section_code === GAMES_PLAY
+            ? { height: "100%" }
+            : undefined
+        }
       >
         {section_code === GAMES_WORDNET ? (
           <GamesWordnet synset_id={this.props.synset_id} />

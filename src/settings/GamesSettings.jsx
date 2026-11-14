@@ -6,6 +6,7 @@ const GAMES_FOLDER = "games";
 export const KEY_GAMES_SPLITTER_POS_PX = `${GAMES_FOLDER}/splitter_pos_px`;
 export const KEY_GAMES_WORDNET_SPLITTER_POS_PX = `${GAMES_FOLDER}/wordnet_splitter_pos_px`;
 export const KEY_GAMES_SECTION = `${GAMES_FOLDER}/games_section`;
+export const KEY_GAMES_PLAY_SETTINGS_POSITION = `${GAMES_FOLDER}/play_settings_position`;
 
 export const KEY_GAMES_WORLDS_DRAFT_VERSION = `${GAMES_FOLDER}/worlds_draft_version`;
 export const KEY_GAMES_WORLD_MAPPING = `${GAMES_FOLDER}/world_mapping`;
@@ -19,6 +20,13 @@ export const GAMES_SETTINGS = "games_settings";
 export const GAMES_STATUS = "games_status";
 
 export const APP_GAMES_SETTINGS = {
+  [KEY_GAMES_PLAY_SETTINGS_POSITION]: {
+    data_type: TYPE_NUMBER,
+    default_value: 0.7,
+    description:
+      "settings drawer left-edge fraction of game play content width (0.5–0.95); default 0.7 gives a 30% drawer width",
+    persist: true,
+  },
   [KEY_GAMES_WORDNET_SPLITTER_POS_PX]: {
     data_type: TYPE_NUMBER,
     default_value: 450,

@@ -73,7 +73,11 @@ For page changes, manually check the affected route, sidebar selection, browser 
 Games wraps its sidebar controller with router search parameters so theme synset
 links can open the WordNet reference directly. See games/README.md for details.
 
-The `play` sidebar item below `music` opens a blank panel titled `game play`.
+The `play` sidebar item below `music` opens a panel titled `game play` with an
+upper-right gear icon below the title bar whose tooltip is `settings`. Clicking
+the gear opens a right-side Settings drawer within that content area, without
+dimming or blocking the rest of the page. Its persisted left-edge splitter limits
+the drawer width to 5%–50% of the content width, with a default of 30%.
 
 Games also accepts `?card=N` to open all worlds and reveal its requested row
 after the database mappings load.

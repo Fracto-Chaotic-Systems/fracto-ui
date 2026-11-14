@@ -2384,13 +2384,20 @@
         "text": "game play",
         "source": "src/text/GamesText.jsx"
       },
-      "settings": [],
+      "settings": [
+        {
+          "key": "games/play_settings_position",
+          "source": "src/settings/GamesSettings.jsx"
+        }
+      ],
       "availability": "placeholder",
-      "purpose": "A blank game play page with a title.",
+      "purpose": "A game play page with a settings gear and right-side Settings drawer below the title bar, without a backdrop. The drawer defaults to 30% of the content width and its persisted vertical splitter limits the drawer width to 5%–50%.",
       "inputs": [],
       "access": "app-shell",
       "environment": [],
-      "limitations": ["Only the page title is displayed."],
+      "limitations": [
+        "The Settings drawer contains only its heading and close control; the rest of the page is blank."
+      ],
       "related_features": [],
       "sources": [
         {

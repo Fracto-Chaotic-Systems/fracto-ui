@@ -1,5 +1,8 @@
 # UI tests
 
+- `games_play_settings_layout.test.js` checks the Settings drawer's initial width,
+  content-relative splitter bounds, restored positions, and resize behavior.
+
 - `points_orbital_backend.test.js` verifies exact-coordinate lookup URLs,
   abort signals, and the selected-ID-only browser calculation request.
 
