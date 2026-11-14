@@ -1,4 +1,139 @@
 const ADMIN_FOLDER = "admin";
+const instrument_transfer_copy = {
+  title: "Instrument export",
+  note: "Copy this server’s instrument library to the selected server. Preview first to review the files and space required.",
+  source: "From this server",
+  destination: "To selected server",
+  setup:
+    "Configure this connection as a trusted transfer peer on both servers, then reload connections.",
+  reload: "Reload connections",
+  loading: "Checking connection…",
+  configured: "Connection ready for preview.",
+  preview: "Preview instrument export",
+  preview_again: "Preview again",
+  apply: "Export instruments to this server",
+  cancel: "Cancel export",
+  cancelling: "Requesting cancellation…",
+  cancel_requested:
+    "Cancellation requested. Waiting for the server’s final status.",
+  detached:
+    "Leaving this page keeps a running export active. Return to this connection to check its progress.",
+  recovering:
+    "Checking the server’s status. The last request may already have been accepted.",
+  working: "Working…",
+  preview_summary: "Export preview",
+  files_total: "Files in package",
+  matching_files: "Already available or verified",
+  missing_files: "Missing files",
+  transfer_bytes: "Bytes to transfer",
+  conflicts: "Conflicting files",
+  free_space: "Destination free space",
+  required_space: "Required free space",
+  preview_note:
+    "Matching files are reused. Different catalogs or conflicting destination files block export.",
+  checked: "Checked {count} files",
+  checked_total: "Checked {count} of {total} files",
+  verified: "Verified {count} of {total} files",
+  bytes_progress: "Transferred {count} of {total}",
+  complete:
+    "Export complete. The destination library has been published and verified.",
+  partial:
+    "The export did not complete. Verified files may already be retained. Preview again to reuse them and review the remaining work.",
+  staged:
+    "Files are staged but have not been published. Update both servers, then preview again.",
+  receipt: "Verified export receipt",
+  completed_at: "Completed",
+  catalog: "Catalog checksum",
+  manifest: "Package checksum",
+  receipt_files: "Verified files",
+  receipt_bytes: "Verified bytes",
+  unavailable: "Unavailable",
+  unit_bytes: "bytes",
+  unit_kib: "KiB",
+  unit_mib: "MiB",
+  unit_gib: "GiB",
+  unit_tib: "TiB",
+  state_previewing: "Checking instrument files…",
+  state_ready: "Preview ready for review.",
+  state_blocked: "Export is blocked.",
+  state_failed: "Export failed.",
+  state_partial: "Export is incomplete.",
+  state_cancelled: "Export cancelled.",
+  state_expired: "This preview expired. Preview again before exporting.",
+  state_transferring: "Exporting instrument files…",
+  state_validating: "Validating instrument files…",
+  state_staged: "Files staged. Publication is still required.",
+  state_publishing: "Publishing the destination library…",
+  state_verifying: "Verifying the published library…",
+  state_completed: "Export verified.",
+  phase_capabilities: "Checking server compatibility…",
+  phase_source_inventory: "Checking source files…",
+  phase_destination_inventory: "Checking destination files and space…",
+  phase_source_reservation: "Rechecking the source…",
+  phase_destination_reservation: "Rechecking the destination…",
+  phase_sending_files: "Exporting instrument files…",
+  phase_verifying_staged_files: "Verifying received files…",
+  phase_publishing_library:
+    "Validating and publishing the destination library…",
+  error_upgrade_required:
+    "Instrument export requires a server update. Install matching transfer and publication support on both servers, then preview again.",
+  error_catalog_conflict:
+    "The servers have different instrument catalogs. Deploy matching catalog versions before exporting.",
+  error_file_conflict:
+    "Some destination files differ from the source. Repair those files, then preview again.",
+  error_snapshot_changed:
+    "Instrument files changed after the preview. Preview again before exporting.",
+  error_insufficient_space:
+    "The destination has insufficient free space. Free space there, then preview again.",
+  error_storage_not_ready:
+    "The destination instrument storage is not ready. Check its persistent storage configuration and access, then preview again.",
+  error_source_incomplete:
+    "The source library is missing required files or failed validation. Repair the source library before exporting.",
+  error_unauthorized:
+    "Access was denied. Check administrator access and the trusted peer connection on both servers.",
+  error_login:
+    "Administrator access is required. In an anonymous lab, an administrator can enable the existing sync access option for the configured UI address.",
+  error_origin:
+    "This page’s address does not match the server’s configured UI address. Open the configured address before exporting.",
+  error_configuration:
+    "The trusted peer configuration is invalid. Correct the server connection settings and reload connections.",
+  error_busy:
+    "Another instrument operation is active. Wait for it to finish, then preview again.",
+  error_missing:
+    "This job is no longer available, usually after a restart. Preview again; verified files are reused.",
+  error_expired:
+    "The preview or transfer session expired. Preview again before exporting.",
+  error_checksum_mismatch:
+    "A file failed checksum verification. Preview again and retry; verified files are reused.",
+  error_validation_failed:
+    "Instrument validation failed. Check the library and server logs, then preview again.",
+  error_verification_failed:
+    "Publication could not be confirmed. Preview again to check the destination before retrying.",
+  error_peer_unavailable:
+    "The selected server could not be reached. Check the connection and retry the preview.",
+  error_timeout:
+    "The server operation timed out. Preview again to check retained files before retrying.",
+  error_interrupted:
+    "The operation was interrupted. Preview again; verified files are reused.",
+  error_limit_exceeded:
+    "This export exceeds the server’s supported limits. Update or review the library before retrying.",
+  error_invalid_state:
+    "The job is no longer ready for this action. Preview again.",
+  error_invalid_request:
+    "The server could not accept this export request. Update both servers, then preview again.",
+  error_invalid_manifest:
+    "The instrument package is not compatible. Update both servers and validate the source library.",
+  error_invalid_path:
+    "Instrument storage contains an unsafe or unsupported file path. Repair storage before exporting.",
+  error_default:
+    "Unable to complete the request. Check the server connection and try again.",
+};
+export const INSTRUMENT_TRANSFER_TEXT = Object.fromEntries(
+  Object.keys(instrument_transfer_copy).map((key) => [
+    key,
+    `${ADMIN_FOLDER}/instrument_transfer_${key}`,
+  ]),
+);
 const SYNC_PEER_CONFIGURATION_ERROR =
   "FRACTO_DATABASE_SYNC_PEERS must be a JSON object mapping server URLs to endpoint and token entries. Setting it to true does not configure a peer. Correct the setting and recreate the server container to load the new environment.";
 const SYNC_JOB_MISSING_ERROR =
@@ -276,6 +411,12 @@ export const KEY_ADMIN_REPOSITORY_NONE = `${ADMIN_FOLDER}/repository_none`;
 export const KEY_ADMIN_COPY_HASH = `${ADMIN_FOLDER}/copy_full_hash`;
 export const KEY_ADMIN_VIEW_GITHUB = `${ADMIN_FOLDER}/view_github`;
 export const APP_ADMIN_TEXT = {
+  ...Object.fromEntries(
+    Object.entries(instrument_transfer_copy).map(([key, value]) => [
+      INSTRUMENT_TRANSFER_TEXT[key],
+      value,
+    ]),
+  ),
   [KEY_ADMIN_SERVERS_AI_SERVER]: "AI server",
   [KEY_ADMIN_REPOSITORY_AI]: "AI",
   [KEY_ADMIN_SERVERS_CLIENTS_TITLE]: "client sessions",

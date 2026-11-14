@@ -8,8 +8,13 @@ export const request_json = async (url, options = {}) => {
   const response = await fetch(url, { credentials: "include", ...options });
   const result = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const detail = result?.error ? `: ${result.error}` : "";
-    throw new Error(`HTTP ${response.status}${detail}`);
+    const code =
+      typeof result?.error === "string" ? result.error : result?.error?.code;
+    const detail = typeof code === "string" ? `: ${code}` : "";
+    const error = new Error(`HTTP ${response.status}${detail}`);
+    error.status = response.status;
+    if (typeof code === "string") error.code = code;
+    throw error;
   }
   return result;
 };

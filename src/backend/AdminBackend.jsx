@@ -3,6 +3,42 @@ import { request_json } from "./BackendUtils.jsx";
 import { stream_chat } from "./ChatStream.js";
 
 export class AdminBackend {
+  static instrument_transfer_peers = (signal) =>
+    request_json(`${service_origin("admin")}/instrument-transfer/peers`, {
+      signal,
+    });
+  static instrument_transfer_preview = (peer, signal) =>
+    request_json(`${service_origin("admin")}/instrument-transfer/jobs`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ protocol_version: 1, peer }),
+      signal,
+    });
+  static instrument_transfer_job = (id, signal) =>
+    request_json(
+      `${service_origin("admin")}/instrument-transfer/jobs/${encodeURIComponent(id)}`,
+      { signal },
+    );
+  static instrument_transfer_apply = (id, plan_sha256, signal) =>
+    request_json(
+      `${service_origin("admin")}/instrument-transfer/jobs/${encodeURIComponent(id)}/apply`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ protocol_version: 1, plan_sha256 }),
+        signal,
+      },
+    );
+  static instrument_transfer_cancel = (id, signal) =>
+    request_json(
+      `${service_origin("admin")}/instrument-transfer/jobs/${encodeURIComponent(id)}/cancel`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ protocol_version: 1 }),
+        signal,
+      },
+    );
   static mesh_sync_peers = () =>
     request_json(`${service_origin("admin")}/mesh-sync/peers`);
   static mesh_sync_preview = (server_url) =>

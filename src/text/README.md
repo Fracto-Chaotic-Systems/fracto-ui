@@ -101,3 +101,9 @@ AssetsText terrain labels include minimum-resolution input, effective cached res
 Terrain controls identify the base minimum separately from nearby detail; the status reports refined patches, fine level, loading and parent fallback.
 
 MUSIC_TEXT also owns instrument choices, original/effective assignment labels, bank/program history, unsupported-source help and assignment errors.
+
+## Instrument export copy
+
+`AdminText.jsx` registers instrument export labels, phases, errors and receipt
+text in `APP_ADMIN_TEXT`, addressed through `INSTRUMENT_TRANSFER_TEXT`. Rendered
+errors use allowlisted messages rather than raw server details.

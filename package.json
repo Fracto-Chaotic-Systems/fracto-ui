@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "test:instrument-transfer": "node --test test/admin_instrument_transfer.test.js",
     "test:game-controller": "node --test test/game_controller.test.js test/games_play_fullscreen.test.js test/games_play_settings_layout.test.js",
     "test:orbital-discovery": "node --test test/points_catalog_ui.test.js test/points_stored_orbitals.test.js test/points_orbital_rays.test.js test/points_orbital_ray_progress.test.js test/study_points_layout.test.js",
     "start": "vite",

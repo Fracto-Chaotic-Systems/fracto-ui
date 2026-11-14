@@ -1,5 +1,23 @@
 # Admin pages
 
+The selected remote server has an `AdminInstrumentTransfer` panel for a one-way
+export from this server to that connection. Preview reviews matching/missing
+files, transfer bytes, conflicts and required/free destination space. Apply sends
+the pinned plan hash only; secrets and file bytes stay between backend services.
+Conflicts, expired plans and receivers without publication support disable Apply.
+Only trusted peer configuration grants access; address-book entries alone do not.
+
+`AdminInstrumentTransfer.jsx` owns commands, polling and per-source/destination
+session-storage job IDs. Leaving the page aborts local requests without cancelling
+server work; returning reattaches to status. Ambiguous writes are polled, never
+automatically repeated. Cancellation waits for authoritative server status,
+including publication critical sections. Missing jobs and partial failures require
+a fresh preview. `InstrumentTransferModel.js` gates actions and validates receipts;
+`InstrumentTransferView.jsx` renders catalog text with local centralized styles.
+Completion requires matching manifest/catalog hashes and verified file/byte totals.
+Use the UI on the other server to reverse direction. See the admin service's
+`INSTRUMENT_TRANSFER.md` for deployment and receiver persistence requirements.
+
 Server Awareness also renders a separate mesh-file sync panel using the shared
 `AdminDatabaseSync.jsx` workflow with `kind="meshes"`. It uses `/mesh-sync` APIs,
 independent stored job IDs, per-level counts, checksum conflict selection, and

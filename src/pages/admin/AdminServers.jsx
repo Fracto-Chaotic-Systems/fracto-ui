@@ -1,5 +1,6 @@
 import AdminServerClients from "./AdminServerClients.jsx";
 import AdminDatabaseSync from "./AdminDatabaseSync.jsx";
+import AdminInstrumentTransfer from "./AdminInstrumentTransfer.jsx";
 import AdminServerTime from "./AdminServerTime.jsx";
 import { server_times, format_server_uptime } from "./AdminServerTimes.js";
 import AdminServerRole from "./AdminServerRole.jsx";
@@ -669,10 +670,24 @@ export class AdminServers extends Component {
                 </MarkdownDocument>
               )}
               {selected_server && !is_local_server && (
-                <AdminDatabaseSync key={`sync:${selected_server}`} server_url={selected_server} />
+                <AdminDatabaseSync
+                  key={`sync:${selected_server}`}
+                  server_url={selected_server}
+                />
               )}
               {selected_server && !is_local_server && (
-                <AdminDatabaseSync key={`mesh-sync:${selected_server}`} server_url={selected_server} kind="meshes" />
+                <AdminDatabaseSync
+                  key={`mesh-sync:${selected_server}`}
+                  server_url={selected_server}
+                  kind="meshes"
+                />
+              )}
+              {selected_server && !is_local_server && (
+                <AdminInstrumentTransfer
+                  key={`instruments:${selected_server}`}
+                  server_url={selected_server}
+                  source_url={globalThis.location?.origin || ""}
+                />
               )}
               {selected_server && (
                 <AdminServerClients

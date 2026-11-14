@@ -126,3 +126,11 @@ with credentials, cancellation and no HTTP caching for the worlds page.
 
 DataBackend.save_world_notes sends notes and their original server value through
 PUT /wordnet_mappings/:cardinality/notes. It never persists browser copies.
+
+## Instrument transfer
+
+`AdminBackend.instrument_transfer_*` wraps version-1 peer discovery, preview,
+status, pinned-plan apply and cancellation on the local admin service. Requests
+include browser credentials and accept an AbortSignal; browsers never handle
+peer tokens or instrument bytes. `request_json` preserves structured error codes
+and HTTP status while retaining existing string-error messages.

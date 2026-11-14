@@ -248,3 +248,13 @@ FluidR3 importer integration: midi_asset_engine_probe.mjs --prepared validates
 all prepared mappings and loads a real FluidR3 flute WAV through the cache and
 voice scheduler with a stub decoder/clock. Default mode tests enabled providers
 only. Neither mode changes catalog enablement or substitutes for native playback.
+
+## Instrument export controls
+
+`admin_instrument_transfer.test.js` covers plan and receipt gates, command races,
+lost acknowledgements, navigation recovery, cancellation, backend request shapes
+and rendered error states. Run `npm run test:instrument-transfer`.
+`admin_instrument_browser.html` mounts the real panel with local in-memory APIs
+for visual/manual checks. Serve through Vite and select `?scenario=unsupported`,
+`conflict`, or `partial`; default runs preview through verified completion.
+The fixture makes no backend requests and cannot export actual instruments.
