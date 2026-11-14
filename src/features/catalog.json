@@ -2391,12 +2391,12 @@
         }
       ],
       "availability": "placeholder",
-      "purpose": "A game play page with a settings gear and right-side Settings drawer below the title bar, without a backdrop. The drawer defaults to 30% of the content width and its persisted vertical splitter limits the drawer width to 5%–50%.",
+      "purpose": "A game play page with a replaceable on-screen game controller and right-side settings drawer below the title bar. The drawer defaults to 30% of the content width with persisted resizing between 5% and 50%.",
       "inputs": [],
       "access": "app-shell",
       "environment": [],
       "limitations": [
-        "The Settings drawer has a collapsible display section with a game-area fullscreen toggle that excludes the sidebar and title. Entry requires a user gesture and Fullscreen API support; the rest of the game area is blank."
+        "Fullscreen requires a user gesture and Fullscreen API support. On-screen input is implemented with virtual-gamepad-lib; keyboard and hand-held input providers and gameplay simulation are not implemented yet."
       ],
       "related_features": [],
       "sources": [

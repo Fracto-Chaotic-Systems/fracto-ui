@@ -1,0 +1,11 @@
+/* Hide the preset's trigger direction arrows without changing trigger input. */
+.gpad-container #shoulder_trigger_back_left .gpad-direction-highlight,
+.gpad-container #shoulder_trigger_back_right .gpad-direction-highlight {
+  display: none;
+}
+
+/* Hide the preset's Forward captions below the two joystick controls. */
+.gpad-container #stick_left > text,
+.gpad-container #stick_right > text {
+  display: none;
+}

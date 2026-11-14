@@ -1,7 +1,12 @@
 # UI tests
 
+- `game_controller.test.js` checks normalized input, subscriptions, physical-pad
+  isolation, blur/visibility/cancellation reset, cleanup, failed mount recovery,
+  and action descriptions for simultaneous buttons and stick directions.
+
 - `games_play_fullscreen.test.js` verifies fullscreen entry/exit, browser Escape
-  synchronization, rejection recovery, unsupported browsers, and listener cleanup.
+  synchronization, rejection recovery, unsupported browsers, listener cleanup,
+  and controller dropdown options, restoration, fallback, and persistence.
 
 - `games_play_settings_layout.test.js` checks the Settings drawer's initial width,
   content-relative splitter bounds, restored positions, and resize behavior.

@@ -9,6 +9,23 @@ export const KEY_GAMES_PLAY_SETTINGS_TITLE = `${GAMES_FOLDER}/play_settings_titl
 export const KEY_GAMES_PLAY_SETTINGS_CLOSE = `${GAMES_FOLDER}/play_settings_close`;
 export const KEY_GAMES_PLAY_SETTINGS_RESIZE = `${GAMES_FOLDER}/play_settings_resize`;
 export const KEY_GAMES_PLAY_DISPLAY = `${GAMES_FOLDER}/play_display`;
+export const KEY_GAMES_PLAY_CONTROLLERS = `${GAMES_FOLDER}/play_controllers`;
+export const KEY_GAMES_PLAY_CONTROLLER_LABEL = `${GAMES_FOLDER}/play_controller_label`;
+export const KEY_GAMES_PLAY_CONTROLLER_ON_SCREEN = `${GAMES_FOLDER}/play_controller_on_screen`;
+export const KEY_GAMES_PLAY_CONTROLLER_KEYBOARD = `${GAMES_FOLDER}/play_controller_keyboard`;
+export const KEY_GAMES_PLAY_CONTROLLER_HAND_HELD = `${GAMES_FOLDER}/play_controller_hand_held`;
+export const KEY_GAMES_PLAY_CONTROLLER_ON_SCREEN_TITLE = `${GAMES_FOLDER}/play_controller_on_screen_title`;
+export const KEY_GAMES_PLAY_CONTROLLER_ERROR = `${GAMES_FOLDER}/play_controller_error`;
+export const KEY_GAMES_PLAY_CONTROLLER_ACTIONS_LABEL = `${GAMES_FOLDER}/play_controller_actions_label`;
+export const CONTROLLER_ACTION_TEXT = Object.fromEntries(
+  [
+    "cross", "circle", "square", "triangle", "left_shoulder", "right_shoulder",
+    "left_trigger", "right_trigger", "select", "start", "left_stick", "right_stick",
+    "dpad_up", "dpad_down", "dpad_left", "dpad_right", "home", "touchpad",
+    "left_turn_left", "left_turn_right", "left_forward", "left_backward",
+    "right_turn_left", "right_turn_right", "right_forward", "right_backward",
+  ].map((code) => [code, `${GAMES_FOLDER}/controller_action_${code}`]),
+);
 export const KEY_GAMES_PLAY_FULL_SCREEN_LABEL = `${GAMES_FOLDER}/play_full_screen_label`;
 export const KEY_GAMES_PLAY_FULL_SCREEN_ERROR = `${GAMES_FOLDER}/play_full_screen_error`;
 export const KEY_GAMES_PLAY_FULL_SCREEN_UNAVAILABLE = `${GAMES_FOLDER}/play_full_screen_unavailable`;
@@ -327,6 +344,40 @@ export const APP_GAMES_TEXT = {
   [KEY_GAMES_PLAY_SETTINGS_CLOSE]: "Close settings",
   [KEY_GAMES_PLAY_SETTINGS_RESIZE]: "Resize settings panel",
   [KEY_GAMES_PLAY_DISPLAY]: "display",
+  [KEY_GAMES_PLAY_CONTROLLERS]: "control",
+  [KEY_GAMES_PLAY_CONTROLLER_LABEL]: "device",
+  [KEY_GAMES_PLAY_CONTROLLER_ON_SCREEN]: "on screen",
+  [KEY_GAMES_PLAY_CONTROLLER_KEYBOARD]: "keyboard",
+  [KEY_GAMES_PLAY_CONTROLLER_HAND_HELD]: "hand held",
+  [KEY_GAMES_PLAY_CONTROLLER_ON_SCREEN_TITLE]: "on screen game controller",
+  [KEY_GAMES_PLAY_CONTROLLER_ERROR]: "Unable to load the on screen controller.",
+  [KEY_GAMES_PLAY_CONTROLLER_ACTIONS_LABEL]: "controller actions",
+  [CONTROLLER_ACTION_TEXT.cross]: "cross",
+  [CONTROLLER_ACTION_TEXT.circle]: "circle",
+  [CONTROLLER_ACTION_TEXT.square]: "square",
+  [CONTROLLER_ACTION_TEXT.triangle]: "triangle",
+  [CONTROLLER_ACTION_TEXT.left_shoulder]: "left shoulder",
+  [CONTROLLER_ACTION_TEXT.right_shoulder]: "right shoulder",
+  [CONTROLLER_ACTION_TEXT.left_trigger]: "left trigger",
+  [CONTROLLER_ACTION_TEXT.right_trigger]: "right trigger",
+  [CONTROLLER_ACTION_TEXT.select]: "select",
+  [CONTROLLER_ACTION_TEXT.start]: "start",
+  [CONTROLLER_ACTION_TEXT.left_stick]: "left stick",
+  [CONTROLLER_ACTION_TEXT.right_stick]: "right stick",
+  [CONTROLLER_ACTION_TEXT.dpad_up]: "d-pad up",
+  [CONTROLLER_ACTION_TEXT.dpad_down]: "d-pad down",
+  [CONTROLLER_ACTION_TEXT.dpad_left]: "d-pad left",
+  [CONTROLLER_ACTION_TEXT.dpad_right]: "d-pad right",
+  [CONTROLLER_ACTION_TEXT.home]: "home",
+  [CONTROLLER_ACTION_TEXT.touchpad]: "touchpad",
+  [CONTROLLER_ACTION_TEXT.left_turn_left]: "left turn left",
+  [CONTROLLER_ACTION_TEXT.left_turn_right]: "left turn right",
+  [CONTROLLER_ACTION_TEXT.left_forward]: "left forward",
+  [CONTROLLER_ACTION_TEXT.left_backward]: "left backward",
+  [CONTROLLER_ACTION_TEXT.right_turn_left]: "right turn left",
+  [CONTROLLER_ACTION_TEXT.right_turn_right]: "right turn right",
+  [CONTROLLER_ACTION_TEXT.right_forward]: "right forward",
+  [CONTROLLER_ACTION_TEXT.right_backward]: "right backward",
   [KEY_GAMES_PLAY_FULL_SCREEN_LABEL]: "full screen",
   [KEY_GAMES_PLAY_FULL_SCREEN_ERROR]: "Unable to change full screen mode. Try again.",
   [KEY_GAMES_PLAY_FULL_SCREEN_UNAVAILABLE]:

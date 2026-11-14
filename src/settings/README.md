@@ -13,6 +13,12 @@ the generator settings. Its mode is persisted by `PageAutomation` under the
 
 ## Files
 
+- `games/play_controller_actions` in `GamesSettings.jsx` persists whether active
+  controller action descriptions are shown between the on-screen halves (default off).
+
+- `games/play_controller` in `GamesSettings.jsx` persists the selected controller
+  type: `on_screen` (default), `keyboard`, or `hand_held`.
+
 - `games/play_full_screen` in `GamesSettings.jsx` records the game play display
   section's confirmed game-area fullscreen state (default off). The toggle and
   setting follow the Fullscreen API, including Escape exits. Stored true values

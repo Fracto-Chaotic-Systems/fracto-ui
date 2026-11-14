@@ -13,6 +13,8 @@ import CoolSplitter, {
 import { SPLITTER_WIDTH_PX } from "../../constants.jsx";
 import { KEY_GAMES_PLAY_SETTINGS_POSITION } from "../../settings/GamesSettings.jsx";
 import GamesPlaySettings from "./GamesPlaySettings.jsx";
+import GameController from "./controllers/GameController.jsx";
+import { create_controller_input } from "./controllers/ControllerInput.js";
 import {
   MAX_SETTINGS_POSITION,
   MIN_SETTINGS_POSITION,
@@ -98,6 +100,8 @@ const SettingsHeading = styled.h2`
 `;
 
 export default function GamesPlay() {
+  // The future game loop reads this vendor-independent controller state.
+  const [game_input] = useState(create_controller_input);
   const [settings_open, set_settings_open] = useState(false);
   const content_ref = useRef(null);
   const gear_ref = useRef(null);
@@ -143,6 +147,7 @@ export default function GamesPlay() {
         {AppText.get(KEY_GAMES_PLAY_TITLE)}
       </styles.SectionTitle>
       <PlayContent ref={content_ref}>
+        <GameController input={game_input} />
         <SettingsToggle
           ref={gear_ref}
           type="button"

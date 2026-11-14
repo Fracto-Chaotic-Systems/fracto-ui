@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "test:game-controller": "node --test test/game_controller.test.js test/games_play_fullscreen.test.js test/games_play_settings_layout.test.js",
     "test:orbital-discovery": "node --test test/points_catalog_ui.test.js test/points_stored_orbitals.test.js test/points_orbital_rays.test.js test/points_orbital_ray_progress.test.js test/study_points_layout.test.js",
     "start": "vite",
     "dev": "vite",
@@ -55,9 +56,11 @@
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.1",
     "styled-components": "^6.3.11",
-    "three": "^0.186.1"
+    "three": "^0.186.1",
+    "virtual-gamepad-lib": "0.3.3"
   },
   "devDependencies": {
+    "@babel/parser": "7.29.8",
     "@eslint/js": "^9.39.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
@@ -66,7 +69,6 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
-    "vite": "^7.2.4",
-    "@babel/parser": "7.29.8"
+    "vite": "^7.2.4"
   }
 }

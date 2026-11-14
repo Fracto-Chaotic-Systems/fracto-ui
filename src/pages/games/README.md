@@ -30,6 +30,18 @@ Overview, Settings, and Status intentionally remain blank.
 - GamesPlaySettings.jsx owns the drawer's collapsible settings sections. The
   first section, **display**, starts collapsed and reveals a **full screen**
   switch when expanded.
+  Its **controller actions** toggle shows active button and stick descriptions in
+  tooltip-style boxes between the controller halves. It defaults off and persists
+  through AppSettings (`games/play_controller_actions`).
+  A **control** section follows **display**, using the same collapsible
+  section styling and starting collapsed. Its **device** dropdown offers
+  **on screen** (default), **keyboard**, and **hand held**, saving the selection
+  through AppSettings (`games/play_controller`). The dropdown has 0.375rem vertical
+  and 0.5rem horizontal padding. Unknown saved values fall back
+  to **on screen**. The on-screen device mounts virtual-gamepad-lib through the
+  replaceable controller adapter in `controllers/`; changing to keyboard or hand
+  held removes it and clears input. Those two input providers are not implemented
+  yet. See controllers/README.md for the normalized input contract and lifecycle.
   The section title and toggle label share a 1.25rem indent, reserving space for
   the section's disclosure chevron and keeping their text aligned. The chevron
   points right when collapsed and down (v-shaped) when expanded.
