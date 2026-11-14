@@ -13,6 +13,9 @@ the generator settings. Its mode is persisted by `PageAutomation` under the
 
 ## Files
 
+- `games/play_controller_color` in `GamesSettings.jsx` persists the on-screen
+  controller's handle palette, defaulting to blue. Unsupported saved values use blue.
+
 - `games/play_controller_actions` in `GamesSettings.jsx` persists whether active
   controller action descriptions are shown between the on-screen halves (default off).
 

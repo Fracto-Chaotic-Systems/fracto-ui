@@ -9,3 +9,21 @@
 .gpad-container #stick_right > text {
   display: none;
 }
+.gpad-container #gpad_base_left {
+  fill: url(#fracto-pad-blue-left);
+}
+
+.gpad-container #gpad_base_right {
+  fill: url(#fracto-pad-blue-right);
+}
+
+.gpad-container .gpad-base {
+  stroke: var(--controller-rim, #6c9bce);
+  stroke-width: 0.7px;
+  paint-order: stroke fill;
+  filter: drop-shadow(0 1px 1px var(--controller-shadow, #07162e66));
+}
+
+.gpad-container .fracto-shell-highlight {
+  pointer-events: none;
+}

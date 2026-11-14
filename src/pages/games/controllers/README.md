@@ -20,6 +20,14 @@ and its bundled SVG/CSS. `VirtualGamepadRuntime.js` wraps its emulator, display 
 API wrapper.
 `VirtualGamepad.css` hides the preset's pink trigger direction arrows and the
 Forward captions below both sticks. Trigger and joystick input remains active.
+`VirtualGamepadSkin.js` adds mirrored shell gradients and soft radial highlights
+to the bundled SVG. `ControllerColors.js` supplies ten palettes for the persisted
+**controller color** display setting, defaulting to blue. The CSS adds a rim and
+shadow to each grip. Palette variables inherit from the React-owned host, so colors
+change live without remounting the controller or resetting held inputs. Invalid
+saved colors fall back to blue.
+Decoration is applied before mounting, without editing the dependency or changing
+the button geometry, tap targets, or standardized input contract.
 The runtime chooses a free native gamepad slot, disables merging with physical
 controllers, forwards normalized input, and resets on blur, hidden documents,
 and pointer cancellation. Before cleanup it finishes active pointers so the

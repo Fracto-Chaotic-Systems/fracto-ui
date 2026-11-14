@@ -33,6 +33,10 @@ Overview, Settings, and Status intentionally remain blank.
   Its **controller actions** toggle shows active button and stick descriptions in
   tooltip-style boxes between the controller halves. It defaults off and persists
   through AppSettings (`games/play_controller_actions`).
+  The **controller color** dropdown offers green, red, orange, white, violet,
+  blue, pink, yellow, black, and grey. It defaults to blue and persists through
+  AppSettings (`games/play_controller_color`). Each scheme keeps the shaded shell,
+  highlights, rim, and shadow; selections update live without remounting the pad.
   A **control** section follows **display**, using the same collapsible
   section styling and starting collapsed. Its **device** dropdown offers
   **on screen** (default), **keyboard**, and **hand held**, saving the selection

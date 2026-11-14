@@ -7,6 +7,30 @@ import {
 import { mount_virtual_gamepad } from "../src/pages/games/controllers/VirtualGamepadRuntime.js";
 import { start_controller_session } from "../src/pages/games/controllers/ControllerSession.js";
 import { controller_action_codes } from "../src/pages/games/controllers/ControllerActions.js";
+import {
+  CONTROLLER_COLORS,
+  controller_color_style,
+} from "../src/pages/games/controllers/ControllerColors.js";
+
+test("every handle palette supplies distinct shading and unsupported colors retain blue", () => {
+  assert.equal(CONTROLLER_COLORS.length, 10);
+  const palettes = CONTROLLER_COLORS.map(controller_color_style);
+  assert.equal(
+    new Set(palettes.map((palette) => palette["--controller-shell-2"])).size,
+    10,
+  );
+  for (const palette of palettes) {
+    assert.match(palette["--controller-highlight"], /^#[0-9a-f]{6}$/);
+    assert.notEqual(
+      palette["--controller-shell-0"],
+      palette["--controller-shell-4"],
+    );
+  }
+  assert.deepEqual(
+    controller_color_style("unknown"),
+    controller_color_style("blue"),
+  );
+});
 
 test("action descriptions include simultaneous trigger, start and stick directions", () => {
   const input = create_controller_input();

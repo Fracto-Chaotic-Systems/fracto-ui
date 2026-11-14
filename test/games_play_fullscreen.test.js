@@ -3,6 +3,10 @@ import test from "node:test";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import { transformSync } from "esbuild";
+import {
+  CONTROLLER_COLORS,
+  normalize_controller_color,
+} from "../src/pages/games/controllers/ControllerColors.js";
 
 const source = readFileSync(
   new URL("../src/pages/games/GamesPlaySettings.jsx", import.meta.url),
@@ -17,6 +21,7 @@ function mount({
   supported = true,
   controller = "on_screen",
   controller_actions = false,
+  controller_color = "blue",
 } = {}) {
   const states = [];
   const effects = [];
@@ -63,7 +68,11 @@ function mount({
     AppText: { get: (key) => key },
     AppSettings: {
       get: (key) =>
-        key === "controller_actions" ? controller_actions : controller,
+        key === "controller_color"
+          ? controller_color
+          : key === "controller_actions"
+            ? controller_actions
+            : controller,
       on_settings_changed: (value) => saved.push(value),
     },
     KEY_GAMES_PLAY_FULL_SCREEN: "fullscreen",
@@ -72,6 +81,13 @@ function mount({
     KEY_GAMES_PLAY_CONTROLLER: "controller",
     KEY_GAMES_PLAY_CONTROLLER_ACTIONS: "controller_actions",
     KEY_GAMES_PLAY_CONTROLLER_ACTIONS_LABEL: "controller actions",
+    KEY_GAMES_PLAY_CONTROLLER_COLOR: "controller_color",
+    KEY_GAMES_PLAY_CONTROLLER_COLOR_LABEL: "controller color",
+    CONTROLLER_COLORS,
+    normalize_controller_color,
+    CONTROLLER_COLOR_TEXT: Object.fromEntries(
+      CONTROLLER_COLORS.map((color) => [color, color]),
+    ),
     KEY_GAMES_PLAY_CONTROLLER_LABEL: "device",
     KEY_GAMES_PLAY_CONTROLLER_ON_SCREEN: "on screen",
     KEY_GAMES_PLAY_CONTROLLER_KEYBOARD: "keyboard",
@@ -183,5 +199,39 @@ test("controller actions switch defaults off and persists its selection", () => 
   assert.equal(
     restored.render().children[0].children[2].children[1].props.checked,
     true,
+  );
+});
+
+test("controller color dropdown has all requested colors, restores and saves choices", () => {
+  const view = mount();
+  const dropdown = () => view.render().children[0].children[3].children[1];
+  assert.equal(dropdown().props.value, "blue");
+  assert.deepEqual(
+    Array.from(dropdown().children[0], (option) => option.children[0]),
+    [
+      "green",
+      "red",
+      "orange",
+      "white",
+      "violet",
+      "blue",
+      "pink",
+      "yellow",
+      "black",
+      "grey",
+    ],
+  );
+  dropdown().props.onChange({ target: { value: "red" } });
+  assert.equal(dropdown().props.value, "red");
+  assert.equal(view.saved.at(-1).controller_color, "red");
+  const restored = mount({ controller_color: "grey" });
+  assert.equal(
+    restored.render().children[0].children[3].children[1].props.value,
+    "grey",
+  );
+  const invalid = mount({ controller_color: "invalid" });
+  assert.equal(
+    invalid.render().children[0].children[3].children[1].props.value,
+    "blue",
   );
 });

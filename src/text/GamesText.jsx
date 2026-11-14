@@ -17,13 +17,49 @@ export const KEY_GAMES_PLAY_CONTROLLER_HAND_HELD = `${GAMES_FOLDER}/play_control
 export const KEY_GAMES_PLAY_CONTROLLER_ON_SCREEN_TITLE = `${GAMES_FOLDER}/play_controller_on_screen_title`;
 export const KEY_GAMES_PLAY_CONTROLLER_ERROR = `${GAMES_FOLDER}/play_controller_error`;
 export const KEY_GAMES_PLAY_CONTROLLER_ACTIONS_LABEL = `${GAMES_FOLDER}/play_controller_actions_label`;
+export const KEY_GAMES_PLAY_CONTROLLER_COLOR_LABEL = `${GAMES_FOLDER}/play_controller_color_label`;
+export const CONTROLLER_COLOR_TEXT = Object.fromEntries(
+  [
+    "green",
+    "red",
+    "orange",
+    "white",
+    "violet",
+    "blue",
+    "pink",
+    "yellow",
+    "black",
+    "grey",
+  ].map((color) => [color, `${GAMES_FOLDER}/controller_color_${color}`]),
+);
 export const CONTROLLER_ACTION_TEXT = Object.fromEntries(
   [
-    "cross", "circle", "square", "triangle", "left_shoulder", "right_shoulder",
-    "left_trigger", "right_trigger", "select", "start", "left_stick", "right_stick",
-    "dpad_up", "dpad_down", "dpad_left", "dpad_right", "home", "touchpad",
-    "left_turn_left", "left_turn_right", "left_forward", "left_backward",
-    "right_turn_left", "right_turn_right", "right_forward", "right_backward",
+    "cross",
+    "circle",
+    "square",
+    "triangle",
+    "left_shoulder",
+    "right_shoulder",
+    "left_trigger",
+    "right_trigger",
+    "select",
+    "start",
+    "left_stick",
+    "right_stick",
+    "dpad_up",
+    "dpad_down",
+    "dpad_left",
+    "dpad_right",
+    "home",
+    "touchpad",
+    "left_turn_left",
+    "left_turn_right",
+    "left_forward",
+    "left_backward",
+    "right_turn_left",
+    "right_turn_right",
+    "right_forward",
+    "right_backward",
   ].map((code) => [code, `${GAMES_FOLDER}/controller_action_${code}`]),
 );
 export const KEY_GAMES_PLAY_FULL_SCREEN_LABEL = `${GAMES_FOLDER}/play_full_screen_label`;
@@ -201,9 +237,12 @@ export const APP_GAMES_TEXT = {
     "Changing libraries stops playback. Original MIDI assignments follow the selected library; compatible manual overrides are retained. Press Play to hear changes.",
   [MUSIC_TEXT.instrument_assignment]: "Instrument",
   [MUSIC_TEXT.kit_assignment]: "Drum kit",
-  [MUSIC_TEXT.kit_original_help]: "Some file kit programs, banks, or drum notes have no verified source. Choose an available kit override.",
-  [MUSIC_TEXT.kit_change_help]: "Changing the drum kit stops playback. Press Play to use the new assignment.",
-  [MUSIC_TEXT.kit_channel_help]: "Channel 10 uses drum note identities. A kit override replaces the file kit program and bank for this track; every note must be supported.",
+  [MUSIC_TEXT.kit_original_help]:
+    "Some file kit programs, banks, or drum notes have no verified source. Choose an available kit override.",
+  [MUSIC_TEXT.kit_change_help]:
+    "Changing the drum kit stops playback. Press Play to use the new assignment.",
+  [MUSIC_TEXT.kit_channel_help]:
+    "Channel 10 uses drum note identities. A kit override replaces the file kit program and bank for this track; every note must be supported.",
   [MUSIC_TEXT.instrument_grandb]: "GrandB piano",
   [MUSIC_TEXT.instrument_original]: "Original MIDI assignment",
   [MUSIC_TEXT.instrument_original_unavailable]:
@@ -352,6 +391,17 @@ export const APP_GAMES_TEXT = {
   [KEY_GAMES_PLAY_CONTROLLER_ON_SCREEN_TITLE]: "on screen game controller",
   [KEY_GAMES_PLAY_CONTROLLER_ERROR]: "Unable to load the on screen controller.",
   [KEY_GAMES_PLAY_CONTROLLER_ACTIONS_LABEL]: "controller actions",
+  [KEY_GAMES_PLAY_CONTROLLER_COLOR_LABEL]: "controller color",
+  [CONTROLLER_COLOR_TEXT.green]: "green",
+  [CONTROLLER_COLOR_TEXT.red]: "red",
+  [CONTROLLER_COLOR_TEXT.orange]: "orange",
+  [CONTROLLER_COLOR_TEXT.white]: "white",
+  [CONTROLLER_COLOR_TEXT.violet]: "violet",
+  [CONTROLLER_COLOR_TEXT.blue]: "blue",
+  [CONTROLLER_COLOR_TEXT.pink]: "pink",
+  [CONTROLLER_COLOR_TEXT.yellow]: "yellow",
+  [CONTROLLER_COLOR_TEXT.black]: "black",
+  [CONTROLLER_COLOR_TEXT.grey]: "grey",
   [CONTROLLER_ACTION_TEXT.cross]: "cross",
   [CONTROLLER_ACTION_TEXT.circle]: "circle",
   [CONTROLLER_ACTION_TEXT.square]: "square",
@@ -379,7 +429,8 @@ export const APP_GAMES_TEXT = {
   [CONTROLLER_ACTION_TEXT.right_forward]: "right forward",
   [CONTROLLER_ACTION_TEXT.right_backward]: "right backward",
   [KEY_GAMES_PLAY_FULL_SCREEN_LABEL]: "full screen",
-  [KEY_GAMES_PLAY_FULL_SCREEN_ERROR]: "Unable to change full screen mode. Try again.",
+  [KEY_GAMES_PLAY_FULL_SCREEN_ERROR]:
+    "Unable to change full screen mode. Try again.",
   [KEY_GAMES_PLAY_FULL_SCREEN_UNAVAILABLE]:
     "Full screen mode is unavailable in this browser.",
   [WORLDS_TEXT.show_card]: "show card",

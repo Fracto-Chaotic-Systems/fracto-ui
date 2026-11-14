@@ -7,6 +7,7 @@ import {
   KEY_GAMES_PLAY_FULL_SCREEN,
   KEY_GAMES_PLAY_CONTROLLER,
   KEY_GAMES_PLAY_CONTROLLER_ACTIONS,
+  KEY_GAMES_PLAY_CONTROLLER_COLOR,
 } from "../../settings/GamesSettings.jsx";
 import {
   KEY_GAMES_PLAY_DISPLAY,
@@ -19,7 +20,13 @@ import {
   KEY_GAMES_PLAY_FULL_SCREEN_ERROR,
   KEY_GAMES_PLAY_FULL_SCREEN_UNAVAILABLE,
   KEY_GAMES_PLAY_CONTROLLER_ACTIONS_LABEL,
+  KEY_GAMES_PLAY_CONTROLLER_COLOR_LABEL,
+  CONTROLLER_COLOR_TEXT,
 } from "../../text/GamesText.jsx";
+import {
+  CONTROLLER_COLORS,
+  normalize_controller_color,
+} from "./controllers/ControllerColors.js";
 
 const CONTROLLER_OPTIONS = [
   { value: "on_screen", label: KEY_GAMES_PLAY_CONTROLLER_ON_SCREEN },
@@ -75,6 +82,11 @@ const ToggleItem = styled.label`
 `;
 
 export default function GamesPlaySettings({ fullscreen_target_ref }) {
+  const [controller_color, set_controller_color] = useState(() =>
+    normalize_controller_color(
+      AppSettings.get(KEY_GAMES_PLAY_CONTROLLER_COLOR),
+    ),
+  );
   const [controller_actions, set_controller_actions] = useState(
     () => !!AppSettings.get(KEY_GAMES_PLAY_CONTROLLER_ACTIONS),
   );
@@ -161,6 +173,25 @@ export default function GamesPlaySettings({ fullscreen_target_ref }) {
               });
             }}
           />
+        </ToggleItem>
+        <ToggleItem>
+          {AppText.get(KEY_GAMES_PLAY_CONTROLLER_COLOR_LABEL)}
+          <select
+            value={controller_color}
+            onChange={(event) => {
+              const value = normalize_controller_color(event.target.value);
+              set_controller_color(value);
+              AppSettings.on_settings_changed({
+                [KEY_GAMES_PLAY_CONTROLLER_COLOR]: value,
+              });
+            }}
+          >
+            {CONTROLLER_COLORS.map((color) => (
+              <option key={color} value={color}>
+                {AppText.get(CONTROLLER_COLOR_TEXT[color])}
+              </option>
+            ))}
+          </select>
         </ToggleItem>
         {(!supported || error) && (
           <p role="status">

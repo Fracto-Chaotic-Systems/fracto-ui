@@ -1,8 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import styled from "styled-components";
 import AppSettings from "../../../AppSettings.jsx";
 import AppText from "../../../AppText.jsx";
-import { KEY_GAMES_PLAY_CONTROLLER } from "../../../settings/GamesSettings.jsx";
+import {
+  KEY_GAMES_PLAY_CONTROLLER,
+  KEY_GAMES_PLAY_CONTROLLER_COLOR,
+} from "../../../settings/GamesSettings.jsx";
 import {
   KEY_GAMES_PLAY_CONTROLLER_ERROR,
   KEY_GAMES_PLAY_CONTROLLER_ON_SCREEN_TITLE,
@@ -10,6 +13,20 @@ import {
 import { CONTROLLER_PROVIDERS } from "./ControllerProviders.js";
 import { start_controller_session } from "./ControllerSession.js";
 import ControllerActions from "./ControllerActions.jsx";
+import {
+  controller_color_style,
+  normalize_controller_color,
+} from "./ControllerColors.js";
+
+const read_color = () =>
+  normalize_controller_color(AppSettings.get(KEY_GAMES_PLAY_CONTROLLER_COLOR));
+const subscribe_color = (notify) => {
+  const subscription = AppSettings.subscribe(
+    KEY_GAMES_PLAY_CONTROLLER_COLOR,
+    notify,
+  );
+  return () => AppSettings.unsubscribe(subscription);
+};
 
 const ControllerHost = styled.div`
   position: absolute;
@@ -42,6 +59,7 @@ const read_device = () => {
 };
 
 export default function GameController({ input }) {
+  const color = useSyncExternalStore(subscribe_color, read_color, read_color);
   const host_ref = useRef(null);
   const [device, set_device] = useState(read_device);
   const [error, set_error] = useState(null);
@@ -71,6 +89,7 @@ export default function GameController({ input }) {
   if (!CONTROLLER_PROVIDERS[device]) return null;
   return (
     <ControllerHost
+      style={controller_color_style(color)}
       aria-label={AppText.get(KEY_GAMES_PLAY_CONTROLLER_ON_SCREEN_TITLE)}
     >
       <div ref={host_ref} />
