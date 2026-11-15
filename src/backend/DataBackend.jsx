@@ -106,15 +106,15 @@ export class DataBackend {
     });
 
   /**
-   * Fetches the newest rows from a whitelisted database table.
+   * Fetches rows from a whitelisted database table using its server-defined order.
    * @param {string} table Table name accepted by the data server query route.
    * @param {number} [limit=1000] Maximum number of rows to return.
-   * @returns {Promise<{result: Object[]}>} Rows ordered by descending id.
+   * @returns {Promise<{result: Object[]}>} Rows ordered by descending primary key.
    * @calledBy AdminQueries
    */
   static query_table = (table, limit = 1000) =>
     request_json(
-      `${DATA_ORIGIN()}/query?${new URLSearchParams({ table, limit: `${limit}`, order: "id DESC" })}`,
+      `${DATA_ORIGIN()}/query?${new URLSearchParams({ table, limit: `${limit}` })}`,
       { credentials: "include" },
     );
 

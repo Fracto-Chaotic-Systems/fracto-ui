@@ -21,6 +21,11 @@ DataBackend.get_orbitals({ x: -0.75, y: 0.1 }, 200, (data) => {
 
 ### `DataBackend.jsx`
 
+`query_table()` leaves ordering to the data service: tiles are ordered by
+`short_code DESC`, while tables with numeric IDs use `id DESC`. The Tiles query
+tab previews the live `tiles` table; the seed table is staged separately until
+validated and promoted.
+
 `stored_orbitals(core, signal, after)`, `stored_orbital(id, signal)`, and
 `orbital_discovery_job(id, signal)` provide abortable persistent-orbital reads.
 `calculate_bailiwick_orbitals(id, signal)` calls the narrow browser route with
