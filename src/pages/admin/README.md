@@ -4,7 +4,10 @@ The selected remote server has an `AdminInstrumentTransfer` panel for a one-way
 export from this server to that connection. Preview reviews matching/missing
 files, transfer bytes, conflicts and required/free destination space. Apply sends
 the pinned plan hash only; secrets and file bytes stay between backend services.
-Conflicts, expired plans and receivers without publication support disable Apply.
+Negotiated source replacement shows the number of differing live files, includes
+pending replacement bytes and offers an explicit export that makes the destination
+package match the source. Backups are retained by the receiver. Unnegotiated
+conflicts, expired plans and receivers without publication support disable Apply.
 Only trusted peer configuration grants access; address-book entries alone do not.
 
 `AdminInstrumentTransfer.jsx` owns commands, polling and per-source/destination

@@ -105,6 +105,16 @@ test("apply requires an unexpired compatible preview with no conflicts", () => {
   ])
     assert.equal(model.transfer_can_apply({ ...ready(), ...patch }), false);
 });
+
+test("source replacement permits reviewed conflicts only when explicitly negotiated", () => {
+  const job = ready();
+  job.summary.conflict_files = 2;
+  assert.equal(model.transfer_can_apply(job), false);
+  job.replacement_policy = "source";
+  assert.equal(model.transfer_can_apply(job), true);
+  job.state = "blocked";
+  assert.equal(model.transfer_can_apply(job), false);
+});
 test("completion requires a matching publication receipt, never byte progress alone", () => {
   const job = { ...ready(), state: "completed" };
   job.summary.publication_state = "published";
@@ -427,6 +437,15 @@ test("view shows direction, disables older receivers, and rejects incomplete rec
   assert.match(old, /http:\/\/peer/);
   assert.match(old, /data-primary="true" disabled/);
   assert.match(old, /support on both servers/);
+  const replacement = ready();
+  replacement.replacement_policy = "source";
+  replacement.summary.conflict_files = 1;
+  replacement.summary.replacement_files = 3; // Two more live files are already staged.
+  replacement.summary.replacement_bytes = 512;
+  const repair = render(replacement);
+  assert.match(repair, /Differing files to replace<\/th><td>3<\/td>/);
+  assert.match(repair, /Export and make destination match source/);
+  assert.doesNotMatch(repair, /data-primary="true" disabled/);
   const bad = render({ ...ready(), state: "completed" });
   assert.doesNotMatch(bad, /Export complete\./);
   assert.match(bad, /Publication could not be confirmed/);

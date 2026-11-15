@@ -18,7 +18,7 @@ export const transfer_can_apply = (job, now = Date.now()) =>
   !transfer_expired(job, now) &&
   /^[a-f0-9]{64}$/.test(job.plan_sha256 || "") &&
   !!job.summary &&
-  job.summary.conflict_files === 0;
+  (job.summary.conflict_files === 0 || job.replacement_policy === "source");
 export function transfer_receipt_verified(job) {
   const receipt = job?.receipt,
     summary = job?.summary;

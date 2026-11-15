@@ -75,8 +75,21 @@ export default function InstrumentTransferView({
         ["files_total", summary.package_files],
         ["matching_files", summary.matching_files],
         ["missing_files", summary.missing_files],
-        ["transfer_bytes", transfer_bytes(summary.missing_bytes, text)],
-        ["conflicts", summary.conflict_files],
+        [
+          "transfer_bytes",
+          transfer_bytes(
+            summary.missing_bytes + (summary.replacement_bytes ?? 0),
+            text,
+          ),
+        ],
+        [
+          job.replacement_policy === "source"
+            ? "replacement_files"
+            : "conflicts",
+          job.replacement_policy === "source"
+            ? (summary.replacement_files ?? summary.conflict_files)
+            : summary.conflict_files,
+        ],
         ["free_space", transfer_bytes(summary.free_bytes, text)],
         ["required_space", transfer_bytes(summary.required_free_bytes, text)],
       ]
@@ -189,7 +202,9 @@ export default function InstrumentTransferView({
               !transfer_can_apply(job)
             }
           >
-            {text("apply")}
+            {text(
+              job.replacement_policy === "source" ? "apply_source" : "apply",
+            )}
           </button>
         )}
         {(active || job?.state === "ready" || uncertain) && (

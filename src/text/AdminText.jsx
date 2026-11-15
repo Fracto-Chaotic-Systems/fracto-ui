@@ -12,6 +12,8 @@ const instrument_transfer_copy = {
   preview: "Preview instrument export",
   preview_again: "Preview again",
   apply: "Export instruments to this server",
+  apply_source: "Export and make destination match source",
+  replacement_files: "Differing files to replace",
   cancel: "Cancel export",
   cancelling: "Requesting cancellation…",
   cancel_requested:
@@ -30,7 +32,7 @@ const instrument_transfer_copy = {
   free_space: "Destination free space",
   required_space: "Required free space",
   preview_note:
-    "Matching files are reused. Different catalogs or conflicting destination files block export.",
+    "Matching files are reused. When both servers support repair, export replaces differing package files and the catalog with verified source bytes, retaining backups. Unrelated destination files are retained. Older servers may require an update before repair.",
   checked: "Checked {count} files",
   checked_total: "Checked {count} of {total} files",
   verified: "Verified {count} of {total} files",
@@ -78,9 +80,9 @@ const instrument_transfer_copy = {
   error_upgrade_required:
     "Instrument export requires a server update. Install matching transfer and publication support on both servers, then preview again.",
   error_catalog_conflict:
-    "The servers have different instrument catalogs. Deploy matching catalog versions before exporting.",
+    "The destination has a different instrument catalog. Update both servers to support replacing it from the source, then preview again.",
   error_file_conflict:
-    "Some destination files differ from the source. Repair those files, then preview again.",
+    "Some destination files differ from the source. Update both servers to support source replacement, then preview again.",
   error_snapshot_changed:
     "Instrument files changed after the preview. Preview again before exporting.",
   error_insufficient_space:
