@@ -116,7 +116,7 @@ export default class MidiSampleCache {
                       throw new Error(`HTTP ${response.status}`);
                     const bytes = await response.arrayBuffer();
                     check();
-                    await verify_asset_bytes(sample, bytes);
+                    await verify_asset_bytes(sample, bytes, request.signal);
                     check();
                     return await context.decodeAudioData(bytes);
                   },

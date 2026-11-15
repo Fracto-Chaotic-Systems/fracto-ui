@@ -340,7 +340,7 @@ export const APP_GAMES_TEXT = {
   [MUSIC_TEXT.file_too_large]:
     "The MIDI file is too large. Choose a file up to 8 MiB.",
   [MUSIC_TEXT.sample_integrity_unavailable]:
-    "Instrument audio verification requires HTTPS or localhost.",
+    "Instrument audio checksum verification failed. Retry playback.",
   [MUSIC_TEXT.catalog_unavailable]:
     "The instrument catalog could not be refreshed. Existing sound sources remain available.",
   [MUSIC_TEXT.loading_progress]: "{completed} of {total} ready.",

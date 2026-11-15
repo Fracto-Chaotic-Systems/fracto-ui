@@ -422,7 +422,10 @@ selector population is the next migration step.
 
 Catalog providers validate mono PCM16 octave assets, coverage, note boundaries,
 versioned URLs and velocity layers. `MidiSampleAsset.js` verifies encoded size and
-SHA-256 before decoding (Web Crypto requires HTTPS or localhost). Shared chunks
+SHA-256 before decoding. Web Crypto is preferred where available; the bundled
+`@noble/hashes` SHA-256 fallback verifies LAN HTTP playback with the same expected
+digest and encoded-size checks. Its incremental updates yield for cancellation.
+Shared chunks
 are fetched/decoded once, with credentials; legacy S3 requests omit credentials.
 The cache estimates decoded memory at the actual context sample rate before
 fetching and enforces its 256 MiB limit. Oversized songs fail explicitly.

@@ -375,7 +375,12 @@ provider IDs; no program mapping is inferred from instrument names. The instrume
 
 Catalog providers validate mono PCM16 octave assets, coverage, note boundaries,
 versioned URLs and velocity layers. `MidiSampleAsset.js` verifies encoded size and
-SHA-256 before decoding (Web Crypto requires HTTPS or localhost). Shared chunks
+SHA-256 before decoding. `MidiSampleHash.js` uses Web Crypto when available and
+the pinned `@noble/hashes` SHA-256 implementation on LAN HTTP origins. The fallback
+hashes every byte in 1 MiB updates, yielding between updates and respecting sample
+loading cancellation; checksum or size mismatches still fail before decoding.
+See the [upstream implementation](https://github.com/paulmillr/noble-hashes).
+Shared chunks
 are fetched/decoded once, with credentials; legacy S3 requests omit credentials.
 The cache estimates decoded memory at the actual context sample rate before
 fetching and enforces its 256 MiB limit. Oversized songs fail explicitly.

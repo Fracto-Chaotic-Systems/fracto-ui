@@ -249,6 +249,15 @@ all prepared mappings and loads a real FluidR3 flute WAV through the cache and
 voice scheduler with a stub decoder/clock. Default mode tests enabled providers
 only. Neither mode changes catalog enablement or substitutes for native playback.
 
+## Instrument audio integrity
+
+`midi_sample_hash.test.js` verifies native and HTTP SHA-256 paths, padding/view
+boundaries, multi-chunk hashing, cancellation and corrupt/short sample rejection
+before decode. It runs with `npm run test:midi`. The Vite-only
+`midi_integrity_browser.html` fixture verifies a synthetic 2 MiB WAV, native decode
+and corrupt-byte rejection on an actual LAN HTTP origin without Web Crypto.
+It makes no instrument-service requests and produces no audio output.
+
 ## Instrument export controls
 
 `admin_instrument_transfer.test.js` covers plan and receipt gates, command races,

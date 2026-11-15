@@ -1,4 +1,5 @@
 import { MidiPlaybackError } from "./MidiPianoSamples.js";
+import { sample_sha256 } from "./MidiSampleHash.js";
 
 export function sample_window(sample, buffer = sample.buffer) {
   const offset = sample.offset_seconds ?? 0;
@@ -31,22 +32,23 @@ export function decoded_asset_bytes(sample, context) {
   );
 }
 
-export async function verify_asset_bytes(sample, bytes) {
+export async function verify_asset_bytes(sample, bytes, signal) {
   if (!sample.sha256) return;
   if (bytes.byteLength !== sample.encoded_bytes)
     throw new MidiPlaybackError(
       "invalid_sample",
       "Instrument audio size differs from its catalog.",
     );
-  if (!globalThis.crypto?.subtle)
+  let actual;
+  try {
+    actual = await sample_sha256(bytes, signal);
+  } catch (error) {
+    if (error instanceof MidiPlaybackError) throw error;
     throw new MidiPlaybackError(
       "sample_integrity_unavailable",
-      "Instrument audio verification requires HTTPS or localhost.",
+      "Instrument audio checksum verification failed. Retry playback.",
     );
-  const digest = await globalThis.crypto.subtle.digest("SHA-256", bytes);
-  const actual = [...new Uint8Array(digest)]
-    .map((value) => value.toString(16).padStart(2, "0"))
-    .join("");
+  }
   if (actual !== sample.sha256)
     throw new MidiPlaybackError(
       "invalid_sample",
