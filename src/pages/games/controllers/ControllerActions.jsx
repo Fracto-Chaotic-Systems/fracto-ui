@@ -15,13 +15,32 @@ const ActionBoxes = styled.ul`
   bottom: 0;
   transform: translateX(-50%);
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 0.25rem;
-  width: max-content;
-  max-width: 100%;
+  justify-content: center;
+  gap: 6px;
+  box-sizing: border-box;
+  width: 38%;
+  height: auto;
+  min-height: 20px;
   margin: 0;
-  padding: 0;
+  padding: 0 3px;
+  border: 3px solid #292d29;
+  border-radius: 3px;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      #00ff6810 0px,
+      #00000000 1px,
+      #00000000 3px
+    ),
+    linear-gradient(135deg, #101b13, #020603 65%);
+  box-shadow:
+    inset 2px 2px 5px #000000,
+    inset 0 0 8px #22ff4414,
+    -1px -1px 0 #b6b4a166,
+    3px 4px 4px #160b07c7;
+  overflow: hidden;
   list-style: none;
   pointer-events: none;
 `;
@@ -29,16 +48,19 @@ const ActionBoxes = styled.ul`
 const ActionBox = styled.li`
   box-sizing: border-box;
   max-width: 100%;
-  padding: 0.375rem 0.5rem;
-  border-radius: 0.25rem;
-  border: 1px solid #cccccc;
-  background: #fafafa;
-  color: #333333;
-  box-shadow: 0 2px 5px #00000033;
-  font-size: 1rem;
-  line-height: 1.25;
+  flex-shrink: 0;
+  color: #70ff88;
+  text-shadow:
+    0 0 3px #29ff62,
+    0 0 7px #29ff6273;
+  font-family: "Courier New", monospace;
+  font-size: clamp(7px, 3.2cqw, 11px);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1;
   text-align: center;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
 `;
 
 const read_enabled = () => !!AppSettings.get(KEY_GAMES_PLAY_CONTROLLER_ACTIONS);
@@ -57,17 +79,14 @@ function ActiveControllerActions({ controls }) {
     controls.get_snapshot,
   );
   const actions = state.actions;
-  if (!actions.length) return null;
   return (
-    <ActionBoxes
-      aria-label={AppText.get(KEY_GAMES_PLAY_CONTROLLER_ACTIONS_LABEL)}
-    >
+    <>
       {actions.map((code) => (
         <ActionBox key={code}>
           {AppText.get(FLIGHT_CONTROL_ACTION_TEXT[code])}
         </ActionBox>
       ))}
-    </ActionBoxes>
+    </>
   );
 }
 
@@ -77,5 +96,12 @@ export default function ControllerActions({ controls }) {
     read_enabled,
     read_enabled,
   );
-  return enabled ? <ActiveControllerActions controls={controls} /> : null;
+  return (
+    <ActionBoxes
+      aria-label={AppText.get(KEY_GAMES_PLAY_CONTROLLER_ACTIONS_LABEL)}
+      aria-live="polite"
+    >
+      {enabled && <ActiveControllerActions controls={controls} />}
+    </ActionBoxes>
+  );
 }

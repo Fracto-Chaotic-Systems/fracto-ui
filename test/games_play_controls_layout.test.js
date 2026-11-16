@@ -21,7 +21,7 @@ test("instruments and controller fit the measured game area at desktop, compact,
     const group_width = layout.compact ? 3 * size + 16 : 2 * size + 8;
     const content_width = layout.compact
       ? Math.max(group_width, controller_width)
-      : 2 * group_width + controller_width + 48;
+      : 2 * group_width + controller_width;
     const content_height = layout.compact
       ? 2 * (size + 16) + controller_height + 16
       : Math.max(2 * (size + 16) + 8, controller_height);
@@ -32,6 +32,13 @@ test("instruments and controller fit the measured game area at desktop, compact,
     );
     assert.ok(size >= 0 && size <= 112);
     assert.ok(controller_width <= 352);
+    assert.ok(layout.dock_width <= width - 32 + 0.01);
+    assert.equal(
+      layout.dock_width,
+      layout.compact
+        ? Math.max(controller_width, ...layout.group_widths)
+        : controller_width + layout.group_widths[0] + layout.group_widths[1],
+    );
     assert.equal(layout.compact, width < 768);
   }
 });

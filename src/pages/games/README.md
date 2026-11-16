@@ -9,8 +9,18 @@ Overview, Settings, and Status intentionally remain blank.
 `GamesPlayControls.jsx` arranges selected flight instruments around the centered
 on-screen controller at the bottom of the game area. Airspeed, attitude, and
 heading default to the left; altitude, vertical speed, and turn coordination
-default to the right. Below 768px the groups stack above the controller in rows
-of up to three. Settings → **instruments** controls visibility, selection,
+default to the right. Desktop instrument groups sit directly beside the controller
+without a horizontal gap. Below 768px the groups stack above the controller in rows
+of up to three. A shared walnut-style dashboard surrounds the instruments and
+controller, with a reflective metal rim and light instrument labels. The centered
+panel hugs the selected controls' combined width, with circular shoulders sized
+to the instrument radius plus side clearance, following the outer dials just above
+the trigger buttons. Each side includes an extra 1rem of wood beyond the original
+rim clearance, and straight sides extend to the bottom edge without lower corner
+curves or a bottom trim. Status text sits above the panel
+without reserving empty dashboard space; hidden instruments do not leave empty side panels. Its decorative
+surface extends into the dock's existing outer margin without adding gaps between
+the controls or intercepting pointer input. Settings → **instruments** controls visibility, selection,
 left/right placement, size, ranges, airspeed/pressure units, and animation.
 Preferences persist in AppSettings under `games/play_instruments`; resetting
 instrument defaults leaves other gameplay settings unchanged.

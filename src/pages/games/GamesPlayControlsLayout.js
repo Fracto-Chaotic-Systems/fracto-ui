@@ -14,7 +14,8 @@ export function game_controls_layout(
 ) {
   const width = Math.max(0, Number.isFinite(width_px) ? width_px : 0);
   const height = Math.max(0, Number.isFinite(height_px) ? height_px : 0);
-  const inner_width = Math.max(0, width - 32);
+  // Leave room for the wood panel's side padding and polished rim.
+  const inner_width = Math.max(0, width - 64);
   const compact = width < 768;
   const controller_height = Math.min(
     352 / CONTROLLER_RATIO,
@@ -37,7 +38,7 @@ export function game_controls_layout(
   const available_height = Math.max(0, height - 64 - (visible ? 24 : 0));
   const group_width = compact
     ? inner_width
-    : (inner_width - controller_width - 48) / 2;
+    : (inner_width - controller_width) / 2;
   const size_by_width = Math.min(
     ...active_groups.map(
       (group) => (group_width - (group.columns - 1) * 8) / group.columns,
@@ -64,8 +65,18 @@ export function game_controls_layout(
   // Below this size, dial markings cease to be usable. Retain saved selections
   // while prioritizing the controller until the game area has more room.
   const limited = visible && instrument_size < 48;
+  const group_widths = groups.map((group) =>
+    limited || !group.count
+      ? 0
+      : group.columns * instrument_size + (group.columns - 1) * 8,
+  );
+  const dock_width = compact
+    ? Math.max(controller_width, ...group_widths)
+    : controller_width + group_widths.reduce((sum, value) => sum + value, 0);
   return {
     compact,
+    dock_width,
+    group_widths,
     controller_width,
     controller_height,
     instrument_size: limited ? 0 : instrument_size,

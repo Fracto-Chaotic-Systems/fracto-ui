@@ -589,7 +589,7 @@ export const APP_GAMES_TEXT = {
   [FLIGHT_INSTRUMENT_TEXT.heading]: "heading",
   [FLIGHT_INSTRUMENT_TEXT.altitude]: "altitude",
   [FLIGHT_INSTRUMENT_TEXT.vertical_speed]: "vertical speed",
-  [FLIGHT_INSTRUMENT_TEXT.turn]: "turn coordinator",
+  [FLIGHT_INSTRUMENT_TEXT.turn]: "turn coord",
   [CONTROLLER_COLOR_TEXT.green]: "green",
   [CONTROLLER_COLOR_TEXT.red]: "red",
   [CONTROLLER_COLOR_TEXT.orange]: "orange",

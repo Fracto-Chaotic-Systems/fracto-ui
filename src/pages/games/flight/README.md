@@ -10,6 +10,15 @@ Compact groups use up to three columns, stacked above the controller by the pare
 compact mode. `GamesPlayControlsLayout.js` calculates those sizes from the game
 area's measured width and height, including fullscreen. The instrument groups
 do not intercept pointer input. Labels and accessible names use GamesText.
+Instrument labels resemble brushed-metal nameplates with uppercase engraved dark text,
+1px letter spacing, and
+a decorative rivet at each end. Plates retain the existing 16px caption height,
+scale their text with gauge size, and hide below 64px as before.
+Depth follows distance from the wood: nameplates use a tight 2px shadow,
+instrument silhouettes a medium 5px blur, and the controller silhouette a wide
+14px blur. Dark shadows fall down and right from an upper-left light source,
+with larger offsets on elements further from the wood. Controller help overlays
+remain outside the shadow filter.
 
 ## Instrument customization
 

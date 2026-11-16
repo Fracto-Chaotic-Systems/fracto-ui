@@ -39,7 +39,7 @@ is horizontally centered, 1rem above the game area's lower edge, including when
 the game area enters fullscreen. Flight instruments flank it in wide areas and
 form compact rows above it below 768px. Instrument selection and side placement
 are configurable in Settings. The controller host fills its assigned
-slot and keeps action boxes anchored between its halves.
+slot and keeps an LED-style message panel anchored between its halves.
 The settings drawer overlays it normally. `flight/FlightSimulation.js` reads
 mapped commands and updates the flight-state store; the raw input adapter stays
 independent of that time-based model.
@@ -47,10 +47,15 @@ independent of that time-based model.
 `ControllerActions.js` is a pure helper for deriving effective action codes from
 raw input and normalized control preferences. The default sticks retain the
 single “move around” and “look around” labels without direction boxes.
-`ControllerActions.jsx` shows active actions in
-tooltip-style boxes centered between the controller halves, aligned 1rem above
-the game area's bottom edge (the screen bottom in fullscreen). The boxes use 1rem
-dark text on a light background. Labels come from AppText. The overlay does
+`ControllerActions.jsx` shows active actions in a recessed black LED-style panel
+fitting the gap between the controller halves, aligned 1rem above the game area's bottom
+edge (the screen bottom in fullscreen). Uppercase green monospace text glows over
+subtle scan lines. The blank panel remains visible when idle or help is disabled;
+text appears while an action is held and the existing help setting is enabled.
+The panel uses 38% of the controller width, a tight 20px minimum height, no vertical
+padding, and smaller text on a single horizontal line. It occupies the lower gap
+without shrinking or separating the controller halves. Its size and type scale
+with the controller. Labels come from AppText. The overlay does
 not intercept pointer input. The persisted display setting **controller actions**
 defaults off. Labels disappear on release, reset, disconnection, or when disabled.
 Only the enabled overlay subscribes to mapped commands. Mapping remains bound

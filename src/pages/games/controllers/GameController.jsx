@@ -34,6 +34,7 @@ const ControllerHost = styled.div`
   height: 100%;
   touch-action: none;
   user-select: none;
+  container-type: inline-size;
 
   > div {
     width: 100%;
@@ -44,6 +45,7 @@ const ControllerHost = styled.div`
     display: block;
     width: 100%;
     height: 100%;
+    filter: drop-shadow(10px 12px 14px #160b07cc);
   }
 `;
 
