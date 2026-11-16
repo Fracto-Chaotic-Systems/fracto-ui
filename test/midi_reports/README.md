@@ -1,5 +1,12 @@
 # MIDI migration evidence
 
+`hammerklavier/hammerklavier-playback.json` records the 2026-11-15 full-duration
+native browser check for the supplied Hammerklavier movement. It identifies the
+local MIDI by hash and records FluidR3 Original assignment and the explicit
+GrandB override, scheduling, allocation, signal and cleanup evidence. The test
+measures the master signal before muting the output; it is not a speaker capture
+or listening review. Reproduce with `../midi_browser/serve-long-piece.mjs`.
+
 Dated snapshots from the 2026-11-02 verification run. These are historical results,
 not runtime health checks. No production catalog source was enabled.
 

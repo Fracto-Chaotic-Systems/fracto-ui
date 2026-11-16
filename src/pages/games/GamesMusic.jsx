@@ -23,7 +23,7 @@ export default function GamesMusic() {
   const player = useMidiPlayer();
   const { snapshot, loaded, reading, file_name, import_error } = player;
   const busy =
-    reading || snapshot.status === "loading" || snapshot.status === "playing";
+    reading || ["loading", "playing", "buffering"].includes(snapshot.status);
   const error_code =
     import_error ||
     (snapshot.error &&

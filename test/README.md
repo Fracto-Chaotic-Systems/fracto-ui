@@ -1,5 +1,12 @@
 # UI tests
 
+- `midi_resource_allocation.test.js` covers windowed eviction, active voice pins,
+  buffer-free note descriptors, adaptive lookahead, persistent decoder
+  reservations across cancellation/retry, bounded downloads, buffering without
+  skipped notes, and Stop during a buffer wait. It is included in `test:midi`.
+  `midi_browser/serve-long-piece.mjs` separately verifies the complete supplied
+  Hammerklavier file through native browser audio; see that folder's guide.
+
 - `game_controller.test.js` checks normalized input, subscriptions, physical-pad
   isolation, blur/visibility/cancellation reset, cleanup, failed mount recovery,
   action descriptions for simultaneous buttons and stick directions, and palettes.

@@ -137,6 +137,7 @@ export const MUSIC_TEXT = Object.fromEntries(
     "ready",
     "loading",
     "playing",
+    "buffering",
     "stopped",
     "completed",
     "error",
@@ -243,7 +244,7 @@ export const APP_GAMES_TEXT = {
     "Changing the drum kit stops playback. Press Play to use the new assignment.",
   [MUSIC_TEXT.kit_channel_help]:
     "Channel 10 uses drum note identities. A kit override replaces the file kit program and bank for this track; every note must be supported.",
-  [MUSIC_TEXT.instrument_grandb]: "GrandB piano",
+  [MUSIC_TEXT.instrument_grandb]: "GrandB piano (Legacy)",
   [MUSIC_TEXT.instrument_original]: "Original MIDI assignment",
   [MUSIC_TEXT.instrument_original_unavailable]:
     "Original MIDI assignment — unavailable",
@@ -330,6 +331,7 @@ export const APP_GAMES_TEXT = {
   [MUSIC_TEXT.ready]: "Ready to play.",
   [MUSIC_TEXT.loading]: "Loading instrument samples…",
   [MUSIC_TEXT.playing]: "Playing.",
+  [MUSIC_TEXT.buffering]: "Preparing the next instrument samples…",
   [MUSIC_TEXT.stopped]: "Stopped. Press Play to restart from the beginning.",
   [MUSIC_TEXT.completed]: "Playback complete.",
   [MUSIC_TEXT.error]: "Playback could not start.",
@@ -353,7 +355,7 @@ export const APP_GAMES_TEXT = {
   [MUSIC_TEXT.invalid_sample]:
     "An instrument sample failed verification or decoding. Press Play to retry.",
   [MUSIC_TEXT.sample_memory_limit]:
-    "This song needs more instrument sample memory than the player supports. Choose a smaller song.",
+    "The samples needed at the same time exceed the player’s memory budget. Choose another instrument.",
   [MUSIC_TEXT.unsupported_pitch]:
     "The selected instrument does not support every pitch in this song. Choose another instrument or file.",
   [MUSIC_TEXT.unsupported_percussion]:

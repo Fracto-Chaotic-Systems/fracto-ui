@@ -2,18 +2,16 @@ import { loading_task } from "./MidiLoadingTask.js";
 import { MidiPlaybackError } from "./MidiPianoSamples.js";
 import { INSTRUMENT_REGISTRY, DEFAULT_INSTRUMENT } from "./MidiInstruments.js";
 import { midi_route_id } from "./MidiMixer.js";
-import {
-  decoded_asset_bytes,
-  sample_window,
-  verify_asset_bytes,
-} from "./MidiSampleAsset.js";
+import { decoded_asset_bytes, sample_window } from "./MidiSampleAsset.js";
+import MidiSampleBudget, { sample_memory_error } from "./MidiSampleBudget.js";
+import { load_cached_sample } from "./MidiSampleLoader.js";
 const MAX_CACHE_BYTES = 256 * 1024 * 1024;
 
 export default class MidiSampleCache {
   constructor({
     fetch_sample = (...args) => fetch(...args),
     sample_root,
-    concurrency = 4,
+    concurrency = 2,
     max_bytes = MAX_CACHE_BYTES,
     load_timeout_ms = 60000,
   } = {}) {
@@ -26,13 +24,16 @@ export default class MidiSampleCache {
     });
     this.buffers = new Map();
     this.bytes = 0;
+    this.peak_decoded_bytes = 0;
     this.preparation = null;
+    this.budget = new MidiSampleBudget(this);
   }
   clear() {
     this.preparation?.abort();
     this.preparation = null;
     this.buffers.clear();
     this.bytes = 0;
+    // Reservations and decoder slots deliberately survive clear/cancellation.
   }
   async prepare(
     notes,
@@ -69,12 +70,11 @@ export default class MidiSampleCache {
       const assets = new Map(
         samples.map((sample) => [sample.cache_key, sample]),
       );
-      for (const [key, buffer] of this.buffers) {
+      for (const [key, buffer] of this.buffers)
         if (!assets.has(key)) {
           this.bytes -= buffer.length * buffer.numberOfChannels * 4;
           this.buffers.delete(key);
         }
-      }
       const estimate = [...assets].reduce((sum, [key, sample]) => {
         const buffer = this.buffers.get(key);
         return (
@@ -84,12 +84,7 @@ export default class MidiSampleCache {
             : decoded_asset_bytes(sample, context))
         );
       }, 0);
-      const memory_error = () =>
-        new MidiPlaybackError(
-          "sample_memory_limit",
-          "This song requires more than the instrument sample memory limit.",
-        );
-      if (estimate > this.max_bytes) throw memory_error();
+      if (estimate > this.max_bytes) throw sample_memory_error();
       const keys = [...assets.keys()];
       let next = 0;
       let completed = keys.filter((key) => this.buffers.has(key)).length;
@@ -100,26 +95,19 @@ export default class MidiSampleCache {
           async () => {
             while (next < keys.length) {
               check();
-              const key = keys[next++],
-                sample = assets.get(key);
+              const key = keys[next++];
               if (this.buffers.has(key)) continue;
-              let buffer;
               try {
-                buffer = await loading_task(
-                  async () => {
-                    const response = await this.fetch_sample(sample.url, {
-                      signal: request.signal,
-                      credentials: sample.credentials ?? "omit",
-                    });
-                    check();
-                    if (!response.ok)
-                      throw new Error(`HTTP ${response.status}`);
-                    const bytes = await response.arrayBuffer();
-                    check();
-                    await verify_asset_bytes(sample, bytes, request.signal);
-                    check();
-                    return await context.decodeAudioData(bytes);
-                  },
+                await loading_task(
+                  () =>
+                    load_cached_sample(
+                      this,
+                      key,
+                      assets.get(key),
+                      context,
+                      request.signal,
+                      check,
+                    ),
                   request.signal,
                   this.load_timeout_ms,
                   "sample_load_timeout",
@@ -133,38 +121,6 @@ export default class MidiSampleCache {
                 );
               }
               check();
-              if (
-                !Number.isFinite(buffer.duration) ||
-                buffer.duration <= 0 ||
-                !Number.isSafeInteger(buffer.length) ||
-                buffer.length <= 0 ||
-                !Number.isSafeInteger(buffer.numberOfChannels) ||
-                buffer.numberOfChannels <= 0
-              )
-                throw new MidiPlaybackError(
-                  "invalid_sample",
-                  "An instrument sample contains no usable audio.",
-                );
-              if (
-                sample.asset_frames &&
-                (buffer.numberOfChannels !== sample.asset_channels ||
-                  Math.abs(
-                    buffer.duration -
-                      sample.asset_frames / sample.asset_sample_rate,
-                  ) >
-                    2 /
-                      (buffer.sampleRate ||
-                        context.sampleRate ||
-                        sample.asset_sample_rate))
-              )
-                throw new MidiPlaybackError(
-                  "invalid_sample",
-                  "Decoded instrument audio differs from its catalog.",
-                );
-              const bytes = buffer.length * buffer.numberOfChannels * 4;
-              if (this.bytes + bytes > this.max_bytes) throw memory_error();
-              this.buffers.set(key, buffer);
-              this.bytes += bytes;
               on_progress({ completed: ++completed, total: keys.length });
             }
           },

@@ -42,6 +42,10 @@ export function piano_sample(note, root = PIANO_SAMPLE_ROOT) {
   return {
     url: `${root.replace(/\/$/, "")}/${layer}/GrandB_${layer}_${String(note.pitch).padStart(3, "0")}_mono.mp3`,
     gain: volume * 0.5,
+    // Native GrandB probes measured 10.033 s mono. Reserve a conservative
+    // 10.1 s at the actual context rate instead of treating unknown size as zero.
+    estimated_duration_seconds: 10.1,
+    estimated_channels: 1,
     pan:
       ((note.pitch - PIANO_MIN_PITCH) / (PIANO_MAX_PITCH - PIANO_MIN_PITCH)) *
         1.2 -

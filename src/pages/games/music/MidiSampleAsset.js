@@ -21,7 +21,15 @@ export function sample_window(sample, buffer = sample.buffer) {
 }
 
 export function decoded_asset_bytes(sample, context) {
-  if (!sample.asset_frames) return 0;
+  if (!sample.asset_frames)
+    return (
+      Math.ceil(
+        (sample.estimated_duration_seconds ?? 10.1) *
+          (context.sampleRate || 48000),
+      ) *
+      (sample.estimated_channels ?? 1) *
+      4
+    );
   return (
     Math.ceil(
       (sample.asset_frames * (context.sampleRate || sample.asset_sample_rate)) /

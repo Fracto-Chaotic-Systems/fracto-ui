@@ -1,5 +1,32 @@
 # MIDI browser verification
 
+## Full Hammerklavier playback
+
+From the UI repository, run:
+
+```powershell
+node test/midi_browser/serve-long-piece.mjs D:/mediaplex/fracto/servers/fracto-ui/test/midi_reports/hammerklavier D:/midi/MIDI/classical/beethoven/beethoven_hammerklavier_1.mid
+```
+
+Open `http://127.0.0.1:43192` and click **Run full FluidR3 and GrandB verification**.
+The isolated built harness uses the product parser, catalog, assignments, cache,
+controller, scheduler, voices and native 48 kHz AudioContexts. It runs the whole
+593.4006-second file twice concurrently: FluidR3 with every route assigned to
+Original MIDI assignment, and the explicit Legacy GrandB override. Neither run
+shortens the file, advances a fake clock, or substitutes generated audio. Output
+is muted after the master signal; an analyser measures that actual signal before
+muting. This is native signal/timing verification, not a listening assessment.
+
+The loopback server holds an immutable snapshot of the requested local MIDI and
+writes its filename, byte count and SHA-256 with the results in
+`hammerklavier-playback.json`. Progress updates every five seconds. Passing
+requires completion, all 8,290 notes scheduled, zero skipped notes, native signal,
+managed allocation within 256 MiB, and at most two simultaneous decoder jobs per
+player. Cleanup records closed contexts, empty caches and no remaining pins/jobs.
+Keep the verification tab active; background timer throttling is an existing
+scheduler limitation. The generated `long-piece-dist/` bundle is ignored by Git.
+The local source MIDI and audio recordings are not committed.
+
 ## Current default: FluidR3 GM (migration step 6)
 
 The catalog now declares `default_library_id: "fluidr3-gm"`. All Music selects it

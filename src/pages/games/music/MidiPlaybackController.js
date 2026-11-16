@@ -1,11 +1,11 @@
 import { loading_task } from "./MidiLoadingTask.js";
-import { sample_window } from "./MidiSampleAsset.js";
 import { events_from_midi } from "./MidiEvents.js";
 import { MidiPlaybackError } from "./MidiPianoSamples.js";
 import MidiSampleCache from "./MidiSampleCache.js";
 import MidiInstrumentAssignments from "./MidiInstrumentAssignments.js";
 import MidiMixer from "./MidiMixer.js";
 import MidiScheduler from "./MidiScheduler.js";
+import MidiSampleSession from "./MidiSampleSession.js";
 
 export default class MidiPlaybackController {
   constructor({
@@ -19,6 +19,8 @@ export default class MidiPlaybackController {
     fetch_sample,
     sample_root,
     load_timeout_ms,
+    max_sample_bytes,
+    sample_concurrency,
     resume_timeout_ms = 15000,
     set_interval,
     clear_interval,
@@ -40,6 +42,8 @@ export default class MidiPlaybackController {
       fetch_sample,
       sample_root,
       load_timeout_ms,
+      max_bytes: max_sample_bytes,
+      concurrency: sample_concurrency,
     });
     this.catalog_request = null;
     this.catalog_state = {
@@ -75,6 +79,8 @@ export default class MidiPlaybackController {
         this.status === "completed"
           ? this.song.duration_seconds
           : (this.scheduler?.position_seconds ?? 0),
+      sample_memory: this.sample_session?.diagnostics() ?? null,
+      playback_stats: this.scheduler?.stats ?? this.last_playback_stats ?? null,
     };
   }
 
@@ -135,6 +141,8 @@ export default class MidiPlaybackController {
     const generation = ++this.generation;
     const request = new AbortController();
     this.request = request;
+    this.playback_request = request;
+    this.last_playback_stats = null;
     const stale = () => this.disposed || generation !== this.generation;
     const song = this.song;
     try {
@@ -155,7 +163,8 @@ export default class MidiPlaybackController {
         "audio_resume_timeout",
       );
       if (stale()) return false;
-      const samples = await this.cache.prepare(
+      const session = new MidiSampleSession(
+        this.cache,
         song.notes,
         context,
         request.signal,
@@ -169,13 +178,18 @@ export default class MidiPlaybackController {
           },
         },
       );
+      this.sample_session = session;
+      await session.prepare();
       if (stale()) return false;
+      const samples = session.samples;
       this.warnings = [...song.warnings];
       const short = song.notes.filter(
         (note, index) =>
           samples[index].playback_mode !== "one-shot" &&
           note.end_seconds - note.start_seconds >
-          sample_window(samples[index]).duration,
+            (samples[index].duration_seconds ??
+              this.cache.buffers.get(samples[index].cache_key)?.duration ??
+              Infinity),
       ).length;
       if (short)
         this.warnings.push({ code: "sample_shorter_than_note", count: short });
@@ -186,11 +200,17 @@ export default class MidiPlaybackController {
         destination: this.master,
         route_destination: (note) => this.mixer.destination(note),
         song,
-        samples,
+        sample_session: session,
+        on_buffering: (buffering) => {
+          if (!stale()) this.notify(buffering ? "buffering" : "playing");
+        },
         set_interval: this.set_interval,
         clear_interval: this.clear_interval,
         on_complete: () => {
           if (stale()) return;
+          this.last_playback_stats = { ...scheduler.stats };
+          this.playback_request?.abort();
+          this.playback_request = null;
           this.scheduler = null;
           this.mixer.disconnect();
           this.notify("completed");
@@ -231,6 +251,8 @@ export default class MidiPlaybackController {
     }
     this.request?.abort();
     this.request = null;
+    this.playback_request?.abort();
+    this.playback_request = null;
     if (this.master && this.context) {
       this.master.gain.cancelScheduledValues(this.context.currentTime);
       this.master.gain.setValueAtTime(0, this.context.currentTime);

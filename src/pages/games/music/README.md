@@ -1,5 +1,46 @@
 # MIDI playback modules
 
+## Bounded sample allocation (2026-11-15)
+
+The default 256 MiB managed sample budget is retained. `MidiSampleSession.js`
+resolves buffer-free note descriptors and chooses whole-song preloading only
+when decoded assets plus temporary byte storage fit. Larger sample sets use a
+five-second prefetch window that shrinks toward the scheduler horizon when
+necessary. Scheduled/active voices pin their assets through sustain, release,
+and percussion tails; unneeded, unpinned cache entries are removed. The song's
+note array does not retain AudioBuffer references after eviction.
+
+`MidiSampleBudget.js` owns a lifetime-wide gate for two concurrent loads/decodes.
+Reservations include estimated decoded data and two copies of bounded encoded
+data (stream chunks plus concatenation). `MidiSampleLoader.js` bounds downloads,
+checks integrity and decoded shape, then transfers reservations to resident
+bytes synchronously. Cancelled or timed-out native decode work retains its slot
+until it actually settles, including across cache clear, Stop and replay. These
+are managed sample allocations; browser/driver overhead and garbage collection
+are outside the budget and are not a browser-process RAM guarantee.
+
+GrandB's verified approximately 10.033-second mono MP3s reserve 10.1 seconds at
+the actual AudioContext rate instead of estimating zero bytes. The UI labels an
+explicit GrandB choice as **GrandB piano (Legacy)** even when FluidR3 is selected;
+it remains an intentional override. **Original MIDI assignment** with FluidR3
+resolves program 0 to the catalog's FluidR3 acoustic grand piano. No automatic
+sound substitution or memory-cap increase is performed.
+
+`MidiScheduler.js` obtains a pinned buffer immediately before scheduling a voice.
+If a needed buffer is not ready, the `buffering` state suspends AudioContext time
+and existing source offsets until preparation finishes; it does not advance the
+note index or skip a note because of sample loading. Stop aborts the session and
+prevents a late preparation from resuming playback. Existing release/tail and
+audio-clock timing behavior is preserved. Playback snapshots expose allocation
+and scheduling counters for verification, without adding technical UI controls.
+
+The Hammerklavier fixture is 74,228 bytes, 8,290 notes, and 593.4006 seconds.
+The current FluidR3 catalog needs seven assets (48.83 MiB decoded at 48 kHz), so
+repacking assets is unnecessary for this piece. GrandB needs 189 assets overall
+and uses windowed loading. See `test/midi_browser/README.md` (from the UI root)
+for the repeatable full-duration native browser test. The MIDI input remains
+outside Git; reports identify it by SHA-256.
+
 ## Current default: FluidR3 GM (migration step 6)
 
 The catalog now declares `default_library_id: "fluidr3-gm"`. All Music selects it
@@ -120,8 +161,10 @@ React refs or color utilities. All pitched programs use the piano. Percussion
 (channel 9) and pitches outside 21–108 currently fail playback explicitly;
 they are not silently omitted or transposed.
 
-`MidiSampleCache.js` preloads only the song's distinct sample URLs, with four
-concurrent fetch/decode jobs, no credentials, and a 256 MiB decoded-cache cap.
+`MidiSampleCache.js` loads a session's distinct required sample URLs with two
+concurrent fetch/decode jobs and a 256 MiB managed sample budget. Catalog sample
+requests retain their declared credentials; external GrandB requests omit them.
+The session controls full-song versus bounded-window loading as described above.
 Replay reuses buffers. Preparing another song prunes unneeded cached buffers;
 failed samples can be retried. Memory-limit failures are explicit errors.
 Stop does not close the context so a replay can reuse decoded buffers;

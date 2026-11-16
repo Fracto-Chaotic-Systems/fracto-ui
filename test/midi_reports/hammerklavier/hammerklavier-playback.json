@@ -1,0 +1,106 @@
+{
+  "fixture": {
+    "name": "beethoven_hammerklavier_1.mid",
+    "bytes": 74228,
+    "sha256": "e5fa95ea1daf5c0c9fd3f3dfa95acede8a59462ac03d968a446d504ea3f1ad61"
+  },
+  "fluidr3-original": {
+    "status": "completed",
+    "output_muted": true,
+    "notes": 8290,
+    "duration_seconds": 593.400583270838,
+    "assignments": {
+      "track:2:channel:0": "original",
+      "track:1:channel:0": "original"
+    },
+    "resolved_instruments": [
+      "asset-fluidr3-gm-acoustic-grand-piano"
+    ],
+    "loading_progress": null,
+    "playback_id": 3,
+    "clock_started": false,
+    "error": null,
+    "warnings": [
+      {
+        "code": "sample_shorter_than_note",
+        "count": 103
+      }
+    ],
+    "position_seconds": 593.400583270838,
+    "sample_memory": {
+      "mode": "preload",
+      "assets": 7,
+      "estimated_bytes": 51201920,
+      "decoded_bytes": 51201920,
+      "reserved_bytes": 0,
+      "peak_decoded_bytes": 51201920,
+      "peak_managed_bytes": 64642600,
+      "decode_jobs": 0,
+      "peak_decode_jobs": 2
+    },
+    "playback_stats": {
+      "scheduled": 8290,
+      "skipped": 0,
+      "buffering_count": 0,
+      "max_lateness_seconds": 0.04189491666666534
+    },
+    "wall_seconds": 594.8566000000238,
+    "measured_peak": 0.0659850537776947,
+    "signal_observations": 2939,
+    "pass": true,
+    "cleanup": {
+      "context_closed": true,
+      "decoded_bytes": 0,
+      "pinned_assets": 0,
+      "active_decodes": 0
+    }
+  },
+  "grandb-override": {
+    "status": "completed",
+    "output_muted": true,
+    "notes": 8290,
+    "duration_seconds": 593.400583270838,
+    "assignments": {
+      "track:2:channel:0": "grandb",
+      "track:1:channel:0": "grandb"
+    },
+    "resolved_instruments": [
+      "grandb"
+    ],
+    "loading_progress": null,
+    "playback_id": 5,
+    "clock_started": false,
+    "error": null,
+    "warnings": [],
+    "position_seconds": 593.400583270838,
+    "sample_memory": {
+      "mode": "windowed",
+      "assets": 189,
+      "estimated_bytes": 366508800,
+      "decoded_bytes": 0,
+      "reserved_bytes": 0,
+      "peak_decoded_bytes": 104021928,
+      "peak_managed_bytes": 120824880,
+      "decode_jobs": 0,
+      "peak_decode_jobs": 2
+    },
+    "playback_stats": {
+      "scheduled": 8290,
+      "skipped": 0,
+      "buffering_count": 0,
+      "max_lateness_seconds": 0.08189491666666537
+    },
+    "wall_seconds": 595.1915,
+    "measured_peak": 0.48035579919815063,
+    "signal_observations": 2963,
+    "pass": true,
+    "cleanup": {
+      "context_closed": true,
+      "decoded_bytes": 0,
+      "pinned_assets": 0,
+      "active_decodes": 0
+    }
+  },
+  "finished": true,
+  "pass": true
+}

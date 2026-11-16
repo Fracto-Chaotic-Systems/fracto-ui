@@ -13,6 +13,8 @@ export default class MidiScheduler {
     route_destination,
     song,
     samples,
+    sample_session,
+    on_buffering = () => {},
     on_complete,
     on_error,
     set_interval = (callback, delay) => setInterval(callback, delay),
@@ -24,6 +26,8 @@ export default class MidiScheduler {
       route_destination,
       song,
       samples,
+      sample_session,
+      on_buffering,
       on_complete,
       on_error,
       set_interval,
@@ -34,6 +38,13 @@ export default class MidiScheduler {
     this.index = 0;
     this.timer = null;
     this.stopped = false;
+    this.buffering = false;
+    this.stats = {
+      scheduled: 0,
+      skipped: 0,
+      buffering_count: 0,
+      max_lateness_seconds: 0,
+    };
     this.origin = context.currentTime + START_DELAY_SECONDS;
   }
 
@@ -50,8 +61,10 @@ export default class MidiScheduler {
   }
 
   pump() {
-    if (this.stopped) return;
+    if (this.stopped || this.buffering) return;
     try {
+      if (this.sample_session?.error) throw this.sample_session.error;
+      this.sample_session?.prefetch(this.position_seconds, this.index);
       let count = 0;
       const horizon = this.context.currentTime + LOOKAHEAD_SECONDS;
       while (
@@ -60,7 +73,14 @@ export default class MidiScheduler {
       ) {
         const note = this.song.notes[this.index];
         if (this.origin + note.start_seconds > horizon) break;
-        const sample = this.samples[this.index++];
+        const sample = this.sample_session
+          ? this.sample_session.acquire(this.index)
+          : this.samples[this.index];
+        if (!sample) {
+          this.wait_for_samples();
+          return;
+        }
+        this.index++;
         // Exclusive classes belong to a kit on a MIDI channel, including hits
         // split across tracks. Schedule the cut at the hit time, not pump time.
         const key =
@@ -82,15 +102,25 @@ export default class MidiScheduler {
           sample,
           this.origin,
           (ended) => {
+            sample.release_buffer?.();
             this.voices.delete(ended);
             group?.delete(ended);
             if (key && !group.size) this.choke_groups.delete(key);
           },
         );
         if (voice) {
+          this.stats.scheduled++;
+          this.stats.max_lateness_seconds = Math.max(
+            this.stats.max_lateness_seconds,
+            this.context.currentTime - this.origin - note.start_seconds,
+          );
           this.voices.add(voice);
           group?.add(voice);
-        } else if (key && !group.size) this.choke_groups.delete(key);
+        } else {
+          sample.release_buffer?.();
+          this.stats.skipped++;
+          if (key && !group.size) this.choke_groups.delete(key);
+        }
       }
       if (
         this.index === this.song.notes.length &&
@@ -104,6 +134,29 @@ export default class MidiScheduler {
       this.stop();
       this.on_error(error);
     }
+  }
+
+  wait_for_samples() {
+    this.buffering = true;
+    this.stats.buffering_count++;
+    this.on_buffering(true);
+    // Suspending freezes AudioContext time and active source offsets together;
+    // no notes are skipped and held notes need not be reconstructed.
+    void (async () => {
+      await this.context.suspend();
+      if (this.stopped) return;
+      await this.sample_session.prepare(this.position_seconds, this.index);
+      if (this.stopped) return;
+      await this.context.resume();
+      if (this.stopped) return;
+      this.buffering = false;
+      this.on_buffering(false);
+      this.pump();
+    })().catch((error) => {
+      if (this.stopped) return;
+      this.stop();
+      this.on_error(error);
+    });
   }
 
   stop() {
