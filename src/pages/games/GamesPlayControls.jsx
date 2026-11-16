@@ -8,10 +8,17 @@ import { game_controls_layout } from "./GamesPlayControlsLayout.js";
 import { useInstrumentSettings } from "./flight/useInstrumentSettings.js";
 import { useDashboardBackground } from "./useDashboardBackground.js";
 import { dashboard_background } from "./DashboardBackground.js";
+import { useNightFlight } from "./useNightFlight.js";
+import NightFlightSwitch from "./NightFlightSwitch.jsx";
 
 const pearl_drift = keyframes`
   from { background-position: 0 0, 0% 0%, 0 0; }
   to { background-position: 0 0, 100% 100%, 0 0; }
+`;
+
+const metal_shine = keyframes`
+  from { background-position: 0% 0, 0 0, 0 0, 0 0; }
+  to { background-position: 100% 0, 0 0, 0 0, 0 0; }
 `;
 
 const ControlsDock = styled.div`
@@ -32,11 +39,20 @@ const ControlsDock = styled.div`
     border-bottom: 0;
     border-radius: ${({ $shoulder_radius }) =>
       `${$shoulder_radius}px ${$shoulder_radius}px 0 0`};
-    background: ${({ $background }) => dashboard_background($background)};
+    background: ${({ $background, $night }) => dashboard_background($background, $night)};
+    filter: ${({ $night }) => ($night ? "brightness(0.42) saturate(0.65)" : "none")};
     ${({ $background }) =>
       $background === "pearl" &&
       css`
         animation: ${pearl_drift} 45s ease-in-out infinite alternate;
+        @media (prefers-reduced-motion: reduce) {
+          animation: none;
+        }
+      `}
+    ${({ $background }) =>
+      $background === "metal" &&
+      css`
+        animation: ${metal_shine} 32s ease-in-out infinite alternate;
         @media (prefers-reduced-motion: reduce) {
           animation: none;
         }
@@ -84,11 +100,20 @@ const InstrumentSlot = styled.div`
 `;
 
 const ControllerSlot = styled.div`
+  position: relative;
   grid-area: controller;
   justify-self: center;
   width: ${({ $width }) => $width}px;
   height: ${({ $height }) => $height}px;
   pointer-events: auto;
+  ${({ $night }) =>
+    $night &&
+    `
+    > div > div > svg {
+      filter: brightness(0.65) drop-shadow(10px 12px 14px #160b07cc);
+    }
+    ul { filter: brightness(0.7); }
+  `}
 `;
 
 export default function GamesPlayControls({
@@ -100,11 +125,13 @@ export default function GamesPlayControls({
 }) {
   const settings = useInstrumentSettings();
   const background = useDashboardBackground();
+  const night = useNightFlight();
   const layout = game_controls_layout(width_px, height_px, settings);
   const groups = layout.groups.filter((group) => group.count);
   if (!width_px || !height_px) return null;
   return (
     <ControlsDock
+      $night={night}
       $background={background}
       $width={layout.dock_width}
       $shoulder_radius={layout.instrument_size / 2 + 28}
@@ -138,14 +165,23 @@ export default function GamesPlayControls({
               side={side}
               size_px={layout.instrument_size}
               compact={layout.compact}
+              night={night}
+              show_night_switch={layout.heading_switch_side === side}
             />
           </InstrumentSlot>
         ))}
         <ControllerSlot
+          $night={night}
           $width={layout.controller_width}
           $height={layout.controller_height}
         >
           <GameController input={input} flight_controls={flight_controls} />
+          {!layout.heading_switch_side && (
+            <NightFlightSwitch
+              enabled={night}
+              width_px={Math.min(54, layout.controller_width * 0.17)}
+            />
+          )}
         </ControllerSlot>
       </ControlsLayout>
     </ControlsDock>

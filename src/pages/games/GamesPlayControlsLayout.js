@@ -24,7 +24,8 @@ export function game_controls_layout(
   );
   const controller_width = controller_height * CONTROLLER_RATIO;
   const groups = ["left", "right"].map((side) => {
-    const count = instrument_codes(settings, side).length;
+    const codes = instrument_codes(settings, side);
+    const count = codes.length;
     const columns = Math.min(compact ? 3 : 2, count);
     return {
       side,
@@ -74,6 +75,17 @@ export function game_controls_layout(
     ? Math.max(controller_width, ...group_widths)
     : controller_width + group_widths.reduce((sum, value) => sum + value, 0);
   return {
+    // The centered last dial leaves an unused half-cell to its left. Reuse it
+    // for the switch, keeping the upper row and the dashboard shoulders tight.
+    heading_switch_side:
+      !compact && !limited
+        ? (groups.find(
+            (group) =>
+              group.columns === 2 &&
+              group.count % 2 === 1 &&
+              instrument_codes(settings, group.side).at(-1) === "heading",
+          )?.side ?? null)
+        : null,
     compact,
     dock_width,
     group_widths,

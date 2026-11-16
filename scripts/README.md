@@ -2,8 +2,8 @@
 
 ## Dashboard textures
 
-`dashboard-textures.py` downloads the approved ambientCG Wood051, Metal010, and
-Wicker010A 1K JPG archives and converts only their color maps to WebP under
+`dashboard-textures.py` downloads the approved Poly Haven Oak Veneer 01 diffuse
+map and ambientCG Metal011 and Wicker010A 1K JPG archives, converting their color maps to WebP under
 `public/dashboard/`. Run with Python and Pillow installed; neither is required
 at application runtime. Source and license information is in that asset folder's
 README. Output includes archive checksums and encoded sizes.

@@ -1,5 +1,8 @@
 # UI settings
 
+`games/play_night_flight` persists the dashboard's night lighting, defaulting off.
+The physical-style switch beside the heading indicator controls this preference.
+
 `games/play_dashboard_background` persists the game dashboard finish as
 `woodgrain` (default), `metal`, `wicker`, or `pearl`. The game display panel and dashboard
 subscribe to this preference; invalid saved values render as woodgrain.

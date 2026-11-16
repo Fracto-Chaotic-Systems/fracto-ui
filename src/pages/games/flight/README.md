@@ -1,5 +1,21 @@
 # Flight instruments
 
+Night-flight lighting is controlled by the enlarged photographic switch in the
+unused half-cell left of the centered heading indicator. Layouts without that
+space use a fallback beside the controller, keeping the upper dials and dashboard
+shoulders tightly fitted. Its shared
+boolean preference comes from the dashboard. Scoped SVG styles illuminate text
+and white markings in warm amber, dim horizon fills, and light the nameplates;
+each dial also has its own soft amber crescent along the upper-left inside rim
+(11 o'clock),
+fading down into the face like a concealed lamp. The circular overlay scales
+with the instrument, appears only at night, and does not intercept input.
+the dependency's SVGs and live telemetry remain intact. The switch never changes
+instrument pointer behavior or adds width to the instrument group.
+When the switch shares the heading row, the heading dial and nameplate shift
+right together to equalize the space on either side of the dial. The switch
+position, size, upper instrument row, and dashboard contour remain fixed.
+
 `FlightInstrumentGroup.jsx` renders selected `flight-indicators` instruments on
 each side of the controller. The default left group contains airspeed, attitude,
 and heading; the right contains altitude, vertical speed, and turn coordination.

@@ -6,6 +6,10 @@ import {
 } from "../pages/games/controllers/FlightControlSettings.js";
 
 const GAMES_FOLDER = "games";
+export const NIGHT_FLIGHT_TEXT = {
+  label: `${GAMES_FOLDER}/night_flight_lighting`,
+  night: `${GAMES_FOLDER}/night_flight_switch_caption`,
+};
 export const FLIGHT_CONTROL_ACTION_TEXT = Object.fromEntries(
   CONTROL_ACTIONS.map((code) => [
     code,
@@ -377,8 +381,8 @@ export const APP_GAMES_TEXT = {
   [FLIGHT_CONTROL_ACTION_TEXT.look]: "look around",
   [FLIGHT_CONTROL_ACTION_TEXT.slow_down]: "slow down",
   [FLIGHT_CONTROL_ACTION_TEXT.speed_up]: "speed up",
-  [FLIGHT_CONTROL_ACTION_TEXT.nose_down]: "nose down",
-  [FLIGHT_CONTROL_ACTION_TEXT.tail_up]: "tail up",
+  [FLIGHT_CONTROL_ACTION_TEXT.nose_down]: "descend",
+  [FLIGHT_CONTROL_ACTION_TEXT.tail_up]: "ascend",
   [FLIGHT_CONTROL_ACTION_TEXT.tilt_left]: "tilt left",
   [FLIGHT_CONTROL_ACTION_TEXT.tilt_right]: "tilt right",
   [FLIGHT_CONTROL_ACTION_TEXT.turn_left]: "turn left",
@@ -544,6 +548,8 @@ export const APP_GAMES_TEXT = {
   [KEY_GAMES_PLAY_SETTINGS_CLOSE]: "Close settings",
   [KEY_GAMES_PLAY_SETTINGS_RESIZE]: "Resize settings panel",
   [KEY_GAMES_PLAY_DISPLAY]: "display",
+  [NIGHT_FLIGHT_TEXT.label]: "night flight lighting",
+  [NIGHT_FLIGHT_TEXT.night]: "lights",
   [DASHBOARD_BACKGROUND_TEXT.label]: "dashboard background",
   [DASHBOARD_BACKGROUND_TEXT.woodgrain]: "woodgrain",
   [DASHBOARD_BACKGROUND_TEXT.metal]: "metal plate",
@@ -623,8 +629,8 @@ export const APP_GAMES_TEXT = {
   [CONTROLLER_ACTION_TEXT.start]: "start",
   [CONTROLLER_ACTION_TEXT.left_stick]: "move around",
   [CONTROLLER_ACTION_TEXT.right_stick]: "look around",
-  [CONTROLLER_ACTION_TEXT.dpad_up]: "nose down",
-  [CONTROLLER_ACTION_TEXT.dpad_down]: "tail up",
+  [CONTROLLER_ACTION_TEXT.dpad_up]: "descend",
+  [CONTROLLER_ACTION_TEXT.dpad_down]: "ascend",
   [CONTROLLER_ACTION_TEXT.dpad_left]: "tilt left",
   [CONTROLLER_ACTION_TEXT.dpad_right]: "tilt right",
   [CONTROLLER_ACTION_TEXT.home]: "home",

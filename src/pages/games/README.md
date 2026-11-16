@@ -14,15 +14,37 @@ without a horizontal gap. Below 768px the groups stack above the controller in r
 of up to three. Settings → **display** → **dashboard background** switches between
 woodgrain, brushed metal plate, woven wicker, and mother of pearl. The finish applies live and
 persists under `games/play_dashboard_background`, defaulting to woodgrain for
-invalid saved values. `DashboardBackground.js` layers local CC0 ambientCG color
+invalid saved values. `DashboardBackground.js` layers local CC0 texture color
 maps from `public/dashboard/` beneath the lighting and polished rim. The 1K WebP
-assets total about 181 KiB; their README records sources and licensing. Texture
+assets total about 177 KiB; their README records sources and licensing. Woodgrain
+uses the lighter Poly Haven Oak Veneer 01 diffuse map. Texture
 tiles retain fixed scales when the panel resizes, without stretching the weave.
 Mother of pearl uses a locally bundled public-domain iridescent image, oversized
 without tiling. Only this image layer drifts edge-to-edge on a 45-second traversal.
 It smoothly reverses at the image boundaries (0% and 100%) without exposing gaps;
 controls, lighting, and rim stay fixed. Reduced-motion preferences disable drift.
+Metal uses ambientCG Metal 011 with a broad reflected highlight sweeping across
+the surface on a 32-second alternating cycle. The texture, rim, and controls stay
+fixed. Night flight lowers the highlight intensity as well as dimming the surface;
+reduced-motion preferences keep the highlight stationary.
 `useDashboardBackground.js` shares the preference between the dock and selector.
+`NightFlightSwitch.jsx` adds a keyboard-accessible vintage lever switch to the
+left of the heading indicator, using the unused half-cell beside the centered
+last dial. The 54 × 72px switch scales down when needed, without adding a gutter
+to the upper instrument row or widening the dashboard shoulder. Its photographic
+sprite uses the supplied left switch for off and
+right switch for on, with transparent surroundings. The image states retain
+their ON/OFF lettering and the button keeps its keyboard and switch semantics.
+The compact **LIGHTS** plate sits directly below the switch, independently of
+the heading caption. `DashboardNameplate.js` shares the riveted metal finish and
+night illumination with instrument captions; the switch plate fits its text plus
+an extra 1rem of width. The switch and plate are offset together 0.5rem to the right.
+If a custom layout or compact row leaves no spare half-cell, or the heading is
+hidden, the switch remains available beside the controller's upper-left area.
+`useNightFlight.js` shares the persisted `games/play_night_flight` preference.
+Night flight dims the dashboard surface/rim, controller and LED display, while
+warming and softly illuminating dial text, white markings/needles, and nameplates.
+Warning arc colors and flight state remain unchanged. Toggling restores day colors.
 A shared dashboard surrounds the instruments and
 controller, with a reflective metal rim and light instrument labels. The centered
 panel hugs the selected controls' combined width, with circular shoulders sized
