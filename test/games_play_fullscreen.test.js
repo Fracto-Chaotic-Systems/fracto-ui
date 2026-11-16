@@ -52,6 +52,9 @@ function mount({
   };
   const fullscreen_target_ref = { current: game_area };
   const component = vm.runInNewContext(code + ";GamesPlaySettings", {
+    FlightInstrumentSettingsPanel: () => null,
+    FlightControlSettingsPanel: () => null,
+    FLIGHT_SETTINGS_TEXT: { instruments: "instruments" },
     React: {
       createElement: (type, props, ...children) => ({ type, props, children }),
     },
@@ -171,7 +174,11 @@ test("unsupported browsers disable entry and mounting never requests fullscreen"
 
 test("controller dropdown restores and saves the selected controller", () => {
   const view = mount({ controller: "keyboard" });
-  const dropdown = () => view.render().children[1].children[1].children[1];
+  const controller_dropdown = (tree) =>
+    tree.children.find(
+      (section) => section.children[0].children[0] === "control",
+    ).children[1].children[1];
+  const dropdown = () => controller_dropdown(view.render());
   assert.equal(dropdown().props.value, "keyboard");
   assert.deepEqual(
     Array.from(dropdown().children[0], (option) => option.children[0]),
@@ -181,10 +188,7 @@ test("controller dropdown restores and saves the selected controller", () => {
   assert.equal(dropdown().props.value, "hand_held");
   assert.equal(view.saved.at(-1).controller, "hand_held");
   const invalid = mount({ controller: "unknown" });
-  assert.equal(
-    invalid.render().children[1].children[1].children[1].props.value,
-    "on_screen",
-  );
+  assert.equal(controller_dropdown(invalid.render()).props.value, "on_screen");
 });
 
 test("controller actions switch defaults off and persists its selection", () => {

@@ -13,8 +13,21 @@ import CoolSplitter, {
 import { SPLITTER_WIDTH_PX } from "../../constants.jsx";
 import { KEY_GAMES_PLAY_SETTINGS_POSITION } from "../../settings/GamesSettings.jsx";
 import GamesPlaySettings from "./GamesPlaySettings.jsx";
-import GameController from "./controllers/GameController.jsx";
+import GamesPlayControls from "./GamesPlayControls.jsx";
 import { create_controller_input } from "./controllers/ControllerInput.js";
+import {
+  create_flight_controls,
+  bind_flight_controls,
+} from "./controllers/FlightControls.js";
+import {
+  read_flight_control_settings,
+  subscribe_flight_control_settings,
+} from "./controllers/useFlightControlSettings.js";
+import {
+  create_flight_state,
+  INITIAL_FLIGHT_STATE,
+} from "./flight/FlightState.js";
+import { start_flight_simulation } from "./flight/FlightSimulation.js";
 import {
   MAX_SETTINGS_POSITION,
   MIN_SETTINGS_POSITION,
@@ -100,8 +113,24 @@ const SettingsHeading = styled.h2`
 `;
 
 export default function GamesPlay() {
-  // The future game loop reads this vendor-independent controller state.
+  // Input, mapped commands, and telemetry have separate per-page lifetimes.
   const [game_input] = useState(create_controller_input);
+  const [flight_controls] = useState(create_flight_controls);
+  useEffect(
+    () =>
+      bind_flight_controls(game_input, flight_controls, {
+        read_settings: read_flight_control_settings,
+        subscribe_settings: subscribe_flight_control_settings,
+      }),
+    [game_input, flight_controls],
+  );
+  const [flight_state] = useState(() =>
+    create_flight_state(INITIAL_FLIGHT_STATE),
+  );
+  useEffect(
+    () => start_flight_simulation(flight_state, flight_controls),
+    [flight_state, flight_controls],
+  );
   const [settings_open, set_settings_open] = useState(false);
   const content_ref = useRef(null);
   const gear_ref = useRef(null);
@@ -147,7 +176,13 @@ export default function GamesPlay() {
         {AppText.get(KEY_GAMES_PLAY_TITLE)}
       </styles.SectionTitle>
       <PlayContent ref={content_ref}>
-        <GameController input={game_input} />
+        <GamesPlayControls
+          input={game_input}
+          flight_controls={flight_controls}
+          flight_state={flight_state}
+          width_px={content_bounds.width}
+          height_px={content_bounds.height}
+        />
         <SettingsToggle
           ref={gear_ref}
           type="button"

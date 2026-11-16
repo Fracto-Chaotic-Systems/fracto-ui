@@ -5,6 +5,8 @@ import {
   TYPE_OBJECT,
 } from "../AppSettings.jsx";
 import { DEFAULT_SIDEBAR_WIDTH } from "../constants.jsx";
+import { DEFAULT_INSTRUMENT_SETTINGS } from "../pages/games/flight/FlightInstrumentSettings.js";
+import { DEFAULT_FLIGHT_CONTROL_SETTINGS } from "../pages/games/controllers/FlightControlSettings.js";
 
 const GAMES_FOLDER = "games";
 
@@ -16,6 +18,8 @@ export const KEY_GAMES_PLAY_FULL_SCREEN = `${GAMES_FOLDER}/play_full_screen`;
 export const KEY_GAMES_PLAY_CONTROLLER = `${GAMES_FOLDER}/play_controller`;
 export const KEY_GAMES_PLAY_CONTROLLER_ACTIONS = `${GAMES_FOLDER}/play_controller_actions`;
 export const KEY_GAMES_PLAY_CONTROLLER_COLOR = `${GAMES_FOLDER}/play_controller_color`;
+export const KEY_GAMES_PLAY_INSTRUMENTS = `${GAMES_FOLDER}/play_instruments`;
+export const KEY_GAMES_PLAY_FLIGHT_CONTROLS = `${GAMES_FOLDER}/play_flight_controls`;
 
 export const KEY_GAMES_WORLDS_DRAFT_VERSION = `${GAMES_FOLDER}/worlds_draft_version`;
 export const KEY_GAMES_WORLD_MAPPING = `${GAMES_FOLDER}/world_mapping`;
@@ -29,6 +33,20 @@ export const GAMES_SETTINGS = "games_settings";
 export const GAMES_STATUS = "games_status";
 
 export const APP_GAMES_SETTINGS = {
+  [KEY_GAMES_PLAY_FLIGHT_CONTROLS]: {
+    data_type: TYPE_OBJECT,
+    default_value: DEFAULT_FLIGHT_CONTROL_SETTINGS,
+    description:
+      "flight control button/axis mappings, inversion, sensitivity, and dead zone",
+    persist: true,
+  },
+  [KEY_GAMES_PLAY_INSTRUMENTS]: {
+    data_type: TYPE_OBJECT,
+    default_value: DEFAULT_INSTRUMENT_SETTINGS,
+    description:
+      "flight instrument visibility, placement, size, units, ranges, and animation",
+    persist: true,
+  },
   [KEY_GAMES_PLAY_CONTROLLER_COLOR]: {
     data_type: TYPE_STRING,
     default_value: "blue",

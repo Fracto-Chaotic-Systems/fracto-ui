@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flight state integration check</title>
+    <style>
+      body {
+        margin: 24px;
+        font-family: system-ui, sans-serif;
+        background: #f4f4f4;
+        color: #222;
+      }
+      button {
+        margin: 0 8px 12px 0;
+        padding: 8px;
+      }
+      #instruments {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 24px;
+        margin-top: 20px;
+      }
+      output {
+        display: block;
+        margin: 12px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Flight state integration check</h1>
+    <p>
+      Development fixture: all readings are synthetic, including sample
+      telemetry.
+    </p>
+    <div id="root"></div>
+    <script type="module">
+      import React, { StrictMode, useState } from "react";
+      import { createRoot } from "react-dom/client";
+      import AppText from "../src/AppText.jsx";
+      import { APP_GAMES_TEXT } from "../src/text/GamesText.jsx";
+      import FlightInstrumentGroup from "../src/pages/games/flight/FlightInstrumentGroup.jsx";
+      import FlightInstrumentStatus from "../src/pages/games/flight/FlightInstrumentStatus.jsx";
+      import {
+        create_flight_state,
+        PREVIEW_FLIGHT_STATE,
+      } from "../src/pages/games/flight/FlightState.js";
+
+      AppText.initialize(APP_GAMES_TEXT);
+      const h = React.createElement;
+      const flight_state = create_flight_state(PREVIEW_FLIGHT_STATE);
+      let parent_renders = 0;
+      function Fixture() {
+        parent_renders++;
+        const [visible, setVisible] = useState(true);
+        return h(
+          React.Fragment,
+          null,
+          h(
+            "button",
+            {
+              onClick: () =>
+                flight_state.update({
+                  source: "live",
+                  pitch_deg: -15,
+                  roll_deg: 25,
+                  heading_deg: 361,
+                  airspeed_knots: 160,
+                  altitude_ft: 4200,
+                  vertical_speed_fpm: -750,
+                  turn_rate_deg_s: 3,
+                  slip: 0.5,
+                  pressure_hpa: 1005,
+                }),
+            },
+            "Publish sample telemetry",
+          ),
+          h(
+            "button",
+            { onClick: () => flight_state.update({ source: "unavailable" }) },
+            "Mark unavailable",
+          ),
+          h("button", { onClick: flight_state.reset }, "Reset preview"),
+          h(
+            "button",
+            { onClick: () => setVisible(!visible) },
+            visible ? "Unmount instruments" : "Mount instruments",
+          ),
+          h("output", null, `Parent renders: ${parent_renders}`),
+          h("output", null, h(FlightInstrumentStatus, { flight_state })),
+          visible &&
+            h(
+              "div",
+              { id: "instruments" },
+              ["left", "right"].map((side) =>
+                h(FlightInstrumentGroup, {
+                  key: side,
+                  side,
+                  size_px: 112,
+                  compact: true,
+                  flight_state,
+                }),
+              ),
+            ),
+        );
+      }
+      createRoot(document.getElementById("root")).render(
+        h(StrictMode, null, h(Fixture)),
+      );
+    </script>
+  </body>
+</html>

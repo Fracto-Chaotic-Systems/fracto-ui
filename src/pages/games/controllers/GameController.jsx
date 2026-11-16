@@ -29,13 +29,9 @@ const subscribe_color = (notify) => {
 };
 
 const ControllerHost = styled.div`
-  position: absolute;
-  bottom: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(22rem, calc(100% - 2rem));
-  aspect-ratio: 276 / 232;
-  max-height: 45%;
+  position: relative;
+  width: 100%;
+  height: 100%;
   touch-action: none;
   user-select: none;
 
@@ -58,7 +54,7 @@ const read_device = () => {
     : "on_screen";
 };
 
-export default function GameController({ input }) {
+export default function GameController({ input, flight_controls }) {
   const color = useSyncExternalStore(subscribe_color, read_color, read_color);
   const host_ref = useRef(null);
   const [device, set_device] = useState(read_device);
@@ -93,7 +89,7 @@ export default function GameController({ input }) {
       aria-label={AppText.get(KEY_GAMES_PLAY_CONTROLLER_ON_SCREEN_TITLE)}
     >
       <div ref={host_ref} />
-      <ControllerActions input={input} />
+      <ControllerActions controls={flight_controls} />
       {error === device && (
         <p role="status">{AppText.get(KEY_GAMES_PLAY_CONTROLLER_ERROR)}</p>
       )}

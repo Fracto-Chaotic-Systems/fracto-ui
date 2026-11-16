@@ -27,6 +27,9 @@ import {
   CONTROLLER_COLORS,
   normalize_controller_color,
 } from "./controllers/ControllerColors.js";
+import FlightInstrumentSettingsPanel from "./flight/FlightInstrumentSettingsPanel.jsx";
+import FlightControlSettingsPanel from "./controllers/FlightControlSettingsPanel.jsx";
+import { FLIGHT_SETTINGS_TEXT } from "../../text/GamesText.jsx";
 
 const CONTROLLER_OPTIONS = [
   { value: "on_screen", label: KEY_GAMES_PLAY_CONTROLLER_ON_SCREEN },
@@ -204,6 +207,10 @@ export default function GamesPlaySettings({ fullscreen_target_ref }) {
         )}
       </SettingsSection>
       <SettingsSection>
+        <summary>{AppText.get(FLIGHT_SETTINGS_TEXT.instruments)}</summary>
+        <FlightInstrumentSettingsPanel />
+      </SettingsSection>
+      <SettingsSection>
         <summary>{AppText.get(KEY_GAMES_PLAY_CONTROLLERS)}</summary>
         <ToggleItem>
           {AppText.get(KEY_GAMES_PLAY_CONTROLLER_LABEL)}
@@ -224,6 +231,7 @@ export default function GamesPlaySettings({ fullscreen_target_ref }) {
             ))}
           </select>
         </ToggleItem>
+        <FlightControlSettingsPanel />
       </SettingsSection>
     </>
   );

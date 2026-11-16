@@ -6,6 +6,35 @@ space below the title without clipping the gear or drawer to a zero-height box.
 Sidebar order is Overview, separator, worlds, music, play, separator, wordnet, Settings, Status.
 Overview, Settings, and Status intentionally remain blank.
 
+`GamesPlayControls.jsx` arranges selected flight instruments around the centered
+on-screen controller at the bottom of the game area. Airspeed, attitude, and
+heading default to the left; altitude, vertical speed, and turn coordination
+default to the right. Below 768px the groups stack above the controller in rows
+of up to three. Settings → **instruments** controls visibility, selection,
+left/right placement, size, ranges, airspeed/pressure units, and animation.
+Preferences persist in AppSettings under `games/play_instruments`; resetting
+instrument defaults leaves other gameplay settings unchanged.
+If available space would reduce gauges below 48px, instruments temporarily give
+way to the controller and a resize hint, recovering automatically when space
+returns. Saved visibility and placement preferences are not changed.
+`GamesPlayControlsLayout.js` uses the game area's measured bounds to fit both
+normal and fullscreen views while leaving room for settings. Instrument groups
+ignore pointer input; the controller retains its own touch targets and help boxes.
+GamesPlay owns a separate immutable flight-state store. The instrument groups
+subscribe directly, so telemetry updates do not rerender the controller or page.
+The current game starts in level flight and a time-based simulation publishes
+live telemetry from mapped controls. See [flight/README.md](flight/README.md).
+
+GamesPlay also owns a separate mapped flight-command store bound to controller
+input and saved preferences from an effect. Settings → **control** supports
+button/axis assignments, axis and pitch inversion, dead zone, sensitivity, and
+reset. The help overlay subscribes to effective commands, so labels follow the
+current assignments. `FlightSimulation.js` consumes continuous commands from an
+animation-frame loop, pauses when hidden/unfocused, and cleans up on page exit.
+Default stick movement banks/changes speed, the D-pad controls attitude, and
+triggers change speed; bank/pitch produce turn and climb/descent readings.
+See [controllers/README.md](controllers/README.md).
+
 - GamesPlay.jsx renders the **game play** title above a flex content area, with a
   gear icon in that area's upper-right corner and the tooltip **settings**.
   Clicking it toggles a persistent Material UI drawer that slides in from the right

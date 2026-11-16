@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flight indicators compatibility check</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 24px;
+        background: #f4f4f4;
+        color: #222;
+      }
+      #instruments {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin: 24px 0;
+      }
+      figure {
+        margin: 0;
+        text-align: center;
+      }
+      button {
+        margin-right: 12px;
+        padding: 8px 12px;
+      }
+      output {
+        display: block;
+        margin: 16px 0;
+        overflow-wrap: anywhere;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Flight indicators compatibility check</h1>
+    <p>Development fixture with synthetic values; separate from gameplay.</p>
+    <div id="root"></div>
+    <output id="errors" role="status">No browser errors captured.</output>
+    <script type="module">
+      import React, { StrictMode, useState } from "react";
+      import { createRoot } from "react-dom/client";
+      import {
+        Airspeed,
+        Altimeter,
+        AttitudeIndicator,
+        HeadingIndicator,
+        VerticalSpeed,
+        TurnCoordinator,
+      } from "flight-indicators";
+
+      const h = React.createElement;
+      const profiles = [
+        {
+          speed: 90,
+          roll: -20,
+          pitch: 10,
+          heading: 359,
+          altitude: 2500,
+          verticalSpeed: 500,
+          turnRate: -3,
+          slip: -0.5,
+        },
+        {
+          speed: 180,
+          roll: 25,
+          pitch: -15,
+          heading: 1,
+          altitude: 4200,
+          verticalSpeed: -750,
+          turnRate: 3,
+          slip: 0.5,
+        },
+      ];
+      const shared = { size: 150, showBox: false, animationDuration: 80 };
+      const reportError = (message) => {
+        document.getElementById("errors").textContent =
+          `Browser error: ${message}`;
+      };
+      window.addEventListener("error", (event) => reportError(event.message));
+      window.addEventListener("unhandledrejection", (event) =>
+        reportError(String(event.reason)),
+      );
+
+      function SmokeCheck() {
+        const [profile, setProfile] = useState(0);
+        const [generation, setGeneration] = useState(0);
+        const data = profiles[profile];
+        const instruments = [
+          [
+            "Airspeed",
+            Airspeed,
+            { speed: data.speed, max: 300, arcs: {}, unit: "KNOTS" },
+          ],
+          [
+            "Attitude",
+            AttitudeIndicator,
+            { roll: data.roll, pitch: data.pitch, pitchLimit: 60 },
+          ],
+          ["Heading", HeadingIndicator, { heading: data.heading }],
+          [
+            "Altitude",
+            Altimeter,
+            { altitude: data.altitude, pressure: 1013, pressureUnit: "hPa" },
+          ],
+          [
+            "Vertical speed",
+            VerticalSpeed,
+            { verticalSpeed: data.verticalSpeed, max: 4000 },
+          ],
+          [
+            "Turn coordinator",
+            TurnCoordinator,
+            { turnRate: data.turnRate, slip: data.slip },
+          ],
+        ];
+        return h(
+          React.Fragment,
+          null,
+          h("p", null, `React ${React.version}; flight-indicators 1.1.0`),
+          h(
+            "button",
+            { onClick: () => setProfile(1 - profile) },
+            "Change flight values",
+          ),
+          h(
+            "button",
+            { onClick: () => setGeneration(generation + 1) },
+            "Remount instruments",
+          ),
+          h(
+            "output",
+            null,
+            `Profile ${profile + 1}; mount ${generation + 1}: ${JSON.stringify(data)}`,
+          ),
+          h(
+            "div",
+            { id: "instruments", key: generation },
+            instruments.map(([label, Component, props]) =>
+              h(
+                "figure",
+                { key: label },
+                h(Component, { ...shared, ...props }),
+                h("figcaption", null, label),
+              ),
+            ),
+          ),
+        );
+      }
+      createRoot(document.getElementById("root")).render(
+        h(StrictMode, null, h(SmokeCheck)),
+      );
+    </script>
+  </body>
+</html>

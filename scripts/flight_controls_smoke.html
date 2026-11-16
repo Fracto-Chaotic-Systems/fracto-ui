@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flight control mapping check</title>
+    <style>
+      body {
+        margin: 24px;
+        color: #333;
+        background: #f4f4f4;
+        font-family: system-ui, sans-serif;
+      }
+      button {
+        padding: 8px;
+        margin: 0 8px 8px 0;
+      }
+      main {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 32px;
+      }
+      section {
+        width: min(440px, 100%);
+      }
+      #help {
+        position: relative;
+        width: min(352px, 100%);
+        height: 140px;
+        background: #e8eef4;
+      }
+      pre {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Flight control mapping check</h1>
+    <p>
+      Development fixture with held synthetic controller input. Changes use the
+      game's saved control preferences.
+    </p>
+    <div id="root"></div>
+    <script type="module">
+      import React, { StrictMode, useSyncExternalStore } from "react";
+      import { createRoot } from "react-dom/client";
+      import AppText from "../src/AppText.jsx";
+      import AppSettings from "../src/AppSettings.jsx";
+      import {
+        APP_GAMES_SETTINGS,
+        KEY_GAMES_PLAY_CONTROLLER_ACTIONS,
+      } from "../src/settings/GamesSettings.jsx";
+      import { APP_GAMES_TEXT } from "../src/text/GamesText.jsx";
+      import { create_controller_input } from "../src/pages/games/controllers/ControllerInput.js";
+      import {
+        create_flight_controls,
+        bind_flight_controls,
+      } from "../src/pages/games/controllers/FlightControls.js";
+      import {
+        read_flight_control_settings,
+        subscribe_flight_control_settings,
+      } from "../src/pages/games/controllers/useFlightControlSettings.js";
+      import FlightControlSettingsPanel from "../src/pages/games/controllers/FlightControlSettingsPanel.jsx";
+      import ControllerActions from "../src/pages/games/controllers/ControllerActions.jsx";
+
+      AppText.initialize(APP_GAMES_TEXT);
+      AppSettings.initialize({
+        ...APP_GAMES_SETTINGS,
+        [KEY_GAMES_PLAY_CONTROLLER_ACTIONS]: {
+          ...APP_GAMES_SETTINGS[KEY_GAMES_PLAY_CONTROLLER_ACTIONS],
+          persist: false,
+        },
+      });
+      AppSettings.on_settings_changed({
+        [KEY_GAMES_PLAY_CONTROLLER_ACTIONS]: true,
+      });
+      const input = create_controller_input();
+      const controls = create_flight_controls();
+      const stop = bind_flight_controls(input, controls, {
+        read_settings: read_flight_control_settings,
+        subscribe_settings: subscribe_flight_control_settings,
+      });
+      window.addEventListener("pagehide", stop);
+      const h = React.createElement;
+      function Readout() {
+        const state = useSyncExternalStore(
+          controls.subscribe,
+          controls.get_snapshot,
+          controls.get_snapshot,
+        );
+        return h("pre", null, JSON.stringify(state, null, 2));
+      }
+      function Fixture() {
+        return h(
+          "main",
+          null,
+          h(
+            "section",
+            null,
+            h(
+              "button",
+              {
+                onClick: () =>
+                  input.update({
+                    connected: true,
+                    buttons: [{ pressed: true, value: 1 }],
+                  }),
+              },
+              "Hold cross",
+            ),
+            h(
+              "button",
+              {
+                onClick: () =>
+                  input.update({ connected: true, axes: [0, -0.6, 0, 0] }),
+              },
+              "Hold left stick up",
+            ),
+            h(
+              "button",
+              {
+                onClick: () =>
+                  input.update({
+                    connected: true,
+                    buttons: Array.from({ length: 8 }, (_, i) => ({
+                      value: i === 7 ? 0.5 : 0,
+                    })),
+                  }),
+              },
+              "Hold half right trigger",
+            ),
+            h(
+              "button",
+              { onClick: () => input.update({ connected: true }) },
+              "Release inputs",
+            ),
+            h("button", { onClick: input.reset }, "Disconnect input"),
+            h("h2", null, "Effective help"),
+            h("div", { id: "help" }, h(ControllerActions, { controls })),
+            h(Readout),
+          ),
+          h(
+            "section",
+            null,
+            h("h2", null, "Control preferences"),
+            h(FlightControlSettingsPanel),
+          ),
+        );
+      }
+      createRoot(document.getElementById("root")).render(
+        h(StrictMode, null, h(Fixture)),
+      );
+    </script>
+  </body>
+</html>

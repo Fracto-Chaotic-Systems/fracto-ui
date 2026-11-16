@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flight integration validation</title>
+    <style>
+      body {
+        margin: 16px;
+        font-family: system-ui, sans-serif;
+        color: #333;
+        background: #f4f4f4;
+      }
+      button {
+        padding: 8px;
+        margin: 0 8px 8px 0;
+      }
+      #game {
+        position: relative;
+        height: 65vh;
+        width: 100%;
+        outline: 1px solid #ccc;
+        overflow: hidden;
+      }
+      #game:fullscreen {
+        width: 100vw;
+        height: 100vh;
+        background: #f4f4f4;
+      }
+      #exit-fullscreen {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        z-index: 1;
+      }
+      #game:not(:fullscreen) #exit-fullscreen {
+        display: none;
+      }
+      output {
+        display: block;
+        margin: 8px 0;
+        overflow-wrap: anywhere;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Flight integration validation</h1>
+    <p>
+      Synthetic telemetry with the production dock, controller, command mapping,
+      and instruments. Preferences are isolated in memory.
+    </p>
+    <div id="root"></div>
+    <script type="module">
+      import React, {
+        StrictMode,
+        useEffect,
+        useRef,
+        useState,
+        useSyncExternalStore,
+      } from "react";
+      import { createRoot } from "react-dom/client";
+      import AppText from "../src/AppText.jsx";
+      import AppSettings from "../src/AppSettings.jsx";
+      import { APP_GAMES_TEXT } from "../src/text/GamesText.jsx";
+      import {
+        APP_GAMES_SETTINGS,
+        KEY_GAMES_PLAY_CONTROLLER_ACTIONS,
+        KEY_GAMES_PLAY_INSTRUMENTS,
+      } from "../src/settings/GamesSettings.jsx";
+      import GamesPlayControls from "../src/pages/games/GamesPlayControls.jsx";
+      import { DEFAULT_INSTRUMENT_SETTINGS } from "../src/pages/games/flight/FlightInstrumentSettings.js";
+      import {
+        create_flight_state,
+        PREVIEW_FLIGHT_STATE,
+      } from "../src/pages/games/flight/FlightState.js";
+      import { create_controller_input } from "../src/pages/games/controllers/ControllerInput.js";
+      import {
+        create_flight_controls,
+        bind_flight_controls,
+      } from "../src/pages/games/controllers/FlightControls.js";
+      import {
+        read_flight_control_settings,
+        subscribe_flight_control_settings,
+      } from "../src/pages/games/controllers/useFlightControlSettings.js";
+
+      AppText.initialize(APP_GAMES_TEXT);
+      const definitions = Object.fromEntries(
+        Object.entries(APP_GAMES_SETTINGS).map(([key, value]) => [
+          key,
+          { ...value, persist: false },
+        ]),
+      );
+      definitions[KEY_GAMES_PLAY_CONTROLLER_ACTIONS].default_value = true;
+      definitions[KEY_GAMES_PLAY_INSTRUMENTS].default_value = {
+        ...DEFAULT_INSTRUMENT_SETTINGS,
+        animation_ms: 300,
+      };
+      AppSettings.initialize(definitions);
+      const input = create_controller_input();
+      const controls = create_flight_controls();
+      const flight_state = create_flight_state(PREVIEW_FLIGHT_STATE);
+      const stop = bind_flight_controls(input, controls, {
+        read_settings: read_flight_control_settings,
+        subscribe_settings: subscribe_flight_control_settings,
+      });
+      window.addEventListener("pagehide", stop);
+      const h = React.createElement;
+      let parent_renders = 0;
+      let inspection = Object.freeze({
+        last_action: "none",
+        pointer: "none",
+        peak_movement: 0,
+        frames: 0,
+      });
+      const inspection_listeners = new Set();
+      const inspect = (patch) => {
+        inspection = Object.freeze({ ...inspection, ...patch });
+        inspection_listeners.forEach((callback) => callback());
+      };
+      const observe = (callback) => {
+        inspection_listeners.add(callback);
+        return () => inspection_listeners.delete(callback);
+      };
+      controls.subscribe(() => {
+        const state = controls.get_snapshot();
+        inspect({
+          last_action: state.actions.length
+            ? state.actions.join(", ")
+            : inspection.last_action,
+          peak_movement: Math.max(
+            inspection.peak_movement,
+            Math.abs(state.move_x),
+            Math.abs(state.move_y),
+          ),
+        });
+      });
+      function Diagnostics() {
+        const state = useSyncExternalStore(
+          controls.subscribe,
+          controls.get_snapshot,
+          controls.get_snapshot,
+        );
+        const observed = useSyncExternalStore(
+          observe,
+          () => inspection,
+          () => inspection,
+        );
+        return h(
+          "output",
+          { id: "diagnostics" },
+          `Last action: ${observed.last_action}; current actions: ${state.actions.join(", ") || "none"}; pointer: ${observed.pointer}; peak movement: ${observed.peak_movement.toFixed(3)}; telemetry frames: ${observed.frames}`,
+        );
+      }
+      function GameHarness() {
+        parent_renders++;
+        const host = useRef(null);
+        const [bounds, setBounds] = useState({ width: 0, height: 0 });
+        useEffect(() => {
+          const observer = new ResizeObserver(([entry]) =>
+            setBounds({
+              width: entry.contentRect.width,
+              height: entry.contentRect.height,
+            }),
+          );
+          observer.observe(host.current);
+          return () => observer.disconnect();
+        }, []);
+        return h(
+          React.Fragment,
+          null,
+          h(
+            "output",
+            { id: "parent-renders" },
+            `Game parent renders: ${parent_renders}`,
+          ),
+          h(
+            "section",
+            {
+              id: "game",
+              ref: host,
+              onPointerDownCapture: (event) =>
+                inspect({ pointer: event.pointerType }),
+            },
+            h(
+              "button",
+              {
+                id: "exit-fullscreen",
+                onClick: () => document.exitFullscreen(),
+              },
+              "Exit fullscreen",
+            ),
+            h(GamesPlayControls, {
+              input,
+              flight_controls: controls,
+              flight_state,
+              width_px: bounds.width,
+              height_px: bounds.height,
+            }),
+          ),
+        );
+      }
+      let stream_generation = 0;
+      const stream = () => {
+        const generation = ++stream_generation;
+        let frame = 0;
+        const tick = () => {
+          if (generation !== stream_generation) return;
+          flight_state.update({
+            source: "live",
+            heading_deg: frame * 3,
+            airspeed_knots: 90 + frame,
+            altitude_ft: 2500 + frame * 10,
+          });
+          inspect({ frames: ++frame });
+          if (frame < 60) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      };
+      window.addEventListener("pagehide", () => stream_generation++);
+      function touch_sample(event, type) {
+        const target = document.getElementById("button_1_tap_target");
+        if (!target) return;
+        const rect = target.getBoundingClientRect();
+        target.dispatchEvent(
+          new PointerEvent(type, {
+            pointerId: event.pointerId,
+            pointerType: "touch",
+            isPrimary: true,
+            bubbles: true,
+            cancelable: true,
+            button: 0,
+            buttons: type === "pointerdown" ? 1 : 0,
+            clientX: rect.x + rect.width / 2,
+            clientY: rect.y + rect.height / 2,
+          }),
+        );
+      }
+      function Fixture() {
+        return h(
+          React.Fragment,
+          null,
+          h(
+            "button",
+            {
+              onClick: () =>
+                flight_state.update({ source: "live", heading_deg: 359 }),
+            },
+            "Heading 359",
+          ),
+          h(
+            "button",
+            {
+              onClick: () =>
+                flight_state.update({ source: "live", heading_deg: 1 }),
+            },
+            "Heading 1",
+          ),
+          h(
+            "button",
+            {
+              onClick: () =>
+                flight_state.update({
+                  heading_deg: NaN,
+                  pitch_deg: Infinity,
+                  roll_deg: null,
+                  airspeed_knots: undefined,
+                  altitude_ft: "bad",
+                  pressure_hpa: -1,
+                }),
+            },
+            "Invalid telemetry",
+          ),
+          h(
+            "button",
+            { onClick: () => flight_state.update({ source: "unavailable" }) },
+            "Missing telemetry",
+          ),
+          h("button", { onClick: stream }, "Stream 60 updates"),
+          h(
+            "button",
+            {
+              onClick: () => {
+                stream_generation++;
+                flight_state.reset();
+                inspect({
+                  last_action: "none",
+                  pointer: "none",
+                  peak_movement: 0,
+                  frames: 0,
+                });
+              },
+            },
+            "Reset preview",
+          ),
+          h(
+            "button",
+            {
+              onClick: () =>
+                document
+                  .getElementById("game")
+                  .requestFullscreen()
+                  .catch((error) => inspect({ last_action: error.message })),
+            },
+            "Fullscreen game",
+          ),
+          h(
+            "button",
+            {
+              onPointerDown: (event) => touch_sample(event, "pointerdown"),
+              onPointerUp: (event) => touch_sample(event, "pointerup"),
+            },
+            "Touch press test",
+          ),
+          h(
+            "button",
+            {
+              onPointerDown: (event) => touch_sample(event, "pointerdown"),
+              onPointerUp: (event) => touch_sample(event, "pointercancel"),
+            },
+            "Touch cancel test",
+          ),
+          h(Diagnostics),
+          h(GameHarness),
+        );
+      }
+      createRoot(document.getElementById("root")).render(
+        h(StrictMode, null, h(Fixture)),
+      );
+    </script>
+  </body>
+</html>

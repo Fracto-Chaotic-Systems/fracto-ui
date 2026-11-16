@@ -32,17 +32,26 @@ test("every handle palette supplies distinct shading and unsupported colors reta
   );
 });
 
-test("action descriptions include simultaneous trigger, start and stick directions", () => {
+test("action descriptions combine stick directions and presses into one label per stick", () => {
   const input = create_controller_input();
   const buttons = Array.from({ length: 18 }, () => ({ pressed: false }));
   buttons[6] = { pressed: true, value: 1 };
   buttons[9] = { pressed: true, value: 1 };
-  input.update({ connected: true, buttons, axes: [0, 0, 0.8, -0.9] });
+  input.update({ connected: true, buttons, axes: [-0.8, 0.9, 0.8, -0.9] });
   assert.deepEqual(controller_action_codes(input.get_snapshot()), [
-    "left_trigger",
+    "slow_down",
     "start",
-    "right_turn_right",
-    "right_forward",
+    "move",
+    "look",
+  ]);
+  buttons[10] = { pressed: true, value: 1 };
+  buttons[11] = { pressed: true, value: 1 };
+  input.update({ connected: true, buttons, axes: [-0.8, 0.9, 0.8, -0.9] });
+  assert.deepEqual(controller_action_codes(input.get_snapshot()), [
+    "slow_down",
+    "start",
+    "move",
+    "look",
   ]);
   input.update({ connected: true, axes: [0.2, -0.2, 0, 0], buttons: [] });
   assert.deepEqual(controller_action_codes(input.get_snapshot()), []);
@@ -58,8 +67,8 @@ test("action descriptions cover every standard button and clear on disconnect", 
   const codes = controller_action_codes(state);
   assert.equal(codes.length, 18);
   assert.equal(new Set(codes).size, 18);
-  assert.ok(codes.includes("right_trigger"));
-  assert.ok(codes.includes("dpad_left"));
+  assert.ok(codes.includes("speed_up"));
+  assert.ok(codes.includes("tilt_left"));
   assert.deepEqual(controller_action_codes({ ...state, connected: false }), []);
 });
 

@@ -1,5 +1,40 @@
 # UI tests
 
+- `flight_simulation.test.js` verifies controller-to-flight integration, analog
+  speed changes, pitch/bank/yaw and climb/turn readings, default movement channels,
+  held attitude on release, frame-rate consistency, model bounds, elapsed-time
+  caps, live remapping/inversion, disconnect, focus/visibility pause without
+  catch-up, and frame/listener cleanup. It is included in `test:flight-indicators`.
+
+- `flight_controls.test.js` checks button/axis remapping, unassignment, dead-zone
+  rescaling, sensitivity saturation, pitch inversion and effective help, analog
+  triggers, invalid preferences, immutable snapshots, live rebinding of held
+  input, disconnect/reset, no-op updates, and subscription cleanup. It is included
+  in `test:game-controller`. The production overlay and preference subscribers
+  are also exercised in `/scripts/flight_controls_smoke.html`.
+
+- `flight_instrument_settings.test.js` covers malformed saved preferences,
+  independent placement defaults, speed/pressure conversions, colored-band and
+  scale conversion, presentation ranges, and fitting custom counts on each side
+  in compact and wide views. It also checks all 729 placement combinations at
+  eight dimensions and the readable-size fallback/recovery without preference
+  changes. It is included in `test:flight-indicators`.
+
+- `flight_state.test.js` checks atomic immutable telemetry snapshots, explicit
+  unit/sign mapping to instruments, partial updates, normalization, malformed
+  data, no-op notifications, unsubscribe, reset, and per-game isolation.
+  It is included in `test:flight-indicators`. The production subscribers are
+  exercised in `/scripts/flight_state_smoke.html`.
+
+- `games_play_controls_layout.test.js` checks that instrument groups and the
+  controller fit desktop, compact, short, and fullscreen game-area bounds.
+  It is included in `test:game-controller`.
+
+- `flight_indicators.test.js` verifies the six planned flight instruments render
+  accessible, finite SVG output with the application's React runtime through
+  both ESM and CommonJS exports. Run with `npm run test:flight-indicators`.
+  Browser updates/remounting use `scripts/flight_indicators_smoke.html`.
+
 - `midi_resource_allocation.test.js` covers windowed eviction, active voice pins,
   buffer-free note descriptors, adaptive lookahead, persistent decoder
   reservations across cancellation/retry, bounded downloads, buffering without
@@ -9,7 +44,8 @@
 
 - `game_controller.test.js` checks normalized input, subscriptions, physical-pad
   isolation, blur/visibility/cancellation reset, cleanup, failed mount recovery,
-  action descriptions for simultaneous buttons and stick directions, and palettes.
+  action descriptions for simultaneous buttons and consolidated stick activity,
+  and palettes.
 
 - `games_play_fullscreen.test.js` verifies fullscreen entry/exit, browser Escape
   synchronization, rejection recovery, unsupported browsers, listener cleanup,
@@ -189,7 +225,6 @@ caches without reading them, plus expected-value saves and response validation.
   parsing bounds, malformed files, parser hook cleanup and legacy export tails.
   Run `node --test test/midi_events.test.js test/midi_parser_compatibility.test.js`.
 
-
 - `midi_playback_controller.test.js` verifies playback lifecycle and stale-work
   cancellation, including MIDI channel/sustain integration. `midi_scheduler.test.js`
   checks audio-clock scheduling and independent voices; `midi_sample_cache.test.js`
@@ -197,7 +232,6 @@ caches without reading them, plus expected-value saves and response validation.
   `midi_audio_fakes.js` supplies deterministic Web Audio and timer test doubles.
   Run `npm run test:midi` for all MIDI suites. A separate Chromium offline
   render is documented in the games MIDI verification report.
-
 
 - `midi_browser/` is a reproducible browser integration harness for the actual
   All Music page and hook under StrictMode. It verifies real piano output,
@@ -235,7 +269,6 @@ midi_instruments.test.js covers verified-only providers, per-note original progr
 
 Step 6 adds completion/stale-callback and 20-cycle combined controller lifecycle regressions (79 total MIDI tests). Browser ResourceChecks.js accounts for frames, intervals, contexts, product connections and source callbacks; SyncChecks.js also tests audio suspension with a longer six-second fixture. The revised browser run remains pending tool access.
 
-
 Current instrument migration coverage: 103 MIDI tests (`npm run test:midi`).
 `midi_asset_engine.test.js` covers catalog URLs/gates, chunk cache integrity,
 memory, bounded voices, cancellation and refresh. `midi_instrument_choices.test.js`
@@ -245,11 +278,9 @@ uses actual HTTP/WAV bytes with a deterministic decoder stub. The browser harnes
 independently verifies native playback; dated JSON evidence is in midi_reports/.
 See ../src/pages/games/music/ASSET_MIGRATION.md for current results and setup.
 
-
 `midi_catalog_libraries.test.js` adds multi-library identity validation,
 scoped program lookup, cache isolation, metadata refresh, 149-entry catalogs and
 bounded UTF-8 catalog-stream tests. The MIDI suite now contains 109 tests.
-
 
 FluidR3 importer integration: midi_asset_engine_probe.mjs --prepared validates
 all prepared mappings and loads a real FluidR3 flute WAV through the cache and

@@ -5,6 +5,17 @@ Each module in this directory declares namespaced setting keys and an
 value type, default value, description, and whether the value should persist.
 The components that use a setting read and update it through `AppSettings.jsx`.
 
+`GamesSettings.jsx` registers the persisted `games/play_instruments` object for
+flight-instrument visibility, placement, size, units, ranges, and animation.
+Defaults and option/range normalization belong to the pure
+`pages/games/flight/FlightInstrumentSettings.js` module; subscribers normalize
+stored data before rendering. Telemetry is a separate, nonpersisted store.
+
+The persisted `games/play_flight_controls` object holds physical-button action
+assignments, axis channel assignments/inversion, pitch inversion, sensitivity,
+and dead zone. `pages/games/controllers/FlightControlSettings.js` owns defaults
+and normalization; the mapped command store is nonpersisted and per game page.
+
 Mesh transforms uses `TilesSettings.jsx` definitions under `tiles_transform/`
 for its persisted frame and three navigator splitter positions. They are
 initialized through the existing `APP_TILES_SETTINGS` merge independently of

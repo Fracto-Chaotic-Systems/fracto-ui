@@ -35,6 +35,26 @@ Commit UI files from this repository. Commit shared constants, network configura
 
 The UI uses native ES modules and React 19.
 
+## Flight instrument dependency
+
+`flight-indicators` is pinned to **1.1.0** in the UI manifest and lockfile. It is
+MIT licensed, has no runtime dependencies, and declares React/ReactDOM >=18 and
+Node >=18. Compatibility was verified with React/ReactDOM 19.2.4 and Vite 7.3.6:
+both ESM and CommonJS rendering tests, the production application build, a
+production bundle of the six-instrument fixture, and browser mounting, value
+updates, and remounting in React StrictMode.
+
+Run `npm run test:flight-indicators` for the automated checks. The separate
+development fixture at `/scripts/flight_indicators_smoke.html` uses synthetic
+values and is documented in [scripts/README.md](scripts/README.md). The gameplay
+page places selected instruments around the controller, subscribed to a per-game
+flight-state store with explicit units and preview/live/unavailable status.
+Gameplay runs a simple time-based flight model driven by mapped controller
+commands, starting in level flight at 90 knots and 2500ft. Instrument readings
+update live; leaving the page stops the loop and returning starts a new flight.
+Settings → **instruments** persists visibility, size, side placement, supported
+units, display ranges, and animation independently of telemetry.
+
 ## Installation
 
 From the root repository:

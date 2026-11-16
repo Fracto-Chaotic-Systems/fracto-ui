@@ -4,10 +4,9 @@ import AppSettings from "../../../AppSettings.jsx";
 import AppText from "../../../AppText.jsx";
 import { KEY_GAMES_PLAY_CONTROLLER_ACTIONS } from "../../../settings/GamesSettings.jsx";
 import {
-  CONTROLLER_ACTION_TEXT,
+  FLIGHT_CONTROL_ACTION_TEXT,
   KEY_GAMES_PLAY_CONTROLLER_ACTIONS_LABEL,
 } from "../../../text/GamesText.jsx";
-import { controller_action_codes } from "./ControllerActions.js";
 
 const ActionBoxes = styled.ul`
   position: absolute;
@@ -51,13 +50,13 @@ const subscribe_enabled = (notify) => {
   return () => AppSettings.unsubscribe(subscription);
 };
 
-function ActiveControllerActions({ input }) {
+function ActiveControllerActions({ controls }) {
   const state = useSyncExternalStore(
-    input.subscribe,
-    input.get_snapshot,
-    input.get_snapshot,
+    controls.subscribe,
+    controls.get_snapshot,
+    controls.get_snapshot,
   );
-  const actions = controller_action_codes(state);
+  const actions = state.actions;
   if (!actions.length) return null;
   return (
     <ActionBoxes
@@ -65,18 +64,18 @@ function ActiveControllerActions({ input }) {
     >
       {actions.map((code) => (
         <ActionBox key={code}>
-          {AppText.get(CONTROLLER_ACTION_TEXT[code])}
+          {AppText.get(FLIGHT_CONTROL_ACTION_TEXT[code])}
         </ActionBox>
       ))}
     </ActionBoxes>
   );
 }
 
-export default function ControllerActions({ input }) {
+export default function ControllerActions({ controls }) {
   const enabled = useSyncExternalStore(
     subscribe_enabled,
     read_enabled,
     read_enabled,
   );
-  return enabled ? <ActiveControllerActions input={input} /> : null;
+  return enabled ? <ActiveControllerActions controls={controls} /> : null;
 }
