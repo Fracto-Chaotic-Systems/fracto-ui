@@ -9,6 +9,7 @@ import { DEFAULT_INSTRUMENT_SETTINGS } from "../pages/games/flight/FlightInstrum
 import { DEFAULT_FLIGHT_CONTROL_SETTINGS } from "../pages/games/controllers/FlightControlSettings.js";
 
 const GAMES_FOLDER = "games";
+export const KEY_GAMES_PLAY_DASHBOARD_BACKGROUND = `${GAMES_FOLDER}/play_dashboard_background`;
 
 export const KEY_GAMES_SPLITTER_POS_PX = `${GAMES_FOLDER}/splitter_pos_px`;
 export const KEY_GAMES_WORDNET_SPLITTER_POS_PX = `${GAMES_FOLDER}/wordnet_splitter_pos_px`;
@@ -33,6 +34,12 @@ export const GAMES_SETTINGS = "games_settings";
 export const GAMES_STATUS = "games_status";
 
 export const APP_GAMES_SETTINGS = {
+  [KEY_GAMES_PLAY_DASHBOARD_BACKGROUND]: {
+    data_type: TYPE_STRING,
+    default_value: "woodgrain",
+    description: "dashboard background finish: woodgrain, metal, wicker, or pearl",
+    persist: true,
+  },
   [KEY_GAMES_PLAY_FLIGHT_CONTROLS]: {
     data_type: TYPE_OBJECT,
     default_value: DEFAULT_FLIGHT_CONTROL_SETTINGS,

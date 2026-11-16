@@ -48,6 +48,12 @@ export const KEY_GAMES_PLAY_SETTINGS_TITLE = `${GAMES_FOLDER}/play_settings_titl
 export const KEY_GAMES_PLAY_SETTINGS_CLOSE = `${GAMES_FOLDER}/play_settings_close`;
 export const KEY_GAMES_PLAY_SETTINGS_RESIZE = `${GAMES_FOLDER}/play_settings_resize`;
 export const KEY_GAMES_PLAY_DISPLAY = `${GAMES_FOLDER}/play_display`;
+export const DASHBOARD_BACKGROUND_TEXT = Object.fromEntries(
+  ["label", "woodgrain", "metal", "wicker", "pearl"].map((code) => [
+    code,
+    `${GAMES_FOLDER}/dashboard_background_${code}`,
+  ]),
+);
 export const KEY_GAMES_PLAY_CONTROLLERS = `${GAMES_FOLDER}/play_controllers`;
 export const KEY_GAMES_PLAY_CONTROLLER_LABEL = `${GAMES_FOLDER}/play_controller_label`;
 export const KEY_GAMES_PLAY_CONTROLLER_ON_SCREEN = `${GAMES_FOLDER}/play_controller_on_screen`;
@@ -538,6 +544,11 @@ export const APP_GAMES_TEXT = {
   [KEY_GAMES_PLAY_SETTINGS_CLOSE]: "Close settings",
   [KEY_GAMES_PLAY_SETTINGS_RESIZE]: "Resize settings panel",
   [KEY_GAMES_PLAY_DISPLAY]: "display",
+  [DASHBOARD_BACKGROUND_TEXT.label]: "dashboard background",
+  [DASHBOARD_BACKGROUND_TEXT.woodgrain]: "woodgrain",
+  [DASHBOARD_BACKGROUND_TEXT.metal]: "metal plate",
+  [DASHBOARD_BACKGROUND_TEXT.wicker]: "wicker",
+  [DASHBOARD_BACKGROUND_TEXT.pearl]: "mother of pearl",
   [KEY_GAMES_PLAY_CONTROLLERS]: "control",
   [KEY_GAMES_PLAY_CONTROLLER_LABEL]: "device",
   [KEY_GAMES_PLAY_CONTROLLER_ON_SCREEN]: "on screen",
@@ -588,7 +599,7 @@ export const APP_GAMES_TEXT = {
   [FLIGHT_INSTRUMENT_TEXT.attitude]: "attitude",
   [FLIGHT_INSTRUMENT_TEXT.heading]: "heading",
   [FLIGHT_INSTRUMENT_TEXT.altitude]: "altitude",
-  [FLIGHT_INSTRUMENT_TEXT.vertical_speed]: "vertical speed",
+  [FLIGHT_INSTRUMENT_TEXT.vertical_speed]: "vert speed",
   [FLIGHT_INSTRUMENT_TEXT.turn]: "turn coord",
   [CONTROLLER_COLOR_TEXT.green]: "green",
   [CONTROLLER_COLOR_TEXT.red]: "red",

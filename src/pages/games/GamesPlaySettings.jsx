@@ -28,6 +28,7 @@ import {
   normalize_controller_color,
 } from "./controllers/ControllerColors.js";
 import FlightInstrumentSettingsPanel from "./flight/FlightInstrumentSettingsPanel.jsx";
+import DashboardBackgroundSetting from "./DashboardBackgroundSetting.jsx";
 import FlightControlSettingsPanel from "./controllers/FlightControlSettingsPanel.jsx";
 import { FLIGHT_SETTINGS_TEXT } from "../../text/GamesText.jsx";
 
@@ -196,6 +197,7 @@ export default function GamesPlaySettings({ fullscreen_target_ref }) {
             ))}
           </select>
         </ToggleItem>
+        <DashboardBackgroundSetting />
         {(!supported || error) && (
           <p role="status">
             {AppText.get(

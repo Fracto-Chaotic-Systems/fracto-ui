@@ -1,5 +1,9 @@
 # UI settings
 
+`games/play_dashboard_background` persists the game dashboard finish as
+`woodgrain` (default), `metal`, `wicker`, or `pearl`. The game display panel and dashboard
+subscribe to this preference; invalid saved values render as woodgrain.
+
 Each module in this directory declares namespaced setting keys and an
 `APP_*_SETTINGS` registry for one part of the UI. A definition supplies the
 value type, default value, description, and whether the value should persist.

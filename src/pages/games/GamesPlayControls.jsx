@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, { css, keyframes } from "styled-components";
 import AppText from "../../AppText.jsx";
 import { FLIGHT_SETTINGS_TEXT } from "../../text/GamesText.jsx";
 import GameController from "./controllers/GameController.jsx";
@@ -6,6 +6,13 @@ import FlightInstrumentGroup from "./flight/FlightInstrumentGroup.jsx";
 import FlightInstrumentStatus from "./flight/FlightInstrumentStatus.jsx";
 import { game_controls_layout } from "./GamesPlayControlsLayout.js";
 import { useInstrumentSettings } from "./flight/useInstrumentSettings.js";
+import { useDashboardBackground } from "./useDashboardBackground.js";
+import { dashboard_background } from "./DashboardBackground.js";
+
+const pearl_drift = keyframes`
+  from { background-position: 0 0, 0% 0%, 0 0; }
+  to { background-position: 0 0, 100% 100%, 0 0; }
+`;
 
 const ControlsDock = styled.div`
   position: absolute;
@@ -25,37 +32,15 @@ const ControlsDock = styled.div`
     border-bottom: 0;
     border-radius: ${({ $shoulder_radius }) =>
       `${$shoulder_radius}px ${$shoulder_radius}px 0 0`};
-    background:
-      linear-gradient(110deg, #ffffff14, #00000033) padding-box,
-      repeating-linear-gradient(
-          2deg,
-          #24100700 0px,
-          #24100700 3px,
-          #24100738 4px,
-          #d5964b26 5px,
-          #24100700 8px
-        )
-        padding-box,
-      repeating-linear-gradient(
-          177deg,
-          #713c20 0px,
-          #92542d 18px,
-          #5b2f19 36px,
-          #804623 55px
-        )
-        padding-box,
-      linear-gradient(
-          135deg,
-          #faf5de 0%,
-          #a7997a 12%,
-          #fffdf2 25%,
-          #706957 43%,
-          #ded8bd 58%,
-          #fffdf2 72%,
-          #6b6251 88%,
-          #d9ceb1 100%
-        )
-        border-box;
+    background: ${({ $background }) => dashboard_background($background)};
+    ${({ $background }) =>
+      $background === "pearl" &&
+      css`
+        animation: ${pearl_drift} 45s ease-in-out infinite alternate;
+        @media (prefers-reduced-motion: reduce) {
+          animation: none;
+        }
+      `}
     box-shadow:
       inset 0 1px 2px #fff6d580,
       inset 0 -3px 8px #1c0d09a6,
@@ -114,11 +99,13 @@ export default function GamesPlayControls({
   height_px,
 }) {
   const settings = useInstrumentSettings();
+  const background = useDashboardBackground();
   const layout = game_controls_layout(width_px, height_px, settings);
   const groups = layout.groups.filter((group) => group.count);
   if (!width_px || !height_px) return null;
   return (
     <ControlsDock
+      $background={background}
       $width={layout.dock_width}
       $shoulder_radius={layout.instrument_size / 2 + 28}
     >

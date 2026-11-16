@@ -1,5 +1,15 @@
 # UI data preparation
 
+## Dashboard textures
+
+`dashboard-textures.py` downloads the approved ambientCG Wood051, Metal010, and
+Wicker010A 1K JPG archives and converts only their color maps to WebP under
+`public/dashboard/`. Run with Python and Pillow installed; neither is required
+at application runtime. Source and license information is in that asset folder's
+README. Output includes archive checksums and encoded sizes.
+It also fetches the public-domain Iridescent Fluid Abstract JPEG for the animated
+mother-of-pearl finish and encodes it at WebP quality 85.
+
 ## Integrated flight validation
 
 `flight_validation.html` mounts the actual production dock, on-screen controller,

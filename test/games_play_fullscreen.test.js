@@ -54,6 +54,7 @@ function mount({
   const component = vm.runInNewContext(code + ";GamesPlaySettings", {
     FlightInstrumentSettingsPanel: () => null,
     FlightControlSettingsPanel: () => null,
+    DashboardBackgroundSetting: () => null,
     FLIGHT_SETTINGS_TEXT: { instruments: "instruments" },
     React: {
       createElement: (type, props, ...children) => ({ type, props, children }),

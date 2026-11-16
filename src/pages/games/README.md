@@ -11,7 +11,19 @@ on-screen controller at the bottom of the game area. Airspeed, attitude, and
 heading default to the left; altitude, vertical speed, and turn coordination
 default to the right. Desktop instrument groups sit directly beside the controller
 without a horizontal gap. Below 768px the groups stack above the controller in rows
-of up to three. A shared walnut-style dashboard surrounds the instruments and
+of up to three. Settings → **display** → **dashboard background** switches between
+woodgrain, brushed metal plate, woven wicker, and mother of pearl. The finish applies live and
+persists under `games/play_dashboard_background`, defaulting to woodgrain for
+invalid saved values. `DashboardBackground.js` layers local CC0 ambientCG color
+maps from `public/dashboard/` beneath the lighting and polished rim. The 1K WebP
+assets total about 181 KiB; their README records sources and licensing. Texture
+tiles retain fixed scales when the panel resizes, without stretching the weave.
+Mother of pearl uses a locally bundled public-domain iridescent image, oversized
+without tiling. Only this image layer drifts edge-to-edge on a 45-second traversal.
+It smoothly reverses at the image boundaries (0% and 100%) without exposing gaps;
+controls, lighting, and rim stay fixed. Reduced-motion preferences disable drift.
+`useDashboardBackground.js` shares the preference between the dock and selector.
+A shared dashboard surrounds the instruments and
 controller, with a reflective metal rim and light instrument labels. The centered
 panel hugs the selected controls' combined width, with circular shoulders sized
 to the instrument radius plus side clearance, following the outer dials just above
