@@ -10,7 +10,69 @@ import {
   visible_track_rows,
   note_rectangle,
   TRACK_LABEL_WIDTH,
+  TRACK_ROW_HEIGHT,
+  SUSTAIN_ROW_HEIGHT,
+  track_row_layout,
+  visible_track_layout,
 } from "../src/pages/games/music/MidiTrackGeometry.js";
+
+test("mixed row heights keep sustain labels, canvases and virtualized positions aligned", () => {
+  const rows = Array.from({ length: 200 }, (_, index) => ({
+    id: String(index),
+    kind: index % 2 ? "pedal" : "notes",
+  }));
+  const layout = track_row_layout(rows);
+  assert.ok(SUSTAIN_ROW_HEIGHT < TRACK_ROW_HEIGHT);
+  assert.equal(layout.rows[1].top, 32 + TRACK_ROW_HEIGHT);
+  assert.equal(layout.rows[2].top, 32 + TRACK_ROW_HEIGHT + SUSTAIN_ROW_HEIGHT);
+  assert.equal(
+    layout.height,
+    32 + 100 * (TRACK_ROW_HEIGHT + SUSTAIN_ROW_HEIGHT),
+  );
+  const top = layout.rows[101].top + 10;
+  const visible = visible_track_layout(layout.rows, top, 200);
+  assert.equal(visible[0].row.id, "100");
+  assert.ok(visible.some((entry) => entry.row.id === "101"));
+  assert.ok(visible.length < 10);
+  assert.deepEqual(visible_track_layout([], 0, 200), []);
+  const events = track_row_layout([
+    { kind: "tempo" },
+    { kind: "meter" },
+    { kind: "pedal" },
+    { kind: "notes" },
+  ]);
+  assert.deepEqual(
+    events.rows.map((entry) => entry.height),
+    [
+      SUSTAIN_ROW_HEIGHT,
+      SUSTAIN_ROW_HEIGHT,
+      SUSTAIN_ROW_HEIGHT,
+      TRACK_ROW_HEIGHT,
+    ],
+  );
+});
+
+test("channel dividers follow complete instrument/sustain groups", () => {
+  const layout = track_row_layout([
+    { kind: "tempo" },
+    { kind: "notes", channel: 0 },
+    { kind: "pedal", channel: 0 },
+    { kind: "notes", channel: 1 },
+    { kind: "pedal", channel: 1 },
+    { kind: "notes", channel: 2 },
+  ]);
+  assert.deepEqual(
+    layout.rows.map((entry) => entry.channel_end),
+    [false, false, true, false, true, true],
+  );
+  const visible = visible_track_layout(layout.rows, layout.rows[2].top, 30);
+  assert.equal(
+    visible.find(
+      (entry) => entry.row.channel === 0 && entry.row.kind === "pedal",
+    ).channel_end,
+    true,
+  );
+});
 
 test("fit and logarithmic zoom bound the timeline width even for very long files", () => {
   for (const duration of [0, 0.001, 1.5, 3600, 1e14]) {
@@ -64,7 +126,7 @@ test("interval queries retain long held notes, overlapping notes, and shared not
 
 test("track virtualization keeps row counts bounded with overscan and fixed label alignment", () => {
   const first = visible_track_rows(0, 400, 256);
-  const late = visible_track_rows(10000, 400, 256);
+  const late = visible_track_rows(140 * TRACK_ROW_HEIGHT, 400, 256);
   assert.equal(first.first, 0);
   assert.ok(late.first > 100);
   assert.ok(late.last - late.first <= 9);

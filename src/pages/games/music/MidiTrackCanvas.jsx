@@ -104,7 +104,7 @@ function MidiTrackCanvas({
         });
       }
     }
-    context.fillStyle = "#dce1e5";
+    context.fillStyle = "#b4bec7";
     context.fillRect(0, height - 1, width, 1);
   }, [width, height, scale, scroll, duration, row, ruler, selected]);
   return (

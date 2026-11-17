@@ -9,9 +9,18 @@ export const MusicPanel = styled.section`
 `;
 export const MusicControls = styled.div`
   display: flex;
+  align-items: center;
   flex-wrap: wrap;
   gap: 0.65rem;
   margin: 1.25rem 0;
+`;
+export const MusicFilename = styled.span`
+  flex: 1;
+  min-width: 0;
+`;
+export const MusicMetadata = styled.p`
+  margin: 0 0 1.25rem;
+  white-space: normal;
 `;
 export const MusicButton = styled.button`
   font: inherit;

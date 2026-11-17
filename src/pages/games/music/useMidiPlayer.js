@@ -3,6 +3,10 @@ import { load_instrument_catalog } from "./MidiInstrumentCatalog.js";
 import { useCallback, useEffect, useRef, useState } from "react";
 import MidiPlaybackController from "./MidiPlaybackController.js";
 import { MAX_MIDI_BYTES } from "./MidiValidation.js";
+import { INSTRUMENT_REGISTRY } from "./MidiInstruments.js";
+import { read_recent_midi, remember_midi } from "./MidiRecentFile.js";
+
+const SOUND_LIBRARY_ID = "fluidr3-gm";
 
 const initial = {
   snapshot: {
@@ -27,44 +31,7 @@ export default function useMidiPlayer() {
   const controller = useRef(null);
   const generation = useRef(0);
   const [state, set_state] = useState(initial);
-  useEffect(() => {
-    let active = true;
-    const player = new MidiPlaybackController({
-      catalog_loader: (signal) =>
-        load_instrument_catalog(`${service_origin("asset")}/instruments`, {
-          signal,
-        }),
-      on_catalog: (catalog) => {
-        if (active) set_state((previous) => ({ ...previous, catalog }));
-      },
-      on_instruments: (instruments) => {
-        if (active) set_state((previous) => ({ ...previous, instruments }));
-      },
-      on_mix: (mix) => {
-        if (active) set_state((previous) => ({ ...previous, mix }));
-      },
-      on_status: (snapshot) => {
-        if (active) set_state((previous) => ({ ...previous, snapshot }));
-      },
-    });
-    controller.current = player;
-    void player.refresh_catalog();
-    return () => {
-      active = false;
-      controller.current = null;
-      void player.dispose();
-    };
-  }, []);
-  useEffect(() => {
-    if (state.snapshot.status !== "playing") return;
-    const timer = setInterval(() => {
-      const snapshot = controller.current?.snapshot();
-      if (snapshot) set_state((previous) => ({ ...previous, snapshot }));
-    }, 200);
-    return () => clearInterval(timer);
-  }, [state.snapshot.status]);
-
-  const open_file = async (file) => {
+  const open_file = useCallback(async (file, { remember = true } = {}) => {
     const player = controller.current;
     if (!file || !player) return;
     const request = ++generation.current;
@@ -87,6 +54,7 @@ export default function useMidiPlayer() {
       if (request !== generation.current || player.disposed) return;
       error_code = "invalid_midi_file";
       const song = player.load(bytes);
+      if (remember) void remember_midi(file.name, bytes);
       set_state((previous) => ({
         ...previous,
         reading: false,
@@ -104,7 +72,62 @@ export default function useMidiPlayer() {
         import_error: error_code,
       }));
     }
-  };
+  }, []);
+  useEffect(() => {
+    let active = true;
+    const player = new MidiPlaybackController({
+      // All Music fixes its library; shared controller/Legacy support is retained.
+      instrument_registry: INSTRUMENT_REGISTRY.with_library(SOUND_LIBRARY_ID),
+      catalog_loader: async (signal) => {
+        const result = await load_instrument_catalog(
+          `${service_origin("asset")}/instruments`,
+          { signal },
+        );
+        return {
+          ...result,
+          registry: result.registry.with_library(SOUND_LIBRARY_ID),
+        };
+      },
+      on_catalog: (catalog) => {
+        if (active) set_state((previous) => ({ ...previous, catalog }));
+      },
+      on_instruments: (instruments) => {
+        if (active) set_state((previous) => ({ ...previous, instruments }));
+      },
+      on_mix: (mix) => {
+        if (active) set_state((previous) => ({ ...previous, mix }));
+      },
+      on_status: (snapshot) => {
+        if (active) set_state((previous) => ({ ...previous, snapshot }));
+      },
+    });
+    controller.current = player;
+    void player.refresh_catalog();
+    const restore_generation = generation.current;
+    void read_recent_midi().then((file) => {
+      if (
+        active &&
+        file &&
+        generation.current === restore_generation &&
+        controller.current === player
+      )
+        void open_file(file, { remember: false });
+    });
+    return () => {
+      active = false;
+      controller.current = null;
+      void player.dispose();
+    };
+  }, [open_file]);
+  useEffect(() => {
+    if (state.snapshot.status !== "playing") return;
+    const timer = setInterval(() => {
+      const snapshot = controller.current?.snapshot();
+      if (snapshot) set_state((previous) => ({ ...previous, snapshot }));
+    }, 200);
+    return () => clearInterval(timer);
+  }, [state.snapshot.status]);
+
   const stop = () => {
     generation.current++;
     controller.current?.stop();

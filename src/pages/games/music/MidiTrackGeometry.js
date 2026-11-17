@@ -1,5 +1,7 @@
 export const TRACK_LABEL_WIDTH = 192;
-export const TRACK_ROW_HEIGHT = 72;
+export const TRACK_ROW_HEIGHT = 80;
+export const EVENT_ROW_HEIGHT = 30;
+export const SUSTAIN_ROW_HEIGHT = EVENT_ROW_HEIGHT;
 export const TRACK_RULER_HEIGHT = 32;
 export const MAX_TRACK_ZOOM = 8;
 
@@ -86,6 +88,39 @@ export function visible_track_rows(scroll_top, height, count) {
     first,
     last: Math.min(count, first + Math.ceil(height / TRACK_ROW_HEIGHT) + 3),
   };
+}
+
+export function track_row_layout(rows) {
+  let top = TRACK_RULER_HEIGHT;
+  const layout = rows.map((row, index) => {
+    const height = row.kind === "notes" ? TRACK_ROW_HEIGHT : EVENT_ROW_HEIGHT;
+    const channel_end =
+      (row.kind === "notes" || row.kind === "pedal") &&
+      Number.isInteger(row.channel) &&
+      rows[index + 1]?.channel !== row.channel;
+    const entry = { row, top, height, channel_end };
+    top += height;
+    return entry;
+  });
+  return { rows: layout, height: top };
+}
+
+export function visible_track_layout(layout, scroll_top, height) {
+  const lower_bound = (value, bottom) => {
+    let lo = 0,
+      hi = layout.length;
+    while (lo < hi) {
+      const mid = (lo + hi) >>> 1;
+      const edge = layout[mid].top + (bottom ? layout[mid].height : 0);
+      if (edge < value) lo = mid + 1;
+      else hi = mid;
+    }
+    return lo;
+  };
+  return layout.slice(
+    Math.max(0, lower_bound(scroll_top, true) - 1),
+    Math.min(layout.length, lower_bound(scroll_top + height, false) + 1),
+  );
 }
 
 export function note_rectangle(note, scale, scroll, width, range) {

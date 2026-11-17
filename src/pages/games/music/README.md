@@ -21,10 +21,13 @@ are outside the budget and are not a browser-process RAM guarantee.
 
 GrandB's verified approximately 10.033-second mono MP3s reserve 10.1 seconds at
 the actual AudioContext rate instead of estimating zero bytes. The UI labels an
-explicit GrandB choice as **GrandB piano (Legacy)** even when FluidR3 is selected;
-it remains an intentional override. **Original MIDI assignment** with FluidR3
-resolves program 0 to the catalog's FluidR3 acoustic grand piano. No automatic
-sound substitution or memory-cap increase is performed.
+GrandB choice as **GrandB piano (Legacy)** even when FluidR3 is selected.
+**Original MIDI assignment** maps standard-bank GM program 0 (Acoustic Grand
+Piano) to GrandB, including notes after program changes. Other programs continue
+to use the selected library, and explicit route overrides use the chosen source.
+Percussion and nonstandard banks are excluded from this substitution; pitches
+outside GrandB's verified range remain unavailable. File metadata and memory
+limits are unchanged. The left-column name reflects the effective GrandB source.
 
 `MidiScheduler.js` obtains a pinned buffer immediately before scheduling a voice.
 If a needed buffer is not ready, the `buffering` state suspends AudioContext time
@@ -35,13 +38,28 @@ audio-clock timing behavior is preserved. Playback snapshots expose allocation
 and scheduling counters for verification, without adding technical UI controls.
 
 The Hammerklavier fixture is 74,228 bytes, 8,290 notes, and 593.4006 seconds.
-The current FluidR3 catalog needs seven assets (48.83 MiB decoded at 48 kHz), so
-repacking assets is unnecessary for this piece. GrandB needs 189 assets overall
-and uses windowed loading. See `test/midi_browser/README.md` (from the UI root)
+Before the GrandB substitution, the FluidR3 rendition needed seven assets
+(48.83 MiB decoded at 48 kHz). GrandB needs 189 assets overall and uses windowed
+loading, including when selected by original Acoustic Grand Piano assignments.
+See `test/midi_browser/README.md` (from the UI root)
 for the repeatable full-duration native browser test. The MIDI input remains
 outside Git; reports identify it by SHA-256.
 
-## Current default: FluidR3 GM (migration step 6)
+## Fixed All Music library: FluidR3 GM
+
+`useMidiPlayer.js` fixes All Music to `SOUND_LIBRARY_ID = "fluidr3-gm"`
+for both its initial registry and every discovered catalog, independent of the
+catalog default. The Sound library selector, Refresh libraries button and
+library-switching help are no longer rendered. Catalog discovery runs on mount;
+reload the page to fetch an updated catalog. Discovery failure reports catalog
+unavailability without automatically substituting Legacy piano. New files use
+Original MIDI assignment; manual route overrides reset on replacement.
+
+Shared Legacy providers, explicit GrandB route overrides, library-switching APIs
+and catalog-refresh code remain implemented. Audio assets, gain and memory
+limits are unchanged. The migration reports below describe historical behavior.
+
+## Historical default: FluidR3 GM (migration step 6)
 
 The catalog now declares `default_library_id: "fluidr3-gm"`. All Music selects it
 when catalog discovery completes, and new files use **Original MIDI assignment**.
@@ -179,11 +197,95 @@ coverage verification remain documented in ../MIDI_VERIFICATION.md.
 
 ## All Music page integration
 
+The track listing begins with its toolbar; the visible Tracks heading and
+track/channel count summary are omitted. The section retains its accessible name.
+The held-key, sustained-key and sustain-tail legend is also omitted above the listing.
+
+Note rows display their effective instrument (or drum kit) in the sticky left
+column. Row headers use a light, low-contrast grey gradient, brightest at the
+upper left, suggesting soft illumination. This background sits in a separate
+layer so text and controls retain their normal colors. Selected rows retain
+the gradient beneath a subtle blue tint and selection stripe.
+Instrument names are preceded by a bold, circled MIDI channel number (1–16)
+on the top line.
+Rows on the same channel share its number. Sustain rows also show the circled
+channel number and sit directly beneath each affected instrument row. Sustain
+is channel-wide, so tracks sharing a channel each show that channel's sustain
+lane; channels without pedal events get no empty lane. Pedal-only channels
+without an instrument row remain at the end. Tempo and meter stay at the top.
+The redundant channel-and-note-count text line is omitted from each row;
+note counts remain available in row tooltips.
+`MidiTrackInstrumentLabel.jsx` switches the name to an inline selector
+on click or keyboard activation and highlights that route. Changes
+use the existing assignment API, stopping playback and retaining mix settings.
+The selector returns to the name after a change, blur or Escape. Choices use
+the registry's verified coverage rules; original MIDI assignment remains available,
+and routes with program changes list all effective instruments. Metadata/event
+lanes retain their labels. File track names remain in row tooltips.
+Each note row also has Mute and Solo checkboxes plus volume and pan sliders in
+the left column, with italic, lowercase mute/solo labels and the first checkbox aligned under the instrument name
+after the channel badge. They are wired to the existing live route mix state by
+`MidiTrackMixControls.jsx`. Slider caps contain regular-weight white `V` and `P` letters
+with a subtle dark text shadow
+instead of separate volume/pan labels. The sliders share an identical width and
+begin at the checkbox's left edge with a 24px inset, without visible readouts.
+`MidiFader.jsx` styles the native range inputs as light recessed mixer slots
+with a dark upper edge suggesting shadow, plus
+scale ticks and flat, darker rectangular caps, preserving keyboard and pointer
+interaction plus visible keyboard focus. Both faders retain the same dimensions.
+Cap letters use inline SVG backgrounds on the native thumb in both Chromium and
+Firefox, so the lettering follows the cap without a separate positioning layer.
+The pan fader has a distinct center tick and an accented cap at exactly zero,
+making centered pan visible even when the cap covers the tick.
+Volume retains its full accessible name, and both sliders expose their current
+values to assistive technology. These controls are separate from the instrument button, so adjusting
+them does not open its selector. Instrument rows are 80px tall and sustain rows
+are 30px tall, with italic, lowercase pedal state beside the Sustain title and
+circled channel number. Tempo and time signature rows share that 30px height,
+with italic current values beside their titles and vertically centered headers.
+Tempo/meter titles and values use full-height flex boxes with a shared line-height
+so their differing font sizes do not shift their vertical alignment.
+`track_row_layout` owns cumulative positions and heights for
+virtualization, labels and timeline canvases, keeping mixed-height rows aligned.
+A 2px groove divider, dark on top and light below, spans the listing after each channel group; the instrument
+and its sustain lane retain their light internal separator. Group boundaries
+are calculated before virtualization, including channels without a sustain lane.
+The same divider separates tempo from meter and the timing rows from instrument
+tracks below them.
+A matching groove also runs above the Tempo row.
+The Tempo header cell paints its own top groove so it remains visible when
+the header stays fixed during horizontal scrolling.
+The Track/channel ruler corner also has a bottom groove and is constrained to
+the ruler height, preventing its padding from overlapping the Tempo header.
+The header/timeline boundary uses a matching 2px vertical groove, dark on the
+left and light on the right, continuing through the ruler corner and selected rows.
+There is no selected-track details text or mixer panel below the listing.
+The older `MidiTrackMixer.jsx` and
+`MidiInstrumentAssignment.jsx` component is retained but is no longer rendered.
+
 `../GamesMusic.jsx` renders Open MIDI, Play and Stop with filename, elapsed /
 total time, live status, errors and warnings. `MusicStyles.jsx` owns its local
-layout. Text is registered in GamesText.jsx under MUSIC_TEXT; internal engine
+layout. The filename (or no-file placeholder) shares the transport button row,
+with long names wrapping within the remaining space. The transport buttons
+appear without an introductory help paragraph.
+Embedded markers, text, copyright notices and cue points are shown as plain text
+below the transport row, aligned under Open MIDI, as a single line separated by
+middle dots that wraps to the available width. The first visible entry is bold;
+the remaining entries are italic. Blank entries are hidden;
+files without these events show no metadata block. The parsed song retains each
+entry's type, track, tick and time in `text_events`; names are not interpreted as
+performer or creator credits. File replacement clears the previous file's text.
+Text is registered in GamesText.jsx under MUSIC_TEXT; internal engine
 errors are mapped to those strings rather than exposing raw exception text.
 Open supports local .mid/.midi files; selecting the same file again works.
+After a successful import, `MidiRecentFile.js` stores just the latest filename
+and MIDI bytes in this browser origin's IndexedDB (bounded by the 8 MiB import
+limit). Opening All Music again, including after refresh, restores that local
+copy without starting playback. It does not reread the original disk path or
+upload the file. Browser storage may be unavailable or cleared; in that case
+the page opens normally without a saved file. Failed imports do not replace the
+last successfully opened file. A new file selection or Stop cancels a pending
+restore, and StrictMode/unmount cleanup prevents stale restores.
 Play is enabled after parsing and disabled while reading/loading/playing.
 Stop also cancels an in-progress file read or sample load; replay starts at zero.
 
@@ -502,7 +604,7 @@ S3 piano. Assigned-source changes still stop and require explicit replay. This
 fix is covered during both preparation and active playback (111 MIDI tests).
 
 
-## FluidR3 library selection (migration step 5)
+## Historical FluidR3 library selection (migration step 5)
 
 All Music offers **Sound library** and **Refresh libraries** before loading a file.
 All 128 verified FluidR3 GM instruments are enabled; Legacy recordings remains the

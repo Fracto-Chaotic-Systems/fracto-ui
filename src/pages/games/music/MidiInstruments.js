@@ -49,6 +49,17 @@ export function create_instrument_registry(
     // Only standard-bank mappings are verified. A numbered GM program alone
     // must not silently reinterpret a bank-select or percussion assignment.
     if ((note.bank_msb ?? 0) !== 0 || (note.bank_lsb ?? 0) !== 0) return null;
+    // Original GM Acoustic Grand Piano uses the preferred Legacy recording.
+    // Explicit route overrides still select their requested provider directly.
+    if (
+      note.channel !== 9 &&
+      (note.program ?? 0) === 0 &&
+      (libraries.length === 0 ||
+        libraries.some((library) => library.id === library_id))
+    )
+      return supports(providers[DEFAULT_INSTRUMENT], note)
+        ? providers[DEFAULT_INSTRUMENT]
+        : null;
     return Object.values(providers).find(
       (provider) =>
         provider.library_id ===

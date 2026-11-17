@@ -109,7 +109,7 @@ test("catalogs above 128 entries work while the 2048 bound remains enforced", ()
   assert.throws(() => catalog_libraries(c));
   assert.throws(() => registry_from_catalog(c, catalog_url));
 });
-test("original programs are scoped to a library with no accidental legacy piano fallback", () => {
+test("original Acoustic Grand Piano uses GrandB while explicit choices retain their source", () => {
   const alternate = {
     ...GRANDB_PROVIDER,
     id: "asset-fluidr3-gm-piano",
@@ -121,7 +121,8 @@ test("original programs are scoped to a library with no accidental legacy piano 
     default_library_id: "fluidr3-gm",
     libraries,
   });
-  assert.equal(r.resolve(note(), "original").instrument_id, alternate.id);
+  assert.equal(r.resolve(note(), "original").instrument_id, "grandb");
+  assert.equal(r.resolve(note(), alternate.id).instrument_id, alternate.id);
   assert.equal(
     r.resolve(note(), "original", { library_id: "legacy" }).instrument_id,
     "grandb",
@@ -132,9 +133,26 @@ test("original programs are scoped to a library with no accidental legacy piano 
       default_library_id: "fluidr3-gm",
       libraries,
     }).can_assign([note()], "original"),
-    false,
+    true,
   );
   assert.equal(r.can_assign([{ ...note(), bank_msb: 1 }], "original"), false);
+  assert.equal(r.can_assign([{ ...note(), bank_lsb: 1 }], "original"), false);
+  assert.equal(r.can_assign([{ ...note(), channel: 9 }], "original"), false);
+  assert.equal(r.can_assign([{ ...note(), pitch: 12 }], "original"), false);
+  const flute = { ...alternate, id: "fluid-flute", programs: [73] };
+  const mixed = create_instrument_registry(
+    [GRANDB_PROVIDER, alternate, flute],
+    {
+      default_library_id: "fluidr3-gm",
+      libraries,
+    },
+  );
+  assert.deepEqual(
+    [note(), { ...note(), program: 73 }, note()].map(
+      (n) => mixed.resolve(n, "original").instrument_id,
+    ),
+    ["grandb", "fluid-flute", "grandb"],
+  );
 });
 test("streamed catalog decoding preserves UTF8 and enforces declared and streamed byte limits", async () => {
   const c = multiple();
@@ -247,8 +265,8 @@ test("late default discovery adopts FluidR3 for automatic routes and preserves e
   await player.refresh_catalog();
   assert.equal(player.instruments.registry.default_library_id, "fluidr3-gm");
   assert.equal(player.instruments.assignments[route], "original");
-  // The fixture only contains FluidR3 flute; no silent piano fallback is allowed.
-  assert.equal(registry.can_assign(player.song.notes, "original"), false);
+  // Original piano uses GrandB even when the catalog only contains FluidR3 flute.
+  assert.equal(registry.can_assign(player.song.notes, "original"), true);
   player.set_instrument(route, "grandb");
   await player.refresh_catalog();
   assert.equal(player.instruments.assignments[route], "grandb");

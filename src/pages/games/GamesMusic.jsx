@@ -8,6 +8,8 @@ import {
   MusicPanel,
   MusicControls,
   MusicButton,
+  MusicFilename,
+  MusicMetadata,
   MusicError,
   MusicProgress,
 } from "./music/MusicStyles.jsx";
@@ -36,7 +38,6 @@ export default function GamesMusic() {
         {AppText.get(KEY_GAMES_MUSIC_TITLE)}
       </styles.SectionTitle>
       <MusicPanel aria-label={AppText.get(KEY_GAMES_MUSIC_TITLE)}>
-        <p>{text("help")}</p>
         {player.catalog.status === "error" && (
           <p>{text("catalog_unavailable")}</p>
         )}
@@ -52,38 +53,6 @@ export default function GamesMusic() {
             void player.open_file(file);
           }}
         />
-        <label>
-          {text("library_label")}
-          <select
-            aria-label={text("library_label")}
-            value={player.catalog.registry?.default_library_id ?? "legacy"}
-            onChange={(event) => player.set_library(event.target.value)}
-          >
-            {(player.catalog.registry?.libraries.length
-              ? player.catalog.registry.libraries
-              : [{ id: "legacy", name: "Legacy recordings" }]
-            ).map((library) => (
-              <option
-                key={library.id}
-                value={library.id}
-                disabled={
-                  player.catalog.registry
-                    ? !player.catalog.registry.can_select_library(library.id)
-                    : false
-                }
-              >
-                {library.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <MusicButton
-          disabled={player.catalog.status === "loading"}
-          onClick={player.refresh_catalog}
-        >
-          {text("library_refresh")}
-        </MusicButton>
-        <p>{text("library_help")}</p>
         <MusicControls>
           <MusicButton onClick={() => input.current?.click()}>
             {text("open")}
@@ -101,8 +70,24 @@ export default function GamesMusic() {
           <MusicButton disabled={!busy} onClick={player.stop}>
             {text("stop")}
           </MusicButton>
+          <MusicFilename>{file_name || text("no_file")}</MusicFilename>
         </MusicControls>
-        <p>{file_name || text("no_file")}</p>
+        {player.song?.text_events.some((event) => event.text.trim()) && (
+          <MusicMetadata aria-label={text("embedded_information")}>
+            {player.song.text_events
+              .filter((event) => event.text.trim())
+              .map((event, index) => (
+                <span key={event.id}>
+                  {index > 0 && " · "}
+                  {index === 0 ? (
+                    <strong>{event.text.trim()}</strong>
+                  ) : (
+                    <em>{event.text.trim()}</em>
+                  )}
+                </span>
+              ))}
+          </MusicMetadata>
+        )}
         <p role="status" aria-live="polite">
           {text(reading ? "reading" : snapshot.status) || text("idle")}
           {snapshot.loading_progress &&

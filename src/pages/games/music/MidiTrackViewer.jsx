@@ -5,18 +5,14 @@ import { build_midi_display_model } from "./MidiDisplayModel.js";
 import { index_track_notes, MAX_TRACK_ZOOM } from "./MidiTrackGeometry.js";
 import {
   build_track_event_lanes,
+  arrange_track_rows,
   follow_track_scroll,
 } from "./MidiTrackPlayback.js";
 import useTrackViewport from "./useTrackViewport.js";
 import useMidiTrackClock from "./useMidiTrackClock.js";
-import MidiTrackMixer from "./MidiTrackMixer.jsx";
 import MidiTrackBody from "./MidiTrackBody.jsx";
 import { MusicButton } from "./MusicStyles.jsx";
-import {
-  TrackSection,
-  TrackToolbar,
-  TrackDetails,
-} from "./MidiTrackStyles.jsx";
+import { TrackSection, TrackToolbar } from "./MidiTrackStyles.jsx";
 
 const text = (key, values = {}) => {
   let value = AppText.get(MUSIC_TEXT[key]);
@@ -38,18 +34,19 @@ function MidiTrackViewer({
 }) {
   const model = useMemo(() => build_midi_display_model(song), [song]);
   const rows = useMemo(
-    () => [
-      ...build_track_event_lanes(song),
-      ...model.rows.flatMap((track) =>
-        track.routes.map((route) => ({
-          ...route,
-          kind: "notes",
-          name: track.name || text("track_name", { number: track.index + 1 }),
-          instrument_name: track.instrument_name,
-          index: index_track_notes(route.notes),
-        })),
+    () =>
+      arrange_track_rows(
+        model.rows.flatMap((track) =>
+          track.routes.map((route) => ({
+            ...route,
+            kind: "notes",
+            name: track.name || text("track_name", { number: track.index + 1 }),
+            instrument_name: track.instrument_name,
+            index: index_track_notes(route.notes),
+          })),
+        ),
+        build_track_event_lanes(song),
       ),
-    ],
     [model, song],
   );
   const [selected, set_selected] = useState(null);
@@ -91,7 +88,6 @@ function MidiTrackViewer({
     viewport.left,
     scroll_to,
   ]);
-  const detail = rows.find((row) => row.id === selected);
   const summary = (row) =>
     text("track_summary", {
       name: row.name,
@@ -102,13 +98,6 @@ function MidiTrackViewer({
     });
   return (
     <TrackSection aria-label={text("tracks")}>
-      <h2>{text("tracks")}</h2>
-      <p>
-        {text("tracks_summary", {
-          tracks: model.rows.length,
-          routes: rows.filter((row) => row.kind === "notes").length,
-        })}
-      </p>
       <TrackToolbar>
         <label>
           {text("zoom")}
@@ -134,11 +123,6 @@ function MidiTrackViewer({
           {text("follow_playhead")}
         </label>
       </TrackToolbar>
-      <p style={{ fontSize: "0.8rem" }}>
-        <span style={{ color: "#075caa" }}>●</span> {text("held_keys")} ·{" "}
-        <span style={{ color: "#bc6b00" }}>●</span> {text("sustained_keys")} ·{" "}
-        {text("sustain_tail")}
-      </p>
       <MidiTrackBody
         viewport_ref={viewport_ref}
         viewport={viewport}
@@ -152,20 +136,10 @@ function MidiTrackViewer({
         position={position}
         running={running}
         mix={mix}
-      />
-      <TrackDetails role="status">
-        {detail
-          ? `${summary(detail)} · ${text("programs", { programs: detail.programs.map((p) => p + 1).join(", ") })}${detail.instrument_name ? ` · ${detail.instrument_name}` : ""}`
-          : text("select_track")}
-      </TrackDetails>
-      <MidiTrackMixer
-        row={detail}
-        mix={mix}
-        on_change={set_mix}
         catalog={catalog}
         instruments={instruments}
         set_instrument={set_instrument}
-        program_changes={song.program_changes}
+        set_mix={set_mix}
       />
       {model.conductor_tracks.length > 0 && (
         <details>

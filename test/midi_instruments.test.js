@@ -267,7 +267,7 @@ test("library selection scopes GM history, retains overrides and rejects missing
     notes
       .slice(0, 2)
       .map((note) => model.registry.resolve(note, "original").instrument_id),
-    ["fluid-piano", "fluid-flute"],
+    ["grandb", "fluid-flute"],
   );
   assert.equal(
     model.registry.can_assign([n(0, 73, { pitch: 61 })], "original"),
@@ -323,7 +323,7 @@ test("switching libraries stops native scheduling, preserves mix and cancels sta
   await player.dispose();
 });
 
-test("catalog refresh preserves selected library and original unsupported assignments", async () => {
+test("catalog refresh preserves selected library and the GrandB original piano mapping", async () => {
   let next = multi;
   const player = new MidiPlaybackController({
     instrument_registry: multi,
@@ -346,7 +346,7 @@ test("catalog refresh preserves selected library and original unsupported assign
   assert.equal(player.instruments.assignments[route], "original");
   assert.equal(
     player.instruments.registry.can_assign(player.song.notes, "original"),
-    false,
+    true,
   );
   await player.dispose();
 });

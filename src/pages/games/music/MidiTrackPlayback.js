@@ -99,6 +99,27 @@ export function build_track_event_lanes(song) {
   }));
 }
 
+// Sustain is channel-wide, including when multiple file tracks share a channel.
+export function arrange_track_rows(note_rows, lanes) {
+  const pedals = lanes.filter(
+    (lane) => lane.kind === "pedal" && lane.channel !== null,
+  );
+  const channels = new Set(note_rows.map((row) => row.channel));
+  return [
+    ...lanes.filter((lane) => lane.kind !== "pedal"),
+    ...note_rows.flatMap((row) => [
+      row,
+      ...pedals
+        .filter((lane) => lane.channel === row.channel)
+        .map((lane) => ({
+          ...lane,
+          id: `${lane.id}:${row.id}`,
+        })),
+    ]),
+    ...pedals.filter((lane) => !channels.has(lane.channel)),
+  ];
+}
+
 // The animation timestamp only throttles painting. Position always comes from
 // the audio controller, including its lead-in, replay origin and suspension.
 export function start_track_clock(

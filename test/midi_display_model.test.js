@@ -49,6 +49,39 @@ const file = (tracks) =>
     ]),
   ]);
 
+test("embedded credits and markers retain their text, type and timeline provenance", () => {
+  const song = events_from_midi(
+    file([
+      [
+        ...text(1, "Created by Example"),
+        ...text(2, "Copyright Example"),
+        ...text(6, "Bunji Hisamori"),
+        ...on(0),
+        ...off(480),
+        ...text(7, "Largo e mesto"),
+        ...end(),
+      ],
+    ]),
+  );
+  assert.deepEqual(
+    song.text_events.map((event) => [event.meta_type, event.text]),
+    [
+      [1, "Created by Example"],
+      [2, "Copyright Example"],
+      [6, "Bunji Hisamori"],
+      [7, "Largo e mesto"],
+    ],
+  );
+  assert.equal(song.text_events[3].tick, 480);
+  assert.equal(song.text_events[3].seconds, 0.5);
+  assert.equal(song.text_events[3].track, 0);
+  assert.ok(Object.isFrozen(song.text_events[0]));
+  const replacement = events_from_midi(
+    file([[...on(0), ...off(480), ...end()]]),
+  );
+  assert.deepEqual(replacement.text_events, []);
+});
+
 test("display events share the note tempo map and preserve names, provenance and tick releases", () => {
   const bytes = file([
     [

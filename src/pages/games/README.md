@@ -137,7 +137,8 @@ See [controllers/README.md](controllers/README.md).
 - GamesMusic.jsx renders **All Music** with Open MIDI, Play, Stop, filename,
   playback position, status, errors, file warnings, and a zoomable track/channel
   viewer with aligned labels, audio-clock playhead/highlighting, event lanes, and live mute/solo/volume/pan
-  controls for the selected route. The music/ modules own
+  controls for the selected route. FluidR3 GM is fixed in the player hook; there
+  is no library selector or refresh button. The music/ modules own
   MIDI parsing, audio scheduling and lifecycle cleanup.
 
 - GamesWorlds.jsx coordinates the **all worlds** mapping table and searchable
@@ -525,6 +526,8 @@ labels, a synchronized playhead, highlights and tempo/meter/pedal lanes.
 The selected route has a working mixer and Reset mix restores all routes;
 additional instrument assignment remains planned.
 
-All Music now offers per-route instrument assignment, with original file programs/banks separate from effective sound. Only verified GrandB piano is available; unsupported original assignments are disabled. See music/README.md.
+All Music offers per-route instrument assignment, with original file programs/banks
+separate from effective sound. FluidR3 GM supplies original assignments; the
+explicit GrandB piano (Legacy) override remains available. See music/README.md.
 
 Interface step 6 automated checks pass (79 MIDI tests and 190-file compatibility corpus). The expanded real-browser verification remains pending tool access; see MIDI_VERIFICATION.md.

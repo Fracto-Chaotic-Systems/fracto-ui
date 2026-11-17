@@ -1,10 +1,12 @@
 # FluidR3 GM v1
 
 Coordinated local tag: `release/fluidr3-gm-v1` in fracto-ui and fracto-asset-server.
-All Music defaults to FluidR3 and original MIDI program assignments; Legacy remains
-selectable. Initial Play waits for catalog discovery; failure retains GrandB.
-Library switches stop playback, retain mixer settings/compatible overrides, and
-require explicit Play. Missing keys, banks and percussion remain unavailable.
+All Music now fixes its library to FluidR3 and uses original MIDI program
+assignments. The library selector and refresh button have been removed; reload
+the page to rediscover the catalog. Discovery failure does not switch to Legacy.
+Legacy providers and explicit GrandB route overrides remain implemented. The
+shared library-switching API still stops playback and retains mixer settings and
+compatible overrides. Unsupported keys, banks and percussion remain unavailable.
 
 The service owns audio. Deploy its matching catalog, indexes and ignored original/
 playback asset directories before this UI. Git alone does not include sound data.

@@ -13,6 +13,7 @@ export function create_midi_metadata() {
   return {
     track_names: [],
     instrument_names: [],
+    text_events: [],
     time_signatures: [],
     pedal_events: [],
     program_changes: [],
@@ -30,6 +31,12 @@ export function record_midi_metadata(
 ) {
   const point = provenance(event, seconds);
   if (event.type === 255) {
+    if ([1, 2, 6, 7].includes(event.metaType))
+      metadata.text_events.push({
+        ...point,
+        meta_type: event.metaType,
+        text: event.data,
+      });
     if (event.metaType === 3)
       metadata.track_names.push({ ...point, name: event.data });
     if (event.metaType === 4) {

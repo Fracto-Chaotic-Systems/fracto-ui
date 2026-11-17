@@ -1,8 +1,9 @@
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import AppText from "../../../AppText.jsx";
 import { MUSIC_TEXT } from "../../../text/GamesText.jsx";
 import {
-  visible_track_rows,
+  track_row_layout,
+  visible_track_layout,
   TRACK_LABEL_WIDTH,
   TRACK_ROW_HEIGHT,
   TRACK_RULER_HEIGHT,
@@ -11,13 +12,13 @@ import MidiTrackCanvas from "./MidiTrackCanvas.jsx";
 import MidiNoteHighlights from "./MidiNoteHighlights.jsx";
 import { DEFAULT_MIDI_MIX, midi_mix_gain } from "./MidiMixer.js";
 import MidiEventLane from "./MidiEventLane.jsx";
+import MidiTrackInstrumentLabel from "./MidiTrackInstrumentLabel.jsx";
 import {
   TrackViewport,
   TrackContent,
   TrackRuler,
   RulerCorner,
   TrackRow,
-  TrackLabel,
   TrackCell,
 } from "./MidiTrackStyles.jsx";
 const text = (key) => AppText.get(MUSIC_TEXT[key]);
@@ -35,11 +36,16 @@ function MidiTrackBody({
   position,
   running,
   mix,
+  catalog,
+  instruments,
+  set_instrument,
+  set_mix,
 }) {
-  const { first, last } = visible_track_rows(
+  const layout = useMemo(() => track_row_layout(rows), [rows]);
+  const visible = visible_track_layout(
+    layout.rows,
     viewport.top,
     viewport.height,
-    rows.length,
   );
   const any_solo = Object.values(mix).some((setting) => setting.solo);
   const route_summary = (row) =>
@@ -54,16 +60,13 @@ function MidiTrackBody({
       aria-label={text("track_timeline")}
       tabIndex={0}
       style={{
-        height: Math.min(
-          416,
-          TRACK_RULER_HEIGHT + rows.length * TRACK_ROW_HEIGHT + 18,
-        ),
+        height: Math.min(416, layout.height + 18),
       }}
     >
       <TrackContent
         style={{
           width: TRACK_LABEL_WIDTH + geometry.extent,
-          height: TRACK_RULER_HEIGHT + rows.length * TRACK_ROW_HEIGHT,
+          height: layout.height,
         }}
       >
         <TrackRuler>
@@ -78,12 +81,16 @@ function MidiTrackBody({
             />
           </TrackCell>
         </TrackRuler>
-        {rows.slice(first, last).map((row, offset) => (
+        {visible.map(({ row, top, height, channel_end }) => (
           <TrackRow
             key={row.id}
             data-row-kind={row.kind}
+            data-strong-divider={
+              channel_end || row.kind === "tempo" || row.kind === "meter"
+            }
             style={{
-              top: TRACK_RULER_HEIGHT + (first + offset) * TRACK_ROW_HEIGHT,
+              top,
+              height,
             }}
           >
             {row.kind !== "notes" ? (
@@ -93,27 +100,21 @@ function MidiTrackBody({
                 scale={geometry.scale}
                 scroll={viewport.left}
                 position={position}
+                height={height}
               />
             ) : (
               <>
-                <TrackLabel
-                  aria-label={route_summary(row)}
-                  title={route_summary(row)}
-                  aria-pressed={selected === row.id}
-                  onClick={() => on_select(row.id)}
-                >
-                  <strong>{row.name}</strong>
-                  <small>
-                    {text("channel_notes")
-                      .replace("{channel}", String(row.channel + 1))
-                      .replace("{count}", String(row.note_count))}
-                    {mix[row.id]?.mute ? ` · ${text("muted")}` : ""}
-                    {mix[row.id]?.solo ? ` · ${text("solo")}` : ""}
-                    {any_solo && !mix[row.id]?.solo
-                      ? ` · ${text("solo_silenced")}`
-                      : ""}
-                  </small>
-                </TrackLabel>
+                <MidiTrackInstrumentLabel
+                  row={row}
+                  summary={route_summary(row)}
+                  selected={selected === row.id}
+                  on_select={on_select}
+                  catalog={catalog}
+                  selection={instruments[row.id]}
+                  set_instrument={set_instrument}
+                  mix={mix[row.id]}
+                  set_mix={set_mix}
+                />
                 <TrackCell>
                   <div
                     style={{

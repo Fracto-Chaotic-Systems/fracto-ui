@@ -5,9 +5,43 @@ import {
   follow_track_scroll,
   event_at_time,
   build_track_event_lanes,
+  arrange_track_rows,
   start_track_clock,
 } from "../src/pages/games/music/MidiTrackPlayback.js";
 import { index_track_notes } from "../src/pages/games/music/MidiTrackGeometry.js";
+
+test("sustain follows each affected channel, including channels shared across tracks", () => {
+  const rows = [
+    { id: "track:0:channel:2", kind: "notes", channel: 2 },
+    { id: "track:1:channel:0", kind: "notes", channel: 0 },
+    { id: "track:2:channel:2", kind: "notes", channel: 2 },
+  ];
+  const lanes = [
+    { id: "tempo", kind: "tempo" },
+    { id: "meter", kind: "meter" },
+    { id: "pedal:0", kind: "pedal", channel: 0 },
+    { id: "pedal:2", kind: "pedal", channel: 2 },
+  ];
+  const arranged = arrange_track_rows(rows, lanes);
+  assert.deepEqual(
+    arranged.map((row) => [row.kind, row.channel]),
+    [
+      ["tempo", undefined],
+      ["meter", undefined],
+      ["notes", 2],
+      ["pedal", 2],
+      ["notes", 0],
+      ["pedal", 0],
+      ["notes", 2],
+      ["pedal", 2],
+    ],
+  );
+  assert.equal(new Set(arranged.map((row) => row.id)).size, arranged.length);
+  assert.deepEqual(
+    arrange_track_rows(rows, [{ id: "empty", kind: "pedal", channel: null }]),
+    rows,
+  );
+});
 
 test("highlight boundaries distinguish held keys, sustain, repeated pitches and silence", () => {
   const first = {
