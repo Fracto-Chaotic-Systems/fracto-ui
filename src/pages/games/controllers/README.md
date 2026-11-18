@@ -103,7 +103,9 @@ publish generic actions; directional movement/view amounts come from axis bindin
 The command store describes held intent, not one-shot events. `FlightSimulation`
 integrates continuous channels into the separate `flight/FlightState.js` store.
 Default `move_x` adds bank input and `move_y` adds speed input. `look_x`/`look_y`
-remain view intent. A future game UI consumer can detect rising edges for
+rotate the independent world camera heading/pitch; releasing them retains the
+view direction. Motion is forward-only, scales with altitude, and stops at zero
+airspeed. A future game UI consumer can detect rising edges for
 confirm/pause/etc. Mapping itself remains pure; simulation scheduling pauses on
 blur/hidden pages and cleans up on unmount. Keyboard and hand-held providers
 remain future work.

@@ -7,6 +7,18 @@ const FRACTO_PROD_URL =
   import.meta.env.VITE_FRACTO_PROD_URL || "https://fracto.mikehallstudio.com";
 
 export class TilesBackend {
+  static tile = (short_code, options = {}) =>
+    request_json(
+      `${service_origin("tiles")}/tile?${new URLSearchParams({ short_code })}`,
+      options,
+    );
+
+  static tile_availability = (short_codes, options = {}) =>
+    request_json(
+      `${service_origin("tiles")}/tile_availability?${new URLSearchParams({ short_codes: short_codes.join(",") })}`,
+      options,
+    );
+
   static mesh_terrain = (params, options = {}) =>
     request_json(
       `${service_origin("tiles")}/mesh_terrain?${new URLSearchParams(params)}`,

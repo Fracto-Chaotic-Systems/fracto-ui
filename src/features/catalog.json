@@ -1,7 +1,7 @@
 {
   "contract_version": 1,
   "catalog_id": "fracto-ui",
-  "catalog_version": "1.2.11",
+  "catalog_version": "1.2.12",
   "access_profiles": [
     {
       "id": "public-entry",
@@ -2397,13 +2397,14 @@
           "source": "src/settings/GamesSettings.jsx"
         }
       ],
-      "availability": "placeholder",
-      "purpose": "A game play page with a replaceable on-screen game controller and right-side settings drawer below the title bar. The drawer defaults to 30% of the content width with persisted resizing between 5% and 50%.",
+      "availability": "implemented",
+      "purpose": "Controller-driven flight above the flat tiled complex plane, with an adaptive worker-rendered canvas below the dashboard, independent camera viewing, altitude-scaled forward motion, and live instruments. A fresh game starts hovering north at (-0.5, -2), altitude 1. The settings drawer defaults to 30% of content width with persisted resizing between 5% and 50%.",
       "inputs": [],
       "access": "app-shell",
       "environment": [],
       "limitations": [
-        "Fullscreen requires a user gesture and Fullscreen API support. On-screen input is implemented with virtual-gamepad-lib; keyboard and hand-held input providers and gameplay simulation are not implemented yet."
+        "Requires Canvas 2D and module Web Worker support. Render resolution adapts to measured frame cost; unavailable or iteration-limited samples can remain unresolved while detail loads.",
+        "Fullscreen requires a user gesture and browser permission. On-screen input is implemented with virtual-gamepad-lib; keyboard and hand-held input providers remain future work."
       ],
       "related_features": [],
       "sources": [
@@ -2414,6 +2415,14 @@
         {
           "repository": "ui",
           "path": "src/pages/games/GamesPlay.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/flight/FlightScene.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/flight/README.md"
         },
         {
           "repository": "ui",

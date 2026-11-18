@@ -5,6 +5,7 @@ import AppSettings from "../../AppSettings.jsx";
 import AppText from "../../AppText.jsx";
 import {
   KEY_GAMES_PLAY_FULL_SCREEN,
+  KEY_GAMES_PLAY_CANVAS_DISPLAY,
   KEY_GAMES_PLAY_CONTROLLER,
   KEY_GAMES_PLAY_CONTROLLER_ACTIONS,
   KEY_GAMES_PLAY_CONTROLLER_COLOR,
@@ -22,6 +23,7 @@ import {
   KEY_GAMES_PLAY_CONTROLLER_ACTIONS_LABEL,
   KEY_GAMES_PLAY_CONTROLLER_COLOR_LABEL,
   CONTROLLER_COLOR_TEXT,
+  FLIGHT_SCENE_TEXT,
 } from "../../text/GamesText.jsx";
 import {
   CONTROLLER_COLORS,
@@ -29,6 +31,7 @@ import {
 } from "./controllers/ControllerColors.js";
 import FlightInstrumentSettingsPanel from "./flight/FlightInstrumentSettingsPanel.jsx";
 import DashboardBackgroundSetting from "./DashboardBackgroundSetting.jsx";
+import { useCanvasDisplay } from "./useCanvasDisplay.js";
 import FlightControlSettingsPanel from "./controllers/FlightControlSettingsPanel.jsx";
 import { FLIGHT_SETTINGS_TEXT } from "../../text/GamesText.jsx";
 
@@ -86,6 +89,7 @@ const ToggleItem = styled.label`
 `;
 
 export default function GamesPlaySettings({ fullscreen_target_ref }) {
+  const canvas_display = useCanvasDisplay();
   const [controller_color, set_controller_color] = useState(() =>
     normalize_controller_color(
       AppSettings.get(KEY_GAMES_PLAY_CONTROLLER_COLOR),
@@ -158,6 +162,22 @@ export default function GamesPlaySettings({ fullscreen_target_ref }) {
     <>
       <SettingsSection>
         <summary>{AppText.get(KEY_GAMES_PLAY_DISPLAY)}</summary>
+        <ToggleItem>
+          {AppText.get(FLIGHT_SCENE_TEXT.display)}
+          <select
+            value={canvas_display}
+            onChange={(event) =>
+              AppSettings.on_settings_changed({
+                [KEY_GAMES_PLAY_CANVAS_DISPLAY]: event.target.value,
+              })
+            }
+          >
+            <option value="fill">{AppText.get(FLIGHT_SCENE_TEXT.fill)}</option>
+            <option value="640x480">
+              {AppText.get(FLIGHT_SCENE_TEXT.fixed)}
+            </option>
+          </select>
+        </ToggleItem>
         <ToggleItem>
           {AppText.get(KEY_GAMES_PLAY_FULL_SCREEN_LABEL)}
           <Switch

@@ -6,6 +6,14 @@ import {
 } from "../pages/games/controllers/FlightControlSettings.js";
 
 const GAMES_FOLDER = "games";
+export const FLIGHT_SCENE_TEXT = {
+  display: `${GAMES_FOLDER}/flight_canvas_display`,
+  fill: `${GAMES_FOLDER}/flight_canvas_fill`,
+  fixed: `${GAMES_FOLDER}/flight_canvas_fixed`,
+  view: `${GAMES_FOLDER}/flight_scene_view`,
+  error: `${GAMES_FOLDER}/flight_scene_error`,
+  retry: `${GAMES_FOLDER}/flight_scene_retry`,
+};
 export const NIGHT_FLIGHT_TEXT = {
   label: `${GAMES_FOLDER}/night_flight_lighting`,
   night: `${GAMES_FOLDER}/night_flight_switch_caption`,
@@ -333,6 +341,12 @@ export const MUSIC_TEXT = Object.fromEntries(
 );
 
 export const APP_GAMES_TEXT = {
+  [FLIGHT_SCENE_TEXT.view]: "Flight over the complex plane",
+  [FLIGHT_SCENE_TEXT.display]: "canvas display",
+  [FLIGHT_SCENE_TEXT.fill]: "Fill available space",
+  [FLIGHT_SCENE_TEXT.fixed]: "640 × 480 pixels",
+  [FLIGHT_SCENE_TEXT.error]: "Flight view unavailable.",
+  [FLIGHT_SCENE_TEXT.retry]: "Retry",
   [CONTROL_SETTINGS_TEXT.response]: "response",
   [CONTROL_SETTINGS_TEXT.axes]: "stick axes",
   [CONTROL_SETTINGS_TEXT.buttons]: "button assignments",

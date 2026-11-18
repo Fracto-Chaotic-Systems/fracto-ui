@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flight scene validation</title>
+    <style>
+      body {
+        margin: 0;
+        font: 14px system-ui;
+        background: #eee;
+        color: #222;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      header {
+        padding: 8px;
+        flex-shrink: 0;
+      }
+      button {
+        margin: 2px 4px 2px 0;
+        padding: 6px 10px;
+      }
+      #root {
+        flex: 1;
+        min-height: 0;
+      }
+      #stage {
+        position: relative;
+        isolation: isolate;
+        height: 100%;
+        min-height: 0;
+        overflow: hidden;
+      }
+      #stage:fullscreen {
+        width: 100vw;
+        height: 100vh;
+      }
+      output {
+        display: block;
+        flex-shrink: 0;
+        padding: 4px 8px;
+        font: 12px monospace;
+        overflow-wrap: anywhere;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <strong
+        >Production flight scene, controller, simulation and instruments</strong
+      >
+      <div id="actions"></div>
+    </header>
+    <div id="root"></div>
+    <output id="metrics">Waiting for a frame…</output>
+    <output id="telemetry"></output>
+    <output id="errors"></output>
+    <script type="module">
+      import React, {
+        StrictMode,
+        useCallback,
+        useEffect,
+        useState,
+      } from "react";
+      import { createRoot } from "react-dom/client";
+      import AppText from "../src/AppText.jsx";
+      import AppSettings from "../src/AppSettings.jsx";
+      import { APP_GAMES_SETTINGS } from "../src/settings/GamesSettings.jsx";
+      import { APP_GAMES_TEXT } from "../src/text/GamesText.jsx";
+      import FlightScene from "../src/pages/games/flight/FlightScene.jsx";
+      import GamesPlayControls from "../src/pages/games/GamesPlayControls.jsx";
+      import {
+        create_flight_state,
+        INITIAL_FLIGHT_STATE,
+      } from "../src/pages/games/flight/FlightState.js";
+      import { start_flight_simulation } from "../src/pages/games/flight/FlightSimulation.js";
+      import { create_flight_frame_client } from "../src/pages/games/flight/FlightFrameClient.js";
+      import { create_controller_input } from "../src/pages/games/controllers/ControllerInput.js";
+      import {
+        create_flight_controls,
+        bind_flight_controls,
+      } from "../src/pages/games/controllers/FlightControls.js";
+      import {
+        read_flight_control_settings,
+        subscribe_flight_control_settings,
+      } from "../src/pages/games/controllers/useFlightControlSettings.js";
+      import { initialize_service_ports } from "../src/utils/service_ports.jsx";
+
+      AppText.initialize(APP_GAMES_TEXT);
+      AppSettings.initialize(
+        Object.fromEntries(
+          Object.entries(APP_GAMES_SETTINGS).map(([key, value]) => [
+            key,
+            { ...value, persist: false },
+          ]),
+        ),
+      );
+      await initialize_service_ports();
+      const input = create_controller_input(),
+        commands = create_flight_controls();
+      const state = create_flight_state(INITIAL_FLIGHT_STATE);
+      const h = React.createElement;
+      let workers = 0,
+        frames = 0,
+        renders = 0,
+        fail_next = false;
+      const report_error = (error) => {
+        document.getElementById("errors").textContent = String(
+          error.message ?? error,
+        );
+      };
+      window.addEventListener("error", report_error);
+      window.addEventListener("unhandledrejection", (event) =>
+        report_error(event.reason),
+      );
+      const create_client = () => {
+        if (fail_next) {
+          fail_next = false;
+          throw new Error("Deliberate fixture startup failure");
+        }
+        const client = create_flight_frame_client();
+        workers++;
+        reading();
+        let destroyed = false;
+        return {
+          ...client,
+          destroy() {
+            if (!destroyed) {
+              destroyed = true;
+              workers--;
+              client.destroy();
+              reading();
+            }
+          },
+        };
+      };
+      const reading = () => {
+        const s = state.get_snapshot();
+        document.getElementById("telemetry").textContent =
+          `Speed ${s.airspeed_knots.toFixed(2)} kn | heading ${s.heading_deg.toFixed(2)}° | camera ${s.camera_heading_deg.toFixed(2)}°/${s.camera_pitch_deg.toFixed(2)}° | complex (${s.position_re.toFixed(8)}, ${s.position_im.toFixed(8)}) | altitude ${s.altitude_world.toPrecision(5)} | workers ${workers} | parent renders ${renders}`;
+      };
+      function Fixture() {
+        renders++;
+        const [bounds, set_bounds] = useState({ width: 0, height: 0 });
+        const [visible, set_visible] = useState(true),
+          [scene_key, set_scene_key] = useState(0);
+        const on_frame = useCallback((frame, resolution) => {
+          frames++;
+          if (frames % 10 === 1)
+            document.getElementById("metrics").textContent =
+              `Frames ${frames} | raster ${frame.width_px}×${frame.height_px} | work ${frame.stats.total_ms.toFixed(1)}ms | tiles ${frame.stats.cache.tiles} | catalog ${frame.stats.refinement.catalog} | unresolved ${frame.stats.calculations.unresolved} | pixel budget ${resolution.pixel_budget} | tile error ${frame.stats.refinement.last_error?.code ?? "none"}`;
+          reading();
+        }, []);
+        useEffect(() => {
+          const stage = document.getElementById("stage");
+          const observer = new ResizeObserver(([entry]) =>
+            set_bounds({
+              width: entry.contentRect.width,
+              height: entry.contentRect.height,
+            }),
+          );
+          observer.observe(stage);
+          const unbind = bind_flight_controls(input, commands, {
+            read_settings: read_flight_control_settings,
+            subscribe_settings: subscribe_flight_control_settings,
+          });
+          const stop = start_flight_simulation(state, commands);
+          const unsubscribe = state.subscribe(reading);
+          return () => {
+            observer.disconnect();
+            unbind();
+            stop();
+            unsubscribe();
+          };
+        }, []);
+        useEffect(() => {
+          const definitions = [
+            ["North hover", () => state.reset()],
+            [
+              "Fractal overview",
+              () =>
+                state.update({
+                  ...INITIAL_FLIGHT_STATE,
+                  position_re: -0.75,
+                  position_im: 0,
+                  altitude_world: 1.3,
+                  altitude_ft: 3250,
+                  camera_pitch_deg: -90,
+                }),
+            ],
+            [
+              "Maximum detail",
+              () =>
+                state.update({
+                  ...INITIAL_FLIGHT_STATE,
+                  position_re: -0.75,
+                  position_im: 0.1,
+                  altitude_world: 1e-10,
+                  altitude_ft: 2.5e-7,
+                  camera_pitch_deg: -90,
+                }),
+            ],
+            ["Sky", () => state.update({ camera_pitch_deg: 90 })],
+            [
+              visible ? "Hide scene" : "Show scene",
+              () => {
+                set_visible((value) => !value);
+                reading();
+              },
+            ],
+            [
+              "Fail next startup",
+              () => {
+                fail_next = true;
+                set_visible(true);
+                set_scene_key((value) => value + 1);
+              },
+            ],
+            [
+              "Fullscreen",
+              () =>
+                document
+                  .getElementById("stage")
+                  .requestFullscreen()
+                  .catch(report_error),
+            ],
+          ];
+          const actions = document.getElementById("actions");
+          actions.replaceChildren(
+            ...definitions.map(([label, action]) => {
+              const button = document.createElement("button");
+              button.textContent = label;
+              button.onclick = action;
+              return button;
+            }),
+          );
+        }, [visible]);
+        return h(
+          "div",
+          { id: "stage" },
+          visible &&
+            h(FlightScene, {
+              key: scene_key,
+              flight_state: state,
+              width_px: bounds.width,
+              height_px: bounds.height,
+              create_client,
+              on_frame,
+            }),
+          h(GamesPlayControls, {
+            input,
+            flight_controls: commands,
+            flight_state: state,
+            width_px: bounds.width,
+            height_px: bounds.height,
+          }),
+        );
+      }
+      createRoot(document.getElementById("root")).render(
+        h(StrictMode, null, h(Fixture)),
+      );
+    </script>
+  </body>
+</html>

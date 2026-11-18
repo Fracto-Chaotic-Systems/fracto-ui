@@ -80,6 +80,10 @@ known fields atomically and only notifies listeners when normalized values chang
 | Field                | Unit / meaning                                            |
 | -------------------- | --------------------------------------------------------- |
 | `source`             | `preview`, `live`, or `unavailable`                       |
+| `position_re`, `position_im` | Complex-plane position; north is +imaginary, east is +real |
+| `altitude_world`     | Strictly positive distance above the flat complex plane |
+| `camera_heading_deg` | Independent world heading, clockwise from north, [0, 360) |
+| `camera_pitch_deg`   | Independent world viewing elevation, -90 through 90 degrees |
 | `pitch_deg`          | Degrees, positive nose up, bounded to -90 through 90      |
 | `roll_deg`           | Degrees, positive right wing down, wrapped to [-180, 180) |
 | `heading_deg`        | Degrees, wrapped to [0, 360)                              |
@@ -101,8 +105,10 @@ telemetry updates do not rerender GamesPlay, the dock, or the controller.
 `FlightInstrumentStatus.jsx` subscribes only to the source string. Accessible
 instrument names include current readings, units, and source status.
 
-Gameplay starts in level flight at 90 knots, heading 45°, and altitude 2500ft,
-with zero pitch, bank, climb, and turn rate. `FlightSimulation.js` publishes live
+Gameplay starts stationary at complex position (-0.5, -2), world altitude 1
+(2500ft), heading north (0°), with the camera facing north and level, and zero
+pitch, bank, climb, and turn rate. Preview fixtures retain their historical
+90-knot/45° readings. `FlightSimulation.js` publishes live
 readings from mapped controller commands. Preview and live status captions are
 hidden; accessible instrument labels still identify their source. Unavailable
 telemetry retains its last readings and shows **no flight data**. Reset restores
@@ -116,16 +122,38 @@ commands change attitude; default left-stick sideways movement also banks, and
 forward/back movement joins the speed command. Analog triggers/assigned speed
 buttons increase or decrease airspeed. A bank produces a coordinated turn;
 assigned yaw input adds turn rate and moves the slip ball. Speed and pitch
-determine vertical speed and altitude. Look channels remain camera intent and
-do not alter aircraft attitude. Discrete confirm/cancel/pause/view actions remain
+determine world motion and vertical-speed telemetry. Look channels change the
+independent camera heading and pitch at up to 90°/s, without changing aircraft
+attitude or travel direction. Horizontal viewing wraps through 360° and vertical
+viewing clamps at straight up/down. Releasing the stick retains that world
+viewing direction, including while the craft turns. Discrete confirm/cancel/pause/view actions remain
 available to future game UI consumers.
 
-Full input changes pitch by 20°/s, bank by 40°/s, and speed by 10 knots/s.
+Full input changes pitch by 20°/s and bank by 40°/s. Speed-up/slow-down
+commands (the default triggers) change speed by 100 knots/s, so a 0.1-second
+full press changes airspeed by 10 knots. Partial trigger pressure scales this
+rate proportionally. The movement stick retains fine speed adjustment at
+10 knots/s; combined speed commands are capped at ±100 knots/s.
 Pitch is limited to ±30°, bank to ±60°, speed to 0–300 knots, and turn rate to
-±12°/s. Altitude has a zero-foot floor; downward vertical speed becomes zero at
-the floor. These game-model bounds are independent of instrument display ranges.
-Pressure is retained from the flight-state store. Mid-step attitude/speed are
-used for altitude and heading integration so common frame rates agree closely.
+±12°/s. These game-model bounds are independent of instrument display ranges.
+Pressure is retained from the flight-state store. Mid-step attitude/speed and
+heading are used for integration so common frame rates agree closely.
+
+`FlightUnits.js` calibrates 1 world unit as 2500ft. At world altitude `h`, world
+speed is `airspeed_knots * (6076.11549 / 3600) / 2500 * h` units/second.
+Pitch separates forward speed into horizontal and vertical components; roll
+controls turning, not sideways translation. Speed cannot become negative, so
+braking ends in a hover. Airspeed remains the commanded reading even as world
+motion slows near the plane. The simulation publishes altitude as `h * 2500`
+feet and vertical speed as the instantaneous derivative in ft/min.
+
+Descent solves `dh/dt = k*h` exponentially and integrates horizontal travel
+using mean altitude over the step. It never intersects the plane. Numerical
+guards at world altitudes 1e-100 and 1e100 prevent floating-point under/overflow;
+these are far beyond indexed tile detail, and vertical speed is zero at either
+guard. World altitude updates must be positive; invalid updates retain the last
+valid altitude. The simulation owns synchronization of world altitude and gauge
+readings; direct telemetry updates remain supported for instrument fixtures.
 
 Releasing input holds speed and attitude. An existing bank continues turning,
 and an existing pitch continues climbing/descending. Disconnected controls
@@ -133,9 +161,9 @@ freeze the flight state. The animation-frame loop reads the command store and
 updates telemetry directly, without React state updates to GamesPlay/controller.
 It caps elapsed time at 100ms, suspends on blur/hidden documents, clears the clock
 on resume, and cancels its frame/listeners on cleanup. Starting from an effect
-supports StrictMode cleanup without leaking loops. This is a simple instrument-
-driving flight model; terrain, rendering a flight scene, and aerodynamic/stall
-modeling are separate work.
+supports StrictMode cleanup without leaking loops. The worker pipeline below
+renders its world state above a flat complex plane; terrain and aerodynamic/stall
+modeling remain outside this game model.
 
 Run `npm run test:flight-indicators` for store and package checks. The separate
 `/scripts/flight_state_smoke.html` fixture exercises subscriptions, changing
@@ -201,3 +229,359 @@ telemetry; the production game now uses the controller-driven model above.
   restored level flight at the initial 90 knots/2500ft/heading 45°.
 - Scoped lint, formatting, and the production build pass. The existing Vite
   large-chunk warning remains.
+
+## World-flight dynamics verification — 2026-11-18
+
+- 47 focused state, dynamics, controller, fullscreen, and layout checks pass,
+  including cardinal-direction travel, altitude scaling, 2000 seconds of
+  exponential descent, braking to hover, retained camera orientation, mapped
+  right-stick input, frame-rate agreement, and background/disconnect cleanup.
+- Scoped ESLint, Prettier, and diff whitespace checks pass.
+- The broader instrument checks and production build cannot complete because
+  the local `flight-indicators` dependency is missing. The broader suite also
+  reports a 768px width failure in the unchanged custom instrument-count layout
+  check. Scene rendering and browser visual verification belong to later steps.
+
+## Ray-to-plane projection
+
+`FlightProjection.js` is the pure numerical stage before tile selection and
+coloring. It imports no browser, rendering, network, or terrain dependencies.
+The world axes are real/east, imaginary/north, and altitude/up; the infinite
+complex plane is at altitude zero. Camera orientation uses only
+`camera_heading_deg` and `camera_pitch_deg`, independently of craft attitude.
+The horizon stays level; camera roll is not part of this contract.
+
+`create_flight_projection(state, { width_px, height_px, vertical_fov_deg })`
+compiles an immutable camera with a default vertical field of view of 60°.
+Raster dimensions must be positive safe integers, field of view strictly between
+0° and 180°, camera coordinates finite, altitude positive, and pitch within ±90°.
+Headings wrap clockwise from north. Rays pass through pixel centers, using a
+top-left raster origin, square pixels, and a horizontal field of view derived
+from aspect ratio. Exact vertical views preserve a stable right direction.
+
+`flight_ray_for_pixel(projection, x, y)` returns a unit `{ re, im, up }` ray.
+`trace_flight_pixel(projection, x, y)` returns a numeric `kind`; plane hits also
+include `position_re`, `position_im`, and `distance_world`. Kind constants are:
+
+- `FLIGHT_RAY_SKY` (0): ray points away from the plane.
+- `FLIGHT_RAY_HORIZON` (1): absolute vertical component of the unit ray is at
+  most 1e-12, avoiding unstable divisions for almost-parallel rays.
+- `FLIGHT_RAY_PLANE` (2): finite forward intersection with the plane.
+- `FLIGHT_RAY_UNREPRESENTABLE` (3): intersection or ray distance exceeds the
+  finite number range. This differs from missing tile coverage.
+
+`trace_flight_frame(projection, output?)` returns row-major typed arrays indexed
+by `y * width_px + x`: `kinds` (`Uint8Array`) and `position_re`/`position_im`
+(`Float64Array`). Only plane entries have coordinates; every miss writes `NaN`,
+including when reusing an output buffer. `create_flight_intersections(width, height)`
+allocates a compatible buffer. Reuse requires matching dimensions and array
+types/lengths. Projection/state inputs remain unchanged; only an explicitly
+provided output is mutated. Camera objects can be structured-cloned and output
+array buffers can be transferred to workers. The raster loop uses row-level
+geometry and no per-pixel objects or routine ray normalization.
+
+This stage does not clip intersections to tile bounds or choose colors. Tile
+availability, adaptive refinement, painting sky, and canvas integration follow
+in later implementation steps.
+
+Run `npm run test:flight-projection` (or
+`node --test test/flight_projection.test.js`). Ten projection tests cover analytic
+coordinates, cardinal directions, pole views, perspective/aspect ratio, 960
+pixel comparisons across camera poses, buffer reuse, horizon/overflow cases,
+invalid input, and worker transfer. Combined with the focused state/controller
+checks, 57 tests pass. Scoped ESLint, Prettier, and diff whitespace checks pass.
+
+## Numerical tile access and browser cache
+
+`FlightTileClient.js` connects the tile service to the per-game
+`FlightTileCache.js`. Create a client once for a game session and call `destroy`
+on cleanup. The module is ready for the adaptive renderer; it does not start
+requests just by importing it. `TilesBackend.tile` and `tile_availability` use
+the configured tile-service origin, credentials, and caller cancellation.
+
+The shared SDK `FractoTileGeometry.js` converts intersections to canonical tile
+codes at levels 3–34, computes bounds, and selects native `(i, j)` samples.
+Southern coordinates use conjugate symmetry (`abs(im)`), matching the existing
+2D renderer. Real coordinates outside [-2, 2) or imaginary magnitude above 2
+have no tile code; an absent indexed tile is also a coverage gap. Level 34 is
+the current index format ceiling, not a promise of available detail everywhere.
+Sampling uses the existing rounded/clamped 256-sample convention, including
+shared tile edges; point-to-code selection assigns one canonical tile.
+
+Client API:
+
+- `availability(codes, { signal }?)` checks up to 256 candidate codes, returning
+  booleans from the service's loaded index. It does not fetch numerical tiles.
+- `load(code, { signal }?)` returns a decoded tile, or `null` for a known index
+  miss. Errors such as source read failures remain rejected and retryable.
+- `peek(code)` synchronously reads an already decoded tile and updates its
+  recency, with no request. Tile `values` is an interleaved `Float64Array`:
+  pattern at `2 * (j * 256 + i)`, iteration at the following index. Signed
+  samples are preserved; null source samples become two `NaN` values. Treat
+  cached arrays as read-only. Bounds and envelope metadata are immutable.
+- `retain(codes)` aborts outstanding tile requests no longer needed by the
+  latest view. A batched availability request remains useful if any of its
+  codes are retained. Cached tiles remain until LRU eviction.
+- `clear()` empties data/metadata and cancels pending work; `destroy()` also
+  permanently rejects new requests. `get_stats()` exposes current occupancy.
+
+Defaults bound the owned decoded cache to 64 tiles/64 MiB, metadata to 1024
+entries, outstanding/queued requests to 256, and active transports to four.
+Options can lower these budgets. Caller-retained arrays and transient JSON
+transport allocations are outside the decoded-cache byte count. Identical tile
+requests and identical sorted availability batches share one transport. Cancelling
+one subscriber leaves other subscribers active; the last cancellation aborts
+the transport. Obsolete results cannot repopulate a cleared/destroyed cache.
+
+Availability metadata expires after five seconds, including confirmed misses.
+Transient errors and invalid payloads are never negative-cached. Responses carry
+the source mode, generation, and index fingerprint as a source identity. A changed
+identity clears existing data and cancels other requests, rejecting the detecting
+request with `TILE_SOURCE_CHANGED`; retry against the new source. Changes are
+detected on service responses; cached data alone cannot detect a server restart.
+Aborting HTTP requests does not cancel shared SDK tile loading on the server.
+
+Run `npm run test:flight-tiles` from the repository root for the service, geometry,
+cache, and production adapter checks, or from the UI directory for cache/adapter
+checks. The 15 checks include real local HTTP round-trips, bounded eviction and
+queuing, shared-request cancellation, stale completions, source changes, malformed
+responses, retry behavior, mirrored/deep coordinate boundaries, and credentials.
+The combined focused flight/controller/tile suite has 72 passing tests.
+
+## Adaptive numerical refinement
+
+`FlightRefinement.js` connects projected intersections with the tile client.
+Create `create_flight_refinement(client, options?)` once per game, then call
+`sample(intersections, output?)` for each frame. Sampling is synchronous and
+returns the best currently cached numerical values; it starts bounded asynchronous
+availability/loading work for subsequent frames. It never waits for network I/O,
+colors samples, calculates uncovered Mandelbrot points, or paints a canvas.
+`settled()` waits for the current pass when needed by a fixture or caller; normal
+animation can continue sampling while requests are in flight. Loaded results never
+mutate an already returned frame.
+
+The catalog starts from the level-3 roots containing visible plane intersections.
+It descends through previously justified child regions and chooses the deepest
+finite sample already cached for each pixel. Missing/sparse children use their
+nearest valid cached parent. Duplicate detection compares the exact canonical
+`(tile code, i, j)` identity, not numerical values or screen adjacency. Every
+pixel participating in a collision justifies only its immediate child region;
+unrelated siblings and singleton regions do not trigger loading. Collisions at
+the maximum level are accepted, including mirrored north/south points. Previously
+justified detail remains available to later frames until metadata/data eviction.
+This is progressive refinement, not a claim of a globally minimal tile cover.
+
+The frame result uses row-major buffers:
+
+- `values`: interleaved `Float64Array` pattern/iteration pairs. Misses are two
+  `NaN` values; signed values are retained unchanged for whole-frame coloring.
+- `levels`: selected tile depth per pixel, or zero for no numerical tile sample.
+- `tile_codes`, `tile_indices`, `sample_indices`: the frame's compact tile table
+  and exact sample provenance. Misses have indices -1.
+- `unresolved_count`: plane hits still needing numerical data, including points
+  outside tile bounds. Sky/horizon pixels are excluded; their classification
+  remains in the input intersection buffer.
+- `duplicate_count`, `max_depth_duplicate_count`, `catalog_limited`: refinement
+  diagnostics. A maximum-depth collision is valid output, not a loading error.
+
+`create_flight_sample_buffer(width, height)` allocates a reusable compatible output.
+Sampling resets every buffer field on reuse, including misses and provenance.
+Inputs remain unchanged; supplied outputs must be separate from input arrays.
+Per-frame working memory scales with raster size; catalog metadata holds no decoded
+tile arrays outside the client's existing memory budget.
+
+Defaults allow depth through level 34, 4096 catalog records, and at most 64 pending
+refinement requests (also at most 64 new requests per pass). Availability is batched
+in groups of at most 256. Deferred work is reconsidered on later samples. Metadata
+uses LRU eviction of regions unused by the current frame. Missing/transient loads
+retry no sooner than 1000ms, subject to the client's existing availability TTL.
+`get_stats().last_error` records the most recent load error until reset; normal
+missing coverage is not an error. Source changes discard remembered paths.
+
+Requests no longer relevant to the view are cancelled. Cancelling one child of a
+shared availability batch leaves the batch alive for other retained children.
+`reset()` cancels owned work, clears the catalog, and releases pins; `destroy()`
+also prevents future sampling. The caller still owns and must dispose the tile
+client separately.
+
+The cache's `pin(codes)` replaces the set of resident tiles protected from LRU
+eviction. Each sampled frame pins its used tiles while children load. If all cache
+capacity is pinned, child admission reports `FLIGHT_TILE_CACHE_BUDGET`, preserving
+the current frame's fallback and staying within the byte/tile limits. Known budget
+exhaustion is detected before requesting another numerical tile. A later frame
+replaces the pins, allowing no-longer-used parents to be evicted normally.
+
+Run `npm run test:flight-refinement` in the UI directory for 16 refinement checks,
+or from the repository root to include cache and service integration checks.
+The combined focused flight/controller/tile/refinement suite has 89 passing tests,
+covering local child selection, progressive reuse, missing/sparse parents/children,
+level-34 termination, cache/catalog/request budgets, cancellation, source changes,
+reusable buffers, and real projection input. Scoped lint, formatting, and whitespace
+checks pass.
+
+## Whole-frame coloring and worker pipeline
+
+`FlightFramePipeline.js` runs projection → adaptive numerical sampling → bounded
+calculation fallback → whole-frame palette → RGBA. It reuses intersection/sample
+buffers at the current raster dimensions. `FlightFrameColors.js` derives the SDK
+escaped/inner/outer tone maps from every valid numerical plane sample in the
+current frame, then writes one RGBA pixel per ray. It does not color tiles
+independently or reuse a previous frame's palette. Signed samples are retained;
+tone lookup uses absolute iterations and hue uses absolute pattern. SDK fixes
+cover the pattern-20000 hue-table boundary and fractional iteration palette keys.
+
+Sky, horizon, and unresolved plane/numerical-miss colors are explicit configurable
+RGBA arrays, with opaque blue/pale-blue/dark defaults. Non-plane rays and unknown
+samples do not influence the numerical palette. Coloring never changes sample
+values. Frame-local color caching, runs of identical histogram entries, native
+duplicate tables, and frame-local catalog traversal contexts reduce repeated
+work without persisting colors between frames. The duplicate scratch pool retains
+at most 64 native tables (16 MiB); reset/destroy release it.
+
+`FlightFrameFallback.js` calculates plane hits lacking finite tile/parent samples,
+including areas outside indexed coverage, with the SDK zero-seed calculator.
+Every new missing plane sample first receives an at-most-16-iteration escape
+prefix using the SDK's zero seed, radius-10 bailout and iteration numbering.
+Proven escapes are valid numerical samples immediately, including during camera
+motion; this avoids deferred dark patches across ordinary exterior regions.
+The default then allows at most 2048 longer point calculations and approximately
+4ms of that longer calculation work per frame, with a 10000-iteration recurrence
+horizon per point. `escape_iterations` configures the prefix (0 disables it);
+`max_calculations: 0` disables both paths for fixtures and benchmarks.
+The time limit is checked between points; an individual bounded SDK calculation
+cannot be interrupted. Unconverged estimates are kept unknown instead of being
+presented as known numerical data. Errors and iteration-limited points remain
+explicit in diagnostics. Sky/horizon rays are never calculated.
+
+The fallback memoizes attempts by pixel and exact complex coordinates in reusable
+arrays proportional to raster size. Stable views progressively fill deferred
+points across frames; camera motion invalidates changed coordinates. Tile samples
+always take precedence. Limited/error attempts are not retried at an identical
+point until reset or source change; newly arriving tiles can still replace them.
+Scan/reuse time is excluded from the calculation-work budget so large cached
+prefixes cannot prevent progress on later pixels.
+
+`FlightFrame.worker.js` owns the production pipeline, tile cache, refinement
+catalog, and calculation memoization. `FlightTileTransport.js` accepts the tile
+origin already discovered on the UI thread, preserving direct-service or
+`/api/tiles` paths, credentials, cancellation and source-aware errors. The worker
+does not import UI origin discovery or require DOM/canvas APIs. It returns
+transferred `Uint8ClampedArray` RGBA pixels plus stage timings and cache,
+refinement and calculation diagnostics.
+
+Use `create_flight_frame_client({ cache_options?, pipeline_options? })` from
+`FlightFrameClient.js` after normal service-port discovery. The client exposes:
+
+- `render(state, {width_px, height_px, vertical_fov_deg?}, colors?)`: returns a
+  promise for `{width_px, height_px, pixels, stats}`. It snapshots the view and
+  keeps only one active render plus one latest queued view. Superseded requests
+  reject with `AbortError`; their completed frames are recycled automatically.
+- `release(frame)`: call after consuming/painting pixels. It transfers the RGBA
+  buffer back to the worker, detaching the caller's pixel array. Release is
+  idempotent; only frames issued by this client are accepted.
+- `cancel()`: rejects outstanding views and requests a numerical/catalog reset.
+- `destroy()`: rejects outstanding work, removes listeners and terminates the
+  worker. Worker/message failures also settle promises and terminate cleanly.
+
+The worker holds at most two recycled RGBA buffers, clearing them on byte-size
+changes. Caller-owned frames remain allocated until released or discarded; paint
+before release. Schedule normal successive renders after the preceding promise
+settles, reading the latest flight snapshot each time. Submitting replacements
+faster than the worker finishes intentionally discards superseded output and can
+prevent any frame from being published. Tracing/calculation in an active worker frame is synchronous and
+cannot be interrupted by a newer view, but stale output is never presented by the
+session. A default 4194304-pixel ceiling guards allocation; configure
+`pipeline_options.max_pixels` explicitly if a larger raster is required. The page
+integration below selects resolution, paints the canvas and owns lifecycle
+cleanup. No request loop starts merely by importing these modules.
+
+Run `npm run test:flight-frames` in the UI directory for 18 palette, fallback,
+pipeline, protocol and lifecycle tests. The root command also runs three existing
+SDK canvas regressions. The bundled production worker is exercised across a real
+Node worker boundary with local HTTP tile fetches and transferable buffers; this
+is complemented by Chromium/page verification below. Scoped lint, formatting and
+syntax checks pass; the complete integrated suite is described below.
+
+`npm run benchmark:flight-frames` in the UI directory measures a repeatable CPU
+baseline with cached uniform level-3 samples, no network/calculation, two warmup
+frames and five measured frames. On 2026-11-18 with local Node 22.19.0, means were
+about 7ms (320×180), 31ms (640×360), and 104ms (1280×720). Before the measured
+sampling/coloring optimizations, those means were about 22/95/539ms. These are
+fixture results, not guaranteed interactive frame rates; high-resolution CPU
+sampling remains the primary cost. Integrated browser measurements follow below.
+
+## Gameplay canvas integration — 2026-11-18
+
+`GamesPlay.jsx` mounts `FlightScene.jsx` inside the measured/fullscreen game
+content area. Its viewport absolutely fills that area at z-index -1 within the
+existing isolated stacking context, below dashboard, controller, settings and
+drawer. The canvas never intercepts pointer events. Existing controls and preferences
+retain their layout and behavior; the view has an accessible label and a
+localized failure message with Retry when canvas/worker startup or rendering fails.
+
+`FlightSceneRuntime.js` requests one frame at a time, paints with ImageData and
+`putImageData`, releases transferred pixels, then schedules the next request on
+animation-frame timing using the latest flight snapshot. It does not subscribe
+React to per-frame telemetry. Resize/DPR/fullscreen changes preserve aspect;
+frames for old dimensions are discarded. Blur/hidden documents pause scheduling
+and invalidate pending views, and focus/visibility resume with current bounds.
+Zero-sized content starts no worker or render loop. Cleanup cancels RAFs, removes
+listeners and destroys the client exactly once, including StrictMode teardown.
+
+`FlightResolution.js` starts with a 57600-pixel budget and targets 32ms work per
+frame. It skips two warmup measurements, smooths subsequent costs, reduces after
+three slow measurements and grows after twelve fast measurements. Budgets stay
+between 14400 and 518400 pixels, and output never exceeds the available native
+raster at up to 2× display density in the default Fill available space mode.
+Display settings also offer a persisted 640 × 480 pixels canvas mode. This mode
+uses an exact 640×480 raster independent of DPR and adaptive budgets, centers
+horizontally when space permits, and starts at the content area's top edge,
+directly below the game title bar. Its viewport scrolls on smaller play areas so
+the fixed canvas can be reached in full. Switching modes invalidates pending
+frames while preserving the existing worker and tile cache.
+
+`/scripts/flight_scene_validation.html` composes the production scene, simulation,
+controls, mapping and instruments in StrictMode with memory-only preferences.
+Visible diagnostics show frame/raster/work/tile counts, worker lifetime, parent
+renders, exact world altitude and current craft/camera readings. Buttons select
+repeatable north/overview/very-low-altitude/sky views, unmount/remount the scene,
+and deliberately fail startup to exercise the real Retry UI. No production flight
+state or preference persistence is replaced by this fixture.
+
+Validation completed against the development stack's real numerical tile service:
+
+- `npm run test:flight` from the repository root: 125 passing checks, including
+  scene scheduling/painting/failure cleanup, adaptive resolution, fullscreen
+  lifecycle geometry, controllers, instruments, refinement, tile access, worker
+  transport, palettes, calculation fallback and SDK canvas regressions.
+- The missing local declared `flight-indicators@1.1.0` package was restored for
+  verification, without changing package versions or lock files. Its ESM/CJS
+  checks pass. An outdated 768px layout assertion reserved removed horizontal
+  spacing; it now matches the unchanged dock's actual 64px rim allowance.
+- Feature catalog validation and its six regression checks pass. Game play is
+  registered as implemented; the knowledge bundle is regenerated and checked.
+- Full production Vite bundling includes the dedicated flight worker and passes.
+  The existing application warning for chunks above 500kB remains. Scoped ESLint,
+  formatting and whitespace checks pass.
+- Chromium gameplay starts at 0 knots/heading 0°/2500ft, with scene below the
+  dashboard and usable settings. Leaving for Overview and returning creates the
+  same fresh initial state. Right-stick drag retained camera heading 17.48° while
+  craft heading stayed 0°. Left-stick drag produced 2.37 knots and forward world
+  displacement; held pitch-down produced -14.67° and about -60.86ft/min with
+  positive decreasing altitude. Those telemetry updates left the fixture parent
+  at four renders; instruments and scene updated independently.
+- Real tile rendering converged to zero unresolved samples in the stationary
+  overview. A representative desktop frame used 408×230 rays at about 26ms work;
+  a portrait view used 372×664 rays at about 27ms, and a cheap sky view reached the
+  native 507×794 raster. These are observations from this machine, not guaranteed
+  rates. Very-low altitude 1e-10 stayed valid while deeper tiles were fetched.
+- Desktop and 390×844 CSS portrait geometry retain the controller and fit the
+  canvas. Scene hide/show displayed workers 1→0→1. A deliberate startup failure
+  showed the real localized alert and Retry recovered to one worker. No
+  flight-specific browser errors were observed; the full app retains its existing
+  React list-key warning.
+- Native fullscreen requests were rejected by the in-app browser. Its switch
+  stayed off and displayed the existing localized error. Successful native
+  fullscreen entry/exit and physical touchscreen/hand-held operation remain
+  unverified; automated entry/exit/rejection, cleanup and changed-size geometry
+  checks pass.

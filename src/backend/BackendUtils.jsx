@@ -14,6 +14,8 @@ export const request_json = async (url, options = {}) => {
     const error = new Error(`HTTP ${response.status}${detail}`);
     error.status = response.status;
     if (typeof code === "string") error.code = code;
+    if (typeof result?.source_id === "string")
+      error.source_id = result.source_id;
     throw error;
   }
   return result;

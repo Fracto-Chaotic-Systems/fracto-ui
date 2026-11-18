@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   create_flight_state,
   PREVIEW_FLIGHT_STATE,
+  INITIAL_FLIGHT_STATE,
 } from "../src/pages/games/flight/FlightState.js";
 import { flight_instrument_props } from "../src/pages/games/flight/FlightInstrumentModel.js";
 
@@ -53,6 +54,11 @@ test("invalid telemetry retains finite readings, bounds physical values, and dro
     arbitrary: "ignored",
   });
   assert.deepEqual(store.get_snapshot(), {
+    position_re: -0.5,
+    position_im: -2,
+    altitude_world: 1,
+    camera_heading_deg: 0,
+    camera_pitch_deg: 0,
     source: "preview",
     pitch_deg: 90,
     roll_deg: -10,
@@ -68,6 +74,41 @@ test("invalid telemetry retains finite readings, bounds physical values, and dro
   assert.equal(store.get_snapshot().altitude_ft, -200);
   assert.equal(store.get_snapshot().pressure_hpa, 1013);
   assert.equal(store.get_snapshot().slip, -1);
+});
+
+test("gameplay starts hovering north and world/camera fields normalize atomically", () => {
+  const store = create_flight_state(INITIAL_FLIGHT_STATE);
+  const initial = store.get_snapshot();
+  assert.equal(initial.position_re, -0.5);
+  assert.equal(initial.position_im, -2);
+  assert.equal(initial.altitude_world, 1);
+  assert.equal(initial.altitude_ft, 2500);
+  assert.equal(initial.airspeed_knots, 0);
+  assert.equal(initial.heading_deg, 0);
+  assert.equal(initial.camera_heading_deg, 0);
+  assert.equal(initial.camera_pitch_deg, 0);
+  store.update({
+    position_re: 2,
+    position_im: 3,
+    altitude_world: 0.25,
+    camera_heading_deg: -1,
+    camera_pitch_deg: 100,
+  });
+  assert.equal(store.get_snapshot().camera_heading_deg, 359);
+  assert.equal(store.get_snapshot().camera_pitch_deg, 90);
+  const last = store.get_snapshot();
+  store.update({
+    position_re: NaN,
+    position_im: Infinity,
+    altitude_world: -1,
+    camera_heading_deg: Infinity,
+    camera_pitch_deg: NaN,
+  });
+  assert.strictEqual(store.get_snapshot(), last);
+  store.update({ altitude_world: 0 });
+  assert.strictEqual(store.get_snapshot(), last);
+  store.reset();
+  assert.deepEqual(store.get_snapshot(), initial);
 });
 
 test("uninitialized stores are unavailable and each game owns an independent lifetime", () => {

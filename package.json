@@ -4,6 +4,12 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "test:flight-scene": "node --test test/flight_scene.test.js test/games_play_fullscreen.test.js test/games_play_controls_layout.test.js",
+    "test:flight-frames": "node --test test/flight_frame_colors.test.js test/flight_frame_worker.test.js",
+    "benchmark:flight-frames": "node scripts/benchmark_flight_frame.js",
+    "test:flight-refinement": "node --test test/flight_refinement.test.js",
+    "test:flight-tiles": "node --test test/flight_tile_cache.test.js",
+    "test:flight-projection": "node --test test/flight_projection.test.js",
     "test:flight-indicators": "node --test test/flight_indicators.test.js test/flight_state.test.js test/flight_instrument_settings.test.js test/flight_simulation.test.js",
     "test:instrument-transfer": "node --test test/admin_instrument_transfer.test.js",
     "test:game-controller": "node --test test/game_controller.test.js test/flight_controls.test.js test/games_play_fullscreen.test.js test/games_play_settings_layout.test.js test/games_play_controls_layout.test.js",

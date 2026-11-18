@@ -130,7 +130,7 @@ test("custom instrument counts fit normal and compact bounds, including all inst
           group.columns * layout.instrument_size + (group.columns - 1) * 8;
         const available_width = layout.compact
           ? width - 32
-          : (width - 32 - layout.controller_width - 48) / 2;
+          : (width - 64 - layout.controller_width) / 2;
         assert.ok(group_width <= available_width + 0.01, `${width} width`);
       }
       const heights = groups.map(

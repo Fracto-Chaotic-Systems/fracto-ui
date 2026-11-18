@@ -6,6 +6,13 @@ space below the title without clipping the gear or drawer to a zero-height box.
 Sidebar order is Overview, separator, worlds, music, play, separator, wordnet, Settings, Status.
 Overview, Settings, and Status intentionally remain blank.
 
+Game Play now renders flight over the flat tiled complex plane beneath the
+dashboard. Its worker handles ray projection, local adaptive tile refinement,
+whole-frame coloring and bounded calculation fallback. Canvas resolution adapts
+to frame cost while the page and instruments retain their measured layout. See
+`flight/FLIGHT_OVER_TILES.md` for the specification and `flight/README.md` for
+state, rendering, lifecycle and verification details.
+
 `GamesPlayControls.jsx` arranges selected flight instruments around the centered
 on-screen controller at the bottom of the game area. Airspeed, attitude, and
 heading default to the left; altitude, vertical speed, and turn coordination

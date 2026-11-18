@@ -56,6 +56,13 @@ function mount({
     FlightControlSettingsPanel: () => null,
     DashboardBackgroundSetting: () => null,
     FLIGHT_SETTINGS_TEXT: { instruments: "instruments" },
+    FLIGHT_SCENE_TEXT: {
+      display: "canvas display",
+      fill: "Fill available space",
+      fixed: "640 × 480 pixels",
+    },
+    useCanvasDisplay: () => "fill",
+    KEY_GAMES_PLAY_CANVAS_DISPLAY: "canvas_display",
     React: {
       createElement: (type, props, ...children) => ({ type, props, children }),
     },
@@ -107,7 +114,7 @@ function mount({
   };
   render();
   const cleanup = effects[0]();
-  const toggle = () => render().children[0].children[1].children[1].props;
+  const toggle = () => render().children[0].children[2].children[1].props;
   return {
     document,
     game_area,
@@ -195,21 +202,21 @@ test("controller dropdown restores and saves the selected controller", () => {
 test("controller actions switch defaults off and persists its selection", () => {
   const view = mount();
   const actions_toggle = () =>
-    view.render().children[0].children[2].children[1].props;
+    view.render().children[0].children[3].children[1].props;
   assert.equal(actions_toggle().checked, false);
   actions_toggle().onChange(null, true);
   assert.equal(actions_toggle().checked, true);
   assert.equal(view.saved.at(-1).controller_actions, true);
   const restored = mount({ controller_actions: true });
   assert.equal(
-    restored.render().children[0].children[2].children[1].props.checked,
+    restored.render().children[0].children[3].children[1].props.checked,
     true,
   );
 });
 
 test("controller color dropdown has all requested colors, restores and saves choices", () => {
   const view = mount();
-  const dropdown = () => view.render().children[0].children[3].children[1];
+  const dropdown = () => view.render().children[0].children[4].children[1];
   assert.equal(dropdown().props.value, "blue");
   assert.deepEqual(
     Array.from(dropdown().children[0], (option) => option.children[0]),
@@ -231,12 +238,12 @@ test("controller color dropdown has all requested colors, restores and saves cho
   assert.equal(view.saved.at(-1).controller_color, "red");
   const restored = mount({ controller_color: "grey" });
   assert.equal(
-    restored.render().children[0].children[3].children[1].props.value,
+    restored.render().children[0].children[4].children[1].props.value,
     "grey",
   );
   const invalid = mount({ controller_color: "invalid" });
   assert.equal(
-    invalid.render().children[0].children[3].children[1].props.value,
+    invalid.render().children[0].children[4].children[1].props.value,
     "blue",
   );
 });

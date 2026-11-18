@@ -17,6 +17,11 @@ import {
 } from "../src/pages/games/controllers/FlightControlSettings.js";
 
 const controls = (patch) => ({ connected: true, ...patch });
+const FLYING_STATE = {
+  ...INITIAL_FLIGHT_STATE,
+  airspeed_knots: 90,
+  heading_deg: 45,
+};
 const close = (actual, expected, tolerance = 1e-8) =>
   assert.ok(
     Math.abs(actual - expected) < tolerance,
@@ -25,14 +30,14 @@ const close = (actual, expected, tolerance = 1e-8) =>
 
 test("mapped pitch, roll, speed and yaw update consistent live instrument readings", () => {
   const next = step_flight_state(
-    INITIAL_FLIGHT_STATE,
+    FLYING_STATE,
     controls({ pitch: 1, roll: 1, speed: 1, yaw: 0.5 }),
     0.1,
   );
   assert.equal(next.source, "live");
   close(next.pitch_deg, 2);
   close(next.roll_deg, 4);
-  close(next.airspeed_knots, 91);
+  close(next.airspeed_knots, 100);
   assert.ok(next.altitude_ft > 2500);
   assert.ok(next.vertical_speed_fpm > 0);
   assert.ok(next.heading_deg > 45);
@@ -43,7 +48,7 @@ test("mapped pitch, roll, speed and yaw update consistent live instrument readin
 
 test("default movement banks and changes speed while look input leaves aircraft attitude alone", () => {
   const moved = step_flight_state(
-    INITIAL_FLIGHT_STATE,
+    FLYING_STATE,
     controls({ move_x: -1, move_y: 1 }),
     0.1,
   );
@@ -55,11 +60,37 @@ test("default movement banks and changes speed while look input leaves aircraft 
     controls({ look_x: 1, look_y: 1 }),
     0.1,
   );
-  assert.deepEqual(looked, INITIAL_FLIGHT_STATE);
+  assert.equal(looked.heading_deg, INITIAL_FLIGHT_STATE.heading_deg);
+  assert.equal(looked.pitch_deg, INITIAL_FLIGHT_STATE.pitch_deg);
+  assert.equal(looked.roll_deg, INITIAL_FLIGHT_STATE.roll_deg);
+  assert.equal(looked.camera_heading_deg, 9);
+  assert.equal(looked.camera_pitch_deg, 9);
+  assert.equal(looked.position_re, INITIAL_FLIGHT_STATE.position_re);
+  assert.equal(looked.position_im, INITIAL_FLIGHT_STATE.position_im);
+});
+
+test("brief trigger presses produce coarse proportional speed changes and retain hover bounds", () => {
+  for (const hz of [30, 60, 120]) {
+    const press = (state, speed) => {
+      for (let i = 0; i < hz / 10; i++)
+        state = step_flight_state(state, controls({ speed }), 1 / hz);
+      return state;
+    };
+    const accelerated = press(INITIAL_FLIGHT_STATE, 1);
+    close(accelerated.airspeed_knots, 10);
+    close(press(accelerated, -0.5).airspeed_knots, 5);
+    close(press(accelerated, 0).airspeed_knots, 10);
+    close(press(accelerated, -1).airspeed_knots, 0);
+    assert.equal(press(INITIAL_FLIGHT_STATE, -1).airspeed_knots, 0);
+    assert.equal(
+      press({ ...INITIAL_FLIGHT_STATE, airspeed_knots: 299 }, 1).airspeed_knots,
+      300,
+    );
+  }
 });
 
 test("release holds speed and attitude while existing bank and pitch continue the flight", () => {
-  const flying = { ...INITIAL_FLIGHT_STATE, pitch_deg: 10, roll_deg: 20 };
+  const flying = { ...FLYING_STATE, pitch_deg: 10, roll_deg: 20 };
   const next = step_flight_state(flying, controls({}), 0.1);
   assert.equal(next.pitch_deg, 10);
   assert.equal(next.roll_deg, 20);
@@ -68,12 +99,11 @@ test("release holds speed and attitude while existing bank and pitch continue th
   assert.ok(next.heading_deg > 45);
 });
 
-test("zero speed, ground, envelope bounds, heading wrap and elapsed-time limits stay finite", () => {
+test("hover, envelope bounds, heading wrap and elapsed-time limits stay finite", () => {
   const grounded = step_flight_state(
     {
       ...INITIAL_FLIGHT_STATE,
       airspeed_knots: 0,
-      altitude_ft: 0,
       pitch_deg: -10,
       roll_deg: 60,
     },
@@ -81,7 +111,10 @@ test("zero speed, ground, envelope bounds, heading wrap and elapsed-time limits 
     0.1,
   );
   assert.equal(grounded.airspeed_knots, 0);
-  assert.equal(grounded.altitude_ft, 0);
+  assert.equal(grounded.altitude_ft, 2500);
+  assert.equal(grounded.altitude_world, 1);
+  assert.equal(grounded.position_re, INITIAL_FLIGHT_STATE.position_re);
+  assert.equal(grounded.position_im, INITIAL_FLIGHT_STATE.position_im);
   assert.equal(grounded.vertical_speed_fpm, 0);
   assert.equal(grounded.turn_rate_deg_s, 0);
   const bounded = step_flight_state(
@@ -126,7 +159,8 @@ test("zero speed, ground, envelope bounds, heading wrap and elapsed-time limits 
 
 test("integration is consistent across common frame rates", () => {
   const integrate = (hz) => {
-    let state = INITIAL_FLIGHT_STATE;
+    // Compare steady flight rather than the near-hover bank-turn threshold.
+    let state = FLYING_STATE;
     for (let frame = 0; frame < hz * 2; frame++)
       state = step_flight_state(
         state,
@@ -137,15 +171,13 @@ test("integration is consistent across common frame rates", () => {
   };
   const slow = integrate(10),
     fast = integrate(120);
-  for (const key of [
-    "pitch_deg",
-    "roll_deg",
-    "airspeed_knots",
-    "vertical_speed_fpm",
-  ])
+  for (const key of ["pitch_deg", "roll_deg", "airspeed_knots"])
     close(slow[key], fast[key], 1e-6);
   close(slow.heading_deg, fast.heading_deg, 0.01);
+  close(slow.vertical_speed_fpm, fast.vertical_speed_fpm, 0.01);
   close(slow.altitude_ft, fast.altitude_ft, 0.1);
+  close(slow.position_re, fast.position_re, 1e-5);
+  close(slow.position_im, fast.position_im, 1e-5);
 });
 
 function environment() {
@@ -182,6 +214,91 @@ function environment() {
   };
 }
 
+test("forward motion follows north/east/south/west and scales with altitude", () => {
+  for (const [heading_deg, dx, dy] of [
+    [0, 0, 1],
+    [90, 1, 0],
+    [180, 0, -1],
+    [270, -1, 0],
+  ]) {
+    const seed = { ...FLYING_STATE, heading_deg };
+    const next = step_flight_state(seed, controls({}), 0.1);
+    const distance = ((90 * (6076.11549 / 3600)) / 2500) * 0.1;
+    close(next.position_re - seed.position_re, dx * distance);
+    close(next.position_im - seed.position_im, dy * distance);
+    assert.equal(next.altitude_world, 1);
+    const low = step_flight_state(
+      { ...seed, altitude_world: 0.1 },
+      controls({}),
+      0.1,
+    );
+    close(low.position_re - seed.position_re, dx * distance * 0.1);
+    close(low.position_im - seed.position_im, dy * distance * 0.1);
+    assert.equal(low.airspeed_knots, next.airspeed_knots);
+  }
+});
+
+test("descent is exponential, stays above the plane, and slows world motion", () => {
+  const seed = { ...FLYING_STATE, pitch_deg: -30, heading_deg: 0 };
+  let state = seed;
+  for (let i = 0; i < 20000; i++)
+    state = step_flight_state(state, controls({}), 0.1);
+  const exponent = ((90 * (6076.11549 / 3600)) / 2500) * -0.5;
+  close(state.altitude_world / Math.exp(exponent * 2000), 1, 1e-9);
+  assert.ok(state.altitude_world > 0 && state.altitude_world < 1e-20);
+  close(state.altitude_ft, state.altitude_world * 2500);
+  assert.ok(state.vertical_speed_fpm < 0);
+  assert.equal(state.airspeed_knots, 90);
+  const next = step_flight_state(state, controls({}), 0.1);
+  assert.ok(next.altitude_world < state.altitude_world);
+  const high = step_flight_state(seed, controls({}), 0.1);
+  close(
+    state.vertical_speed_fpm / high.vertical_speed_fpm,
+    state.altitude_world / high.altitude_world,
+  );
+});
+
+test("braking stops at hover without backward motion, even with pitch and bank", () => {
+  let state = {
+    ...INITIAL_FLIGHT_STATE,
+    airspeed_knots: 1,
+    pitch_deg: -20,
+    roll_deg: 20,
+  };
+  const braking = step_flight_state(state, controls({ move_y: -1 }), 0.1);
+  assert.ok(braking.position_im > state.position_im);
+  assert.equal(braking.airspeed_knots, 0);
+  state = step_flight_state(braking, controls({ move_y: -1 }), 0.1);
+  assert.equal(state.position_re, braking.position_re);
+  assert.equal(state.position_im, braking.position_im);
+  assert.equal(state.altitude_world, braking.altitude_world);
+  assert.equal(state.vertical_speed_fpm, 0);
+});
+
+test("camera wraps, reaches both poles and retains a world direction through craft turns", () => {
+  let state = {
+    ...INITIAL_FLIGHT_STATE,
+    camera_heading_deg: 359,
+    camera_pitch_deg: 89,
+  };
+  state = step_flight_state(state, controls({ look_x: 1, look_y: 1 }), 0.1);
+  assert.equal(state.camera_heading_deg, 8);
+  assert.equal(state.camera_pitch_deg, 90);
+  const turned = step_flight_state(
+    state,
+    controls({ yaw: 1, pitch: 1, roll: 1 }),
+    0.1,
+  );
+  assert.equal(turned.camera_heading_deg, 8);
+  assert.equal(turned.camera_pitch_deg, 90);
+  assert.ok(turned.heading_deg > state.heading_deg);
+  for (let i = 0; i < 21; i++)
+    state = step_flight_state(state, controls({ look_y: -1 }), 0.1);
+  assert.equal(state.camera_pitch_deg, -90);
+  state = step_flight_state(state, controls({ look_x: -1 }), 0.1);
+  assert.equal(state.camera_heading_deg, 359);
+});
+
 test("real input mapping drives the store and updated bindings take effect without recreating the loop", () => {
   const env = environment(),
     input = create_controller_input(),
@@ -204,7 +321,7 @@ test("real input mapping drives the store and updated bindings take effect witho
   input.update({ connected: true, buttons });
   env.frame(0);
   env.frame(100);
-  close(state.get_snapshot().airspeed_knots, 90.5);
+  close(state.get_snapshot().airspeed_knots, 5);
   buttons[7] = { value: 0 };
   buttons[12] = { pressed: true };
   input.update({ connected: true, buttons });
@@ -214,9 +331,15 @@ test("real input mapping drives the store and updated bindings take effect witho
   changed();
   env.frame(300);
   assert.equal(state.get_snapshot().pitch_deg, 0);
+  buttons[12] = { pressed: false };
+  input.update({ connected: true, buttons, axes: [0, 0, 1, -1] });
+  env.frame(400);
+  assert.equal(state.get_snapshot().camera_heading_deg, 9);
+  assert.equal(state.get_snapshot().camera_pitch_deg, 9);
+  assert.equal(state.get_snapshot().pitch_deg, 0);
   input.reset();
   const disconnected = state.get_snapshot();
-  env.frame(400);
+  env.frame(500);
   assert.deepEqual(state.get_snapshot(), disconnected);
   stop();
   unbind();
@@ -230,28 +353,28 @@ test("blur, hidden documents, resumption and cleanup never integrate time spent 
   const stop = start_flight_simulation(state, mapped, env);
   env.frame(0);
   env.frame(100);
-  assert.equal(state.get_snapshot().airspeed_knots, 91);
+  assert.equal(state.get_snapshot().airspeed_knots, 10);
   env.windowListeners.get("blur")();
   assert.equal(env.frames.size, 0);
   env.windowListeners.get("focus")();
   env.frame(10000);
-  assert.equal(state.get_snapshot().airspeed_knots, 91);
+  assert.equal(state.get_snapshot().airspeed_knots, 10);
   env.frame(10100);
-  assert.equal(state.get_snapshot().airspeed_knots, 92);
+  assert.equal(state.get_snapshot().airspeed_knots, 20);
   env.document.hidden = true;
   env.documentListeners.get("visibilitychange")();
   assert.equal(env.frames.size, 0);
   env.document.hidden = false;
   env.documentListeners.get("visibilitychange")();
   env.frame(50000);
-  assert.equal(state.get_snapshot().airspeed_knots, 92);
+  assert.equal(state.get_snapshot().airspeed_knots, 20);
   env.frame(50100);
-  assert.equal(state.get_snapshot().airspeed_knots, 93);
+  assert.equal(state.get_snapshot().airspeed_knots, 30);
   const late = env.frames.values().next().value;
   stop();
   stop();
   late(99999);
-  assert.equal(state.get_snapshot().airspeed_knots, 93);
+  assert.equal(state.get_snapshot().airspeed_knots, 30);
   assert.equal(env.frames.size, 0);
   assert.equal(env.windowListeners.size, 0);
   assert.equal(env.documentListeners.size, 0);
