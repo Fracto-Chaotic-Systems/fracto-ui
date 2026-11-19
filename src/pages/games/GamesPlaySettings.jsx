@@ -6,6 +6,7 @@ import AppText from "../../AppText.jsx";
 import {
   KEY_GAMES_PLAY_FULL_SCREEN,
   KEY_GAMES_PLAY_CANVAS_DISPLAY,
+  KEY_GAMES_PLAY_CANVAS_SHAPE,
   KEY_GAMES_PLAY_FISHEYE_STRENGTH,
   KEY_GAMES_PLAY_CONTROLLER,
   KEY_GAMES_PLAY_CONTROLLER_ACTIONS,
@@ -32,7 +33,7 @@ import {
 } from "./controllers/ControllerColors.js";
 import FlightInstrumentSettingsPanel from "./flight/FlightInstrumentSettingsPanel.jsx";
 import DashboardBackgroundSetting from "./DashboardBackgroundSetting.jsx";
-import { useCanvasDisplay } from "./useCanvasDisplay.js";
+import { useCanvasDisplay, useCanvasShape } from "./useCanvasDisplay.js";
 import { useFisheyeStrength } from "./useFisheye.js";
 import {
   fisheye_slider_value,
@@ -94,20 +95,25 @@ const ToggleItem = styled.label`
   }
 `;
 const LensField = styled(ToggleItem)`
-  flex-wrap: wrap;
-  > input {
-    width: 100%;
-    min-width: 0;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  > output {
+    margin-left: auto;
+    flex-shrink: 0;
+    min-width: 2.5em;
+    text-align: right;
   }
-  > small {
-    width: 100%;
-    color: #666666;
-    font-size: 0.75rem;
+  > input {
+    flex: 0 1 7rem;
+    width: 7rem;
+    min-width: 0;
+    margin: 0;
   }
 `;
 
 export default function GamesPlaySettings({ fullscreen_target_ref }) {
   const canvas_display = useCanvasDisplay();
+  const canvas_shape = useCanvasShape();
   const fisheye_strength = useFisheyeStrength();
   const lens_level = fisheye_slider_value(fisheye_strength);
   const [controller_color, set_controller_color] = useState(() =>
@@ -183,9 +189,28 @@ export default function GamesPlaySettings({ fullscreen_target_ref }) {
       <SettingsSection>
         <summary>{AppText.get(KEY_GAMES_PLAY_DISPLAY)}</summary>
         <ToggleItem>
+          {AppText.get(FLIGHT_SCENE_TEXT.mode)}
+          <select
+            value={canvas_shape}
+            onChange={(event) =>
+              AppSettings.on_settings_changed({
+                [KEY_GAMES_PLAY_CANVAS_SHAPE]: event.target.value,
+              })
+            }
+          >
+            <option value="cinema">
+              {AppText.get(FLIGHT_SCENE_TEXT.cinema)}
+            </option>
+            <option value="porthole">
+              {AppText.get(FLIGHT_SCENE_TEXT.porthole)}
+            </option>
+          </select>
+        </ToggleItem>
+        <ToggleItem>
           {AppText.get(FLIGHT_SCENE_TEXT.display)}
           <select
             value={canvas_display}
+            disabled={canvas_shape === "porthole"}
             onChange={(event) =>
               AppSettings.on_settings_changed({
                 [KEY_GAMES_PLAY_CANVAS_DISPLAY]: event.target.value,
@@ -257,7 +282,6 @@ export default function GamesPlaySettings({ fullscreen_target_ref }) {
               })
             }
           />
-          <small>{AppText.get(FLIGHT_SCENE_TEXT.fisheye_hint)}</small>
         </LensField>
         {(!supported || error) && (
           <p role="status">

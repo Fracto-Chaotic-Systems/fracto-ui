@@ -1,3 +1,5 @@
+import { MAX_FLIGHT_AIRSPEED_KNOTS } from "./FlightUnits.js";
+
 export const FLIGHT_INSTRUMENT_CODES = Object.freeze([
   "airspeed",
   "attitude",
@@ -16,7 +18,7 @@ export const DEFAULT_INSTRUMENT_SETTINGS = Object.freeze({
   size: "medium",
   speed_unit: "knots",
   pressure_unit: "hPa",
-  speed_max_knots: 200,
+  speed_max_knots: MAX_FLIGHT_AIRSPEED_KNOTS,
   pitch_limit_deg: 40,
   vertical_speed_max_fpm: 2000,
   animation_ms: 0,
@@ -54,7 +56,7 @@ export function normalize_instrument_settings(value) {
     speed_max_knots: bounded(
       value?.speed_max_knots,
       defaults.speed_max_knots,
-      20,
+      MAX_FLIGHT_AIRSPEED_KNOTS,
       1000,
     ),
     pitch_limit_deg: bounded(

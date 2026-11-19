@@ -1,7 +1,7 @@
 {
   "contract_version": 1,
   "catalog_id": "fracto-ui",
-  "catalog_version": "1.2.16",
+  "catalog_version": "1.2.17",
   "access_profiles": [
     {
       "id": "public-entry",
@@ -2398,7 +2398,7 @@
         }
       ],
       "availability": "implemented",
-      "purpose": "Controller-driven flight above the flat tiled complex plane, with an adaptive worker-rendered canvas below the dashboard, a view following craft heading/pitch/bank with relative look offsets and an optional fish-eye lens, altitude-scaled forward motion, and live instruments. A fresh game starts hovering north at (-0.5, -2), altitude 1. The settings drawer defaults to 30% of content width with persisted resizing between 5% and 50%.",
+      "purpose": "Controller-driven flight above the flat tiled complex plane, with cinema or 640px circular porthole canvas modes below the dashboard, a view following craft heading/pitch/bank with relative look offsets and an optional fish-eye lens, altitude-scaled forward motion, and live instruments. A fresh game starts hovering north at (-0.5, -2), altitude 1. The settings drawer defaults to 30% of content width with persisted resizing between 5% and 50%.",
       "inputs": [],
       "access": "app-shell",
       "environment": [],

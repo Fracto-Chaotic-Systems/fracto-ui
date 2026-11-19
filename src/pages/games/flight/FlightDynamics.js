@@ -1,6 +1,7 @@
 import {
   FEET_PER_WORLD_UNIT,
   FEET_PER_KNOT_SECOND,
+  MAX_FLIGHT_AIRSPEED_KNOTS,
   MIN_WORLD_ALTITUDE,
   MAX_WORLD_ALTITUDE,
 } from "./FlightUnits.js";
@@ -96,7 +97,7 @@ export function step_flight_state(state, controls, elapsed_seconds) {
   const airspeed_knots = clamp(
     state.airspeed_knots + speed_change_knots_s * dt,
     0,
-    300,
+    MAX_FLIGHT_AIRSPEED_KNOTS,
   );
   const mid_pitch = (state.pitch_deg + pitch_deg) / 2;
   const mid_roll = (state.roll_deg + roll_deg) / 2;

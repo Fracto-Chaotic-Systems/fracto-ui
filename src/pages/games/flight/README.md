@@ -62,7 +62,13 @@ speed bands, and accessible label are converted together. The stored maximum
 remains in knots when changing units. Pressure supports hPa and inHg, converting
 the supplied pressure value as well as its label. The dependency's altimeter
 uses feet and its vertical-speed dial uses ft/min; these are stated in settings.
-Display ranges are normalized to 20–1000 knots, pitch 10–90°, vertical speed
+The airspeed dial defaults to 500 knots and covers at least the full flight
+envelope. Previously saved 200-knot ranges normalize to 500, including when
+displaying km/h or m/s. Color-band thresholds scale with the maximum so their
+angles match the original 200-knot dial: green ends at 64.5% of the scale,
+yellow ends and the red marker sits at 81.5%. At 500 knots those boundaries are
+322.5 and 407.5 knots. White and green starting points scale proportionally too.
+Display ranges are normalized to 500–1000 knots, pitch 10–90°, vertical speed
 500–10000 ft/min, and animation 0–1000ms (0 disables it). Invalid persisted
 options fall back to defaults; finite out-of-range numbers are clamped.
 
@@ -139,7 +145,7 @@ The on-screen d-pad applies 10% button strength for fine adjustments by default;
 hold Shift for full strength. Shift can be changed while holding a direction.
 Both on-screen joysticks use quarter strength by default; Shift restores full
 strength. Scaling follows dead zone, sensitivity, and inversion processing.
-Pitch is limited to ±30°, bank to ±60°, speed to 0–300 knots, and turn rate to
+Pitch is limited to ±30°, bank to ±60°, speed to 0–500 knots, and turn rate to
 ±12°/s. These game-model bounds are independent of instrument display ranges.
 Pressure is retained from the flight-state store. Mid-step attitude/speed and
 heading are used for integration so common frame rates agree closely.
@@ -585,6 +591,16 @@ horizontally when space permits, and starts at the content area's top edge,
 directly below the game title bar. Its viewport scrolls on smaller play areas so
 the fixed canvas can be reached in full. Switching modes invalidates pending
 frames while preserving the existing worker and tile cache.
+
+Display → canvas mode selects **cinema** (the default rectangle) or **porthole**
+(a 640px-diameter circle). Cinema keeps the existing fill/640×480 preference
+under **cinema size**. That size selector is disabled in porthole mode and its
+value is retained for the return to cinema. The shape preference persists as
+`games/play_canvas_shape`; unknown values fall back to cinema. Porthole renders
+a square 640×640 raster with the correct 1:1 projection aspect, then the canvas
+element clips it with a 50% border radius. This avoids stretching a 4:3 image
+into a circle. It stays horizontally centered and top-aligned below the game
+title, with scrolling when needed, and mode switches keep the worker/cache.
 
 `/scripts/flight_scene_validation.html` composes the production scene, simulation,
 controls, mapping and instruments in StrictMode with memory-only preferences.

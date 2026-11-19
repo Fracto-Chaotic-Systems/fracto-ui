@@ -4,6 +4,7 @@ import test from "node:test";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import * as indicators from "flight-indicators";
+import { flight_instrument_props } from "../src/pages/games/flight/FlightInstrumentModel.js";
 
 const cases = [
   ["Airspeed", { speed: 180, max: 300, arcs: {}, unit: "KNOTS" }],
@@ -13,6 +14,36 @@ const cases = [
   ["VerticalSpeed", { verticalSpeed: -750, max: 4000 }],
   ["TurnCoordinator", { turnRate: 3, slip: 0.5 }],
 ];
+
+test("expanded airspeed dials render exactly the original colored band angles", () => {
+  const original = {
+    white: [33, 85],
+    green: [44, 129],
+    yellow: [129, 163],
+    red: 163,
+  };
+  const paths = (props) => {
+    const markup = renderToStaticMarkup(
+      React.createElement(indicators.Airspeed, props),
+    );
+    return ["#fff", "#2fb54a", "#f2c200", "#e02020"].map((color) => {
+      const path = [...markup.matchAll(/<path\b[^>]*>/g)]
+        .map((match) => match[0])
+        .find((path) => path.includes(`stroke="${color}"`));
+      return path.match(/\bd="([^"]+)"/)[1];
+    });
+  };
+  const reference = paths({ max: 200, arcs: original });
+  for (const speed_max_knots of [500, 800, 1000])
+    for (const speed_unit of ["knots", "kmh", "mps"]) {
+      const props = flight_instrument_props(
+        "airspeed",
+        { airspeed_knots: 300 },
+        { speed_max_knots, speed_unit },
+      );
+      assert.deepEqual(paths(props), reference);
+    }
+});
 
 for (const [format, library] of [
   ["ESM", indicators],

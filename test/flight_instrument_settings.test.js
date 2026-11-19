@@ -41,7 +41,7 @@ test("malformed persisted settings fall back safely and normalize ranges and pla
   assert.equal(value.size, "medium");
   assert.equal(value.speed_unit, "knots");
   assert.equal(value.pressure_unit, "hPa");
-  assert.equal(value.speed_max_knots, 20);
+  assert.equal(value.speed_max_knots, 500);
   assert.equal(value.pitch_limit_deg, 90);
   assert.equal(value.vertical_speed_max_fpm, 2000);
   assert.equal(value.animation_ms, 1000);
@@ -53,11 +53,38 @@ test("malformed persisted settings fall back safely and normalize ranges and pla
   assert.equal(DEFAULT_INSTRUMENT_SETTINGS.placements.airspeed, "left");
 });
 
+test("legacy 200-knot ranges expand to 500 and high readings retain colored band proportions", () => {
+  const settings = normalize_instrument_settings({ speed_max_knots: 200 });
+  assert.equal(settings.speed_max_knots, 500);
+  assert.equal(DEFAULT_INSTRUMENT_SETTINGS.speed_max_knots, 500);
+  for (const speed_unit of ["knots", "kmh", "mps"])
+    for (const airspeed_knots of [250, 400, 500]) {
+      const props = flight_instrument_props(
+        "airspeed",
+        { ...PREVIEW_FLIGHT_STATE, airspeed_knots },
+        { ...settings, speed_unit },
+      );
+      const factor = speed_from_knots(1, speed_unit);
+      assert.equal(props.speed, airspeed_knots * factor);
+      assert.equal(props.max, 500 * factor);
+      assert.deepEqual(props.arcs, {
+        white: [82.5 * factor, 212.5 * factor],
+        green: [110 * factor, 322.5 * factor],
+        yellow: [322.5 * factor, 407.5 * factor],
+        red: 407.5 * factor,
+      });
+    }
+  assert.equal(
+    normalize_instrument_settings({ speed_max_knots: 800 }).speed_max_knots,
+    800,
+  );
+});
+
 test("speed units convert readings, scale, and every colored band without changing telemetry", () => {
   for (const speed_unit of ["knots", "kmh", "mps"]) {
     const settings = normalize_instrument_settings({
       speed_unit,
-      speed_max_knots: 300,
+      speed_max_knots: 500,
     });
     const props = flight_instrument_props(
       "airspeed",
@@ -66,11 +93,11 @@ test("speed units convert readings, scale, and every colored band without changi
     );
     const factor = speed_from_knots(1, speed_unit);
     assert.equal(props.speed, 90 * factor);
-    assert.equal(props.max, 300 * factor);
-    assert.equal(props.arcs.red, 163 * factor);
-    assert.deepEqual(props.arcs.white, [33 * factor, 85 * factor]);
-    assert.deepEqual(props.arcs.green, [44 * factor, 129 * factor]);
-    assert.deepEqual(props.arcs.yellow, [129 * factor, 163 * factor]);
+    assert.equal(props.max, 500 * factor);
+    assert.equal(props.arcs.red, 407.5 * factor);
+    assert.deepEqual(props.arcs.white, [82.5 * factor, 212.5 * factor]);
+    assert.deepEqual(props.arcs.green, [110 * factor, 322.5 * factor]);
+    assert.deepEqual(props.arcs.yellow, [322.5 * factor, 407.5 * factor]);
     assert.ok(Math.abs(speed_to_knots(props.speed, speed_unit) - 90) < 1e-10);
   }
   assert.equal(PREVIEW_FLIGHT_STATE.airspeed_knots, 90);

@@ -180,6 +180,16 @@
           const definitions = [
             ["North hover", () => state.reset()],
             [
+              "250 knots",
+              () =>
+                state.update({ ...INITIAL_FLIGHT_STATE, airspeed_knots: 250 }),
+            ],
+            [
+              "500 knots",
+              () =>
+                state.update({ ...INITIAL_FLIGHT_STATE, airspeed_knots: 500 }),
+            ],
+            [
               "Climb",
               () => state.update({ ...INITIAL_FLIGHT_STATE, pitch_deg: 20 }),
             ],

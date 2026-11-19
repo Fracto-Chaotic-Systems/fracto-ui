@@ -2,6 +2,7 @@ import {
   DEFAULT_INSTRUMENT_SETTINGS,
   speed_from_knots,
 } from "./FlightInstrumentSettings.js";
+import { MAX_FLIGHT_AIRSPEED_KNOTS } from "./FlightUnits.js";
 
 export const HPA_PER_INHG = 33.8638866667;
 
@@ -12,10 +13,17 @@ export function flight_instrument_props(
   settings = DEFAULT_INSTRUMENT_SETTINGS,
 ) {
   switch (code) {
-    case "airspeed":
+    case "airspeed": {
+      const max_knots = Math.max(
+        MAX_FLIGHT_AIRSPEED_KNOTS,
+        settings.speed_max_knots,
+      );
+      // Preserve the band angles of the original 200-knot dial at every scale.
+      const arc_value = (value) =>
+        speed_from_knots((value * max_knots) / 200, settings.speed_unit);
       return {
         speed: speed_from_knots(state.airspeed_knots, settings.speed_unit),
-        max: speed_from_knots(settings.speed_max_knots, settings.speed_unit),
+        max: speed_from_knots(max_knots, settings.speed_unit),
         unit: { knots: "KNOTS", kmh: "KM/H", mps: "M/S" }[settings.speed_unit],
         arcs: Object.fromEntries(
           Object.entries({
@@ -25,12 +33,11 @@ export function flight_instrument_props(
             red: 163,
           }).map(([key, value]) => [
             key,
-            Array.isArray(value)
-              ? value.map((v) => speed_from_knots(v, settings.speed_unit))
-              : speed_from_knots(value, settings.speed_unit),
+            Array.isArray(value) ? value.map(arc_value) : arc_value(value),
           ]),
         ),
       };
+    }
     case "attitude":
       return {
         pitch: state.pitch_deg,

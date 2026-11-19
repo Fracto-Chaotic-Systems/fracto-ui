@@ -143,9 +143,14 @@ test("instrument adapters preserve units and pitch, turn, and descent signs", ()
   const state = store.get_snapshot();
   assert.deepEqual(flight_instrument_props("airspeed", state), {
     speed: 123,
-    max: 200,
+    max: 500,
     unit: "KNOTS",
-    arcs: { white: [33, 85], green: [44, 129], yellow: [129, 163], red: 163 },
+    arcs: {
+      white: [82.5, 212.5],
+      green: [110, 322.5],
+      yellow: [322.5, 407.5],
+      red: 407.5,
+    },
   });
   assert.deepEqual(flight_instrument_props("attitude", state), {
     pitch: -12,

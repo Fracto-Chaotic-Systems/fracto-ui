@@ -15,6 +15,7 @@ import {
   save_instrument_settings,
   useInstrumentSettings,
 } from "./useInstrumentSettings.js";
+import { MAX_FLIGHT_AIRSPEED_KNOTS } from "./FlightUnits.js";
 
 const Row = styled.label`
   display: flex;
@@ -151,7 +152,7 @@ export default function FlightInstrumentSettingsPanel() {
             settings.speed_max_knots,
             settings.speed_unit,
           )}
-          min={speed_from_knots(20, settings.speed_unit)}
+          min={speed_from_knots(MAX_FLIGHT_AIRSPEED_KNOTS, settings.speed_unit)}
           max={speed_from_knots(1000, settings.speed_unit)}
           onCommit={(value) =>
             save_instrument_settings({

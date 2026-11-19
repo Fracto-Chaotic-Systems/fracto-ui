@@ -61,13 +61,15 @@ export function start_flight_scene(
     if (!usable() || busy) return;
     const generation = revision;
     const viewport =
-      display_mode === "640x480"
-        ? { width_px: 640, height_px: 480 }
-        : resolution.viewport(
-            bounds.width,
-            bounds.height,
-            target_window.devicePixelRatio,
-          );
+      display_mode === "porthole"
+        ? { width_px: 640, height_px: 640 }
+        : display_mode === "640x480"
+          ? { width_px: 640, height_px: 480 }
+          : resolution.viewport(
+              bounds.width,
+              bounds.height,
+              target_window.devicePixelRatio,
+            );
     busy = true;
     let frame = null;
     try {
@@ -130,7 +132,8 @@ export function start_flight_scene(
       const next_strength = Number.isFinite(strength)
         ? Math.max(0, Math.min(MAX_FLIGHT_FISHEYE_STRENGTH, strength))
         : 0;
-      const next_mode = mode === "640x480" ? mode : "fill";
+      const next_mode =
+        mode === "640x480" || mode === "porthole" ? mode : "fill";
       const next = {
         width: Number.isFinite(width) ? Math.max(0, width) : 0,
         height: Number.isFinite(height) ? Math.max(0, height) : 0,

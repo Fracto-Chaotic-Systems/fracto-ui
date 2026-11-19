@@ -7,8 +7,10 @@ import {
 
 const GAMES_FOLDER = "games";
 export const FLIGHT_SCENE_TEXT = {
+  mode: `${GAMES_FOLDER}/flight_canvas_mode`,
+  cinema: `${GAMES_FOLDER}/flight_cinema_mode`,
+  porthole: `${GAMES_FOLDER}/flight_porthole_mode`,
   fisheye: `${GAMES_FOLDER}/flight_fisheye`,
-  fisheye_hint: `${GAMES_FOLDER}/flight_fisheye_hint`,
   display: `${GAMES_FOLDER}/flight_canvas_display`,
   fill: `${GAMES_FOLDER}/flight_canvas_fill`,
   fixed: `${GAMES_FOLDER}/flight_canvas_fixed`,
@@ -344,10 +346,11 @@ export const MUSIC_TEXT = Object.fromEntries(
 
 export const APP_GAMES_TEXT = {
   [FLIGHT_SCENE_TEXT.view]: "Flight over the complex plane",
-  [FLIGHT_SCENE_TEXT.display]: "canvas display",
+  [FLIGHT_SCENE_TEXT.display]: "cinema size",
+  [FLIGHT_SCENE_TEXT.mode]: "canvas mode",
+  [FLIGHT_SCENE_TEXT.cinema]: "cinema",
+  [FLIGHT_SCENE_TEXT.porthole]: "porthole",
   [FLIGHT_SCENE_TEXT.fisheye]: "fish-eye lens",
-  [FLIGHT_SCENE_TEXT.fisheye_hint]:
-    "0 = off; 100 = extreme. Look down to see a circular horizon.",
   [FLIGHT_SCENE_TEXT.fill]: "Fill available space",
   [FLIGHT_SCENE_TEXT.fixed]: "640 × 480 pixels",
   [FLIGHT_SCENE_TEXT.error]: "Flight view unavailable.",

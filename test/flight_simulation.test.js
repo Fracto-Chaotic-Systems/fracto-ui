@@ -83,8 +83,12 @@ test("brief trigger presses produce coarse proportional speed changes and retain
     close(press(accelerated, -1).airspeed_knots, 0);
     assert.equal(press(INITIAL_FLIGHT_STATE, -1).airspeed_knots, 0);
     assert.equal(
-      press({ ...INITIAL_FLIGHT_STATE, airspeed_knots: 299 }, 1).airspeed_knots,
-      300,
+      press({ ...INITIAL_FLIGHT_STATE, airspeed_knots: 499 }, 1).airspeed_knots,
+      500,
+    );
+    close(
+      press({ ...INITIAL_FLIGHT_STATE, airspeed_knots: 300 }, 1).airspeed_knots,
+      310,
     );
   }
 });
@@ -122,7 +126,7 @@ test("hover, envelope bounds, heading wrap and elapsed-time limits stay finite",
       ...INITIAL_FLIGHT_STATE,
       pitch_deg: 30,
       roll_deg: 60,
-      airspeed_knots: 300,
+      airspeed_knots: 500,
       heading_deg: 359.9,
     },
     controls({ pitch: 1, roll: 1, speed: 1, yaw: 1 }),
@@ -130,7 +134,7 @@ test("hover, envelope bounds, heading wrap and elapsed-time limits stay finite",
   );
   assert.equal(bounded.pitch_deg, 30);
   assert.equal(bounded.roll_deg, 60);
-  assert.equal(bounded.airspeed_knots, 300);
+  assert.equal(bounded.airspeed_knots, 500);
   assert.ok(bounded.heading_deg >= 0 && bounded.heading_deg < 360);
   assert.ok(Math.abs(bounded.turn_rate_deg_s) <= 12);
   assert.ok(

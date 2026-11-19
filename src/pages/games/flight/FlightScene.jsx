@@ -13,8 +13,9 @@ const SceneViewport = styled.div`
   overflow: ${({ $fixed }) => ($fixed ? "auto" : "hidden")};
 `;
 const SceneCanvas = styled.canvas`
-  width: ${({ $fixed }) => ($fixed ? "640px" : "100%")};
-  height: ${({ $fixed }) => ($fixed ? "480px" : "100%")};
+  width: ${({ $mode }) => ($mode === "640x480" || $mode === "porthole" ? "640px" : "100%")};
+  height: ${({ $mode }) => ($mode === "porthole" ? "640px" : $mode === "640x480" ? "480px" : "100%")};
+  border-radius: ${({ $mode }) => ($mode === "porthole" ? "50%" : "0")};
   margin: 0 auto;
   display: block;
   pointer-events: none;
@@ -79,9 +80,11 @@ export default function FlightScene({
   ]);
   return (
     <>
-      <SceneViewport $fixed={display_mode === "640x480"}>
+      <SceneViewport
+        $fixed={display_mode === "640x480" || display_mode === "porthole"}
+      >
         <SceneCanvas
-          $fixed={display_mode === "640x480"}
+          $mode={display_mode}
           ref={canvas_ref}
           role="img"
           aria-label={AppText.get(FLIGHT_SCENE_TEXT.view)}

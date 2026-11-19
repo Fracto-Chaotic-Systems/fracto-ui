@@ -220,6 +220,40 @@ test("fixed display keeps exact pixels across resize and switches back using the
   f.runtime.destroy();
 });
 
+test("porthole mode uses a 640px square raster and preserves the client through mode and window changes", async () => {
+  const f = fixture();
+  f.window.devicePixelRatio = 2;
+  f.runtime.resize(1200, 800, "640x480", 0.35);
+  const cinema = f.tick();
+  f.runtime.resize(1200, 800, "porthole", 0.35);
+  f.finish();
+  await cinema;
+  assert.equal(f.painted.length, 0);
+  for (const [width, height] of [
+    [1200, 800],
+    [390, 400],
+  ]) {
+    f.runtime.resize(width, height, "porthole", 0.35);
+    const frame = f.tick();
+    assert.deepEqual(f.requests.at(-1).viewport, {
+      width_px: 640,
+      height_px: 640,
+      fisheye_strength: 0.35,
+    });
+    f.finish();
+    await frame;
+    assert.equal(f.canvas.width, 640);
+    assert.equal(f.canvas.height, 640);
+  }
+  f.runtime.resize(1200, 800, "640x480", 0.35);
+  const restored = f.tick();
+  assert.equal(f.requests.at(-1).viewport.height_px, 480);
+  f.finish();
+  await restored;
+  assert.equal(f.stats().created, 1);
+  f.runtime.destroy();
+});
+
 test("changing lenses invalidates old frames without restarting the worker or changing raster size", async () => {
   const f = fixture();
   f.runtime.resize(640, 480, "640x480", 0);

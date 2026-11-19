@@ -235,3 +235,31 @@ must not cause a click reset. Publish each reset once on pointer release and
 apply it immediately, independently of animation-frame scheduling.
 
 <!-- 2026-11-18: Added click-to-neutral joystick gestures and mapped resets. -->
+
+The flight model permits airspeeds from 0 to 500 knots. Raising this limit
+does not change acceleration rates, instrument colors, or palette rules.
+
+<!-- 2026-11-18: Increased maximum possible airspeed to 500 knots. -->
+
+The airspeed dial must cover at least the full 500-knot flight envelope.
+Default, restored, and configurable minimum gauge ranges use that shared limit,
+so a previously saved 200-knot scale cannot clamp the needle prematurely.
+Preserve existing colored-band angles by scaling their thresholds with the dial
+maximum, using the original 200-knot face as the reference. Green ends at 64.5%
+of the scale; yellow ends and the red marker sits at 81.5%.
+
+<!-- 2026-11-18: Aligned the airspeed dial and saved display ranges with 500 knots. -->
+
+<!-- 2026-11-18: Preserve original color-band angles on the expanded airspeed scale. -->
+
+## Cinema and porthole display modes
+
+Display settings select cinema (the current rectangular canvas) or porthole
+(a circular canvas with diameter 640 CSS pixels). Porthole uses a 640×640
+rendering buffer and square projection aspect, clipped to a circle, horizontally
+centered with its top directly below the game title. Keep the previous cinema
+fill/640×480 sizing preference while porthole is selected; restore it when
+switching back. Persist the shape choice and preserve the worker and tile cache
+when switching, discarding any pending frame with the old aspect.
+
+<!-- 2026-11-19: Added cinema/porthole canvas modes with a fixed 640px circle. -->
