@@ -2,7 +2,7 @@
 export function start_controller_session(
   load,
   host,
-  { on_input, on_ready, on_error },
+  { on_input, on_stick_reset, on_ready, on_error },
 ) {
   let cancelled = false;
   let controller;
@@ -10,7 +10,7 @@ export function start_controller_session(
     .then(load)
     .then((create) => {
       if (cancelled) return;
-      controller = create(host, { on_input });
+      controller = create(host, { on_input, on_stick_reset });
       on_ready();
     })
     .catch(() => {

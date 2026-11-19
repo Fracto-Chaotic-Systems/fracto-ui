@@ -30,6 +30,7 @@ import {
 import { start_flight_simulation } from "./flight/FlightSimulation.js";
 import FlightScene from "./flight/FlightScene.jsx";
 import { useCanvasDisplay } from "./useCanvasDisplay.js";
+import { useFisheyeStrength } from "./useFisheye.js";
 import {
   MAX_SETTINGS_POSITION,
   MIN_SETTINGS_POSITION,
@@ -116,6 +117,7 @@ const SettingsHeading = styled.h2`
 
 export default function GamesPlay() {
   const canvas_display = useCanvasDisplay();
+  const fisheye_strength = useFisheyeStrength();
   // Input, mapped commands, and telemetry have separate per-page lifetimes.
   const [game_input] = useState(create_controller_input);
   const [flight_controls] = useState(create_flight_controls);
@@ -181,6 +183,7 @@ export default function GamesPlay() {
       <PlayContent ref={content_ref}>
         <FlightScene
           display_mode={canvas_display}
+          fisheye_strength={fisheye_strength}
           flight_state={flight_state}
           width_px={content_bounds.width}
           height_px={content_bounds.height}

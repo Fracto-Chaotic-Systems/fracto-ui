@@ -7,6 +7,10 @@ import {
   CONTROLLER_COLORS,
   normalize_controller_color,
 } from "../src/pages/games/controllers/ControllerColors.js";
+import {
+  fisheye_slider_value,
+  fisheye_strength_for_slider,
+} from "../src/pages/games/flight/FlightLens.js";
 
 const source = readFileSync(
   new URL("../src/pages/games/GamesPlaySettings.jsx", import.meta.url),
@@ -22,6 +26,7 @@ function mount({
   controller = "on_screen",
   controller_actions = false,
   controller_color = "blue",
+  fisheye_strength = 0.35,
 } = {}) {
   const states = [];
   const effects = [];
@@ -60,8 +65,13 @@ function mount({
       display: "canvas display",
       fill: "Fill available space",
       fixed: "640 × 480 pixels",
+      fisheye: "fish-eye lens",
     },
     useCanvasDisplay: () => "fill",
+    useFisheyeStrength: () => fisheye_strength,
+    KEY_GAMES_PLAY_FISHEYE_STRENGTH: "fisheye_strength",
+    fisheye_slider_value,
+    fisheye_strength_for_slider,
     KEY_GAMES_PLAY_CANVAS_DISPLAY: "canvas_display",
     React: {
       createElement: (type, props, ...children) => ({ type, props, children }),
@@ -74,7 +84,10 @@ function mount({
       return [states[index], (value) => (states[index] = value)];
     },
     useEffect: (effect) => effects.push(effect),
-    styled: { details: () => "details", label: () => "label" },
+    styled: Object.assign(() => () => "label", {
+      details: () => "details",
+      label: () => "label",
+    }),
     Switch: "switch",
     AppText: { get: (key) => key },
     AppSettings: {
@@ -178,6 +191,30 @@ test("unsupported browsers disable entry and mounting never requests fullscreen"
   assert.equal(view.toggle().disabled, true);
   assert.deepEqual(view.counts(), { requests: 0, exits: 0 });
   assert.match(JSON.stringify(view.render()), /unavailable/);
+});
+
+test("fish-eye slider restores strength and saves zero and the extreme maximum", () => {
+  const view = mount();
+  const field = view
+    .render()
+    .children[0].children.find(
+      (item) => item?.children?.[0] === "fish-eye lens",
+    );
+  const slider = field.children[2].props;
+  assert.equal(slider.type, "range");
+  assert.equal(slider.min, 0);
+  assert.equal(slider.max, 100);
+  assert.ok(slider.value > 0 && slider.value < 20);
+  slider.onChange({ target: { value: "0" } });
+  assert.equal(view.saved.at(-1).fisheye_strength, 0);
+  slider.onChange({ target: { value: "100" } });
+  assert.equal(view.saved.at(-1).fisheye_strength, 64);
+  const restored = mount({ fisheye_strength: 64 })
+    .render()
+    .children[0].children.find(
+      (item) => item?.children?.[0] === "fish-eye lens",
+    );
+  assert.equal(restored.children[2].props.value, 100);
 });
 
 test("controller dropdown restores and saves the selected controller", () => {

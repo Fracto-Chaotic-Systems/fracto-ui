@@ -4,6 +4,7 @@ import AppText from "../../../AppText.jsx";
 import { FLIGHT_SCENE_TEXT } from "../../../text/GamesText.jsx";
 import { create_flight_frame_client } from "./FlightFrameClient.js";
 import { start_flight_scene } from "./FlightSceneRuntime.js";
+import { DEFAULT_FLIGHT_FISHEYE_STRENGTH } from "./FlightProjection.js";
 
 const SceneViewport = styled.div`
   position: absolute;
@@ -39,6 +40,7 @@ export default function FlightScene({
   width_px,
   height_px,
   display_mode = "fill",
+  fisheye_strength = DEFAULT_FLIGHT_FISHEYE_STRENGTH,
   create_client = create_flight_frame_client,
   on_frame,
 }) {
@@ -59,11 +61,17 @@ export default function FlightScene({
     };
   }, [flight_state, create_client, on_frame, attempt]);
   useEffect(() => {
-    runtime_ref.current?.resize(width_px, height_px, display_mode);
+    runtime_ref.current?.resize(
+      width_px,
+      height_px,
+      display_mode,
+      fisheye_strength,
+    );
   }, [
     width_px,
     height_px,
     display_mode,
+    fisheye_strength,
     attempt,
     flight_state,
     create_client,

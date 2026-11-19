@@ -1,4 +1,7 @@
-import { step_flight_state } from "./FlightDynamics.js";
+import {
+  step_flight_state,
+  neutralize_flight_channels,
+} from "./FlightDynamics.js";
 
 // Start from an effect, not a state initializer, so StrictMode can cleanly rebind.
 export function start_flight_simulation(
@@ -11,6 +14,12 @@ export function start_flight_simulation(
   let suspended = !!target_document.hidden;
   let frame = null;
   let last_time = null;
+  const unsubscribe_neutralize = controls.subscribe_neutralize?.((channels) => {
+    if (active)
+      flight_state.update(
+        neutralize_flight_channels(flight_state.get_snapshot(), channels),
+      );
+  });
   const schedule = () => {
     if (active && !suspended && !target_document.hidden && frame === null) {
       frame = target_window.requestAnimationFrame(tick);
@@ -55,6 +64,7 @@ export function start_flight_simulation(
   return () => {
     if (!active) return;
     active = false;
+    unsubscribe_neutralize?.();
     reset_clock();
     target_window.removeEventListener("blur", blur);
     target_window.removeEventListener("focus", resume);

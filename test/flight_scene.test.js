@@ -201,6 +201,7 @@ test("fixed display keeps exact pixels across resize and switches back using the
     assert.deepEqual(f.requests.at(-1).viewport, {
       width_px: 640,
       height_px: 480,
+      fisheye_strength: 0,
     });
     f.finish();
     await frame;
@@ -216,6 +217,26 @@ test("fixed display keeps exact pixels across resize and switches back using the
   assert.equal(f.stats().created, 1);
   f.runtime.resize(0, 0, "640x480");
   assert.equal(f.frames.size, 0);
+  f.runtime.destroy();
+});
+
+test("changing lenses invalidates old frames without restarting the worker or changing raster size", async () => {
+  const f = fixture();
+  f.runtime.resize(640, 480, "640x480", 0);
+  const old = f.tick();
+  f.runtime.resize(640, 480, "640x480", 0.35);
+  f.finish();
+  await old;
+  assert.equal(f.painted.length, 0);
+  const lens = f.tick();
+  assert.deepEqual(f.requests.at(-1).viewport, {
+    width_px: 640,
+    height_px: 480,
+    fisheye_strength: 0.35,
+  });
+  f.finish();
+  await lens;
+  assert.equal(f.stats().created, 1);
   f.runtime.destroy();
 });
 

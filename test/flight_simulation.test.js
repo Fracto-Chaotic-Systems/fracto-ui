@@ -275,7 +275,7 @@ test("braking stops at hover without backward motion, even with pitch and bank",
   assert.equal(state.vertical_speed_fpm, 0);
 });
 
-test("camera wraps, reaches both poles and retains a world direction through craft turns", () => {
+test("look offsets wrap, reach local poles and persist through craft turns", () => {
   let state = {
     ...INITIAL_FLIGHT_STATE,
     camera_heading_deg: 359,
@@ -344,6 +344,70 @@ test("real input mapping drives the store and updated bindings take effect witho
   stop();
   unbind();
   assert.equal(env.frames.size, 0);
+});
+
+test("stick clicks neutralize mapped values once without resetting position, heading or the other stick", () => {
+  const env = environment(),
+    input = create_controller_input(),
+    mapped = create_flight_controls();
+  const state = create_flight_state({
+    ...FLYING_STATE,
+    roll_deg: 25,
+    pitch_deg: 10,
+    camera_heading_deg: 40,
+    camera_pitch_deg: -20,
+  });
+  let settings = DEFAULT_FLIGHT_CONTROL_SETTINGS;
+  let changed;
+  const unbind = bind_flight_controls(input, mapped, {
+    read_settings: () => settings,
+    subscribe_settings: (callback) => {
+      changed = callback;
+      return () => {};
+    },
+  });
+  const stop = start_flight_simulation(state, mapped, env);
+  input.update({ connected: true });
+  const before = state.get_snapshot();
+  input.request_stick_reset(1);
+  const centered = state.get_snapshot();
+  assert.deepEqual(centered, {
+    ...before,
+    camera_heading_deg: 0,
+    camera_pitch_deg: 0,
+  });
+  state.update({ camera_heading_deg: 70, camera_pitch_deg: -10 });
+  input.request_stick_reset(0);
+  const stopped = state.get_snapshot();
+  assert.equal(stopped.airspeed_knots, 0);
+  assert.equal(stopped.roll_deg, 0);
+  assert.equal(stopped.pitch_deg, 10);
+  assert.equal(stopped.camera_heading_deg, 70);
+  assert.equal(stopped.camera_pitch_deg, -10);
+  assert.equal(stopped.vertical_speed_fpm, 0);
+  assert.equal(stopped.turn_rate_deg_s, 0);
+  for (const key of [
+    "position_re",
+    "position_im",
+    "altitude_world",
+    "heading_deg",
+  ])
+    assert.equal(stopped[key], before[key]);
+  // A remapped right stick resets its assigned attitude channels instead of look.
+  settings = normalize_flight_control_settings({
+    axes: { right_x: "roll", right_y: "pitch" },
+  });
+  changed();
+  state.update({ roll_deg: 20, pitch_deg: 15, camera_heading_deg: 60 });
+  input.request_stick_reset(1);
+  assert.equal(state.get_snapshot().roll_deg, 0);
+  assert.equal(state.get_snapshot().pitch_deg, 0);
+  assert.equal(state.get_snapshot().camera_heading_deg, 60);
+  stop();
+  state.update({ roll_deg: 20 });
+  input.request_stick_reset(1);
+  assert.equal(state.get_snapshot().roll_deg, 20);
+  unbind();
 });
 
 test("blur, hidden documents, resumption and cleanup never integrate time spent away", () => {

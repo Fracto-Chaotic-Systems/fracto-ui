@@ -18,6 +18,8 @@ export const KEY_GAMES_SECTION = `${GAMES_FOLDER}/games_section`;
 export const KEY_GAMES_PLAY_SETTINGS_POSITION = `${GAMES_FOLDER}/play_settings_position`;
 export const KEY_GAMES_PLAY_FULL_SCREEN = `${GAMES_FOLDER}/play_full_screen`;
 export const KEY_GAMES_PLAY_CANVAS_DISPLAY = `${GAMES_FOLDER}/play_canvas_display`;
+export const KEY_GAMES_PLAY_FISHEYE = `${GAMES_FOLDER}/play_fisheye`;
+export const KEY_GAMES_PLAY_FISHEYE_STRENGTH = `${GAMES_FOLDER}/play_fisheye_strength`;
 export const KEY_GAMES_PLAY_CONTROLLER = `${GAMES_FOLDER}/play_controller`;
 export const KEY_GAMES_PLAY_CONTROLLER_ACTIONS = `${GAMES_FOLDER}/play_controller_actions`;
 export const KEY_GAMES_PLAY_CONTROLLER_COLOR = `${GAMES_FOLDER}/play_controller_color`;
@@ -36,6 +38,19 @@ export const GAMES_SETTINGS = "games_settings";
 export const GAMES_STATUS = "games_status";
 
 export const APP_GAMES_SETTINGS = {
+  [KEY_GAMES_PLAY_FISHEYE_STRENGTH]: {
+    data_type: TYPE_NUMBER,
+    default_value: -1,
+    description:
+      "flight fisheye strength, 0–64; -1 inherits the legacy toggle preference",
+    persist: true,
+  },
+  [KEY_GAMES_PLAY_FISHEYE]: {
+    data_type: TYPE_BOOLEAN,
+    default_value: true,
+    description: "mild fisheye lens for the flight canvas",
+    persist: true,
+  },
   [KEY_GAMES_PLAY_CANVAS_DISPLAY]: {
     data_type: TYPE_STRING,
     default_value: "fill",

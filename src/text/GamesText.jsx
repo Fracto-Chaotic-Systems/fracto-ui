@@ -7,6 +7,8 @@ import {
 
 const GAMES_FOLDER = "games";
 export const FLIGHT_SCENE_TEXT = {
+  fisheye: `${GAMES_FOLDER}/flight_fisheye`,
+  fisheye_hint: `${GAMES_FOLDER}/flight_fisheye_hint`,
   display: `${GAMES_FOLDER}/flight_canvas_display`,
   fill: `${GAMES_FOLDER}/flight_canvas_fill`,
   fixed: `${GAMES_FOLDER}/flight_canvas_fixed`,
@@ -343,6 +345,9 @@ export const MUSIC_TEXT = Object.fromEntries(
 export const APP_GAMES_TEXT = {
   [FLIGHT_SCENE_TEXT.view]: "Flight over the complex plane",
   [FLIGHT_SCENE_TEXT.display]: "canvas display",
+  [FLIGHT_SCENE_TEXT.fisheye]: "fish-eye lens",
+  [FLIGHT_SCENE_TEXT.fisheye_hint]:
+    "0 = off; 100 = extreme. Look down to see a circular horizon.",
   [FLIGHT_SCENE_TEXT.fill]: "Fill available space",
   [FLIGHT_SCENE_TEXT.fixed]: "640 × 480 pixels",
   [FLIGHT_SCENE_TEXT.error]: "Flight view unavailable.",
@@ -357,7 +362,7 @@ export const APP_GAMES_TEXT = {
   [CONTROL_SETTINGS_TEXT.axis_inversion_label]: "invert {axis}",
   [CONTROL_SETTINGS_TEXT.reset]: "restore flight control defaults",
   [CONTROL_SETTINGS_TEXT.note]:
-    "Response settings affect stick axes. Pitch inversion applies to pitch commands from axes and buttons. Help text follows the current assignments.",
+    "Response settings affect stick axes. Pitch inversion applies to pitch commands from axes and buttons. On-screen joysticks use quarter strength and the d-pad uses one-tenth strength by default; hold Shift for full-strength changes. Click a joystick to return its controls to neutral. Help text follows the current assignments.",
   [CONTROL_CHANNEL_TEXT.none]: "unassigned",
   [CONTROL_CHANNEL_TEXT.move_x]: "move sideways",
   [CONTROL_CHANNEL_TEXT.move_y]: "move forward / backward",

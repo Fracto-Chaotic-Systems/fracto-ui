@@ -1,4 +1,5 @@
 import { create_flight_resolution } from "./FlightResolution.js";
+import { MAX_FLIGHT_FISHEYE_STRENGTH } from "./FlightLens.js";
 
 /** Completion-driven painting. No subscriptions or per-frame React updates. */
 export function start_flight_scene(
@@ -25,6 +26,7 @@ export function start_flight_scene(
     revision = 0;
   let bounds = { width: 0, height: 0 },
     display_mode = "fill",
+    fisheye_strength = 0,
     painted = 0;
   const usable = () =>
     active &&
@@ -73,7 +75,10 @@ export function start_flight_scene(
       if (!context) throw new Error("Canvas rendering unavailable");
       if (!client) client = create_client();
       const start = target_window.performance.now();
-      frame = await client.render(flight_state.get_snapshot(), viewport);
+      frame = await client.render(flight_state.get_snapshot(), {
+        ...viewport,
+        fisheye_strength,
+      });
       if (!usable() || generation !== revision) return;
       const image = new target_window.ImageData(
         frame.pixels,
@@ -121,7 +126,10 @@ export function start_flight_scene(
   target_window.addEventListener("focus", resume);
   target_document.addEventListener("visibilitychange", resume);
   return {
-    resize(width, height, mode = "fill") {
+    resize(width, height, mode = "fill", strength = 0) {
+      const next_strength = Number.isFinite(strength)
+        ? Math.max(0, Math.min(MAX_FLIGHT_FISHEYE_STRENGTH, strength))
+        : 0;
       const next_mode = mode === "640x480" ? mode : "fill";
       const next = {
         width: Number.isFinite(width) ? Math.max(0, width) : 0,
@@ -130,10 +138,12 @@ export function start_flight_scene(
       if (
         next.width === bounds.width &&
         next.height === bounds.height &&
-        next_mode === display_mode
+        next_mode === display_mode &&
+        next_strength === fisheye_strength
       )
         return;
       display_mode = next_mode;
+      fisheye_strength = next_strength;
       bounds = next;
       invalidate();
       schedule();

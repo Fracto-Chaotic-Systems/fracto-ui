@@ -30,34 +30,48 @@ const state = {
   camera_pitch_deg: -90,
 };
 try {
-  for (const width_px of [320, 640, 1280]) {
-    const viewport = { width_px, height_px: (width_px * 9) / 16 };
-    let frame = pipeline.render(state, viewport);
-    for (let warm = 0; warm < 2; warm++)
-      frame = pipeline.render(state, viewport, frame.pixels);
-    const totals = {
-      trace_ms: 0,
-      sample_ms: 0,
-      fallback_ms: 0,
-      color_ms: 0,
-      total_ms: 0,
-    };
-    for (let run = 0; run < 5; run++) {
-      frame = pipeline.render(state, viewport, frame.pixels);
-      for (const key of Object.keys(totals))
-        totals[key] += frame.stats[key] / 5;
-    }
-    console.log(
-      JSON.stringify({
-        ...viewport,
-        mean_ms: Object.fromEntries(
-          Object.entries(totals).map(([key, value]) => [
-            key,
-            Number(value.toFixed(2)),
-          ]),
-        ),
-      }),
-    );
+  for (const [width_px, height_px] of [
+    [320, 180],
+    [640, 480],
+    [1280, 720],
+  ]) {
+    const modes = [0, 0.35].map((fisheye_strength) => ({
+      viewport: { width_px, height_px, fisheye_strength },
+      totals: {
+        trace_ms: 0,
+        sample_ms: 0,
+        fallback_ms: 0,
+        color_ms: 0,
+        total_ms: 0,
+      },
+      samples: [],
+    }));
+    let frame = pipeline.render(state, modes[0].viewport);
+    for (let warm = 0; warm < 30; warm++)
+      frame = pipeline.render(state, modes[warm % 2].viewport, frame.pixels);
+    // Alternate order each pair so neither lens consistently benefits from warmup.
+    for (let run = 0; run < 15; run++)
+      for (const mode of run % 2 ? [...modes].reverse() : modes) {
+        frame = pipeline.render(state, mode.viewport, frame.pixels);
+        mode.samples.push(frame.stats.total_ms);
+        for (const key of Object.keys(mode.totals))
+          mode.totals[key] += frame.stats[key] / 15;
+      }
+    for (const mode of modes)
+      console.log(
+        JSON.stringify({
+          ...mode.viewport,
+          median_total_ms: Number(
+            mode.samples.sort((a, b) => a - b)[7].toFixed(2),
+          ),
+          mean_ms: Object.fromEntries(
+            Object.entries(mode.totals).map(([key, value]) => [
+              key,
+              Number(value.toFixed(2)),
+            ]),
+          ),
+        }),
+      );
   }
 } finally {
   pipeline.destroy();

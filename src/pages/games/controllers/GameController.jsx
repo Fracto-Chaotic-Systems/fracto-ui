@@ -75,6 +75,7 @@ export default function GameController({ input, flight_controls }) {
     if (!load) return;
     const session = start_controller_session(load, host_ref.current, {
       on_input: input.update,
+      on_stick_reset: input.request_stick_reset,
       on_ready: () => set_error(null),
       on_error: () => set_error(device),
     });

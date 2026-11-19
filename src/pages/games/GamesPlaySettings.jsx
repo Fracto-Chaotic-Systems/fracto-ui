@@ -6,6 +6,7 @@ import AppText from "../../AppText.jsx";
 import {
   KEY_GAMES_PLAY_FULL_SCREEN,
   KEY_GAMES_PLAY_CANVAS_DISPLAY,
+  KEY_GAMES_PLAY_FISHEYE_STRENGTH,
   KEY_GAMES_PLAY_CONTROLLER,
   KEY_GAMES_PLAY_CONTROLLER_ACTIONS,
   KEY_GAMES_PLAY_CONTROLLER_COLOR,
@@ -32,6 +33,11 @@ import {
 import FlightInstrumentSettingsPanel from "./flight/FlightInstrumentSettingsPanel.jsx";
 import DashboardBackgroundSetting from "./DashboardBackgroundSetting.jsx";
 import { useCanvasDisplay } from "./useCanvasDisplay.js";
+import { useFisheyeStrength } from "./useFisheye.js";
+import {
+  fisheye_slider_value,
+  fisheye_strength_for_slider,
+} from "./flight/FlightLens.js";
 import FlightControlSettingsPanel from "./controllers/FlightControlSettingsPanel.jsx";
 import { FLIGHT_SETTINGS_TEXT } from "../../text/GamesText.jsx";
 
@@ -87,9 +93,23 @@ const ToggleItem = styled.label`
     padding: 0.375rem 0.5rem;
   }
 `;
+const LensField = styled(ToggleItem)`
+  flex-wrap: wrap;
+  > input {
+    width: 100%;
+    min-width: 0;
+  }
+  > small {
+    width: 100%;
+    color: #666666;
+    font-size: 0.75rem;
+  }
+`;
 
 export default function GamesPlaySettings({ fullscreen_target_ref }) {
   const canvas_display = useCanvasDisplay();
+  const fisheye_strength = useFisheyeStrength();
+  const lens_level = fisheye_slider_value(fisheye_strength);
   const [controller_color, set_controller_color] = useState(() =>
     normalize_controller_color(
       AppSettings.get(KEY_GAMES_PLAY_CONTROLLER_COLOR),
@@ -218,6 +238,27 @@ export default function GamesPlaySettings({ fullscreen_target_ref }) {
           </select>
         </ToggleItem>
         <DashboardBackgroundSetting />
+        <LensField>
+          {AppText.get(FLIGHT_SCENE_TEXT.fisheye)}
+          <output>{Math.round(lens_level)}%</output>
+          <input
+            type="range"
+            aria-label={AppText.get(FLIGHT_SCENE_TEXT.fisheye)}
+            aria-valuetext={`${Math.round(lens_level)}%`}
+            min={0}
+            max={100}
+            step={0.1}
+            value={lens_level}
+            onChange={(event) =>
+              AppSettings.on_settings_changed({
+                [KEY_GAMES_PLAY_FISHEYE_STRENGTH]: fisheye_strength_for_slider(
+                  Number(event.target.value),
+                ),
+              })
+            }
+          />
+          <small>{AppText.get(FLIGHT_SCENE_TEXT.fisheye_hint)}</small>
+        </LensField>
         {(!supported || error) && (
           <p role="status">
             {AppText.get(

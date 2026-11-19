@@ -2,7 +2,7 @@
 
 GamesPlay owns a `ControllerInput` store. Game code reads its immutable, standard
 Gamepad-shaped snapshots or subscribes to changes; it never imports a vendor API.
-Snapshots contain only `connected`, four axes, and eighteen buttons with `value`,
+Snapshots contain `connected`, `axis_scale` (0–1, default 1), four axes, and eighteen buttons with `value`,
 `pressed`, and `touched`. Axes are clamped to -1–1 and button values to 0–1.
 
 `GameController.jsx` observes the AppSettings device preference and owns the React
@@ -33,6 +33,33 @@ controllers, forwards normalized input, and resets on blur, hidden documents,
 and pointer cancellation. Before cleanup it finishes active pointers so the
 package's document drag listeners are released. Cleanup stops polling, removes
 the emulated pad, restores the native API, and clears the host.
+
+On-screen d-pad buttons publish 10% strength by default for fine adjustments.
+Holding Shift restores full strength, including when Shift changes during a
+held direction. The modifier is also read on pointer down, and blur, hidden
+documents, pointer cancellation, and teardown clear it with held input.
+This applies to d-pad slots 12–15 before action mapping, so custom assignments
+retain fine/coarse behavior. Both on-screen joysticks use quarter strength by
+default, with Shift restoring full strength immediately for held axes. The
+adapter publishes `axis_scale` separately from raw axes; mapping applies it
+after dead zone, saved sensitivity, and inversion, so precision mode does not
+enlarge the dead zone. Triggers and other buttons retain their response.
+The Settings control note explains the Shift shortcut.
+
+A single click/tap on a stick neutralizes the flight values assigned to that
+stick's axes. By default, left resets bank and airspeed to zero, and right
+resets both craft-relative look offsets to zero. Position, altitude, heading,
+and the other stick's values are retained. Custom axis assignments are honored.
+Pointer travel over 6 CSS pixels marks a drag permanently for that gesture,
+including a drag that returns to center. Drag release, pointer cancellation,
+blur, hiding, and teardown never trigger a click reset.
+
+The adapter clears only the clicked stick's raw axes/button before emitting
+`on_stick_reset`. `ControllerSession` forwards it to the input store's discrete
+reset subscriptions; `bind_flight_controls` maps the current axes to channels.
+`FlightSimulation` subscribes to neutralization requests independently of RAF
+ticks and updates flight state immediately, recomputing motion readings when
+needed. No request remains latched, and cleanup removes both subscriptions.
 
 `GamesPlayControls.jsx` owns the controller's placement and size. The controller
 is horizontally centered, 1rem above the game area's lower edge, including when
@@ -103,8 +130,9 @@ publish generic actions; directional movement/view amounts come from axis bindin
 The command store describes held intent, not one-shot events. `FlightSimulation`
 integrates continuous channels into the separate `flight/FlightState.js` store.
 Default `move_x` adds bank input and `move_y` adds speed input. `look_x`/`look_y`
-rotate the independent world camera heading/pitch; releasing them retains the
-view direction. Motion is forward-only, scales with altitude, and stops at zero
+rotate craft-relative look yaw/pitch offsets; releasing them retains those
+offsets while the view follows the craft's heading, pitch, and bank. Neutral
+look faces the direction of motion. Motion is forward-only, scales with altitude, and stops at zero
 airspeed. A future game UI consumer can detect rising edges for
 confirm/pause/etc. Mapping itself remains pure; simulation scheduling pauses on
 blur/hidden pages and cleans up on unmount. Keyboard and hand-held providers

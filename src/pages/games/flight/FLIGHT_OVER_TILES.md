@@ -71,10 +71,12 @@ Descent uses exponential altitude integration so the craft never reaches the
 plane. Numerical altitude guards of 1e-100 and 1e100 prevent floating-point
 under/overflow, well beyond the range of tile detail.
 
-The right joystick controls a separate world camera orientation at up to 90
-degrees/second. Heading wraps through 360 degrees and viewing elevation reaches
-straight up/down. Releasing the stick retains the viewing direction independently
-of subsequent craft turns. Initially the view is level and north-facing.
+The default camera follows the craft's heading, pitch, and bank. The right
+joystick controls relative look yaw/pitch offsets at up to 90 degrees/second.
+Look yaw wraps through 360 degrees and look pitch reaches ±90 degrees relative
+to the craft. Releasing the stick retains those offsets, so the view continues
+to follow subsequent craft turns, climbs, descents, and banks. Initially the
+view is level and north-facing with zero look offsets.
 
 <!-- 2026-11-18: Accepted altitude calibration, altitude-scaled velocity with
 exponential descent, and independent retained camera orientation; implemented
@@ -83,8 +85,11 @@ flight state and dynamics as step 1 of the flight rendering plan. -->
 ## Perspective Projection Contract
 
 The pure projection stage uses pixel-center pinhole rays, square pixels, and a
-configurable vertical field of view, initially 60 degrees. Camera heading and
-pitch are independent of craft attitude, with no camera roll. The surface is
+configurable vertical field of view, initially 60 degrees. The camera follows
+craft heading/pitch/roll, then applies look yaw and pitch in the craft's local
+frame. Descent raises the horizon, ascent lowers it, and banking tilts it.
+Both unit-ray and batched tracing use all three components of the rotated basis.
+The surface is
 the infinite flat plane at altitude zero; tile coverage is resolved separately.
 Rays directed away from the plane are sky. Rays with absolute unit vertical
 component at most 1e-12 are classified as horizon. Remaining downward rays
@@ -183,3 +188,50 @@ bottom of the game title bar. It centers horizontally when space permits and
 provides scrolling when the play area is smaller than the canvas.
 
 <!-- 2026-11-18: Added the fixed 640×480 display mode and top alignment. -->
+
+<!-- 2026-11-18: Replaced the independent world camera with a craft-following
+view and retained local look offsets; incorporated pitch and bank into all rays. -->
+
+The on-screen d-pad uses 10% strength for subtle adjustments. Holding Shift
+restores full strength; pressing or releasing Shift updates held directions
+immediately. Triggers and other buttons retain their existing strength.
+
+<!-- 2026-11-18: Added fine d-pad response with Shift for full-strength input. -->
+
+Both on-screen joysticks use 25% strength by default, applied after dead-zone
+and sensitivity processing. Holding Shift restores full strength, including
+for a joystick already being held. Triggers retain their current response.
+
+<!-- 2026-11-18: Added fine joystick response with Shift for full-strength input. -->
+
+## Fish-eye lens
+
+Gameplay defaults to a mild radial fish-eye effect, with a persisted Display
+slider from 0 (pinhole) to 100 (extreme). The ray's forward component decreases
+smoothly toward the corners, widening peripheral viewing and bending off-center
+horizons while retaining the craft-relative center direction. The slider uses
+cubic travel mapped to strengths 0–64, normalized to the viewport corner radius;
+default strength 0.35 appears near 18%. The maximum encloses a full circular
+horizon when looking downward; level forward viewing keeps the horizon through
+the center. Existing off/on preferences become zero/default strength until the
+numeric slider preference is first saved.
+Apply the effect inside the existing ray pass, with no extra pixel count,
+postprocessing pass, or per-pixel trigonometry. Switching lenses preserves the
+worker and tile cache, and discards pending frames from the previous lens.
+
+<!-- 2026-11-18: Added a lightweight fish-eye projection and Display toggle. -->
+
+<!-- 2026-11-18: Replaced the lens toggle with a persisted strength slider,
+extended to circular-horizon extremes while preserving craft-relative viewing. -->
+
+## Joystick neutralization
+
+A single click/tap resets the accumulated values assigned to that joystick's
+axes to zero. With default bindings, left resets bank and airspeed and right
+centers the craft-relative look offsets. Position, altitude, heading, and
+unrelated controls remain unchanged. Custom axis mappings are honored.
+Drags (over 6 CSS pixels), drag release, cancellation, and lifecycle cleanup
+must not cause a click reset. Publish each reset once on pointer release and
+apply it immediately, independently of animation-frame scheduling.
+
+<!-- 2026-11-18: Added click-to-neutral joystick gestures and mapped resets. -->

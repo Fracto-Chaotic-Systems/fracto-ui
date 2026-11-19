@@ -140,7 +140,7 @@
       const reading = () => {
         const s = state.get_snapshot();
         document.getElementById("telemetry").textContent =
-          `Speed ${s.airspeed_knots.toFixed(2)} kn | heading ${s.heading_deg.toFixed(2)}° | camera ${s.camera_heading_deg.toFixed(2)}°/${s.camera_pitch_deg.toFixed(2)}° | complex (${s.position_re.toFixed(8)}, ${s.position_im.toFixed(8)}) | altitude ${s.altitude_world.toPrecision(5)} | workers ${workers} | parent renders ${renders}`;
+          `Speed ${s.airspeed_knots.toFixed(2)} kn | heading ${s.heading_deg.toFixed(2)}° | pitch/bank ${s.pitch_deg.toFixed(2)}°/${s.roll_deg.toFixed(2)}° | look offsets ${s.camera_heading_deg.toFixed(2)}°/${s.camera_pitch_deg.toFixed(2)}° | complex (${s.position_re.toFixed(8)}, ${s.position_im.toFixed(8)}) | altitude ${s.altitude_world.toPrecision(5)} | workers ${workers} | parent renders ${renders}`;
       };
       function Fixture() {
         renders++;
@@ -179,6 +179,23 @@
         useEffect(() => {
           const definitions = [
             ["North hover", () => state.reset()],
+            [
+              "Climb",
+              () => state.update({ ...INITIAL_FLIGHT_STATE, pitch_deg: 20 }),
+            ],
+            [
+              "Descent",
+              () => state.update({ ...INITIAL_FLIGHT_STATE, pitch_deg: -20 }),
+            ],
+            [
+              "Right bank",
+              () =>
+                state.update({
+                  ...INITIAL_FLIGHT_STATE,
+                  pitch_deg: -10,
+                  roll_deg: 30,
+                }),
+            ],
             [
               "Fractal overview",
               () =>

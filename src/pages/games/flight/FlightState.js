@@ -72,7 +72,7 @@ function normalize_flight_state(patch, previous) {
   return Object.freeze(next);
 }
 
-/** Per-game world pose, independent camera pose, and unit-bearing telemetry. */
+/** Per-game world pose, craft-relative look offsets, and unit-bearing telemetry. */
 export function create_flight_state(initial_state) {
   const initial = normalize_flight_state(initial_state, EMPTY_FLIGHT_STATE);
   let snapshot = initial;

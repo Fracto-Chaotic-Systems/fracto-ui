@@ -82,8 +82,8 @@ known fields atomically and only notifies listeners when normalized values chang
 | `source`             | `preview`, `live`, or `unavailable`                       |
 | `position_re`, `position_im` | Complex-plane position; north is +imaginary, east is +real |
 | `altitude_world`     | Strictly positive distance above the flat complex plane |
-| `camera_heading_deg` | Independent world heading, clockwise from north, [0, 360) |
-| `camera_pitch_deg`   | Independent world viewing elevation, -90 through 90 degrees |
+| `camera_heading_deg` | Look yaw offset from craft forward, clockwise, [0, 360) |
+| `camera_pitch_deg`   | Look elevation offset in the craft frame, -90 through 90 degrees |
 | `pitch_deg`          | Degrees, positive nose up, bounded to -90 through 90      |
 | `roll_deg`           | Degrees, positive right wing down, wrapped to [-180, 180) |
 | `heading_deg`        | Degrees, wrapped to [0, 360)                              |
@@ -123,10 +123,11 @@ forward/back movement joins the speed command. Analog triggers/assigned speed
 buttons increase or decrease airspeed. A bank produces a coordinated turn;
 assigned yaw input adds turn rate and moves the slip ball. Speed and pitch
 determine world motion and vertical-speed telemetry. Look channels change the
-independent camera heading and pitch at up to 90°/s, without changing aircraft
-attitude or travel direction. Horizontal viewing wraps through 360° and vertical
-viewing clamps at straight up/down. Releasing the stick retains that world
-viewing direction, including while the craft turns. Discrete confirm/cancel/pause/view actions remain
+craft-relative camera yaw and pitch offsets at up to 90°/s, without changing
+aircraft attitude or travel direction. Horizontal viewing wraps through 360°;
+vertical viewing clamps at ±90° relative to the craft. Releasing the stick
+retains those offsets while the view follows subsequent turns, climbs, descents,
+and banks. Discrete confirm/cancel/pause/view actions remain
 available to future game UI consumers.
 
 Full input changes pitch by 20°/s and bank by 40°/s. Speed-up/slow-down
@@ -134,6 +135,10 @@ commands (the default triggers) change speed by 100 knots/s, so a 0.1-second
 full press changes airspeed by 10 knots. Partial trigger pressure scales this
 rate proportionally. The movement stick retains fine speed adjustment at
 10 knots/s; combined speed commands are capped at ±100 knots/s.
+The on-screen d-pad applies 10% button strength for fine adjustments by default;
+hold Shift for full strength. Shift can be changed while holding a direction.
+Both on-screen joysticks use quarter strength by default; Shift restores full
+strength. Scaling follows dead zone, sensitivity, and inversion processing.
 Pitch is limited to ±30°, bank to ±60°, speed to 0–300 knots, and turn rate to
 ±12°/s. These game-model bounds are independent of instrument display ranges.
 Pressure is retained from the flight-state store. Mid-step attitude/speed and
@@ -154,6 +159,12 @@ these are far beyond indexed tile detail, and vertical speed is zero at either
 guard. World altitude updates must be positive; invalid updates retain the last
 valid altitude. The simulation owns synchronization of world altitude and gauge
 readings; direct telemetry updates remain supported for instrument fixtures.
+
+Clicking a joystick neutralizes the values assigned to its axes: the default
+left stick resets bank and airspeed; the right resets look yaw and pitch.
+`neutralize_flight_channels` preserves world position/altitude/heading and
+unrelated controls, and updates motion readings immediately. The simulation
+subscribes to these discrete requests and removes that subscription on cleanup.
 
 Releasing input holds speed and attitude. An existing bank continues turning,
 and an existing pitch continues climbing/descending. Disconnected controls
@@ -247,14 +258,37 @@ telemetry; the production game now uses the controller-driven model above.
 `FlightProjection.js` is the pure numerical stage before tile selection and
 coloring. It imports no browser, rendering, network, or terrain dependencies.
 The world axes are real/east, imaginary/north, and altitude/up; the infinite
-complex plane is at altitude zero. Camera orientation uses only
-`camera_heading_deg` and `camera_pitch_deg`, independently of craft attitude.
-The horizon stays level; camera roll is not part of this contract.
+complex plane is at altitude zero. The default camera follows craft heading,
+pitch (the direction of travel), and roll. Descent shifts the horizon upward,
+ascent shifts it downward, and banking tilts it opposite the craft's roll.
+`camera_heading_deg` and `camera_pitch_deg` store retained look offsets rather
+than absolute world angles. Projection builds the craft's heading/pitch basis,
+banks its right/up vectors, then applies local look yaw followed by look pitch.
+The composed orthonormal basis stays defined at local vertical views without
+clamping the resulting world elevation or using Euler-angle addition.
 
-`create_flight_projection(state, { width_px, height_px, vertical_fov_deg })`
+`create_flight_projection(state, { width_px, height_px, vertical_fov_deg, fisheye_strength })`
 compiles an immutable camera with a default vertical field of view of 60°.
+Gameplay enables a mild fish-eye lens by default; Display → fish-eye lens is a
+persisted 0–100 slider. Its cubic mapping spans numerical strengths 0–64,
+providing fine control near zero. The numerical API defaults to 0 for a pinhole
+camera; gameplay initially uses 0.35 (about 18% on the slider). The new numeric
+preference inherits the old toggle until first edited: off becomes 0 and on
+becomes 0.35. Invalid saved values recover this default; explicit zero is retained.
+For screen coordinates
+`h,v`, the unnormalized ray is `(1-k*(h²+v²))*forward + h*right + v*up`, with
+`k` normalized by the viewport corner radius. This keeps center rays unchanged,
+widens peripheral rays, and curves an off-center horizon. It is a bounded radial
+fish-eye approximation. Extreme strengths allow rear-facing rays and can enclose
+the horizon as a complete circle when the view points downward. At exactly level
+forward viewing, the horizon remains through the center; the lens does not
+change the craft-relative center direction. Numerical overflow checks account
+for the longer unnormalized rays at high strengths. The existing ray
+pass includes the effect without extra pixels, image copies, or per-pixel
+trigonometry. Lens changes invalidate pending frames and retain the worker/cache.
 Raster dimensions must be positive safe integers, field of view strictly between
-0° and 180°, camera coordinates finite, altitude positive, and pitch within ±90°.
+0° and 180°, camera coordinates/attitude finite, altitude positive, and craft
+pitch and look pitch individually within ±90°.
 Headings wrap clockwise from north. Rays pass through pixel centers, using a
 top-left raster origin, square pixels, and a horizontal field of view derived
 from aspect ratio. Exact vertical views preserve a stable right direction.
@@ -502,13 +536,25 @@ Node worker boundary with local HTTP tile fetches and transferable buffers; this
 is complemented by Chromium/page verification below. Scoped lint, formatting and
 syntax checks pass; the complete integrated suite is described below.
 
-`npm run benchmark:flight-frames` in the UI directory measures a repeatable CPU
-baseline with cached uniform level-3 samples, no network/calculation, two warmup
-frames and five measured frames. On 2026-11-18 with local Node 22.19.0, means were
-about 7ms (320×180), 31ms (640×360), and 104ms (1280×720). Before the measured
-sampling/coloring optimizations, those means were about 22/95/539ms. These are
-fixture results, not guaranteed interactive frame rates; high-resolution CPU
-sampling remains the primary cost. Integrated browser measurements follow below.
+`npm run benchmark:flight-frames` compares pinhole and fish-eye modes using
+cached uniform level-3 samples with no network/calculation. It alternates modes
+through 30 warmup frames, then measures 15 frames per mode with alternating
+pair order. A local Node 22.19.0 run on 2026-11-18 recorded these total medians:
+
+| Raster | Pinhole | Fish-eye |
+| --- | --- | --- |
+| 320×180 | 11.68ms | 12.94ms |
+| 640×480 | 74.23ms | 76.99ms |
+| 1280×720 | 185.99ms | 182.04ms |
+
+At 640×480, the full-pipeline difference was about 3.7%. A separate warmed
+ray-only comparison against the preceding implementation measured 2.78ms
+before versus 3.10ms with fish-eye (about 0.32ms added). Timing noise and the
+visible tile footprint affect the result; these CPU fixture numbers do not
+predict EC2 or browser frame rates. Wider peripheral coverage may require
+additional tiles in real scenes. Pixel budgets, cache bounds, and adaptive
+resolution remain unchanged. Sampling/coloring continue to dominate cost.
+These measurements use mild strength 0.35, rather than the extreme slider maximum.
 
 ## Gameplay canvas integration — 2026-11-18
 

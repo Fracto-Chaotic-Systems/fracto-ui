@@ -18,6 +18,57 @@ function turn_rate(roll, speed, yaw) {
   return clamp(bank_turn + yaw * 6, -12, 12);
 }
 
+function motion_readings(pitch, roll, speed, altitude, yaw) {
+  return {
+    vertical_speed_fpm:
+      speed === 0 ||
+      altitude === MIN_WORLD_ALTITUDE ||
+      altitude === MAX_WORLD_ALTITUDE
+        ? 0
+        : altitude * speed * FEET_PER_KNOT_SECOND * Math.sin(pitch * RAD) * 60,
+    turn_rate_deg_s: turn_rate(roll, speed, yaw),
+    slip: yaw,
+  };
+}
+
+/** Neutralize only the accumulated values controlled by the selected stick. */
+export function neutralize_flight_channels(state, channels) {
+  const fields = {
+    move_x: "roll_deg",
+    move_y: "airspeed_knots",
+    pitch: "pitch_deg",
+    roll: "roll_deg",
+    speed: "airspeed_knots",
+    yaw: "slip",
+    look_x: "camera_heading_deg",
+    look_y: "camera_pitch_deg",
+  };
+  const next = { ...state };
+  let changed = false;
+  let motion_changed = false;
+  for (const channel of channels ?? []) {
+    const field = fields[channel];
+    if (typeof field === "string" && next[field] !== 0) {
+      next[field] = 0;
+      changed = true;
+      if (!field.startsWith("camera_")) motion_changed = true;
+    }
+  }
+  if (!changed) return state;
+  return motion_changed
+    ? {
+        ...next,
+        ...motion_readings(
+          next.pitch_deg,
+          next.roll_deg,
+          next.airspeed_knots,
+          next.altitude_world,
+          next.slip,
+        ),
+      }
+    : next;
+}
+
 /** A bounded, time-based game model; instrument display preferences do not affect physics. */
 export function step_flight_state(state, controls, elapsed_seconds) {
   if (
@@ -88,17 +139,12 @@ export function step_flight_state(state, controls, elapsed_seconds) {
     ),
     heading_deg: (((state.heading_deg + heading_delta) % 360) + 360) % 360,
     altitude_ft: altitude_world * FEET_PER_WORLD_UNIT,
-    vertical_speed_fpm:
-      airspeed_knots === 0 ||
-      altitude_world === MIN_WORLD_ALTITUDE ||
-      altitude_world === MAX_WORLD_ALTITUDE
-        ? 0
-        : altitude_world *
-          airspeed_knots *
-          FEET_PER_KNOT_SECOND *
-          Math.sin(pitch_deg * RAD) *
-          60,
-    turn_rate_deg_s: turn_rate(roll_deg, airspeed_knots, yaw),
-    slip: yaw,
+    ...motion_readings(
+      pitch_deg,
+      roll_deg,
+      airspeed_knots,
+      altitude_world,
+      yaw,
+    ),
   };
 }

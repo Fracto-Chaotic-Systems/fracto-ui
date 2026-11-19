@@ -73,9 +73,14 @@ export function map_flight_controls(
       else action(target, amount);
     });
     CONTROL_AXES.forEach((code, index) => {
+      // Apply precision after the dead zone so gentle stick motion still works.
+      const axis_scale = Number.isFinite(state.axis_scale)
+        ? Math.max(0, clamp(state.axis_scale))
+        : 1;
       const value =
         apply_axis_response(state.axes?.[index], settings) *
-        (settings.axis_inverted[code] ? -1 : 1);
+        (settings.axis_inverted[code] ? -1 : 1) *
+        axis_scale;
       signal(settings.axes[code], value);
     });
   }
