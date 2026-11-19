@@ -1,8 +1,6 @@
 import { useSyncExternalStore } from "react";
 import styled from "styled-components";
-import AppSettings from "../../../AppSettings.jsx";
 import AppText from "../../../AppText.jsx";
-import { KEY_GAMES_PLAY_CONTROLLER_ACTIONS } from "../../../settings/GamesSettings.jsx";
 import {
   FLIGHT_CONTROL_ACTION_TEXT,
   KEY_GAMES_PLAY_CONTROLLER_ACTIONS_LABEL,
@@ -63,15 +61,6 @@ const ActionBox = styled.li`
   white-space: nowrap;
 `;
 
-const read_enabled = () => !!AppSettings.get(KEY_GAMES_PLAY_CONTROLLER_ACTIONS);
-const subscribe_enabled = (notify) => {
-  const subscription = AppSettings.subscribe(
-    KEY_GAMES_PLAY_CONTROLLER_ACTIONS,
-    notify,
-  );
-  return () => AppSettings.unsubscribe(subscription);
-};
-
 function ActiveControllerActions({ controls }) {
   const state = useSyncExternalStore(
     controls.subscribe,
@@ -91,17 +80,12 @@ function ActiveControllerActions({ controls }) {
 }
 
 export default function ControllerActions({ controls }) {
-  const enabled = useSyncExternalStore(
-    subscribe_enabled,
-    read_enabled,
-    read_enabled,
-  );
   return (
     <ActionBoxes
       aria-label={AppText.get(KEY_GAMES_PLAY_CONTROLLER_ACTIONS_LABEL)}
       aria-live="polite"
     >
-      {enabled && <ActiveControllerActions controls={controls} />}
+      <ActiveControllerActions controls={controls} />
     </ActionBoxes>
   );
 }

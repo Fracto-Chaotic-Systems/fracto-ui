@@ -29,8 +29,9 @@ import {
 } from "./flight/FlightState.js";
 import { start_flight_simulation } from "./flight/FlightSimulation.js";
 import FlightScene from "./flight/FlightScene.jsx";
-import { useCanvasDisplay, useCanvasShape } from "./useCanvasDisplay.js";
+import { useCanvasShape } from "./useCanvasDisplay.js";
 import { useFisheyeStrength } from "./useFisheye.js";
+import { useAtmosphere } from "./useAtmosphere.js";
 import {
   MAX_SETTINGS_POSITION,
   MIN_SETTINGS_POSITION,
@@ -116,9 +117,9 @@ const SettingsHeading = styled.h2`
 `;
 
 export default function GamesPlay() {
-  const canvas_display = useCanvasDisplay();
   const canvas_shape = useCanvasShape();
   const fisheye_strength = useFisheyeStrength();
+  const haze_percent = useAtmosphere();
   // Input, mapped commands, and telemetry have separate per-page lifetimes.
   const [game_input] = useState(create_controller_input);
   const [flight_controls] = useState(create_flight_controls);
@@ -183,10 +184,9 @@ export default function GamesPlay() {
       </styles.SectionTitle>
       <PlayContent ref={content_ref}>
         <FlightScene
-          display_mode={
-            canvas_shape === "porthole" ? "porthole" : canvas_display
-          }
+          display_mode={canvas_shape === "porthole" ? "porthole" : "640x480"}
           fisheye_strength={fisheye_strength}
+          haze_percent={haze_percent}
           flight_state={flight_state}
           width_px={content_bounds.width}
           height_px={content_bounds.height}

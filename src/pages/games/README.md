@@ -110,9 +110,8 @@ See [controllers/README.md](controllers/README.md).
 - GamesPlaySettings.jsx owns the drawer's collapsible settings sections. The
   first section, **display**, starts collapsed and reveals a **full screen**
   switch when expanded.
-  Its **controller actions** toggle shows active button and stick descriptions in
-  tooltip-style boxes between the controller halves. It defaults off and persists
-  through AppSettings (`games/play_controller_actions`).
+  Active button and stick descriptions are always enabled between the controller
+  halves. There is no controller-actions toggle; old saved preferences are ignored.
   The **controller color** dropdown offers green, red, orange, white, violet,
   blue, pink, yellow, black, and grey. It defaults to blue and persists through
   AppSettings (`games/play_controller_color`). Each scheme keeps the shaded shell,

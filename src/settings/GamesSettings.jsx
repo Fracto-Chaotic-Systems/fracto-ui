@@ -7,6 +7,7 @@ import {
 import { DEFAULT_SIDEBAR_WIDTH } from "../constants.jsx";
 import { DEFAULT_INSTRUMENT_SETTINGS } from "../pages/games/flight/FlightInstrumentSettings.js";
 import { DEFAULT_FLIGHT_CONTROL_SETTINGS } from "../pages/games/controllers/FlightControlSettings.js";
+import { DEFAULT_FLIGHT_HAZE_PERCENT } from "../pages/games/flight/FlightAtmosphere.js";
 
 const GAMES_FOLDER = "games";
 export const KEY_GAMES_PLAY_DASHBOARD_BACKGROUND = `${GAMES_FOLDER}/play_dashboard_background`;
@@ -17,12 +18,11 @@ export const KEY_GAMES_WORDNET_SPLITTER_POS_PX = `${GAMES_FOLDER}/wordnet_splitt
 export const KEY_GAMES_SECTION = `${GAMES_FOLDER}/games_section`;
 export const KEY_GAMES_PLAY_SETTINGS_POSITION = `${GAMES_FOLDER}/play_settings_position`;
 export const KEY_GAMES_PLAY_FULL_SCREEN = `${GAMES_FOLDER}/play_full_screen`;
-export const KEY_GAMES_PLAY_CANVAS_DISPLAY = `${GAMES_FOLDER}/play_canvas_display`;
 export const KEY_GAMES_PLAY_CANVAS_SHAPE = `${GAMES_FOLDER}/play_canvas_shape`;
 export const KEY_GAMES_PLAY_FISHEYE = `${GAMES_FOLDER}/play_fisheye`;
+export const KEY_GAMES_PLAY_HAZE = `${GAMES_FOLDER}/play_haze_percent`;
 export const KEY_GAMES_PLAY_FISHEYE_STRENGTH = `${GAMES_FOLDER}/play_fisheye_strength`;
 export const KEY_GAMES_PLAY_CONTROLLER = `${GAMES_FOLDER}/play_controller`;
-export const KEY_GAMES_PLAY_CONTROLLER_ACTIONS = `${GAMES_FOLDER}/play_controller_actions`;
 export const KEY_GAMES_PLAY_CONTROLLER_COLOR = `${GAMES_FOLDER}/play_controller_color`;
 export const KEY_GAMES_PLAY_INSTRUMENTS = `${GAMES_FOLDER}/play_instruments`;
 export const KEY_GAMES_PLAY_FLIGHT_CONTROLS = `${GAMES_FOLDER}/play_flight_controls`;
@@ -39,6 +39,13 @@ export const GAMES_SETTINGS = "games_settings";
 export const GAMES_STATUS = "games_status";
 
 export const APP_GAMES_SETTINGS = {
+  [KEY_GAMES_PLAY_HAZE]: {
+    data_type: TYPE_NUMBER,
+    default_value: DEFAULT_FLIGHT_HAZE_PERCENT,
+    description:
+      "flight atmosphere haze, 0 percent clear to 100 percent dense fog",
+    persist: true,
+  },
   [KEY_GAMES_PLAY_CANVAS_SHAPE]: {
     data_type: TYPE_STRING,
     default_value: "cinema",
@@ -56,12 +63,6 @@ export const APP_GAMES_SETTINGS = {
     data_type: TYPE_BOOLEAN,
     default_value: true,
     description: "mild fisheye lens for the flight canvas",
-    persist: true,
-  },
-  [KEY_GAMES_PLAY_CANVAS_DISPLAY]: {
-    data_type: TYPE_STRING,
-    default_value: "fill",
-    description: "flight canvas display: fill or 640x480 pixels",
     persist: true,
   },
   [KEY_GAMES_PLAY_NIGHT_FLIGHT]: {
@@ -96,13 +97,6 @@ export const APP_GAMES_SETTINGS = {
     data_type: TYPE_STRING,
     default_value: "blue",
     description: "on-screen controller handle color scheme",
-    persist: true,
-  },
-  [KEY_GAMES_PLAY_CONTROLLER_ACTIONS]: {
-    data_type: TYPE_BOOLEAN,
-    default_value: false,
-    description:
-      "show descriptive action labels between the on-screen controller halves",
     persist: true,
   },
   [KEY_GAMES_PLAY_CONTROLLER]: {

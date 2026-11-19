@@ -264,12 +264,14 @@ of the scale; yellow ends and the red marker sits at 81.5%.
 Display settings select cinema (the current rectangular canvas) or porthole
 (a circular canvas with diameter 640 CSS pixels). Porthole uses a 640×640
 rendering buffer and square projection aspect, clipped to a circle, horizontally
-centered below the game title. Keep the previous cinema
-fill/640×480 sizing preference while porthole is selected; restore it when
-switching back. Persist the shape choice and preserve the worker and tile cache
+centered below the game title. Cinema always uses a 640×480 canvas; remove the
+cinema size setting and ignore its old saved preference.
+Persist the shape choice and preserve the worker and tile cache
 when switching, discarding any pending frame with the old aspect.
 
 <!-- 2026-11-19: Added cinema/porthole canvas modes with a fixed 640px circle. -->
+
+<!-- 2026-11-19: Removed cinema sizing preferences; cinema is always 640×480. -->
 
 In porthole mode, surround the 640px glass with a 36px brass casing and 16
 raised rivets. Leave a 16px gap above the casing, placing the glass 52px lower
@@ -286,3 +288,30 @@ area and uses the resulting inner glass dimensions for perspective and raster
 selection. Share the decorative finish between cinema and porthole modes.
 
 <!-- 2026-11-19: Added matching rectangular brass cinema frames and inner sizing. -->
+
+Porthole glass has very subtle, static edge reflections: a faint peripheral
+sheen and tapered curved highlights suggesting an outward-bulging window.
+Keep the center clear, clip the decoration inside the glass, and preserve
+controller input and the numerical frame-rendering pipeline.
+
+<!-- 2026-11-19: Added subtle convex-glass reflections at the porthole edges. -->
+
+## Atmosphere
+
+Settings include an **effects** section with an **atmospheric haze** slider
+from 0% (no atmosphere) to 100% (dense fog), persisted independently of display
+mode. Start at 25%. Apply distance-based extinction to plane pixels after
+palette coloring, blending toward the horizon color. Keep sky and horizon
+colors unchanged. Use slant distance divided by craft altitude so atmosphere
+remains consistent across fractal zoom scales. Optical depth increases with
+the square of that distance: transmission is
+`exp(-4 * (percent / 100)^4 * (distance / altitude)^2)`.
+A quartic slider response keeps nearby detail clear at light settings while
+allowing near-total extinction at the dense-fog endpoint.
+Reuse existing workers, tile caches, and RGBA buffers; discard stale frames
+when the haze setting changes.
+
+<!-- 2026-11-19: Added altitude-relative distance haze and persisted effects control. -->
+
+<!-- 2026-11-19: Changed fog extinction to squared distance and adjusted slider
+response to preserve nearby detail while distant details diffuse more strongly. -->

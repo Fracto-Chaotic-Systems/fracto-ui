@@ -14,12 +14,140 @@ import {
 import FractoFastCalc from "@fracto/sdk/FractoFastCalc.js";
 import {
   create_flight_intersections,
+  create_flight_projection,
+  trace_flight_pixel,
   FLIGHT_RAY_PLANE,
   FLIGHT_RAY_SKY,
   FLIGHT_RAY_HORIZON,
   FLIGHT_RAY_UNREPRESENTABLE,
 } from "../src/pages/games/flight/FlightProjection.js";
 import { create_flight_sample_buffer } from "../src/pages/games/flight/FlightRefinement.js";
+import { INITIAL_FLIGHT_STATE } from "../src/pages/games/flight/FlightState.js";
+import {
+  flight_haze_density,
+  flight_haze_transmission,
+  normalize_flight_haze,
+} from "../src/pages/games/flight/FlightAtmosphere.js";
+
+test("atmosphere preserves clear colors, fades distant details first, and becomes dense fog", () => {
+  const { samples, rays } = fixture(Array(9).fill([2, 10]));
+  samples.width_px = rays.width_px = 3;
+  samples.height_px = rays.height_px = 3;
+  const projection = create_flight_projection(
+    { ...INITIAL_FLIGHT_STATE, camera_pitch_deg: -35 },
+    { width_px: 3, height_px: 3 },
+  );
+  const clear = color_flight_frame(samples, rays.kinds);
+  assert.deepEqual(
+    color_flight_frame(
+      samples,
+      rays.kinds,
+      null,
+      {},
+      { projection, haze_percent: 0 },
+    ),
+    clear,
+  );
+  const haze = color_flight_frame(
+    samples,
+    rays.kinds,
+    null,
+    {},
+    { projection, haze_percent: 50 },
+  );
+  const fog = color_flight_frame(
+    samples,
+    rays.kinds,
+    null,
+    {},
+    { projection, haze_percent: 100 },
+  );
+  const fog_color = DEFAULT_FLIGHT_FRAME_COLORS.horizon;
+  const difference = (pixels, index) =>
+    fog_color
+      .slice(0, 3)
+      .reduce(
+        (sum, value, channel) =>
+          sum + Math.abs(value - pixels[index * 4 + channel]),
+        0,
+      );
+  assert.ok(difference(haze, 1) < difference(haze, 7));
+  for (let i = 0; i < 9; i++) {
+    assert.ok(difference(haze, i) <= difference(clear, i));
+    assert.ok(difference(fog, i) < 12);
+    assert.equal(fog[i * 4 + 3], 255);
+  }
+  rays.kinds.set([
+    FLIGHT_RAY_SKY,
+    FLIGHT_RAY_HORIZON,
+    FLIGHT_RAY_UNREPRESENTABLE,
+  ]);
+  assert.deepEqual(
+    color_flight_frame(
+      samples,
+      rays.kinds,
+      null,
+      {},
+      { projection, haze_percent: 100 },
+    ).slice(0, 12),
+    color_flight_frame(samples, rays.kinds).slice(0, 12),
+  );
+});
+
+test("atmospheric distance follows banked fisheye rays and stays stable at extreme zoom", () => {
+  const density = flight_haze_density(40);
+  for (const altitude_world of [1e-80, 1, 1e80]) {
+    const projection = create_flight_projection(
+      {
+        ...INITIAL_FLIGHT_STATE,
+        altitude_world,
+        camera_pitch_deg: -60,
+        roll_deg: 25,
+      },
+      { width_px: 5, height_px: 3, fisheye_strength: 0.35 },
+    );
+    for (const [x, y] of [
+      [0, 0],
+      [2, 1],
+      [4, 2],
+    ]) {
+      const hit = trace_flight_pixel(projection, x, y);
+      assert.equal(hit.kind, FLIGHT_RAY_PLANE);
+      const expected = Math.exp(
+        -density * (hit.distance_world / altitude_world) ** 2,
+      );
+      assert.ok(
+        Math.abs(
+          flight_haze_transmission(projection, x, y, density) - expected,
+        ) < 1e-12,
+      );
+    }
+  }
+  assert.equal(normalize_flight_haze(-1), 0);
+  assert.equal(normalize_flight_haze(200), 100);
+  assert.equal(normalize_flight_haze(NaN), 0);
+});
+
+test("doubling plane distance quadruples fog optical depth while nearby detail stays clear", () => {
+  const density = flight_haze_density(25);
+  const transmission_at_distance = (distance) => {
+    const projection = create_flight_projection(
+      {
+        ...INITIAL_FLIGHT_STATE,
+        camera_pitch_deg: (-Math.asin(1 / distance) * 180) / Math.PI,
+      },
+      { width_px: 1, height_px: 1 },
+    );
+    return flight_haze_transmission(projection, 0, 0, density);
+  };
+  const near = transmission_at_distance(1);
+  const middle = transmission_at_distance(2);
+  const far = transmission_at_distance(4);
+  assert.ok(near > 0.98);
+  assert.ok(near > middle && middle > far);
+  assert.ok(Math.abs(Math.log(far) / Math.log(middle) - 4) < 1e-12);
+  assert.ok(transmission_at_distance(16) < 0.02);
+});
 
 function fixture(pairs) {
   const samples = create_flight_sample_buffer(pairs.length, 1);

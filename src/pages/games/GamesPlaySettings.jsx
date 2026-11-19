@@ -5,11 +5,10 @@ import AppSettings from "../../AppSettings.jsx";
 import AppText from "../../AppText.jsx";
 import {
   KEY_GAMES_PLAY_FULL_SCREEN,
-  KEY_GAMES_PLAY_CANVAS_DISPLAY,
   KEY_GAMES_PLAY_CANVAS_SHAPE,
   KEY_GAMES_PLAY_FISHEYE_STRENGTH,
+  KEY_GAMES_PLAY_HAZE,
   KEY_GAMES_PLAY_CONTROLLER,
-  KEY_GAMES_PLAY_CONTROLLER_ACTIONS,
   KEY_GAMES_PLAY_CONTROLLER_COLOR,
 } from "../../settings/GamesSettings.jsx";
 import {
@@ -22,7 +21,6 @@ import {
   KEY_GAMES_PLAY_FULL_SCREEN_LABEL,
   KEY_GAMES_PLAY_FULL_SCREEN_ERROR,
   KEY_GAMES_PLAY_FULL_SCREEN_UNAVAILABLE,
-  KEY_GAMES_PLAY_CONTROLLER_ACTIONS_LABEL,
   KEY_GAMES_PLAY_CONTROLLER_COLOR_LABEL,
   CONTROLLER_COLOR_TEXT,
   FLIGHT_SCENE_TEXT,
@@ -33,8 +31,9 @@ import {
 } from "./controllers/ControllerColors.js";
 import FlightInstrumentSettingsPanel from "./flight/FlightInstrumentSettingsPanel.jsx";
 import DashboardBackgroundSetting from "./DashboardBackgroundSetting.jsx";
-import { useCanvasDisplay, useCanvasShape } from "./useCanvasDisplay.js";
+import { useCanvasShape } from "./useCanvasDisplay.js";
 import { useFisheyeStrength } from "./useFisheye.js";
+import { useAtmosphere } from "./useAtmosphere.js";
 import {
   fisheye_slider_value,
   fisheye_strength_for_slider,
@@ -112,17 +111,14 @@ const LensField = styled(ToggleItem)`
 `;
 
 export default function GamesPlaySettings({ fullscreen_target_ref }) {
-  const canvas_display = useCanvasDisplay();
   const canvas_shape = useCanvasShape();
   const fisheye_strength = useFisheyeStrength();
+  const haze_percent = useAtmosphere();
   const lens_level = fisheye_slider_value(fisheye_strength);
   const [controller_color, set_controller_color] = useState(() =>
     normalize_controller_color(
       AppSettings.get(KEY_GAMES_PLAY_CONTROLLER_COLOR),
     ),
-  );
-  const [controller_actions, set_controller_actions] = useState(
-    () => !!AppSettings.get(KEY_GAMES_PLAY_CONTROLLER_ACTIONS),
   );
   const [controller, set_controller] = useState(() => {
     const saved = AppSettings.get(KEY_GAMES_PLAY_CONTROLLER);
@@ -189,6 +185,14 @@ export default function GamesPlaySettings({ fullscreen_target_ref }) {
       <SettingsSection>
         <summary>{AppText.get(KEY_GAMES_PLAY_DISPLAY)}</summary>
         <ToggleItem>
+          {AppText.get(KEY_GAMES_PLAY_FULL_SCREEN_LABEL)}
+          <Switch
+            checked={full_screen}
+            disabled={changing || (!supported && !full_screen)}
+            onChange={change_fullscreen}
+          />
+        </ToggleItem>
+        <ToggleItem>
           {AppText.get(FLIGHT_SCENE_TEXT.mode)}
           <select
             value={canvas_shape}
@@ -205,43 +209,6 @@ export default function GamesPlaySettings({ fullscreen_target_ref }) {
               {AppText.get(FLIGHT_SCENE_TEXT.porthole)}
             </option>
           </select>
-        </ToggleItem>
-        <ToggleItem>
-          {AppText.get(FLIGHT_SCENE_TEXT.display)}
-          <select
-            value={canvas_display}
-            disabled={canvas_shape === "porthole"}
-            onChange={(event) =>
-              AppSettings.on_settings_changed({
-                [KEY_GAMES_PLAY_CANVAS_DISPLAY]: event.target.value,
-              })
-            }
-          >
-            <option value="fill">{AppText.get(FLIGHT_SCENE_TEXT.fill)}</option>
-            <option value="640x480">
-              {AppText.get(FLIGHT_SCENE_TEXT.fixed)}
-            </option>
-          </select>
-        </ToggleItem>
-        <ToggleItem>
-          {AppText.get(KEY_GAMES_PLAY_FULL_SCREEN_LABEL)}
-          <Switch
-            checked={full_screen}
-            disabled={changing || (!supported && !full_screen)}
-            onChange={change_fullscreen}
-          />
-        </ToggleItem>
-        <ToggleItem>
-          {AppText.get(KEY_GAMES_PLAY_CONTROLLER_ACTIONS_LABEL)}
-          <Switch
-            checked={controller_actions}
-            onChange={(_, checked) => {
-              set_controller_actions(checked);
-              AppSettings.on_settings_changed({
-                [KEY_GAMES_PLAY_CONTROLLER_ACTIONS]: checked,
-              });
-            }}
-          />
         </ToggleItem>
         <ToggleItem>
           {AppText.get(KEY_GAMES_PLAY_CONTROLLER_COLOR_LABEL)}
@@ -263,6 +230,18 @@ export default function GamesPlaySettings({ fullscreen_target_ref }) {
           </select>
         </ToggleItem>
         <DashboardBackgroundSetting />
+        {(!supported || error) && (
+          <p role="status">
+            {AppText.get(
+              error
+                ? KEY_GAMES_PLAY_FULL_SCREEN_ERROR
+                : KEY_GAMES_PLAY_FULL_SCREEN_UNAVAILABLE,
+            )}
+          </p>
+        )}
+      </SettingsSection>
+      <SettingsSection>
+        <summary>{AppText.get(FLIGHT_SCENE_TEXT.effects)}</summary>
         <LensField>
           {AppText.get(FLIGHT_SCENE_TEXT.fisheye)}
           <output>{Math.round(lens_level)}%</output>
@@ -283,15 +262,24 @@ export default function GamesPlaySettings({ fullscreen_target_ref }) {
             }
           />
         </LensField>
-        {(!supported || error) && (
-          <p role="status">
-            {AppText.get(
-              error
-                ? KEY_GAMES_PLAY_FULL_SCREEN_ERROR
-                : KEY_GAMES_PLAY_FULL_SCREEN_UNAVAILABLE,
-            )}
-          </p>
-        )}
+        <LensField>
+          {AppText.get(FLIGHT_SCENE_TEXT.haze)}
+          <output>{Math.round(haze_percent)}%</output>
+          <input
+            type="range"
+            aria-label={AppText.get(FLIGHT_SCENE_TEXT.haze)}
+            aria-valuetext={`${Math.round(haze_percent)}%`}
+            min={0}
+            max={100}
+            step={1}
+            value={haze_percent}
+            onChange={(event) =>
+              AppSettings.on_settings_changed({
+                [KEY_GAMES_PLAY_HAZE]: Number(event.target.value),
+              })
+            }
+          />
+        </LensField>
       </SettingsSection>
       <SettingsSection>
         <summary>{AppText.get(FLIGHT_SETTINGS_TEXT.instruments)}</summary>

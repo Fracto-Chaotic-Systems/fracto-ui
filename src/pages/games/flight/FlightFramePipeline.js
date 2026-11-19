@@ -59,7 +59,16 @@ export function create_flight_frame_pipeline(
       const sampled = now(),
         calculations = fallback.apply(intersections, samples);
       const calculated = now(),
-        rgba = color_flight_frame(samples, intersections.kinds, pixels, colors);
+        rgba = color_flight_frame(
+          samples,
+          intersections.kinds,
+          pixels,
+          colors,
+          {
+            projection,
+            haze_percent: viewport.haze_percent,
+          },
+        );
       const finished = now();
       return {
         width_px,

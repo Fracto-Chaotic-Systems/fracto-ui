@@ -7,6 +7,10 @@ import {
   FLIGHT_RAY_SKY,
   FLIGHT_RAY_HORIZON,
 } from "./FlightProjection.js";
+import {
+  flight_haze_density,
+  flight_haze_transmission,
+} from "./FlightAtmosphere.js";
 
 export const DEFAULT_FLIGHT_FRAME_COLORS = Object.freeze({
   sky: Object.freeze([145, 190, 222, 255]),
@@ -101,7 +105,13 @@ function pattern_rgb(pattern, tone) {
 }
 
 /** Produces one opaque RGBA pixel per ray. Numerical inputs remain unchanged. */
-export function color_flight_frame(samples, kinds, output = null, colors = {}) {
+export function color_flight_frame(
+  samples,
+  kinds,
+  output = null,
+  colors = {},
+  atmosphere = {},
+) {
   const count = validate_frame(samples, kinds);
   const pixels = output ?? new Uint8ClampedArray(count * 4);
   if (!(pixels instanceof Uint8ClampedArray) || pixels.length !== count * 4)
@@ -121,6 +131,15 @@ export function color_flight_frame(samples, kinds, output = null, colors = {}) {
   }
   const palette = build_flight_palette(samples, kinds),
     color_cache = new Map();
+  const density = flight_haze_density(atmosphere.haze_percent);
+  const projection = atmosphere.projection;
+  if (
+    density > 0 &&
+    (!projection ||
+      projection.width_px !== samples.width_px ||
+      projection.height_px !== samples.height_px)
+  )
+    throw new RangeError("Atmosphere requires a matching flight projection");
   let last_pattern = NaN,
     last_iteration = NaN,
     last_rgba = null;
@@ -166,6 +185,19 @@ export function color_flight_frame(samples, kinds, output = null, colors = {}) {
     pixels[offset + 1] = rgba[1];
     pixels[offset + 2] = rgba[2];
     pixels[offset + 3] = rgba[3];
+    if (density > 0 && kind === FLIGHT_RAY_PLANE) {
+      const x = pixel % samples.width_px;
+      const transmission = flight_haze_transmission(
+        projection,
+        x,
+        (pixel - x) / samples.width_px,
+        density,
+      );
+      for (let channel = 0; channel < 3; channel++)
+        pixels[offset + channel] =
+          background.horizon[channel] +
+          (rgba[channel] - background.horizon[channel]) * transmission;
+    }
   }
   return pixels;
 }

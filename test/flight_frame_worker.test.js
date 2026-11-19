@@ -56,6 +56,12 @@ test("pipeline progresses from missing samples to tile colors and reuses output 
   const second = pipeline.render(down, viewport);
   assert.equal(second.stats.calculations.unresolved, 0);
   assert.notDeepEqual(second.pixels, first.pixels);
+  const fog = pipeline.render(down, { ...viewport, haze_percent: 100 });
+  assert.notDeepEqual(fog.pixels, second.pixels);
+  for (let i = 0; i < fog.pixels.length; i++)
+    assert.ok(
+      Math.abs(fog.pixels[i] - DEFAULT_FLIGHT_FRAME_COLORS.horizon[i % 4]) <= 5,
+    );
   const third = pipeline.render(sky, viewport, second.pixels);
   assert.strictEqual(third.pixels, second.pixels);
   assert.deepEqual(

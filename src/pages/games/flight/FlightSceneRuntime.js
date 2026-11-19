@@ -1,5 +1,6 @@
 import { create_flight_resolution } from "./FlightResolution.js";
 import { MAX_FLIGHT_FISHEYE_STRENGTH } from "./FlightLens.js";
+import { normalize_flight_haze } from "./FlightAtmosphere.js";
 
 /** Completion-driven painting. No subscriptions or per-frame React updates. */
 export function start_flight_scene(
@@ -27,6 +28,7 @@ export function start_flight_scene(
   let bounds = { width: 0, height: 0 },
     display_mode = "fill",
     fisheye_strength = 0,
+    haze_percent = 0,
     painted = 0;
   const usable = () =>
     active &&
@@ -80,6 +82,7 @@ export function start_flight_scene(
       frame = await client.render(flight_state.get_snapshot(), {
         ...viewport,
         fisheye_strength,
+        haze_percent,
       });
       if (!usable() || generation !== revision) return;
       const image = new target_window.ImageData(
@@ -128,7 +131,8 @@ export function start_flight_scene(
   target_window.addEventListener("focus", resume);
   target_document.addEventListener("visibilitychange", resume);
   return {
-    resize(width, height, mode = "fill", strength = 0) {
+    resize(width, height, mode = "fill", strength = 0, haze = 0) {
+      const next_haze = normalize_flight_haze(haze);
       const next_strength = Number.isFinite(strength)
         ? Math.max(0, Math.min(MAX_FLIGHT_FISHEYE_STRENGTH, strength))
         : 0;
@@ -142,11 +146,13 @@ export function start_flight_scene(
         next.width === bounds.width &&
         next.height === bounds.height &&
         next_mode === display_mode &&
-        next_strength === fisheye_strength
+        next_strength === fisheye_strength &&
+        next_haze === haze_percent
       )
         return;
       display_mode = next_mode;
       fisheye_strength = next_strength;
+      haze_percent = next_haze;
       bounds = next;
       invalidate();
       schedule();

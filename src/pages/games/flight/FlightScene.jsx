@@ -6,6 +6,7 @@ import { create_flight_frame_client } from "./FlightFrameClient.js";
 import { start_flight_scene } from "./FlightSceneRuntime.js";
 import { DEFAULT_FLIGHT_FISHEYE_STRENGTH } from "./FlightProjection.js";
 import FlightCasing from "./FlightCasing.jsx";
+import { DEFAULT_FLIGHT_HAZE_PERCENT } from "./FlightAtmosphere.js";
 import {
   flight_scene_layout,
   FLIGHT_FRAME_RIM_PX,
@@ -38,6 +39,41 @@ const SceneMount = styled.div`
   visibility: ${({ $ready }) => ($ready ? "visible" : "hidden")};
   pointer-events: none;
 `;
+// Static glass highlights stay outside the numerical rendering/frame loop.
+const PortholeGlass = styled.div`
+  position: absolute;
+  inset: ${FLIGHT_FRAME_RIM_PX}px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(
+    circle closest-side,
+    transparent 86%,
+    #e6f6ff08 92%,
+    #e6f6ff1c 97%,
+    #effaff38 100%
+  );
+  box-shadow: inset 0 0 5px #18313c1a;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 12px;
+    border-radius: 50%;
+    background: conic-gradient(
+      from 0deg,
+      transparent 0deg 105deg,
+      #e4f5ff47 135deg,
+      transparent 165deg 270deg,
+      #f4fbff80 310deg,
+      transparent 355deg
+    );
+    mask-image: radial-gradient(
+      circle closest-side,
+      transparent 94%,
+      #000 97.5%,
+      transparent 100%
+    );
+  }
+`;
 const SceneError = styled.div`
   position: absolute;
   top: 1rem;
@@ -57,8 +93,9 @@ export default function FlightScene({
   flight_state,
   width_px,
   height_px,
-  display_mode = "fill",
+  display_mode = "640x480",
   fisheye_strength = DEFAULT_FLIGHT_FISHEYE_STRENGTH,
+  haze_percent = DEFAULT_FLIGHT_HAZE_PERCENT,
   create_client = create_flight_frame_client,
   on_frame,
 }) {
@@ -92,12 +129,14 @@ export default function FlightScene({
       glass_height_px,
       mode,
       fisheye_strength,
+      haze_percent,
     );
   }, [
     glass_width_px,
     glass_height_px,
     mode,
     fisheye_strength,
+    haze_percent,
     attempt,
     flight_state,
     create_client,
@@ -117,6 +156,7 @@ export default function FlightScene({
             role="img"
             aria-label={AppText.get(FLIGHT_SCENE_TEXT.view)}
           />
+          {ready && mode === "porthole" && <PortholeGlass aria-hidden="true" />}
           {ready && (
             <FlightCasing
               shape={mode === "porthole" ? "porthole" : "cinema"}

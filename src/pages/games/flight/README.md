@@ -277,7 +277,7 @@ clamping the resulting world elevation or using Euler-angle addition.
 
 `create_flight_projection(state, { width_px, height_px, vertical_fov_deg, fisheye_strength })`
 compiles an immutable camera with a default vertical field of view of 60°.
-Gameplay enables a mild fish-eye lens by default; Display → fish-eye lens is a
+Gameplay enables a mild fish-eye lens by default; Effects → fish-eye lens is a
 persisted 0–100 slider. Its cubic mapping spans numerical strengths 0–64,
 providing fine control near zero. The numerical API defaults to 0 for a pinhole
 camera; gameplay initially uses 0.35 (about 18% on the slider). The new numeric
@@ -587,17 +587,29 @@ frame. It skips two warmup measurements, smooths subsequent costs, reduces after
 three slow measurements and grows after twelve fast measurements. Budgets stay
 between 14400 and 518400 pixels, and output never exceeds the available native
 raster at up to 2× display density in the default Fill available space mode.
-Display settings also offer a persisted 640 × 480 pixels canvas mode. This mode
-uses an exact 640×480 raster independent of DPR and adaptive budgets, centers
-horizontally when space permits, and starts at the content area's top edge,
-directly below the game title bar. Its viewport scrolls on smaller play areas so
-the fixed canvas can be reached in full. Switching modes invalidates pending
+Settings → **effects** → **atmospheric haze** controls distance fog from 0–100%,
+persisted as `games/play_haze_percent` (default 25%). `FlightAtmosphere.js` uses
+Squared-distance transmission
+`exp(-4 * (percent / 100)^4 * (distance / altitude)^2)`.
+Doubling distance quadruples optical depth; the quartic slider response keeps
+nearby detail clearer at light and moderate settings while retaining dense fog
+at 100%.
+Slant distance is derived from the projection ray before world-coordinate
+rounding, preserving deep-zoom stability and fisheye/bank geometry. Plane RGB
+blends toward the horizon color within the existing worker coloring loop;
+sky, horizon, palettes, tile selection, and alpha remain unchanged. At 0% the
+extra ray math is skipped and colors are identical to clear rendering. Edits
+invalidate pending frames without restarting the worker or clearing tiles.
+
+Cinema always uses an exact 640×480 raster independent of DPR and adaptive
+budgets, centered horizontally when space permits. The legacy cinema size
+preference is no longer read or offered in settings. Its viewport scrolls on
+smaller play areas so the fixed canvas can be reached in full. Switching shapes invalidates pending
 frames while preserving the existing worker and tile cache.
 
 Display → canvas mode selects **cinema** (the default rectangle) or **porthole**
-(a 640px-diameter circle). Cinema keeps the existing fill/640×480 preference
-under **cinema size**. That size selector is disabled in porthole mode and its
-value is retained for the return to cinema. The shape preference persists as
+(a 640px-diameter circle). Cinema has a constant 640×480 size.
+The shape preference persists as
 `games/play_canvas_shape`; unknown values fall back to cinema. Porthole renders
 a square 640×640 raster with the correct 1:1 projection aspect, then the canvas
 element clips it with a 50% border radius. This avoids stretching a 4:3 image
@@ -611,7 +623,8 @@ the canvas element, worker, and tile cache.
 
 Cinema uses the same brass finish, bevels, and rivets on a rectangular frame.
 Its fixed 640×480 glass sits inside a 712×552 casing, with slightly rounded
-corners and the same 52px drop below the title. In fill mode, the outer frame
+corners and the same 52px drop below the title. The internal fill mode, retained
+for renderer validation fixtures, gives the outer frame
 leaves 16px above and at each side, and 28px below; its 36px rim is deducted
 from the glass dimensions. `FlightSceneLayout.js` supplies those inner dimensions
 to the renderer so its projection aspect matches the visible glass. Frame and

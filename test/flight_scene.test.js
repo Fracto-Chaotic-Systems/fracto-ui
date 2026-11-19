@@ -235,6 +235,7 @@ test("fixed display keeps exact pixels across resize and switches back using the
       width_px: 640,
       height_px: 480,
       fisheye_strength: 0,
+      haze_percent: 0,
     });
     f.finish();
     await frame;
@@ -272,6 +273,7 @@ test("porthole mode uses a 640px square raster and preserves the client through 
       width_px: 640,
       height_px: 640,
       fisheye_strength: 0.35,
+      haze_percent: 0,
     });
     f.finish();
     await frame;
@@ -300,10 +302,29 @@ test("changing lenses invalidates old frames without restarting the worker or ch
     width_px: 640,
     height_px: 480,
     fisheye_strength: 0.35,
+    haze_percent: 0,
   });
   f.finish();
   await lens;
   assert.equal(f.stats().created, 1);
+  f.runtime.destroy();
+});
+
+test("haze edits invalidate stale frames and reuse the worker and raster", async () => {
+  const f = fixture();
+  f.runtime.resize(640, 480, "640x480", 0.35, 25);
+  const old = f.tick();
+  assert.equal(f.requests[0].viewport.haze_percent, 25);
+  f.runtime.resize(640, 480, "640x480", 0.35, 100);
+  f.finish();
+  await old;
+  assert.equal(f.painted.length, 0);
+  const fog = f.tick();
+  assert.equal(f.requests.at(-1).viewport.haze_percent, 100);
+  f.finish();
+  await fog;
+  assert.equal(f.stats().created, 1);
+  assert.equal(f.canvas.width, 640);
   f.runtime.destroy();
 });
 

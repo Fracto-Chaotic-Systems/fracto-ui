@@ -27,6 +27,7 @@ function mount({
   controller_actions = false,
   controller_color = "blue",
   fisheye_strength = 0.35,
+  haze_percent = 25,
   canvas_shape = "cinema",
 } = {}) {
   const states = [];
@@ -70,15 +71,17 @@ function mount({
       fill: "Fill available space",
       fixed: "640 × 480 pixels",
       fisheye: "fish-eye lens",
+      effects: "effects",
+      haze: "atmospheric haze",
     },
-    useCanvasDisplay: () => "fill",
     useCanvasShape: () => canvas_shape,
     KEY_GAMES_PLAY_CANVAS_SHAPE: "canvas_shape",
     useFisheyeStrength: () => fisheye_strength,
+    useAtmosphere: () => haze_percent,
+    KEY_GAMES_PLAY_HAZE: "haze_percent",
     KEY_GAMES_PLAY_FISHEYE_STRENGTH: "fisheye_strength",
     fisheye_slider_value,
     fisheye_strength_for_slider,
-    KEY_GAMES_PLAY_CANVAS_DISPLAY: "canvas_display",
     React: {
       createElement: (type, props, ...children) => ({ type, props, children }),
     },
@@ -133,7 +136,7 @@ function mount({
   };
   render();
   const cleanup = effects[0]();
-  const toggle = () => render().children[0].children[3].children[1].props;
+  const toggle = () => render().children[0].children[1].children[1].props;
   return {
     document,
     game_area,
@@ -199,9 +202,9 @@ test("unsupported browsers disable entry and mounting never requests fullscreen"
   assert.match(JSON.stringify(view.render()), /unavailable/);
 });
 
-test("canvas mode defaults to cinema, saves porthole and disables only cinema sizing", () => {
+test("canvas mode defaults to cinema and restores porthole without a cinema size selector", () => {
   const view = mount();
-  const mode = view.render().children[0].children[1].children[1];
+  const mode = view.render().children[0].children[2].children[1];
   assert.equal(mode.props.value, "cinema");
   assert.deepEqual(
     Array.from(mode.children, (option) => option.children[0]),
@@ -211,24 +214,17 @@ test("canvas mode defaults to cinema, saves porthole and disables only cinema si
   assert.equal(view.saved.at(-1).canvas_shape, "porthole");
   const restored = mount({ canvas_shape: "porthole" }).render();
   assert.equal(
-    restored.children[0].children[1].children[1].props.value,
+    restored.children[0].children[2].children[1].props.value,
     "porthole",
   );
-  assert.equal(
-    restored.children[0].children[2].children[1].props.disabled,
-    true,
-  );
-  assert.equal(
-    view.render().children[0].children[2].children[1].props.disabled,
-    false,
-  );
+  assert.ok(!JSON.stringify(view.render()).includes("canvas display"));
 });
 
 test("fish-eye slider restores strength and saves zero and the extreme maximum", () => {
   const view = mount();
   const field = view
     .render()
-    .children[0].children.find(
+    .children[1].children.find(
       (item) => item?.children?.[0] === "fish-eye lens",
     );
   const slider = field.children[2].props;
@@ -242,10 +238,29 @@ test("fish-eye slider restores strength and saves zero and the extreme maximum",
   assert.equal(view.saved.at(-1).fisheye_strength, 64);
   const restored = mount({ fisheye_strength: 64 })
     .render()
-    .children[0].children.find(
+    .children[1].children.find(
       (item) => item?.children?.[0] === "fish-eye lens",
     );
   assert.equal(restored.children[2].props.value, 100);
+});
+
+test("effects section restores atmospheric haze and saves clear and dense-fog endpoints", () => {
+  const view = mount({ haze_percent: 65 });
+  const effects = view
+    .render()
+    .children.find((section) => section.children[0].children[0] === "effects");
+  const slider = effects.children.find(
+    (item) => item?.children?.[0] === "atmospheric haze",
+  ).children[2].props;
+  assert.equal(slider["aria-label"], "atmospheric haze");
+  assert.equal(slider["aria-valuetext"], "65%");
+  assert.equal(slider.value, 65);
+  assert.equal(slider.min, 0);
+  assert.equal(slider.max, 100);
+  slider.onChange({ target: { value: "0" } });
+  assert.equal(view.saved.at(-1).haze_percent, 0);
+  slider.onChange({ target: { value: "100" } });
+  assert.equal(view.saved.at(-1).haze_percent, 100);
 });
 
 test("controller dropdown restores and saves the selected controller", () => {
@@ -267,24 +282,9 @@ test("controller dropdown restores and saves the selected controller", () => {
   assert.equal(controller_dropdown(invalid.render()).props.value, "on_screen");
 });
 
-test("controller actions switch defaults off and persists its selection", () => {
-  const view = mount();
-  const actions_toggle = () =>
-    view.render().children[0].children[4].children[1].props;
-  assert.equal(actions_toggle().checked, false);
-  actions_toggle().onChange(null, true);
-  assert.equal(actions_toggle().checked, true);
-  assert.equal(view.saved.at(-1).controller_actions, true);
-  const restored = mount({ controller_actions: true });
-  assert.equal(
-    restored.render().children[0].children[4].children[1].props.checked,
-    true,
-  );
-});
-
 test("controller color dropdown has all requested colors, restores and saves choices", () => {
   const view = mount();
-  const dropdown = () => view.render().children[0].children[5].children[1];
+  const dropdown = () => view.render().children[0].children[3].children[1];
   assert.equal(dropdown().props.value, "blue");
   assert.deepEqual(
     Array.from(dropdown().children[0], (option) => option.children[0]),
@@ -306,12 +306,12 @@ test("controller color dropdown has all requested colors, restores and saves cho
   assert.equal(view.saved.at(-1).controller_color, "red");
   const restored = mount({ controller_color: "grey" });
   assert.equal(
-    restored.render().children[0].children[5].children[1].props.value,
+    restored.render().children[0].children[3].children[1].props.value,
     "grey",
   );
   const invalid = mount({ controller_color: "invalid" });
   assert.equal(
-    invalid.render().children[0].children[5].children[1].props.value,
+    invalid.render().children[0].children[3].children[1].props.value,
     "blue",
   );
 });
