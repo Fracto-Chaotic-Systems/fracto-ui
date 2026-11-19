@@ -86,7 +86,8 @@ test("gameplay starts hovering north and world/camera fields normalize atomicall
   assert.equal(initial.airspeed_knots, 0);
   assert.equal(initial.heading_deg, 0);
   assert.equal(initial.camera_heading_deg, 0);
-  assert.equal(initial.camera_pitch_deg, 0);
+  assert.equal(initial.camera_pitch_deg, (-Math.atan2(1, 2) * 180) / Math.PI);
+  assert.equal(initial.pitch_deg, 0);
   store.update({
     position_re: 2,
     position_im: 3,

@@ -3,6 +3,7 @@ import test from "node:test";
 import { setImmediate } from "node:timers";
 import { create_flight_resolution } from "../src/pages/games/flight/FlightResolution.js";
 import { start_flight_scene } from "../src/pages/games/flight/FlightSceneRuntime.js";
+import { flight_scene_layout } from "../src/pages/games/flight/FlightSceneLayout.js";
 import {
   create_flight_state,
   INITIAL_FLIGHT_STATE,
@@ -108,6 +109,38 @@ function fixture(options = {}) {
     },
   };
 }
+
+test("framed cinema uses the inner glass aspect while fixed views retain their specified sizes", async () => {
+  const layout = flight_scene_layout(1200, 900, "fill");
+  assert.equal(layout.frame_width_px, 1168);
+  assert.equal(layout.frame_height_px, 856);
+  assert.equal(layout.glass_width_px, 1096);
+  assert.equal(layout.glass_height_px, 784);
+  const f = fixture();
+  f.runtime.resize(layout.glass_width_px, layout.glass_height_px, layout.mode);
+  const frame = f.tick();
+  const viewport = f.requests[0].viewport;
+  assert.ok(
+    Math.abs(viewport.width_px / viewport.height_px - 1096 / 784) < 0.02,
+  );
+  f.finish();
+  await frame;
+  f.runtime.destroy();
+  for (const [mode, height] of [
+    ["640x480", 480],
+    ["porthole", 640],
+  ]) {
+    const fixed = flight_scene_layout(390, 500, mode);
+    assert.equal(fixed.glass_width_px, 640);
+    assert.equal(fixed.glass_height_px, height);
+    assert.equal(fixed.frame_width_px, 712);
+    assert.equal(fixed.frame_height_px, height + 72);
+  }
+  assert.equal(flight_scene_layout(0, 900).glass_width_px, 0);
+  assert.equal(flight_scene_layout(900, NaN).glass_height_px, 0);
+  assert.equal(flight_scene_layout(40, 40).glass_width_px, 1);
+  assert.equal(flight_scene_layout(40, 40).glass_height_px, 1);
+});
 
 test("resolution preserves aspect, respects display density and adapts with bounded hysteresis", () => {
   const quality = create_flight_resolution();

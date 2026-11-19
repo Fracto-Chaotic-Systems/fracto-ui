@@ -83,22 +83,22 @@ separate from controller input and settings. Its snapshot is not persisted.
 known fields atomically and only notifies listeners when normalized values change.
 `reset()` restores that store's initial snapshot values.
 
-| Field                | Unit / meaning                                            |
-| -------------------- | --------------------------------------------------------- |
-| `source`             | `preview`, `live`, or `unavailable`                       |
-| `position_re`, `position_im` | Complex-plane position; north is +imaginary, east is +real |
-| `altitude_world`     | Strictly positive distance above the flat complex plane |
-| `camera_heading_deg` | Look yaw offset from craft forward, clockwise, [0, 360) |
-| `camera_pitch_deg`   | Look elevation offset in the craft frame, -90 through 90 degrees |
-| `pitch_deg`          | Degrees, positive nose up, bounded to -90 through 90      |
-| `roll_deg`           | Degrees, positive right wing down, wrapped to [-180, 180) |
-| `heading_deg`        | Degrees, wrapped to [0, 360)                              |
-| `airspeed_knots`     | Knots, nonnegative                                        |
-| `altitude_ft`        | Feet, signed                                              |
-| `vertical_speed_fpm` | Feet/minute, positive climbing                            |
-| `turn_rate_deg_s`    | Degrees/second, positive right turn                       |
-| `slip`               | Dimensionless, bounded to [-1, 1]                         |
-| `pressure_hpa`       | hPa, positive                                             |
+| Field                        | Unit / meaning                                                   |
+| ---------------------------- | ---------------------------------------------------------------- |
+| `source`                     | `preview`, `live`, or `unavailable`                              |
+| `position_re`, `position_im` | Complex-plane position; north is +imaginary, east is +real       |
+| `altitude_world`             | Strictly positive distance above the flat complex plane          |
+| `camera_heading_deg`         | Look yaw offset from craft forward, clockwise, [0, 360)          |
+| `camera_pitch_deg`           | Look elevation offset in the craft frame, -90 through 90 degrees |
+| `pitch_deg`                  | Degrees, positive nose up, bounded to -90 through 90             |
+| `roll_deg`                   | Degrees, positive right wing down, wrapped to [-180, 180)        |
+| `heading_deg`                | Degrees, wrapped to [0, 360)                                     |
+| `airspeed_knots`             | Knots, nonnegative                                               |
+| `altitude_ft`                | Feet, signed                                                     |
+| `vertical_speed_fpm`         | Feet/minute, positive climbing                                   |
+| `turn_rate_deg_s`            | Degrees/second, positive right turn                              |
+| `slip`                       | Dimensionless, bounded to [-1, 1]                                |
+| `pressure_hpa`               | hPa, positive                                                    |
 
 Missing, nonnumeric, or nonfinite fields retain their previous value; unknown
 fields are dropped. Nonpositive pressure retains its last valid value. Store
@@ -112,8 +112,10 @@ telemetry updates do not rerender GamesPlay, the dock, or the controller.
 instrument names include current readings, units, and source status.
 
 Gameplay starts stationary at complex position (-0.5, -2), world altitude 1
-(2500ft), heading north (0°), with the camera facing north and level, and zero
-pitch, bank, climb, and turn rate. Preview fixtures retain their historical
+(2500ft), heading north (0°), with zero craft pitch, bank, climb, and turn rate.
+The initial camera look pitch is `-atan2(1, 2)` (about -26.565°), aiming at
+`i=0` halfway down the display. Refresh and a complete state reset restore this
+view; subsequent look offsets continue to follow the craft. Preview fixtures retain their historical
 90-knot/45° readings. `FlightSimulation.js` publishes live
 readings from mapped controller commands. Preview and live status captions are
 hidden; accessible instrument labels still identify their source. Unavailable
@@ -547,10 +549,10 @@ cached uniform level-3 samples with no network/calculation. It alternates modes
 through 30 warmup frames, then measures 15 frames per mode with alternating
 pair order. A local Node 22.19.0 run on 2026-11-18 recorded these total medians:
 
-| Raster | Pinhole | Fish-eye |
-| --- | --- | --- |
-| 320×180 | 11.68ms | 12.94ms |
-| 640×480 | 74.23ms | 76.99ms |
+| Raster   | Pinhole  | Fish-eye |
+| -------- | -------- | -------- |
+| 320×180  | 11.68ms  | 12.94ms  |
+| 640×480  | 74.23ms  | 76.99ms  |
 | 1280×720 | 185.99ms | 182.04ms |
 
 At 640×480, the full-pipeline difference was about 3.7%. A separate warmed
@@ -599,8 +601,23 @@ value is retained for the return to cinema. The shape preference persists as
 `games/play_canvas_shape`; unknown values fall back to cinema. Porthole renders
 a square 640×640 raster with the correct 1:1 projection aspect, then the canvas
 element clips it with a 50% border radius. This avoids stretching a 4:3 image
-into a circle. It stays horizontally centered and top-aligned below the game
-title, with scrolling when needed, and mode switches keep the worker/cache.
+into a circle. A static SVG brass casing surrounds the glass with a 36px rim,
+beveled edges, and 16 raised rivets. The casing's outer diameter is 712px; a
+16px top gap puts the glass 52px below its former position under the title.
+The mount stays horizontally centered, scrolls when needed, and does not
+intercept controls. Its decoration is outside the canvas and adds no flight
+frame-loop work. The 640×640 porthole raster is unchanged; mode switches retain
+the canvas element, worker, and tile cache.
+
+Cinema uses the same brass finish, bevels, and rivets on a rectangular frame.
+Its fixed 640×480 glass sits inside a 712×552 casing, with slightly rounded
+corners and the same 52px drop below the title. In fill mode, the outer frame
+leaves 16px above and at each side, and 28px below; its 36px rim is deducted
+from the glass dimensions. `FlightSceneLayout.js` supplies those inner dimensions
+to the renderer so its projection aspect matches the visible glass. Frame and
+glass dimensions remain positive on cramped views, with scroll access to fixed
+frames. Both shapes share `FlightCasing.jsx`; their decoration is static and
+pointer-transparent, independent of the worker and canvas painting loop.
 
 `/scripts/flight_scene_validation.html` composes the production scene, simulation,
 controls, mapping and instruments in StrictMode with memory-only preferences.

@@ -38,6 +38,14 @@ export const PREVIEW_FLIGHT_STATE = Object.freeze({
 export const INITIAL_FLIGHT_STATE = Object.freeze({
   ...EMPTY_FLIGHT_STATE,
   source: "live",
+  // Aim the center ray at i=0 while the stationary craft remains level.
+  camera_pitch_deg:
+    (-Math.atan2(
+      EMPTY_FLIGHT_STATE.altitude_world,
+      -EMPTY_FLIGHT_STATE.position_im,
+    ) *
+      180) /
+    Math.PI,
   altitude_ft: FEET_PER_WORLD_UNIT,
 });
 

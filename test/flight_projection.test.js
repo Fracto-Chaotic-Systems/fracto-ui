@@ -26,11 +26,11 @@ const close = (actual, expected, tolerance = 1e-10) =>
   );
 const projection = (state = {}, viewport = {}) =>
   create_flight_projection(
-    { ...INITIAL_FLIGHT_STATE, ...state },
+    { ...INITIAL_FLIGHT_STATE, camera_pitch_deg: 0, ...state },
     { width_px: 3, height_px: 3, ...viewport },
   );
 
-test("initial north-facing view separates sky, horizon and forward plane hits", () => {
+test("level north-facing view separates sky, horizon and forward plane hits", () => {
   const camera = projection();
   const frame = trace_flight_frame(camera);
   assert.deepEqual(
@@ -55,6 +55,27 @@ test("initial north-facing view separates sky, horizon and forward plane hits", 
   assert.deepEqual(trace_flight_pixel(camera, 1, 1), {
     kind: FLIGHT_RAY_HORIZON,
   });
+});
+
+test("reset view places i=0 across the middle of cinema and porthole displays", () => {
+  for (const [width_px, height_px] of [
+    [641, 481],
+    [641, 641],
+    [1001, 301],
+  ]) {
+    for (const fisheye_strength of [0, 0.35]) {
+      const camera = create_flight_projection(INITIAL_FLIGHT_STATE, {
+        width_px,
+        height_px,
+        fisheye_strength,
+      });
+      for (const x of [0, (width_px - 1) / 2, width_px - 1]) {
+        const hit = trace_flight_pixel(camera, x, (height_px - 1) / 2);
+        assert.equal(hit.kind, FLIGHT_RAY_PLANE);
+        close(hit.position_im, 0);
+      }
+    }
+  }
 });
 
 test("center rays look toward cardinal headings with correct altitude-scaled intersections", () => {
@@ -138,6 +159,7 @@ test("neutral look faces the direction of motion at any heading, climb angle and
       const state = {
         ...INITIAL_FLIGHT_STATE,
         heading_deg,
+        camera_pitch_deg: 0,
         pitch_deg,
         roll_deg: 40,
         airspeed_knots: 100,

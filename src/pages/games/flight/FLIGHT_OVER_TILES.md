@@ -3,6 +3,7 @@
 This document outlines the requirements and basic operation of the tile-based flight simulator.
 
 ## Starting Point
+
 1. A tiling interface exists that has been used to render 2D portions of the complext plane, for the purposes of studying the Mandelbrot Set.
 2. The mechanisms that are in place to cache tiles for rendering should be re-used as much as possible, and enhanced if necessary for this feature.
 3. On the "game play" page, a simple controller interface has been created, and linked with status indicators that signify various flight states of the craft.
@@ -23,13 +24,12 @@ The overall approach involves ray tracing, which is similar to the 2D approach i
 To render a 2D image, the scope is divided by the number of pixels to determine the complex coordinates of each pixel.
 In this rendering, a 3D ray should be used to intersect the complex plane, thus determining which tile and then which (i, j) data point of that tile which should be used to render the given pixel.
 
-
 To minimize the number of tiles required for a given rendering, it's important not to load more tiles than is necessary for the given framing.
 Level 3 tiles have the largest scope, so they can be used at points that are distant from the viewer.
 Parts of the plane that are closer to the viewer will require deeper levels in order to display the true amount of detail that can be obtained.
 
 There's a simple test to determine if the tile being used for a given pixel is not at a low enough level to correctly render details:
-If the same data point index (i, j) of the same tile is used for two different ray-traced pixels, then a deeper level tile must be used instead in that area (and *only* that area, until there is evidence for the need of more detail).
+If the same data point index (i, j) of the same tile is used for two different ray-traced pixels, then a deeper level tile must be used instead in that area (and _only_ that area, until there is evidence for the need of more detail).
 
 Once the need for the deeper level tile has been identified, that detailed tile should be used in the "catalog" of all tiles used in the ray tracing for that frame, and accessed in future tracings instead of the coarser level (parent) tile.
 Using this rule, an adaptive rendering scheme should be able to quickly find the fewest number of tiles of the correct scale to render a given point of view.
@@ -76,7 +76,14 @@ joystick controls relative look yaw/pitch offsets at up to 90 degrees/second.
 Look yaw wraps through 360 degrees and look pitch reaches ±90 degrees relative
 to the craft. Releasing the stick retains those offsets, so the view continues
 to follow subsequent craft turns, climbs, descents, and banks. Initially the
-view is level and north-facing with zero look offsets.
+craft is level and north-facing. The initial look pitch is
+`-atan2(altitude_world, -position_im)`, about -26.565 degrees at the starting
+position. This places the plane's `i=0` line halfway from top to bottom on the
+display, including with the default fisheye lens. Page refresh and a complete
+state reset restore this angle.
+
+<!-- 2026-11-19: Calibrated the reset camera look pitch to center i=0 while
+preserving the stationary, level craft pose. -->
 
 <!-- 2026-11-18: Accepted altitude calibration, altitude-scaled velocity with
 exponential descent, and independent retained camera orientation; implemented
@@ -257,9 +264,25 @@ of the scale; yellow ends and the red marker sits at 81.5%.
 Display settings select cinema (the current rectangular canvas) or porthole
 (a circular canvas with diameter 640 CSS pixels). Porthole uses a 640×640
 rendering buffer and square projection aspect, clipped to a circle, horizontally
-centered with its top directly below the game title. Keep the previous cinema
+centered below the game title. Keep the previous cinema
 fill/640×480 sizing preference while porthole is selected; restore it when
 switching back. Persist the shape choice and preserve the worker and tile cache
 when switching, discarding any pending frame with the old aspect.
 
 <!-- 2026-11-19: Added cinema/porthole canvas modes with a fixed 640px circle. -->
+
+In porthole mode, surround the 640px glass with a 36px brass casing and 16
+raised rivets. Leave a 16px gap above the casing, placing the glass 52px lower
+than its original top alignment. The 712px casing stays outside the rendered
+glass, uses static vector decoration, and does not intercept controller input.
+Preserve the porthole rendering resolution and existing rendering lifecycle.
+
+<!-- 2026-11-19: Added a brass porthole casing and rivets, lowering the glass. -->
+
+Cinema also has a rectangular brass casing with matching bevels and rivets,
+and a 52px downward shift of the glass. Keep fixed cinema glass at 640×480
+inside a 712×552 frame. Fill mode leaves space for the frame within the play
+area and uses the resulting inner glass dimensions for perspective and raster
+selection. Share the decorative finish between cinema and porthole modes.
+
+<!-- 2026-11-19: Added matching rectangular brass cinema frames and inner sizing. -->

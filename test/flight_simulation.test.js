@@ -64,7 +64,10 @@ test("default movement banks and changes speed while look input leaves aircraft 
   assert.equal(looked.pitch_deg, INITIAL_FLIGHT_STATE.pitch_deg);
   assert.equal(looked.roll_deg, INITIAL_FLIGHT_STATE.roll_deg);
   assert.equal(looked.camera_heading_deg, 9);
-  assert.equal(looked.camera_pitch_deg, 9);
+  assert.equal(
+    looked.camera_pitch_deg,
+    INITIAL_FLIGHT_STATE.camera_pitch_deg + 9,
+  );
   assert.equal(looked.position_re, INITIAL_FLIGHT_STATE.position_re);
   assert.equal(looked.position_im, INITIAL_FLIGHT_STATE.position_im);
 });
@@ -339,7 +342,10 @@ test("real input mapping drives the store and updated bindings take effect witho
   input.update({ connected: true, buttons, axes: [0, 0, 1, -1] });
   env.frame(400);
   assert.equal(state.get_snapshot().camera_heading_deg, 9);
-  assert.equal(state.get_snapshot().camera_pitch_deg, 9);
+  assert.equal(
+    state.get_snapshot().camera_pitch_deg,
+    INITIAL_FLIGHT_STATE.camera_pitch_deg + 9,
+  );
   assert.equal(state.get_snapshot().pitch_deg, 0);
   input.reset();
   const disconnected = state.get_snapshot();
