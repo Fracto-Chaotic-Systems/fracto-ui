@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "test:crt": "node --test test/crt_mount.test.js test/crt_screen.test.js test/crt_playlist.test.js",
     "test:flight-scene": "node --test test/flight_scene.test.js test/games_play_fullscreen.test.js test/games_play_controls_layout.test.js",
     "test:flight-frames": "node --test test/flight_frame_colors.test.js test/flight_frame_worker.test.js",
     "benchmark:flight-frames": "node scripts/benchmark_flight_frame.js",

@@ -1,5 +1,18 @@
 # UI tests
 
+- `crt_playlist.test.js` checks shuffled coverage, no immediate media repeats,
+  face interludes, variable dwell times, reduced-motion pause, encoded catalog
+  URLs, file-type filtering, polling when filesystem events are missed, and
+  dev-server catalog watcher cleanup. `test:crt`
+  includes it alongside the screen compositor and mechanical tests.
+
+- `crt_screen.test.js` covers irregular face/static cadence, reduced motion,
+  portrait top-to-bottom zoom/pan and per-selection clock resets,
+  image/video aspect fitting, ordered/isolated layer composition, animation
+  timing, loading/error fallback, CORS rejection, and owned-media cleanup.
+  Run alongside `crt_mount.test.js`; `/scripts/crt_screen_preview.html` checks
+  the same compositor on the moving production glass in a browser.
+
 - `crt_mount.test.js` checks that the robotic CRT neck keeps both arm lengths
   fixed and the links behind the cabinet over extension, idle bob, swivel, and
   tilt, with the wrist attached to the rear plate. It verifies dangling cable

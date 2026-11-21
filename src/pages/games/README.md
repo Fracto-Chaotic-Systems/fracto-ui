@@ -8,6 +8,11 @@ Overview, Settings, and Status intentionally remain blank.
 
 ## Corner CRT character
 
+`CrtImageReveal.js` calculates focal-point zoom-out framing for image layers.
+The playlist gives `Image3.jpg` an 18–24 second reveal from its upper blank face
+to the entire image, with brief holds at the start and finish. Other images keep
+their existing framing and portrait scans.
+
 `GamesPlay.jsx` places `GamesCrt.jsx` in the upper-left corner of `PlayContent`,
 below the Game Play title, so it stays inside the content area in fullscreen and
 unmounts when leaving Play. The sidebar contains navigation only. The corner
@@ -21,7 +26,7 @@ small Three.js scene, observers, pointer tracking, and its extend/retract contro
 it does not change the selected panel or persist poses. `CrtModel.js` builds the
 ceiling bracket, paired metal arms, cradle, rounded vintage cabinet, and convex
 CRT glass. `CrtMotion.js` owns the constant-length two-link inverse kinematics,
-swivel, pitch, inquisitive roll, and locally drawn phosphor face. Pointer tracking
+swivel, pitch, inquisitive roll, and cable movement. Pointer tracking
 is page-wide; clicking the glass toggles extension and retraction. An invisible
 native button follows the projected rounded-glass silhouette every rendered
 frame, so transparent surroundings do not intercept gameplay clicks. The same
@@ -57,6 +62,16 @@ lips give the slots depth under the scene lighting and share the aged shell fini
 gritty industrial finish: pitted metal, scratched paint, dark grime and small
 rust patches. Shared color, bump, roughness and metalness maps are generated
 once and disposed with the scene; corroded patches have reduced metallic shine.
+
+The screen has a context-driven compositor for images, video, custom canvas
+animation, face/static layers and combinations. The default blinking face briefly
+changes to static at irregular intervals. Game Play defaults to a shuffled
+playlist of images and MP4s in `public/screens`, with face interludes and brief
+static. Every source shares the moving glass's
+texture/UV mapping. Portrait images zoom into the top and smoothly pan to the
+bottom across their display slot, with brief holds at either end. See
+[CRT_SCREEN_CONTENT.md](CRT_SCREEN_CONTENT.md) for the
+descriptor API, media ownership, timing, reduced motion and verification fixture.
 
 Animation and screen painting are capped at 24 fps, pause while hidden/offscreen,
 and honor reduced motion with immediate user-driven poses and no idle animation.
@@ -166,7 +181,10 @@ See [controllers/README.md](controllers/README.md).
   GamesPlaySettingsLayout.js owns the pure
   default/bounds calculations.
   The close icon or Escape while focus is inside the drawer dismisses it and
-  restores focus to the gear. GamesPlay owns the drawer's open state.
+  restores focus to the gear. Clicking outside the drawer also closes it while
+  preserving focus on the clicked control. Portaled settings menus count as
+  inside the drawer, and the gear continues to toggle it. GamesPlay owns the
+  drawer's open state.
 - GamesPlaySettings.jsx owns the drawer's collapsible settings sections. The
   first section, **display**, starts collapsed and reveals a **full screen**
   switch when expanded.

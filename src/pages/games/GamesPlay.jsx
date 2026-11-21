@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import styled from "styled-components";
 import Drawer from "@mui/material/Drawer";
+import ClickAwayListener from "@mui/material/ClickAwayListener";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGear, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { MainStyles as styles } from "../../styles/MainStyles.jsx";
@@ -15,6 +16,7 @@ import { KEY_GAMES_PLAY_SETTINGS_POSITION } from "../../settings/GamesSettings.j
 import GamesPlaySettings from "./GamesPlaySettings.jsx";
 import GamesPlayControls from "./GamesPlayControls.jsx";
 import GamesCrt from "./GamesCrt.jsx";
+import screen_media from "virtual:crt-screen-media";
 import { create_controller_input } from "./controllers/ControllerInput.js";
 import {
   create_flight_controls,
@@ -55,6 +57,8 @@ const PlayPanel = styled.div`
     flex-shrink: 0;
   }
 `;
+
+const DEFAULT_CRT_CONTENT = { playlist: screen_media };
 
 const PlayContent = styled.div`
   position: relative;
@@ -136,7 +140,7 @@ const SettingsHeading = styled.h2`
   padding-right: 2rem;
 `;
 
-export default function GamesPlay() {
+export default function GamesPlay({ crt_content } = {}) {
   const canvas_shape = useCanvasShape();
   const fisheye_strength = useFisheyeStrength();
   const haze_percent = useAtmosphere();
@@ -219,7 +223,7 @@ export default function GamesPlay() {
           height_px={content_bounds.height}
         />
         <CornerTv>
-          <GamesCrt />
+          <GamesCrt screen_content={crt_content ?? DEFAULT_CRT_CONTENT} />
         </CornerTv>
         <SettingsToggle
           ref={gear_ref}
@@ -241,61 +245,69 @@ export default function GamesPlay() {
         >
           <FontAwesomeIcon icon={settings_open ? faXmark : faGear} />
         </SettingsToggle>
-        <Drawer
-          variant="persistent"
-          anchor="right"
-          open={settings_open}
-          sx={{
-            position: "absolute",
-            inset: 0,
-            pointerEvents: "none",
-            zIndex: 0,
-          }}
-          onKeyDown={(event) => {
-            if (event.key === "Escape") {
-              event.stopPropagation();
-              close_settings();
+        <ClickAwayListener
+          onClickAway={(event) => {
+            if (settings_open && !gear_ref.current?.contains(event.target)) {
+              set_settings_open(false);
             }
           }}
-          slotProps={{
-            paper: {
-              id: drawer_id,
-              role: "dialog",
-              "aria-labelledby": heading_id,
-              style: {
-                position: "absolute",
-                width: layout.width,
-                maxWidth: "100%",
-                height: "100%",
-                flexDirection: "row",
-                overflow: "hidden",
-                pointerEvents: "auto",
-              },
-            },
-          }}
         >
-          {settings_open && content_bounds.width > 0 && (
-            <CoolSplitter
-              type={SPLITTER_TYPE_VERTICAL}
-              layout={SPLITTER_LAYOUT_FLOW}
-              name={KEY_GAMES_PLAY_SETTINGS_POSITION}
-              bar_width_px={SPLITTER_WIDTH_PX}
-              container_bounds={content_bounds}
-              position={layout.position * content_bounds.width}
-              min_position={MIN_SETTINGS_POSITION * content_bounds.width}
-              max_position={MAX_SETTINGS_POSITION * content_bounds.width}
-              on_change={(position) =>
-                resize_settings(position / content_bounds.width)
+          <Drawer
+            variant="persistent"
+            anchor="right"
+            open={settings_open}
+            sx={{
+              position: "absolute",
+              inset: 0,
+              pointerEvents: "none",
+              zIndex: 0,
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Escape") {
+                event.stopPropagation();
+                close_settings();
               }
-            />
-          )}
-          <SettingsContent>
-            <SettingsHeading id={heading_id}>
-              {AppText.get(KEY_GAMES_PLAY_SETTINGS_TITLE)}
-            </SettingsHeading>
-            <GamesPlaySettings fullscreen_target_ref={content_ref} />
-          </SettingsContent>
-        </Drawer>
+            }}
+            slotProps={{
+              paper: {
+                id: drawer_id,
+                role: "dialog",
+                "aria-labelledby": heading_id,
+                style: {
+                  position: "absolute",
+                  width: layout.width,
+                  maxWidth: "100%",
+                  height: "100%",
+                  flexDirection: "row",
+                  overflow: "hidden",
+                  pointerEvents: "auto",
+                },
+              },
+            }}
+          >
+            {settings_open && content_bounds.width > 0 && (
+              <CoolSplitter
+                type={SPLITTER_TYPE_VERTICAL}
+                layout={SPLITTER_LAYOUT_FLOW}
+                name={KEY_GAMES_PLAY_SETTINGS_POSITION}
+                bar_width_px={SPLITTER_WIDTH_PX}
+                container_bounds={content_bounds}
+                position={layout.position * content_bounds.width}
+                min_position={MIN_SETTINGS_POSITION * content_bounds.width}
+                max_position={MAX_SETTINGS_POSITION * content_bounds.width}
+                on_change={(position) =>
+                  resize_settings(position / content_bounds.width)
+                }
+              />
+            )}
+            <SettingsContent>
+              <SettingsHeading id={heading_id}>
+                {AppText.get(KEY_GAMES_PLAY_SETTINGS_TITLE)}
+              </SettingsHeading>
+              <GamesPlaySettings fullscreen_target_ref={content_ref} />
+            </SettingsContent>
+          </Drawer>
+        </ClickAwayListener>
       </PlayContent>
     </PlayPanel>
   );

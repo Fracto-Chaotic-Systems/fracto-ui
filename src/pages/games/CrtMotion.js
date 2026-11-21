@@ -34,45 +34,6 @@ function connect(mesh, from, to) {
   );
 }
 
-function draw_face(model, time, pointer, reduced_motion) {
-  const ctx = model.screen_canvas.getContext("2d");
-  const gradient = ctx.createRadialGradient(256, 180, 15, 256, 180, 320);
-  gradient.addColorStop(0, "#17483f");
-  gradient.addColorStop(1, "#03120f");
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, 512, 384);
-  const blink = !reduced_motion && time % 5.7 > 5.53;
-  const eye_height = blink ? 5 : 48;
-  ctx.shadowColor = "#80ffd0";
-  ctx.shadowBlur = 24;
-  ctx.fillStyle = "#a2ffda";
-  for (const x of [174, 338]) {
-    ctx.beginPath();
-    ctx.roundRect(
-      x - 21 + pointer.x * 16,
-      172 - eye_height / 2 - pointer.y * 10,
-      42,
-      eye_height,
-      12,
-    );
-    ctx.fill();
-  }
-  ctx.lineWidth = 5;
-  ctx.strokeStyle = "#8cefc8";
-  ctx.beginPath();
-  ctx.arc(256, 226, 35, 0.18 * Math.PI, 0.82 * Math.PI);
-  ctx.stroke();
-  ctx.shadowBlur = 0;
-  ctx.fillStyle = "rgba(0, 0, 0, 0.18)";
-  for (let y = 0; y < 384; y += 4) ctx.fillRect(0, y, 512, 1);
-  const reflection = ctx.createLinearGradient(0, 0, 320, 384);
-  reflection.addColorStop(0, "rgba(255,255,255,0.15)");
-  reflection.addColorStop(0.42, "rgba(255,255,255,0)");
-  ctx.fillStyle = reflection;
-  ctx.fillRect(0, 0, 512, 384);
-  model.texture.needsUpdate = true;
-}
-
 export function pose_crt(model, time, pointer, extension, reduced_motion) {
   const idle = reduced_motion ? 0 : Math.sin(time * 0.9);
   model.head.position.set(
@@ -124,5 +85,4 @@ export function pose_crt(model, time, pointer, extension, reduced_motion) {
       extension,
       reduced_motion,
     );
-  draw_face(model, time, pointer, reduced_motion);
 }

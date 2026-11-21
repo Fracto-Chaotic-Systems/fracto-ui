@@ -10,6 +10,7 @@ import {
   dispose_crt_scene,
 } from "./CrtModel.js";
 import { pose_crt } from "./CrtMotion.js";
+import { create_crt_screen } from "./CrtScreen.js";
 
 const Mount = styled.div`
   position: relative;
@@ -46,12 +47,17 @@ const Fallback = styled.p`
   font-size: 0.875rem;
 `;
 
-export default function GamesCrt() {
+export default function GamesCrt({ screen_content } = {}) {
   const host = useRef(null),
     screen_control = useRef(null),
+    content_ref = useRef(screen_content),
     extended = useRef(true);
   const [is_extended, set_extended] = useState(true);
   const [unavailable, set_unavailable] = useState(false);
+  useEffect(() => {
+    content_ref.current = screen_content;
+    host.current?.dispatchEvent(new Event("crt-content"));
+  }, [screen_content]);
   useEffect(() => {
     const element = host.current;
     const scene = new THREE.Scene();
@@ -78,17 +84,24 @@ export default function GamesCrt() {
     light.position.set(-3, 5, 6);
     scene.add(light);
     const model = create_crt_model(scene);
+    const display = create_crt_screen(model.screen_canvas, {
+      on_ready: () => restart(),
+      on_error: (error) =>
+        console.warn("CRT screen content unavailable", error),
+    });
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const pointer = { x: 0, y: 0 },
       target = { x: 0, y: 0 };
     let extension = 1,
       previous = 0,
       face_time = 0,
+      screen_dt = 0,
       frame = null,
       visible = true;
     const render = (stamp = 0) => {
       const dt = Math.min((stamp - previous) / 1000 || 0, 0.05);
       previous = stamp;
+      screen_dt += dt;
       const smoothing = motion.matches ? 1 : 1 - Math.exp(-dt * 5);
       pointer.x += (target.x - pointer.x) * smoothing;
       pointer.y += (target.y - pointer.y) * smoothing;
@@ -96,6 +109,16 @@ export default function GamesCrt() {
       // Keep the small display's dynamic texture at 24 fps.
       if (stamp - face_time > 1000 / 24 || motion.matches || stamp === 0) {
         pose_crt(model, stamp / 1000, pointer, extension, motion.matches);
+        display.set_active(visible && !document.hidden && !motion.matches);
+        display.set_content(content_ref.current);
+        element.dataset.crtScreenMode = display.paint({
+          dt: screen_dt,
+          pointer,
+          reduced_motion: motion.matches,
+        });
+        element.dataset.crtScreenSource = display.source;
+        screen_dt = 0;
+        model.texture.needsUpdate = true;
         renderer.render(scene, camera);
         if (screen_control.current) {
           screen_control.current.style.clipPath = crt_screen_outline(
@@ -113,6 +136,7 @@ export default function GamesCrt() {
       if (frame !== null) cancelAnimationFrame(frame);
       frame = null;
       previous = performance.now();
+      display.set_active(visible && !document.hidden && !motion.matches);
       if (visible && !document.hidden) render(previous);
     };
     const resize = new ResizeObserver(() => {
@@ -143,6 +167,7 @@ export default function GamesCrt() {
     document.addEventListener("visibilitychange", restart);
     motion.addEventListener("change", restart);
     element.addEventListener("crt-pose", restart);
+    element.addEventListener("crt-content", restart);
     render();
     return () => {
       if (frame !== null) cancelAnimationFrame(frame);
@@ -152,6 +177,8 @@ export default function GamesCrt() {
       document.removeEventListener("visibilitychange", restart);
       motion.removeEventListener("change", restart);
       element.removeEventListener("crt-pose", restart);
+      element.removeEventListener("crt-content", restart);
+      display.dispose();
       dispose_crt_scene(scene);
       renderer.dispose();
       renderer.domElement.remove();

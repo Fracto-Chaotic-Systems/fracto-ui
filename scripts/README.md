@@ -1,6 +1,31 @@
 # UI data preparation
 
+## Pong screen clip
+
+`render_pong.py` creates an original 16-second, silent Pong-style video at
+`public/screens/pong.mp4`. It draws RGB frames using Python's standard library
+and pipes them to FFmpeg for H.264 encoding. Pass `--ffmpeg <executable>` when
+FFmpeg is not on PATH. Optional `--output`, `--seconds`, and `--fps` control the
+render. It refuses existing output, stages an unsupported `.part` file while
+encoding, fully decodes the result for verification, then publishes the finished
+MP4 for automatic playlist discovery.
+
 ## Corner CRT preview
+
+`crt_screen_media_plugin.js` scans `public/screens` into the
+`virtual:crt-screen-media` catalog for Game Play's default shuffled playlist.
+It preserves public URLs (encoding spaces) and refreshes the dev catalog when
+supported images/MP4s are added or removed. Production scans happen at build time.
+A three-second catalog poll catches file additions missed by Docker bind-mount
+watchers. It reloads the page only if the set of eligible files actually changes,
+and its timer and watchers stop with the dev server.
+
+`crt_screen_preview.html` exercises the same production component with selectable
+face, static, image, locally generated video, animation, mixed-layer, playlist,
+portrait and library-video modes. The latter plays an actual MP4 from the public catalog.
+Portrait mode uses a real vertical image to inspect the top-to-bottom crop/pan.
+It owns and releases its demonstration video stream. Move the pointer and click
+the glass to check mapping at different angles and in both arm poses.
 
 `crt_preview.html` mounts the production games CRT with its text catalog, without
 service discovery, authentication, or saved preferences. Open
