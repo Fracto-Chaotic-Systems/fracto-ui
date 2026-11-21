@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CRT mount preview</title>
+    <style>
+      body {
+        margin: 0;
+        background: #f4f4f4;
+        font-family: system-ui, sans-serif;
+      }
+      #root {
+        width: min(100%, 320px);
+        background: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      import React from "react";
+      import { createRoot } from "react-dom/client";
+      import GamesCrt from "/src/pages/games/GamesCrt.jsx";
+      import AppText from "/src/AppText.jsx";
+      import { APP_GAMES_TEXT } from "/src/text/GamesText.jsx";
+      AppText.initialize(APP_GAMES_TEXT);
+      createRoot(document.getElementById("root")).render(
+        React.createElement(GamesCrt),
+      );
+    </script>
+  </body>
+</html>

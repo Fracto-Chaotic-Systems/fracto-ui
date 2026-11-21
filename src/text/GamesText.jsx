@@ -6,6 +6,12 @@ import {
 } from "../pages/games/controllers/FlightControlSettings.js";
 
 const GAMES_FOLDER = "games";
+export const CRT_TEXT = Object.fromEntries(
+  ["label", "toggle", "unavailable"].map((key) => [
+    key,
+    `${GAMES_FOLDER}/crt_${key}`,
+  ]),
+);
 export const FLIGHT_SCENE_TEXT = {
   mode: `${GAMES_FOLDER}/flight_canvas_mode`,
   cinema: `${GAMES_FOLDER}/flight_cinema_mode`,
@@ -344,6 +350,10 @@ export const MUSIC_TEXT = Object.fromEntries(
 );
 
 export const APP_GAMES_TEXT = {
+  [CRT_TEXT.label]: "Vintage CRT on an articulated ceiling mount",
+  [CRT_TEXT.toggle]:
+    "Click the TV screen to extend or retract its robotic neck",
+  [CRT_TEXT.unavailable]: "The 3D TV requires WebGL.",
   [FLIGHT_SCENE_TEXT.view]: "Flight over the complex plane",
   [FLIGHT_SCENE_TEXT.mode]: "canvas mode",
   [FLIGHT_SCENE_TEXT.cinema]: "cinema",

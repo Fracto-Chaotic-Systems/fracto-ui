@@ -1,5 +1,13 @@
 # UI tests
 
+- `crt_mount.test.js` checks that the robotic CRT neck keeps both arm lengths
+  fixed and the links behind the cabinet over extension, idle bob, swivel, and
+  tilt, with the wrist attached to the rear plate. It verifies dangling cable
+  endpoints, slack, reusable buffers and reduced-motion sway. The glass is
+  convex with forward-facing normals, valid texture coordinates, and rounded
+  corners. Run with `node --test test/crt_mount.test.js`; the production browser
+  preview is `/scripts/crt_preview.html`.
+
 - `flight_simulation.test.js` verifies controller-to-flight integration, analog
   speed changes, pitch/bank/yaw and climb/turn readings, default movement channels,
   held attitude on release, frame-rate consistency, model bounds, elapsed-time

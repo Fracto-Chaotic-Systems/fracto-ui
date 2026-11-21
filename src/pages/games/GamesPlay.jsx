@@ -14,6 +14,7 @@ import { SPLITTER_WIDTH_PX } from "../../constants.jsx";
 import { KEY_GAMES_PLAY_SETTINGS_POSITION } from "../../settings/GamesSettings.jsx";
 import GamesPlaySettings from "./GamesPlaySettings.jsx";
 import GamesPlayControls from "./GamesPlayControls.jsx";
+import GamesCrt from "./GamesCrt.jsx";
 import { create_controller_input } from "./controllers/ControllerInput.js";
 import {
   create_flight_controls,
@@ -70,6 +71,25 @@ const PlayContent = styled.div`
     margin: 0;
     flex: none;
     background: #f4f4f4;
+  }
+`;
+
+const CornerTv = styled.div`
+  position: absolute;
+  top: 0;
+  left: -50px;
+  z-index: 0;
+  width: clamp(425px, 67.5%, 725px);
+  max-width: calc(125% - 3.75rem);
+  aspect-ratio: 1.25;
+  pointer-events: none;
+
+  > div {
+    height: 100%;
+  }
+
+  button {
+    pointer-events: auto;
   }
 `;
 
@@ -198,6 +218,9 @@ export default function GamesPlay() {
           width_px={content_bounds.width}
           height_px={content_bounds.height}
         />
+        <CornerTv>
+          <GamesCrt />
+        </CornerTv>
         <SettingsToggle
           ref={gear_ref}
           type="button"

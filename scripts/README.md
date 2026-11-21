@@ -1,5 +1,19 @@
 # UI data preparation
 
+## Corner CRT preview
+
+`crt_preview.html` mounts the production games CRT with its text catalog, without
+service discovery, authentication, or saved preferences. Open
+`/scripts/crt_preview.html` on Vite, move the pointer to test swivel/tilt, and use
+the TV screen (including keyboard activation) to extend/retract the neck. The fixture
+uses a 320px sidebar; resize its root to inspect narrower layouts.
+
+Known existing fixture issue: `flight_controls_smoke.html` and
+`flight_validation.html` import the removed `KEY_GAMES_PLAY_CONTROLLER_ACTIONS`
+setting. Vite's automatic HTML dependency scan reports those imports; their
+previous validation descriptions below require re-verification after repair.
+This does not prevent the CRT fixture or production entry from compiling.
+
 ## Dashboard textures
 
 `dashboard-textures.py` downloads the approved Poly Haven Oak Veneer 01 diffuse

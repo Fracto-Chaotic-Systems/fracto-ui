@@ -6,6 +6,66 @@ space below the title without clipping the gear or drawer to a zero-height box.
 Sidebar order is Overview, separator, worlds, music, play, separator, wordnet, Settings, Status.
 Overview, Settings, and Status intentionally remain blank.
 
+## Corner CRT character
+
+`GamesPlay.jsx` places `GamesCrt.jsx` in the upper-left corner of `PlayContent`,
+below the Game Play title, so it stays inside the content area in fullscreen and
+unmounts when leaving Play. The sidebar contains navigation only. The corner
+overlay scales from 425 to 725px, exactly 25% above the prior sizing, including
+its responsive cap. The whole overlay is offset 50px left; the content boundary
+clips the elbow when it extends past the edge. The transparent canvas can extend
+beyond the content width, and camera framing reduces transparent padding.
+It passes pointer events through except
+on its clickable TV screen; the settings drawer renders above it. It owns a
+small Three.js scene, observers, pointer tracking, and its extend/retract control;
+it does not change the selected panel or persist poses. `CrtModel.js` builds the
+ceiling bracket, paired metal arms, cradle, rounded vintage cabinet, and convex
+CRT glass. `CrtMotion.js` owns the constant-length two-link inverse kinematics,
+swivel, pitch, inquisitive roll, and locally drawn phosphor face. Pointer tracking
+is page-wide; clicking the glass toggles extension and retraction. An invisible
+native button follows the projected rounded-glass silhouette every rendered
+frame, so transparent surroundings do not intercept gameplay clicks. The same
+control supports Tab, Enter/Space, a screen-reader label, and a visible focus tint.
+The head's resting yaw faces the viewer's right relative to the angled camera;
+pointer tracking adds a bounded swivel around that pose.
+The WebGL canvas and its wrapper are transparent, with no wall or ceiling
+surfaces. On resize, camera framing aligns the stationary bracket with the very
+top edge of the gameplay content, independently of the animated head pose.
+Both neck poses hold the TV higher, close beneath the top bracket; the elbow
+folds to reach the raised wrist while retaining both arm lengths.
+The wrist follows a mounting plate behind the cabinet as the TV swivels and
+tilts. The elbow folds to the left and rear, making the mechanism visible beside
+the cabinet while keeping both links behind its shell throughout retraction.
+Camera framing leaves room beside the TV for the elbow and paired links; the
+overlay's left offset intentionally allows them to be clipped at the page edge.
+
+`CrtCables.js` adds two flexible leads fixed at the ceiling bracket and plugged
+into rear sockets on the moving TV. Their slack loops hang below the cabinet,
+with gentle damped sway and extra slack on retraction. Tube vertex buffers are
+updated in place at the scene's paint rate; reduced motion disables sway. Cable
+meshes and socket materials share the scene's normal disposal lifecycle.
+
+`CrtCasing.js` generates the cabinet's aged ABS finish once at initialization:
+uneven yellowing, mottled dirt, grime along panel edges, fine molded grain, and
+small scuffs. Separate color, bump and roughness maps keep the case matte while
+the CRT glass stays glossy. The dark bezel shares these maps with its own tint;
+scene disposal releases the shared textures once. No image assets are fetched.
+`CrtVents.js` adds six horizontal cooling slots on each side of the cabinet,
+including its visible left side. Dark inset faces, grime rims and molded lower
+lips give the slots depth under the scene lighting and share the aged shell finish.
+`CrtArmature.js` gives the ceiling plate, links, joints and cradle a matching
+gritty industrial finish: pitted metal, scratched paint, dark grime and small
+rust patches. Shared color, bump, roughness and metalness maps are generated
+once and disposed with the scene; corroded patches have reduced metallic shine.
+
+Animation and screen painting are capped at 24 fps, pause while hidden/offscreen,
+and honor reduced motion with immediate user-driven poses and no idle animation.
+Unmount releases GPU resources, observers, and listeners. A localized message
+replaces the scene if WebGL initialization fails. No model downloads are needed.
+Run `node --test test/crt_mount.test.js` from the UI folder for the full arm travel
+and convex-glass checks. `/scripts/crt_preview.html` previews the production
+component independently of authentication and backend service discovery.
+
 Game Play now renders flight over the flat tiled complex plane beneath the
 dashboard. Its worker handles ray projection, local adaptive tile refinement,
 whole-frame coloring and bounded calculation fallback. Canvas resolution adapts
