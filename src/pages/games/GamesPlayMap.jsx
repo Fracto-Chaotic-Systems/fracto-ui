@@ -21,7 +21,9 @@ const ScrollBackground = styled.img`
   inset: 0;
   width: 100%;
   height: 100%;
-  transform: rotate(90deg);
+  transform: rotate(270deg);
+  /* The rotation turns this offset into an 18px right, 24px down cast shadow. */
+  filter: drop-shadow(-24px 18px 20px #00000080);
 `;
 
 const Chart = styled.div`
