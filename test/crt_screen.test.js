@@ -8,6 +8,60 @@ import {
 } from "../src/pages/games/CrtScreenMedia.js";
 import { create_crt_screen } from "../src/pages/games/CrtScreen.js";
 import { crt_image_reveal_rect } from "../src/pages/games/CrtImageReveal.js";
+import {
+  crt_broadcast_state,
+  create_crt_broadcast_sequence,
+} from "../src/pages/games/CrtBroadcast.js";
+
+test("broadcast alternates English and random translations using each text's width", () => {
+  const translated = [
+    { message: "日本語", deploy: "展開に備えよ", language: "ja" },
+    {
+      message: "العربية",
+      deploy: "استعد للنشر",
+      language: "ar",
+      direction: "rtl",
+    },
+  ];
+  const sequence = create_crt_broadcast_sequence(
+    {
+      message: "English message",
+      deploy: "PREPARE TO DEPLOY",
+      translations: translated,
+      random: () => 0,
+    },
+    (text) => text.length * 40,
+    100,
+  );
+  const duration = (text) => (100 + text.length * 40) / 127.5 + 6;
+  let time = 0;
+  assert.equal(sequence(time).language, "en");
+  assert.equal(sequence(time).deploy, "PREPARE TO DEPLOY");
+  time += duration("English message");
+  assert.equal(sequence(time + 0.01).language, "ja");
+  time += duration(translated[0].message);
+  assert.equal(sequence(time - 0.01).alert, true);
+  assert.equal(sequence(time - 0.01).deploy, "展開に備えよ");
+  assert.equal(sequence(time + 0.01).language, "en");
+  assert.equal(sequence(time + 0.01).deploy, "PREPARE TO DEPLOY");
+  time += duration("English message");
+  const arabic = sequence(time + 0.01);
+  assert.equal(arabic.language, "ar");
+  assert.equal(arabic.direction, "rtl");
+  assert.equal(arabic.deploy, "استعد للنشر");
+  assert.ok(sequence(time + 0.1).x > arabic.x);
+});
+
+test("broadcast finishes its crawl, blinks the alert, and repeats", () => {
+  const end = (488 + 2000) / 127.5;
+  assert.equal(crt_broadcast_state(2000, 0, 488).x, 488);
+  const exiting = crt_broadcast_state(2000, end - 0.01, 488);
+  assert.equal(exiting.alert, false);
+  assert.ok(exiting.x > -2000);
+  assert.equal(crt_broadcast_state(2000, end + 0.1, 488).alert, true);
+  assert.equal(crt_broadcast_state(2000, end + 0.6, 488).visible, false);
+  assert.equal(crt_broadcast_state(2000, end + 6.1, 488).alert, false);
+});
 
 test("image reveal starts on the upper face and finishes with the whole image", () => {
   const focus = { x: 0.4, y: 0.2, width: 0.25 };
@@ -39,6 +93,7 @@ function drawing_context() {
     },
     createImageData: (w, h) => ({ data: new Uint8ClampedArray(w * h * 4) }),
     getImageData: () => ({ data: new Uint8ClampedArray(4) }),
+    measureText: (text) => ({ width: text.length * 12 }),
     createLinearGradient: () => ({ addColorStop() {} }),
     createRadialGradient: () => ({ addColorStop() {} }),
   };
@@ -56,6 +111,7 @@ function drawing_context() {
     "stroke",
     "putImageData",
     "drawImage",
+    "fillText",
   ]) {
     ctx[method] = (...args) =>
       calls.push({
@@ -63,6 +119,7 @@ function drawing_context() {
         args,
         alpha: ctx.globalAlpha,
         blend: ctx.globalCompositeOperation,
+        color: ctx.fillStyle,
       });
   }
   return ctx;
@@ -120,6 +177,34 @@ function environment() {
   const canvas = doc.createElement("canvas");
   return { canvas, ctx: contexts[0], doc, elements, contexts };
 }
+
+test("broadcast remains above static and keeps scrolling across content changes", () => {
+  const env = environment();
+  const display = create_crt_screen(env.canvas, {
+    broadcast: {
+      message: "Independent scrolling message",
+      alert: "PREPARE TO DEPLOY",
+    },
+  });
+  display.set_content({ layers: [{ type: "face" }] });
+  display.paint({ dt: 0.1 });
+  const first = env.ctx.calls.find((call) => call.method === "fillText");
+  display.set_content({ layers: [{ type: "static" }] });
+  env.ctx.calls.length = 0;
+  assert.equal(display.paint({ dt: 0.1 }), "static");
+  const text_index = env.ctx.calls.findIndex(
+    (call) => call.method === "fillText",
+  );
+  const noise_index = env.ctx.calls.findIndex(
+    (call) => call.method === "drawImage",
+  );
+  const text = env.ctx.calls[text_index];
+  assert.ok(text_index > noise_index);
+  assert.equal(text.args[0], "Independent scrolling message");
+  assert.equal(text.color, "#ffffff");
+  assert.ok(text.args[1] < first.args[1]);
+  display.dispose();
+});
 
 test("interference alternates brief static and face at irregular bounded intervals", () => {
   const values = [0, 0.2, 0.9, 0.6, 0.35, 0.8];

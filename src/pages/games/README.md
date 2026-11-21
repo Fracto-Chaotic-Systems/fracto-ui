@@ -8,6 +8,22 @@ Overview, Settings, and Status intentionally remain blank.
 
 ## Corner CRT character
 
+`CrtBroadcast.js` paints a vintage monospace alert strip over all screen content,
+including static, before the glass finish. Its independent screen-lifetime
+clock scrolls bold 32px monospace AppText lettering in a 46px-high strip
+aligned to the screen's bottom edge, right to left in white on blue at 127.5 texture
+pixels per second. After the complete message exits, a centered red-on-white
+`PREPARE TO DEPLOY` blinks for six seconds, then the sequence repeats. Media
+changes do not reset it. Reduced motion keeps the alert lettering steadily visible.
+Successive crawls alternate English and a randomly chosen AppText translation:
+Spanish, French, German, Russian, Greek, Arabic, Hindi, Japanese, Chinese, or
+Korean. Consecutive translated turns avoid repeating the same language. Each
+message is measured separately so the full text exits before the alert begins;
+Arabic is shaped right-to-left and enters from the left for reading order.
+Unicode font fallbacks cover the additional scripts. The deployment alert uses
+the preceding crawl's language and text direction, with centered text fitted
+inside the strip. Language selection never resets or waits for the media playlist.
+
 `CrtImageReveal.js` calculates focal-point zoom-out framing for image layers.
 The playlist gives `Image3.jpg` an 18–24 second reveal from its upper blank face
 to the entire image, with brief holds at the start and finish. Other images keep

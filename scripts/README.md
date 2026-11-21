@@ -117,6 +117,12 @@ Format reference: https://wordnet.princeton.edu/documentation/wndb5wn
 
 ## Feature catalog checks
 
+`render_chaotic_bars.py` reads `public/screens/smpte-color-bars.png` and generates
+`smpte-color-bars-chaos.mp4`, preserving the pattern geometry while shuffling
+colors at irregular intervals. It uses Python's standard library and FFmpeg,
+refuses to overwrite output, and verifies a full decode before publishing it.
+Run `python scripts/render_chaotic_bars.py --ffmpeg <ffmpeg-executable>`.
+
 `check_feature_catalog.js` is the Node CLI and assertion layer for the reviewed
 `src/features/catalog.json`. It runs before npm builds and is exercised by
 `test/feature_catalog.test.js`. It requires the surrounding Fracto checkout for

@@ -6,6 +6,22 @@ Changing it updates only the display compositor, not the rig, camera or WebGL
 renderer. Omitting it on Game Play selects the random public media playlist.
 An unconfigured standalone `GamesCrt` still shows the face with static bursts.
 
+`GamesCrt` also supplies the AppText broadcast messages through the compositor's
+`broadcast: { message, alert }` creation option. This strip is painted after all
+media/static and before the glass finish, using the screen-lifetime clock rather
+than the per-content clock. Content changes and static do not restart the loop.
+After the full white-on-blue crawl exits, the centered red-on-white alert blinks
+for six seconds before the crawl restarts. Standalone compositors omit the strip
+unless this option is supplied.
+The optional `translations` array contains `{ message, deploy, language, direction }`
+entries. Crawls start in English and alternate with random translated entries,
+avoiding the previous translated entry when possible. Duration uses the current
+message's measured width; RTL entries scroll in the opposite direction. The
+optional `random` function supports deterministic selection in tests.
+`deploy` supplies the matching alert translation, displayed with that crawl's
+text direction. English turns use the top-level `alert` message. Alert text fits
+within the strip width while retaining the same font height and blink timing.
+
 ## Default Game Play playlist
 
 `crt_screen_media_plugin.js` discovers browser images and MP4 files directly in

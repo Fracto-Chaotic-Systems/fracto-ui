@@ -6,8 +6,19 @@ import {
 } from "../pages/games/controllers/FlightControlSettings.js";
 
 const GAMES_FOLDER = "games";
+export const CRT_BROADCAST_TRANSLATIONS = Object.fromEntries(
+  ["es", "fr", "de", "ru", "el", "ar", "hi", "ja", "zh", "ko"].map(
+    (language) => [language, `${GAMES_FOLDER}/crt_broadcast_${language}`],
+  ),
+);
+export const CRT_DEPLOY_TRANSLATIONS = Object.fromEntries(
+  Object.keys(CRT_BROADCAST_TRANSLATIONS).map((language) => [
+    language,
+    `${GAMES_FOLDER}/crt_deploy_${language}`,
+  ]),
+);
 export const CRT_TEXT = Object.fromEntries(
-  ["label", "toggle", "unavailable"].map((key) => [
+  ["label", "toggle", "unavailable", "broadcast", "deploy"].map((key) => [
     key,
     `${GAMES_FOLDER}/crt_${key}`,
   ]),
@@ -354,6 +365,39 @@ export const APP_GAMES_TEXT = {
   [CRT_TEXT.toggle]:
     "Click the TV screen to extend or retract its robotic neck",
   [CRT_TEXT.unavailable]: "The 3D TV requires WebGL.",
+  [CRT_TEXT.broadcast]:
+    "This is a test of the chaotic broadcast system. This is only a test. If this were an actual chaotic event, you would be advised to deal with it and carry on with your life.",
+  [CRT_TEXT.deploy]: "PREPARE TO DEPLOY",
+  [CRT_DEPLOY_TRANSLATIONS.es]: "PREPÁRESE PARA DESPLEGAR",
+  [CRT_DEPLOY_TRANSLATIONS.fr]: "PRÉPAREZ LE DÉPLOIEMENT",
+  [CRT_DEPLOY_TRANSLATIONS.de]: "ZUM EINSATZ BEREITMACHEN",
+  [CRT_DEPLOY_TRANSLATIONS.ru]: "ПРИГОТОВЬТЕСЬ К РАЗВЁРТЫВАНИЮ",
+  [CRT_DEPLOY_TRANSLATIONS.el]: "ΕΤΟΙΜΑΣΤΕΙΤΕ ΓΙΑ ΑΝΑΠΤΥΞΗ",
+  [CRT_DEPLOY_TRANSLATIONS.ar]: "استعد للنشر",
+  [CRT_DEPLOY_TRANSLATIONS.hi]: "तैनाती के लिए तैयार रहें",
+  [CRT_DEPLOY_TRANSLATIONS.ja]: "展開に備えよ",
+  [CRT_DEPLOY_TRANSLATIONS.zh]: "准备部署",
+  [CRT_DEPLOY_TRANSLATIONS.ko]: "배치 준비",
+  [CRT_BROADCAST_TRANSLATIONS.es]:
+    "Esta es una prueba del sistema de radiodifusión caótica. Esto es solo una prueba. Si se tratara de un evento caótico real, se le aconsejaría afrontarlo y seguir con su vida.",
+  [CRT_BROADCAST_TRANSLATIONS.fr]:
+    "Ceci est un test du système de diffusion chaotique. Ceci n’est qu’un test. S’il s’agissait d’un véritable événement chaotique, il vous serait conseillé d’y faire face et de continuer à vivre votre vie.",
+  [CRT_BROADCAST_TRANSLATIONS.de]:
+    "Dies ist ein Test des chaotischen Rundfunksystems. Dies ist nur ein Test. Im Falle eines tatsächlichen chaotischen Ereignisses würde Ihnen geraten, damit umzugehen und Ihr Leben weiterzuleben.",
+  [CRT_BROADCAST_TRANSLATIONS.ru]:
+    "Это проверка системы хаотического вещания. Это всего лишь проверка. В случае настоящего хаотического события вам было бы рекомендовано справиться с ним и продолжать жить своей жизнью.",
+  [CRT_BROADCAST_TRANSLATIONS.el]:
+    "Αυτή είναι μια δοκιμή του συστήματος χαοτικής μετάδοσης. Είναι μόνο μια δοκιμή. Αν επρόκειτο για ένα πραγματικό χαοτικό γεγονός, θα σας συνιστούσαμε να το αντιμετωπίσετε και να συνεχίσετε τη ζωή σας.",
+  [CRT_BROADCAST_TRANSLATIONS.ar]:
+    "هذا اختبار لنظام البث الفوضوي. هذا مجرد اختبار. لو كان هذا حدثًا فوضويًا حقيقيًا، لنُصحت بالتعامل معه والمضي قدمًا في حياتك.",
+  [CRT_BROADCAST_TRANSLATIONS.hi]:
+    "यह अराजक प्रसारण प्रणाली का परीक्षण है। यह केवल एक परीक्षण है। यदि यह वास्तव में कोई अराजक घटना होती, तो आपको उससे निपटने और अपना जीवन आगे बढ़ाने की सलाह दी जाती।",
+  [CRT_BROADCAST_TRANSLATIONS.ja]:
+    "これはカオス放送システムのテストです。これはあくまでもテストです。実際に混乱を招く出来事が起きた場合は、それに対処し、日常生活を続けることをお勧めします。",
+  [CRT_BROADCAST_TRANSLATIONS.zh]:
+    "这是混乱广播系统的一次测试。这仅仅是一次测试。如果真的发生了混乱事件，我们会建议您应对它，然后继续自己的生活。",
+  [CRT_BROADCAST_TRANSLATIONS.ko]:
+    "이것은 혼돈 방송 시스템의 시험입니다. 이것은 단지 시험일 뿐입니다. 실제로 혼란스러운 상황이 발생한다면, 그 상황에 대처하고 일상을 이어 가시기 바랍니다.",
   [FLIGHT_SCENE_TEXT.view]: "Flight over the complex plane",
   [FLIGHT_SCENE_TEXT.mode]: "canvas mode",
   [FLIGHT_SCENE_TEXT.cinema]: "cinema",

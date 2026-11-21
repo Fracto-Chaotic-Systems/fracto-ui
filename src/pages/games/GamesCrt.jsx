@@ -2,7 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import * as THREE from "three";
 import AppText from "../../AppText.jsx";
-import { CRT_TEXT } from "../../text/GamesText.jsx";
+import {
+  CRT_TEXT,
+  CRT_BROADCAST_TRANSLATIONS,
+  CRT_DEPLOY_TRANSLATIONS,
+} from "../../text/GamesText.jsx";
 import {
   align_crt_bracket,
   create_crt_model,
@@ -85,6 +89,18 @@ export default function GamesCrt({ screen_content } = {}) {
     scene.add(light);
     const model = create_crt_model(scene);
     const display = create_crt_screen(model.screen_canvas, {
+      broadcast: {
+        message: AppText.get(CRT_TEXT.broadcast),
+        alert: AppText.get(CRT_TEXT.deploy),
+        translations: Object.entries(CRT_BROADCAST_TRANSLATIONS).map(
+          ([language, key]) => ({
+            language,
+            message: AppText.get(key),
+            deploy: AppText.get(CRT_DEPLOY_TRANSLATIONS[language]),
+            direction: language === "ar" ? "rtl" : "ltr",
+          }),
+        ),
+      },
       on_ready: () => restart(),
       on_error: (error) =>
         console.warn("CRT screen content unavailable", error),

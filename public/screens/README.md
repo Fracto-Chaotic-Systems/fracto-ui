@@ -22,9 +22,17 @@ paddles, wall rebounds, a dashed net and score changes. It is H.264/yuv420p,
 `scripts/render_pong.py --ffmpeg <ffmpeg-executable>`; the generator uses only
 Python's standard library plus FFmpeg and refuses to overwrite existing output.
 
-`smpte-color-bars.png` is a lossless 960 by 720 (4:3) classic color-bars test
-pattern generated with [FFmpeg's smptebars source](https://ffmpeg.org/ffmpeg-filters.html#smptebars).
-Recreate it with `ffmpeg -f lavfi -i smptebars=size=960x720:rate=1 -frames:v 1 -pix_fmt rgb24 smpte-color-bars.png`.
+The generator's source `smpte-color-bars.png` is no longer stored here. To
+recreate the lossless 960 by 720 (4:3) classic test pattern, use
+[FFmpeg's smptebars source](https://ffmpeg.org/ffmpeg-filters.html#smptebars):
+`ffmpeg -f lavfi -i smptebars=size=960x720:rate=1 -frames:v 1 -pix_fmt rgb24 smpte-color-bars.png`.
+
+`smpte-color-bars-chaos.mp4` animates that pattern with irregular randomized
+color swaps while preserving its bar and patch geometry. It is a silent,
+12-second 640 by 480 H.264/yuv420p clip with fast-start metadata and matching
+original-pattern frames at both ends for looping. Recreate the PNG source above
+first, then recreate the video with
+`python scripts/render_chaotic_bars.py --ffmpeg <ffmpeg-executable>`.
 
 Use `/screens/<filename>` as an image or video source in the screen-content
 descriptor documented in `src/pages/games/CRT_SCREEN_CONTENT.md`.

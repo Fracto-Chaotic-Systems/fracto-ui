@@ -6,6 +6,7 @@ import {
 } from "./CrtScreenEffects.js";
 import { prepare_crt_media } from "./CrtScreenMedia.js";
 import { create_crt_playlist } from "./CrtScreenPlaylist.js";
+import { create_crt_broadcast } from "./CrtBroadcast.js";
 
 const DEFAULT_CONTENT = { layers: [{ type: "face" }], interference: true };
 
@@ -17,12 +18,14 @@ export function create_crt_screen(
     random,
     on_ready = () => {},
     on_error = () => {},
+    broadcast,
     canvas_factory = () => canvas.ownerDocument.createElement("canvas"),
   } = {},
 ) {
   const ctx = canvas.getContext("2d");
   const noise = create_crt_noise(canvas_factory);
   const interference = create_crt_interference({ random });
+  const draw_broadcast = broadcast ? create_crt_broadcast(broadcast) : null;
   let content,
     requested,
     playlist,
@@ -140,6 +143,7 @@ export function create_crt_screen(
           }
         }
       if (!drawn) draw_crt_face(ctx, frame);
+      draw_broadcast?.(ctx, frame);
       draw_crt_glass(ctx, frame.width, frame.height);
       return interrupted ||
         (layers.length === 1 && layers[0].layer.type === "static")
