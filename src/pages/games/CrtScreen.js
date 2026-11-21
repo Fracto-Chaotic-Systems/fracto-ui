@@ -7,6 +7,10 @@ import {
 import { prepare_crt_media } from "./CrtScreenMedia.js";
 import { create_crt_playlist } from "./CrtScreenPlaylist.js";
 import { create_crt_broadcast } from "./CrtBroadcast.js";
+import {
+  create_crt_static_flash,
+  draw_crt_static_flash,
+} from "./CrtStaticFlash.js";
 
 const DEFAULT_CONTENT = { layers: [{ type: "face" }], interference: true };
 
@@ -19,6 +23,7 @@ export function create_crt_screen(
     on_ready = () => {},
     on_error = () => {},
     broadcast,
+    static_flash,
     canvas_factory = () => canvas.ownerDocument.createElement("canvas"),
   } = {},
 ) {
@@ -26,6 +31,7 @@ export function create_crt_screen(
   const noise = create_crt_noise(canvas_factory);
   const interference = create_crt_interference({ random });
   const draw_broadcast = broadcast ? create_crt_broadcast(broadcast) : null;
+  const flash = create_crt_static_flash({ random });
   let content,
     requested,
     playlist,
@@ -99,6 +105,8 @@ export function create_crt_screen(
       let drawn = false;
       if (interrupted) {
         noise(ctx, frame);
+        if (static_flash && flash(interference.state, !reduced_motion))
+          draw_crt_static_flash(ctx, frame, static_flash);
         drawn = true;
       } else
         for (const entry of layers) {

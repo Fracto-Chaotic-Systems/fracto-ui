@@ -13,6 +13,10 @@ than the per-content clock. Content changes and static do not restart the loop.
 After the full white-on-blue crawl exits, the centered red-on-white alert blinks
 for six seconds before the crawl restarts. Standalone compositors omit the strip
 unless this option is supplied.
+`GamesCrt` also supplies `static_flash`, an AppText title shown on one display
+frame near the middle of a randomly selected static burst (35% chance per burst).
+It is composited before the broadcast strip and glass, and disabled under
+reduced motion. The title card does not reset either the media or message clock.
 The optional `translations` array contains `{ message, deploy, language, direction }`
 entries. Crawls start in English and alternate with random translated entries,
 avoiding the previous translated entry when possible. Duration uses the current

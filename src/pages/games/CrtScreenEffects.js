@@ -2,6 +2,8 @@ export function create_crt_interference({ random = Math.random } = {}) {
   const duration = (min, max) =>
     min + Math.max(0, Math.min(1, Number(random()) || 0)) * (max - min);
   let is_static = false,
+    burst = 0,
+    burst_duration = 0,
     remaining = duration(3.4, 7.8);
   return {
     reset() {
@@ -19,12 +21,16 @@ export function create_crt_interference({ random = Math.random } = {}) {
       remaining -= Math.max(0, Math.min(60, Number(dt) || 0));
       while (remaining <= 0) {
         is_static = !is_static;
-        remaining += is_static ? duration(0.22, 0.68) : duration(3.4, 7.8);
+        if (is_static) {
+          burst++;
+          burst_duration = duration(0.22, 0.68);
+          remaining += burst_duration;
+        } else remaining += duration(3.4, 7.8);
       }
       return is_static;
     },
     get state() {
-      return { is_static, remaining };
+      return { is_static, remaining, burst, burst_duration };
     },
   };
 }
@@ -101,5 +107,17 @@ export function draw_crt_glass(ctx, width, height) {
   reflection.addColorStop(0.42, "rgba(255,255,255,0)");
   ctx.fillStyle = reflection;
   ctx.fillRect(0, 0, width, height);
+  // A soft oval glint follows the curved glass UVs, over every display source.
+  ctx.save();
+  ctx.translate(width * 0.2, height * 0.15);
+  ctx.scale(1, 0.5);
+  const radius = width * 0.24;
+  const glint = ctx.createRadialGradient(0, 0, 0, 0, 0, radius);
+  glint.addColorStop(0, "rgba(239,248,255,0.2)");
+  glint.addColorStop(0.45, "rgba(239,248,255,0.1)");
+  glint.addColorStop(1, "rgba(239,248,255,0)");
+  ctx.fillStyle = glint;
+  ctx.fillRect(-radius, -radius, radius * 2, radius * 2);
+  ctx.restore();
   ctx.restore();
 }

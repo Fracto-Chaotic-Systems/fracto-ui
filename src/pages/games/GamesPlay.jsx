@@ -66,6 +66,17 @@ const PlayContent = styled.div`
   flex: 1;
   min-height: 0;
   overflow: hidden;
+  background-color: #cbd3d9;
+  background-image:
+    radial-gradient(ellipse at 25% 0%, #ffffff55, transparent 65%),
+    repeating-linear-gradient(
+      0deg,
+      #0000000b 0 1px,
+      #ffffff16 1px 2px,
+      transparent 2px 4px
+    ),
+    repeating-linear-gradient(92deg, transparent 0 58px, #00000008 59px 60px),
+    linear-gradient(115deg, #aab4bc, #e2e7eb 42%, #bcc5cd 74%, #aab5be);
 
   &:fullscreen {
     width: 100vw;
@@ -74,7 +85,6 @@ const PlayContent = styled.div`
     max-height: none;
     margin: 0;
     flex: none;
-    background: #f4f4f4;
   }
 `;
 
@@ -122,6 +132,13 @@ const SettingsIcon = styled.button`
 
 const SettingsToggle = styled(SettingsIcon)`
   z-index: 1;
+  color: #444444;
+
+  &:hover,
+  &:focus-visible {
+    background: #00000010;
+    color: #222222;
+  }
 `;
 
 const SettingsContent = styled.div`

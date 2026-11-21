@@ -7,9 +7,21 @@ import {
 
 const GAMES_FOLDER = "games";
 export const CRT_BROADCAST_TRANSLATIONS = Object.fromEntries(
-  ["es", "fr", "de", "ru", "el", "ar", "hi", "ja", "zh", "ko"].map(
-    (language) => [language, `${GAMES_FOLDER}/crt_broadcast_${language}`],
-  ),
+  [
+    "es",
+    "fr",
+    "de",
+    "ru",
+    "el",
+    "ar",
+    "hi",
+    "ja",
+    "zh",
+    "ko",
+    "eo",
+    "la",
+    "lorem",
+  ].map((language) => [language, `${GAMES_FOLDER}/crt_broadcast_${language}`]),
 );
 export const CRT_DEPLOY_TRANSLATIONS = Object.fromEntries(
   Object.keys(CRT_BROADCAST_TRANSLATIONS).map((language) => [
@@ -18,10 +30,9 @@ export const CRT_DEPLOY_TRANSLATIONS = Object.fromEntries(
   ]),
 );
 export const CRT_TEXT = Object.fromEntries(
-  ["label", "toggle", "unavailable", "broadcast", "deploy"].map((key) => [
-    key,
-    `${GAMES_FOLDER}/crt_${key}`,
-  ]),
+  ["label", "toggle", "unavailable", "broadcast", "deploy", "husker_du"].map(
+    (key) => [key, `${GAMES_FOLDER}/crt_${key}`],
+  ),
 );
 export const FLIGHT_SCENE_TEXT = {
   mode: `${GAMES_FOLDER}/flight_canvas_mode`,
@@ -368,6 +379,16 @@ export const APP_GAMES_TEXT = {
   [CRT_TEXT.broadcast]:
     "This is a test of the chaotic broadcast system. This is only a test. If this were an actual chaotic event, you would be advised to deal with it and carry on with your life.",
   [CRT_TEXT.deploy]: "PREPARE TO DEPLOY",
+  [CRT_TEXT.husker_du]: "Husker Du",
+  [CRT_DEPLOY_TRANSLATIONS.eo]: "PRETIĜU POR DISLOKIĜO",
+  [CRT_BROADCAST_TRANSLATIONS.eo]:
+    "Ĉi tio estas provo de la kaosa elsenda sistemo. Ĉi tio estas nur provo. Se ĉi tio estus vera kaosa evento, oni konsilus al vi trakti ĝin kaj daŭrigi vian vivon.",
+  [CRT_DEPLOY_TRANSLATIONS.la]: "TE AD EXPLICANDUM PARA",
+  [CRT_BROADCAST_TRANSLATIONS.la]:
+    "Haec est probatio systematis emissionum chaoticarum. Haec tantum probatio est. Si res vere chaotica accideret, monereris ut eam tractares et vitam tuam agere pergeres.",
+  [CRT_DEPLOY_TRANSLATIONS.lorem]: "anim id est laborum",
+  [CRT_BROADCAST_TRANSLATIONS.lorem]:
+    "Lorem ipsum a testum de la chaotica broadcastum systema. Ipsum est solum a testum. Si lorem esset un actualum chaotica eventum, tu velum sit advisum ad flib cum id et blorpa onum cum tua vita.",
   [CRT_DEPLOY_TRANSLATIONS.es]: "PREPÁRESE PARA DESPLEGAR",
   [CRT_DEPLOY_TRANSLATIONS.fr]: "PRÉPAREZ LE DÉPLOIEMENT",
   [CRT_DEPLOY_TRANSLATIONS.de]: "ZUM EINSATZ BEREITMACHEN",

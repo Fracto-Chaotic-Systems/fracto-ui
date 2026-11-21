@@ -3,10 +3,28 @@
 The parent ../Games.jsx owns sidebar selection and the persisted splitter.
 It gives the play pane full height so GamesPlay's flex content area can fill the
 space below the title without clipping the gear or drawer to a zero-height box.
+`GamesPlay` gives that content area a light silver brushed-metal background, using
+layered CSS grain, scratches, and soft highlights beneath the flight scene,
+TV, instruments, and controls. The same finish carries into fullscreen. The
+settings gear uses a dark color for contrast over both the metal and the open drawer.
 Sidebar order is Overview, separator, worlds, music, play, separator, wordnet, Settings, Status.
 Overview, Settings, and Status intentionally remain blank.
 
 ## Corner CRT character
+
+The transparent TV canvas casts a dark, diffuse CSS drop shadow from its alpha
+silhouette, offset 10px right and 16px down with an 18px blur. It follows the
+cabinet and rig as they move without adding an opaque backdrop or scene walls.
+The glass finish includes a subtle cool-white oval reflection in its upper left,
+composited over every screen source and mapped to the curved glass as it moves.
+
+`CrtStaticFlash.js` gives each intermittent static burst a 35% chance of a
+single-frame `Husker Du` title card near its midpoint. Large off-white lettering
+appears on a dark screen, then static resumes. At the display's 24 fps cadence
+the card lasts approximately 1/24 second. It remains below the independent
+broadcast strip and is suppressed under reduced motion. Burst identifiers and
+durations come from the interference scheduler, so media changes cannot cause
+repeated flashes within one burst.
 
 `CrtBroadcast.js` paints a vintage monospace alert strip over all screen content,
 including static, before the glass finish. Its independent screen-lifetime
@@ -16,8 +34,10 @@ pixels per second. After the complete message exits, a centered red-on-white
 `PREPARE TO DEPLOY` blinks for six seconds, then the sequence repeats. Media
 changes do not reset it. Reduced motion keeps the alert lettering steadily visible.
 Successive crawls alternate English and a randomly chosen AppText translation:
-Spanish, French, German, Russian, Greek, Arabic, Hindi, Japanese, Chinese, or
-Korean. Consecutive translated turns avoid repeating the same language. Each
+Spanish, French, German, Russian, Greek, Arabic, Hindi, Japanese, Chinese,
+Korean, Esperanto, or Latin, plus a deliberately nonsensical lorem ipsum variant with the English
+message's sentence cadence and punctuation. Its blinking alert reads exactly
+`anim id est laborum`. Consecutive translated turns avoid repeating the same option. Each
 message is measured separately so the full text exits before the alert begins;
 Arabic is shaped right-to-left and enters from the left for reading order.
 Unicode font fallbacks cover the additional scripts. The deployment alert uses

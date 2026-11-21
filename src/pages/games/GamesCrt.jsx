@@ -26,6 +26,7 @@ const Mount = styled.div`
     display: block;
     width: 100%;
     height: 100%;
+    filter: drop-shadow(10px 16px 18px rgb(0 0 0 / 65%));
   }
 `;
 const Control = styled.button`
@@ -89,6 +90,7 @@ export default function GamesCrt({ screen_content } = {}) {
     scene.add(light);
     const model = create_crt_model(scene);
     const display = create_crt_screen(model.screen_canvas, {
+      static_flash: AppText.get(CRT_TEXT.husker_du),
       broadcast: {
         message: AppText.get(CRT_TEXT.broadcast),
         alert: AppText.get(CRT_TEXT.deploy),

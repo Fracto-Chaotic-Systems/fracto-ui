@@ -7,6 +7,7 @@ import {
   prepare_crt_media,
 } from "../src/pages/games/CrtScreenMedia.js";
 import { create_crt_screen } from "../src/pages/games/CrtScreen.js";
+import { create_crt_static_flash } from "../src/pages/games/CrtStaticFlash.js";
 import { crt_image_reveal_rect } from "../src/pages/games/CrtImageReveal.js";
 import {
   crt_broadcast_state,
@@ -61,6 +62,25 @@ test("broadcast finishes its crawl, blinks the alert, and repeats", () => {
   assert.equal(crt_broadcast_state(2000, end + 0.1, 488).alert, true);
   assert.equal(crt_broadcast_state(2000, end + 0.6, 488).visible, false);
   assert.equal(crt_broadcast_state(2000, end + 6.1, 488).alert, false);
+});
+
+test("selected static bursts show one midpoint title frame, with static before and after", () => {
+  const interference = create_crt_interference({ random: () => 0 });
+  const flash = create_crt_static_flash({ random: () => 0 });
+  const skipped = create_crt_static_flash({ random: () => 0.9 });
+  const frames = [];
+  for (let i = 0; i < 100; i++) {
+    interference.advance(1 / 24);
+    const state = interference.state;
+    const title = flash(state);
+    assert.equal(skipped(state), false);
+    if (state.is_static) frames.push(title);
+    if (title) assert.ok(state.remaining <= state.burst_duration / 2);
+  }
+  assert.equal(frames.filter(Boolean).length, 1);
+  const index = frames.indexOf(true);
+  assert.ok(index > 0 && index < frames.length - 1);
+  assert.equal(flash(interference.state, false), false);
 });
 
 test("image reveal starts on the upper face and finishes with the whole image", () => {
@@ -203,6 +223,28 @@ test("broadcast remains above static and keeps scrolling across content changes"
   assert.equal(text.args[0], "Independent scrolling message");
   assert.equal(text.color, "#ffffff");
   assert.ok(text.args[1] < first.args[1]);
+  display.dispose();
+});
+
+test("static title card is drawn once beneath the continuing broadcast", () => {
+  const env = environment();
+  const display = create_crt_screen(env.canvas, {
+    random: () => 0,
+    static_flash: "Husker Du",
+    broadcast: { message: "Continuing message", alert: "PREPARE TO DEPLOY" },
+  });
+  let title_frames = 0;
+  for (let i = 0; i < 100; i++) {
+    env.ctx.calls.length = 0;
+    display.paint({ dt: 1 / 24 });
+    const texts = env.ctx.calls.filter((call) => call.method === "fillText");
+    const title = texts.findIndex((call) => call.args[0] === "Husker Du");
+    if (title >= 0) {
+      title_frames++;
+      assert.equal(texts[title + 1].args[0], "Continuing message");
+    }
+  }
+  assert.equal(title_frames, 1);
   display.dispose();
 });
 
