@@ -1,0 +1,105 @@
+import styled from "styled-components";
+import { parchment_grid_lines } from "./GamesPlayMap.js";
+import GamesPlayMapMarker from "./GamesPlayMapMarker.jsx";
+import GamesPlayMapRaster from "./GamesPlayMapRaster.jsx";
+
+const Parchment = styled.figure`
+  position: absolute;
+  right: ${({ $above }) => ($above ? "auto" : "calc(100% + 28px)")};
+  left: ${({ $above, $left }) => ($above ? `${$left}px` : "auto")};
+  bottom: ${({ $above }) => ($above ? "calc(100% + 48px)" : "12px")};
+  transform: translateY(60px);
+  box-sizing: border-box;
+  width: ${({ $width }) => $width}px;
+  aspect-ratio: 1;
+  margin: 0;
+  pointer-events: none;
+`;
+
+const ScrollBackground = styled.img`
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(90deg);
+`;
+
+const Chart = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 16%;
+  width: 68%;
+  transform: translateY(-50%);
+  overflow: hidden;
+`;
+
+const RasterLayer = styled.div`
+  position: relative;
+  isolation: isolate;
+  mix-blend-mode: multiply;
+
+  canvas {
+    position: relative;
+    width: 100%;
+    height: auto;
+  }
+`;
+
+const Grid = styled.svg`
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+`;
+
+const GRID_LINES = parchment_grid_lines();
+
+export default function GamesPlayMap({
+  width_px,
+  dock_width,
+  dock_height,
+  height_px,
+  flight_state,
+}) {
+  // The dashboard's rim extends 28px beyond its controls. Fill the remaining
+  // horizontal space to the viewport edge instead of capping the scroll size.
+  const side_space = (width_px - dock_width) / 2 - 28;
+  const above = side_space < 96;
+  const width = above
+    ? Math.min(200, width_px - 32, height_px - dock_height - 96)
+    : side_space;
+  if (width < 96) return null;
+
+  return (
+    <Parchment
+      role="group"
+      aria-label="Mandelbrot Set chart on curled parchment, with a grid in the escape regions"
+      $width={width}
+      $above={above}
+      $left={(dock_width - width_px) / 2 + 16}
+    >
+      <ScrollBackground src="/images/10-transparent.png" alt="" />
+      <Chart>
+        <RasterLayer>
+          <Grid viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            {GRID_LINES.map(({ axis, value, major, half, position_pct }) => (
+              <line
+                key={`${axis}-${value}`}
+                x1={axis === "re" ? position_pct : 0}
+                x2={axis === "re" ? position_pct : 100}
+                y1={axis === "im" ? position_pct : 0}
+                y2={axis === "im" ? position_pct : 100}
+                stroke="#785b38"
+                strokeOpacity={major ? 0.65 : half ? 0.4 : 0.25}
+                strokeWidth={major ? 1.25 : half ? 0.85 : 0.65}
+                vectorEffect="non-scaling-stroke"
+              />
+            ))}
+          </Grid>
+          <GamesPlayMapRaster display_width={width * 0.68} />
+        </RasterLayer>
+        <GamesPlayMapMarker flight_state={flight_state} />
+      </Chart>
+    </Parchment>
+  );
+}

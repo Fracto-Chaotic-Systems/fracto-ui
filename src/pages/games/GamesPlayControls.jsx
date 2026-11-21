@@ -10,6 +10,7 @@ import { useDashboardBackground } from "./useDashboardBackground.js";
 import { dashboard_background } from "./DashboardBackground.js";
 import { useNightFlight } from "./useNightFlight.js";
 import NightFlightSwitch from "./NightFlightSwitch.jsx";
+import GamesPlayMap from "./GamesPlayMap.jsx";
 
 const pearl_drift = keyframes`
   from { background-position: 0 0, 0% 0%, 0 0; }
@@ -128,6 +129,12 @@ export default function GamesPlayControls({
   const night = useNightFlight();
   const layout = game_controls_layout(width_px, height_px, settings);
   const groups = layout.groups.filter((group) => group.count);
+  const group_height = (group) =>
+    group.rows * (layout.instrument_size + 16) + Math.max(0, group.rows - 1) * 8;
+  const dock_height = layout.compact
+    ? layout.controller_height +
+      groups.reduce((sum, group) => sum + group_height(group) + 8, 0)
+    : Math.max(layout.controller_height, ...groups.map(group_height));
   if (!width_px || !height_px) return null;
   return (
     <ControlsDock
@@ -136,6 +143,13 @@ export default function GamesPlayControls({
       $width={layout.dock_width}
       $shoulder_radius={layout.instrument_size / 2 + 28}
     >
+      <GamesPlayMap
+        flight_state={flight_state}
+        width_px={width_px}
+        height_px={height_px}
+        dock_width={layout.dock_width}
+        dock_height={dock_height}
+      />
       {(layout.visible || layout.limited) && (
         <InstrumentCaption
           title={
