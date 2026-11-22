@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { update_crt_cables } from "./CrtCables.js";
+import { game_ambient_motion } from "./GameAmbientMotion.js";
 
 // Constant-length two-bone IK: extension folds the elbow rather than stretching
 // either arm. The wrist attaches behind the cabinet; the elbow folds left/rear.
@@ -35,10 +36,10 @@ function connect(mesh, from, to) {
 }
 
 export function pose_crt(model, time, pointer, extension, reduced_motion) {
-  const idle = reduced_motion ? 0 : Math.sin(time * 0.9);
+  const idle = game_ambient_motion(time, reduced_motion);
   model.head.position.set(
     -0.28 + extension * 0.32,
-    0.99 - extension * 0.2 + idle * 0.035,
+    0.99 - extension * 0.2 + idle.lift,
     -0.08 + extension * 0.6,
   );
   // Keep the support on the rear mounting plate as the cabinet swivels/tilts.
@@ -46,7 +47,7 @@ export function pose_crt(model, time, pointer, extension, reduced_motion) {
   model.head.rotation.set(
     -0.08 - pointer.y * 0.16,
     0.85 + pointer.x * 0.22,
-    -0.045 + pointer.x * 0.07 + idle * 0.025,
+    -0.045 + pointer.x * 0.07 + idle.roll_rad,
   );
   const wrist = new THREE.Vector3(0, 0.28, -0.98)
     .applyQuaternion(model.head.quaternion)

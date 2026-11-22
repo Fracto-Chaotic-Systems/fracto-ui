@@ -2,6 +2,21 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { advance_parchment_roll } from "../src/pages/games/ParchmentMotion.js";
 import { parchment_string_points } from "../src/pages/games/ParchmentSuspension.js";
+import { game_ambient_motion } from "../src/pages/games/GameAmbientMotion.js";
+
+test("shared ambient force has a slow bounded cycle and freezes under reduced motion", () => {
+  const quarter = Math.PI / (2 * 0.32);
+  const crest = game_ambient_motion(quarter);
+  assert.ok(Math.abs(crest.roll_rad - 0.025) < 1e-10);
+  assert.ok(Math.abs(crest.lift - 0.035) < 1e-10);
+  const trough = game_ambient_motion(quarter * 3);
+  assert.ok(Math.abs(trough.roll_rad + crest.roll_rad) < 1e-10);
+  assert.ok(Math.abs(trough.lift + crest.lift) < 1e-10);
+  assert.deepEqual(game_ambient_motion(quarter, true), {
+    roll_rad: 0,
+    lift: 0,
+  });
+});
 
 test("hanging string follows the wooden handles while its nail remains fixed", () => {
   const rest = parchment_string_points(0);

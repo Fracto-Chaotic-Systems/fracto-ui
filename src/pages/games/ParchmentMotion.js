@@ -1,3 +1,5 @@
+import { game_ambient_motion } from "./GameAmbientMotion.js";
+
 const angle_delta = (target, angle) =>
   ((((target - angle + 180) % 360) + 360) % 360) - 180;
 
@@ -31,7 +33,7 @@ export function bind_parchment_roll(element, flight_state, on_roll = () => {}) {
   const read_target = () => -flight_state.get_snapshot().roll_deg;
   let target = read_target();
   const initial = parseFloat(
-    element.style.getPropertyValue("--parchment-roll"),
+    element.style.getPropertyValue("--parchment-attitude-roll"),
   );
   const state = {
     angle: Number.isFinite(initial) ? initial : target,
@@ -40,9 +42,13 @@ export function bind_parchment_roll(element, flight_state, on_roll = () => {}) {
   const reduced_motion = window.matchMedia("(prefers-reduced-motion: reduce)");
   let frame = null,
     previous = 0;
-  const paint = () => {
-    element.style.setProperty("--parchment-roll", `${state.angle}deg`);
-    on_roll(state.angle);
+  const paint = (time = performance.now()) => {
+    const idle = game_ambient_motion(time / 1000, reduced_motion.matches);
+    // Three.js uses Y-up; CSS rotation uses Y-down, hence the sign conversion.
+    const displayed_angle = state.angle - (idle.roll_rad * 180) / Math.PI;
+    element.style.setProperty("--parchment-attitude-roll", `${state.angle}deg`);
+    element.style.setProperty("--parchment-roll", `${displayed_angle}deg`);
+    on_roll(displayed_angle);
   };
   const stop = () => {
     if (frame !== null) cancelAnimationFrame(frame);
@@ -50,14 +56,15 @@ export function bind_parchment_roll(element, flight_state, on_roll = () => {}) {
   };
   const animate = (time) => {
     frame = null;
-    const settled = advance_parchment_roll(
+    advance_parchment_roll(
       state,
       target,
       previous ? (time - previous) / 1000 : 1 / 60,
     );
     previous = time;
-    paint();
-    if (!settled && !document.hidden) frame = requestAnimationFrame(animate);
+    paint(time);
+    if (!document.hidden && !reduced_motion.matches)
+      frame = requestAnimationFrame(animate);
   };
   const wake = () => {
     if (reduced_motion.matches) {

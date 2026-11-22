@@ -6,6 +6,7 @@ import GamesPlayMapRaster from "./GamesPlayMapRaster.jsx";
 import { bind_parchment_roll } from "./ParchmentMotion.js";
 import ParchmentSuspension from "./ParchmentSuspension.jsx";
 import { parchment_string_path } from "./ParchmentSuspension.js";
+import ParchmentNameplate from "./ParchmentNameplate.jsx";
 
 const MapMount = styled.figure`
   position: absolute;
@@ -131,6 +132,7 @@ export default function GamesPlayMap({
         </Chart>
       </Parchment>
       <ParchmentSuspension suspension_ref={suspension_ref} />
+      <ParchmentNameplate />
     </MapMount>
   );
 }

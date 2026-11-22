@@ -12,6 +12,13 @@ Overview, Settings, and Status intentionally remain blank.
 
 ## Corner CRT character
 
+`GameAmbientMotion.js` gives the TV and parchment one shared slow force cycle,
+sampled from the document animation clock. Its roughly 20-second sway gently
+bobs and rolls the TV and turns the map in the matching visual direction.
+The map adds this sway to its lagged attitude angle and updates the support
+string from the combined angle; the nail remains fixed. Reduced motion disables
+the shared sway for both objects.
+
 The transparent TV canvas casts a dark, diffuse CSS drop shadow from its alpha
 silhouette, offset 10px right and 16px down with an 18px blur. It follows the
 cabinet and rig as they move without adding an opaque backdrop or scene walls.
@@ -35,9 +42,11 @@ pixels per second. After the complete message exits, a centered red-on-white
 changes do not reset it. Reduced motion keeps the alert lettering steadily visible.
 Successive crawls alternate English and a randomly chosen AppText translation:
 Spanish, French, German, Russian, Greek, Arabic, Hindi, Japanese, Chinese,
-Korean, Esperanto, or Latin, plus a deliberately nonsensical lorem ipsum variant with the English
+Korean, Esperanto, or Latin, plus pirate speech and a deliberately nonsensical
+lorem ipsum variant with the English
 message's sentence cadence and punctuation. Its blinking alert reads exactly
 `anim id est laborum`. Consecutive translated turns avoid repeating the same option. Each
+pirate crawl ends with the blinking battle cry `TO ARMS, YE SCALLYWAGS!`. Each
 message is measured separately so the full text exits before the alert begins;
 Arabic is shaped right-to-left and enters from the left for reading order.
 Unicode font fallbacks cover the additional scripts. The deployment alert uses
@@ -132,8 +141,9 @@ attitude roll angle. `ParchmentMotion.js` uses a gently damped spring so it lags
 changes and settles gradually with slight inertia, generally over 2–3 seconds.
 It takes the shortest angular path across ±180°. A per-map telemetry subscription
 updates the target, and animation updates a CSS variable without redrawing the
-raster. Animation stops after settling or while hidden, and reduced motion
-applies the target directly. Frame callbacks and subscriptions are released on
+raster. The attitude spring settles independently while ambient sway continues.
+Animation pauses while hidden, and reduced motion disables sway and applies the
+attitude target directly. Frame callbacks and subscriptions are released on
 unmount.
 `ParchmentSuspension.jsx` adds a fixed metal nail centered slightly above the
 wooden knobs and a textured twine loop layered behind the parchment. The nail
@@ -144,6 +154,16 @@ points on the wooden handles around the map center. The string's
 straight spans update with the displayed spring angle, staying taut and attached
 while the nail remains stationary. Both the parchment and its fittings keep the
 existing dock placement and vertical offset.
+`ParchmentNameplate.jsx` adds a stationary weathered-steel plate below the map,
+with four corner rivets, spaced FRACTO lettering, the atlas subtitle, and the
+establishment year. It sits outside the rotating body, scales its typography to
+the available map width, and reads its three lines from the Games AppText catalog.
+The plate is centered at 60.8% of the map width and raised 2rem, with larger corner
+rivets and fuller lettering. FRACTO uses the welcome screen's normal-weight
+monospace font, 0.65 height scale, and proportional tracking (5px at 80px).
+The second line has 0.08em tracking, and fluid type scales to fit the narrower plate.
+Subtle pitting, scratches, mottled patina, and muted rivets give the metal a dull,
+aged finish without the former polished highlight band.
 Airspeed, attitude, and
 heading default to the left; altitude, vertical speed, and turn coordination
 default to the right. Desktop instrument groups sit directly beside the controller

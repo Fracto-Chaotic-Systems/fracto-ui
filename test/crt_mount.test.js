@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { Object3D, Scene, Vector3 } from "three";
 import { pose_crt } from "../src/pages/games/CrtMotion.js";
 import { create_tube_geometry } from "../src/pages/games/CrtModel.js";
+import { game_ambient_motion } from "../src/pages/games/GameAmbientMotion.js";
 import {
   create_crt_cables,
   crt_cable_curve,
@@ -72,8 +73,19 @@ test("neck stays connected behind the cabinet throughout travel and pointer moti
   for (let step = 0; step <= 20; step++) {
     for (const x of [-1, 0, 1])
       for (const y of [-1, 0, 1]) {
-        for (const time of [0, Math.PI / 1.8, Math.PI / 0.6]) {
+        for (const time of [0, Math.PI / 0.64, (3 * Math.PI) / 0.64]) {
           pose_crt(model, time, { x, y }, step / 20, false);
+          const ambient = game_ambient_motion(time);
+          assert.ok(
+            Math.abs(
+              model.head.rotation.z - (-0.045 + x * 0.07 + ambient.roll_rad),
+            ) < 1e-10,
+          );
+          assert.ok(
+            Math.abs(
+              model.head.position.y - (0.99 - (step / 20) * 0.2 + ambient.lift),
+            ) < 1e-10,
+          );
           const [shoulder, elbow, wrist] = model.joints.map(
             (joint) => joint.position,
           );

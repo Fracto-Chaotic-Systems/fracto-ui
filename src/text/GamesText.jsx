@@ -6,6 +6,12 @@ import {
 } from "../pages/games/controllers/FlightControlSettings.js";
 
 const GAMES_FOLDER = "games";
+export const PARCHMENT_PLATE_TEXT = Object.fromEntries(
+  ["name", "tagline", "established"].map((key) => [
+    key,
+    `${GAMES_FOLDER}/parchment_plate_${key}`,
+  ]),
+);
 export const CRT_BROADCAST_TRANSLATIONS = Object.fromEntries(
   [
     "es",
@@ -21,6 +27,7 @@ export const CRT_BROADCAST_TRANSLATIONS = Object.fromEntries(
     "eo",
     "la",
     "lorem",
+    "pirate",
   ].map((language) => [language, `${GAMES_FOLDER}/crt_broadcast_${language}`]),
 );
 export const CRT_DEPLOY_TRANSLATIONS = Object.fromEntries(
@@ -372,6 +379,9 @@ export const MUSIC_TEXT = Object.fromEntries(
 );
 
 export const APP_GAMES_TEXT = {
+  [PARCHMENT_PLATE_TEXT.name]: "FRACTO",
+  [PARCHMENT_PLATE_TEXT.tagline]: "the atlas of chaos",
+  [PARCHMENT_PLATE_TEXT.established]: "est. 2025",
   [CRT_TEXT.label]: "Vintage CRT on an articulated ceiling mount",
   [CRT_TEXT.toggle]:
     "Click the TV screen to extend or retract its robotic neck",
@@ -387,6 +397,9 @@ export const APP_GAMES_TEXT = {
   [CRT_BROADCAST_TRANSLATIONS.la]:
     "Haec est probatio systematis emissionum chaoticarum. Haec tantum probatio est. Si res vere chaotica accideret, monereris ut eam tractares et vitam tuam agere pergeres.",
   [CRT_DEPLOY_TRANSLATIONS.lorem]: "anim id est laborum",
+  [CRT_DEPLOY_TRANSLATIONS.pirate]: "TO ARMS, YE SCALLYWAGS!",
+  [CRT_BROADCAST_TRANSLATIONS.pirate]:
+    "Arrr, this be a test o’ the chaotic broadcast system. ’Tis only a test, matey. Were this a real bout o’ chaos, ye’d be advised to weather the storm and sail on with yer life.",
   [CRT_BROADCAST_TRANSLATIONS.lorem]:
     "Lorem ipsum a testum de la chaotica broadcastum systema. Ipsum est solum a testum. Si lorem esset un actualum chaotica eventum, tu velum sit advisum ad flib cum id et blorpa onum cum tua vita.",
   [CRT_DEPLOY_TRANSLATIONS.es]: "PREPÁRESE PARA DESPLEGAR",
