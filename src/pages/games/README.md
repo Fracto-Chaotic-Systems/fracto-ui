@@ -816,3 +816,8 @@ extra decoders are not configured; those assets may need a plain GLB export.
 Imported units and materials require visual review. GLB preview stats are derived
 from the loaded model, and material toggles restore each material's original
 alpha cutoff and color. Missing previews do not prevent catalog editing.
+
+`InventoryAssetRequest.js` bounds catalog requests (including response bodies)
+to 15 seconds. Timeouts show the existing error and Retry control instead of
+leaving the list stuck on Loading assets. Navigation aborts requests quietly;
+failed loads are not presented as an empty catalog inviting reimport.

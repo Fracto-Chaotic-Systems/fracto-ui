@@ -212,7 +212,11 @@ export default function GamesInventory({ children, category }) {
           </>
         ) : (
           <InventoryCaption>
-            {inventory.loading ? text("loading_assets") : text("empty_assets")}
+            {inventory.loading
+              ? text("loading_assets")
+              : inventory.error
+                ? text("assets_error")
+                : text("empty_assets")}
           </InventoryCaption>
         )}
       </InventoryWorkspace>

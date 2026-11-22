@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { fetch_inventory_assets } from "./InventoryAssetRequest.js";
 export default function useInventoryAssets(category) {
   const catalog_url = `${import.meta.env.BASE_URL}api/environment-catalog?category=${encodeURIComponent(category)}`;
   const [assets, set_assets] = useState([]),
@@ -7,18 +8,14 @@ export default function useInventoryAssets(category) {
     [error, set_error] = useState(false);
   const reload = async (preferred) => {
     try {
-      const response = await fetch(catalog_url, {
-        credentials: "include",
-        cache: "no-store",
-      });
-      if (!response.ok) throw new Error("catalog_unavailable");
-      const data = await response.json();
+      const loaded_assets = await fetch_inventory_assets(catalog_url);
       set_error(false);
-      set_assets(data.assets);
+      set_assets(loaded_assets);
       set_selected(
         (current) =>
-          data.assets.find((item) => item.id === (preferred || current))?.id ||
-          data.assets[0]?.id ||
+          loaded_assets.find((item) => item.id === (preferred || current))
+            ?.id ||
+          loaded_assets[0]?.id ||
           null,
       );
     } catch {
@@ -29,16 +26,10 @@ export default function useInventoryAssets(category) {
   };
   useEffect(() => {
     const controller = new AbortController();
-    fetch(catalog_url, {
-      credentials: "include",
-      cache: "no-store",
-      signal: controller.signal,
-    })
-      .then(async (response) => {
-        if (!response.ok) throw new Error("catalog_unavailable");
-        const data = await response.json();
-        set_assets(data.assets);
-        set_selected(data.assets[0]?.id || null);
+    fetch_inventory_assets(catalog_url, { signal: controller.signal })
+      .then((loaded_assets) => {
+        set_assets(loaded_assets);
+        set_selected(loaded_assets[0]?.id || null);
       })
       .catch((error) => {
         if (error.name !== "AbortError") set_error(true);

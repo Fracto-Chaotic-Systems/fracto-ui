@@ -366,3 +366,7 @@ and pending-frame cancellation coverage.
 `flight_preview_entries.test.js` bundles both flight control/integration HTML
 fixtures against current application exports and checks Vite’s explicit app entry.
 Run `npm run test:flight-previews`; production prebuild runs it as well.
+
+`inventory_asset_request.test.js` checks material list loading, request and body
+timeouts, navigation cancellation and failure handling. It uses synthetic requests
+and verifies a stalled connection cannot leave the inventory loading indefinitely.
