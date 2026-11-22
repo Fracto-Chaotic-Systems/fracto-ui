@@ -1,5 +1,10 @@
 # UI text and translation
 
+Games uses **assets** for its environment-library sidebar label and
+**assets inventory** for the page title. The `games/inventory` and
+`games/inventory_title` text keys remain stable.
+The former Inventory introductory message and its unused text key are removed.
+
 AdminText also registers AI server-health and repository labels.
 
 The modules in this directory define the user-facing text for the major UI

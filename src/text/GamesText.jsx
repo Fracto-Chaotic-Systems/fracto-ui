@@ -6,6 +6,112 @@ import {
 } from "../pages/games/controllers/FlightControlSettings.js";
 
 const GAMES_FOLDER = "games";
+export const INVENTORY_IMPORT_TEXT = Object.fromEntries(
+  [
+    "blender_unavailable",
+    "blender_missing_textures",
+    "blender_no_mesh",
+    "blender_conversion_failed",
+    "button",
+    "title",
+    "help",
+    "name",
+    "model",
+    "files",
+    "confirm",
+    "cancel",
+    "reading",
+    "importing",
+    "success",
+    "duplicate",
+    "error",
+    "unsafe_path",
+    "duplicate_path",
+    "import_too_large",
+    "archive_depth",
+    "no_model",
+    "import_busy",
+  ].map((key) => [key, `${GAMES_FOLDER}/inventory_import_${key}`]),
+);
+export const KEY_GAMES_INVENTORY = `${GAMES_FOLDER}/inventory`;
+export const KEY_GAMES_INVENTORY_TITLE = `${GAMES_FOLDER}/inventory_title`;
+export const INVENTORY_CATALOG_TEXT = Object.fromEntries(
+  [
+    "loading",
+    "load_error",
+    "reload",
+    "discard_reload",
+    "saving",
+    "saved_direct",
+    "direct_help",
+    "recovered",
+    "title",
+    "id",
+    "version",
+    "creator_name",
+    "creator_profile_url",
+    "source_url",
+    "license_name",
+    "license_file",
+    "credit_text",
+    "modification_conditions",
+    "redistribution_conditions",
+    "notes",
+    "missing",
+    "edit",
+    "open",
+    "save_file",
+    "download",
+    "save",
+    "cancel",
+    "add_note",
+    "local_help",
+    "opened_file",
+    "opened",
+    "saved",
+    "file_saved",
+    "downloaded",
+    "invalid_url",
+    "invalid_record",
+    "file_conflict",
+    "open_error",
+    "save_error",
+    "file_error",
+    "json_file",
+    "sources",
+    "history",
+  ].map((key) => [key, `${GAMES_FOLDER}/inventory_catalog_${key}`]),
+);
+export const INVENTORY_TEXT = Object.fromEntries(
+  [
+    "material_repair",
+    "density",
+    "density_help",
+    "loading_assets",
+    "assets_error",
+    "empty_assets",
+    "assets",
+    "asset",
+    "grass",
+    "scale",
+    "height",
+    "lighting",
+    "strength",
+    "normal",
+    "roughness",
+    "wireframe",
+    "reference",
+    "reset",
+    "help",
+    "loading",
+    "error",
+    "retry",
+    "ready",
+    "note",
+    "view",
+    "units",
+  ].map((key) => [key, `${GAMES_FOLDER}/inventory_${key}`]),
+);
 export const PARCHMENT_PLATE_TEXT = Object.fromEntries(
   ["name", "tagline", "established"].map((key) => [
     key,
@@ -379,6 +485,134 @@ export const MUSIC_TEXT = Object.fromEntries(
 );
 
 export const APP_GAMES_TEXT = {
+  [INVENTORY_TEXT.material_repair]:
+    "FBX cutout material corrected for this preview. Source files are unchanged.",
+  [INVENTORY_TEXT.density]: "Grass density",
+  [INVENTORY_TEXT.density_help]:
+    "Preview only. Increase for fuller grass; 0 hides the clumps. Original Blender and catalog files stay unchanged.",
+  [INVENTORY_IMPORT_TEXT.blender_unavailable]:
+    "Blender conversion is unavailable on the server. Install Blender or configure its executable, then retry.",
+  [INVENTORY_IMPORT_TEXT.blender_missing_textures]:
+    "The Blender model references missing texture files. Include them in the selected folder and retry.",
+  [INVENTORY_IMPORT_TEXT.blender_no_mesh]:
+    "No mesh objects were found in the Blender scene. Convert procedural or curve objects to meshes in Blender before importing.",
+  [INVENTORY_IMPORT_TEXT.blender_conversion_failed]:
+    "The Blender model could not be converted. Check its textures and Blender version, then retry. No asset was added.",
+  [INVENTORY_IMPORT_TEXT.button]: "Import folder",
+  [INVENTORY_IMPORT_TEXT.title]: "Import environment asset",
+  [INVENTORY_IMPORT_TEXT.help]:
+    "Choose a name and the model to preview. Blender files are converted to a separate GLB automatically. Original models, textures, and license/readme files are preserved. Creator and license details can be completed afterward.",
+  [INVENTORY_IMPORT_TEXT.name]: "Asset name",
+  [INVENTORY_IMPORT_TEXT.model]: "Preview model",
+  [INVENTORY_IMPORT_TEXT.files]: "{count} source files selected",
+  [INVENTORY_IMPORT_TEXT.confirm]: "Import asset",
+  [INVENTORY_IMPORT_TEXT.cancel]: "Cancel",
+  [INVENTORY_IMPORT_TEXT.reading]: "Reading folder…",
+  [INVENTORY_IMPORT_TEXT.importing]:
+    "Importing asset… Blender models may take up to two minutes to convert.",
+  [INVENTORY_IMPORT_TEXT.success]: "Asset imported and selected.",
+  [INVENTORY_IMPORT_TEXT.duplicate]:
+    "This folder is already cataloged. Selected the existing asset.",
+  [INVENTORY_IMPORT_TEXT.error]:
+    "The folder could not be imported. Check its files and retry.",
+  [INVENTORY_IMPORT_TEXT.unsafe_path]:
+    "A filename or archive path is not supported. Check the folder and retry.",
+  [INVENTORY_IMPORT_TEXT.duplicate_path]:
+    "The folder or archive contains duplicate filenames.",
+  [INVENTORY_IMPORT_TEXT.import_too_large]:
+    "Imports support up to 2,000 files and 100 MB including extracted ZIP contents.",
+  [INVENTORY_IMPORT_TEXT.archive_depth]:
+    "Unpack deeply nested ZIP archives before importing.",
+  [INVENTORY_IMPORT_TEXT.no_model]:
+    "Choose a folder containing Blender (.blend), GLB, glTF, FBX, OBJ, or 3DS models. ZIP downloads are supported.",
+  [INVENTORY_IMPORT_TEXT.import_busy]:
+    "Another import is in progress. Retry shortly.",
+  [INVENTORY_TEXT.loading_assets]: "Loading assets…",
+  [INVENTORY_TEXT.assets_error]: "The asset list could not be loaded.",
+  [INVENTORY_TEXT.empty_assets]: "Import a folder to add an environment asset.",
+  [INVENTORY_CATALOG_TEXT.loading]: "Loading catalog information…",
+  [INVENTORY_CATALOG_TEXT.load_error]:
+    "Catalog information could not be loaded. Check the server and retry.",
+  [INVENTORY_CATALOG_TEXT.reload]: "Reload catalog",
+  [INVENTORY_CATALOG_TEXT.discard_reload]: "Discard edits and reload",
+  [INVENTORY_CATALOG_TEXT.saving]: "Saving catalog…",
+  [INVENTORY_CATALOG_TEXT.saved_direct]: "Saved to the asset’s catalog file.",
+  [INVENTORY_CATALOG_TEXT.direct_help]:
+    "Save writes directly to this asset’s catalog file and records changes in its history.",
+  [INVENTORY_CATALOG_TEXT.recovered]:
+    "Previous browser edits were recovered. Review them and Save to update the catalog file.",
+  [INVENTORY_CATALOG_TEXT.title]: "Catalog information",
+  [INVENTORY_CATALOG_TEXT.id]: "Asset ID",
+  [INVENTORY_CATALOG_TEXT.version]: "Version",
+  [INVENTORY_CATALOG_TEXT.creator_name]: "Creator",
+  [INVENTORY_CATALOG_TEXT.creator_profile_url]: "Creator website",
+  [INVENTORY_CATALOG_TEXT.source_url]: "Original source URL",
+  [INVENTORY_CATALOG_TEXT.license_name]: "License",
+  [INVENTORY_CATALOG_TEXT.license_file]: "License file",
+  [INVENTORY_CATALOG_TEXT.credit_text]: "Attribution text",
+  [INVENTORY_CATALOG_TEXT.modification_conditions]: "Modification conditions",
+  [INVENTORY_CATALOG_TEXT.redistribution_conditions]:
+    "Redistribution conditions",
+  [INVENTORY_CATALOG_TEXT.notes]: "Attribution notes",
+  [INVENTORY_CATALOG_TEXT.missing]: "Not recorded",
+  [INVENTORY_CATALOG_TEXT.edit]: "Edit catalog details",
+  [INVENTORY_CATALOG_TEXT.open]: "Open catalog file",
+  [INVENTORY_CATALOG_TEXT.save_file]: "Save to catalog file",
+  [INVENTORY_CATALOG_TEXT.download]: "Download catalog JSON",
+  [INVENTORY_CATALOG_TEXT.save]: "Save catalog details",
+  [INVENTORY_CATALOG_TEXT.cancel]: "Cancel",
+  [INVENTORY_CATALOG_TEXT.add_note]: "Add a modification note (optional)",
+  [INVENTORY_CATALOG_TEXT.local_help]:
+    "Edits are stored in this browser. Open the asset’s local asset.json to read its latest details and enable direct file saving in supported browsers, or download the updated JSON. Creator details stay local and are not sent to services.",
+  [INVENTORY_CATALOG_TEXT.opened_file]: "Opened file",
+  [INVENTORY_CATALOG_TEXT.opened]:
+    "Catalog file opened. Its details are now shown below.",
+  [INVENTORY_CATALOG_TEXT.saved]:
+    "Details saved in this browser. Save to the opened catalog file or download JSON to keep a file copy.",
+  [INVENTORY_CATALOG_TEXT.file_saved]: "The opened catalog file was updated.",
+  [INVENTORY_CATALOG_TEXT.downloaded]:
+    "Updated catalog JSON downloaded. The original file has not been changed.",
+  [INVENTORY_CATALOG_TEXT.invalid_url]:
+    "Enter a complete http:// or https:// website address.",
+  [INVENTORY_CATALOG_TEXT.invalid_record]:
+    "Choose a valid catalog JSON record for the selected asset.",
+  [INVENTORY_CATALOG_TEXT.file_conflict]:
+    "The catalog changed while you were editing. Your edits remain in the form. Review or copy them before discarding edits and reloading the latest catalog.",
+  [INVENTORY_CATALOG_TEXT.open_error]:
+    "The catalog file could not be opened. Try again.",
+  [INVENTORY_CATALOG_TEXT.save_error]:
+    "The catalog file could not be saved. Your edits are still in the form; retry after checking the server.",
+  [INVENTORY_CATALOG_TEXT.file_error]:
+    "The file could not be saved. Check write permission or download JSON instead.",
+  [INVENTORY_CATALOG_TEXT.json_file]: "Asset catalog JSON",
+  [INVENTORY_CATALOG_TEXT.sources]: "Preserved source files",
+  [INVENTORY_CATALOG_TEXT.history]: "Modification history",
+  [KEY_GAMES_INVENTORY]: "assets",
+  [KEY_GAMES_INVENTORY_TITLE]: "assets inventory",
+  [INVENTORY_TEXT.asset]: "Environment asset",
+  [INVENTORY_TEXT.assets]: "Assets",
+  [INVENTORY_TEXT.grass]: "Grass patch · 001",
+  [INVENTORY_TEXT.scale]: "Preview scale",
+  [INVENTORY_TEXT.height]: "Model height",
+  [INVENTORY_TEXT.lighting]: "Light direction",
+  [INVENTORY_TEXT.strength]: "Light intensity",
+  [INVENTORY_TEXT.normal]: "Normal map",
+  [INVENTORY_TEXT.roughness]: "Roughness map",
+  [INVENTORY_TEXT.wireframe]: "Wireframe",
+  [INVENTORY_TEXT.reference]: "1 m reference cube",
+  [INVENTORY_TEXT.reset]: "Reset preview",
+  [INVENTORY_TEXT.help]:
+    "Drag to orbit · scroll or pinch to zoom · right-drag to pan. Focus the preview and use arrow keys to pan.",
+  [INVENTORY_TEXT.loading]: "Loading grass patch…",
+  [INVENTORY_TEXT.error]:
+    "The 3D preview could not load. Check WebGL support and retry.",
+  [INVENTORY_TEXT.retry]: "Retry preview",
+  [INVENTORY_TEXT.ready]:
+    "{triangles} triangles · {materials} materials · {textures} textures",
+  [INVENTORY_TEXT.note]:
+    "Verify imported scale and materials before use. Preview adjustments do not edit the catalog or original files.",
+  [INVENTORY_TEXT.view]: "Interactive environment asset preview",
+  [INVENTORY_TEXT.units]: "Grid: 10 cm squares · ruler: 1 m",
   [PARCHMENT_PLATE_TEXT.name]: "FRACTO",
   [PARCHMENT_PLATE_TEXT.tagline]: "the atlas of chaos",
   [PARCHMENT_PLATE_TEXT.established]: "est. 2025",

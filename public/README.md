@@ -1,5 +1,9 @@
 # Public UI assets
 
+`inventory/` contains the derived grass GLB for Games inventory. Its README
+records the canonical source and refresh command. Original downloads and creator
+metadata are retained in the main repository's local environment catalog.
+
 `dashboard/` contains optimized CC0 ambientCG color maps for woodgrain, metal,
 and wicker dashboard finishes. Its README records sources and license details.
 

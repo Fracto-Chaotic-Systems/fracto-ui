@@ -1,5 +1,23 @@
 # UI tests
 
+- `node --test test/inventory_camera.test.js` checks tight projected framing for
+  wide/flat assets and visibility of the model and meter references across aspect
+  ratios.
+
+- `node --test test/inventory_material_preview.test.js` verifies the FBX
+  zero-opacity shared-texture cutout repair without altering other transparency
+  conventions or other model formats.
+
+- `node --test test/inventory_grass_density.test.js` verifies that 1× retains
+  existing placements, added instances remain inside the field, counts and
+  triangle statistics change correctly, zero keeps the ground, and repeated
+  adjustments are deterministic without changing source geometry/materials.
+
+- `node --test test/inventory_catalog.test.js` covers attribution editing,
+  preservation of original metadata/history and source hashes, asset-scoped
+  browser persistence, imported-record validation, safe links, and conflict-aware
+  local file writes including aborted failures. It uses in-memory file mocks.
+
 - `crt_playlist.test.js` checks shuffled coverage, no immediate media repeats,
   face interludes, variable dwell times, reduced-motion pause, encoded catalog
   URLs, file-type filtering, polling when filesystem events are missed, and

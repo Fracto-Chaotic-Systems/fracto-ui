@@ -7,8 +7,81 @@ space below the title without clipping the gear or drawer to a zero-height box.
 layered CSS grain, scratches, and soft highlights beneath the flight scene,
 TV, instruments, and controls. The same finish carries into fullscreen. The
 settings gear uses a dark color for contrast over both the metal and the open drawer.
-Sidebar order is Overview, separator, worlds, music, play, separator, wordnet, Settings, Status.
+Sidebar order is Overview, separator, assets, worlds, music, play, separator, wordnet, Settings, Status.
 Overview, Settings, and Status intentionally remain blank.
+
+## Inventory
+
+The sidebar label is **assets** and the page title is **assets inventory**.
+The internal `games_inventory` section and saved selection key remain stable.
+The Import folder button sits in a toolbar below the title, above the asset list
+and preview. The former introductory message has been removed.
+
+`InventoryMaterialPreview.js` repairs a specific FBX cutout-export convention:
+zero global opacity with the same texture assigned to color and alpha maps.
+The preview uses the color texture's alpha channel, a 0.5 cutoff and double-sided
+cards. Other transparent materials and other formats retain their settings.
+The repaired cutouts use a subdued specular response so the legacy FBX highlights
+do not wash out the texture. `InventoryCamera.js` fits projected model bounds,
+including the scale references, to make wide/flat imports easier to inspect.
+The corrected settings are captured before material toggles are initialized, so
+wireframe/reset preserve the repair. A caption identifies the preview adjustment.
+No asset source or catalog files are modified. This fixes the grasses3 FBX import.
+
+Grasses 2 has a preview-only Grass density control from 0× to 8×, defaulting to
+the imported 1× density. `InventoryGrassDensity.js` batches the repeated grass
+clumps into one instanced mesh, retaining the initial placements at 1× and adding
+deterministically scattered/rotated copies within the ground surface for fuller
+settings. The ground is unaffected; geometry and materials are shared. Counts
+and triangle statistics update with the slider. Reset and asset selection restore
+1×. The control makes no requests and writes no catalog, GLB or Blender files.
+Instance GPU buffers are released with the preview's normal disposal lifecycle.
+
+`GamesInventory.jsx` owns preview controls and loading/retry status.
+`useInventoryAssets.js` loads registered assets from the live catalog endpoint.
+The left-hand list follows that catalog, including imports after a page reload.
+`InventoryImport.jsx` lets the user choose a local folder, name it, choose a model,
+and import it. Original files and ZIPs are preserved, archive contents are safely
+expanded, and the new asset is registered and selected. Reimporting identical
+source files selects the existing asset. Name collisions receive a suffix.
+On narrow screens, controls move below the preview while the asset list stays
+alongside it; on phone widths the list stacks above the preview.
+`InventoryScene.js` loads the selected model through `InventoryModelLoader.js`, renders
+on demand, supports orbit/zoom/pan and keyboard panning, and releases WebGL,
+controls, textures, materials and geometry on unmount. Late loads are disposed
+after navigation. `InventoryStyles.jsx` contains responsive styles.
+
+The fixed 10 cm grid, 1 m ruler and optional 1 m reference cube stay independent
+of the patch scale slider. Light direction/intensity, normal and roughness maps,
+and wireframe can be adjusted. Reset restores all defaults and the camera.
+Preview controls do not write to the source catalog. Scale and texture roles are
+provisional; original files and unresolved attribution stay in the main asset
+catalog. Preview resources are served directly from the registered asset library.
+
+`InventoryCatalogPanel.jsx` displays the selected asset's creator, source,
+license, attribution text/conditions, preserved files and modification history
+below the preview. `InventoryCatalogEditor.jsx` owns the editable form and
+`InventoryCatalogStyles.jsx` owns its presentation. `InventoryCatalog.js`
+validates imports and edits, preserves unknown fields, and appends attribution
+changes and optional modification notes
+to history. Blank fields remain null; filling basic attribution marks it recorded
+but unverified rather than claiming license verification.
+
+`useInventoryCatalog.js` loads the current record from the same-origin
+`/api/environment-catalog/:id` endpoint. Save writes attribution fields and an
+optional modification note directly to the registered canonical `asset.json`.
+The shared store in the main repository preserves all other fields, serializes
+writers, rejects stale revisions, and replaces the file atomically. Failures keep
+the form open. Reload explicitly discards the form and reads the latest file.
+The old browser-only editor's differing drafts are recovered for review and an
+explicit Save; they never overwrite the file automatically. The snapshot JSON is
+now a test fixture, not runtime catalog data. No file picker or download is needed.
+
+The Vite plugin and production static server mount the same authenticated router.
+Compose mounts the workspace `assets/environments` directory so writes reach the
+host catalog; `FRACTO_ENVIRONMENT_CATALOG_DIR` overrides the server-side library
+root when needed. Catalog creator/source/license information uses the narrow
+asset-provenance exception in PROJECT_GUIDELINES.md and is not logged.
 
 ## Corner CRT character
 
@@ -690,3 +763,43 @@ separate from effective sound. FluidR3 GM supplies original assignments; the
 explicit GrandB piano (Legacy) override remains available. See music/README.md.
 
 Interface step 6 automated checks pass (79 MIDI tests and 190-file compatibility corpus). The expanded real-browser verification remains pending tool access; see MIDI_VERIFICATION.md.
+
+### Folder import and preview resources
+
+Blender `.blend` files are accepted alongside the direct preview formats. On
+import, the server preserves the original and exports `runtime/model.glb` with
+Blender. `working/blender-export.json` and the catalog history record changes made
+only to the preview. Original particle systems remain editable in the `.blend`;
+static previews realize object instances under a 500,000-triangle/256-instance
+budget. Referenced textures are matched within the imported files. If exactly
+one referenced image is missing and one supplied image remains, it is relinked
+with an explicit review warning. Ambiguous missing textures fail the import.
+World lighting is not exported. Simple Diffuse materials are adapted to Principled;
+more complex shaders may require baking and visual review.
+
+The server needs Blender 3.4+ with glTF export support (`FRACTO_BLENDER_BIN` can
+override its executable). Docker development/build/runtime stages include Blender
+and the NumPy exporter dependency. Conversions time out after two minutes and
+failed conversions do not publish an asset. Embedded Blender scripts are disabled.
+
+`InventoryImport.jsx` uploads a ZIP envelope to POST `/api/environment-catalog/import`.
+The envelope is generated locally from the selected files; no absolute host paths
+are sent. Browser/server validation shares SDK `FractoAssetArchive.js`. Inputs
+support GLB, glTF, FBX, OBJ/MTL and 3DS, including up to two ZIP levels. Limits are
+2,000 files and 100 MiB including expanded contents. Originals are hashed under
+`source/files`; extracted resources live under `source/extracted`. Readme/license
+files are preserved; creator/license meanings remain unverified for later editing.
+
+The importer serializes catalog publication with an exclusive library lock and
+stages files before adding an index entry. A failed import leaves existing assets
+untouched. If a process crashes during an import, an operator should verify no
+import is running before removing a leftover `.catalog-import.lock`.
+
+GET `/api/environment-catalog` provides the live list and declared preview files.
+GET `/:id/files/*file` serves only resources declared by that registered record.
+The model loader resolves accompanying local files, rejects external resource
+fetches, and frames models automatically. Compressed glTF extensions requiring
+extra decoders are not configured; those assets may need a plain GLB export.
+Imported units and materials require visual review. GLB preview stats are derived
+from the loaded model, and material toggles restore each material's original
+alpha cutoff and color. Missing previews do not prevent catalog editing.

@@ -1,5 +1,9 @@
 # Fracto UI pages
 
+Games also includes `assets`, titled `assets inventory`: an interactive grass preview with scale
+references and material/lighting controls. Its adjustments are preview-only.
+The Games sidebar places assets immediately below the first separator, above worlds.
+
 This directory contains the routed application areas and the feature components rendered inside them. `App.jsx` owns the top-level routes; the page components here own each area's sidebar, section selection, splitter layout, and feature composition.
 
 ## Routed areas

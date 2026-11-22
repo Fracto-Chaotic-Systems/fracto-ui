@@ -1,5 +1,9 @@
 # UI data preparation
 
+`environment_catalog_plugin.js` mounts the shared environment catalog router in
+Vite, matching the production static UI server's endpoint. It reads live metadata
+and saves attribution edits directly to the mounted canonical asset catalog.
+
 ## Pong screen clip
 
 `render_pong.py` creates an original 16-second, silent Pong-style video at
