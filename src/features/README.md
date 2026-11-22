@@ -1,14 +1,16 @@
 # Structured application feature catalog
 
-Games' `games-inventory` feature is labeled **assets** and titled
-**assets inventory**; its feature ID, section and text keys remain stable.
-Its catalog entry follows Games Overview and precedes worlds, matching the sidebar.
+Games’ `games-inventory` feature is labeled **materials** and titled
+**all materials**; its feature ID, section and text keys remain stable.
+Components and areas follow it in the models group, below play.
+All three share the inventory scaffold; category-specific behavior is deferred
+and folder imports still create ingredients.
 Asset feature source references point to the owning asset and data services;
 the UI endpoint is a transport-only compatibility proxy.
 
 `catalog.json` is reviewed application reference data for future AI knowledge
 seeding. It covers the home entry page and every current sidebar destination:
-seven areas and 55 entries including home. It contains no user records, settings values,
+seven areas and 57 entries including home. It contains no user records, settings values,
 credentials, conversations, runtime observations or deployment-specific URLs.
 The UI does not load this catalog at runtime. Navigation still belongs to
 `App.jsx` and the area's `SIDEBAR_LIST` registrations.

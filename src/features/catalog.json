@@ -2297,109 +2297,6 @@
       ]
     },
     {
-      "id": "games-inventory",
-      "area": "games",
-      "section": "games_inventory",
-      "component": "src/pages/games/GamesInventory.jsx",
-      "label": {
-        "key": "games/inventory",
-        "text": "assets",
-        "source": "src/text/GamesText.jsx"
-      },
-      "title": {
-        "key": "games/inventory_title",
-        "text": "assets inventory",
-        "source": "src/text/GamesText.jsx"
-      },
-      "settings": [],
-      "availability": "implemented",
-      "purpose": "Import local environment asset folders, browse the live catalog, inspect models in 3D and edit their attribution and modification history.",
-      "inputs": [
-        "Orbit, zoom and pan",
-        "Preview scale, light direction and intensity",
-        "Normal and roughness maps, wireframe and reference cube toggles",
-        "Creator, source, license and attribution edits; modification notes",
-        "Local asset folders with Blender .blend, GLB/glTF, FBX, OBJ/MTL or 3DS files, ZIP downloads and textures",
-        "Grasses 2 preview density from 0x to 8x, without modifying model or catalog files"
-      ],
-      "access": "service-api",
-      "environment": [],
-      "limitations": [
-        "Requires WebGL. Source scale and texture map roles remain provisional. Preview controls do not modify model files.",
-        "Catalog saves require the writable canonical environment library. Stale revisions are rejected, retaining edits in the form.",
-        "Imports are limited to 2,000 files and 100 MiB including expanded ZIP contents. Model units/materials need review; glTF compression decoders are not configured.",
-        "Blender imports require a server Blender installation with glTF support. Static particle previews use a bounded density; procedural materials and texture relinking require review.",
-        "Asset storage/imports and the data-service registry must be available; the UI endpoint is a transport proxy only."
-      ],
-      "related_features": ["games-play"],
-      "sources": [
-        {
-          "repository": "ui",
-          "path": "src/pages/Games.jsx"
-        },
-        {
-          "repository": "ui",
-          "path": "src/pages/games/GamesInventory.jsx"
-        },
-        {
-          "repository": "ui",
-          "path": "src/pages/games/InventoryScene.js"
-        },
-        {
-          "repository": "ui",
-          "path": "src/pages/games/README.md"
-        },
-        {
-          "repository": "ui",
-          "path": "src/pages/games/InventoryCatalogPanel.jsx"
-        },
-        {
-          "repository": "data",
-          "path": "environment/routes.js"
-        },
-        {
-          "repository": "ui",
-          "path": "src/pages/games/useInventoryCatalog.js"
-        },
-        {
-          "repository": "assets",
-          "path": "environment/catalog.js"
-        },
-        {
-          "repository": "assets",
-          "path": "environment/routes.js"
-        },
-        {
-          "repository": "ui",
-          "path": "src/pages/games/InventoryImport.jsx"
-        },
-        {
-          "repository": "ui",
-          "path": "src/pages/games/useInventoryAssets.js"
-        },
-        {
-          "repository": "ui",
-          "path": "src/pages/games/InventoryModelLoader.js"
-        },
-        {
-          "repository": "assets",
-          "path": "environment/import.js"
-        },
-        {
-          "repository": "assets",
-          "path": "environment/blender_conversion.js"
-        },
-        {
-          "repository": "ui",
-          "path": "src/pages/games/InventoryGrassDensity.js"
-        },
-        {
-          "repository": "ui",
-          "path": "src/pages/games/InventoryMaterialPreview.js"
-        }
-      ]
-    },
-    {
       "id": "games-worlds",
       "area": "games",
       "section": "games_worlds",
@@ -2530,6 +2427,326 @@
         {
           "repository": "ui",
           "path": "src/pages/games/README.md"
+        }
+      ]
+    },
+    {
+      "id": "games-inventory",
+      "area": "games",
+      "section": "games_inventory",
+      "component": "src/pages/games/GamesIngredients.jsx",
+      "label": {
+        "key": "games/inventory",
+        "text": "materials",
+        "source": "src/text/GamesText.jsx"
+      },
+      "title": {
+        "key": "games/inventory_title",
+        "text": "all materials",
+        "source": "src/text/GamesText.jsx"
+      },
+      "settings": [],
+      "availability": "implemented",
+      "purpose": "Import local environment asset folders, browse the live catalog, inspect models in 3D and edit their attribution and modification history.",
+      "inputs": [
+        "Orbit, zoom and pan",
+        "Preview scale, light direction and intensity",
+        "Normal and roughness maps, wireframe and reference cube toggles",
+        "Creator, source, license and attribution edits; modification notes",
+        "Local asset folders with Blender .blend, GLB/glTF, FBX, OBJ/MTL or 3DS files, ZIP downloads and textures",
+        "Grasses 2 preview density from 0x to 8x, without modifying model or catalog files"
+      ],
+      "access": "service-api",
+      "environment": [],
+      "limitations": [
+        "Requires WebGL. Source scale and texture map roles remain provisional. Preview controls do not modify model files.",
+        "Catalog saves require the writable canonical environment library. Stale revisions are rejected, retaining edits in the form.",
+        "Imports are limited to 2,000 files and 100 MiB including expanded ZIP contents. Model units/materials need review; glTF compression decoders are not configured.",
+        "Blender imports require a server Blender installation with glTF support. Static particle previews use a bounded density; procedural materials and texture relinking require review.",
+        "Asset storage/imports and the data-service registry must be available; the UI endpoint is a transport proxy only.",
+        "The three model pages currently share the live catalog and import workflow. Category filtering, import destinations and composition tools are deferred; folder imports still create ingredients."
+      ],
+      "related_features": [
+        "games-play"
+      ],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/games/GamesInventory.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/InventoryScene.js"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/README.md"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/InventoryCatalogPanel.jsx"
+        },
+        {
+          "repository": "data",
+          "path": "environment/routes.js"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/useInventoryCatalog.js"
+        },
+        {
+          "repository": "assets",
+          "path": "environment/catalog.js"
+        },
+        {
+          "repository": "assets",
+          "path": "environment/routes.js"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/InventoryImport.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/useInventoryAssets.js"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/InventoryModelLoader.js"
+        },
+        {
+          "repository": "assets",
+          "path": "environment/import.js"
+        },
+        {
+          "repository": "assets",
+          "path": "environment/blender_conversion.js"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/InventoryGrassDensity.js"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/InventoryMaterialPreview.js"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/GamesIngredients.jsx"
+        }
+      ]
+    },
+    {
+      "id": "games-composites",
+      "area": "games",
+      "section": "games_composites",
+      "component": "src/pages/games/GamesComposites.jsx",
+      "label": {
+        "key": "games/composites",
+        "text": "components",
+        "source": "src/text/GamesText.jsx"
+      },
+      "title": {
+        "key": "games/composites_title",
+        "text": "all components",
+        "source": "src/text/GamesText.jsx"
+      },
+      "settings": [],
+      "availability": "implemented",
+      "purpose": "Scaffold the components model page using the shared model inventory, preview and attribution tools.",
+      "inputs": [
+        "Orbit, zoom and pan",
+        "Preview scale, light direction and intensity",
+        "Normal and roughness maps, wireframe and reference cube toggles",
+        "Creator, source, license and attribution edits; modification notes",
+        "Local asset folders with Blender .blend, GLB/glTF, FBX, OBJ/MTL or 3DS files, ZIP downloads and textures",
+        "Grasses 2 preview density from 0x to 8x, without modifying model or catalog files"
+      ],
+      "access": "service-api",
+      "environment": [],
+      "limitations": [
+        "Requires WebGL. Source scale and texture map roles remain provisional. Preview controls do not modify model files.",
+        "Catalog saves require the writable canonical environment library. Stale revisions are rejected, retaining edits in the form.",
+        "Imports are limited to 2,000 files and 100 MiB including expanded ZIP contents. Model units/materials need review; glTF compression decoders are not configured.",
+        "Blender imports require a server Blender installation with glTF support. Static particle previews use a bounded density; procedural materials and texture relinking require review.",
+        "Asset storage/imports and the data-service registry must be available; the UI endpoint is a transport proxy only.",
+        "The three model pages currently share the live catalog and import workflow. Category filtering, import destinations and composition tools are deferred; folder imports still create ingredients."
+      ],
+      "related_features": [
+        "games-inventory",
+        "games-play"
+      ],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/games/GamesInventory.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/InventoryScene.js"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/README.md"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/InventoryCatalogPanel.jsx"
+        },
+        {
+          "repository": "data",
+          "path": "environment/routes.js"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/useInventoryCatalog.js"
+        },
+        {
+          "repository": "assets",
+          "path": "environment/catalog.js"
+        },
+        {
+          "repository": "assets",
+          "path": "environment/routes.js"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/InventoryImport.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/useInventoryAssets.js"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/InventoryModelLoader.js"
+        },
+        {
+          "repository": "assets",
+          "path": "environment/import.js"
+        },
+        {
+          "repository": "assets",
+          "path": "environment/blender_conversion.js"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/InventoryGrassDensity.js"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/InventoryMaterialPreview.js"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/GamesComposites.jsx"
+        }
+      ]
+    },
+    {
+      "id": "games-environments",
+      "area": "games",
+      "section": "games_environments",
+      "component": "src/pages/games/GamesEnvironments.jsx",
+      "label": {
+        "key": "games/environments",
+        "text": "areas",
+        "source": "src/text/GamesText.jsx"
+      },
+      "title": {
+        "key": "games/environments_title",
+        "text": "all areas",
+        "source": "src/text/GamesText.jsx"
+      },
+      "settings": [],
+      "availability": "implemented",
+      "purpose": "Scaffold the areas model page using the shared model inventory, preview and attribution tools.",
+      "inputs": [
+        "Orbit, zoom and pan",
+        "Preview scale, light direction and intensity",
+        "Normal and roughness maps, wireframe and reference cube toggles",
+        "Creator, source, license and attribution edits; modification notes",
+        "Local asset folders with Blender .blend, GLB/glTF, FBX, OBJ/MTL or 3DS files, ZIP downloads and textures",
+        "Grasses 2 preview density from 0x to 8x, without modifying model or catalog files"
+      ],
+      "access": "service-api",
+      "environment": [],
+      "limitations": [
+        "Requires WebGL. Source scale and texture map roles remain provisional. Preview controls do not modify model files.",
+        "Catalog saves require the writable canonical environment library. Stale revisions are rejected, retaining edits in the form.",
+        "Imports are limited to 2,000 files and 100 MiB including expanded ZIP contents. Model units/materials need review; glTF compression decoders are not configured.",
+        "Blender imports require a server Blender installation with glTF support. Static particle previews use a bounded density; procedural materials and texture relinking require review.",
+        "Asset storage/imports and the data-service registry must be available; the UI endpoint is a transport proxy only.",
+        "The three model pages currently share the live catalog and import workflow. Category filtering, import destinations and composition tools are deferred; folder imports still create ingredients."
+      ],
+      "related_features": [
+        "games-inventory",
+        "games-play"
+      ],
+      "sources": [
+        {
+          "repository": "ui",
+          "path": "src/pages/games/GamesInventory.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/InventoryScene.js"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/README.md"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/InventoryCatalogPanel.jsx"
+        },
+        {
+          "repository": "data",
+          "path": "environment/routes.js"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/useInventoryCatalog.js"
+        },
+        {
+          "repository": "assets",
+          "path": "environment/catalog.js"
+        },
+        {
+          "repository": "assets",
+          "path": "environment/routes.js"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/InventoryImport.jsx"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/useInventoryAssets.js"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/InventoryModelLoader.js"
+        },
+        {
+          "repository": "assets",
+          "path": "environment/import.js"
+        },
+        {
+          "repository": "assets",
+          "path": "environment/blender_conversion.js"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/InventoryGrassDensity.js"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/InventoryMaterialPreview.js"
+        },
+        {
+          "repository": "ui",
+          "path": "src/pages/games/GamesEnvironments.jsx"
         }
       ]
     },

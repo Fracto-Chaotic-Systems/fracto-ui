@@ -20,10 +20,7 @@ test("UI extractor emits seven bounded area documents covering all feature state
   const documents = await extract();
   const definition = JSON.parse(
     readFileSync(
-      new URL(
-        "./fixtures/ui-provider.json",
-        import.meta.url,
-      ),
+      new URL("./fixtures/ui-provider.json", import.meta.url),
       "utf8",
     ),
   );
@@ -34,7 +31,7 @@ test("UI extractor emits seven bounded area documents covering all feature state
         total + (document.text.match(/^### .*\([^\n]+\)$/gm) || []).length,
       0,
     ),
-    55,
+    57,
   );
   const admin = documents.find((document) => document.id === "admin").text;
   assert.ok(admin.includes("fracto AI"));

@@ -35,6 +35,11 @@ export const INVENTORY_IMPORT_TEXT = Object.fromEntries(
 );
 export const KEY_GAMES_INVENTORY = `${GAMES_FOLDER}/inventory`;
 export const KEY_GAMES_INVENTORY_TITLE = `${GAMES_FOLDER}/inventory_title`;
+export const KEY_GAMES_MODELS = `${GAMES_FOLDER}/models`;
+export const KEY_GAMES_COMPOSITES = `${GAMES_FOLDER}/composites`;
+export const KEY_GAMES_COMPOSITES_TITLE = `${GAMES_FOLDER}/composites_title`;
+export const KEY_GAMES_ENVIRONMENTS = `${GAMES_FOLDER}/environments`;
+export const KEY_GAMES_ENVIRONMENTS_TITLE = `${GAMES_FOLDER}/environments_title`;
 export const INVENTORY_CATALOG_TEXT = Object.fromEntries(
   [
     "loading",
@@ -587,8 +592,13 @@ export const APP_GAMES_TEXT = {
   [INVENTORY_CATALOG_TEXT.json_file]: "Asset catalog JSON",
   [INVENTORY_CATALOG_TEXT.sources]: "Preserved source files",
   [INVENTORY_CATALOG_TEXT.history]: "Modification history",
-  [KEY_GAMES_INVENTORY]: "assets",
-  [KEY_GAMES_INVENTORY_TITLE]: "assets inventory",
+  [KEY_GAMES_MODELS]: "models",
+  [KEY_GAMES_INVENTORY]: "materials",
+  [KEY_GAMES_INVENTORY_TITLE]: "all materials",
+  [KEY_GAMES_COMPOSITES]: "components",
+  [KEY_GAMES_COMPOSITES_TITLE]: "all components",
+  [KEY_GAMES_ENVIRONMENTS]: "areas",
+  [KEY_GAMES_ENVIRONMENTS_TITLE]: "all areas",
   [INVENTORY_TEXT.asset]: "Environment asset",
   [INVENTORY_TEXT.assets]: "Assets",
   [INVENTORY_TEXT.grass]: "Grass patch · 001",

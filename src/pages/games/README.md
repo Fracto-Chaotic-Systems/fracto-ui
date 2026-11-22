@@ -7,12 +7,21 @@ space below the title without clipping the gear or drawer to a zero-height box.
 layered CSS grain, scratches, and soft highlights beneath the flight scene,
 TV, instruments, and controls. The same finish carries into fullscreen. The
 settings gear uses a dark color for contrast over both the metal and the open drawer.
-Sidebar order is Overview, separator, assets, worlds, music, play, separator, wordnet, Settings, Status.
+Sidebar order is Overview, separator, worlds, music, play, models group (materials, components, areas), separator, wordnet, Settings, Status.
+The models group uses the same labeled sidebar separator as Study’s bailiwicks group.
 Overview, Settings, and Status intentionally remain blank.
 
 ## Inventory
 
-The sidebar label is **assets** and the page title is **assets inventory**.
+The three dedicated pages are **materials**, **components**, and **areas**,
+with matching **all materials**, **all components**, and
+**all areas** titles. `GamesIngredients.jsx`, `GamesComposites.jsx`
+and `GamesEnvironments.jsx` provide their headings around the shared
+`GamesInventory.jsx` scaffold. Distinct page components unmount the previous
+preview and own independent inventory state. Category-specific behavior is
+deferred: all three currently show the same live catalog and import/edit tools;
+folder imports still create ingredients. No category filtering or assembly
+workflow is implied by this UI scaffold.
 The internal `games_inventory` section and saved selection key remain stable.
 The Import folder button sits in a toolbar below the title, above the asset list
 and preview. The former introductory message has been removed.

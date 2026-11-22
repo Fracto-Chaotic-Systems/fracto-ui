@@ -3,11 +3,7 @@ import AppText from "../../AppText.jsx";
 import InventoryCatalogPanel from "./InventoryCatalogPanel.jsx";
 import InventoryImport from "./InventoryImport.jsx";
 import useInventoryAssets from "./useInventoryAssets.js";
-import { MainStyles as styles } from "../../styles/MainStyles.jsx";
-import {
-  INVENTORY_TEXT,
-  KEY_GAMES_INVENTORY_TITLE,
-} from "../../text/GamesText.jsx";
+import { INVENTORY_TEXT } from "../../text/GamesText.jsx";
 import {
   create_inventory_scene,
   DEFAULT_INVENTORY_PREVIEW,
@@ -62,7 +58,7 @@ function InventoryPreview({
   return <InventoryViewport ref={host} />;
 }
 
-export default function GamesInventory() {
+export default function GamesInventory({ children }) {
   const inventory = useInventoryAssets();
   const { asset } = inventory;
   const [options, set_options] = useState({ ...DEFAULT_INVENTORY_PREVIEW });
@@ -92,9 +88,7 @@ export default function GamesInventory() {
   );
   return (
     <InventoryLayout>
-      <styles.SectionTitle>
-        {AppText.get(KEY_GAMES_INVENTORY_TITLE)}
-      </styles.SectionTitle>
+      {children}
       <InventoryToolbar>
         <InventoryImport
           on_imported={async (id) => {

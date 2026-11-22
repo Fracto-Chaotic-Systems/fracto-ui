@@ -1,7 +1,8 @@
 # UI text and translation
 
-Games uses **assets** for its environment-library sidebar label and
-**assets inventory** for the page title. The `games/inventory` and
+Games groups **materials**, **components**, and **areas** under
+**models**, with **all materials**, **all components**, and **all areas**
+page titles. Materials replaces the former ingredients label. The `games/inventory` and
 `games/inventory_title` text keys remain stable.
 The former Inventory introductory message and its unused text key are removed.
 

@@ -13,6 +13,8 @@ import {
   GAMES_MUSIC,
   GAMES_PLAY,
   GAMES_INVENTORY,
+  GAMES_COMPOSITES,
+  GAMES_ENVIRONMENTS,
   GAMES_SETTINGS,
   GAMES_STATUS,
   KEY_GAMES_SECTION,
@@ -30,11 +32,16 @@ import GamesWordnet from "./games/GamesWordnet.jsx";
 import GamesWorlds from "./games/GamesWorlds.jsx";
 import GamesMusic from "./games/GamesMusic.jsx";
 import GamesPlay from "./games/GamesPlay.jsx";
-import GamesInventory from "./games/GamesInventory.jsx";
+import GamesIngredients from "./games/GamesIngredients.jsx";
+import GamesComposites from "./games/GamesComposites.jsx";
+import GamesEnvironments from "./games/GamesEnvironments.jsx";
 import {
   KEY_GAMES_MUSIC,
   KEY_GAMES_PLAY,
   KEY_GAMES_INVENTORY,
+  KEY_GAMES_MODELS,
+  KEY_GAMES_COMPOSITES,
+  KEY_GAMES_ENVIRONMENTS,
   KEY_GAMES_WORDNET,
   KEY_GAMES_WORLDS,
 } from "../text/GamesText.jsx";
@@ -46,11 +53,6 @@ const SIDEBAR_LIST = [
     right_pane: null,
   },
   { section_code: SIDEBAR_BREAKER },
-  {
-    title_key: KEY_GAMES_INVENTORY,
-    section_code: GAMES_INVENTORY,
-    right_pane: <GamesInventory />,
-  },
   {
     title_key: KEY_GAMES_WORLDS,
     section_code: GAMES_WORLDS,
@@ -65,6 +67,22 @@ const SIDEBAR_LIST = [
     title_key: KEY_GAMES_PLAY,
     section_code: GAMES_PLAY,
     right_pane: <GamesPlay />,
+  },
+  { section_code: SIDEBAR_BREAKER, section_text_key: KEY_GAMES_MODELS },
+  {
+    title_key: KEY_GAMES_INVENTORY,
+    section_code: GAMES_INVENTORY,
+    right_pane: <GamesIngredients />,
+  },
+  {
+    title_key: KEY_GAMES_COMPOSITES,
+    section_code: GAMES_COMPOSITES,
+    right_pane: <GamesComposites />,
+  },
+  {
+    title_key: KEY_GAMES_ENVIRONMENTS,
+    section_code: GAMES_ENVIRONMENTS,
+    right_pane: <GamesEnvironments />,
   },
   { section_code: SIDEBAR_BREAKER },
   {
