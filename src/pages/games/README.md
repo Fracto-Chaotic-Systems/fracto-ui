@@ -78,7 +78,7 @@ explicit Save; they never overwrite the file automatically. The snapshot JSON is
 now a test fixture, not runtime catalog data. No file picker or download is needed.
 
 The Vite plugin and UI-owned production static server proxy to the asset service's
-authenticated router. The asset service owns `servers/fracto-asset-server/environments`
+authenticated router. The asset service owns `servers/fracto-asset-server/models`
 and calls the data service's internal registry API for database persistence.
 `FRACTO_ENVIRONMENT_CATALOG_DIR` overrides its canonical library root when needed.
 Neither the UI nor root infrastructure opens the library or database.
