@@ -58,8 +58,8 @@ function InventoryPreview({
   return <InventoryViewport ref={host} />;
 }
 
-export default function GamesInventory({ children }) {
-  const inventory = useInventoryAssets();
+export default function GamesInventory({ children, category }) {
+  const inventory = useInventoryAssets(category);
   const { asset } = inventory;
   const [options, set_options] = useState({ ...DEFAULT_INVENTORY_PREVIEW });
   const [status, set_status] = useState("loading");
@@ -91,6 +91,7 @@ export default function GamesInventory({ children }) {
       {children}
       <InventoryToolbar>
         <InventoryImport
+          category={category}
           on_imported={async (id) => {
             await inventory.reload(id);
             set_status("loading");
@@ -100,7 +101,6 @@ export default function GamesInventory({ children }) {
       </InventoryToolbar>
       <InventoryWorkspace>
         <InventoryAssetList aria-label={text("assets")}>
-          <strong>{text("assets")}</strong>
           {inventory.loading && <p role="status">{text("loading_assets")}</p>}
           {inventory.error && (
             <p role="alert">

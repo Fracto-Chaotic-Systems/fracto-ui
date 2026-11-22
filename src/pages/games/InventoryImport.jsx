@@ -18,7 +18,7 @@ import {
   ImportActions,
 } from "./InventoryImportStyles.jsx";
 const text = (key) => AppText.get(INVENTORY_IMPORT_TEXT[key]);
-export default function InventoryImport({ on_imported }) {
+export default function InventoryImport({ on_imported, category }) {
   const input = useRef(null);
   const [pending, set_pending] = useState(null),
     [name, set_name] = useState("");
@@ -88,7 +88,7 @@ export default function InventoryImport({ on_imported }) {
         pending.files.map((file) => [`files/${file.path}`, file.data]),
       );
       entries["manifest.json"] = strToU8(
-        JSON.stringify({ name: name.trim(), model }),
+        JSON.stringify({ name: name.trim(), model, model_category: category }),
       );
       const response = await fetch(
         `${import.meta.env.BASE_URL}api/environment-catalog/import`,

@@ -24,6 +24,8 @@ export default defineConfig({
     process.env.FRACTO_WATCH === "true"
       ? "/tmp/fracto-vite-cache"
       : "node_modules/.vite",
+  // Scan the application entry; previews load on demand and generated reports are not app entries.
+  optimizeDeps: { entries: ["index.html"] },
   resolve: {
     // Ensure tree-library dependencies resolve to the application React
     // instance rather than creating a second optimized React copy.

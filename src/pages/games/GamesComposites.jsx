@@ -5,7 +5,7 @@ import GamesInventory from "./GamesInventory.jsx";
 
 export default function GamesComposites() {
   return (
-    <GamesInventory>
+    <GamesInventory category="component">
       <styles.SectionTitle>
         {AppText.get(KEY_GAMES_COMPOSITES_TITLE)}
       </styles.SectionTitle>

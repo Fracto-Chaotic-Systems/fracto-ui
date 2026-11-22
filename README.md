@@ -200,3 +200,8 @@ Focused Node test commands are available: `npm run test:auth`, `npm run test:com
 - **Startup update is blocked:** commit, stash, or revert tracked changes in this repository.
 
 When supervised by the root process, Vite output is appended to `logs/fracto-ui-log-YYYY-MM-DD.txt` in the root repository.
+
+Vite dependency pre-bundling starts from `index.html` explicitly. Development
+HTML previews remain available on demand; generated test report HTML is not
+scanned at startup. Prebuild bundles the two flight control/integration previews
+to catch removed imports before they break development dependency scanning.

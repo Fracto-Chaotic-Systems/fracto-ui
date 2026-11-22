@@ -18,13 +18,15 @@ with matching **all materials**, **all components**, and
 **all areas** titles. `GamesIngredients.jsx`, `GamesComposites.jsx`
 and `GamesEnvironments.jsx` provide their headings around the shared
 `GamesInventory.jsx` scaffold. Distinct page components unmount the previous
-preview and own independent inventory state. Category-specific behavior is
-deferred: all three currently show the same live catalog and import/edit tools;
-folder imports still create ingredients. No category filtering or assembly
-workflow is implied by this UI scaffold.
+preview and own independent inventory state. Each page requests one database
+category: material, component or area. All use the data service’s shared
+`environment_assets` table and `model_category` column through the asset service.
+Imports carry the selected page’s category and publish under ingredients,
+composites or environments respectively. Assembly workflows remain deferred.
 The internal `games_inventory` section and saved selection key remain stable.
 The Import folder button sits in a toolbar below the title, above the asset list
 and preview. The former introductory message has been removed.
+Materials, components and areas omit the visible Assets list heading; each list retains its accessible label.
 
 `InventoryMaterialPreview.js` repairs a specific FBX cutout-export convention:
 zero global opacity with the same texture assigned to color and alpha maps.

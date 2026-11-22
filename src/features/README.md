@@ -3,8 +3,8 @@
 Games’ `games-inventory` feature is labeled **materials** and titled
 **all materials**; its feature ID, section and text keys remain stable.
 Components and areas follow it in the models group, below play.
-All three share the inventory scaffold; category-specific behavior is deferred
-and folder imports still create ingredients.
+All three share the inventory scaffold and request their respective database
+categories. Imports use the page’s category; assembly workflows remain deferred.
 Asset feature source references point to the owning asset and data services;
 the UI endpoint is a transport-only compatibility proxy.
 

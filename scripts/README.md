@@ -41,11 +41,12 @@ service discovery, authentication, or saved preferences. Open
 the TV screen (including keyboard activation) to extend/retract the neck. The fixture
 uses a 320px sidebar; resize its root to inspect narrower layouts.
 
-Known existing fixture issue: `flight_controls_smoke.html` and
-`flight_validation.html` import the removed `KEY_GAMES_PLAY_CONTROLLER_ACTIONS`
-setting. Vite's automatic HTML dependency scan reports those imports; their
-previous validation descriptions below require re-verification after repair.
-This does not prevent the CRT fixture or production entry from compiling.
+Flight fixtures use the current always-visible controller action display; they
+no longer depend on a removed controller-actions visibility setting. Vite scans
+only `index.html` for startup dependency optimization. Preview pages remain
+available on demand; generated HTML reports are not application scan entries.
+`test/flight_preview_entries.test.js` bundles both fixtures to catch missing local
+exports and validates the development scan entry.
 
 ## Dashboard textures
 

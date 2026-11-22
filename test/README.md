@@ -362,3 +362,7 @@ when changing `ParchmentMotion.js`.
 used by the production canvas overlay. It verifies that marker fills and outlines
 share bounds and clear together, while retaining hover, selection, ray visibility
 and pending-frame cancellation coverage.
+
+`flight_preview_entries.test.js` bundles both flight control/integration HTML
+fixtures against current application exports and checks Vite’s explicit app entry.
+Run `npm run test:flight-previews`; production prebuild runs it as well.

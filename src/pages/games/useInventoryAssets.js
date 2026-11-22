@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
-export default function useInventoryAssets() {
+export default function useInventoryAssets(category) {
+  const catalog_url = `${import.meta.env.BASE_URL}api/environment-catalog?category=${encodeURIComponent(category)}`;
   const [assets, set_assets] = useState([]),
     [selected, set_selected] = useState(null);
   const [loading, set_loading] = useState(true),
     [error, set_error] = useState(false);
   const reload = async (preferred) => {
     try {
-      const response = await fetch(
-        `${import.meta.env.BASE_URL}api/environment-catalog`,
-        { credentials: "include", cache: "no-store" },
-      );
+      const response = await fetch(catalog_url, {
+        credentials: "include",
+        cache: "no-store",
+      });
       if (!response.ok) throw new Error("catalog_unavailable");
       const data = await response.json();
       set_error(false);
@@ -28,7 +29,7 @@ export default function useInventoryAssets() {
   };
   useEffect(() => {
     const controller = new AbortController();
-    fetch(`${import.meta.env.BASE_URL}api/environment-catalog`, {
+    fetch(catalog_url, {
       credentials: "include",
       cache: "no-store",
       signal: controller.signal,
@@ -46,7 +47,7 @@ export default function useInventoryAssets() {
         if (!controller.signal.aborted) set_loading(false);
       });
     return () => controller.abort();
-  }, []);
+  }, [catalog_url]);
   return {
     assets,
     selected,

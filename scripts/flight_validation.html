@@ -64,7 +64,6 @@
       import { APP_GAMES_TEXT } from "../src/text/GamesText.jsx";
       import {
         APP_GAMES_SETTINGS,
-        KEY_GAMES_PLAY_CONTROLLER_ACTIONS,
         KEY_GAMES_PLAY_INSTRUMENTS,
       } from "../src/settings/GamesSettings.jsx";
       import GamesPlayControls from "../src/pages/games/GamesPlayControls.jsx";
@@ -90,7 +89,6 @@
           { ...value, persist: false },
         ]),
       );
-      definitions[KEY_GAMES_PLAY_CONTROLLER_ACTIONS].default_value = true;
       definitions[KEY_GAMES_PLAY_INSTRUMENTS].default_value = {
         ...DEFAULT_INSTRUMENT_SETTINGS,
         animation_ms: 300,

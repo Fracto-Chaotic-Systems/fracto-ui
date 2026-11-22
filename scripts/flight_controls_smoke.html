@@ -47,10 +47,7 @@
       import { createRoot } from "react-dom/client";
       import AppText from "../src/AppText.jsx";
       import AppSettings from "../src/AppSettings.jsx";
-      import {
-        APP_GAMES_SETTINGS,
-        KEY_GAMES_PLAY_CONTROLLER_ACTIONS,
-      } from "../src/settings/GamesSettings.jsx";
+      import { APP_GAMES_SETTINGS } from "../src/settings/GamesSettings.jsx";
       import { APP_GAMES_TEXT } from "../src/text/GamesText.jsx";
       import { create_controller_input } from "../src/pages/games/controllers/ControllerInput.js";
       import {
@@ -65,16 +62,7 @@
       import ControllerActions from "../src/pages/games/controllers/ControllerActions.jsx";
 
       AppText.initialize(APP_GAMES_TEXT);
-      AppSettings.initialize({
-        ...APP_GAMES_SETTINGS,
-        [KEY_GAMES_PLAY_CONTROLLER_ACTIONS]: {
-          ...APP_GAMES_SETTINGS[KEY_GAMES_PLAY_CONTROLLER_ACTIONS],
-          persist: false,
-        },
-      });
-      AppSettings.on_settings_changed({
-        [KEY_GAMES_PLAY_CONTROLLER_ACTIONS]: true,
-      });
+      AppSettings.initialize(APP_GAMES_SETTINGS);
       const input = create_controller_input();
       const controls = create_flight_controls();
       const stop = bind_flight_controls(input, controls, {
