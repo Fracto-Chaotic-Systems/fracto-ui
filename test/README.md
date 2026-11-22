@@ -326,3 +326,10 @@ and rendered error states. Run `npm run test:instrument-transfer`.
 for visual/manual checks. Serve through Vite and select `?scenario=unsupported`,
 `conflict`, or `partial`; default runs preview through verified completion.
 The fixture makes no backend requests and cannot export actual instruments.
+
+## Parchment motion
+
+`parchment_motion.test.js` checks gradual spring settling, frame-rate independence,
+angular wraparound, and momentum continuity when attitude targets change. Run
+`node --test test/parchment_motion.test.js` with the map and flight-state suites
+when changing `ParchmentMotion.js`.

@@ -125,7 +125,17 @@ to frame cost while the page and instruments retain their measured layout. See
 state, rendering, lifecycle and verification details.
 
 `GamesPlayControls.jsx` arranges selected flight instruments around the centered
-on-screen controller at the bottom of the game area. Airspeed, attitude, and
+on-screen controller at the bottom of the game area. `GamesPlayMap.jsx` positions
+the parchment chart relative to that dock, with a -65px vertical offset.
+The whole parchment rotates about its center toward the negative of the live
+attitude roll angle. `ParchmentMotion.js` uses a gently damped spring so it lags behind attitude
+changes and settles gradually with slight inertia, generally over 2–3 seconds.
+It takes the shortest angular path across ±180°. A per-map telemetry subscription
+updates the target, and animation updates a CSS variable without redrawing the
+raster. Animation stops after settling or while hidden, and reduced motion
+applies the target directly. Frame callbacks and subscriptions are released on
+unmount.
+Airspeed, attitude, and
 heading default to the left; altitude, vertical speed, and turn coordination
 default to the right. Desktop instrument groups sit directly beside the controller
 without a horizontal gap. Below 768px the groups stack above the controller in rows

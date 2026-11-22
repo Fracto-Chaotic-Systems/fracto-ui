@@ -1,14 +1,17 @@
+import { useEffect, useRef } from "react";
 import styled from "styled-components";
 import { parchment_grid_lines } from "./GamesPlayMap.js";
 import GamesPlayMapMarker from "./GamesPlayMapMarker.jsx";
 import GamesPlayMapRaster from "./GamesPlayMapRaster.jsx";
+import { bind_parchment_roll } from "./ParchmentMotion.js";
 
 const Parchment = styled.figure`
   position: absolute;
   right: ${({ $above }) => ($above ? "auto" : "calc(100% + 28px)")};
   left: ${({ $above, $left }) => ($above ? `${$left}px` : "auto")};
   bottom: ${({ $above }) => ($above ? "calc(100% + 48px)" : "12px")};
-  transform: translateY(60px);
+  transform: translateY(-65px) rotate(var(--parchment-roll, 0deg));
+  transform-origin: 50% 50%;
   box-sizing: border-box;
   width: ${({ $width }) => $width}px;
   aspect-ratio: 1;
@@ -70,10 +73,16 @@ export default function GamesPlayMap({
   const width = above
     ? Math.min(200, width_px - 32, height_px - dock_height - 96)
     : side_space;
+  const parchment_ref = useRef(null);
+  useEffect(() => {
+    if (!parchment_ref.current) return;
+    return bind_parchment_roll(parchment_ref.current, flight_state);
+  }, [flight_state, width]);
   if (width < 96) return null;
 
   return (
     <Parchment
+      ref={parchment_ref}
       role="group"
       aria-label="Mandelbrot Set chart on curled parchment, with a grid in the escape regions"
       $width={width}
@@ -83,7 +92,11 @@ export default function GamesPlayMap({
       <ScrollBackground src="/images/10-transparent.png" alt="" />
       <Chart>
         <RasterLayer>
-          <Grid viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <Grid
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
             {GRID_LINES.map(({ axis, value, major, half, position_pct }) => (
               <line
                 key={`${axis}-${value}`}
