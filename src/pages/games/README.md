@@ -135,6 +135,15 @@ updates the target, and animation updates a CSS variable without redrawing the
 raster. Animation stops after settling or while hidden, and reduced motion
 applies the target directly. Frame callbacks and subscriptions are released on
 unmount.
+`ParchmentSuspension.jsx` adds a fixed metal nail centered slightly above the
+wooden knobs and a textured twine loop layered behind the parchment. The nail
+sits at 10% of the frame height. String ends extend to the wooden handles at
+10% and 90% of the frame width, both at 17% of its height.
+`ParchmentSuspension.js` rotates the two attachment
+points on the wooden handles around the map center. The string's
+straight spans update with the displayed spring angle, staying taut and attached
+while the nail remains stationary. Both the parchment and its fittings keep the
+existing dock placement and vertical offset.
 Airspeed, attitude, and
 heading default to the left; altitude, vertical speed, and turn coordination
 default to the right. Desktop instrument groups sit directly beside the controller

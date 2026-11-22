@@ -4,19 +4,28 @@ import { parchment_grid_lines } from "./GamesPlayMap.js";
 import GamesPlayMapMarker from "./GamesPlayMapMarker.jsx";
 import GamesPlayMapRaster from "./GamesPlayMapRaster.jsx";
 import { bind_parchment_roll } from "./ParchmentMotion.js";
+import ParchmentSuspension from "./ParchmentSuspension.jsx";
+import { parchment_string_path } from "./ParchmentSuspension.js";
 
-const Parchment = styled.figure`
+const MapMount = styled.figure`
   position: absolute;
   right: ${({ $above }) => ($above ? "auto" : "calc(100% + 28px)")};
   left: ${({ $above, $left }) => ($above ? `${$left}px` : "auto")};
   bottom: ${({ $above }) => ($above ? "calc(100% + 48px)" : "12px")};
-  transform: translateY(-65px) rotate(var(--parchment-roll, 0deg));
-  transform-origin: 50% 50%;
+  transform: translateY(-65px);
   box-sizing: border-box;
   width: ${({ $width }) => $width}px;
   aspect-ratio: 1;
   margin: 0;
   pointer-events: none;
+`;
+
+const Parchment = styled.div`
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  transform: rotate(var(--parchment-roll, 0deg));
+  transform-origin: 50% 50%;
 `;
 
 const ScrollBackground = styled.img`
@@ -74,47 +83,54 @@ export default function GamesPlayMap({
     ? Math.min(200, width_px - 32, height_px - dock_height - 96)
     : side_space;
   const parchment_ref = useRef(null);
+  const suspension_ref = useRef(null);
   useEffect(() => {
     if (!parchment_ref.current) return;
-    return bind_parchment_roll(parchment_ref.current, flight_state);
+    const strings = suspension_ref.current?.querySelectorAll("polyline") ?? [];
+    return bind_parchment_roll(parchment_ref.current, flight_state, (angle) => {
+      const points = parchment_string_path(angle);
+      strings.forEach((string) => string.setAttribute("points", points));
+    });
   }, [flight_state, width]);
   if (width < 96) return null;
 
   return (
-    <Parchment
-      ref={parchment_ref}
+    <MapMount
       role="group"
       aria-label="Mandelbrot Set chart on curled parchment, with a grid in the escape regions"
       $width={width}
       $above={above}
       $left={(dock_width - width_px) / 2 + 16}
     >
-      <ScrollBackground src="/images/10-transparent.png" alt="" />
-      <Chart>
-        <RasterLayer>
-          <Grid
-            viewBox="0 0 100 100"
-            preserveAspectRatio="none"
-            aria-hidden="true"
-          >
-            {GRID_LINES.map(({ axis, value, major, half, position_pct }) => (
-              <line
-                key={`${axis}-${value}`}
-                x1={axis === "re" ? position_pct : 0}
-                x2={axis === "re" ? position_pct : 100}
-                y1={axis === "im" ? position_pct : 0}
-                y2={axis === "im" ? position_pct : 100}
-                stroke="#785b38"
-                strokeOpacity={major ? 0.65 : half ? 0.4 : 0.25}
-                strokeWidth={major ? 1.25 : half ? 0.85 : 0.65}
-                vectorEffect="non-scaling-stroke"
-              />
-            ))}
-          </Grid>
-          <GamesPlayMapRaster display_width={width * 0.68} />
-        </RasterLayer>
-        <GamesPlayMapMarker flight_state={flight_state} />
-      </Chart>
-    </Parchment>
+      <Parchment ref={parchment_ref}>
+        <ScrollBackground src="/images/10-transparent.png" alt="" />
+        <Chart>
+          <RasterLayer>
+            <Grid
+              viewBox="0 0 100 100"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              {GRID_LINES.map(({ axis, value, major, half, position_pct }) => (
+                <line
+                  key={`${axis}-${value}`}
+                  x1={axis === "re" ? position_pct : 0}
+                  x2={axis === "re" ? position_pct : 100}
+                  y1={axis === "im" ? position_pct : 0}
+                  y2={axis === "im" ? position_pct : 100}
+                  stroke="#785b38"
+                  strokeOpacity={major ? 0.65 : half ? 0.4 : 0.25}
+                  strokeWidth={major ? 1.25 : half ? 0.85 : 0.65}
+                  vectorEffect="non-scaling-stroke"
+                />
+              ))}
+            </Grid>
+            <GamesPlayMapRaster display_width={width * 0.68} />
+          </RasterLayer>
+          <GamesPlayMapMarker flight_state={flight_state} />
+        </Chart>
+      </Parchment>
+      <ParchmentSuspension suspension_ref={suspension_ref} />
+    </MapMount>
   );
 }

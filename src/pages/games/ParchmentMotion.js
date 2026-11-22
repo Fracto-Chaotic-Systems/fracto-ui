@@ -27,7 +27,7 @@ export function advance_parchment_roll(state, target, dt) {
   return settled;
 }
 
-export function bind_parchment_roll(element, flight_state) {
+export function bind_parchment_roll(element, flight_state, on_roll = () => {}) {
   const read_target = () => -flight_state.get_snapshot().roll_deg;
   let target = read_target();
   const initial = parseFloat(
@@ -40,8 +40,10 @@ export function bind_parchment_roll(element, flight_state) {
   const reduced_motion = window.matchMedia("(prefers-reduced-motion: reduce)");
   let frame = null,
     previous = 0;
-  const paint = () =>
+  const paint = () => {
     element.style.setProperty("--parchment-roll", `${state.angle}deg`);
+    on_roll(state.angle);
+  };
   const stop = () => {
     if (frame !== null) cancelAnimationFrame(frame);
     frame = null;

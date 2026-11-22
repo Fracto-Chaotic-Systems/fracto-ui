@@ -1,6 +1,38 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { advance_parchment_roll } from "../src/pages/games/ParchmentMotion.js";
+import { parchment_string_points } from "../src/pages/games/ParchmentSuspension.js";
+
+test("hanging string follows the wooden handles while its nail remains fixed", () => {
+  const rest = parchment_string_points(0);
+  assert.deepEqual(rest, [
+    { x: 10, y: 17 },
+    { x: 50, y: 10 },
+    { x: 90, y: 17 },
+  ]);
+  for (const angle of [-120, -60, -15, 15, 60, 120]) {
+    const points = parchment_string_points(angle);
+    assert.deepEqual(points[1], rest[1]);
+    for (const index of [0, 2]) {
+      assert.ok(
+        Math.abs(
+          Math.hypot(points[index].x - 50, points[index].y - 50) -
+            Math.hypot(40, 33),
+        ) < 1e-9,
+      );
+    }
+    assert.ok(
+      Math.abs(
+        Math.hypot(points[0].x - points[2].x, points[0].y - points[2].y) - 80,
+      ) < 1e-9,
+    );
+  }
+  const quarter = parchment_string_points(90);
+  assert.ok(Math.abs(quarter[0].x - 83) < 1e-9);
+  assert.ok(Math.abs(quarter[0].y - 10) < 1e-9);
+  assert.ok(Math.abs(quarter[2].x - 83) < 1e-9);
+  assert.ok(Math.abs(quarter[2].y - 90) < 1e-9);
+});
 
 test("parchment lags a roll change and gradually settles at the target", () => {
   const state = { angle: 0, velocity: 0 };
