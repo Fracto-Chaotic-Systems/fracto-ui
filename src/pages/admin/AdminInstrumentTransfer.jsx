@@ -8,7 +8,7 @@ import {
   transfer_error_key,
   transfer_expired,
   transfer_missing_job,
-} from "./InstrumentTransferModel.js";
+} from "@fracto/sdk/music/TransferModel.js";
 
 const normalize = (url) => url.replace(/\/+$/, "");
 export default class AdminInstrumentTransfer extends Component {

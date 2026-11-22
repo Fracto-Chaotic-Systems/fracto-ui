@@ -4,7 +4,7 @@ import {
   read_recent_midi,
   remember_midi,
 } from "../src/pages/games/music/MidiRecentFile.js";
-import { MAX_MIDI_BYTES } from "../src/pages/games/music/MidiValidation.js";
+import { MAX_MIDI_BYTES } from "@fracto/sdk/music/MidiValidation.js";
 
 // Exercise the asynchronous request/transaction boundary, structured copies and
 // failures without depending on a browser or changing production storage code.

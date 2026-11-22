@@ -8,7 +8,7 @@ import {
   render_coverage_table,
   RESOLUTIONS,
 } from "./AssetsUtils.jsx";
-import { update_dimensions } from "./../PageUtils.jsx";
+import { update_dimensions } from "../PageUtils.jsx";
 
 import { MainStyles as styles, MARGIN_PX } from "../../styles/MainStyles.jsx";
 import CoolStyles from "../../utils/ui/styles/CoolStyles.jsx";

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { setImmediate } from "node:timers";
-import { create_flight_tile_cache } from "../src/pages/games/flight/FlightTileCache.js";
+import { create_flight_tile_cache } from "@fracto/sdk/flight/TileCache.js";
 import {
   create_flight_refinement,
   create_flight_sample_buffer,

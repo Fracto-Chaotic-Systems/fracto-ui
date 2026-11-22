@@ -1,4 +1,4 @@
-import { MidiPlaybackError } from "./MidiPianoSamples.js";
+import { MidiPlaybackError } from "@fracto/sdk/music/MidiPianoSamples.js";
 import { sample_sha256 } from "./MidiSampleHash.js";
 
 export function sample_window(sample, buffer = sample.buffer) {

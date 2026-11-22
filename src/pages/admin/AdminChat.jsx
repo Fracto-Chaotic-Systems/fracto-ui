@@ -16,11 +16,11 @@ import { MainStyles as styles } from "../../styles/MainStyles.jsx";
 import AppText from "../../AppText.jsx";
 import AdminBackend from "../../backend/AdminBackend.jsx";
 import MarkdownDocument from "../../utils/ui/MarkdownDocument.jsx";
-import { prepare_chat_messages } from "./chat_messages.js";
+import { prepare_chat_messages } from "@fracto/sdk/chat/Messages.js";
 import {
   create_chat_attachment_adapter,
   CHAT_FILE_COUNT,
-} from "./chat_attachments.js";
+} from "@fracto/sdk/chat/Attachments.js";
 import {
   KEY_ADMIN_CHAT_TITLE,
   KEY_ADMIN_CHAT_STATUS,

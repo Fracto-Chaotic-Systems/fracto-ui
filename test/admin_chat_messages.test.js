@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { prepare_chat_messages } from "../src/pages/admin/chat_messages.js";
+import { prepare_chat_messages } from "@fracto/sdk/chat/Messages.js";
 import {
   extract_chat_file,
   create_chat_attachment_adapter,
-} from "../src/pages/admin/chat_attachments.js";
+} from "@fracto/sdk/chat/Attachments.js";
 
 const message = (role, text) => ({ role, content: [{ type: "text", text }] });
 test("app-reference mode sends only a bounded standalone question and rejects attachments", () => {

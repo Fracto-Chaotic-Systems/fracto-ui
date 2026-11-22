@@ -5,12 +5,12 @@ import {
   DEFAULT_INSTRUMENT,
   INSTRUMENT_REGISTRY,
   ORIGINAL_INSTRUMENT,
-} from "./MidiInstruments.js";
+} from "@fracto/sdk/music/MidiInstruments.js";
 import {
   effective_instrument,
   instrument_choices,
   instrument_label,
-} from "./MidiInstrumentChoices.js";
+} from "@fracto/sdk/music/MidiInstrumentChoices.js";
 import {
   TrackLabel,
   TrackInstrumentSelect,

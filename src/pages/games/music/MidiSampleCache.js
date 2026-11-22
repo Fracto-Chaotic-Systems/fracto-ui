@@ -1,6 +1,6 @@
 import { loading_task } from "./MidiLoadingTask.js";
-import { MidiPlaybackError } from "./MidiPianoSamples.js";
-import { INSTRUMENT_REGISTRY, DEFAULT_INSTRUMENT } from "./MidiInstruments.js";
+import { MidiPlaybackError } from "@fracto/sdk/music/MidiPianoSamples.js";
+import { INSTRUMENT_REGISTRY, DEFAULT_INSTRUMENT } from "@fracto/sdk/music/MidiInstruments.js";
 import { midi_route_id } from "./MidiMixer.js";
 import { decoded_asset_bytes, sample_window } from "./MidiSampleAsset.js";
 import MidiSampleBudget, { sample_memory_error } from "./MidiSampleBudget.js";

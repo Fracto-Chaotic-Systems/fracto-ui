@@ -7,7 +7,7 @@ import { transformSync } from "esbuild";
 import {
   create_flight_tile_cache,
   FLIGHT_TILE_BYTES,
-} from "../src/pages/games/flight/FlightTileCache.js";
+} from "@fracto/sdk/flight/TileCache.js";
 
 const data = Array.from({ length: 256 }, (_, i) =>
   Array.from({ length: 256 }, (_, j) => [i - j, j * 1000 + i]),
@@ -380,7 +380,7 @@ test("production client routes through TilesBackend with credentials, cancellati
   });
   const client = load("../src/pages/games/flight/FlightTileClient.js", {
     "../../../backend/TilesBackend.jsx": backend,
-    "./FlightTileCache.js": { create_flight_tile_cache },
+    "@fracto/sdk/flight/TileCache.js": { create_flight_tile_cache },
   }).create_flight_tile_client();
   await client.availability(["000", "001"]);
   const controller = new AbortController();

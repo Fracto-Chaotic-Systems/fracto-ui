@@ -4,9 +4,10 @@ import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import { transformSync } from "esbuild";
 import FractoFastCalc from "@fracto/sdk/FractoFastCalc.js";
-import { handle_orbital_newton } from "../../fracto-data-server/handlers/handle_orbital_newton.js";
+import{launch_service_fixture}from"@fracto/sdk/testing/ServiceFixture.js";
+import{fileURLToPath}from"node:url";
 
-test("orbital points page formats the reported outside-cardioid point into a closed Newton chart", () => {
+test("orbital points page formats the reported outside-cardioid point into a closed Newton chart", async (t) => {
   const source = readFileSync(
     new URL("../src/pages/study/points/PointsMainPanel.jsx", import.meta.url),
     "utf8",
@@ -23,26 +24,9 @@ test("orbital points page formats the reported outside-cardioid point into a clo
     FractoFastCalc,
   });
   const point = { x: 0.2693785307, y: 0.5397724687 };
-  const res = {
-    status(code) {
-      assert.equal(code, 200);
-      return this;
-    },
-    json(body) {
-      this.body = body;
-      return this;
-    },
-  };
-  handle_orbital_newton(
-    {
-      query: {
-        re: String(point.x),
-        im: String(point.y),
-        newton_mode: "big_complex",
-      },
-    },
-    res,
-  );
+  const fixture=await launch_service_fixture(fileURLToPath(new URL("../../fracto-data-server/tests/newton_fixture.mjs",import.meta.url)),{},t);
+  const response=await fetch(fixture.base+"/orbital-newton?"+new URLSearchParams({re:String(point.x),im:String(point.y),newton_mode:"big_complex"}));
+  assert.equal(response.status,200);const res={body:await response.json()};
   const formatted = new Panel().format_detected_newton(res.body, point);
   assert.equal(formatted.cardinality, 4);
   assert.equal(formatted.point_list.length, 5);
@@ -59,7 +43,7 @@ test("orbital points page formats the reported outside-cardioid point into a clo
   );
 });
 
-test("page forwards legacy iterative cardinality and formats the supplied-period Newton result", () => {
+test("page forwards legacy iterative cardinality and formats the supplied-period Newton result", async (t) => {
   const source = readFileSync(
     new URL("../src/pages/study/points/PointsMainPanel.jsx", import.meta.url),
     "utf8",
@@ -71,6 +55,8 @@ test("page forwards legacy iterative cardinality and formats the supplied-period
       .replace(/^export class /gm, "class "),
     { loader: "jsx" },
   ).code;
+  const fixture=await launch_service_fixture(fileURLToPath(new URL("../../fracto-data-server/tests/newton_fixture.mjs",import.meta.url)),{},t);
+  let complete; const completed=new Promise(resolve=>complete=resolve);
   let options;
   const DataBackend = {
     get_orbitals(_point, _limit, callback) {
@@ -86,20 +72,7 @@ test("page forwards legacy iterative cardinality and formats the supplied-period
     },
     get_orbital_newton(point, callback, value) {
       options = value;
-      const res = {
-        status(code) {
-          assert.equal(code, 200);
-          return this;
-        },
-        json(body) {
-          callback(body);
-          return this;
-        },
-      };
-      handle_orbital_newton(
-        { query: { re: String(point.x), im: String(point.y), ...value } },
-        res,
-      );
+      fetch(fixture.base+"/orbital-newton?"+new URLSearchParams({re:String(point.x),im:String(point.y),...value})).then(r=>r.json()).then(data=>{callback(data);complete();});
     },
   };
   const Panel = vm.runInNewContext(`${code}\nPointsMainPanel`, {
@@ -120,6 +93,7 @@ test("page forwards legacy iterative cardinality and formats the supplied-period
   panel.on_chart_update("frame", {
     focal_point: { x: 0.2, y: 0.3 },
   });
+  await completed;
   assert.equal(options.cardinality, 1);
   assert.equal(options.cardinality_source, "legacy_iterative");
   assert.equal(options.adaptive_detection, undefined);

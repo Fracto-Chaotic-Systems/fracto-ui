@@ -1,7 +1,7 @@
 import MidiPlaybackController from "../../src/pages/games/music/MidiPlaybackController.js";
 import MidiScheduler from "../../src/pages/games/music/MidiScheduler.js";
 import MidiSampleCache from "../../src/pages/games/music/MidiSampleCache.js";
-import { load_instrument_catalog } from "../../src/pages/games/music/MidiInstrumentCatalog.js";
+import { load_instrument_catalog } from "@fracto/sdk/music/MidiInstrumentCatalog.js";
 import { contexts, rms, wav } from "./Capture.js";
 import { resource_counts } from "./ResourceChecks.js";
 const check = (value, message) => {

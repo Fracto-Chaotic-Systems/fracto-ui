@@ -4,11 +4,11 @@ import assert from "node:assert/strict";
 import {
   create_instrument_registry,
   GRANDB_PROVIDER,
-} from "../src/pages/games/music/MidiInstruments.js";
+} from "@fracto/sdk/music/MidiInstruments.js";
 import {
   instrument_choices,
   effective_instrument,
-} from "../src/pages/games/music/MidiInstrumentChoices.js";
+} from "@fracto/sdk/music/MidiInstrumentChoices.js";
 const flute = {
   ...GRANDB_PROVIDER,
   id: "asset-flute",

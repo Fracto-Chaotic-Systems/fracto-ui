@@ -4,13 +4,13 @@ import {
   GRANDB_PROVIDER,
   INSTRUMENT_REGISTRY,
   create_instrument_registry,
-} from "../src/pages/games/music/MidiInstruments.js";
+} from "@fracto/sdk/music/MidiInstruments.js";
 import MidiInstrumentAssignments from "../src/pages/games/music/MidiInstrumentAssignments.js";
 import MidiPlaybackController from "../src/pages/games/music/MidiPlaybackController.js";
 import MidiSampleCache from "../src/pages/games/music/MidiSampleCache.js";
-import { piano_sample } from "../src/pages/games/music/MidiPianoSamples.js";
+import { piano_sample } from "@fracto/sdk/music/MidiPianoSamples.js";
 import { midi_route_id } from "../src/pages/games/music/MidiMixer.js";
-import { events_from_midi } from "../src/pages/games/music/MidiEvents.js";
+import { events_from_midi } from "@fracto/sdk/music/MidiEvents.js";
 import {
   FakeContext,
   fake_timers,

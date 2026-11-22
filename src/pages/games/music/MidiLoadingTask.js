@@ -1,4 +1,4 @@
-import { MidiPlaybackError } from "./MidiPianoSamples.js";
+import { MidiPlaybackError } from "@fracto/sdk/music/MidiPianoSamples.js";
 
 // Abort and timeout must settle even if a fetch/decoder/resume ignores cancellation.
 export function loading_task(operation, signal, timeout_ms, timeout_code) {

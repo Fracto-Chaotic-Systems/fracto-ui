@@ -1,4 +1,4 @@
-import { MidiPlaybackError } from "./MidiPianoSamples.js";
+import { MidiPlaybackError } from "@fracto/sdk/music/MidiPianoSamples.js";
 import { decoded_asset_bytes, verify_asset_bytes } from "./MidiSampleAsset.js";
 import { sample_memory_error } from "./MidiSampleBudget.js";
 

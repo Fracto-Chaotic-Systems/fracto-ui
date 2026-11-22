@@ -1,14 +1,15 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import MidiParser from "midi-parser-js";
+import { createRequire } from "node:module";
+const MidiParser = createRequire(import.meta.resolve("@fracto/sdk/music/MidiEvents.js"))("midi-parser-js");
 import {
   events_from_midi,
   MidiFileError,
-} from "../src/pages/games/music/MidiEvents.js";
+} from "@fracto/sdk/music/MidiEvents.js";
 import {
   MAX_MIDI_BYTES,
   MAX_MIDI_EVENTS,
-} from "../src/pages/games/music/MidiValidation.js";
+} from "@fracto/sdk/music/MidiValidation.js";
 
 const vlq = (value) => {
   const bytes = [value & 127];

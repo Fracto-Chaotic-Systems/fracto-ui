@@ -1,5 +1,5 @@
 import MidiPlaybackController from "../../src/pages/games/music/MidiPlaybackController.js";
-import { load_instrument_catalog } from "../../src/pages/games/music/MidiInstrumentCatalog.js";
+import { load_instrument_catalog } from "@fracto/sdk/music/MidiInstrumentCatalog.js";
 import { contexts, rms } from "./Capture.js";
 import { resource_counts } from "./ResourceChecks.js";
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));

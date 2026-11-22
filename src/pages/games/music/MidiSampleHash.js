@@ -1,6 +1,6 @@
 import { sha256 } from "@noble/hashes/sha2.js";
 import { bytesToHex } from "@noble/hashes/utils.js";
-import { MidiPlaybackError } from "./MidiPianoSamples.js";
+import { MidiPlaybackError } from "@fracto/sdk/music/MidiPianoSamples.js";
 
 const CHUNK_BYTES = 1024 * 1024;
 const check = (signal) => {

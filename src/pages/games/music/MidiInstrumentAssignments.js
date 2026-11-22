@@ -3,7 +3,7 @@ import {
   DEFAULT_INSTRUMENT,
   ORIGINAL_INSTRUMENT,
   INSTRUMENT_REGISTRY,
-} from "./MidiInstruments.js";
+} from "@fracto/sdk/music/MidiInstruments.js";
 
 export default class MidiInstrumentAssignments {
   constructor(registry = INSTRUMENT_REGISTRY) {

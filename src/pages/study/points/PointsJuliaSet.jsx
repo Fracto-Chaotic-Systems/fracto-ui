@@ -2,7 +2,7 @@ import React from "react";
 import AppText from "../../../AppText.jsx";
 import { POINTS_ORBITAL_TEXT } from "../../../text/StudyText.jsx";
 import PointsJuliaCanvas from "./PointsJuliaCanvas.jsx";
-import { SEED_SURVEY_DISCOVERY_OPTIONS } from "../../assets/surveys/SeedSurveyScan.js";
+import { SEED_SURVEY_DISCOVERY_OPTIONS } from "@fracto/sdk/orbitals/FractoSeedSurveyScan.js";
 import { selected_core_point } from "./PointsStoredOrbitals.jsx";
 import { build_orbital_trace_request } from "./PointsOrbitalTraceRequest.js";
 

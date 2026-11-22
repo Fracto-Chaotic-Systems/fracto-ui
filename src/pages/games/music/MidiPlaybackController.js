@@ -1,6 +1,6 @@
 import { loading_task } from "./MidiLoadingTask.js";
-import { events_from_midi } from "./MidiEvents.js";
-import { MidiPlaybackError } from "./MidiPianoSamples.js";
+import { events_from_midi } from "@fracto/sdk/music/MidiEvents.js";
+import { MidiPlaybackError } from "@fracto/sdk/music/MidiPianoSamples.js";
 import MidiSampleCache from "./MidiSampleCache.js";
 import MidiInstrumentAssignments from "./MidiInstrumentAssignments.js";
 import MidiMixer from "./MidiMixer.js";

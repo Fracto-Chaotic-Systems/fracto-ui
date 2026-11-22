@@ -5,15 +5,15 @@ import assert from "node:assert/strict";
 import {
   catalog_libraries,
   MAX_CATALOG_BYTES,
-} from "../src/pages/games/music/MidiCatalogLibraries.js";
+} from "@fracto/sdk/music/MidiCatalogLibraries.js";
 import {
   registry_from_catalog,
   load_instrument_catalog,
-} from "../src/pages/games/music/MidiInstrumentCatalog.js";
+} from "@fracto/sdk/music/MidiInstrumentCatalog.js";
 import {
   create_instrument_registry,
   GRANDB_PROVIDER,
-} from "../src/pages/games/music/MidiInstruments.js";
+} from "@fracto/sdk/music/MidiInstruments.js";
 import { asset_fixture, catalog_url } from "./midi_asset_fixtures.js";
 import { note } from "./midi_audio_fakes.js";
 const libraries = [

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { newton_big_complex } from "@fracto/sdk/orbitals/FractoNewtonBigComplex.js";
-import { non_escape_seeds, same_orbital, scan_orbitals, refine_seed, merge_orbital } from "../src/pages/assets/surveys/SeedSurveyScan.js";
+import { non_escape_seeds, same_orbital, scan_orbitals, refine_seed, merge_orbital } from "@fracto/sdk/orbitals/FractoSeedSurveyScan.js";
 const survey = {
   canvas_buffer: [[[0, 1], [0, 1], [0, 1]], [[2, 9], [0, 1], [2, 9]], [[0, 1], [2, 9], [2, 9]]],
   half_span: 1.5, sampling: "bounds", focal_point: {x: -1, y: 0}, iteration_limit: 100000,

@@ -19,7 +19,7 @@ import {
   KEY_STUDY_POINTS_SEED_SURVEY,
 } from "../../../text/StudyText.jsx";
 
-import { update_dimensions } from "./../../PageUtils.jsx";
+import { update_dimensions } from "../../PageUtils.jsx";
 import DataBackend from "../../../backend/DataBackend.jsx";
 import PointsSeriesChart from "./PointsSeriesChart.jsx";
 import SeedSurveyChart from "./SeedSurveyChart.jsx";

@@ -5,7 +5,7 @@ import {
   cached_ray_result,
   merge_ray_cache,
   RAY_CACHE_GROUPS,
-} from "../../../sdk/orbitals/FractoMinibrotRayCache.js";
+} from "@fracto/sdk/orbitals/FractoMinibrotRayCache.js";
 import { format_minibrot_angle } from "../src/pages/study/minibrots/MinibrotRayLabels.js";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";

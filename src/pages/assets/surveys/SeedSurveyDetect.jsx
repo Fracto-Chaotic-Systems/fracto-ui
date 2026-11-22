@@ -13,7 +13,7 @@ import AppText from "../../../AppText.jsx";
 import SeedSurveyCanvas from "./SeedSurveyCanvas.jsx";
 import SeedSurveyOrbitals from "./SeedSurveyOrbitals.jsx";
 import SeedSurveyRays from "./SeedSurveyRays.jsx";
-import { SEED_SURVEY_DISCOVERY_OPTIONS } from "./SeedSurveyScan.js";
+import { SEED_SURVEY_DISCOVERY_OPTIONS } from "@fracto/sdk/orbitals/FractoSeedSurveyScan.js";
 import { paint_survey_rays } from "./SeedSurveyRayOverlay.js";
 import { paint_survey_orbital_points } from "./SeedSurveyOrbitalOverlay.js";
 import {

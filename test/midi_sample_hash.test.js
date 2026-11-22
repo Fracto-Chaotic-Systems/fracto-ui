@@ -4,7 +4,7 @@ import { createHash, webcrypto } from "node:crypto";
 import { sample_sha256 } from "../src/pages/games/music/MidiSampleHash.js";
 import { verify_asset_bytes } from "../src/pages/games/music/MidiSampleAsset.js";
 import MidiSampleCache from "../src/pages/games/music/MidiSampleCache.js";
-import { registry_from_catalog } from "../src/pages/games/music/MidiInstrumentCatalog.js";
+import { registry_from_catalog } from "@fracto/sdk/music/MidiInstrumentCatalog.js";
 import { asset_fixture, catalog_url } from "./midi_asset_fixtures.js";
 import { FakeContext, note } from "./midi_audio_fakes.js";
 

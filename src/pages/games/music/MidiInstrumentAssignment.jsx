@@ -5,12 +5,12 @@ import {
   INSTRUMENT_REGISTRY,
   DEFAULT_INSTRUMENT,
   ORIGINAL_INSTRUMENT,
-} from "./MidiInstruments.js";
+} from "@fracto/sdk/music/MidiInstruments.js";
 import {
   instrument_choices,
   instrument_label,
   effective_instrument,
-} from "./MidiInstrumentChoices.js";
+} from "@fracto/sdk/music/MidiInstrumentChoices.js";
 import { timeline_time } from "./MidiTrackGeometry.js";
 
 const text = (key, values = {}) => {

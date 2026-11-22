@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { piano_sample } from "../src/pages/games/music/MidiPianoSamples.js";
+import { piano_sample } from "@fracto/sdk/music/MidiPianoSamples.js";
 import MidiSampleCache from "../src/pages/games/music/MidiSampleCache.js";
 import {
   FakeContext,

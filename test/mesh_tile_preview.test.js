@@ -3,17 +3,17 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
 import { transformSync } from "esbuild";
-import { build_terrain_tile } from "../../../sdk/terrain/Mesh.js";
+import { build_terrain_tile } from "@fracto/sdk/terrain/Mesh.js";
 import {
   encode_terrain_mesh,
   decode_terrain_mesh,
-} from "../../../sdk/terrain/Cache.js";
+} from "@fracto/sdk/terrain/Cache.js";
 import {
   decode_preview_mesh,
   preview_positions,
   paint_preview_tile,
 } from "../src/pages/tiles/MeshTilePreviewData.js";
-import FractoCanvasBuffer from "../../../sdk/FractoCanvasBuffer.js";
+import FractoCanvasBuffer from "@fracto/sdk/FractoCanvasBuffer.js";
 
 test("browser preview decodes the stored mesh, preserves standard palette samples and applies scope/25 relief", async () => {
   const source = Array.from({ length: 256 }, (_, x) =>

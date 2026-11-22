@@ -7,18 +7,18 @@ import { setImmediate } from "node:timers";
 import { transformSync } from "esbuild";
 import * as THREE from "three";
 import SimulatorMeshScene from "../src/pages/assets/SimulatorMeshScene.js";
-import { build_terrain_tile } from "../../../sdk/terrain/Mesh.js";
-import { encode_terrain_mesh } from "../../../sdk/terrain/Cache.js";
-import { decode_terrain_gzip } from "../../../sdk/terrain/Decode.js";
+import { build_terrain_tile } from "@fracto/sdk/terrain/Mesh.js";
+import { encode_terrain_mesh } from "@fracto/sdk/terrain/Cache.js";
+import { decode_terrain_gzip } from "@fracto/sdk/terrain/Decode.js";
 import {
   terrain_palette,
   terrain_palette_mapper,
-} from "../../../sdk/terrain/Palette.js";
+} from "@fracto/sdk/terrain/Palette.js";
 import {
   resolve_lod_plan,
   request_lod_plan,
-} from "../../../sdk/terrain/Lod.js";
-import FractoCanvasBuffer from "../../../sdk/FractoCanvasBuffer.js";
+} from "@fracto/sdk/terrain/Lod.js";
+import FractoCanvasBuffer from "@fracto/sdk/FractoCanvasBuffer.js";
 import { minimum_terrain_resolution } from "../src/pages/assets/SimulatorTerrainData.js";
 import { flight_readings } from "../src/pages/assets/SimulatorFlightMetrics.js";
 import {

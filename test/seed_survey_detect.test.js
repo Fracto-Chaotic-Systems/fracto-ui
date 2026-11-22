@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
-import { SEED_SURVEY_DISCOVERY_OPTIONS } from "../src/pages/assets/surveys/SeedSurveyScan.js";
+import { SEED_SURVEY_DISCOVERY_OPTIONS } from "@fracto/sdk/orbitals/FractoSeedSurveyScan.js";
 import {
   orbital_confirmation,
   orbital_closure_error,
@@ -267,6 +267,7 @@ test("hover overlays only chart points, clears old dots, and cancels pending hov
   const h = harness();
   const arcs = [];
   const squares = [];
+  const fills = [];
   let restores = 0;
   const context = {
     getImageData: () => ({}),
@@ -274,12 +275,14 @@ test("hover overlays only chart points, clears old dots, and cancels pending hov
       restores++;
       arcs.length = 0;
       squares.length = 0;
+      fills.length = 0;
     },
     save() {},
     restore() {},
     beginPath() {},
     fill() {},
     stroke() {},
+    fillRect: (...args) => fills.push(args),
     arc: (...args) => arcs.push(args),
     strokeRect(...args) {
       squares.push([this.strokeStyle, this.lineWidth, ...args]);
@@ -292,6 +295,11 @@ test("hover overlays only chart points, clears old dots, and cancels pending hov
   assert.equal(arcs[0][2], 1.5);
   assert.equal(arcs.at(-1)[2], 4, "Q is larger and drawn after orbital dots");
   assert.equal(squares.length, 2);
+  assert.deepEqual(
+    fills,
+    squares.map((square) => square.slice(2)),
+    "filled markers share their outline bounds",
+  );
   assert.deepEqual(squares[0], [
     "#000000",
     1,
@@ -308,6 +316,7 @@ test("hover overlays only chart points, clears old dots, and cancels pending hov
     "missing chart clears orbital dots, retaining Q",
   );
   assert.equal(squares.length, 0);
+  assert.equal(fills.length, 0);
   h.component.on_seed_hover({ x: 1, y: 1 });
   h.component.on_seed_leave();
   assert.equal(h.frames.size, 0);
@@ -389,6 +398,7 @@ test("selecting a scanned orbital shows persistent points and restores its seed 
     beginPath() {},
     fill() {},
     stroke() {},
+    fillRect() {},
     strokeRect() {},
     arc: (...args) => arcs.push(args),
   };
@@ -452,6 +462,7 @@ test("rays belong only to table selection and are hidden during hover", () => {
     beginPath() {},
     fill() {},
     stroke() {},
+    fillRect() {},
     strokeRect() {},
     arc() {},
   };

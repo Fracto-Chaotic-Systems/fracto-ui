@@ -70,17 +70,19 @@ but unverified rather than claiming license verification.
 `useInventoryCatalog.js` loads the current record from the same-origin
 `/api/environment-catalog/:id` endpoint. Save writes attribution fields and an
 optional modification note directly to the registered canonical `asset.json`.
-The shared store in the main repository preserves all other fields, serializes
+The asset service's catalog store preserves all other fields, serializes
 writers, rejects stale revisions, and replaces the file atomically. Failures keep
 the form open. Reload explicitly discards the form and reads the latest file.
 The old browser-only editor's differing drafts are recovered for review and an
 explicit Save; they never overwrite the file automatically. The snapshot JSON is
 now a test fixture, not runtime catalog data. No file picker or download is needed.
 
-The Vite plugin and production static server mount the same authenticated router.
-Compose mounts the workspace `assets/environments` directory so writes reach the
-host catalog; `FRACTO_ENVIRONMENT_CATALOG_DIR` overrides the server-side library
-root when needed. Catalog creator/source/license information uses the narrow
+The Vite plugin and UI-owned production static server proxy to the asset service's
+authenticated router. The asset service owns `servers/fracto-asset-server/environments`
+and calls the data service's internal registry API for database persistence.
+`FRACTO_ENVIRONMENT_CATALOG_DIR` overrides its canonical library root when needed.
+Neither the UI nor root infrastructure opens the library or database.
+Catalog creator/source/license information uses the narrow
 asset-provenance exception in PROJECT_GUIDELINES.md and is not logged.
 
 ## Corner CRT character

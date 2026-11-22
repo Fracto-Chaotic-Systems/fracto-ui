@@ -1,6 +1,6 @@
 import { service_origin } from "../utils/service_origin.jsx";
 import { request_json } from "./BackendUtils.jsx";
-import { stream_chat } from "./ChatStream.js";
+import { stream_chat } from "@fracto/sdk/chat/ChatClient.js";
 
 export class AdminBackend {
   static instrument_transfer_peers = (signal) =>

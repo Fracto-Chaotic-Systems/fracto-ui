@@ -1,8 +1,8 @@
 import {
   load_instrument_catalog,
   instrument_audio_url,
-} from "../../src/pages/games/music/MidiInstrumentCatalog.js";
-import { create_instrument_registry } from "../../src/pages/games/music/MidiInstruments.js";
+} from "@fracto/sdk/music/MidiInstrumentCatalog.js";
+import { create_instrument_registry } from "@fracto/sdk/music/MidiInstruments.js";
 import MidiSampleCache from "../../src/pages/games/music/MidiSampleCache.js";
 import {
   sample_window,

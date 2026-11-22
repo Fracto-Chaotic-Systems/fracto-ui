@@ -8,7 +8,7 @@ import {
   transfer_error_key,
   transfer_expired,
   transfer_receipt_verified,
-} from "./InstrumentTransferModel.js";
+} from "@fracto/sdk/music/TransferModel.js";
 import {
   TransferPanel,
   TransferActions,

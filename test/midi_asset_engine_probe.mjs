@@ -1,20 +1,19 @@
+import{fileURLToPath}from"node:url";
 import { Buffer } from "node:buffer";
 // Real HTTP/catalog/WAV integration with a deterministic clock/decoder stub.
 // This is not a browser audio-output test and never enables library entries.
 import http from "node:http";
 import fs from "node:fs/promises";
-import { createRequire } from "node:module";
 import { randomBytes } from "node:crypto";
 import { parseArgs } from "node:util";
 import assert from "node:assert/strict";
-import { create_instrument_router } from "../../fracto-asset-server/handlers/instruments.js";
-import { load_instrument_catalog } from "../src/pages/games/music/MidiInstrumentCatalog.js";
+import {launch_service_fixture}from"@fracto/sdk/testing/ServiceFixture.js";
+import{create_http_proxy}from"@fracto/sdk/utils/HttpProxy.js";
+import express from "express";
+import { load_instrument_catalog } from "@fracto/sdk/music/MidiInstrumentCatalog.js";
 import MidiPlaybackController from "../src/pages/games/music/MidiPlaybackController.js";
 import { FakeContext, fake_timers, note } from "./midi_audio_fakes.js";
-const require = createRequire(
-  new URL("../../fracto-asset-server/package.json", import.meta.url),
-);
-const express = require("express");
+
 const { values } = parseArgs({
   options: {
     output: { type: "string" },
@@ -22,12 +21,14 @@ const { values } = parseArgs({
   },
 });
 const token = randomBytes(24).toString("hex");
+const asset_fixture=await launch_service_fixture(fileURLToPath(new URL("../../fracto-asset-server/test/service_fixture.mjs",import.meta.url)),{catalog_only:true,catalog_prefix:"/api/asset/instruments"});
+process.once("SIGTERM",()=>asset_fixture.close().then(()=>process.exit(0)));
 const app = express();
 app.use(
   "/api/asset/instruments",
   (req, res, next) =>
     req.get("x-fracto-service-token") === token ? next() : res.sendStatus(401),
-  create_instrument_router({ public_url: "" }),
+  create_http_proxy({origin:asset_fixture.base,prefix:"/api/asset/instruments"}),
 );
 const server = http.createServer(app);
 const context = new FakeContext();
@@ -187,6 +188,7 @@ try {
     await fs.writeFile(values.output, JSON.stringify(report, null, 2) + "\n");
   console.log(JSON.stringify(report, null, 2));
 } finally {
+  await asset_fixture.close();
   await player?.dispose();
   await new Promise((resolve) => {
     server.close(resolve);

@@ -1,5 +1,10 @@
 # fracto-ui
 
+Assets inventory uses a transport-only `/api/environment-catalog` proxy to the
+asset service. Imports, catalog files and conversion belong to that service;
+database access belongs to the data service. Both Vite and this UI's static
+`scripts/serve_ui.js` use the same streaming proxy with bounded upstream timeouts.
+
 React and Vite user interface for exploring Fracto services, tiles, assets, studies, and administrative status. The standalone development UI defaults to port 3006 and discovers backend ports through admin. Compose development uses port 3106; proxied deployments use same-origin service routes.
 
 ## Development entry

@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { source_reader } from "./catalog_source_facts.js";
 import { navigation_facts } from "./catalog_navigation.js";
 import process from "node:process";
-import { validate_catalog } from "../src/features/catalog_contract.js";
+import { validate_catalog } from "@fracto/sdk/catalog/CatalogContract.js";
 
 export const UI_ROOT = path.resolve(import.meta.dirname, "..");
 const MAIN_ROOT = path.resolve(UI_ROOT, "../..");

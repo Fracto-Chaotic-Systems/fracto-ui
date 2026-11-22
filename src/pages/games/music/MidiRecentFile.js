@@ -1,4 +1,4 @@
-import { MAX_MIDI_BYTES } from "./MidiValidation.js";
+import { MAX_MIDI_BYTES } from "@fracto/sdk/music/MidiValidation.js";
 
 const DATABASE = "fracto-midi";
 const STORE = "recent-file";

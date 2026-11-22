@@ -1,4 +1,4 @@
-import { load_instrument_catalog } from "../../src/pages/games/music/MidiInstrumentCatalog.js";
+import { load_instrument_catalog } from "@fracto/sdk/music/MidiInstrumentCatalog.js";
 import MidiSampleCache from "../../src/pages/games/music/MidiSampleCache.js";
 import { schedule_midi_voice } from "../../src/pages/games/music/MidiVoice.js";
 import { verify_asset_engine } from "./AssetEngineChecks.js";

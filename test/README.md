@@ -1,5 +1,9 @@
 # UI tests
 
+`environment_catalog_proxy.test.js` exercises the UI's transport against an HTTP
+contract double. It verifies payload and origin/session forwarding and exclusion
+of browser-supplied service tokens without importing another service's modules.
+
 - `node --test test/inventory_camera.test.js` checks tight projected framing for
   wide/flat assets and visibility of the model and meter references across aspect
   ratios.
@@ -353,3 +357,8 @@ angular wraparound, momentum continuity when attitude targets change, and fixed
 nail/moving handle connections for the taut suspension string. Run
 `node --test test/parchment_motion.test.js` with the map and flight-state suites
 when changing `ParchmentMotion.js`.
+
+`seed_survey_detect.test.js` supplies the filled and outlined rectangle methods
+used by the production canvas overlay. It verifies that marker fills and outlines
+share bounds and clear together, while retaining hover, selection, ray visibility
+and pending-frame cancellation coverage.

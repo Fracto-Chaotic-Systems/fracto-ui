@@ -11,7 +11,7 @@ import { createRoot } from "react-dom/client";
 import GamesMusic from "../../src/pages/games/GamesMusic.jsx";
 import AppText from "../../src/AppText.jsx";
 import { APP_GAMES_TEXT } from "../../src/text/GamesText.jsx";
-import { events_from_midi } from "../../src/pages/games/music/MidiEvents.js";
+import { events_from_midi } from "@fracto/sdk/music/MidiEvents.js";
 import { midi, midi_file } from "./fixtures.js";
 import { contexts, rms, wav } from "./Capture.js";
 import {

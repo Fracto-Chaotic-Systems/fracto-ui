@@ -5,12 +5,12 @@ import {
   registry_from_catalog,
   load_instrument_catalog,
   instrument_audio_url,
-} from "../src/pages/games/music/MidiInstrumentCatalog.js";
+} from "@fracto/sdk/music/MidiInstrumentCatalog.js";
 import {
   create_instrument_registry,
   GRANDB_PROVIDER,
   INSTRUMENT_REGISTRY,
-} from "../src/pages/games/music/MidiInstruments.js";
+} from "@fracto/sdk/music/MidiInstruments.js";
 import { sample_window } from "../src/pages/games/music/MidiSampleAsset.js";
 import { schedule_midi_voice } from "../src/pages/games/music/MidiVoice.js";
 import MidiSampleCache from "../src/pages/games/music/MidiSampleCache.js";

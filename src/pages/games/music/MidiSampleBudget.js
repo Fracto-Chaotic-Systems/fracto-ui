@@ -1,4 +1,4 @@
-import { MidiPlaybackError } from "./MidiPianoSamples.js";
+import { MidiPlaybackError } from "@fracto/sdk/music/MidiPianoSamples.js";
 
 export const sample_memory_error = () =>
   new MidiPlaybackError(

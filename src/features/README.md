@@ -3,6 +3,8 @@
 Games' `games-inventory` feature is labeled **assets** and titled
 **assets inventory**; its feature ID, section and text keys remain stable.
 Its catalog entry follows Games Overview and precedes worlds, matching the sidebar.
+Asset feature source references point to the owning asset and data services;
+the UI endpoint is a transport-only compatibility proxy.
 
 `catalog.json` is reviewed application reference data for future AI knowledge
 seeding. It covers the home entry page and every current sidebar destination:

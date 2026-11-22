@@ -2,14 +2,14 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
-import { validate_catalog } from "../src/features/catalog_contract.js";
+import { validate_catalog } from "@fracto/sdk/catalog/CatalogContract.js";
 import { check_catalog, UI_ROOT } from "../scripts/check_feature_catalog.js";
 import {
   CHAT_FILE_ACCEPT,
   CHAT_FILE_LIMIT,
   CHAT_FILE_COUNT,
-} from "../src/pages/admin/chat_attachments.js";
-import { validate_provider } from "../../fracto-ai-server/subject_providers/contracts.js";
+} from "@fracto/sdk/chat/Attachments.js";
+import { validate_provider } from "@fracto/sdk/knowledge/Contracts.js";
 
 const original = JSON.parse(
   readFileSync(path.join(UI_ROOT, "src/features/catalog.json"), "utf8"),
@@ -175,7 +175,7 @@ test("source inspection rejects dynamic registries without evaluating applicatio
 test("subject-provider declaration binds the reviewed catalog to all app areas without seeding", () => {
   const provider = JSON.parse(
     readFileSync(
-      path.resolve(UI_ROOT, "../fracto-ai-server/subject_providers/ui.json"),
+      path.resolve(UI_ROOT, "test/fixtures/ui-provider.json"),
       "utf8",
     ),
   );

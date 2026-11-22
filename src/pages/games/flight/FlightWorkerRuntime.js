@@ -1,5 +1,5 @@
 import { create_flight_tile_transport } from "./FlightTileTransport.js";
-import { create_flight_tile_cache } from "./FlightTileCache.js";
+import { create_flight_tile_cache } from "@fracto/sdk/flight/TileCache.js";
 import { create_flight_frame_pipeline } from "./FlightFramePipeline.js";
 
 /** Worker protocol, separately testable without a browser global. */

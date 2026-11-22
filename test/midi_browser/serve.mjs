@@ -1,17 +1,17 @@
-import { createRequire } from "node:module";
-import { create_instrument_router } from "../../../fracto-asset-server/handlers/instruments.js";
+import {launch_service_fixture}from"@fracto/sdk/testing/ServiceFixture.js";
+import{create_http_proxy}from"@fracto/sdk/utils/HttpProxy.js";
+import express from "express";
 import http from "node:http";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { build } from "vite";
-const require = createRequire(
-  new URL("../../../fracto-asset-server/package.json", import.meta.url),
-);
-const asset_app = require("express")();
+const asset_fixture=await launch_service_fixture(fileURLToPath(new URL("../../../fracto-asset-server/test/service_fixture.mjs",import.meta.url)),{catalog_only:true,catalog_prefix:"/api/asset/instruments"});
+process.once("SIGTERM",()=>asset_fixture.close().then(()=>process.exit(0)));
+const asset_app = express();
 asset_app.use(
   "/api/asset/instruments",
-  create_instrument_router({ public_url: "" }),
+  create_http_proxy({origin:asset_fixture.base,prefix:"/api/asset/instruments"}),
 );
 const directory = path.dirname(fileURLToPath(import.meta.url));
 if (!process.argv[2] || !path.isAbsolute(process.argv[2]))

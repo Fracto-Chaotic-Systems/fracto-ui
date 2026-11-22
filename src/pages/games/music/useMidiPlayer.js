@@ -1,9 +1,9 @@
 import { service_origin } from "../../../utils/service_origin.jsx";
-import { load_instrument_catalog } from "./MidiInstrumentCatalog.js";
+import { load_instrument_catalog } from "@fracto/sdk/music/MidiInstrumentCatalog.js";
 import { useCallback, useEffect, useRef, useState } from "react";
 import MidiPlaybackController from "./MidiPlaybackController.js";
-import { MAX_MIDI_BYTES } from "./MidiValidation.js";
-import { INSTRUMENT_REGISTRY } from "./MidiInstruments.js";
+import { MAX_MIDI_BYTES } from "@fracto/sdk/music/MidiValidation.js";
+import { INSTRUMENT_REGISTRY } from "@fracto/sdk/music/MidiInstruments.js";
 import { read_recent_midi, remember_midi } from "./MidiRecentFile.js";
 
 const SOUND_LIBRARY_ID = "fluidr3-gm";

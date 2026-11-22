@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { extract_ui_catalog } from "../src/features/knowledge_documents.js";
-import { validate_documents } from "../../fracto-ai-server/subject_providers/contracts.js";
+import { extract_ui_catalog } from "@fracto/sdk/catalog/KnowledgeDocuments.js";
+import { validate_documents } from "@fracto/sdk/knowledge/Contracts.js";
 
 const input = () =>
   JSON.parse(
@@ -21,7 +21,7 @@ test("UI extractor emits seven bounded area documents covering all feature state
   const definition = JSON.parse(
     readFileSync(
       new URL(
-        "../../fracto-ai-server/subject_providers/ui.json",
+        "./fixtures/ui-provider.json",
         import.meta.url,
       ),
       "utf8",

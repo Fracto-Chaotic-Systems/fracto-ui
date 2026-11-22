@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { events_from_midi } from "../src/pages/games/music/MidiEvents.js";
+import { events_from_midi } from "@fracto/sdk/music/MidiEvents.js";
 import { build_midi_display_model } from "../src/pages/games/music/MidiDisplayModel.js";
 
 const vlq = (n) => {

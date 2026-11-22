@@ -10,7 +10,7 @@ import express from "express";
 import { create_flight_frame_pipeline } from "../src/pages/games/flight/FlightFramePipeline.js";
 import { create_flight_worker_runtime } from "../src/pages/games/flight/FlightWorkerRuntime.js";
 import { create_flight_frame_session } from "../src/pages/games/flight/FlightFrameSession.js";
-import { create_flight_tile_cache } from "../src/pages/games/flight/FlightTileCache.js";
+import { create_flight_tile_cache } from "@fracto/sdk/flight/TileCache.js";
 import { create_flight_tile_transport } from "../src/pages/games/flight/FlightTileTransport.js";
 import { INITIAL_FLIGHT_STATE } from "../src/pages/games/flight/FlightState.js";
 import { DEFAULT_FLIGHT_FRAME_COLORS } from "../src/pages/games/flight/FlightFrameColors.js";

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { build_terrain_tile } from "../../../sdk/terrain/Mesh.js";
+import { build_terrain_tile } from "@fracto/sdk/terrain/Mesh.js";
 import { scale_escape_relief } from "../src/pages/assets/SimulatorEscapeRelief.js";
 
 test("escape scaling precedes log/cap/smoothing and preserves cached buffers and palette samples", () => {

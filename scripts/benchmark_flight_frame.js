@@ -1,4 +1,4 @@
-import { create_flight_tile_cache } from "../src/pages/games/flight/FlightTileCache.js";
+import { create_flight_tile_cache } from "@fracto/sdk/flight/TileCache.js";
 import { create_flight_frame_pipeline } from "../src/pages/games/flight/FlightFramePipeline.js";
 import { INITIAL_FLIGHT_STATE } from "../src/pages/games/flight/FlightState.js";
 

@@ -6,7 +6,7 @@ import { transformSync } from "esbuild";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { setImmediate } from "node:timers";
-import * as model from "../src/pages/admin/InstrumentTransferModel.js";
+import * as model from "@fracto/sdk/music/TransferModel.js";
 
 const read = (path) => readFileSync(new URL(path, import.meta.url), "utf8");
 const stripped = (path) =>

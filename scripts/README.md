@@ -1,8 +1,12 @@
 # UI data preparation
 
-`environment_catalog_plugin.js` mounts the shared environment catalog router in
-Vite, matching the production static UI server's endpoint. It reads live metadata
-and saves attribution edits directly to the mounted canonical asset catalog.
+`environment_catalog_plugin.js` mounts the transport-only catalog proxy in Vite.
+`environment_catalog_proxy.js` streams requests to the loopback asset service
+selected by `FRACTO_ASSET_PORT`, forwarding necessary content/session/origin/range
+headers while excluding internal service tokens supplied by browsers. A bounded
+timeout covers Blender conversion; connection errors become sanitized 503s.
+`serve_ui.js` serves the built UI and the same proxy in production. It lives here
+rather than in the root. None of these modules opens asset files or MySQL.
 
 ## Pong screen clip
 

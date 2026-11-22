@@ -2,9 +2,9 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
-import * as cache from "../../../sdk/orbitals/FractoOrbitalRayCache.js";
-import { SEED_SURVEY_RAY_OPTIONS } from "../../../sdk/orbitals/FractoDynamicRays.js";
-import { trace_known_dynamic_rays } from "../../../sdk/orbitals/FractoKnownDynamicRays.js";
+import * as cache from "@fracto/sdk/orbitals/FractoOrbitalRayCache.js";
+import { SEED_SURVEY_RAY_OPTIONS } from "@fracto/sdk/orbitals/FractoDynamicRays.js";
+import { trace_known_dynamic_rays } from "@fracto/sdk/orbitals/FractoKnownDynamicRays.js";
 import { build_orbital_trace_request } from "../src/pages/study/points/PointsOrbitalTraceRequest.js";
 
 const request = build_orbital_trace_request(

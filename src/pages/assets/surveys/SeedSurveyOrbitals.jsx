@@ -5,7 +5,7 @@ import CoolTable from "../../../utils/ui/CoolTable.jsx";
 import { render_pattern_block } from "../../study/StudyUtils.jsx";
 import { CELL_TYPE_CALLBACK, CELL_TYPE_TEXT, TABLE_CAN_SELECT, TABLE_NO_BORDER } from "../../../utils/ui/styles/CoolTableStyles.jsx";
 import { KEY_ASSETS_SURVEYS_SCAN_PROGRESS, KEY_ASSETS_SURVEYS_SCAN_WAITING, KEY_ASSETS_SURVEYS_SCAN_RUNNING, KEY_ASSETS_SURVEYS_SCAN_COMPLETE, KEY_ASSETS_SURVEYS_TABLE_PATTERN, KEY_ASSETS_SURVEYS_TABLE_CONFIDENCE, KEY_ASSETS_SURVEYS_TABLE_SEED, KEY_ASSETS_SURVEYS_TABLE_DISCOVERIES, KEY_ASSETS_SURVEYS_FAILED } from "../../../text/AssetsText.jsx";
-import { scan_orbitals } from "./SeedSurveyScan.js";
+import { scan_orbitals } from "@fracto/sdk/orbitals/FractoSeedSurveyScan.js";
 
 /** Owns the incremental survey scan independently of hover calculations. */
 export default class SeedSurveyOrbitals extends Component {

@@ -1,4 +1,4 @@
-import { DEFAULT_INSTRUMENT } from "./MidiInstruments.js";
+import { DEFAULT_INSTRUMENT } from "@fracto/sdk/music/MidiInstruments.js";
 import { midi_route_id } from "./MidiMixer.js";
 import { decoded_asset_bytes, sample_window } from "./MidiSampleAsset.js";
 import { sample_reservation } from "./MidiSampleLoader.js";

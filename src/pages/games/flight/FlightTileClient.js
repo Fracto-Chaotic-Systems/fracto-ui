@@ -1,5 +1,5 @@
 import TilesBackend from "../../../backend/TilesBackend.jsx";
-import { create_flight_tile_cache } from "./FlightTileCache.js";
+import { create_flight_tile_cache } from "@fracto/sdk/flight/TileCache.js";
 
 /** Production transport adapter; create once per game and destroy on cleanup. */
 export function create_flight_tile_client(options = {}) {

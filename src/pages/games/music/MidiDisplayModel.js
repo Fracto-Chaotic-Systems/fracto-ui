@@ -1,4 +1,4 @@
-import { freeze_midi_song } from "./MidiMetadata.js";
+import { freeze_midi_song } from "@fracto/sdk/music/MidiMetadata.js";
 
 const summarize = (notes) => {
   let min = Infinity,

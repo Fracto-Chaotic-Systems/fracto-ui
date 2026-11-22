@@ -1,5 +1,5 @@
 import MidiPlaybackController from "../../src/pages/games/music/MidiPlaybackController.js";
-import { load_instrument_catalog } from "../../src/pages/games/music/MidiInstrumentCatalog.js";
+import { load_instrument_catalog } from "@fracto/sdk/music/MidiInstrumentCatalog.js";
 const status = document.querySelector("#status");
 const results = {};
 const check = (value, message) => {
