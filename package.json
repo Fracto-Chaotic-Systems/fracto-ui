@@ -36,7 +36,8 @@
     "check:catalog": "node scripts/check_feature_catalog.js",
     "prebuild": "node scripts/check_feature_catalog.js && node --test test/flight_preview_entries.test.js && node ../../scripts/build_knowledge_bundle.js",
     "test:catalog": "node --test test/feature_catalog.test.js test/knowledge_documents.test.js",
-    "test:flight-previews": "node --test test/flight_preview_entries.test.js"
+    "test:flight-previews": "node --test test/flight_preview_entries.test.js",
+    "inventory:probe-fbx": "node scripts/probe_inventory_fbx.js"
   },
   "dependencies": {
     "@assistant-ui/react": "^0.15.32",

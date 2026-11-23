@@ -13,6 +13,8 @@ export default function InventoryAssetTree({
   on_select,
   category,
   on_folders,
+  selected_folder,
+  on_folder_select,
 }) {
   const organization = useInventoryFolders(category, assets, on_folders);
   const [creating, set_creating] = useState(false),
@@ -22,6 +24,10 @@ export default function InventoryAssetTree({
     () => build_inventory_asset_tree(assets, organization.folders),
     [assets, organization.folders],
   );
+  const folder =
+    selected_folder && tree.folder_keys.includes(`folder:${selected_folder}`)
+      ? selected_folder
+      : null;
   const [collapsed, set_collapsed] = useState([]);
   return (
     <>
@@ -76,7 +82,13 @@ export default function InventoryAssetTree({
           tree_data={tree.nodes}
           hide_single_root={false}
           tree_label={AppText.get(INVENTORY_TEXT.assets)}
-          selected_keys={selected ? [`asset:${selected}`] : []}
+          selected_keys={
+            folder
+              ? [`folder:${folder}`]
+              : selected
+                ? [`asset:${selected}`]
+                : []
+          }
           expanded_keys={tree.folder_keys.filter(
             (key) => !collapsed.includes(key),
           )}
@@ -86,6 +98,9 @@ export default function InventoryAssetTree({
             )
           }
           on_select={(keys, { items }) => {
+            on_folder_select(
+              keys[0]?.startsWith("folder:") ? keys[0].slice(7) : null,
+            );
             const asset = items.find((item) => item.isLeaf);
             if (asset) on_select(asset.metadata.asset_id);
           }}

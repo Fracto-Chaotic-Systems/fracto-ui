@@ -28,6 +28,7 @@ export default function InventoryImport({ on_imported, category }) {
   const report = (error) =>
     set_message(
       [
+        "invalid_archive",
         "unsafe_path",
         "duplicate_path",
         "import_too_large",

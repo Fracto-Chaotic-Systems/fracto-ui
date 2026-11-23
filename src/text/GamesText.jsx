@@ -25,6 +25,7 @@ export const INVENTORY_IMPORT_TEXT = Object.fromEntries(
     "success",
     "duplicate",
     "error",
+    "invalid_archive",
     "unsafe_path",
     "duplicate_path",
     "import_too_large",
@@ -53,6 +54,18 @@ export const INVENTORY_CATALOG_TEXT = Object.fromEntries(
     "title",
     "id",
     "version",
+    "rename",
+    "delete",
+    "new_name",
+    "accept_rename",
+    "rename_invalid",
+    "confirm_delete",
+    "delete_model_help",
+    "delete_folder_help",
+    "tree_error",
+    "folder_not_empty",
+    "folder_conflict",
+    "folder_not_found",
     "new_folder",
     "move_folder",
     "folder_error",
@@ -97,6 +110,7 @@ export const INVENTORY_CATALOG_TEXT = Object.fromEntries(
 export const INVENTORY_TEXT = Object.fromEntries(
   [
     "material_repair",
+    "model_error",
     "density",
     "density_help",
     "loading_assets",
@@ -497,6 +511,9 @@ export const MUSIC_TEXT = Object.fromEntries(
 );
 
 export const APP_GAMES_TEXT = {
+  [INVENTORY_TEXT.animation]: "Play animation",
+  [INVENTORY_TEXT.model_error]:
+    "The model or one of its required textures could not load. Check the imported files and retry.",
   [INVENTORY_TEXT.material_repair]:
     "FBX cutout material corrected for this preview. Source files are unchanged.",
   [INVENTORY_TEXT.density]: "Grass density",
@@ -527,6 +544,8 @@ export const APP_GAMES_TEXT = {
     "This folder is already cataloged. Selected the existing asset.",
   [INVENTORY_IMPORT_TEXT.error]:
     "The folder could not be imported. Check its files and retry.",
+  [INVENTORY_IMPORT_TEXT.invalid_archive]:
+    "The archive could not be extracted. Password-protected or multipart RAR files are not supported.",
   [INVENTORY_IMPORT_TEXT.unsafe_path]:
     "A filename or archive path is not supported. Check the folder and retry.",
   [INVENTORY_IMPORT_TEXT.duplicate_path]:
@@ -597,6 +616,25 @@ export const APP_GAMES_TEXT = {
   [INVENTORY_CATALOG_TEXT.file_error]:
     "The file could not be saved. Check write permission or download JSON instead.",
   [INVENTORY_CATALOG_TEXT.json_file]: "Asset catalog JSON",
+  [INVENTORY_CATALOG_TEXT.rename]: "Rename",
+  [INVENTORY_CATALOG_TEXT.delete]: "Delete",
+  [INVENTORY_CATALOG_TEXT.rename_invalid]:
+    "Enter a nonempty name within the length limit. Folder names cannot contain /, colons, backslashes or control characters.",
+  [INVENTORY_CATALOG_TEXT.accept_rename]: "Accept name",
+  [INVENTORY_CATALOG_TEXT.new_name]: "New name",
+  [INVENTORY_CATALOG_TEXT.confirm_delete]: "Confirm delete",
+  [INVENTORY_CATALOG_TEXT.delete_model_help]:
+    "Remove this model from the inventory? Its files and attribution will be retained for recovery.",
+  [INVENTORY_CATALOG_TEXT.delete_folder_help]:
+    "Delete this folder? Move or delete its models and subfolders first; only empty folders can be deleted.",
+  [INVENTORY_CATALOG_TEXT.tree_error]:
+    "The operation could not be completed. Refresh the list before retrying.",
+  [INVENTORY_CATALOG_TEXT.folder_not_empty]:
+    "This folder contains models or subfolders. Empty it before deleting.",
+  [INVENTORY_CATALOG_TEXT.folder_conflict]:
+    "The folder changed or the destination already exists. Refresh the list and review its contents.",
+  [INVENTORY_CATALOG_TEXT.folder_not_found]:
+    "This folder no longer exists. Refresh the list.",
   [INVENTORY_CATALOG_TEXT.new_folder]: "New folder",
   [INVENTORY_CATALOG_TEXT.move_folder]: "Move to folder",
   [INVENTORY_CATALOG_TEXT.folder_error]:

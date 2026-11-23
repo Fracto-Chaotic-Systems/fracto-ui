@@ -1,3 +1,4 @@
+import InventorySelectionName from "./InventorySelectionName.jsx";
 import { useEffect, useRef, useState } from "react";
 import AppText from "../../AppText.jsx";
 import InventoryCatalogPanel from "./InventoryCatalogPanel.jsx";
@@ -66,6 +67,13 @@ export default function GamesInventory({ children, category }) {
   const inventory = useInventoryAssets(category);
   const { asset } = inventory;
   const [folders, set_folders] = useState([]);
+  const [catalog_editing, set_catalog_editing] = useState(false);
+  const [selected_folder, set_selected_folder] = useState(null);
+  const target = selected_folder
+    ? { kind: "folder", path: selected_folder, label: selected_folder }
+    : asset
+      ? { kind: "model", id: asset.id, label: asset.name }
+      : null;
   const [options, set_options] = useState({ ...DEFAULT_INVENTORY_PREVIEW });
   const [status, set_status] = useState("loading");
   const [model_info, set_model_info] = useState(null);
@@ -98,6 +106,7 @@ export default function GamesInventory({ children, category }) {
         <InventoryImport
           category={category}
           on_imported={async (id) => {
+            set_selected_folder(null);
             await inventory.reload(id);
             set_status("loading");
             set_options({ ...DEFAULT_INVENTORY_PREVIEW });
@@ -118,6 +127,8 @@ export default function GamesInventory({ children, category }) {
           <InventoryAssetTree
             category={category}
             on_folders={set_folders}
+            selected_folder={selected_folder}
+            on_folder_select={set_selected_folder}
             assets={inventory.assets}
             selected={inventory.selected}
             on_select={(id) => {
@@ -142,7 +153,7 @@ export default function GamesInventory({ children, category }) {
               {status !== "ready" && (
                 <InventoryStatus role="status">
                   {text(status)}{" "}
-                  {status === "error" && (
+                  {["error", "model_error"].includes(status) && (
                     <button
                       onClick={() => {
                         set_status("loading");
@@ -160,65 +171,15 @@ export default function GamesInventory({ children, category }) {
                 aria-label={AppText.get(INVENTORY_CATALOG_TEXT.title)}
               >
                 <InventoryCaption>{text("units")}</InventoryCaption>
-                <InventoryCaption>{text("help")}</InventoryCaption>
                 <InventoryCatalogPanel
-                  key={asset.id}
+                  key={`${asset.id}:${asset.name}:${asset.folder_path}`}
                   asset_id={asset.id}
                   folders={folders}
+                  on_editing_change={set_catalog_editing}
                   on_saved={() => inventory.reload(asset.id)}
                 />
               </InventoryDetails>
             </InventoryPreviewPane>
-            <InventoryControls aria-label={text("asset")}>
-              <strong>{asset.name}</strong>
-              {status === "ready" && model_info?.material_repairs > 0 && (
-                <InventoryCaption>{text("material_repair")}</InventoryCaption>
-              )}
-              {range("scale", 0.1, 2, 0.05, "×")}
-              {asset.id === "grasses-2" && (
-                <>
-                  {range("density", 0, 8, 0.25, "×")}
-                  <InventoryCaption>{text("density_help")}</InventoryCaption>
-                </>
-              )}
-              <div>
-                {text("height")}:{" "}
-                <output>
-                  {model_info
-                    ? (model_info.height * options.scale).toFixed(2)
-                    : "—"}{" "}
-                  m
-                </output>
-              </div>
-              {range("lighting", 0, 360, 5, "°")}
-              {range("strength", 0.25, 6, 0.25, "")}
-              {["normal", "roughness", "wireframe", "reference"].map((key) => (
-                <label key={key}>
-                  <input
-                    type="checkbox"
-                    checked={options[key]}
-                    onChange={(event) => set_option(key, event.target.checked)}
-                  />
-                  {text(key)}
-                </label>
-              ))}
-              <button
-                onClick={() => {
-                  set_options({ ...DEFAULT_INVENTORY_PREVIEW });
-                  set_reset((value) => value + 1);
-                }}
-              >
-                {text("reset")}
-              </button>
-              <InventoryCaption>
-                {status === "ready" && model_info
-                  ? text("ready")
-                      .replace("{triangles}", model_info.triangles)
-                      .replace("{materials}", model_info.materials)
-                      .replace("{textures}", model_info.textures)
-                  : text(status)}
-              </InventoryCaption>
-            </InventoryControls>
           </>
         ) : (
           <InventoryCaption>
@@ -228,6 +189,92 @@ export default function GamesInventory({ children, category }) {
                 ? text("assets_error")
                 : text("empty_assets")}
           </InventoryCaption>
+        )}
+        {target && (
+          <InventoryControls aria-label={text("asset")}>
+            <InventorySelectionName
+              key={
+                selected_folder
+                  ? `folder:${selected_folder}`
+                  : `model:${asset.id}`
+              }
+              target={target}
+              category={category}
+              disabled={catalog_editing}
+              on_changed={async (result) => {
+                if (target.kind === "folder")
+                  set_selected_folder(result.target || null);
+                await inventory.reload();
+              }}
+            />
+            {asset && !selected_folder && (
+              <>
+                {status === "ready" && model_info?.material_repairs > 0 && (
+                  <InventoryCaption>{text("material_repair")}</InventoryCaption>
+                )}
+                {status === "ready" && model_info?.animations > 0 && (
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={options.animation}
+                      onChange={(event) =>
+                        set_option("animation", event.target.checked)
+                      }
+                    />
+                    {text("animation")}
+                  </label>
+                )}
+                {range("scale", 0.1, 2, 0.05, "×")}
+                {asset.id === "grasses-2" && (
+                  <>
+                    {range("density", 0, 8, 0.25, "×")}
+                    <InventoryCaption>{text("density_help")}</InventoryCaption>
+                  </>
+                )}
+                <div>
+                  {text("height")}:{" "}
+                  <output>
+                    {model_info
+                      ? (model_info.height * options.scale).toFixed(2)
+                      : "—"}{" "}
+                    m
+                  </output>
+                </div>
+                {range("lighting", 0, 360, 5, "°")}
+                {range("strength", 0.25, 6, 0.25, "")}
+                {["normal", "roughness", "wireframe", "reference"].map(
+                  (key) => (
+                    <label key={key}>
+                      <input
+                        type="checkbox"
+                        checked={options[key]}
+                        onChange={(event) =>
+                          set_option(key, event.target.checked)
+                        }
+                      />
+                      {text(key)}
+                    </label>
+                  ),
+                )}
+                <button
+                  onClick={() => {
+                    set_options({ ...DEFAULT_INVENTORY_PREVIEW });
+                    set_reset((value) => value + 1);
+                  }}
+                >
+                  {text("reset")}
+                </button>
+                <InventoryCaption>
+                  {status === "ready" && model_info
+                    ? text("ready")
+                        .replace("{triangles}", model_info.triangles)
+                        .replace("{materials}", model_info.materials)
+                        .replace("{textures}", model_info.textures)
+                    : text(status)}
+                </InventoryCaption>
+              </>
+            )}
+          </InventoryControls>
         )}
       </InventoryWorkspace>
       <InventoryCaption>{text("note")}</InventoryCaption>

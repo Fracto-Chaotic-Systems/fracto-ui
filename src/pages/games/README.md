@@ -854,3 +854,50 @@ the asset tree and preview controls retain their own bounded scrolling areas.
 Inventory trees keep every top-level node visible via CoolTree
 `hide_single_root={false}`. A single folder containing the whole category must
 remain a named, expandable row rather than becoming the hidden internal root.
+
+Select any model or folder in the tree. Delete uses a dark red trash icon at the right edge of the
+name row in the details panel, opening inline Confirm delete/Cancel
+controls there. Its first click sends no mutation and never opens a popup. Rename
+uses a pencil icon beside the name in the right-hand details panel and opens
+its name editor there. Empty folders also have this details panel. Folder rename updates descendant assignments
+in the same category. Delete requires an inline confirmation: models leave the
+inventory while retaining files/provenance, and folders must be empty. Root cannot
+be renamed/deleted. Cancel sends no mutation. Details actions are disabled while
+catalog edits are open to preserve drafts. Successful actions refresh folders,
+model selection and metadata. useInventoryDelete.js owns deletion request and inline confirmation state.
+
+InventorySelectionName.jsx and useInventoryRename.js own the pencil action,
+rename draft, revision fetch and save/cancel/error behavior. Folder selection is
+coordinated by GamesInventory so the right panel follows the tree, including
+renamed paths. Model preview controls appear only when a model is selected.
+
+Rename replaces the header name in place with an input. Green check (submit) and
+red X (cancel) icons sit to its right; pencil and trash are absent throughout the
+edit, including while saving or displaying a conflict. Enter accepts and Escape
+cancels. Failed saves keep the draft; Cancel sends no mutation.
+
+The trash icon is revealed on name-row hover (or keyboard focus within the row).
+It remains absent throughout inline name editing.
+
+The Move to folder editor uses the same green check and red X icons to the
+right of its selector. Check submits the revision-checked save; X or Escape
+cancels. Both actions are disabled while a save is running.
+
+Model/resource load failures now show a model/texture error with Retry. Renderer
+creation and WebGL context failures retain the graphics error. Folder imports
+retain RAR sources and the asset service extracts their bounded preview resources.
+
+Animated GLB/glTF and FBX previews retain their clips and loop the first authored
+clip; Play animation pauses/resumes the current pose. Static models retain the
+on-demand renderer. Animation pauses while the document is hidden and releases
+its mixer and frame callback when selection changes. A separate framing parent
+keeps preview centering/scale from overwriting authored animation transforms.
+Initial framing uses precise posed vertices rather than unioning all morph targets.
+InventoryAnimation.js owns mixer lifetime; InventoryScene.js owns the visible loop.
+
+InventorySpecGloss.js registers support for legacy KHR_materials_pbrSpecularGlossiness
+assets. It restores diffuse/alpha textures and direct specular reflectance, and
+reads gloss from the texture alpha channel with the authored UV set. The shader
+adapter is preview-only; standard metallic/roughness materials are unchanged.
+The material's clone and shader cache identity preserve the adapter. Shader
+integration tests must pass when upgrading Three.js. Source models are untouched.

@@ -37,3 +37,13 @@ CoolTree uses CoolTreeItems.js to build its item map. The optional
 `hide_single_root` flag defaults to true for existing callers. Set it to false
 for inventories where every top-level folder or asset must remain visible, even
 when there is only one. The hidden synthetic root then owns all visible nodes.
+
+CoolEditLink accepts optional disabled for callers with an active draft or
+request; it preserves native disabled semantics and the accessible pencil title.
+
+CoolIconLink provides the shared native icon action (title/aria-label and disabled
+state). CoolEditLink supplies its pencil icon; model details use the matching trash
+icon for inline deletion confirmation.
+
+CoolIconLink also accepts optional type (button/submit) and color for inline
+accept/cancel actions. It retains the supplied title as its accessible label.

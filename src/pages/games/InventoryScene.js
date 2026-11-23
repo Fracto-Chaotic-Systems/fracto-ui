@@ -1,3 +1,4 @@
+import { create_inventory_animation } from "./InventoryAnimation.js";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { load_inventory_model } from "./InventoryModelLoader.js";
@@ -14,6 +15,7 @@ export const DEFAULT_INVENTORY_PREVIEW = {
   wireframe: false,
   reference: true,
   density: 1,
+  animation: true,
 };
 
 function dispose_tree(root) {
@@ -97,7 +99,11 @@ export function create_inventory_scene(
     ),
   );
   let disposed = false,
+    context_failed = false,
     model = null,
+    animation = null,
+    frame = null,
+    last_frame = null,
     extent = 1,
     model_height = 1,
     model_size = new THREE.Vector3(1, 1, 1),
@@ -108,6 +114,37 @@ export function create_inventory_scene(
   const render = () => {
     if (!disposed) renderer.render(scene, camera);
   };
+  const stop_animation = () => {
+    if (frame !== null) cancelAnimationFrame(frame);
+    frame = null;
+    last_frame = null;
+  };
+  const start_animation = () => {
+    if (
+      disposed ||
+      context_failed ||
+      !animation?.count ||
+      !options.animation ||
+      document.hidden ||
+      frame !== null
+    )
+      return;
+    const tick = (time) => {
+      frame = null;
+      if (disposed || !options.animation || document.hidden) return;
+      if (last_frame !== null)
+        animation.update(Math.min((time - last_frame) / 1000, 0.1));
+      last_frame = time;
+      render();
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+  };
+  const visibility_changed = () => {
+    stop_animation();
+    start_animation();
+  };
+  document.addEventListener("visibilitychange", visibility_changed);
   controls.addEventListener("change", render);
   const reset_camera = () => {
     controls.target.set(extent <= 2 ? 0.3 : 0, model_height / 2, 0);
@@ -129,6 +166,8 @@ export function create_inventory_scene(
   };
   const update = (next) => {
     options = next;
+    if (options.animation) start_animation();
+    else stop_animation();
     const angle = THREE.MathUtils.degToRad(options.lighting);
     light.position.set(Math.cos(angle) * 4, 3, Math.sin(angle) * 4);
     light.intensity = options.strength;
@@ -177,6 +216,8 @@ export function create_inventory_scene(
   observer.observe(host);
   const context_lost = (event) => {
     event.preventDefault();
+    context_failed = true;
+    stop_animation();
     on_status("error");
   };
   canvas.addEventListener("webglcontextlost", context_lost);
@@ -189,12 +230,15 @@ export function create_inventory_scene(
         dispose_tree(loaded);
         return;
       }
-      const bounds = new THREE.Box3().setFromObject(loaded),
+      animation = create_inventory_animation(loaded);
+      const bounds = new THREE.Box3().setFromObject(loaded, true),
         size = bounds.getSize(new THREE.Vector3());
       const center = bounds.getCenter(new THREE.Vector3());
       model = new THREE.Group();
-      model.add(loaded);
-      loaded.position.sub(new THREE.Vector3(center.x, bounds.min.y, center.z));
+      const centered = new THREE.Group();
+      centered.add(loaded);
+      centered.position.set(-center.x, -bounds.min.y, -center.z);
+      model.add(centered);
       extent = Math.max(1, size.x, size.y, size.z);
       model_height = size.y;
       model_size = size.clone();
@@ -228,6 +272,7 @@ export function create_inventory_scene(
       });
       model_info = {
         material_repairs,
+        animations: animation.count,
         height: size.y,
         triangles: Math.round(triangles),
         materials: materials.size,
@@ -241,13 +286,16 @@ export function create_inventory_scene(
       on_status("ready");
     })
     .catch(() => {
-      if (!disposed) on_status("error");
+      if (!disposed) on_status("model_error");
     });
   return {
     update,
     reset_camera,
     dispose() {
       disposed = true;
+      stop_animation();
+      animation?.dispose();
+      document.removeEventListener("visibilitychange", visibility_changed);
       observer.disconnect();
       canvas.removeEventListener("webglcontextlost", context_lost);
       controls.dispose();

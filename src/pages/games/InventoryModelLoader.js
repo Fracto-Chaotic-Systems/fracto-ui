@@ -1,3 +1,4 @@
+import { inventory_spec_gloss } from "./InventorySpecGloss.js";
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
@@ -50,8 +51,13 @@ export async function load_inventory_model(asset, on_resources) {
       return inventory_file_url(asset, matches[0]);
     throw new Error("unresolved_asset_resource");
   });
-  if (["glb", "gltf"].includes(asset.format))
-    return (await new GLTFLoader(manager).loadAsync(url)).scene;
+  if (["glb", "gltf"].includes(asset.format)) {
+    const result = await new GLTFLoader(manager)
+      .register(inventory_spec_gloss)
+      .loadAsync(url);
+    result.scene.animations = result.animations;
+    return result.scene;
+  }
   if (asset.format === "fbx") return new FBXLoader(manager).loadAsync(url);
   if (asset.format === "3ds") return new TDSLoader(manager).loadAsync(url);
   if (asset.format === "obj") {

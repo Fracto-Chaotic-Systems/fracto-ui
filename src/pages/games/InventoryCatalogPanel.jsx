@@ -1,4 +1,6 @@
-import { Fragment, useState } from "react";
+import CoolIconLink from "../../utils/ui/CoolIconLink.jsx";
+import { check_icon, cancel_icon } from "../../utils/ui/CoolIcons.jsx";
+import { Fragment, useState, useEffect } from "react";
 import AppText from "../../AppText.jsx";
 import { INVENTORY_CATALOG_TEXT } from "../../text/GamesText.jsx";
 import InventoryCatalogEditor from "./InventoryCatalogEditor.jsx";
@@ -6,6 +8,7 @@ import useInventoryCatalog from "./useInventoryCatalog.js";
 import { ATTRIBUTION_FIELDS, safe_catalog_url } from "./InventoryCatalog.js";
 import {
   CatalogPanel,
+  CatalogMoveForm,
   CatalogActions,
   CatalogMessage,
 } from "./InventoryCatalogStyles.jsx";
@@ -15,10 +18,15 @@ export default function InventoryCatalogPanel({
   asset_id,
   on_saved,
   folders = [],
+  on_editing_change,
 }) {
   const [moving, set_moving] = useState(false);
   const catalog = useInventoryCatalog(asset_id, on_saved);
   const { record, busy, editing, message, load_error } = catalog;
+  useEffect(() => {
+    on_editing_change?.(editing);
+    return () => on_editing_change?.(false);
+  }, [editing, on_editing_change]);
   const display_value = (field) => {
     const value = record.attribution[field];
     const url = field.endsWith("_url") ? safe_catalog_url(value) : null;
@@ -84,7 +92,15 @@ export default function InventoryCatalogPanel({
             />
           )}
           {editing && moving && (
-            <form onSubmit={catalog.save}>
+            <CatalogMoveForm
+              onSubmit={catalog.save}
+              onKeyDown={(event) => {
+                if (event.key === "Escape" && !busy) {
+                  event.preventDefault();
+                  catalog.cancel();
+                }
+              }}
+            >
               <label>
                 {text("folder_path")}
                 <select
@@ -108,11 +124,21 @@ export default function InventoryCatalogPanel({
                     ))}
                 </select>
               </label>
-              <button disabled={busy}>{text("move_folder")}</button>
-              <button type="button" disabled={busy} onClick={catalog.cancel}>
-                {text("cancel")}
-              </button>
-            </form>
+              <CoolIconLink
+                title={text("move_folder")}
+                icon={check_icon}
+                color="#17803d"
+                type="submit"
+                disabled={busy}
+              />
+              <CoolIconLink
+                title={text("cancel")}
+                icon={cancel_icon}
+                color="#c62828"
+                on_click={catalog.cancel}
+                disabled={busy}
+              />
+            </CatalogMoveForm>
           )}
           <strong>{record.name}</strong>
           <p>{record.description}</p>

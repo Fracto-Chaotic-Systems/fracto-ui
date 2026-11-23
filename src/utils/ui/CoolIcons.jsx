@@ -327,3 +327,16 @@ export const pencil_icon = (
     <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm17.71-10.9a1 1 0 0 0 0-1.41l-1.65-1.65a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.14-1.14z" />
   </svg>
 );
+
+export const trash_icon = (
+ <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/>
+ </svg>
+);
+
+export const check_icon = (
+ <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m4 12 5 5L20 6"/></svg>
+);
+export const cancel_icon = (
+ <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+);

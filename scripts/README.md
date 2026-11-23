@@ -147,3 +147,15 @@ These source tools validate metadata. The npm prebuild then invokes the root
 `build_knowledge_bundle.js` command, which renders and publishes the deterministic
 artifact without opening a knowledge store or skill registry. See
 `../src/features/README.md` for catalog fields and update procedure.
+
+inventory:probe-fbx <asset-id> [UI origin] [category] runs the UI FBX parser and
+resource URL resolver against the live catalog/proxy, fetching actual referenced
+image files. It substitutes texture construction to run without a browser/GPU;
+this verifies geometry and texture delivery, not WebGL rendering. Defaults are
+localhost port 3006 and material. It prints counts only and modifies no assets.
+
+inventory_preview_validation.html?id=ASSET_ID&category=material is a read-only
+browser probe served by Vite. It uses the real model loader and scene through the
+UI catalog proxy, checks morph movement and counts WebGL errors, then exercises
+roughness and animation toggles. The final JSON appears below the canvas. It
+never edits catalog records. This complements the headless FBX resource probe.

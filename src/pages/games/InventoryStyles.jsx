@@ -140,3 +140,60 @@ export const InventoryCaption = styled.p`
   color: #52636a;
   font-size: 0.8rem;
 `;
+
+export const TreeActions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.5rem 0;
+  button {
+    cursor: pointer;
+    padding: 0.3rem 0.5rem;
+  }
+`;
+export const TreeActionForm = styled.form`
+  margin: 0.65rem 0;
+  padding: 0.6rem;
+  border: 1px solid #ccd4d6;
+  border-radius: 4px;
+  overflow-wrap: anywhere;
+  label {
+    display: grid;
+    gap: 0.35rem;
+    margin: 0.5rem 0;
+  }
+  input {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+`;
+
+export const InventoryNameRow = styled.div`
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  .inventory-delete-action {
+    margin-left: auto;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  &:hover .inventory-delete-action,
+  &:focus-within .inventory-delete-action {
+    visibility: visible;
+    pointer-events: auto;
+  }
+  strong {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  input {
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+    font: inherit;
+    padding: 0.2rem 0.35rem;
+  }
+`;

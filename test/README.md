@@ -378,3 +378,24 @@ and regrouping without changing preview IDs. Catalog persistence/validation and
 database folder round-trips are tested by the owning asset/data services.
 
 Inventory tree tests include empty saved folders, nested parents and asset moves.
+
+Inventory tree action tests exercise confirmation/cancellation, scoped folder
+rename requests, successful refresh, draft protection and nonempty-folder errors.
+
+Details rename tests exercise model/folder pencil actions, scoped save requests,
+revision conflicts, cancellation and draft protection, and verify the tree no
+longer exposes Rename.
+
+Details deletion tests verify adjacent pencil/trash icons, no mutation until
+inline confirmation, cancellation, draft protection and mutually exclusive forms.
+
+Inline rename tests verify header replacement, right-hand green check/red X order,
+hidden pencil/trash controls, Escape cancellation and preserved conflict drafts.
+
+Catalog control tests cover the move selector’s check/X actions, root and folder
+choices, cancellation without saving, and disabled controls during a move.
+
+inventory_animation.test.js covers morph looping, transform framing isolation,
+first-clip selection, static assets and mixer disposal. It also verifies legacy
+specular/glossiness texture assignment, UV/color spaces and shader integration
+against the installed Three.js chunks.

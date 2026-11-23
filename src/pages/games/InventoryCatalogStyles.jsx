@@ -89,3 +89,24 @@ export const CatalogMessage = styled.p`
   background: #eaf1f3;
   border-radius: 4px;
 `;
+
+export const CatalogMoveForm = styled.form`
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.75rem 0;
+  label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+  select {
+    flex: 0 1 auto;
+    width: auto;
+    max-width: 100%;
+    min-width: 0;
+    font: inherit;
+  }
+`;
