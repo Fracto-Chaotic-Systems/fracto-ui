@@ -18,7 +18,8 @@ async function request(id, options = {}) {
   return result;
 }
 
-export default function useInventoryCatalog(asset_id) {
+export default function useInventoryCatalog(asset_id, on_saved) {
+  const [folder_path, set_folder_path] = useState("");
   const [catalog, set_catalog] = useState(null),
     [reload_count, set_reload_count] = useState(0);
   const [editing, set_editing] = useState(false),
@@ -32,6 +33,7 @@ export default function useInventoryCatalog(asset_id) {
     request(asset_id, { signal: controller.signal })
       .then((next) => {
         set_catalog(next);
+        set_folder_path(next.record.folder_path || "");
         set_load_error(false);
         set_busy(false);
         if (reload_count === 0) {
@@ -74,6 +76,7 @@ export default function useInventoryCatalog(asset_id) {
     return () => controller.abort();
   }, [asset_id, reload_count]);
   const edit = () => {
+    set_folder_path(catalog.record.folder_path || "");
     set_fields(
       Object.fromEntries(
         ATTRIBUTION_FIELDS.map((key) => [
@@ -105,11 +108,13 @@ export default function useInventoryCatalog(asset_id) {
           revision: catalog.revision,
           attribution: fields,
           note,
+          folder_path,
         }),
       });
       set_catalog(next);
       set_editing(false);
       set_message("saved_direct");
+      await on_saved?.(next.record);
       try {
         window.localStorage.removeItem(CATALOG_DRAFT_PREFIX + asset_id);
       } catch {
@@ -117,9 +122,12 @@ export default function useInventoryCatalog(asset_id) {
       }
     } catch (error) {
       set_message(
-        ["file_conflict", "invalid_url", "invalid_record"].includes(
-          error.message,
-        )
+        [
+          "file_conflict",
+          "invalid_url",
+          "invalid_record",
+          "invalid_folder",
+        ].includes(error.message)
           ? error.message
           : "save_error",
       );
@@ -134,6 +142,8 @@ export default function useInventoryCatalog(asset_id) {
     editing,
     fields,
     set_fields,
+    folder_path,
+    set_folder_path,
     note,
     set_note,
     message,

@@ -32,3 +32,8 @@ explicitly enabled for trusted application documents; the social workspace uses
 this existing capability for its media markup. Do not enable it for database notes.
 
 MarkdownDocument accepts additional `remark_plugins` for caller-specific parsed-document decorations without changing the Markdown source.
+
+CoolTree uses CoolTreeItems.js to build its item map. The optional
+`hide_single_root` flag defaults to true for existing callers. Set it to false
+for inventories where every top-level folder or asset must remain visible, even
+when there is only one. The hidden synthetic root then owns all visible nodes.

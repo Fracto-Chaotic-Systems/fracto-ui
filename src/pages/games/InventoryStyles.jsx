@@ -1,7 +1,12 @@
 import styled from "styled-components";
 
 export const InventoryLayout = styled.div`
-  padding: 0 1rem 1.5rem;
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  padding: 0 1rem 0.5rem;
   max-width: 1500px;
   p {
     line-height: 1.5;
@@ -15,11 +20,15 @@ export const InventoryToolbar = styled.div`
   }
 `;
 export const InventoryWorkspace = styled.div`
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
   display: grid;
-  grid-template-columns: 180px minmax(0, 1fr) 245px;
+  grid-template-rows: minmax(440px, 1fr);
+  grid-template-columns: 240px minmax(0, 1fr) 245px;
   gap: 1rem;
   @media (max-width: 1100px) {
-    grid-template-columns: 170px minmax(0, 1fr);
+    grid-template-columns: 210px minmax(0, 1fr);
     > aside {
       grid-column: 2;
     }
@@ -33,50 +42,26 @@ export const InventoryWorkspace = styled.div`
 `;
 export const InventoryAssetList = styled.nav`
   align-self: stretch;
+  min-height: 0;
+  overflow: auto;
   padding: 1rem 0.65rem;
   border-right: 1px solid #ccd4d6;
   font-size: 0.875rem;
-  ul {
-    list-style: none;
-    padding: 0;
-    margin: 1rem 0 0;
-  }
-  li + li {
-    margin-top: 0.4rem;
-  }
   @media (max-width: 650px) {
     border-right: 0;
     border-bottom: 1px solid #ccd4d6;
   }
 `;
-export const InventoryAssetButton = styled.button`
-  display: block;
+export const InventoryTreeHost = styled.div`
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  background: transparent;
-  color: #3d565b;
-  text-align: left;
-  font: inherit;
-  cursor: pointer;
-  &:hover {
-    background: #eef3f4;
-  }
-  &[aria-pressed="true"] {
-    border-color: #a5bec6;
-    background: #e2edf0;
-    color: #244b58;
-    font-weight: 600;
-  }
-  &:focus-visible {
-    outline: 2px solid #427e8a;
-    outline-offset: 2px;
-  }
+  min-width: 0;
+  height: clamp(260px, 58vh, 740px);
 `;
 export const InventoryViewport = styled.div`
   position: relative;
-  height: clamp(340px, 58vh, 740px);
+  flex: 0 0 55%;
+  min-height: 180px;
+  box-sizing: border-box;
   background: #e8eef0;
   border: 1px solid #bdc9cc;
   border-radius: 6px;
@@ -95,6 +80,20 @@ export const InventoryViewport = styled.div`
 export const InventoryPreviewPane = styled.div`
   position: relative;
   min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+`;
+export const InventoryDetails = styled.div`
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  scrollbar-gutter: stable;
+  padding-right: 0.35rem;
+  &:focus-visible {
+    outline: 2px solid #427e8a;
+    outline-offset: -2px;
+  }
 `;
 export const InventoryStatus = styled.div`
   position: absolute;
@@ -107,7 +106,9 @@ export const InventoryStatus = styled.div`
   font-size: 0.875rem;
 `;
 export const InventoryControls = styled.aside`
-  align-self: start;
+  align-self: stretch;
+  min-height: 0;
+  overflow: auto;
   display: flex;
   flex-direction: column;
   gap: 1rem;

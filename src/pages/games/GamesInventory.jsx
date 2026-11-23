@@ -2,8 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import AppText from "../../AppText.jsx";
 import InventoryCatalogPanel from "./InventoryCatalogPanel.jsx";
 import InventoryImport from "./InventoryImport.jsx";
+import InventoryAssetTree from "./InventoryAssetTree.jsx";
 import useInventoryAssets from "./useInventoryAssets.js";
-import { INVENTORY_TEXT } from "../../text/GamesText.jsx";
+import {
+  INVENTORY_TEXT,
+  INVENTORY_CATALOG_TEXT,
+} from "../../text/GamesText.jsx";
 import {
   create_inventory_scene,
   DEFAULT_INVENTORY_PREVIEW,
@@ -17,8 +21,8 @@ import {
   InventoryControls,
   InventoryCaption,
   InventoryPreviewPane,
+  InventoryDetails,
   InventoryAssetList,
-  InventoryAssetButton,
 } from "./InventoryStyles.jsx";
 
 const text = (key) => AppText.get(INVENTORY_TEXT[key]);
@@ -61,6 +65,7 @@ function InventoryPreview({
 export default function GamesInventory({ children, category }) {
   const inventory = useInventoryAssets(category);
   const { asset } = inventory;
+  const [folders, set_folders] = useState([]);
   const [options, set_options] = useState({ ...DEFAULT_INVENTORY_PREVIEW });
   const [status, set_status] = useState("loading");
   const [model_info, set_model_info] = useState(null);
@@ -110,24 +115,18 @@ export default function GamesInventory({ children, category }) {
               </button>
             </p>
           )}
-          <ul>
-            {inventory.assets.map((item) => (
-              <li key={item.id}>
-                <InventoryAssetButton
-                  type="button"
-                  aria-pressed={item.id === inventory.selected}
-                  onClick={() => {
-                    if (item.id === inventory.selected) return;
-                    inventory.select(item.id);
-                    set_status("loading");
-                    set_options({ ...DEFAULT_INVENTORY_PREVIEW });
-                  }}
-                >
-                  {item.name}
-                </InventoryAssetButton>
-              </li>
-            ))}
-          </ul>
+          <InventoryAssetTree
+            category={category}
+            on_folders={set_folders}
+            assets={inventory.assets}
+            selected={inventory.selected}
+            on_select={(id) => {
+              if (id === inventory.selected) return;
+              inventory.select(id);
+              set_status("loading");
+              set_options({ ...DEFAULT_INVENTORY_PREVIEW });
+            }}
+          />
         </InventoryAssetList>
         {asset ? (
           <>
@@ -155,9 +154,20 @@ export default function GamesInventory({ children, category }) {
                   )}
                 </InventoryStatus>
               )}
-              <InventoryCaption>{text("units")}</InventoryCaption>
-              <InventoryCaption>{text("help")}</InventoryCaption>
-              <InventoryCatalogPanel key={asset.id} asset_id={asset.id} />
+              <InventoryDetails
+                tabIndex={0}
+                role="region"
+                aria-label={AppText.get(INVENTORY_CATALOG_TEXT.title)}
+              >
+                <InventoryCaption>{text("units")}</InventoryCaption>
+                <InventoryCaption>{text("help")}</InventoryCaption>
+                <InventoryCatalogPanel
+                  key={asset.id}
+                  asset_id={asset.id}
+                  folders={folders}
+                  on_saved={() => inventory.reload(asset.id)}
+                />
+              </InventoryDetails>
             </InventoryPreviewPane>
             <InventoryControls aria-label={text("asset")}>
               <strong>{asset.name}</strong>

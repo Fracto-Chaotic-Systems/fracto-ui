@@ -159,7 +159,13 @@ export class Games extends Component {
     return (
       <styles.PaneWrapper
         style={
-          section_code === GAMES_MUSIC || section_code === GAMES_PLAY
+          [
+            GAMES_MUSIC,
+            GAMES_PLAY,
+            GAMES_INVENTORY,
+            GAMES_COMPOSITES,
+            GAMES_ENVIRONMENTS,
+          ].includes(section_code)
             ? { height: "100%" }
             : undefined
         }

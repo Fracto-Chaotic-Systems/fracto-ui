@@ -2464,7 +2464,7 @@
         "Imports are limited to 2,000 files and 100 MiB including expanded ZIP contents. Model units/materials need review; glTF compression decoders are not configured.",
         "Blender imports require a server Blender installation with glTF support. Static particle previews use a bounded density; procedural materials and texture relinking require review.",
         "Asset storage/imports and the data-service registry must be available; the UI endpoint is a transport proxy only.",
-        "All three model pages query environment_assets through the data and asset APIs, filtered by model_category (material, component or area). Imports use the selected page category. Assembly workflows remain deferred."
+        "All three model pages query environment_assets through the data and asset APIs, filtered by model_category (material, component or area). Imports use the selected page category. Saved folders organize each category in an expandable asset tree. New folder preserves empty nested groups, and Move to folder saves assignments with revision checks and history. Assembly workflows remain deferred."
       ],
       "related_features": [
         "games-play"
@@ -2570,7 +2570,7 @@
         "Imports are limited to 2,000 files and 100 MiB including expanded ZIP contents. Model units/materials need review; glTF compression decoders are not configured.",
         "Blender imports require a server Blender installation with glTF support. Static particle previews use a bounded density; procedural materials and texture relinking require review.",
         "Asset storage/imports and the data-service registry must be available; the UI endpoint is a transport proxy only.",
-        "All three model pages query environment_assets through the data and asset APIs, filtered by model_category (material, component or area). Imports use the selected page category. Assembly workflows remain deferred."
+        "All three model pages query environment_assets through the data and asset APIs, filtered by model_category (material, component or area). Imports use the selected page category. Saved folders organize each category in an expandable asset tree. New folder preserves empty nested groups, and Move to folder saves assignments with revision checks and history. Assembly workflows remain deferred."
       ],
       "related_features": [
         "games-inventory",
@@ -2677,7 +2677,7 @@
         "Imports are limited to 2,000 files and 100 MiB including expanded ZIP contents. Model units/materials need review; glTF compression decoders are not configured.",
         "Blender imports require a server Blender installation with glTF support. Static particle previews use a bounded density; procedural materials and texture relinking require review.",
         "Asset storage/imports and the data-service registry must be available; the UI endpoint is a transport proxy only.",
-        "All three model pages query environment_assets through the data and asset APIs, filtered by model_category (material, component or area). Imports use the selected page category. Assembly workflows remain deferred."
+        "All three model pages query environment_assets through the data and asset APIs, filtered by model_category (material, component or area). Imports use the selected page category. Saved folders organize each category in an expandable asset tree. New folder preserves empty nested groups, and Move to folder saves assignments with revision checks and history. Assembly workflows remain deferred."
       ],
       "related_features": [
         "games-inventory",

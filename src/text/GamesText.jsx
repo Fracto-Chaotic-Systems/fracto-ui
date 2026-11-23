@@ -53,6 +53,13 @@ export const INVENTORY_CATALOG_TEXT = Object.fromEntries(
     "title",
     "id",
     "version",
+    "new_folder",
+    "move_folder",
+    "folder_error",
+    "folder_path",
+    "folder_root",
+    "folder_help",
+    "invalid_folder",
     "creator_name",
     "creator_profile_url",
     "source_url",
@@ -590,6 +597,16 @@ export const APP_GAMES_TEXT = {
   [INVENTORY_CATALOG_TEXT.file_error]:
     "The file could not be saved. Check write permission or download JSON instead.",
   [INVENTORY_CATALOG_TEXT.json_file]: "Asset catalog JSON",
+  [INVENTORY_CATALOG_TEXT.new_folder]: "New folder",
+  [INVENTORY_CATALOG_TEXT.move_folder]: "Move to folder",
+  [INVENTORY_CATALOG_TEXT.folder_error]:
+    "Folders could not be loaded or saved. Check the folder path and server, then retry.",
+  [INVENTORY_CATALOG_TEXT.folder_path]: "Folder path",
+  [INVENTORY_CATALOG_TEXT.folder_root]: "Category root",
+  [INVENTORY_CATALOG_TEXT.folder_help]:
+    "Use / for nested folders, for example Vegetation/Grasses. Leave blank for the category root.",
+  [INVENTORY_CATALOG_TEXT.invalid_folder]:
+    "Use up to eight folder levels separated by /. Folder names cannot be empty, . or .., or contain colons or backslashes.",
   [INVENTORY_CATALOG_TEXT.sources]: "Preserved source files",
   [INVENTORY_CATALOG_TEXT.history]: "Modification history",
   [KEY_GAMES_MODELS]: "models",

@@ -370,3 +370,11 @@ Run `npm run test:flight-previews`; production prebuild runs it as well.
 `inventory_asset_request.test.js` checks material list loading, request and body
 timeouts, navigation cancellation and failure handling. It uses synthetic requests
 and verifies a stalled connection cannot leave the inventory loading indefinitely.
+
+
+inventory_asset_tree.test.js verifies stable leaf identities, shared nested
+folders, deterministic folder-first sorting, duplicate names, empty categories
+and regrouping without changing preview IDs. Catalog persistence/validation and
+database folder round-trips are tested by the owning asset/data services.
+
+Inventory tree tests include empty saved folders, nested parents and asset moves.

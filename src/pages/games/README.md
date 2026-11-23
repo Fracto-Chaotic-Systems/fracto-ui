@@ -50,7 +50,7 @@ Instance GPU buffers are released with the preview's normal disposal lifecycle.
 
 `GamesInventory.jsx` owns preview controls and loading/retry status.
 `useInventoryAssets.js` loads registered assets from the live catalog endpoint.
-The left-hand list follows that catalog, including imports after a page reload.
+The left-hand tree follows that catalog, including imports after a page reload.
 `InventoryImport.jsx` lets the user choose a local folder, name it, choose a model,
 and import it. Original files and ZIPs are preserved, archive contents are safely
 expanded, and the new asset is registered and selected. Reimporting identical
@@ -821,3 +821,36 @@ alpha cutoff and color. Missing previews do not prevent catalog editing.
 to 15 seconds. Timeouts show the existing error and Retry control instead of
 leaving the list stuck on Loading assets. Navigation aborts requests quietly;
 failed loads are not presented as an empty catalog inviting reimport.
+
+## Model organization tree
+
+All three category pages use InventoryAssetTree.jsx with the shared CoolTree
+control. Folder paths form nested expandable groups; leaves retain permanent
+asset IDs for preview selection. Folders sort before assets, with stable name/ID
+ordering. The tree supports keyboard navigation and collapse/expand, and has a
+bounded scrolling host. Selecting a folder does not replace the preview.
+
+To organize an asset, select it, choose Edit catalog details below the preview,
+and save Folder path (for example Vegetation/Grasses). A blank path means the
+category root. The tree refreshes after a successful save while retaining the
+selected asset. Folders are persistent category-scoped logical groups; model
+binaries and library directories are not moved. Folder changes are revision
+checked and recorded in modification history. Folder names are bounded to eight
+levels, 64 characters each, 512 characters overall; absolute/traversal-style,
+empty-segment and control-character paths are rejected.
+
+New folder above each tree accepts a slash-separated path, including nested and
+empty folders. Definitions live in the data service, accessed through the asset
+service and thin UI proxy. Select a model and choose Move to folder below its
+preview, choose an existing folder (or Category root), then confirm. This form
+uses the same revision-checked catalog save as attribution editing, preserving
+attribution and recording movement history. Cancel leaves the asset unchanged.
+
+Model inventory pages fill the Games pane. The preview stays above an independently
+scrollable, keyboard-focusable details region containing catalog metadata, folder
+controls, editing and history. The workspace also scrolls on short/narrow displays;
+the asset tree and preview controls retain their own bounded scrolling areas.
+
+Inventory trees keep every top-level node visible via CoolTree
+`hide_single_root={false}`. A single folder containing the whole category must
+remain a named, expandable row rather than becoming the hidden internal root.

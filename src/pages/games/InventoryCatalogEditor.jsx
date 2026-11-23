@@ -12,6 +12,8 @@ const MULTILINE = new Set([
 ]);
 
 export default function InventoryCatalogEditor({
+  folder_path,
+  set_folder_path,
   fields,
   set_fields,
   note,
@@ -23,6 +25,16 @@ export default function InventoryCatalogEditor({
   return (
     <CatalogForm onSubmit={on_save}>
       <fieldset disabled={busy}>
+        <label>
+          {text("folder_path")}
+          <input
+            type="text"
+            maxLength={512}
+            value={folder_path}
+            onChange={(event) => set_folder_path(event.target.value)}
+          />
+          <small>{text("folder_help")}</small>
+        </label>
         {ATTRIBUTION_FIELDS.map((field) => (
           <label key={field}>
             {text(field)}

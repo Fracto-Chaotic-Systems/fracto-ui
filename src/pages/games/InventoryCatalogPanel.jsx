@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import AppText from "../../AppText.jsx";
 import { INVENTORY_CATALOG_TEXT } from "../../text/GamesText.jsx";
 import InventoryCatalogEditor from "./InventoryCatalogEditor.jsx";
@@ -11,8 +11,13 @@ import {
 } from "./InventoryCatalogStyles.jsx";
 
 const text = (key) => AppText.get(INVENTORY_CATALOG_TEXT[key]);
-export default function InventoryCatalogPanel({ asset_id }) {
-  const catalog = useInventoryCatalog(asset_id);
+export default function InventoryCatalogPanel({
+  asset_id,
+  on_saved,
+  folders = [],
+}) {
+  const [moving, set_moving] = useState(false);
+  const catalog = useInventoryCatalog(asset_id, on_saved);
   const { record, busy, editing, message, load_error } = catalog;
   const display_value = (field) => {
     const value = record.attribution[field];
@@ -40,25 +45,24 @@ export default function InventoryCatalogPanel({ asset_id }) {
         </>
       ) : (
         <>
-          <strong>{record.name}</strong>
-          <p>{record.description}</p>
-          <dl>
-            <dt>{text("id")}</dt>
-            <dd>{record.id}</dd>
-            <dt>{text("version")}</dt>
-            <dd>{record.version}</dd>
-            {ATTRIBUTION_FIELDS.map((field) => (
-              <Fragment key={field}>
-                <dt>{text(field)}</dt>
-                <dd>{display_value(field)}</dd>
-              </Fragment>
-            ))}
-          </dl>
           <CatalogActions>
             <button
               type="button"
               disabled={editing || busy || load_error}
-              onClick={catalog.edit}
+              onClick={() => {
+                catalog.edit();
+                set_moving(true);
+              }}
+            >
+              {text("move_folder")}
+            </button>
+            <button
+              type="button"
+              disabled={editing || busy || load_error}
+              onClick={() => {
+                set_moving(false);
+                catalog.edit();
+              }}
             >
               {text("edit")}
             </button>
@@ -66,12 +70,10 @@ export default function InventoryCatalogPanel({ asset_id }) {
               {text(editing ? "discard_reload" : "reload")}
             </button>
           </CatalogActions>
-          <p>{text("direct_help")}</p>
-          {message && (
-            <CatalogMessage role="status">{text(message)}</CatalogMessage>
-          )}
-          {editing && (
+          {editing && !moving && (
             <InventoryCatalogEditor
+              folder_path={catalog.folder_path}
+              set_folder_path={catalog.set_folder_path}
               fields={catalog.fields}
               set_fields={catalog.set_fields}
               note={catalog.note}
@@ -80,6 +82,58 @@ export default function InventoryCatalogPanel({ asset_id }) {
               on_cancel={catalog.cancel}
               busy={busy}
             />
+          )}
+          {editing && moving && (
+            <form onSubmit={catalog.save}>
+              <label>
+                {text("folder_path")}
+                <select
+                  value={catalog.folder_path}
+                  disabled={busy}
+                  onChange={(event) =>
+                    catalog.set_folder_path(event.target.value)
+                  }
+                >
+                  <option value="">{text("folder_root")}</option>
+                  {[
+                    ...new Set(
+                      [...folders, record.folder_path].filter(Boolean),
+                    ),
+                  ]
+                    .sort()
+                    .map((path) => (
+                      <option key={path} value={path}>
+                        {path}
+                      </option>
+                    ))}
+                </select>
+              </label>
+              <button disabled={busy}>{text("move_folder")}</button>
+              <button type="button" disabled={busy} onClick={catalog.cancel}>
+                {text("cancel")}
+              </button>
+            </form>
+          )}
+          <strong>{record.name}</strong>
+          <p>{record.description}</p>
+          <dl>
+            <dt>{text("id")}</dt>
+            <dd>{record.id}</dd>
+            <dt>{text("version")}</dt>
+            <dd>{record.version}</dd>
+            <dt>{text("folder_path")}</dt>
+            <dd>{record.folder_path || text("folder_root")}</dd>
+            {ATTRIBUTION_FIELDS.map((field) => (
+              <Fragment key={field}>
+                <dt>{text(field)}</dt>
+                <dd>{display_value(field)}</dd>
+              </Fragment>
+            ))}
+          </dl>
+
+          <p>{text("direct_help")}</p>
+          {message && (
+            <CatalogMessage role="status">{text(message)}</CatalogMessage>
           )}
           <h3>{text("sources")}</h3>
           <ul>
