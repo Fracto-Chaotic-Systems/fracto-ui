@@ -136,6 +136,7 @@ export const INVENTORY_TEXT = Object.fromEntries(
     "note",
     "view",
     "units",
+    "units_grid",
   ].map((key) => [key, `${GAMES_FOLDER}/inventory_${key}`]),
 );
 export const PARCHMENT_PLATE_TEXT = Object.fromEntries(
@@ -551,11 +552,11 @@ export const APP_GAMES_TEXT = {
   [INVENTORY_IMPORT_TEXT.duplicate_path]:
     "The folder or archive contains duplicate filenames.",
   [INVENTORY_IMPORT_TEXT.import_too_large]:
-    "Imports support up to 2,000 files and 100 MB including extracted ZIP contents.",
+    "Imports support up to 2,000 files and 100 MB including extracted ZIP/RAR contents.",
   [INVENTORY_IMPORT_TEXT.archive_depth]:
-    "Unpack deeply nested ZIP archives before importing.",
+    "Unpack deeply nested archives before importing.",
   [INVENTORY_IMPORT_TEXT.no_model]:
-    "Choose a folder containing Blender (.blend), GLB, glTF, FBX, OBJ, or 3DS models. ZIP downloads are supported.",
+    "Choose a folder containing Blender (.blend), GLB, glTF, FBX, OBJ, or 3DS models. ZIP and RAR downloads are supported.",
   [INVENTORY_IMPORT_TEXT.import_busy]:
     "Another import is in progress. Retry shortly.",
   [INVENTORY_TEXT.loading_assets]: "Loading assets…",
@@ -664,7 +665,7 @@ export const APP_GAMES_TEXT = {
   [INVENTORY_TEXT.normal]: "Normal map",
   [INVENTORY_TEXT.roughness]: "Roughness map",
   [INVENTORY_TEXT.wireframe]: "Wireframe",
-  [INVENTORY_TEXT.reference]: "1 m reference cube",
+  [INVENTORY_TEXT.reference]: "1 m reference cube and ruler",
   [INVENTORY_TEXT.reset]: "Reset preview",
   [INVENTORY_TEXT.help]:
     "Drag to orbit · scroll or pinch to zoom · right-drag to pan. Focus the preview and use arrow keys to pan.",
@@ -677,6 +678,7 @@ export const APP_GAMES_TEXT = {
   [INVENTORY_TEXT.note]:
     "Verify imported scale and materials before use. Preview adjustments do not edit the catalog or original files.",
   [INVENTORY_TEXT.view]: "Interactive environment asset preview",
+  [INVENTORY_TEXT.units_grid]: "Grid: 10 cm squares",
   [INVENTORY_TEXT.units]: "Grid: 10 cm squares · ruler: 1 m",
   [PARCHMENT_PLATE_TEXT.name]: "FRACTO",
   [PARCHMENT_PLATE_TEXT.tagline]: "the atlas of chaos",

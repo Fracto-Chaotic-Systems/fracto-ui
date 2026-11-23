@@ -52,7 +52,7 @@ Instance GPU buffers are released with the preview's normal disposal lifecycle.
 `useInventoryAssets.js` loads registered assets from the live catalog endpoint.
 The left-hand tree follows that catalog, including imports after a page reload.
 `InventoryImport.jsx` lets the user choose a local folder, name it, choose a model,
-and import it. Original files and ZIPs are preserved, archive contents are safely
+and import it. Original files and ZIP/RAR archives are preserved, archive contents are safely
 expanded, and the new asset is registered and selected. Reimporting identical
 source files selects the existing asset. Name collisions receive a suffix.
 On narrow screens, controls move below the preview while the asset list stays
@@ -798,7 +798,7 @@ failed conversions do not publish an asset. Embedded Blender scripts are disable
 `InventoryImport.jsx` uploads a ZIP envelope to POST `/api/environment-catalog/import`.
 The envelope is generated locally from the selected files; no absolute host paths
 are sent. Browser/server validation shares SDK `FractoAssetArchive.js`. Inputs
-support GLB, glTF, FBX, OBJ/MTL and 3DS, including up to two ZIP levels. Limits are
+support GLB, glTF, FBX, OBJ/MTL and 3DS, including bounded ZIP/RAR downloads. Limits are
 2,000 files and 100 MiB including expanded contents. Originals are hashed under
 `source/files`; extracted resources live under `source/extracted`. Readme/license
 files are preserved; creator/license meanings remain unverified for later editing.
@@ -901,3 +901,25 @@ reads gloss from the texture alpha channel with the authored UV set. The shader
 adapter is preview-only; standard metallic/roughness materials are unchanged.
 The material's clone and shader cache identity preserve the adapter. Shader
 integration tests must pass when upgrading Three.js. Source models are untouched.
+
+Inventory previews initially frame only the selected asset at its imported scale.
+The 1 m reference checkbox reveals both cube and ruler and refits the view; turning
+it off fits just the model. Tiny centimeter/millimeter assets use proportional
+camera padding, near clipping and orbit limits, so meter references cannot make
+them appear empty. Reference markers retain their real scale; source files and
+catalog units are unchanged. InventoryCamera.js owns target/framing calculations.
+
+InventoryImportData.js owns envelope creation and model discovery. Direct and ZIP
+models are discovered locally. If the selected folder contains a RAR (including
+one inside a ZIP), the dialog calls the read-only asset inspection endpoint before
+showing the model selector. No browser RAR codec or application logic in the UI
+proxy is needed. The final import sends the preserved originals again; the asset
+service independently validates/unpacks them and publishes the selected model.
+RAR-only downloads can therefore be imported without manually unpacking them.
+
+For FBX foliage whose material ignores the diffuse texture's cutout alpha, the
+preview samples a bounded 64x64 image after textures arrive. Only an otherwise
+opaque material with both fully transparent and visibly opaque sampled pixels
+receives alpha testing/double-sided rendering. Opaque bark textures and intentional
+translucency retain their settings. Preview map snapshots retain the correction
+across material toggles; original textures, models and catalogs are unchanged.

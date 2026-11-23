@@ -159,3 +159,6 @@ browser probe served by Vite. It uses the real model loader and scene through th
 UI catalog proxy, checks morph movement and counts WebGL errors, then exercises
 roughness and animation toggles. The final JSON appears below the canvas. It
 never edits catalog records. This complements the headless FBX resource probe.
+
+The generic environment catalog proxy also relays POST /import/inspect. Archive
+model discovery and codec validation remain entirely in the asset service.

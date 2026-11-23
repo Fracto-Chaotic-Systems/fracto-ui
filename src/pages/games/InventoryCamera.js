@@ -1,5 +1,13 @@
 import { Vector3 } from "three";
 
+export function inventory_camera_target(size, reference) {
+  return new Vector3(
+    reference && Math.max(size.x, size.y, size.z) <= 2 ? 0.3 : 0,
+    size.y / 2,
+    0,
+  );
+}
+
 // Fit projected box corners rather than a sphere, which wastes space for flat
 // grass cards and ground patches. Reference objects retain their real scale.
 export function inventory_camera_position(
@@ -16,7 +24,8 @@ export function inventory_camera_position(
   const up = new Vector3().crossVectors(direction, right);
   const vertical = Math.tan((fov * Math.PI) / 360),
     horizontal = vertical * aspect;
-  let distance = 0.25;
+  const span = Math.max(size.x, size.y, size.z, 0.000001);
+  let distance = span * 0.01;
   const include = (x, y, z) => {
     const point = new Vector3(x, y, z).sub(target),
       depth = point.dot(direction);
@@ -29,9 +38,12 @@ export function inventory_camera_position(
   for (const x of [-size.x / 2, size.x / 2])
     for (const y of [0, size.y])
       for (const z of [-size.z / 2, size.z / 2]) include(x, y, z);
-  for (const y of [0, 1]) include(-0.8, y, 0);
-  if (reference)
+  if (reference) {
+    for (const y of [0, 1]) include(-0.8, y, 0);
     for (const x of [0.85, 1.85])
       for (const y of [0, 1]) for (const z of [-0.5, 0.5]) include(x, y, z);
-  return target.clone().addScaledVector(direction, distance * 1.12 + 0.05);
+  }
+  return target
+    .clone()
+    .addScaledVector(direction, distance * 1.12 + span * 0.01);
 }

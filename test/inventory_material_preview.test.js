@@ -55,3 +55,30 @@ test("intentional transparency, distinct alpha masks and other formats are not c
   assert.equal(repair_fbx_cutouts(root, "glb"), 0);
   assert.equal(material.opacity, 0);
 });
+
+test("opaque FBX leaf cards adopt an image cutout after textures load and keep it across preview toggles", () => {
+  const { root, material, map } = fixture({
+    opacity: 1,
+    transparent: false,
+    alphaMap: null,
+  });
+  material.userData.inventory_maps = { base: map, alpha: 0, alpha_map: null };
+  assert.equal(
+    repair_fbx_cutouts(root, "fbx", () => false),
+    0,
+  );
+  assert.equal(
+    repair_fbx_cutouts(root, "fbx", () => true),
+    1,
+  );
+  assert.equal(material.alphaTest, 0.5);
+  assert.equal(material.side, DoubleSide);
+  assert.equal(material.userData.inventory_maps.alpha, 0.5);
+  material.map = null;
+  material.alphaTest = 0; // wireframe hides maps temporarily
+  assert.equal(
+    repair_fbx_cutouts(root, "fbx", () => true),
+    0,
+  );
+  assert.equal(material.userData.inventory_maps.alpha, 0.5);
+});

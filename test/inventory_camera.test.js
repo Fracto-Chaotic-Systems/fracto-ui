@@ -1,10 +1,18 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { Vector3, PerspectiveCamera } from "three";
-import { inventory_camera_position } from "../src/pages/games/InventoryCamera.js";
+import {
+  inventory_camera_position,
+  inventory_camera_target,
+} from "../src/pages/games/InventoryCamera.js";
 function check(size, aspect, reference) {
-  const target = new Vector3(size.x <= 2 ? 0.3 : 0, size.y / 2, 0);
-  const camera = new PerspectiveCamera(38, aspect, 0.01, 1000000);
+  const target = inventory_camera_target(size, reference);
+  const camera = new PerspectiveCamera(
+    38,
+    aspect,
+    Math.max(1e-8, Math.min(0.01, size.length() / 1000)),
+    1000000,
+  );
   camera.position.copy(
     inventory_camera_position(size, target, aspect, 38, reference),
   );
@@ -31,4 +39,16 @@ test("projected framing fits flat imported grass tightly", () => {
 test("framing keeps small assets and meter references visible on wide and narrow previews", () => {
   for (const aspect of [0.5, 1, 2]) check(new Vector3(1, 1, 1), aspect, true);
   check(new Vector3(10, 0.38, 10), 1.5, false);
+});
+
+test("centimeter and millimeter assets fill the view without meter-scale references", () => {
+  for (const aspect of [0.5, 1, 2]) {
+    const size = new Vector3(0.0708, 0.0509, 0.029);
+    const distance = check(size, aspect, false);
+    assert.ok(distance < Math.max(size.x, size.y, size.z) * 6);
+    assert.ok(check(size, aspect, true) > distance * 10);
+    assert.equal(inventory_camera_target(size, false).x, 0);
+    const miniature = size.clone().multiplyScalar(0.01);
+    assert.ok(check(miniature, aspect, false) < distance * 0.02);
+  }
 });

@@ -399,3 +399,9 @@ inventory_animation.test.js covers morph looping, transform framing isolation,
 first-clip selection, static assets and mixer disposal. It also verifies legacy
 specular/glossiness texture assignment, UV/color spaces and shader integration
 against the installed Three.js chunks.
+
+inventory_camera.test.js includes centimeter and millimeter assets, portrait and
+landscape views, with model-only framing and explicitly enabled meter references.
+
+inventory_import.test.js covers RAR-only server discovery, direct-model local
+choices, original envelope preservation, and rejected inspection results/errors.

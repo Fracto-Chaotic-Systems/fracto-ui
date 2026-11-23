@@ -1,13 +1,11 @@
-import { useRef, useState } from "react";
 import {
-  zipSync,
-  unzipSync,
-  strToU8,
-} from "three/addons/libs/fflate.module.js";
+  inventory_import_upload,
+  prepare_inventory_import,
+} from "./InventoryImportData.js";
+import { useRef, useState } from "react";
 import {
   ASSET_IMPORT_LIMIT,
   ASSET_FILE_LIMIT,
-  expand_asset_files,
   ignored_asset_file,
 } from "@fracto/sdk/FractoAssetArchive.js";
 import AppText from "../../AppText.jsx";
@@ -65,13 +63,26 @@ export default function InventoryImport({ on_imported, category }) {
           data: new Uint8Array(await file.arrayBuffer()),
         })),
       );
-      const { models } = expand_asset_files(files, unzipSync);
-      set_pending({ files, models });
-      set_model(models[0]);
-      set_name(
+      const folder_name =
         selected[0].webkitRelativePath?.split("/")[0] ||
-          selected[0].name.replace(/\.[^.]+$/, ""),
-      );
+        selected[0].name.replace(/\.[^.]+$/, "");
+      const prepared = await prepare_inventory_import(files, async () => {
+        const response = await fetch(
+          `${import.meta.env.BASE_URL}api/environment-catalog/import/inspect`,
+          {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/zip" },
+            body: inventory_import_upload(files, { model_category: category }),
+          },
+        );
+        const result = await response.json();
+        if (!response.ok) throw Error(result.error || "error");
+        return result;
+      });
+      set_pending(prepared);
+      set_model(prepared.models[0]);
+      set_name(folder_name);
       set_message("");
     } catch (error) {
       report(error);
@@ -85,19 +96,17 @@ export default function InventoryImport({ on_imported, category }) {
     set_busy(true);
     set_message("importing");
     try {
-      const entries = Object.fromEntries(
-        pending.files.map((file) => [`files/${file.path}`, file.data]),
-      );
-      entries["manifest.json"] = strToU8(
-        JSON.stringify({ name: name.trim(), model, model_category: category }),
-      );
       const response = await fetch(
         `${import.meta.env.BASE_URL}api/environment-catalog/import`,
         {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/zip" },
-          body: zipSync(entries, { level: 0 }),
+          body: inventory_import_upload(pending.files, {
+            name: name.trim(),
+            model,
+            model_category: category,
+          }),
         },
       );
       const result = await response.json();

@@ -170,7 +170,9 @@ export default function GamesInventory({ children, category }) {
                 role="region"
                 aria-label={AppText.get(INVENTORY_CATALOG_TEXT.title)}
               >
-                <InventoryCaption>{text("units")}</InventoryCaption>
+                <InventoryCaption>
+                  {text(options.reference ? "units" : "units_grid")}
+                </InventoryCaption>
                 <InventoryCatalogPanel
                   key={`${asset.id}:${asset.name}:${asset.folder_path}`}
                   asset_id={asset.id}
