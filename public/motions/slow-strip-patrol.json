@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "algorithm": "polyline-ping-pong-v1",
+  "units": "m",
+  "points": [
+    [0, 0, 9.45],
+    [0, 0, -9.45]
+  ],
+  "speed_mps": 0.01,
+  "ramp_seconds": 4,
+  "pause_seconds": 2,
+  "turn_seconds": 6
+}

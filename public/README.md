@@ -1,5 +1,8 @@
 # Public UI assets
 
+`motions/` holds separately authored, reusable path-motion descriptions. Files
+are copied unchanged into builds and validated by the shared SDK when loaded.
+
 `inventory/` contains the derived grass GLB for Games inventory. Its README
 records the canonical source and refresh command. Original downloads and creator
 metadata are retained in the main repository's local environment catalog.

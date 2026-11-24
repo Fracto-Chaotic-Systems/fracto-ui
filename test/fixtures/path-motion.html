@@ -1,0 +1,96 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Path motion preview</title>
+    <style>
+      body {
+        margin: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        font: 14px system-ui;
+      }
+      header {
+        padding: 8px;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      #view {
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+      }
+      output {
+        font-size: 12px;
+      }
+      button {
+        padding: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <strong>Independent path motion</strong><button id="start">Start</button
+      ><button id="stop">Endpoint stop</button
+      ><button id="turn">Half-turn</button
+      ><button id="return">Return leg</button
+      ><button id="other">Other half-turn</button
+      ><output id="status">Loading</output>
+    </header>
+    <div id="view"></div>
+    <script type="module">
+      import { create_play_grass_scene } from "/src/pages/games/GamesPlayGrassScene.js";
+      import { load_path_motion } from "/src/utils/render/TopDownPathCamera.js";
+      import { create_path_motion_controller } from "@fracto/sdk/FractoPathMotion.js";
+      const host = document.querySelector("#view"),
+        status = document.querySelector("#status");
+      try {
+        const [{ document: component }, path_motion] = await Promise.all([
+          fetch(
+            "/api/component-documents/0bb37175-0459-49bf-b5fc-f918bf090563",
+          ).then((r) => r.json()),
+          load_path_motion("/motions/slow-strip-patrol.json"),
+        ]);
+        const runtime = create_play_grass_scene(host, {
+          path_motion,
+          on_error: () => (status.textContent = "Rendering failed"),
+        });
+        const resize = () =>
+          runtime.resize(host.clientWidth, host.clientHeight);
+        new ResizeObserver(resize).observe(host);
+        resize();
+        await runtime.update(component);
+        const motion = create_path_motion_controller(path_motion);
+        const show = (seconds) => {
+          status.textContent = JSON.stringify(runtime.seek_motion(seconds));
+        };
+        document.querySelector("#start").onclick = () => show(0);
+        document.querySelector("#stop").onclick = () =>
+          show(motion.travel_seconds + 1);
+        document.querySelector("#turn").onclick = () =>
+          show(
+            motion.travel_seconds +
+              path_motion.pause_seconds +
+              path_motion.turn_seconds / 2,
+          );
+        document.querySelector("#return").onclick = () =>
+          show(motion.leg_seconds + 60);
+        document.querySelector("#other").onclick = () =>
+          show(
+            motion.leg_seconds +
+              motion.travel_seconds +
+              path_motion.pause_seconds +
+              path_motion.turn_seconds / 2,
+          );
+        show(0);
+        window.addEventListener("pagehide", () => runtime.dispose(), {
+          once: true,
+        });
+      } catch (e) {
+        status.textContent = "ERROR: " + e.message;
+        throw e;
+      }
+    </script>
+  </body>
+</html>

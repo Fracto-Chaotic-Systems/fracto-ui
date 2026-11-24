@@ -6,8 +6,11 @@ import {
   fit_component_shadows,
 } from "./ComponentStageShadows.js";
 import { play_grass_view } from "./GamesPlayGrassView.js";
+import { create_path_motion_controller } from "@fracto/sdk/FractoPathMotion.js";
+import { apply_top_down_path_pose } from "../../utils/render/TopDownPathCamera.js";
 
-export function create_play_grass_scene(host, { on_error }) {
+export function create_play_grass_scene(host, { on_error, path_motion }) {
+  const motion = create_path_motion_controller(path_motion);
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -33,7 +36,9 @@ export function create_play_grass_scene(host, { on_error }) {
     failed = false,
     width = 1,
     height = 1,
-    shadow_root = null;
+    shadow_root = null,
+    shadow_bounds = null,
+    ready = false;
   const stop = () => {
     if (frame !== null) cancelAnimationFrame(frame);
     frame = null;
@@ -48,17 +53,27 @@ export function create_play_grass_scene(host, { on_error }) {
   const render = () => {
     if (disposed || failed || document.hidden || !component) return;
     if (shadow_root !== content.root) {
-      fit_component_shadows(light, content.root, component, camera);
+      shadow_bounds = new THREE.Box3().setFromObject(content.root);
       shadow_root = content.root;
     }
+    fit_component_shadows(
+      light,
+      content.root,
+      component,
+      camera,
+      shadow_bounds,
+    );
     renderer.render(scene, camera);
-    if (content.animated && frame === null) frame = requestAnimationFrame(tick);
+    if (ready && frame === null) frame = requestAnimationFrame(tick);
   };
   const tick = (time) => {
     frame = null;
     if (disposed || failed || document.hidden) return;
-    if (last_time !== null)
-      content.animate(Math.min((time - last_time) / 1000, 0.1));
+    if (last_time !== null) {
+      const delta = (time - last_time) / 1000;
+      content.animate(Math.min(delta, 0.1));
+      apply_top_down_path_pose(camera, motion.advance(delta));
+    }
     last_time = time;
     render();
   };
@@ -66,7 +81,13 @@ export function create_play_grass_scene(host, { on_error }) {
     scene,
     render,
     on_status: (status) => {
-      if (status !== "loading_content" && status !== "content_ready") fail();
+      if (status === "loading_content") {
+        ready = false;
+        stop();
+      } else if (status === "content_ready") {
+        ready = true;
+        render();
+      } else fail();
     },
   });
   const resize = (next_width, next_height) => {
@@ -79,10 +100,8 @@ export function create_play_grass_scene(host, { on_error }) {
     camera.right = view.width / 2;
     camera.top = view.height / 2;
     camera.bottom = -view.height / 2;
-    camera.position.set(0, 10, view.center_z);
-    camera.lookAt(0, 0, view.center_z);
     camera.updateProjectionMatrix();
-    camera.updateMatrixWorld();
+    apply_top_down_path_pose(camera, motion.pose);
     shadow_root = null;
     render();
   };
@@ -98,9 +117,26 @@ export function create_play_grass_scene(host, { on_error }) {
   renderer.domElement.addEventListener("webglcontextlost", context_lost);
   return {
     resize,
+    seek_motion(seconds) {
+      const pose = motion.reset(seconds);
+      apply_top_down_path_pose(camera, pose);
+      last_time = null;
+      render();
+      return pose;
+    },
     async update(document) {
       if (disposed) return;
       if (!document.floor) throw new Error("component_floor_required");
+      const radius = (Math.min(...document.floor.size) * 0.97) / 2;
+      if (
+        path_motion.points.some(
+          ([x, y, z]) =>
+            y !== 0 ||
+            Math.abs(x) + radius > document.floor.size[0] / 2 ||
+            Math.abs(z) + radius > document.floor.size[1] / 2,
+        )
+      )
+        throw new Error("path_motion_outside_floor");
       component = document;
       update_component_lighting(light, document);
       resize(width, height);

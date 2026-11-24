@@ -67,8 +67,16 @@ export function visible_component_shadow_bounds(bounds, camera) {
 
 // Overview covers the complete visible strip; close views spend the same map
 // on nearby ground so millimetre-wide sparse blades retain their shadows.
-export function fit_component_shadows(light, root, document, view_camera) {
-  let bounds = new THREE.Box3().setFromObject(root);
+export function fit_component_shadows(
+  light,
+  root,
+  document,
+  view_camera,
+  cached_bounds,
+) {
+  let bounds = cached_bounds
+    ? cached_bounds.clone()
+    : new THREE.Box3().setFromObject(root);
   if (bounds.isEmpty()) return;
   if (view_camera)
     bounds = visible_component_shadow_bounds(bounds, view_camera);

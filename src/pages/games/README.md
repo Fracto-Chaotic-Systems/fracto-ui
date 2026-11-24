@@ -73,12 +73,26 @@ existing read-only component/material APIs (the authoring services must currentl
 be available); it is not a published standalone component package. The runtime
 reuses the stage's calibrated geometry, animation clocks, motion and view-focused
 shadows, without editor guides or controls. An orthographic camera looks straight
-down onto a cover crop of the middle of the 1 × 20 m floor; a 3% inset excludes
-the floor edge at every aspect ratio, including fullscreen. The passive layer is
+down onto a rotating cover crop of the 1 × 20 m floor. Its diagonal is at most
+97% of the narrowest floor dimension, keeping dirt edges out during turns at
+every aspect ratio, including fullscreen. The passive layer is
 below FlightScene's existing -1 layer and never captures foreground interaction.
 The parent passes its measured dimensions; the renderer resizes without reloading
 assets, pauses while the document is hidden and disposes on unmount. Load/context
 failure offers a localized retry. The previous brushed-metal background is removed.
+
+Path motion is authored separately in `public/motions/slow-strip-patrol.json`,
+and operated by the framework-neutral SDK `FractoPathMotion.js`. The Play layer
+only binds that route to the saved grass base. `TopDownPathCamera.js` is a generic
+renderer adapter consuming its poses; neither route nor controller references
+this page or any model. Current movement is 1 cm/s between Z=±9.45 m, with 4-second
+speed ramps, a 2-second endpoint pause and a 6-second in-place 180° turn. Material
+animation clocks remain independent. Motion also runs for static models, pauses
+with the hidden page and keeps progress through resize/fullscreen. Routes that
+cannot contain the rotating crop on the floor are rejected instead of clamped.
+Shadows follow the moving camera, reusing cached component bounds. The runtime's
+`seek_motion(seconds)` supports previewing any phase without changing the route
+or saved component; the live fixture tests complete turns without a half-hour wait.
 Sidebar order is Overview, separator, worlds, music, play, models group (materials, components, areas), separator, wordnet, Settings, Status.
 The models group uses the same labeled sidebar separator as Study’s bailiwicks group.
 Overview, Settings, and Status intentionally remain blank.

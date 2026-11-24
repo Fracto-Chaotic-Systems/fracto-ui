@@ -7,6 +7,7 @@ import {
   validate_component_response,
 } from "./ComponentDocumentApi.js";
 import { create_play_grass_scene } from "./GamesPlayGrassScene.js";
+import { load_path_motion } from "../../utils/render/TopDownPathCamera.js";
 
 const GRASS_STRIP_ID = "0bb37175-0459-49bf-b5fc-f918bf090563";
 const Background = styled.div`
@@ -43,11 +44,19 @@ export default function GamesPlayGrass({ width_px, height_px }) {
   useEffect(() => {
     const controller = new AbortController();
     let scene;
-    component_request(`/${GRASS_STRIP_ID}`, { signal: controller.signal })
-      .then(validate_component_response)
-      .then(({ document }) => {
+    Promise.all([
+      component_request(`/${GRASS_STRIP_ID}`, {
+        signal: controller.signal,
+      }).then(validate_component_response),
+      load_path_motion(
+        `${import.meta.env.BASE_URL}motions/slow-strip-patrol.json`,
+        controller.signal,
+      ),
+    ])
+      .then(([{ document }, path_motion]) => {
         if (controller.signal.aborted) return;
         scene = create_play_grass_scene(host.current, {
+          path_motion,
           on_error: () => {
             if (!controller.signal.aborted) set_failed(true);
           },

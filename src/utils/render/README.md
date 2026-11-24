@@ -1,5 +1,10 @@
 # Shared rendering utilities
 
+`TopDownPathCamera.js` loads and SDK-validates independently authored motion
+descriptions and applies a supplied path pose to a downward-looking camera.
+It owns no clock, game/page state or model reference. The SDK path controller
+owns travel, endpoint stops and turns; other renderers can consume the same poses.
+
 `FractoRasterImage.jsx` owns raster canvas lifecycle; `FractoCanvasClient.jsx`
 requests and paints canvas buffers and reports completed buffer/context pairs.
 `FractoUIColors.jsx`, `CanvasUtils.jsx`, and `ImageFrameStyle.jsx` provide shared

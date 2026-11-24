@@ -5,12 +5,23 @@ import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { runInNewContext } from "node:vm";
 import { transformSync } from "esbuild";
+import * as THREE from "three";
+import { create_path_motion_controller } from "@fracto/sdk/FractoPathMotion.js";
+import { apply_top_down_path_pose } from "../src/utils/render/TopDownPathCamera.js";
+const path_motion = JSON.parse(
+  readFileSync(
+    new URL("../public/motions/slow-strip-patrol.json", import.meta.url),
+    "utf8",
+  ),
+);
 
 test("background unmount aborts loading and prevents late renderer creation; loaded scene is disposed", async () => {
   const source = readFileSync(
     new URL("../src/pages/games/GamesPlayGrass.jsx", import.meta.url),
     "utf8",
-  ).replace(/^import[^;]+;\r?\n/gm, "");
+  )
+    .replace(/^import[^;]+;\r?\n/gm, "")
+    .replaceAll("import.meta.env.BASE_URL", '"/"');
   const code = transformSync(source, {
     loader: "jsx",
     format: "cjs",
@@ -36,12 +47,14 @@ test("background unmount aborts loading and prevents late renderer creation; loa
       AppText: { get: (v) => v },
       PLAY_GRASS_TEXT: {},
       validate_component_response: (v) => v,
+      load_path_motion: async () => path_motion,
       component_request: (path, options) => {
         calls.push(path);
         signal = options.signal;
         return promise;
       },
-      create_play_grass_scene: () => {
+      create_play_grass_scene: (host, options) => {
+        assert.equal(options.path_motion, path_motion);
         calls.push("create");
         return {
           resize: (w, h) => calls.push([w, h]),
@@ -71,8 +84,10 @@ test("background unmount aborts loading and prevents late renderer creation; loa
   }
 });
 
-test("downward grass cover crop fills normal, fullscreen and extreme portrait views without exposing floor edges", () => {
+test("path camera remains downward and all rotating crop corners stay inside the dirt at both endpoints", () => {
   const floor = { size: [1, 20] };
+  const motion = create_path_motion_controller(path_motion);
+  const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.001, 100);
   for (const [width, height] of [
     [1280, 650],
     [1920, 1080],
@@ -83,14 +98,36 @@ test("downward grass cover crop fills normal, fullscreen and extreme portrait vi
   ]) {
     const view = play_grass_view(floor, width, height);
     assert.ok(Math.abs(view.width / view.height - width / height) < 1e-9);
-    assert.ok(view.width <= 0.97 + 1e-9);
-    assert.ok(view.center_z - view.height / 2 >= -9.7 - 1e-9);
-    assert.ok(view.center_z + view.height / 2 <= 9.7 + 1e-9);
-    assert.ok(
-      Math.abs(view.width - 0.97) < 1e-9 || Math.abs(view.height - 19.4) < 1e-9,
-    );
+    assert.ok(Math.abs(Math.hypot(view.width, view.height) - 0.97) < 1e-9);
+    camera.left = -view.width / 2;
+    camera.right = view.width / 2;
+    camera.top = view.height / 2;
+    camera.bottom = -view.height / 2;
+    camera.updateProjectionMatrix();
+    for (const leg of [0, 1])
+      for (const fraction of [0, 0.25, 0.5, 0.75, 1]) {
+        const pose = motion.sample(
+          leg * motion.leg_seconds +
+            motion.travel_seconds +
+            path_motion.pause_seconds +
+            fraction * path_motion.turn_seconds,
+        );
+        apply_top_down_path_pose(camera, pose);
+        assert.ok(
+          camera
+            .getWorldDirection(new THREE.Vector3())
+            .distanceTo(new THREE.Vector3(0, -1, 0)) < 1e-9,
+        );
+        for (const x of [-1, 1])
+          for (const y of [-1, 1]) {
+            const p = new THREE.Vector3(x, y, 0).unproject(camera);
+            assert.ok(
+              Math.abs(p.x) < 0.5 && Math.abs(p.z) < 10,
+              `${width}x${height} exposed dirt edge`,
+            );
+          }
+      }
   }
   const middle = play_grass_view(floor, 1280, 650);
-  assert.equal(middle.center_z, 0.5);
   assert.ok(middle.height < 1);
 });
