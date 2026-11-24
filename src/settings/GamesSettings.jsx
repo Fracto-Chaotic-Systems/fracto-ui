@@ -10,6 +10,7 @@ import { DEFAULT_FLIGHT_CONTROL_SETTINGS } from "../pages/games/controllers/Flig
 import { DEFAULT_FLIGHT_HAZE_PERCENT } from "../pages/games/flight/FlightAtmosphere.js";
 
 const GAMES_FOLDER = "games";
+export const KEY_GAMES_CONSTRUCTION_MEMORY = `${GAMES_FOLDER}/construction_memory_v1`;
 export const KEY_GAMES_PLAY_DASHBOARD_BACKGROUND = `${GAMES_FOLDER}/play_dashboard_background`;
 export const KEY_GAMES_PLAY_NIGHT_FLIGHT = `${GAMES_FOLDER}/play_night_flight`;
 
@@ -42,6 +43,14 @@ export const GAMES_SETTINGS = "games_settings";
 export const GAMES_STATUS = "games_status";
 
 export const APP_GAMES_SETTINGS = {
+  [KEY_GAMES_CONSTRUCTION_MEMORY]: {
+    data_type: TYPE_OBJECT,
+    default_value: { schema_version: 1, patterns: [] },
+    description:
+      "Explicit browser-local construction preferences and reusable recipe instructions",
+    persist: true,
+    max_persist_length: 65536,
+  },
   [KEY_GAMES_PLAY_HAZE]: {
     data_type: TYPE_NUMBER,
     default_value: DEFAULT_FLIGHT_HAZE_PERCENT,

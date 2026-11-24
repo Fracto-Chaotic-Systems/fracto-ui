@@ -1,10 +1,20 @@
 # UI text and translation
 
+GamesText's `CONSTRUCTION_TEXT` registers floor, placement, transform, selection,
+scatter/exclusion and construction load/validation/conflict messages.
+
+GamesText's `MATERIAL_TEXT` registers search, metadata readiness, dimensions/unit/
+axis/placement labels, form guidance, pagination and save/conflict messages.
+
 Games groups **materials**, **components**, and **areas** under
 **models**, with **all materials**, **all components**, and **all areas**
 page titles. Materials replaces the former ingredients label. The `games/inventory` and
 `games/inventory_title` text keys remain stable.
 The former Inventory introductory message and its unused text key are removed.
+`COMPONENT_STAGE_TEXT` in GamesText supplies the component construction action,
+draft controls, stage navigation guidance and graphics error/retry labels.
+It also registers component save/load, history, saved-list and conflict/discard
+messages. Persistence and history labels use the same stable stage namespace.
 
 AdminText also registers AI server-health and repository labels.
 
@@ -113,3 +123,17 @@ MUSIC_TEXT also owns instrument choices, original/effective assignment labels, b
 `AdminText.jsx` registers instrument export labels, phases, errors and receipt
 text in `APP_ADMIN_TEXT`, addressed through `INSTRUMENT_TRANSFER_TEXT`. Rendered
 errors use allowlisted messages rather than raw server details.
+
+`GamesText.jsx` registers `COMPONENT_PLANNER_TEXT` for the component stage's
+conversation, planning/preparation/Apply phases, preview controls, material gaps,
+catalog alternatives and recoverable failures. Model/catalog prose is rendered
+as plain React text, never interpreted as markup or code.
+
+`CONSTRUCTION_MEMORY_TEXT` registers explicit memory review, scope, persistence
+status, inspect/edit/enable/delete and guidance-budget messages. Local pattern
+titles and instructions are rendered as plain text.
+
+# Component playback text
+
+The games component-stage catalog includes the authored **Animation speed (×)**
+label and help describing persistence, 0–10 limits, pause, Save and undo/redo.

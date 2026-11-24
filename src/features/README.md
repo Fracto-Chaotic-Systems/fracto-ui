@@ -4,7 +4,13 @@ Games’ `games-inventory` feature is labeled **materials** and titled
 **all materials**; its feature ID, section and text keys remain stable.
 Components and areas follow it in the models group, below play.
 All three share the inventory scaffold and request their respective database
-categories. Imports use the page’s category; assembly workflows remain deferred.
+categories. Materials and areas retain imports. Components initiate a blank
+stage and support persistent document save/load, session-local undo/redo, floors,
+calibrated model placement/transforms/removal and versioned footprint scattering.
+The stage now supports bounded AI planning, separate proposal preview and explicit
+Apply, plus browser-local explicit construction preferences and saved recipe
+instructions. Pattern controls expose scope, enable/disable and inspect/edit/delete.
+Automatic inference of preferences and account-linked memory remain deferred.
 Asset feature source references point to the owning asset and data services;
 the UI endpoint is a transport-only compatibility proxy.
 

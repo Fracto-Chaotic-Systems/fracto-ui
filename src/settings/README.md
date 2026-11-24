@@ -1,5 +1,11 @@
 # UI settings
 
+`games/construction_memory_v1` persists the bounded explicit preference/recipe
+library for the component stage, with a 65,536-character object limit. The feature
+validates schema/revisions, owns review/edit/delete and restores prior runtime
+state on storage write failures. It contains no account/profile association and
+does not synchronize across origins or browser tabs. See games/COMPONENT_MEMORY.md.
+
 `games/play_night_flight` persists the dashboard's night lighting, defaulting off.
 The physical-style switch beside the heading indicator controls this preference.
 

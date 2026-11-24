@@ -1,5 +1,16 @@
 # UI data preparation
 
+`component_planner_proxy.js` is the transport-only stage bridge from
+`/api/component-construction` to the AI service's `/construction` browser route,
+mounted in Vite and production `serve_ui.js`. It preserves origin/session checks,
+strips caller machine/service tokens, propagates disconnect cancellation and uses
+a 180-second deadline. It never reads AI credentials or builds inference context.
+
+`component_documents_proxy.js` is a bounded, transport-only proxy to the data
+service's `/component-documents` endpoint, mounted at `/api/component-documents`
+by the Vite catalog plugin and production `serve_ui.js`. Data-service auth and
+origin checks own authorization. No browser-supplied internal token is forwarded.
+
 `environment_catalog_plugin.js` mounts the transport-only catalog proxy in Vite.
 `environment_catalog_proxy.js` streams requests to the loopback asset service
 selected by `FRACTO_ASSET_PORT`, forwarding necessary content/session/origin/range

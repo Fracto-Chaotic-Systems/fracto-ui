@@ -1,5 +1,52 @@
 # UI tests
 
+`component_build_evaluation.test.js` applies eight shared representative builds
+through the proposal reducer and actual Three.js content renderer with synthetic
+prototypes/neutral floors. It verifies counts, authored scale/extents and geometry
+after undo/redo. Texture decoding/visual quality are outside this test. The hook
+tests also retain a populated wooded-path draft on engine/catalog failure.
+
+`component_memory_store.test.js` covers AppSettings serialization/reload, revision
+edits/deletes, storage-failure rollback and explicit reset of invalid schemas.
+`component_memory_controls.test.js` exercises actual review forms, inspect/edit,
+enable/disable, delete confirmation and preserved revisions. The planner hook tests
+also cover guidance projection and invalidation/cancellation on memory changes.
+
+`component_proposal.test.js` checks separate previews, canonical hashes, stale
+and invalid proposals, material failures and one-step Apply/undo/redo.
+`component_planner_hook.test.js` runs the actual hook with a deterministic hook
+harness and injected transport: clarification context, reducer acknowledgement,
+late cancellation and edits during planning/Apply. `component_planner_proxy.test.js`
+checks HTTP transport, credential stripping and deployment mounts. No model is needed.
+
+`component_stage_content.test.js` verifies source-unit/axis/anchor transforms,
+shared resource caching, name-only edits, transform updates and late-load disposal
+using real Three.js objects and injected transport/model loaders.
+
+`component_stage_animation.test.js` checks synchronized looping morph playback
+across 809 clones, unchanged placements/source prototypes, static assets and cleanup.
+
+Stage content tests also verify authored object patrols, component speed scaling,
+forward-facing return legs, pause, disposal and immutable document transforms.
+
+Set `FRACTO_TEST_COMPONENT_ANIMATION=1` to run
+`live_component_animation.test.js` against the running local stack. It reads the
+saved grass strip through the data API and its original GLB through the asset
+API, then verifies real morph playback on all 809 patches, unchanged placement
+and cleanup. It uses the saved component multiplier and compares every
+grass patch's morph weights against an independent reference mixer at that speed;
+additional insect objects are excluded from this grass-only check.
+Textures are stubbed; no component or catalog data is changed.
+
+`material_metadata_form.test.js` checks blank metadata preservation, explicit
+vector parsing, tag normalization and rejection of incomplete vector components.
+
+`node --test test/component_stage.test.js test/component_document_state.test.js`
+exercises new/back/resume, unsaved replacement checks, saved-snapshot dirty
+tracking, undo/redo across saves and history reset on load. The data service owns
+HTTP/SQL persistence tests; the root SDK tests validate complete documents and
+bounded history. `component_documents_proxy.test.js` checks the transport boundary.
+
 `environment_catalog_proxy.test.js` exercises the UI's transport against an HTTP
 contract double. It verifies payload and origin/session forwarding and exclusion
 of browser-supplied service tokens without importing another service's modules.
@@ -371,7 +418,6 @@ Run `npm run test:flight-previews`; production prebuild runs it as well.
 timeouts, navigation cancellation and failure handling. It uses synthetic requests
 and verifies a stalled connection cannot leave the inventory loading indefinitely.
 
-
 inventory_asset_tree.test.js verifies stable leaf identities, shared nested
 folders, deterministic folder-first sorting, duplicate names, empty categories
 and regrouping without changing preview IDs. Catalog persistence/validation and
@@ -405,3 +451,9 @@ landscape views, with model-only framing and explicitly enabled meter references
 
 inventory_import.test.js covers RAR-only server discovery, direct-model local
 choices, original envelope preservation, and rejected inspection results/errors.
+
+# Dense pattern proposals
+
+`component_proposal.test.js` also checks shared material-pin collection for a
+compact 809-instance `place-pattern` proposal, full SDK replay and missing-pin
+rejection. SDK and AI-owned recipe tests cover atomic expansion and undo/redo.

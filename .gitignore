@@ -10,6 +10,8 @@ lerna-debug.log*
 ../fracto-ui-not/node_modules
 dist
 dist-ssr
+/runtime/stage-calibration-measurements.json
+/runtime/grass-strip-repair/
 test/midi_reports/**/long-piece-dist/
 *.local
 

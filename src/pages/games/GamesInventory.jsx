@@ -1,4 +1,5 @@
 import InventorySelectionName from "./InventorySelectionName.jsx";
+import MaterialMetadataPanel from "./MaterialMetadataPanel.jsx";
 import { useEffect, useRef, useState } from "react";
 import AppText from "../../AppText.jsx";
 import InventoryCatalogPanel from "./InventoryCatalogPanel.jsx";
@@ -63,11 +64,18 @@ function InventoryPreview({
   return <InventoryViewport ref={host} />;
 }
 
-export default function GamesInventory({ children, category }) {
+export default function GamesInventory({
+  children,
+  category,
+  toolbar,
+  empty_message,
+}) {
   const inventory = useInventoryAssets(category);
   const { asset } = inventory;
   const [folders, set_folders] = useState([]);
   const [catalog_editing, set_catalog_editing] = useState(false);
+  const [material_editing, set_material_editing] = useState(false);
+  const [catalog_refresh, set_catalog_refresh] = useState(0);
   const [selected_folder, set_selected_folder] = useState(null);
   const target = selected_folder
     ? { kind: "folder", path: selected_folder, label: selected_folder }
@@ -103,15 +111,17 @@ export default function GamesInventory({ children, category }) {
     <InventoryLayout>
       {children}
       <InventoryToolbar>
-        <InventoryImport
-          category={category}
-          on_imported={async (id) => {
-            set_selected_folder(null);
-            await inventory.reload(id);
-            set_status("loading");
-            set_options({ ...DEFAULT_INVENTORY_PREVIEW });
-          }}
-        />
+        {toolbar ?? (
+          <InventoryImport
+            category={category}
+            on_imported={async (id) => {
+              set_selected_folder(null);
+              await inventory.reload(id);
+              set_status("loading");
+              set_options({ ...DEFAULT_INVENTORY_PREVIEW });
+            }}
+          />
+        )}
       </InventoryToolbar>
       <InventoryWorkspace>
         <InventoryAssetList aria-label={text("assets")}>
@@ -174,12 +184,22 @@ export default function GamesInventory({ children, category }) {
                   {text(options.reference ? "units" : "units_grid")}
                 </InventoryCaption>
                 <InventoryCatalogPanel
-                  key={`${asset.id}:${asset.name}:${asset.folder_path}`}
+                  key={`${asset.id}:${asset.name}:${asset.folder_path}:${catalog_refresh}`}
+                  editing_disabled={material_editing}
                   asset_id={asset.id}
                   folders={folders}
                   on_editing_change={set_catalog_editing}
                   on_saved={() => inventory.reload(asset.id)}
                 />
+                {category === "material" && (
+                  <MaterialMetadataPanel
+                    key={asset.id}
+                    asset_id={asset.id}
+                    disabled={catalog_editing}
+                    on_editing_change={set_material_editing}
+                    on_saved={() => set_catalog_refresh((value) => value + 1)}
+                  />
+                )}
               </InventoryDetails>
             </InventoryPreviewPane>
           </>
@@ -189,7 +209,7 @@ export default function GamesInventory({ children, category }) {
               ? text("loading_assets")
               : inventory.error
                 ? text("assets_error")
-                : text("empty_assets")}
+                : (empty_message ?? text("empty_assets"))}
           </InventoryCaption>
         )}
         {target && (
@@ -202,7 +222,7 @@ export default function GamesInventory({ children, category }) {
               }
               target={target}
               category={category}
-              disabled={catalog_editing}
+              disabled={catalog_editing || material_editing}
               on_changed={async (result) => {
                 if (target.kind === "folder")
                   set_selected_folder(result.target || null);

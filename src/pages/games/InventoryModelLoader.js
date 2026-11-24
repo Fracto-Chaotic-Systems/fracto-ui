@@ -12,7 +12,7 @@ export const inventory_file_url = (asset, file) =>
     window.location.origin,
   ).href;
 
-export async function load_inventory_model(asset, on_resources) {
+export async function load_inventory_model(asset, on_resources, on_error) {
   const files = [...new Set([asset.model, ...asset.resources].filter(Boolean))];
   const urls = new Map(
     files.map((file) => [inventory_file_url(asset, file), file]),
@@ -20,6 +20,7 @@ export async function load_inventory_model(asset, on_resources) {
   const url = inventory_file_url(asset, asset.model),
     manager = new THREE.LoadingManager();
   manager.onLoad = () => on_resources?.();
+  manager.onError = () => on_error?.();
   manager.setURLModifier((requested) => {
     if (/^(?:data:|blob:)/.test(requested)) return requested;
     const resolved = new URL(requested, url).href;

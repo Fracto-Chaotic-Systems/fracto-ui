@@ -1,0 +1,181 @@
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { create_component_content } from "./ComponentStageContent.js";
+
+// Stage guides are editor furniture, separate from future authored floor/objects.
+export function create_component_stage(
+  host,
+  { label, on_error, on_status, on_select },
+) {
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  const canvas = renderer.domElement;
+  canvas.setAttribute("aria-label", label);
+  canvas.setAttribute("role", "img");
+  canvas.tabIndex = 0;
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xe8eef0);
+  const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 1000000);
+  const controls = new OrbitControls(camera, canvas);
+  controls.minDistance = 0.02;
+  controls.maxDistance = 50000;
+  controls.maxPolarAngle = Math.PI * 0.49;
+  controls.listenToKeyEvents(canvas);
+  const grid = new THREE.GridHelper(20, 20, 0x718780, 0xb1bcb5);
+  const origin = new THREE.AxesHelper(2);
+  scene.add(grid, origin);
+  const sunlight = new THREE.DirectionalLight(0xfff4e5, 3);
+  sunlight.position.set(10, 20, 8);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x657565, 2), sunlight);
+  const selection_box = new THREE.Box3(),
+    highlight = new THREE.Box3Helper(selection_box, 0xe29a23);
+  highlight.visible = false;
+  scene.add(highlight);
+  let selected = null,
+    content = null;
+  let disposed = false,
+    context_failed = false,
+    frame = null,
+    last_frame = null;
+  const stop_animation = () => {
+    if (frame !== null) cancelAnimationFrame(frame);
+    frame = null;
+    last_frame = null;
+  };
+  const start_animation = () => {
+    if (disposed || context_failed || document.hidden || !content?.animated) {
+      stop_animation();
+      return;
+    }
+    if (frame !== null) return;
+    frame = requestAnimationFrame((time) => {
+      frame = null;
+      if (disposed || context_failed || document.hidden || !content?.animated)
+        return;
+      if (last_frame !== null)
+        content.animate(Math.min((time - last_frame) / 1000, 0.1));
+      last_frame = time;
+      render();
+    });
+  };
+  const render = () => {
+    selection_box.makeEmpty();
+    if (selected && content)
+      for (const child of content.root.children)
+        if (child.userData.component_item_id === selected)
+          selection_box.expandByObject(child);
+    highlight.visible = !selection_box.isEmpty();
+    if (!disposed) renderer.render(scene, camera);
+    start_animation();
+  };
+  content = create_component_content({ scene, render, on_status });
+  const reset_camera = () => {
+    const bounds = new THREE.Box3().setFromObject(content.root);
+    if (bounds.isEmpty()) {
+      camera.position.set(16, 12, 16);
+      controls.target.set(0, 0, 0);
+    } else {
+      const sphere = bounds.getBoundingSphere(new THREE.Sphere());
+      controls.target.copy(sphere.center);
+      camera.position
+        .copy(sphere.center)
+        .add(
+          new THREE.Vector3(1, 0.75, 1)
+            .normalize()
+            .multiplyScalar(
+              Math.max(sphere.radius, 0.1) *
+                3.5 *
+                Math.max(1, 1 / camera.aspect),
+            ),
+        );
+    }
+    controls.update();
+    render();
+  };
+  const resize = () => {
+    const width = Math.max(host.clientWidth, 1);
+    const height = Math.max(host.clientHeight, 1);
+    renderer.setSize(width, height, false);
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    render();
+  };
+  const context_lost = (event) => {
+    event.preventDefault();
+    context_failed = true;
+    stop_animation();
+    on_error();
+  };
+  const observer = new ResizeObserver(resize);
+  let pointer_start = null;
+  const pointer_down = (event) => {
+    pointer_start = [event.clientX, event.clientY];
+  };
+  const pointer_up = (event) => {
+    if (
+      !pointer_start ||
+      event.button !== 0 ||
+      Math.hypot(
+        event.clientX - pointer_start[0],
+        event.clientY - pointer_start[1],
+      ) > 4
+    )
+      return;
+    const rect = canvas.getBoundingClientRect(),
+      ray = new THREE.Raycaster();
+    ray.setFromCamera(
+      new THREE.Vector2(
+        ((event.clientX - rect.left) / rect.width) * 2 - 1,
+        1 - ((event.clientY - rect.top) / rect.height) * 2,
+      ),
+      camera,
+    );
+    let node = ray.intersectObject(content.root, true)[0]?.object;
+    while (node && !node.userData.component_item_id) node = node.parent;
+    on_select?.(node?.userData.component_item_id || "");
+  };
+  controls.addEventListener("change", render);
+  const visibility_changed = () => {
+    stop_animation();
+    start_animation();
+  };
+  document.addEventListener("visibilitychange", visibility_changed);
+  canvas.addEventListener("webglcontextlost", context_lost);
+  canvas.addEventListener("pointerdown", pointer_down);
+  canvas.addEventListener("pointerup", pointer_up);
+  host.prepend(canvas);
+  observer.observe(host);
+  reset_camera();
+  resize();
+  return {
+    reset_camera,
+    update_document: (document) => content.update(document),
+    select(id) {
+      selected = id;
+      render();
+    },
+    dispose() {
+      disposed = true;
+      stop_animation();
+      document.removeEventListener("visibilitychange", visibility_changed);
+      observer.disconnect();
+      controls.removeEventListener("change", render);
+      controls.dispose();
+      content.dispose();
+      highlight.geometry.dispose();
+      highlight.material.dispose();
+      canvas.removeEventListener("webglcontextlost", context_lost);
+      canvas.removeEventListener("pointerdown", pointer_down);
+      canvas.removeEventListener("pointerup", pointer_up);
+      for (const guide of [grid, origin]) {
+        guide.geometry.dispose();
+        for (const material of [guide.material].flat()) material.dispose();
+      }
+      renderer.dispose();
+      renderer.forceContextLoss();
+      canvas.remove();
+    },
+  };
+}

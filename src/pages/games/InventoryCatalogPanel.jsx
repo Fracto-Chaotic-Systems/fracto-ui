@@ -19,6 +19,7 @@ export default function InventoryCatalogPanel({
   on_saved,
   folders = [],
   on_editing_change,
+  editing_disabled = false,
 }) {
   const [moving, set_moving] = useState(false);
   const catalog = useInventoryCatalog(asset_id, on_saved);
@@ -56,7 +57,7 @@ export default function InventoryCatalogPanel({
           <CatalogActions>
             <button
               type="button"
-              disabled={editing || busy || load_error}
+              disabled={editing || busy || load_error || editing_disabled}
               onClick={() => {
                 catalog.edit();
                 set_moving(true);
@@ -66,7 +67,7 @@ export default function InventoryCatalogPanel({
             </button>
             <button
               type="button"
-              disabled={editing || busy || load_error}
+              disabled={editing || busy || load_error || editing_disabled}
               onClick={() => {
                 set_moving(false);
                 catalog.edit();

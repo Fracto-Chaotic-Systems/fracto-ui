@@ -2551,24 +2551,28 @@
       },
       "settings": [],
       "availability": "implemented",
-      "purpose": "Browse database-registered components with shared model preview, import and attribution tools.",
+      "purpose": "Construct components with catalog materials, manual tools and a local AI conversation with explicit Apply, undo/redo and browser-local remembered preferences and recipes.",
       "inputs": [
+        "New component, component name, save, reopen saved documents and explicit reload",
+        "Construction directions and clarifications, proposal/draft preview toggle, catalog alternatives, explicit Apply as one undo step, and cancellation; model responsiveness depends on the configured local engine",
+        "Explicit remember-this preferences and last-applied recipe instructions, with inspect/edit/delete, enable/disable and matching keywords; current directions override remembered guidance",
+        "Plain or explicitly textured floor, place, move/rotate/scale, select/remove, and seeded scatter with footprint exclusion rectangles; one undo step per batch",
+        "Material search by names, tags, categories and descriptions; placement filters and catalog snapshot pagination",
+        "Curated dimensions, unit conversion, orientation, ground anchor, footprint and texture tile size; unknown values remain explicit",
+        "Undo/redo up to 100 edits; back/resume retains the mounted editor draft",
         "Orbit, zoom and pan",
         "Preview scale, light direction and intensity",
         "Normal and roughness maps, wireframe and reference cube toggles",
-        "Creator, source, license and attribution edits; modification notes",
-        "Local asset folders with Blender .blend, GLB/glTF, FBX, OBJ/MTL or 3DS files, ZIP downloads and textures",
-        "Grasses 2 preview density from 0x to 8x, without modifying model or catalog files"
+        "Creator, source, license and attribution edits for published assets"
       ],
       "access": "service-api",
       "environment": [],
       "limitations": [
         "Requires WebGL. Source scale and texture map roles remain provisional. Preview controls do not modify model files.",
         "Catalog saves require the writable canonical environment library. Stale revisions are rejected, retaining edits in the form.",
-        "Imports are limited to 2,000 files and 100 MiB including expanded ZIP contents. Model units/materials need review; glTF compression decoders are not configured.",
-        "Blender imports require a server Blender installation with glTF support. Static particle previews use a bounded density; procedural materials and texture relinking require review.",
-        "Asset storage/imports and the data-service registry must be available; the UI endpoint is a transport proxy only.",
-        "All three model pages query environment_assets through the data and asset APIs, filtered by model_category (material, component or area). Imports use the selected page category. Saved folders organize each category in an expandable asset tree. New folder preserves empty nested groups, and Move to folder saves assignments with revision checks and history. The details-panel pencil updates model names or folder descendants; the adjacent trash icon requires inline confirmation to delete models (files retained) or empty folders. Assembly workflows remain deferred."
+        "Component persistence requires the data service and migration 024. Documents pin material references structurally; construction tools and Apply recheck current calibrated catalog references.",
+        "Published model previews require registered asset resources; authored document saving is independent of asset publication.",
+        "Construction requires calibrated facts and exact catalog revisions. Limits are 1,000 instances and 64 material revisions; static poses only, without physics or drag gizmos. Scattering respects conservative exclusions but permits overlap between instances. Planning requires explicit preview/Apply and separate model-quality evaluation. Remembered guidance is browser-local; account sync and automatic preference inference are unavailable. Saving does not publish an asset. Unsaved edits and undo history are session-local."
       ],
       "related_features": ["games-inventory", "games-play"],
       "sources": [

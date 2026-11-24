@@ -1,5 +1,24 @@
 # Games panels
 
+Representative construction evaluation covers geometry, counts, path clearance,
+refinement, history and real MySQL roundtrips. Live plain-floor, wooded-path and
+dense grass-strip builds now pass after latency and catalog fixes; see the AI
+service's construction/EVALUATION.md for measured results and remaining limits.
+
+The component stage now has conversation, separate proposal preview, Apply,
+cancellation and one-batch undo/redo. See
+[COMPONENT_CONVERSATION.md](COMPONENT_CONVERSATION.md) for workflow, authenticated
+transport, stale-proposal protection and verification limits.
+
+Explicit browser-local preferences and saved recipe instructions now support
+remember/review, scope matching, enable/disable and inspect/edit/delete. See
+[COMPONENT_MEMORY.md](COMPONENT_MEMORY.md) for storage ownership, API projection,
+limits and invalidation when remembered patterns change.
+
+The implemented floor/placement/transform/removal/scatter workflow, shared command
+contract, frozen scatter algorithm and renderer ownership are documented in
+[COMPONENT_TOOLS.md](COMPONENT_TOOLS.md).
+
 The parent ../Games.jsx owns sidebar selection and the persisted splitter.
 It gives the play pane full height so GamesPlay's flex content area can fill the
 space below the title without clipping the gear or drawer to a zero-height box.
@@ -13,6 +32,23 @@ Overview, Settings, and Status intentionally remain blank.
 
 ## Inventory
 
+The construction stage includes `MaterialSearchPanel.jsx`: bounded catalog search
+over names/tags/categories/descriptions, placement filters, paginated results,
+stable IDs/revisions and explicit missing placement facts. It does not place
+objects or alter the component document. Expanding a result shows `MaterialFacts`;
+its construction metadata can be edited there or beneath a material's catalog
+preview via `MaterialMetadataPanel.jsx`. Search/paging is blocked while metadata
+edits are open. Successful metadata saves invalidate the old search snapshot.
+
+`MaterialMetadataEditor.jsx` owns the form and `MaterialMetadataForm.js` handles
+blank/number/vector conversion with the SDK contract. Unknown dimensions, scale,
+orientation, ground contact, footprint and texture tile size remain explicit;
+preview geometry is not automatically treated as calibrated physical size.
+Edits preserve original model files and use catalog revision checks. Metadata
+editing and attribution/rename actions are coordinated to avoid replacing drafts.
+`MaterialSearchStyles.jsx` owns the compact stage browser's styling. See the
+asset service's `environment/MATERIAL_SEARCH.md` for fields and HTTP contracts.
+
 The three dedicated pages are **materials**, **components**, and **areas**,
 with matching **all materials**, **all components**, and
 **all areas** titles. `GamesIngredients.jsx`, `GamesComposites.jsx`
@@ -21,11 +57,12 @@ and `GamesEnvironments.jsx` provide their headings around the shared
 preview and own independent inventory state. Each page requests one database
 category: material, component or area. All use the data service’s shared
 `environment_assets` table and `model_category` column through the asset service.
-Imports carry the selected page’s category and publish under ingredients,
-composites or environments respectively. Assembly workflows remain deferred.
+Materials and areas import into their selected category and publish under
+ingredients or environments respectively. Existing component catalogs remain browsable.
 The internal `games_inventory` section and saved selection key remain stable.
-The Import folder button sits in a toolbar below the title, above the asset list
-and preview. The former introductory message has been removed.
+Materials and areas retain Import folder in the toolbar below the title.
+Components replace it with **new component**, opening a blank construction stage.
+The former introductory message has been removed.
 Materials, components and areas omit the visible Assets list heading; each list retains its accessible label.
 
 `InventoryMaterialPreview.js` repairs a specific FBX cutout-export convention:
@@ -49,6 +86,28 @@ and triangle statistics update with the slider. Reset and asset selection restor
 Instance GPU buffers are released with the preview's normal disposal lifecycle.
 
 `GamesInventory.jsx` owns preview controls and loading/retry status.
+Its optional toolbar lets the components page supply its construction action.
+`GamesComposites.jsx` switches between the catalog and `ComponentStage.jsx`.
+`useComponentDocument.js` owns document save/load and request status;
+`ComponentDocumentState.js` owns reducer/history/dirty semantics using the shared
+SDK contract. `ComponentDocumentApi.js` is the bounded data-service client.
+`SavedComponents.jsx` lists paginated authored documents separately from published
+catalog assets. Save persists the complete document with expected-revision checks.
+Back/resume retains the current editor; new/open/reload require inline discard
+when dirty. Browser close/refresh warns while dirty. Unsaved edits remain local
+to the mounted components page. Saved documents survive navigation/restarts.
+The stage supports name editing, save, load, undo/redo (100 snapshots), orbit/pan/
+zoom, reset view, and graphics retry. Save preserves history; load resets it.
+Ctrl/Cmd+S saves; Ctrl/Cmd+Z and Shift+Z or Ctrl+Y undo/redo outside text fields.
+Save failures retain the draft; conflicts require explicit reload/review.
+`ComponentStageScene.js` owns the on-demand Three.js renderer, camera, resize
+observer and disposal. Its 20 m guide with 1 m grid and origin axes is editor
+furniture, not an authored floor or placed material. `ComponentStageStyles.jsx`
+owns the responsive workspace. Material selection/placement, floor texturing,
+transforms and rendering authored materials are now provided by the construction
+tools. Agent orchestration and creative memory remain future work.
+The accepted design and staged roadmap are in
+[COMPONENT_CONSTRUCTION_PLAN.md](COMPONENT_CONSTRUCTION_PLAN.md).
 `useInventoryAssets.js` loads registered assets from the live catalog endpoint.
 The left-hand tree follows that catalog, including imports after a page reload.
 `InventoryImport.jsx` lets the user choose a local folder, name it, choose a model,
@@ -894,6 +953,29 @@ its mixer and frame callback when selection changes. A separate framing parent
 keeps preview centering/scale from overwriting authored animation transforms.
 Initial framing uses precise posed vertices rather than unioning all morph targets.
 InventoryAnimation.js owns mixer lifetime; InventoryScene.js owns the visible loop.
+
+Component stages also automatically loop the first authored clip of each placed
+or scattered material, including every grass-strip patch. ComponentStageAnimation.js
+groups clones by cached source and uses one mixer per material, preserving the
+outer placement, ground anchor and source-unit parents. Static stages render on
+demand. The frame loop pauses in hidden documents and stops on context loss;
+rebuilds, proposal changes and disposal release old bindings and callbacks.
+
+The component properties pane edits **Animation speed (×)** as authored
+`document.animation_speed` (0–10, omitted defaults to 1×). Save/load, proposal
+hashes and undo/redo retain it. Every component material mixer uses that multiplier;
+0 pauses without a continuous render loop. It is independent of Inventory preview
+options and browser settings.
+
+Placed objects may also carry an authored `motion` patrol. The stage samples
+the SDK's `facing-patrol-v1` at component time, moves the outer placement along
+local +Z, and turns it to face the return leg. Clip animation stays below the
+placement/anchor/unit parents. The document's initial transforms are never mutated;
+reload/undo rebuilds reset component time. Component speed governs wind, walking
+clips and movement together. The grass strip now retains the later user-edited
+0.125× multiplier and includes 20 ladybugs in interior openings, one per metre.
+Its current randomized grass distribution and measured coverage are documented
+in [GRASS_STRIP_LADYBUGS.md](GRASS_STRIP_LADYBUGS.md).
 
 InventorySpecGloss.js registers support for legacy KHR_materials_pbrSpecularGlossiness
 assets. It restores diffuse/alpha textures and direct specular reflectance, and
