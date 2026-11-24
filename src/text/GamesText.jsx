@@ -6,6 +6,10 @@ import {
 } from "../pages/games/controllers/FlightControlSettings.js";
 
 const GAMES_FOLDER = "games";
+export const PLAY_GRASS_TEXT = {
+  unavailable: `${GAMES_FOLDER}/play_grass_unavailable`,
+  retry: `${GAMES_FOLDER}/play_grass_retry`,
+};
 export const CONSTRUCTION_MEMORY_TEXT = Object.fromEntries(
   [
     "remember",
@@ -1532,6 +1536,8 @@ export const APP_GAMES_TEXT = {
   [KEY_GAMES_MUSIC_TITLE]: "All Music",
   [KEY_GAMES_PLAY]: "play",
   [KEY_GAMES_PLAY_TITLE]: "game play",
+  [PLAY_GRASS_TEXT.unavailable]: "Grass background unavailable",
+  [PLAY_GRASS_TEXT.retry]: "Retry background",
   [KEY_GAMES_PLAY_SETTINGS]: "settings",
   [KEY_GAMES_PLAY_SETTINGS_TITLE]: "Settings",
   [KEY_GAMES_PLAY_SETTINGS_CLOSE]: "Close settings",

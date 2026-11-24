@@ -16,6 +16,7 @@ import { KEY_GAMES_PLAY_SETTINGS_POSITION } from "../../settings/GamesSettings.j
 import GamesPlaySettings from "./GamesPlaySettings.jsx";
 import GamesPlayControls from "./GamesPlayControls.jsx";
 import GamesCrt from "./GamesCrt.jsx";
+import GamesPlayGrass from "./GamesPlayGrass.jsx";
 import screen_media from "virtual:crt-screen-media";
 import { create_controller_input } from "./controllers/ControllerInput.js";
 import {
@@ -66,17 +67,7 @@ const PlayContent = styled.div`
   flex: 1;
   min-height: 0;
   overflow: hidden;
-  background-color: #cbd3d9;
-  background-image:
-    radial-gradient(ellipse at 25% 0%, #ffffff55, transparent 65%),
-    repeating-linear-gradient(
-      0deg,
-      #0000000b 0 1px,
-      #ffffff16 1px 2px,
-      transparent 2px 4px
-    ),
-    repeating-linear-gradient(92deg, transparent 0 58px, #00000008 59px 60px),
-    linear-gradient(115deg, #aab4bc, #e2e7eb 42%, #bcc5cd 74%, #aab5be);
+  background-color: #554e36;
 
   &:fullscreen {
     width: 100vw;
@@ -224,6 +215,10 @@ export default function GamesPlay({ crt_content } = {}) {
         {AppText.get(KEY_GAMES_PLAY_TITLE)}
       </styles.SectionTitle>
       <PlayContent ref={content_ref}>
+        <GamesPlayGrass
+          width_px={content_bounds.width}
+          height_px={content_bounds.height}
+        />
         <FlightScene
           display_mode={canvas_shape === "porthole" ? "porthole" : "640x480"}
           fisheye_strength={fisheye_strength}

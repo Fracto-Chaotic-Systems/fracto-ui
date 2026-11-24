@@ -1,5 +1,9 @@
 # UI tests
 
+`games_play_grass.test.js` checks the downward grass cover crop at desktop,
+fullscreen, mobile and extreme aspect ratios, keeping the dirt floor's boundary
+outside the viewport. Live Play-page checks cover foreground stacking and controls.
+
 `component_stage_shadows.test.js` checks full-floor light-space coverage for
 translated long components at several light directions, GPU-capped shadow maps,
 transparent foliage shadow cutouts and clone-specific depth-material disposal.

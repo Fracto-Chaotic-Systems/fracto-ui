@@ -67,10 +67,18 @@ workflow rather than the current stage UI.
 The parent ../Games.jsx owns sidebar selection and the persisted splitter.
 It gives the play pane full height so GamesPlay's flex content area can fill the
 space below the title without clipping the gear or drawer to a zero-height box.
-`GamesPlay` gives that content area a light silver brushed-metal background, using
-layered CSS grain, scratches, and soft highlights beneath the flight scene,
-TV, instruments, and controls. The same finish carries into fullscreen. The
-settings gear uses a dark color for contrast over both the metal and the open drawer.
+`GamesPlayGrass` fills that content area behind the flight scene, TV, scroll map,
+instruments and controls with the saved grass-strip base component. It uses the
+existing read-only component/material APIs (the authoring services must currently
+be available); it is not a published standalone component package. The runtime
+reuses the stage's calibrated geometry, animation clocks, motion and view-focused
+shadows, without editor guides or controls. An orthographic camera looks straight
+down onto a cover crop of the middle of the 1 × 20 m floor; a 3% inset excludes
+the floor edge at every aspect ratio, including fullscreen. The passive layer is
+below FlightScene's existing -1 layer and never captures foreground interaction.
+The parent passes its measured dimensions; the renderer resizes without reloading
+assets, pauses while the document is hidden and disposes on unmount. Load/context
+failure offers a localized retry. The previous brushed-metal background is removed.
 Sidebar order is Overview, separator, worlds, music, play, models group (materials, components, areas), separator, wordnet, Settings, Status.
 The models group uses the same labeled sidebar separator as Study’s bailiwicks group.
 Overview, Settings, and Status intentionally remain blank.
