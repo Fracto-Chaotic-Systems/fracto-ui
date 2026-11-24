@@ -46,11 +46,13 @@ test("background unmount aborts loading and prevents late renderer creation; loa
       styled: { div: () => "div" },
       AppText: { get: (v) => v },
       PLAY_GRASS_TEXT: {},
-      validate_component_response: (v) => v,
+      PLAY_GRASS_RELEASE: { key: "grass-strip", release: "a".repeat(64) },
+      component_runtime_manifest_url: () =>
+        "http://runtime.invalid/grass-strip/manifest.json",
       load_path_motion: async () => path_motion,
-      component_request: (path, options) => {
+      load_component_runtime: (path, request_signal) => {
         calls.push(path);
-        signal = options.signal;
+        signal = request_signal;
         return promise;
       },
       create_play_grass_scene: (host, options) => {

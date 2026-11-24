@@ -9,7 +9,12 @@ import { play_grass_view } from "./GamesPlayGrassView.js";
 import { create_path_motion_controller } from "@fracto/sdk/FractoPathMotion.js";
 import { apply_top_down_path_pose } from "../../utils/render/TopDownPathCamera.js";
 
-export function create_play_grass_scene(host, { on_error, path_motion }) {
+export function create_play_grass_scene(
+  host,
+  { on_error, path_motion, resolve_materials },
+) {
+  if (typeof resolve_materials !== "function")
+    throw new Error("runtime_package_required");
   const motion = create_path_motion_controller(path_motion);
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
@@ -80,6 +85,7 @@ export function create_play_grass_scene(host, { on_error, path_motion }) {
   content = create_component_content({
     scene,
     render,
+    resolve: resolve_materials,
     on_status: (status) => {
       if (status === "loading_content") {
         ready = false;

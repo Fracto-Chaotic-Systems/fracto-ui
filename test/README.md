@@ -1,5 +1,9 @@
 # UI tests
 
+`component_runtime_package.test.js` verifies pinned manifest identity, static
+resource URLs, no authoring requests/fallback, and canonical lab routing. The
+Play lifecycle test loads the runtime package rather than an editor database row.
+
 `games_play_grass.test.js` checks read-only loading/cancellation/disposal and the
 actual path camera's downward pose and all viewport corners throughout both
 half-turns at desktop, fullscreen, mobile and extreme aspect ratios. Live

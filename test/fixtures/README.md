@@ -1,9 +1,11 @@
 # Contract fixtures
 
-`path-motion.html` loads the real saved grass base and separate motion file into
+`path-motion.html` loads the published grass package and separate motion file into
 the production Play renderer. Seek buttons preview stops, either half-turn and
 reverse travel in seconds, without changing model records or speeding up the
 production route. It exercises the same camera crop, shadows and material clocks.
+Optional `?manifest=URL` selects the same pinned manifest on a file-only runtime
+server, proving WebGL playback without authoring API availability.
 
 `sparse-grass-shadows.html` is a read-only live WebGL regression using the saved
 component's actual sparse-grass model, scale and alpha texture. It compares lit

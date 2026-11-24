@@ -43,17 +43,29 @@
       import { create_play_grass_scene } from "/src/pages/games/GamesPlayGrassScene.js";
       import { load_path_motion } from "/src/utils/render/TopDownPathCamera.js";
       import { create_path_motion_controller } from "@fracto/sdk/FractoPathMotion.js";
+      import {
+        component_runtime_manifest_url,
+        load_component_runtime,
+      } from "/src/utils/render/ComponentRuntimePackage.js";
+      import { PLAY_GRASS_RELEASE } from "/src/pages/games/GamesPlayGrassRelease.js";
       const host = document.querySelector("#view"),
         status = document.querySelector("#status");
       try {
-        const [{ document: component }, path_motion] = await Promise.all([
-          fetch(
-            "/api/component-documents/0bb37175-0459-49bf-b5fc-f918bf090563",
-          ).then((r) => r.json()),
-          load_path_motion("/motions/slow-strip-patrol.json"),
-        ]);
+        const [{ document: component, resolve_materials }, path_motion] =
+          await Promise.all([
+            load_component_runtime(
+              new URLSearchParams(location.hash.slice(1)).get("manifest") ||
+                new URLSearchParams(location.search).get("manifest") ||
+                component_runtime_manifest_url(
+                  PLAY_GRASS_RELEASE.key,
+                  PLAY_GRASS_RELEASE.release,
+                ),
+            ),
+            load_path_motion("/motions/slow-strip-patrol.json"),
+          ]);
         const runtime = create_play_grass_scene(host, {
           path_motion,
+          resolve_materials,
           on_error: () => (status.textContent = "Rendering failed"),
         });
         const resize = () =>

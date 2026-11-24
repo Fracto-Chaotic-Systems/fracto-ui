@@ -68,9 +68,10 @@ The parent ../Games.jsx owns sidebar selection and the persisted splitter.
 It gives the play pane full height so GamesPlay's flex content area can fill the
 space below the title without clipping the gear or drawer to a zero-height box.
 `GamesPlayGrass` fills that content area behind the flight scene, TV, scroll map,
-instruments and controls with the saved grass-strip base component. It uses the
-existing read-only component/material APIs (the authoring services must currently
-be available); it is not a published standalone component package. The runtime
+instruments and controls with an explicitly published grass-strip base release.
+`GamesPlayGrassRelease.js` pins the content-addressed manifest. The runtime
+loader reads the packaged component, calibration and files; it makes no component
+database or authoring material-catalog requests and has no fallback to them. The runtime
 reuses the stage's calibrated geometry, animation clocks, motion and view-focused
 shadows, without editor guides or controls. An orthographic camera looks straight
 down onto a rotating cover crop of the 1 × 20 m floor. Its diagonal is at most
@@ -93,6 +94,14 @@ cannot contain the rotating crop on the floor are rejected instead of clamped.
 Shadows follow the moving camera, reusing cached component bounds. The runtime's
 `seek_motion(seconds)` supports previewing any phase without changing the route
 or saved component; the live fixture tests complete turns without a half-hour wait.
+
+The asset service owns explicit publication and the complete release directory.
+Authoring saves never change an existing release. Publish the accepted scene,
+deploy that directory with the asset service, then update the UI release binding.
+Public/lab origins use the existing `/api/asset/component-runtime` route; direct
+UI ports use a thin `/api/component-runtime` proxy. Neither path queries an
+authoring registry. Files are immutable and browser-cacheable; the first load
+still downloads the referenced geometry/textures (about 62 MB for this release).
 Sidebar order is Overview, separator, worlds, music, play, models group (materials, components, areas), separator, wordnet, Settings, Status.
 The models group uses the same labeled sidebar separator as Study’s bailiwicks group.
 Overview, Settings, and Status intentionally remain blank.

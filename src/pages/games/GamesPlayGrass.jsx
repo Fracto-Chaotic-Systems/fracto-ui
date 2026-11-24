@@ -3,13 +3,13 @@ import styled from "styled-components";
 import AppText from "../../AppText.jsx";
 import { PLAY_GRASS_TEXT } from "../../text/GamesText.jsx";
 import {
-  component_request,
-  validate_component_response,
-} from "./ComponentDocumentApi.js";
+  component_runtime_manifest_url,
+  load_component_runtime,
+} from "../../utils/render/ComponentRuntimePackage.js";
+import { PLAY_GRASS_RELEASE } from "./GamesPlayGrassRelease.js";
 import { create_play_grass_scene } from "./GamesPlayGrassScene.js";
 import { load_path_motion } from "../../utils/render/TopDownPathCamera.js";
 
-const GRASS_STRIP_ID = "0bb37175-0459-49bf-b5fc-f918bf090563";
 const Background = styled.div`
   position: absolute;
   inset: 0;
@@ -45,18 +45,23 @@ export default function GamesPlayGrass({ width_px, height_px }) {
     const controller = new AbortController();
     let scene;
     Promise.all([
-      component_request(`/${GRASS_STRIP_ID}`, {
-        signal: controller.signal,
-      }).then(validate_component_response),
+      load_component_runtime(
+        component_runtime_manifest_url(
+          PLAY_GRASS_RELEASE.key,
+          PLAY_GRASS_RELEASE.release,
+        ),
+        controller.signal,
+      ),
       load_path_motion(
         `${import.meta.env.BASE_URL}motions/slow-strip-patrol.json`,
         controller.signal,
       ),
     ])
-      .then(([{ document }, path_motion]) => {
+      .then(([{ document, resolve_materials }, path_motion]) => {
         if (controller.signal.aborted) return;
         scene = create_play_grass_scene(host.current, {
           path_motion,
+          resolve_materials,
           on_error: () => {
             if (!controller.signal.aborted) set_failed(true);
           },

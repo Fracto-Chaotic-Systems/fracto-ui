@@ -1,5 +1,10 @@
 # Shared rendering utilities
 
+`ComponentRuntimePackage.js` loads a pinned published manifest, verifies its
+canonical SHA-256 (including on HTTP lab origins without Web Crypto), and resolves
+material pins and registered file URLs entirely from that manifest. Missing or
+corrupt packages fail closed; no authoring/database fallback is attempted.
+
 `TopDownPathCamera.js` loads and SDK-validates independently authored motion
 descriptions and applies a supplied path pose to a downward-looking camera.
 It owns no clock, game/page state or model reference. The SDK path controller

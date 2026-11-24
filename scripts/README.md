@@ -1,5 +1,11 @@
 # UI data preparation
 
+`component_runtime_proxy.js` is a transport-only mount for direct UI ports,
+forwarding `/api/component-runtime` to asset-owned immutable published files.
+Lab/public origins use the established canonical `/api/asset/component-runtime`
+Nginx route. Neither proxy reads asset files, resolves catalog entries or queries
+the authoring database.
+
 `measure_grass_grounding.js` reads the saved grass strip and pinned material
 models through service endpoints, samples 49 native wind poses through the real
 stage transforms, and reports minimum soil overlap for all current grass scales
