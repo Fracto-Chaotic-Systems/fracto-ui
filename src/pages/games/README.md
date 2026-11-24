@@ -1,5 +1,32 @@
 # Games panels
 
+## First-person walk on the construction stage
+
+The stage's **Walk** button switches the orbit camera to a first-person explorer
+for studying an environment at human scale. Click the stage to capture the mouse
+(pointer lock); Esc releases it, and choosing Walk again restores the exact orbit
+view. Controls: mouse looks, WASD/arrows move (1.4 m/s), Shift runs (4.2 m/s),
+Space jumps (about 0.6 m), F toggles flying, with E/Q to rise and sink (4 m/s,
+×3 with Shift). Eye height is 1.7 m and the field of view is 70°.
+
+`ComponentStageWalk.js` owns the walker. Its pure `step_walk`, `look_walk` and
+`walk_spawn` functions hold the movement rules; `create_walk_controller` adds
+keyboard, pointer-lock and mouse input; `create_floor_probe` reads height only
+from the authored floor mesh (`component_item_id === "floor"`). It takes a getter,
+because the stage replaces its content group on every rebuild. Without a floor,
+or beyond its edge, ground level is 0. Plants and props do not lift or block the
+walker yet; collision belongs to the future engine package. Walking starts inside
+the construction's edge, on the side the orbit camera was viewing from, facing
+the centre. `ComponentStageScene.js` drives walking and clip animation from one
+animation-frame loop, hides the grid/axes and selection highlight, and disables
+selection clicks while walking. Hiding the stage, fitting the construction or
+disposing it leaves walk mode. The module has no React or UI-framework
+dependencies so it can move into a dedicated engine package later.
+
+Tests: `test/component_stage_walk.test.js` covers movement direction and speed,
+diagonal normalization, jump and floor following, flying clearance, pitch clamping,
+spawn placement and the floor-only probe.
+
 ComponentStageLightingControls places the materials-style light direction and
 intensity sliders on the Stage / Construction document button row above the
 workspace. Each control is 20rem wide; the row scrolls horizontally when the

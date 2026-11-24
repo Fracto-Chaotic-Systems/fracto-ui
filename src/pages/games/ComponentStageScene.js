@@ -6,11 +6,17 @@ import {
   configure_component_shadows,
   fit_component_shadows,
 } from "./ComponentStageShadows.js";
+import {
+  WALK_SETTINGS,
+  create_floor_probe,
+  create_walk_controller,
+  walk_spawn,
+} from "./ComponentStageWalk.js";
 
 // Stage guides are editor furniture, separate from future authored floor/objects.
 export function create_component_stage(
   host,
-  { label, on_error, on_status, on_select },
+  { label, on_error, on_status, on_select, on_walk },
 ) {
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -52,7 +58,10 @@ export function create_component_stage(
     context_failed = false,
     frame = null,
     last_frame = null,
-    suspended = false;
+    suspended = false,
+    walk = null,
+    orbit_view = null;
+  const looping = () => Boolean(content?.animated || walk?.active);
   const stop_animation = () => {
     if (frame !== null) cancelAnimationFrame(frame);
     frame = null;
@@ -64,7 +73,7 @@ export function create_component_stage(
       suspended ||
       context_failed ||
       document.hidden ||
-      !content?.animated
+      !looping()
     ) {
       stop_animation();
       return;
@@ -77,11 +86,14 @@ export function create_component_stage(
         suspended ||
         context_failed ||
         document.hidden ||
-        !content?.animated
+        !looping()
       )
         return;
-      if (last_frame !== null)
-        content.animate(Math.min((time - last_frame) / 1000, 0.1));
+      if (last_frame !== null) {
+        const dt = Math.min((time - last_frame) / 1000, 0.1);
+        walk.update(Math.min(dt, 0.05));
+        if (content.animated) content.animate(dt);
+      }
       last_frame = time;
       render();
     });
@@ -107,7 +119,7 @@ export function create_component_stage(
       }
     }
     selection_box.makeEmpty();
-    if (selected && content)
+    if (selected && content && !walk?.active)
       for (const child of content.root.children)
         if (child.userData.component_item_id === selected)
           selection_box.expandByObject(child);
@@ -116,7 +128,58 @@ export function create_component_stage(
     start_animation();
   };
   content = create_component_content({ scene, render, on_status });
+  walk = create_walk_controller({
+    camera,
+    canvas,
+    ground: create_floor_probe(() => content.root),
+    on_change: (status) => {
+      on_walk?.(status);
+      start_animation();
+    },
+  });
+  const set_walking = (value) => {
+    if (value === walk.active || context_failed) return;
+    if (value) {
+      orbit_view = {
+        position: camera.position.clone(),
+        quaternion: camera.quaternion.clone(),
+        target: controls.target.clone(),
+      };
+      const bounds = new THREE.Box3().setFromObject(content.root);
+      const center = bounds.isEmpty()
+        ? new THREE.Vector3()
+        : bounds.getCenter(new THREE.Vector3());
+      const size = bounds.isEmpty()
+        ? new THREE.Vector3(20, 0, 20)
+        : bounds.getSize(new THREE.Vector3());
+      controls.enabled = false;
+      grid.visible = origin.visible = false;
+      camera.fov = WALK_SETTINGS.field_of_view;
+      camera.updateProjectionMatrix();
+      walk.enter(
+        walk_spawn(
+          [center.x, 0, center.z],
+          Math.hypot(size.x, size.z) / 2,
+          camera.position.toArray(),
+        ),
+      );
+    } else {
+      walk.exit();
+      camera.fov = 45;
+      camera.updateProjectionMatrix();
+      if (orbit_view) {
+        camera.position.copy(orbit_view.position);
+        camera.quaternion.copy(orbit_view.quaternion);
+        controls.target.copy(orbit_view.target);
+      }
+      controls.enabled = true;
+      grid.visible = origin.visible = true;
+      controls.update();
+    }
+    render();
+  };
   const reset_camera = () => {
+    if (walk.active) set_walking(false);
     const bounds = new THREE.Box3().setFromObject(content.root);
     if (bounds.isEmpty()) {
       camera.position.set(16, 12, 16);
@@ -160,6 +223,7 @@ export function create_component_stage(
   };
   const pointer_up = (event) => {
     if (
+      walk.active ||
       !pointer_start ||
       event.button !== 0 ||
       Math.hypot(
@@ -196,7 +260,9 @@ export function create_component_stage(
   resize();
   return {
     reset_camera,
+    set_walking,
     set_visible(value) {
+      if (!value) set_walking(false);
       suspended = !value;
       if (suspended) stop_animation();
       else resize();
@@ -221,6 +287,7 @@ export function create_component_stage(
       observer.disconnect();
       controls.removeEventListener("change", render);
       controls.dispose();
+      walk.dispose();
       content.dispose();
       sunlight.shadow.dispose();
       highlight.geometry.dispose();

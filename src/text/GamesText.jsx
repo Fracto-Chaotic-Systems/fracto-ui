@@ -241,6 +241,11 @@ export const COMPONENT_STAGE_TEXT = Object.fromEntries(
     "animation_speed_help",
     "editor_views",
     "stage_view",
+    "walk",
+    "walk_click",
+    "walk_controls",
+    "walk_flying",
+    "walk_navigation",
     "construction_document",
     "document_read",
     "document_edit",
@@ -1040,6 +1045,14 @@ export const APP_GAMES_TEXT = {
   [COMPONENT_STAGE_TEXT.name]: "Component name",
   [COMPONENT_STAGE_TEXT.editor_views]: "Component editor views",
   [COMPONENT_STAGE_TEXT.stage_view]: "Stage",
+  [COMPONENT_STAGE_TEXT.walk]: "Walk",
+  [COMPONENT_STAGE_TEXT.walk_click]:
+    "Click the stage to look around. WASD or arrow keys move.",
+  [COMPONENT_STAGE_TEXT.walk_controls]:
+    "Mouse looks · WASD or arrows move · Shift runs · Space jumps · F toggles flying (E up, Q down) · Esc releases the mouse",
+  [COMPONENT_STAGE_TEXT.walk_flying]: "Flying",
+  [COMPONENT_STAGE_TEXT.walk_navigation]:
+    "First-person walk at 1.7 m eye height on the authored floor. Plants and props do not block movement yet. Choose Walk again to return to the orbit camera.",
   [COMPONENT_STAGE_TEXT.construction_document]: "Construction document",
   [COMPONENT_STAGE_TEXT.document_read]: "Read",
   [COMPONENT_STAGE_TEXT.document_edit]: "Edit",

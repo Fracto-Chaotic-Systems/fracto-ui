@@ -16,6 +16,7 @@ import {
   StageWorkspace,
   StageViewport,
   StageViewButtons,
+  StagePreviewNotice,
 } from "./ComponentStageStyles.jsx";
 import { create_component_stage } from "./ComponentStageScene.js";
 import { construction_text } from "./ComponentToolFields.jsx";
@@ -39,6 +40,7 @@ export default function ComponentStage({
   const [content_status, set_content_status] = useState("content_ready");
   const [document_view, set_document_view] = useState(false);
   const [selection, set_selection] = useState(null);
+  const [walk, set_walk] = useState({ active: false, locked: false });
   const selected =
     selection?.component_id === draft.id ? selection.variant : null;
   const preview = useMemo(() => {
@@ -58,6 +60,7 @@ export default function ComponentStage({
         label: text("view"),
         on_error: () => set_failed(true),
         on_status: set_content_status,
+        on_walk: set_walk,
       });
     } catch {
       queueMicrotask(() => {
@@ -68,6 +71,7 @@ export default function ComponentStage({
       active = false;
       scene.current?.dispose();
       scene.current = null;
+      set_walk({ active: false, locked: false });
     };
   }, [attempt]);
   useEffect(() => {
@@ -155,6 +159,16 @@ export default function ComponentStage({
         >
           {text("construction_document")}
         </button>
+        {!document_view && (
+          <button
+            type="button"
+            aria-pressed={walk.active}
+            disabled={failed}
+            onClick={() => scene.current?.set_walking(!walk.active)}
+          >
+            {text("walk")}
+          </button>
+        )}
         <ComponentStageLightingControls
           document={draft}
           on_change={editor.edit}
@@ -170,6 +184,12 @@ export default function ComponentStage({
       />
       <StageWorkspace $hidden={document_view}>
         <StageViewport ref={host}>
+          {walk.active && !failed && (
+            <StagePreviewNotice role="status">
+              {walk.flying && <strong>{text("walk_flying")} · </strong>}
+              {text(walk.locked ? "walk_controls" : "walk_click")}
+            </StagePreviewNotice>
+          )}
           {!failed && content_status !== "content_ready" && (
             <InventoryStatus role="status">
               {construction_text(content_status)}{" "}
@@ -209,7 +229,9 @@ export default function ComponentStage({
         />
       </StageWorkspace>
       {preview.error && <p role="alert">{text("variant_preview_error")}</p>}
-      <InventoryCaption>{text("navigation")}</InventoryCaption>
+      <InventoryCaption>
+        {text(walk.active ? "walk_navigation" : "navigation")}
+      </InventoryCaption>
     </InventoryLayout>
   );
 }
