@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { preview_component_variant } from "@fracto/sdk/FractoComponentVariant.js";
 import AppText from "../../AppText.jsx";
 import {
   COMPONENT_STAGE_TEXT,
@@ -8,25 +9,19 @@ import { MainStyles } from "../../styles/MainStyles.jsx";
 import {
   InventoryLayout,
   InventoryToolbar,
-  InventoryControls,
   InventoryCaption,
   InventoryStatus,
 } from "./InventoryStyles.jsx";
 import {
   StageWorkspace,
   StageViewport,
-  StagePreviewNotice,
+  StageViewButtons,
 } from "./ComponentStageStyles.jsx";
-import useComponentPlanner from "./useComponentPlanner.js";
-import ComponentConversation, {
-  planner_text,
-} from "./ComponentConversation.jsx";
-import useConstructionMemory from "./useConstructionMemory.js";
 import { create_component_stage } from "./ComponentStageScene.js";
-import MaterialSearchPanel from "./MaterialSearchPanel.jsx";
-import useComponentConstruction from "./useComponentConstruction.js";
-import ComponentConstructionTools from "./ComponentConstructionTools.jsx";
 import { construction_text } from "./ComponentToolFields.jsx";
+import ComponentConstructionDocument from "./ComponentConstructionDocument.jsx";
+import ComponentVariants from "./ComponentVariants.jsx";
+import ComponentStageLightingControls from "./ComponentStageLightingControls.jsx";
 
 const text = (key) => AppText.get(COMPONENT_STAGE_TEXT[key]);
 
@@ -41,12 +36,21 @@ export default function ComponentStage({
   const scene = useRef(null);
   const [failed, set_failed] = useState(false);
   const [attempt, set_attempt] = useState(0);
-  const [selected, set_selected] = useState("");
   const [content_status, set_content_status] = useState("content_ready");
-  const tools = useComponentConstruction(editor);
-  const memory = useConstructionMemory();
-  const planner = useComponentPlanner(editor, { memory: memory.library });
-  const displayed = planner.preview || draft;
+  const [document_view, set_document_view] = useState(false);
+  const [selection, set_selection] = useState(null);
+  const selected =
+    selection?.component_id === draft.id ? selection.variant : null;
+  const preview = useMemo(() => {
+    if (selected) {
+      try {
+        return preview_component_variant(draft, selected, editor.revision);
+      } catch {
+        return { document: draft, clip_rates: {}, error: true };
+      }
+    }
+    return { document: draft, clip_rates: {} };
+  }, [draft, selected, editor.revision]);
   useEffect(() => {
     let active = true;
     try {
@@ -54,7 +58,6 @@ export default function ComponentStage({
         label: text("view"),
         on_error: () => set_failed(true),
         on_status: set_content_status,
-        on_select: set_selected,
       });
     } catch {
       queueMicrotask(() => {
@@ -68,11 +71,13 @@ export default function ComponentStage({
     };
   }, [attempt]);
   useEffect(() => {
-    void scene.current?.update_document(displayed);
-  }, [displayed, attempt]);
+    void scene.current?.update_document(preview.document, {
+      clip_rates: preview.clip_rates,
+    });
+  }, [preview, attempt]);
   useEffect(() => {
-    scene.current?.select(selected);
-  }, [selected, attempt]);
+    scene.current?.set_visible(!document_view);
+  }, [document_view, attempt]);
 
   return (
     <InventoryLayout
@@ -135,13 +140,36 @@ export default function ComponentStage({
         )}
         {notice}
       </InventoryToolbar>
-      <StageWorkspace>
+      <StageViewButtons aria-label={text("editor_views")}>
+        <button
+          type="button"
+          aria-pressed={!document_view}
+          onClick={() => set_document_view(false)}
+        >
+          {text("stage_view")}
+        </button>
+        <button
+          type="button"
+          aria-pressed={document_view}
+          onClick={() => set_document_view(true)}
+        >
+          {text("construction_document")}
+        </button>
+      </StageViewButtons>
+      <ComponentConstructionDocument
+        document={draft}
+        on_change={editor.edit}
+        disabled={editor.busy}
+        hidden={!document_view}
+      />
+      <ComponentStageLightingControls
+        document={draft}
+        on_change={editor.edit}
+        disabled={editor.busy}
+        hidden={document_view}
+      />
+      <StageWorkspace $hidden={document_view}>
         <StageViewport ref={host}>
-          {planner.previewing && (
-            <StagePreviewNotice role="status">
-              {planner_text("preview_notice")}
-            </StagePreviewNotice>
-          )}
           {!failed && content_status !== "content_ready" && (
             <InventoryStatus role="status">
               {construction_text(content_status)}{" "}
@@ -166,94 +194,21 @@ export default function ComponentStage({
             </InventoryStatus>
           )}
         </StageViewport>
-        <InventoryControls aria-label={text("properties")}>
-          <ComponentConversation
-            memory={memory}
-            planner={planner}
-            disabled={editor.busy || tools.busy}
-          />
-          <strong>{text("title")}</strong>
-          <label>
-            {text("name")}
-            <input
-              value={draft.name}
-              disabled={
-                editor.busy ||
-                planner.previewing ||
-                planner.phase === "applying"
-              }
-              maxLength={120}
-              onChange={(event) =>
-                editor.edit({ ...draft, name: event.target.value })
-              }
-            />
-          </label>
-          <div>
-            {text("objects")}{" "}
-            <output>
-              {draft.objects.length +
-                draft.scatters.reduce((sum, rule) => sum + rule.count, 0)}
-            </output>
-          </div>
-          <InventoryCaption>
-            {text(
-              draft.floor || draft.objects.length || draft.scatters.length
-                ? "content_pending"
-                : "empty",
-            )}
-          </InventoryCaption>
-          <label>
-            {text("animation_speed")}
-            <input
-              type="number"
-              min={0}
-              max={10}
-              step={0.05}
-              value={draft.animation_speed ?? 1}
-              disabled={
-                editor.busy ||
-                planner.previewing ||
-                planner.phase === "applying"
-              }
-              onChange={(event) => {
-                const value = event.target.valueAsNumber;
-                if (Number.isFinite(value) && value >= 0 && value <= 10)
-                  editor.edit({ ...draft, animation_speed: value });
-              }}
-            />
-          </label>
-          <InventoryCaption>{text("animation_speed_help")}</InventoryCaption>
-          <button
-            disabled={failed}
-            onClick={() => scene.current?.reset_camera()}
-          >
-            {text("reset")}
-          </button>
-          <InventoryCaption>{text("draft")}</InventoryCaption>
-          <ComponentConstructionTools
-            document={draft}
-            tools={{
-              ...tools,
-              busy:
-                tools.busy ||
-                planner.previewing ||
-                planner.phase === "applying",
-            }}
-            editor={editor}
-            selected={selected}
-            on_select={set_selected}
-          />
-          <MaterialSearchPanel
-            on_choose={tools.choose}
-            disabled={
-              tools.busy ||
-              editor.busy ||
-              planner.previewing ||
-              planner.phase === "applying"
-            }
-          />
-        </InventoryControls>
+        <ComponentVariants
+          key={draft.id}
+          component_id={draft.id}
+          selected_key={preview.error ? null : selected?.key}
+          on_select={(variant) =>
+            set_selection((current) =>
+              current?.component_id === draft.id &&
+              current.variant.key === variant.key
+                ? null
+                : { component_id: draft.id, variant },
+            )
+          }
+        />
       </StageWorkspace>
+      {preview.error && <p role="alert">{text("variant_preview_error")}</p>}
       <InventoryCaption>{text("navigation")}</InventoryCaption>
     </InventoryLayout>
   );

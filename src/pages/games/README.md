@@ -1,23 +1,55 @@
 # Games panels
 
+ComponentStageLightingControls places the materials-style light direction and
+intensity sliders above the stage workspace. They edit `document.lighting`
+through the existing editor history and Save component flow; variants inherit
+the base lighting. New documents store 45° / 3 defaults and legacy documents
+resolve those values until edited. Direction spans 0–360° (step 5°), intensity
+0.25–6 (step 0.25). ComponentStageLighting applies the same light position
+convention as InventoryScene. Lighting-only edits render immediately without
+reloading materials, resetting animation or changing stage geometry.
+
+Component creation now follows collaborative authoring with maintained,
+role-based construction descriptions. See the data service's
+`components/blueprints/README.md` for the workflow and complete grass-strip
+description. Construction document in the editor provides formatted Read and
+Markdown Edit views of the saved description. Save component, reload, dirty-state
+warnings and undo/redo include the text; description-only edits do not rebuild
+geometry. Structured blueprint/server ingestion remains future work.
+
 Representative construction evaluation covers geometry, counts, path clearance,
 refinement, history and real MySQL roundtrips. Live plain-floor, wooded-path and
 dense grass-strip builds now pass after latency and catalog fixes; see the AI
 service's construction/EVALUATION.md for measured results and remaining limits.
 
-The component stage now has conversation, separate proposal preview, Apply,
-cancellation and one-batch undo/redo. See
-[COMPONENT_CONVERSATION.md](COMPONENT_CONVERSATION.md) for workflow, authenticated
-transport, stale-proposal protection and verification limits.
+The stage's right-hand panel now lists variants for the open component. It reads
+`GET /api/component-documents/:id/variants` through the existing thin data-service
+proxy. Names and overrides are shown, with loading, empty, error and retry states.
+Requests are cancelled on component changes and stale results are discarded.
+Click a variant to preview it; clicking it again restores the base. Only one
+variant or none can be selected, and the selected button is highlighted with
+`aria-pressed=true`. Previews derive from the authored base every time and never
+enter save/undo history. The grass strip's Ladybug zoomies preview scales insect
+patrol speed and walk clips by 8×; grass wind and the component clock stay inherited.
+Clip mixers are separated by source and rate so shared models cannot contaminate
+one another's playback. The SDK currently resolves multiply/replace overrides for
+`motion.speed_mps` and `walk_clip.playback_rate`; unsupported targets or a base
+revision mismatch show an error and the base. New base revisions need explicit
+variant rebasing. Clip rates are renderer options, not new persisted scene fields.
 
-Explicit browser-local preferences and saved recipe instructions now support
-remember/review, scope matching, enable/disable and inspect/edit/delete. See
-[COMPONENT_MEMORY.md](COMPONENT_MEMORY.md) for storage ownership, API projection,
-limits and invalidation when remembered patterns change.
+Objects may persist `animation_speed` to override the component clock for their
+clips. Sparse `animated_grass` uses 1× while original grass and insect motion
+inherit 0.125×. Explicit object clocks remain active even when the component clock
+is zero; hiding the stage still pauses all rendering. Variant clip multipliers
+are applied after clock selection, without rewriting the base object's value.
 
-The implemented floor/placement/transform/removal/scatter workflow, shared command
-contract, frozen scatter algorithm and renderer ownership are documented in
-[COMPONENT_TOOLS.md](COMPONENT_TOOLS.md).
+The previous conversation, proposal/Apply, memory, properties, construction tools
+and material search controls have been removed from the stage sidebar, along with
+their active stage hooks. Save/reload, undo/redo, navigation and construction
+document editing remain. The underlying planner, memory and tool modules remain
+available as existing capabilities; [conversation](COMPONENT_CONVERSATION.md),
+[memory](COMPONENT_MEMORY.md) and [tools](COMPONENT_TOOLS.md) document that earlier
+workflow rather than the current stage UI.
 
 The parent ../Games.jsx owns sidebar selection and the persisted splitter.
 It gives the play pane full height so GamesPlay's flex content area can fill the
@@ -956,16 +988,16 @@ InventoryAnimation.js owns mixer lifetime; InventoryScene.js owns the visible lo
 
 Component stages also automatically loop the first authored clip of each placed
 or scattered material, including every grass-strip patch. ComponentStageAnimation.js
-groups clones by cached source and uses one mixer per material, preserving the
+groups clones by cached source, clock and clip rate, preserving the
 outer placement, ground anchor and source-unit parents. Static stages render on
 demand. The frame loop pauses in hidden documents and stops on context loss;
 rebuilds, proposal changes and disposal release old bindings and callbacks.
 
-The component properties pane edits **Animation speed (×)** as authored
-`document.animation_speed` (0–10, omitted defaults to 1×). Save/load, proposal
-hashes and undo/redo retain it. Every component material mixer uses that multiplier;
-0 pauses without a continuous render loop. It is independent of Inventory preview
-options and browser settings.
+Authored `document.animation_speed` (0–10, omitted defaults to 1×) is retained by
+save/load, proposal hashes and undo/redo. Clips inherit it unless an object has
+its own `animation_speed`; 0 pauses inherited clips and patrols, while explicit
+object clocks continue. These rates are independent of Inventory preview options
+and browser settings. The old properties controls are no longer in the sidebar.
 
 Placed objects may also carry an authored `motion` patrol. The stage samples
 the SDK's `facing-patrol-v1` at component time, moves the outer placement along

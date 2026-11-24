@@ -1,5 +1,11 @@
 # UI data preparation
 
+`measure_grass_grounding.js` reads the saved grass strip and pinned material
+models through service endpoints, samples 49 native wind poses through the real
+stage transforms, and reports minimum soil overlap for all current grass scales
+and anchors. It performs no component writes. Run `node scripts/measure_grass_grounding.js`
+with the local data and asset services running.
+
 `component_planner_proxy.js` is the transport-only stage bridge from
 `/api/component-construction` to the AI service's `/construction` browser route,
 mounted in Vite and production `serve_ui.js`. It preserves origin/session checks,

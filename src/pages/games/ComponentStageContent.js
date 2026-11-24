@@ -113,12 +113,13 @@ export function create_component_content({
         node.rotation.fromArray([...pose.rotation, "XYZ"]);
       }
     },
-    async update(document) {
+    async update(document, { clip_rates = {} } = {}) {
       const signature = JSON.stringify([
         document.floor,
         document.objects,
         document.scatters,
         document.animation_speed ?? 1,
+        clip_rates,
       ]);
       if (signature === last || disposed) return;
       last = signature;
@@ -190,7 +191,13 @@ export function create_component_content({
             descriptor.material.construction,
             item,
             item.id,
-            (model) => next_animation.add(source, model),
+            (model) =>
+              next_animation.add(
+                source,
+                model,
+                clip_rates[item.id] ?? 1,
+                item.animation_speed,
+              ),
           );
           next.add(placed);
           if (item.motion) next_motions.push({ node: placed, object: item });

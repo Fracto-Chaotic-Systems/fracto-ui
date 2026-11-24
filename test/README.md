@@ -1,5 +1,15 @@
 # UI tests
 
+`component_stage_lighting.test.js` checks the materials-compatible light direction
+and intensity mapping, authored slider edits and invalid/busy input handling.
+The content suite checks lighting edits preserve the current animation pose.
+
+`component_construction_document.test.js` covers reading/editing component
+Markdown, legacy empty documents, shared save/load/undo history, disabled controls
+and inert link/image presentation. Proposal tests check description preservation
+and stale hashes after a description edit. Live browser checks exercise both
+editor views, save/reload and the grass-strip description.
+
 `component_build_evaluation.test.js` applies eight shared representative builds
 through the proposal reducer and actual Three.js content renderer with synthetic
 prototypes/neutral floors. It verifies counts, authored scale/extents and geometry
@@ -457,3 +467,18 @@ choices, original envelope preservation, and rejected inspection results/errors.
 `component_proposal.test.js` also checks shared material-pin collection for a
 compact 809-instance `place-pattern` proposal, full SDK replay and missing-pin
 rejection. SDK and AI-owned recipe tests cover atomic expansion and undo/redo.
+
+`component_variant_selection.test.js` covers single-selection toggling, switching
+variants, restoration of the base, stale-base errors and exclusion from authored
+history. `component_stage_animation.test.js` checks independent clip rates even
+when instances share a source. `live_component_variant.test.js` is opt-in with
+`FRACTO_TEST_COMPONENT_VARIANT=1`: it reads the saved grass strip and actual ladybug
+rig through service endpoints, compares patrol and walk-bone transforms for all
+20 insects in base/zoomies/base modes, and verifies the saved revision and scene
+remain unchanged. It performs no component writes.
+
+`live_sparse_grass_animation.test.js` is opt-in with `FRACTO_TEST_SPARSE_GRASS=1`.
+It reads the saved grass strip and the actual sparse-grass clip through service
+endpoints, checks all 140 objects retain explicit native 1× clocks, and compares
+all local rig/morph poses against native-time playback while the component clock
+remains 0.125×. It checks the saved scene and revision are unchanged by the test.

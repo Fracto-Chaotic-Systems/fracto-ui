@@ -159,6 +159,26 @@ test("saved component speed drives clips and speed-only edits update playback", 
     content.root.getObjectByProperty("isMesh", true).position.x,
     0.25,
   );
+  const independent = {
+    ...document,
+    animation_speed: 0,
+    objects: document.objects.map((o) => ({ ...o, animation_speed: 1 })),
+  };
+  await content.update(independent);
+  assert.equal(content.animated, true);
+  content.animate(1);
+  assert.equal(content.root.getObjectByProperty("isMesh", true).position.x, 1);
+  await content.update(document, {
+    clip_rates: { [document.objects[0].id]: 4 },
+  });
+  content.animate(1);
+  assert.equal(content.root.getObjectByProperty("isMesh", true).position.x, 1);
+  await content.update(document);
+  content.animate(1);
+  assert.equal(
+    content.root.getObjectByProperty("isMesh", true).position.x,
+    0.25,
+  );
   await content.update({ ...document, animation_speed: 0.5 });
   content.animate(1);
   assert.equal(
@@ -241,6 +261,13 @@ test("authored patrols move the outer placement, face forwards, inherit speed an
   content.animate(30);
   assert.ok(Math.abs(content.root.children[0].position.z - 0.029) < 1e-12);
   assert.equal(content.root.children[0].rotation.y, Math.PI);
+  const placement = content.root.children[0];
+  await content.update({
+    ...d,
+    lighting: { direction_degrees: 180, intensity: 1.25 },
+  });
+  assert.equal(content.root.children[0], placement);
+  assert.ok(Math.abs(placement.position.z - 0.029) < 1e-12);
   assert.equal(JSON.stringify(d), original);
   await content.update({ ...d, animation_speed: 0 });
   assert.equal(content.animated, false);

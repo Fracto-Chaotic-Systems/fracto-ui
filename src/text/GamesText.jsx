@@ -211,6 +211,17 @@ export const MATERIAL_TEXT = Object.fromEntries(
 );
 export const COMPONENT_STAGE_TEXT = Object.fromEntries(
   [
+    "variants",
+    "variant_preview_error",
+    "stage_lighting",
+    "variants_loading",
+    "variants_empty",
+    "variants_error",
+    "variant_movement",
+    "variant_walk",
+    "variant_replace",
+    "variant_add",
+    "variant_remove",
     "new",
     "resume",
     "untitled",
@@ -224,6 +235,14 @@ export const COMPONENT_STAGE_TEXT = Object.fromEntries(
     "content_pending",
     "animation_speed",
     "animation_speed_help",
+    "editor_views",
+    "stage_view",
+    "construction_document",
+    "document_read",
+    "document_edit",
+    "document_help",
+    "document_text",
+    "document_empty",
     "reset",
     "draft",
     "navigation",
@@ -908,7 +927,7 @@ export const APP_GAMES_TEXT = {
   [CONSTRUCTION_TEXT.scatter_help]:
     "Uses the stored seed and calibrated footprint. Entire footprints stay inside the area and outside exclusions. Instances may overlap each other. Impossible counts are rejected without changing the document.",
   [CONSTRUCTION_TEXT.tool_help]:
-    "Use comma-separated vectors. Click an item in the stage or choose it in the list. Each applied operation is one undo step. Source models are unchanged; animations show their static authored pose.",
+    "Use comma-separated vectors. Click an item in the stage or choose it in the list. Each applied operation is one undo step. Animated materials use the component's saved animation speed.",
   [CONSTRUCTION_TEXT.loading_content]: "Loading construction…",
   [CONSTRUCTION_TEXT.content_ready]: "Construction ready",
   [CONSTRUCTION_TEXT.material_revision_changed]:
@@ -995,6 +1014,18 @@ export const APP_GAMES_TEXT = {
   [MATERIAL_TEXT.results]: "{count} matching materials",
   [MATERIAL_TEXT.unmatched]: "No catalog match for",
   [MATERIAL_TEXT.more]: "more materials",
+  [COMPONENT_STAGE_TEXT.variants]: "Variants",
+  [COMPONENT_STAGE_TEXT.stage_lighting]: "Stage lighting",
+  [COMPONENT_STAGE_TEXT.variant_preview_error]:
+    "Unable to preview this variant against the current component. Showing the base component.",
+  [COMPONENT_STAGE_TEXT.variants_loading]: "Loading variants…",
+  [COMPONENT_STAGE_TEXT.variants_empty]: "No variants for this component.",
+  [COMPONENT_STAGE_TEXT.variants_error]: "Unable to load component variants.",
+  [COMPONENT_STAGE_TEXT.variant_movement]: "Insect movement speed",
+  [COMPONENT_STAGE_TEXT.variant_walk]: "Walk animation rate",
+  [COMPONENT_STAGE_TEXT.variant_replace]: "Set to",
+  [COMPONENT_STAGE_TEXT.variant_add]: "Add",
+  [COMPONENT_STAGE_TEXT.variant_remove]: "Remove",
   [COMPONENT_STAGE_TEXT.new]: "new component",
   [COMPONENT_STAGE_TEXT.resume]: "resume draft",
   [COMPONENT_STAGE_TEXT.untitled]: "Untitled component",
@@ -1003,6 +1034,16 @@ export const APP_GAMES_TEXT = {
   [COMPONENT_STAGE_TEXT.properties]: "Component properties",
   [COMPONENT_STAGE_TEXT.title]: "Construction stage",
   [COMPONENT_STAGE_TEXT.name]: "Component name",
+  [COMPONENT_STAGE_TEXT.editor_views]: "Component editor views",
+  [COMPONENT_STAGE_TEXT.stage_view]: "Stage",
+  [COMPONENT_STAGE_TEXT.construction_document]: "Construction document",
+  [COMPONENT_STAGE_TEXT.document_read]: "Read",
+  [COMPONENT_STAGE_TEXT.document_edit]: "Edit",
+  [COMPONENT_STAGE_TEXT.document_text]: "Construction document text",
+  [COMPONENT_STAGE_TEXT.document_empty]:
+    "No construction document yet. Choose Edit to describe this component.",
+  [COMPONENT_STAGE_TEXT.document_help]:
+    "Describe the materials, proportions, construction rules, movement and checks. Markdown formatting is supported. Save component keeps this text with the model; Undo and Redo restore edits. Editing the description does not rebuild the model.",
   [COMPONENT_STAGE_TEXT.animation_speed]: "Animation speed (×)",
   [COMPONENT_STAGE_TEXT.animation_speed_help]:
     "Saved with this component. 1 is normal speed; 0 pauses animation. Range: 0–10. Use Save to keep changes; Undo and Redo restore edits.",

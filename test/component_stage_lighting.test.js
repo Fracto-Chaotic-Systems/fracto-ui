@@ -1,0 +1,89 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
+import { runInNewContext } from "node:vm";
+import { randomUUID } from "node:crypto";
+import test from "node:test";
+import { transformSync } from "esbuild";
+import * as THREE from "three";
+import {
+  component_lighting,
+  create_component_document,
+} from "@fracto/sdk/FractoComponentDocument.js";
+import { update_component_lighting } from "../src/pages/games/ComponentStageLighting.js";
+
+test("lighting uses the materials viewer azimuth and native intensity", () => {
+  const light = new THREE.DirectionalLight();
+  for (const [angle, expected] of [
+    [0, [4, 3, 0]],
+    [90, [0, 3, 4]],
+    [180, [-4, 3, 0]],
+    [270, [0, 3, -4]],
+  ]) {
+    update_component_lighting(light, {
+      lighting: { direction_degrees: angle, intensity: 0.75 },
+    });
+    assert.ok(
+      light.position.distanceTo(new THREE.Vector3(...expected)) < 1e-10,
+    );
+    assert.equal(light.intensity, 0.75);
+  }
+  update_component_lighting(light, {});
+  assert.equal(light.intensity, 3);
+  assert.ok(Math.abs(light.position.x - Math.sqrt(8)) < 1e-10);
+});
+
+test("lighting controls author component defaults and reject invalid or busy edits", () => {
+  const source = readFileSync(
+    new URL(
+      "../src/pages/games/ComponentStageLightingControls.jsx",
+      import.meta.url,
+    ),
+    "utf8",
+  ).replace(/^import[^;]+;\r?\n/gm, "");
+  const module = { exports: {} };
+  runInNewContext(
+    transformSync(source, { loader: "jsx", format: "cjs", jsx: "automatic" })
+      .code,
+    {
+      module,
+      exports: module.exports,
+      require: createRequire(import.meta.url),
+      AppText: { get: (v) => v },
+      INVENTORY_TEXT: {
+        lighting: "Light direction",
+        strength: "Light intensity",
+      },
+      COMPONENT_STAGE_TEXT: { stage_lighting: "Stage lighting" },
+      component_lighting,
+      StageLightingBar: "bar",
+    },
+  );
+  const document = create_component_document(randomUUID(), "Stage"),
+    edits = [];
+  const render = (disabled = false) =>
+    module.exports.default({
+      document,
+      on_change: (v) => edits.push(v),
+      disabled,
+      hidden: true,
+    });
+  const inputs = (tree) =>
+    tree.props.children.map((label) => label.props.children[1]);
+  const tree = render(),
+    [direction, intensity] = inputs(tree);
+  assert.equal(tree.props.hidden, true);
+  assert.equal(direction.props.value, 45);
+  assert.equal(intensity.props.value, 3);
+  direction.props.onChange({ target: { valueAsNumber: 120 } });
+  assert.equal(edits[0].lighting.direction_degrees, 120);
+  assert.equal(edits[0].lighting.intensity, 3);
+  assert.equal(edits[0].id, document.id);
+  assert.equal(document.lighting.direction_degrees, 45);
+  intensity.props.onChange({ target: { valueAsNumber: 1.25 } });
+  assert.equal(edits[1].lighting.intensity, 1.25);
+  for (const value of [NaN, Infinity, -1, 7])
+    intensity.props.onChange({ target: { valueAsNumber: value } });
+  inputs(render(true))[0].props.onChange({ target: { valueAsNumber: 180 } });
+  assert.equal(edits.length, 2);
+});

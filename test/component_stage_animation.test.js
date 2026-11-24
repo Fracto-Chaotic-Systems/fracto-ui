@@ -87,3 +87,45 @@ test("static stages need no animated frame loop", () => {
   assert.equal(animation.active, false);
   animation.dispose();
 });
+
+test("variant clip clocks isolate rates even for clones sharing one source", () => {
+  const source = new THREE.Group();
+  source.animations = [
+    new THREE.AnimationClip("Walk", 10, [
+      new THREE.VectorKeyframeTrack(".position", [0, 10], [0, 0, 0, 10, 0, 0]),
+    ]),
+  ];
+  const normal = source.clone(),
+    fast = source.clone();
+  const animation = create_component_animation();
+  animation.add(source, normal);
+  animation.add(source, fast, 8);
+  animation.start(0.125);
+  animation.update(1);
+  assert.equal(normal.position.x, 0.125);
+  assert.equal(fast.position.x, 1);
+  assert.equal(source.position.x, 0);
+  animation.dispose();
+});
+
+test("an explicit object clock runs at native speed independently of the component clock", () => {
+  const source = new THREE.Group();
+  source.animations = [
+    new THREE.AnimationClip("Wind", 10, [
+      new THREE.VectorKeyframeTrack(".position", [0, 10], [0, 0, 0, 10, 0, 0]),
+    ]),
+  ];
+  for (const speed of [0.125, 0.5, 0]) {
+    const inherited = source.clone(),
+      independent = source.clone(),
+      animation = create_component_animation();
+    animation.add(source, inherited);
+    animation.add(source, independent, 1, 1);
+    animation.start(speed);
+    animation.update(1);
+    assert.equal(inherited.position.x, speed);
+    assert.equal(independent.position.x, 1);
+    assert.equal(animation.active, true);
+    animation.dispose();
+  }
+});

@@ -1,5 +1,15 @@
 # Stage construction conversation
 
+Historical workflow: these controls have been removed from the component stage.
+The right-hand panel now lists component variants. The modules and service
+capabilities described below remain, but are not mounted by the current editor.
+
+Component descriptions are editable in the separate Construction document view.
+They are part of the scene hash: editing one invalidates a pending proposal, and
+Apply preserves the stored description. The current planner does not include
+this full text in its compact model context; document-assisted planning is future
+work. This avoids silently truncating a long description into short guidance.
+
 The construction assistant appears at the top of the stage properties pane.
 Enter directions in meters, request a proposal, review assumptions and questions,
 then compare **preview proposal** and **show current draft**. Catalog matches

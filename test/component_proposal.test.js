@@ -102,6 +102,7 @@ test("dense pattern proposals resolve their shared pin and Apply remains one und
 });
 test("proposal previews preserve the draft and Apply forms one dirty undoable snapshot", async () => {
   const document = create_component_document(randomUUID(), "Path");
+  document.construction_description = "# Path\n\nRetain a clear corridor.";
   const original = structuredClone(document),
     plan = floor_plan(document);
   assert.equal(
@@ -123,6 +124,19 @@ test("proposal previews preserve the draft and Apply forms one dirty undoable sn
   );
   assert.equal(reads, 1);
   assert.deepEqual(prepared.document.floor.size, [4, 12]);
+  assert.equal(
+    prepared.document.construction_description,
+    document.construction_description,
+  );
+  assert.throws(
+    () =>
+      replay_component_proposal(
+        plan,
+        { ...document, construction_description: "Changed description" },
+        {},
+      ),
+    /proposal_stale/,
+  );
   assert.deepEqual(document, original);
   let state = reduce({}, { type: "open", document, revision: 3 });
   assert.equal(component_is_dirty(state), false);

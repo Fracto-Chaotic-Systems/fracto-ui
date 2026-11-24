@@ -1,5 +1,9 @@
 # Component construction tools, v1
 
+Historical workflow: these controls have been removed from the component stage.
+The right-hand panel now lists component variants. The modules and service
+capabilities described below remain, but are not mounted by the current editor.
+
 The stage now renders authored content and exposes floor, place, transform,
 remove and scatter controls. Search for a material, choose **use for construction**,
 then use the tool forms. Objects can be selected by clicking the stage or using
@@ -42,7 +46,7 @@ algorithm:"footprint-xz-v1"}}` inserts or replaces a rule with the same ID.
 `materials` maps `assetId:revision` to the asset service's revision-checked runtime
 descriptor. New references are independently checked against calibrated facts;
 surface paths must occur in the registered resource allowlist. Limits are 1,000
-total objects/scattered instances and 64 distinct referenced material revisions.
+total objects/scattered instances and 128 distinct referenced material revisions.
 Removal/transform can repair a document containing another unavailable reference.
 
 `useComponentConstruction.js` resolves new references over the existing thin UI

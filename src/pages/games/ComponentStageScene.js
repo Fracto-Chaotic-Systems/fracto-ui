@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { create_component_content } from "./ComponentStageContent.js";
+import { update_component_lighting } from "./ComponentStageLighting.js";
 
 // Stage guides are editor furniture, separate from future authored floor/objects.
 export function create_component_stage(
@@ -27,7 +28,7 @@ export function create_component_stage(
   const origin = new THREE.AxesHelper(2);
   scene.add(grid, origin);
   const sunlight = new THREE.DirectionalLight(0xfff4e5, 3);
-  sunlight.position.set(10, 20, 8);
+  update_component_lighting(sunlight, {});
   scene.add(new THREE.HemisphereLight(0xffffff, 0x657565, 2), sunlight);
   const selection_box = new THREE.Box3(),
     highlight = new THREE.Box3Helper(selection_box, 0xe29a23);
@@ -38,21 +39,34 @@ export function create_component_stage(
   let disposed = false,
     context_failed = false,
     frame = null,
-    last_frame = null;
+    last_frame = null,
+    suspended = false;
   const stop_animation = () => {
     if (frame !== null) cancelAnimationFrame(frame);
     frame = null;
     last_frame = null;
   };
   const start_animation = () => {
-    if (disposed || context_failed || document.hidden || !content?.animated) {
+    if (
+      disposed ||
+      suspended ||
+      context_failed ||
+      document.hidden ||
+      !content?.animated
+    ) {
       stop_animation();
       return;
     }
     if (frame !== null) return;
     frame = requestAnimationFrame((time) => {
       frame = null;
-      if (disposed || context_failed || document.hidden || !content?.animated)
+      if (
+        disposed ||
+        suspended ||
+        context_failed ||
+        document.hidden ||
+        !content?.animated
+      )
         return;
       if (last_frame !== null)
         content.animate(Math.min((time - last_frame) / 1000, 0.1));
@@ -61,6 +75,7 @@ export function create_component_stage(
     });
   };
   const render = () => {
+    if (disposed || suspended) return;
     selection_box.makeEmpty();
     if (selected && content)
       for (const child of content.root.children)
@@ -151,7 +166,16 @@ export function create_component_stage(
   resize();
   return {
     reset_camera,
-    update_document: (document) => content.update(document),
+    set_visible(value) {
+      suspended = !value;
+      if (suspended) stop_animation();
+      else resize();
+    },
+    update_document(document, options) {
+      update_component_lighting(sunlight, document);
+      render();
+      return content.update(document, options);
+    },
     select(id) {
       selected = id;
       render();

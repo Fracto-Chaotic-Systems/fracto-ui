@@ -1,5 +1,29 @@
 # Agent-assisted component construction
 
+## Current authoring direction
+
+Components are now developed collaboratively with the coding assistant, with a
+maintained construction description for each component. Material roles, physical
+relationships, distribution/opening rules, animation and acceptance criteria are
+the blueprint; the saved SDK document is its concrete realization. Coordinate
+lists are useful for exact snapshots but are not the primary design description.
+
+The data service's `components/blueprints/README.md` defines the workflow and
+template. Each component has its own folder there; `grass-strip/` holds its
+description, structured parameters, accepted scene snapshot and future variants.
+Replacements should preserve physical/visual targets and revalidate
+affected content. Future Fracto AI integration should read these documents to
+propose small edits, showing a description diff and scene preview together.
+Readable descriptions are now editable in the stage's Construction document view
+and saved with the scene as `construction_description`. Structured blueprint API
+persistence, a compiler/editor and AI ingestion remain future work.
+
+This direction supersedes automatic server planning as the default creation
+process. The rest of this document records the earlier implemented capabilities;
+they remain available without defining the new authoring workflow.
+
+## Earlier implemented design
+
 Accepted design, 2026-11-23. Components are authored macro-scale assemblies of
 cataloged materials. The first example is a wooded path: dirt floor, grass edges,
 shrub clusters and trees. The construction stage is the entry point for Fracto's
@@ -145,11 +169,8 @@ real MySQL temporary-table test after applying migration 024.
 
 ## Next implementation target
 
-Material search, manual tools, server planning and stage conversation with
-preview/apply and explicit memory are implemented and representative evaluation
-has run. The plain-floor latency gate now passes in 9.1–9.3 seconds after GPU
-initialization, with first-run costs documented. Vegetation and `dry_dirt`
-calibration are complete. Reviewed wooded-path composition now passes the live
-case. Continue with other material-build cases and actual visual review.
-Repeated visual/user-correction evaluation is required before claiming creative
-model quality or measured preference benefit.
+Maintain descriptions during collaborative construction, then define a bounded
+data-owned blueprint contract and component association. Add paired description
+diff/scene preview and conflict-checked saving before giving the in-house agent
+document-assisted minor edits. Existing planner latency and build evaluations
+remain historical evidence, not validation of this new ingestion workflow.

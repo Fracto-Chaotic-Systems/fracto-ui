@@ -1,5 +1,11 @@
 # Grass strip insects
 
+The authoritative construction intent and rules are now described in the data
+service's `components/blueprints/grass-strip/grass-strip.md`, with a structured companion and
+the revision-8 realization snapshot. This UI note retains implementation and
+verification history; future changes should update the construction description
+alongside the model.
+
 The initial insect version (revision 7) contained 20 animated ladybugs, one randomized
 position in each of its 20 metre sections. Its 809 grass patches and the later
 user-edited component animation speed of 0.125× were retained. The insect group
@@ -50,5 +56,5 @@ seconds of sampled playback. No geometry left the strip or its own metre section
 Feet remain at the recessed dirt surface. Exact save/reload equality was checked;
 the original revision 6 is backed up in ignored UI-owned maintenance diagnostics.
 Shared motion/document/tool tests, UI content/proposal tests and the data-service
-API tests passed. The separate live grass check still verifies all 809 wind clips
-using the component's current speed.
+API tests passed. The live grass check verifies every currently saved grass
+patch at the component's current speed (420 in revision 8).

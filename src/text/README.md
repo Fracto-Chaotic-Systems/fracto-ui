@@ -1,5 +1,8 @@
 # UI text and translation
 
+The component-stage text catalog includes Stage/Construction document view
+controls, Read/Edit labels, empty-state guidance and shared-save instructions.
+
 GamesText's `CONSTRUCTION_TEXT` registers floor, placement, transform, selection,
 scatter/exclusion and construction load/validation/conflict messages.
 

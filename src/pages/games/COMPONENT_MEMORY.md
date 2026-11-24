@@ -1,5 +1,9 @@
 # Explicit construction memory
 
+Historical workflow: these controls have been removed from the component stage.
+The right-hand panel now lists component variants. The modules and service
+capabilities described below remain, but are not mounted by the current editor.
+
 The stage's **remember this** button opens a review form using the composer text
 or most recent user direction. Nothing is saved until **save remembered pattern**.
 **save last applied recipe** opens a recipe form only after a proposal has been

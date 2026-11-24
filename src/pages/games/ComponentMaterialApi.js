@@ -1,4 +1,7 @@
-import { component_reference_key } from "@fracto/sdk/FractoComponentTools.js";
+import {
+  component_reference_key,
+  COMPONENT_MATERIAL_LIMIT,
+} from "@fracto/sdk/FractoComponentTools.js";
 export async function resolve_component_material(reference, signal) {
   const url = `${import.meta.env.BASE_URL}api/environment-catalog/${encodeURIComponent(reference.id)}/construction/runtime?revision=${encodeURIComponent(reference.revision)}`;
   const response = await fetch(url, {
@@ -32,7 +35,8 @@ export async function resolve_component_references(references, signal) {
         .map((ref) => [component_reference_key(ref), ref]),
     ).values(),
   ];
-  if (unique.length > 64) throw new Error("construction_limit");
+  if (unique.length > COMPONENT_MATERIAL_LIMIT)
+    throw new Error("construction_limit");
   const resolved = {};
   for (let i = 0; i < unique.length; i += 4)
     await Promise.all(
