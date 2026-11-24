@@ -26,18 +26,15 @@ export const StageViewport = styled(InventoryViewport)`
 `;
 export const StageLightingBar = styled.div`
   display: flex;
-  flex-wrap: wrap;
+  flex: 0 0 auto;
   gap: 1rem;
-  margin-bottom: 0.75rem;
-  padding: 0.6rem 0.8rem;
-  border: 1px solid #d7dfe1;
-  border-radius: 6px;
-  background: #f7f9f9;
+  margin-left: 0.5rem;
   &[hidden] {
     display: none;
   }
   label {
-    flex: 1 1 220px;
+    flex: 0 0 20rem;
+    width: 20rem;
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
@@ -93,9 +90,14 @@ export const SavedComponentList = styled.div`
 
 export const StageViewButtons = styled.nav`
   display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  overflow-x: auto;
   gap: 0.5rem;
   margin-bottom: 0.75rem;
   button {
+    flex: 0 0 auto;
+    white-space: nowrap;
     padding: 0.5rem 0.75rem;
     cursor: pointer;
   }

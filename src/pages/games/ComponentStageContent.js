@@ -171,6 +171,7 @@ export function create_component_content({
           floor.userData.component_item_id = "floor";
           floor.rotation.x = -Math.PI / 2;
           floor.position.y = -0.005;
+          floor.receiveShadow = true;
           if (asset) {
             const descriptor = descriptors[component_reference_key(asset)];
             const texture = await new THREE.TextureLoader().loadAsync(

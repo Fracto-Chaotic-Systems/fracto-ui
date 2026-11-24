@@ -2,6 +2,10 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { create_component_content } from "./ComponentStageContent.js";
 import { update_component_lighting } from "./ComponentStageLighting.js";
+import {
+  configure_component_shadows,
+  fit_component_shadows,
+} from "./ComponentStageShadows.js";
 
 // Stage guides are editor furniture, separate from future authored floor/objects.
 export function create_component_stage(
@@ -28,13 +32,21 @@ export function create_component_stage(
   const origin = new THREE.AxesHelper(2);
   scene.add(grid, origin);
   const sunlight = new THREE.DirectionalLight(0xfff4e5, 3);
+  configure_component_shadows(renderer, sunlight);
   update_component_lighting(sunlight, {});
-  scene.add(new THREE.HemisphereLight(0xffffff, 0x657565, 2), sunlight);
+  scene.add(
+    new THREE.HemisphereLight(0xffffff, 0x657565, 2),
+    sunlight,
+    sunlight.target,
+  );
   const selection_box = new THREE.Box3(),
     highlight = new THREE.Box3Helper(selection_box, 0xe29a23);
   highlight.visible = false;
   scene.add(highlight);
   let selected = null,
+    lighting_document = {},
+    shadow_view = null,
+    lighting_generation = 0,
     content = null;
   let disposed = false,
     context_failed = false,
@@ -76,6 +88,24 @@ export function create_component_stage(
   };
   const render = () => {
     if (disposed || suspended) return;
+    camera.updateMatrixWorld();
+    if (content) {
+      const view = [
+        content.root.uuid,
+        lighting_document.lighting?.direction_degrees ?? 45,
+        ...camera.matrixWorld.elements,
+        ...camera.projectionMatrix.elements,
+      ].join(",");
+      if (view !== shadow_view) {
+        fit_component_shadows(
+          sunlight,
+          content.root,
+          lighting_document,
+          camera,
+        );
+        shadow_view = view;
+      }
+    }
     selection_box.makeEmpty();
     if (selected && content)
       for (const child of content.root.children)
@@ -171,10 +201,14 @@ export function create_component_stage(
       if (suspended) stop_animation();
       else resize();
     },
-    update_document(document, options) {
+    async update_document(document, options) {
+      const token = ++lighting_generation;
+      lighting_document = document;
+      shadow_view = null;
       update_component_lighting(sunlight, document);
+      await content.update(document, options);
+      if (disposed || token !== lighting_generation) return;
       render();
-      return content.update(document, options);
     },
     select(id) {
       selected = id;
@@ -188,6 +222,7 @@ export function create_component_stage(
       controls.removeEventListener("change", render);
       controls.dispose();
       content.dispose();
+      sunlight.shadow.dispose();
       highlight.geometry.dispose();
       highlight.material.dispose();
       canvas.removeEventListener("webglcontextlost", context_lost);

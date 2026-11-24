@@ -1,0 +1,156 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Sparse grass shadow verification</title>
+  </head>
+  <body>
+    <h1>Sparse grass shadow verification</h1>
+    <output id="result">Loading</output>
+    <div id="view"></div>
+    <script type="module">
+      import * as THREE from "three";
+      import { load_inventory_model } from "/src/pages/games/InventoryModelLoader.js";
+      import { oriented_component_instance } from "/src/pages/games/ComponentStageGeometry.js";
+      import {
+        configure_component_shadows,
+        fit_component_shadows,
+      } from "/src/pages/games/ComponentStageShadows.js";
+      const result = document.querySelector("#result");
+      try {
+        const { document: doc } = await (
+          await fetch(
+            "/api/component-documents/0bb37175-0459-49bf-b5fc-f918bf090563",
+          )
+        ).json();
+        const object = doc.objects.find((o) => o.asset.id === "animated-grass");
+        const descriptor = await (
+          await fetch(
+            "/api/environment-catalog/animated-grass/construction/runtime?revision=" +
+              object.asset.revision,
+          )
+        ).json();
+        const source = await load_inventory_model(descriptor.runtime);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(700, 700);
+        document.querySelector("#view").append(renderer.domElement);
+        const scene = new THREE.Scene(),
+          root = new THREE.Group(),
+          light = new THREE.DirectionalLight(0xffffff, 3);
+        scene.add(
+          root,
+          light,
+          light.target,
+          new THREE.HemisphereLight(0xffffff, 0x657565, 2),
+        );
+        configure_component_shadows(renderer, light);
+        const plant = oriented_component_instance(
+          source,
+          descriptor.material.construction,
+          { ...object, position: [-0.12, -0.015, 0], rotation: [0, 0, 0] },
+          "sparse",
+        );
+        root.add(plant);
+        const floor = new THREE.Mesh(
+          new THREE.PlaneGeometry(1, 1),
+          new THREE.MeshStandardMaterial({ color: 0xffffff }),
+        );
+        floor.rotation.x = -Math.PI / 2;
+        floor.position.y = -0.005;
+        floor.receiveShadow = true;
+        root.add(floor);
+        const camera = new THREE.OrthographicCamera(
+          -0.5,
+          0.5,
+          0.5,
+          -0.5,
+          0.01,
+          10,
+        );
+        camera.position.set(0, 2, 0);
+        camera.up.set(0, 0, -1);
+        camera.lookAt(0, 0, 0);
+        camera.updateMatrixWorld();
+        const target = new THREE.WebGLRenderTarget(512, 512),
+          pixels = new Uint8Array(512 * 512 * 4),
+          meshes = [];
+        plant.traverse((n) => {
+          if (n.isMesh) meshes.push(n);
+        });
+        const capture = () => {
+          renderer.setRenderTarget(target);
+          renderer.render(scene, camera);
+          renderer.readRenderTargetPixels(target, 0, 0, 512, 512, pixels);
+          return pixels.slice();
+        };
+        const reports = [];
+        for (const [span, focused] of [
+          [20, false],
+          [20, true],
+          [1, false],
+        ]) {
+          floor.geometry.dispose();
+          floor.geometry = new THREE.PlaneGeometry(1, span);
+          fit_component_shadows(
+            light,
+            root,
+            { lighting: { direction_degrees: 180, intensity: 3 } },
+            focused ? camera : undefined,
+          );
+          for (const m of meshes) m.castShadow = false;
+          const baseline = capture();
+          let draws = 0;
+          for (const m of meshes) {
+            m.castShadow = true;
+            m.onBeforeShadow = () => draws++;
+          }
+          const shadowed = capture();
+          let changed = 0,
+            max_delta = 0;
+          for (let y = 0; y < 512; y++)
+            for (let x = 300; x < 460; x++) {
+              const i = (y * 512 + x) * 4;
+              const delta =
+                baseline[i] +
+                baseline[i + 1] +
+                baseline[i + 2] -
+                shadowed[i] -
+                shadowed[i + 1] -
+                shadowed[i + 2];
+              if (delta > 6) changed++;
+              max_delta = Math.max(max_delta, delta);
+            }
+          reports.push({
+            floor_length_m: span,
+            focused,
+            shadow_draws: draws,
+            shadow_pixels_outside_plant: changed,
+            max_delta,
+            shadow_span_m: [
+              light.shadow.camera.right - light.shadow.camera.left,
+              light.shadow.camera.top - light.shadow.camera.bottom,
+            ],
+            default_bounds: new THREE.Box3()
+              .setFromObject(root)
+              .getSize(new THREE.Vector3())
+              .toArray(),
+            posed_bounds: new THREE.Box3()
+              .setFromObject(root, true)
+              .getSize(new THREE.Vector3())
+              .toArray(),
+          });
+        }
+        renderer.setRenderTarget(null);
+        renderer.render(scene, camera);
+        if (reports[1].shadow_pixels_outside_plant <= 0)
+          throw new Error(
+            "Focused 20m floor lost sparse-grass shadows: " +
+              JSON.stringify(reports),
+          );
+        result.textContent = JSON.stringify(reports);
+      } catch (e) {
+        result.textContent = "ERROR: " + e.message;
+        throw e;
+      }
+    </script>
+  </body>
+</html>

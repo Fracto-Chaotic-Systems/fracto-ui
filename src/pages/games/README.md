@@ -1,13 +1,26 @@
 # Games panels
 
 ComponentStageLightingControls places the materials-style light direction and
-intensity sliders above the stage workspace. They edit `document.lighting`
+intensity sliders on the Stage / Construction document button row above the
+workspace. Each control is 20rem wide; the row scrolls horizontally when the
+available width cannot fit both controls and buttons. They edit `document.lighting`
 through the existing editor history and Save component flow; variants inherit
 the base lighting. New documents store 45° / 3 defaults and legacy documents
 resolve those values until edited. Direction spans 0–360° (step 5°), intensity
 0.25–6 (step 0.25). ComponentStageLighting applies the same light position
 convention as InventoryScene. Lighting-only edits render immediately without
 reloading materials, resetting animation or changing stage geometry.
+
+ComponentStageShadows enables filtered directional shadows onto the textured
+floor and placed materials. Shadow coverage follows the visible component region
+as the camera pans, zooms or rotates, and follows the saved light direction.
+Close views retain the thin sparse-grass shadows that disappear when one map is
+spread across the full 20-metre floor. Coverage includes offscreen casters within
+the full plant-height shadow reach; overview views still cover the visible strip.
+Shadow resolution is capped at 4096 and the GPU texture limit. Animated meshes
+cast from their current poses. Native alpha masks are retained; blended foliage
+uses a shadow-only alpha cutoff so transparent cards do not cast solid rectangles.
+Per-clone depth materials and the light's shadow map are disposed with the stage.
 
 Component creation now follows collaborative authoring with maintained,
 role-based construction descriptions. See the data service's

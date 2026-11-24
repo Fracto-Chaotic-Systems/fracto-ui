@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { clone } from "three/addons/utils/SkeletonUtils.js";
+import { prepare_component_shadow_meshes } from "./ComponentStageShadows.js";
 export function oriented_component_instance(
   prototype,
   facts,
@@ -29,6 +30,7 @@ export function oriented_component_instance(
   const units = new THREE.Group();
   units.scale.setScalar(facts.meters_per_unit);
   const model = clone(prototype);
+  prepare_component_shadow_meshes(model);
   units.add(model);
   on_model?.(model);
   anchored.add(units);
@@ -42,6 +44,7 @@ export function dispose_component_resources(root, resources = true) {
     textures = new Set();
   root.traverse((node) => {
     node.skeleton?.dispose();
+    node.customDepthMaterial?.dispose();
     if (node.isInstancedMesh) node.dispose();
     if (!resources) return;
     if (node.geometry) geometry.add(node.geometry);

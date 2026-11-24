@@ -1,5 +1,12 @@
 # UI tests
 
+`component_stage_shadows.test.js` checks full-floor light-space coverage for
+translated long components at several light directions, GPU-capped shadow maps,
+transparent foliage shadow cutouts and clone-specific depth-material disposal.
+It also checks close-view fitting preserves offscreen caster reach. The live
+`fixtures/sparse-grass-shadows.html` regression checks real sparse-leaf shadow
+pixels against an unshadowed baseline using the registered alpha texture.
+
 `component_stage_lighting.test.js` checks the materials-compatible light direction
 and intensity mapping, authored slider edits and invalid/busy input handling.
 The content suite checks lighting edits preserve the current animation pose.

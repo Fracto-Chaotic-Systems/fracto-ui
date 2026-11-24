@@ -155,18 +155,18 @@ export default function ComponentStage({
         >
           {text("construction_document")}
         </button>
+        <ComponentStageLightingControls
+          document={draft}
+          on_change={editor.edit}
+          disabled={editor.busy}
+          hidden={document_view}
+        />
       </StageViewButtons>
       <ComponentConstructionDocument
         document={draft}
         on_change={editor.edit}
         disabled={editor.busy}
         hidden={!document_view}
-      />
-      <ComponentStageLightingControls
-        document={draft}
-        on_change={editor.edit}
-        disabled={editor.busy}
-        hidden={document_view}
       />
       <StageWorkspace $hidden={document_view}>
         <StageViewport ref={host}>
