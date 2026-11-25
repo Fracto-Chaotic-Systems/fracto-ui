@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { create_component_content } from "./ComponentStageContent.js";
+import { create_component_section_content } from "./ComponentSectionContent.js";
 import { update_component_lighting } from "./ComponentStageLighting.js";
 import {
   configure_component_shadows,
@@ -42,6 +42,7 @@ export function create_play_grass_scene(
     width = 1,
     height = 1,
     shadow_root = null,
+    shadow_revision = -1,
     shadow_bounds = null,
     ready = false;
   const stop = () => {
@@ -57,9 +58,10 @@ export function create_play_grass_scene(
   };
   const render = () => {
     if (disposed || failed || document.hidden || !component) return;
-    if (shadow_root !== content.root) {
+    if (shadow_root !== content.root || shadow_revision !== content.revision) {
       shadow_bounds = new THREE.Box3().setFromObject(content.root);
       shadow_root = content.root;
+      shadow_revision = content.revision;
     }
     fit_component_shadows(
       light,
@@ -77,12 +79,15 @@ export function create_play_grass_scene(
     if (last_time !== null) {
       const delta = (time - last_time) / 1000;
       content.animate(Math.min(delta, 0.1));
-      apply_top_down_path_pose(camera, motion.advance(delta));
+      const candidate = motion.sample(motion.elapsed_seconds + delta);
+      if (content.focus(candidate, view_radius()))
+        apply_top_down_path_pose(camera, motion.advance(delta));
     }
     last_time = time;
     render();
   };
-  content = create_component_content({
+  const view_radius = () => Math.hypot(camera.right, camera.top);
+  content = create_component_section_content({
     scene,
     render,
     resolve: resolve_materials,
@@ -125,6 +130,7 @@ export function create_play_grass_scene(
     resize,
     seek_motion(seconds) {
       const pose = motion.reset(seconds);
+      content.focus(pose, view_radius());
       apply_top_down_path_pose(camera, pose);
       last_time = null;
       render();
@@ -146,7 +152,7 @@ export function create_play_grass_scene(
       component = document;
       update_component_lighting(light, document);
       resize(width, height);
-      await content.update(document);
+      await content.update(document, motion.pose, view_radius());
       if (!disposed) {
         shadow_root = null;
         render();

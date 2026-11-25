@@ -484,6 +484,16 @@ choices, original envelope preservation, and rejected inspection results/errors.
 compact 809-instance `place-pattern` proposal, full SDK replay and missing-pin
 rejection. SDK and AI-owned recipe tests cover atomic expansion and undo/redo.
 
+`live_grass_optimization.test.js` is opt-in with `FRACTO_TEST_RUNTIME_BASE` pointing
+to a published-file server's `/component-runtime` prefix. It compares original and
+optimized grass releases through HTTP, decoding all buffer views with the same
+Meshopt decoder bundled in the viewer. Every geometry/animation/image byte and
+all clip, material and calibration metadata must match.
+
+`component_section_content.test.js` covers visible-first playback, deferred distant
+materials, shared prototype lifetime, synchronized animation for late sections,
+patrol/shadow selection bounds, and cancellation during a model load.
+
 `component_variant_selection.test.js` covers single-selection toggling, switching
 variants, restoration of the base, stale-base errors and exclusion from authored
 history. `component_stage_animation.test.js` checks independent clip rates even

@@ -1,5 +1,5 @@
 // Deliberate release binding. Authoring saves never move this game dependency.
 export const PLAY_GRASS_RELEASE = {
   key: "grass-strip",
-  release: "d8e227c70918a9be7a1db2ba1f7f759de1ae7d8a9e9cd0d9c79bbf7df326716c",
+  release: "bd9af53adc6de4a1be2b1bf8a789ef99fa5bd6399dcedf35b0db1d5a655caf69",
 };

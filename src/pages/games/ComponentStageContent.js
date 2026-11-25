@@ -24,6 +24,7 @@ export function create_component_content({
   on_status,
   resolve = resolve_component_references,
   load = load_inventory_model,
+  own_prototypes = true,
 }) {
   let root = new THREE.Group(),
     generation = 0,
@@ -79,7 +80,7 @@ export function create_component_content({
         .then((loaded) => {
           model = loaded;
           if (disposed || resource_failed) {
-            dispose_component_resources(model);
+            if (own_prototypes) dispose_component_resources(model);
             throw new Error("material_load_error");
           }
           repair_fbx_cutouts(model, descriptor.runtime.format);
@@ -149,7 +150,9 @@ export function create_component_content({
           if (!active_refs.has(key)) {
             cache.delete(key);
             promise
-              .then((model) => dispose_component_resources(model))
+              .then(
+                (model) => own_prototypes && dispose_component_resources(model),
+              )
               .catch(() => {});
           }
         validate_component_materials(document, descriptors);
@@ -270,7 +273,7 @@ export function create_component_content({
       scene.remove(root);
       cache.forEach((promise) =>
         promise
-          .then((model) => dispose_component_resources(model))
+          .then((model) => own_prototypes && dispose_component_resources(model))
           .catch(() => {}),
       );
       cache.clear();

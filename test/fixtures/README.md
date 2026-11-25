@@ -19,3 +19,11 @@ the lost sub-texel shadows. No component or material records are modified.
 knowledge validator tests. UI tests use this local input rather than reading AI
 service implementation/configuration files. The generated bundle integration
 validates the current published catalog independently.
+
+## Grass asset optimization comparison
+
+`grass-optimization.html#base=URL` compares the original and optimized published
+grass at identical camera, lighting and manually stepped animation times. `URL`
+is the URL-encoded `/component-runtime` prefix of the file-only server. The fixture
+checks matching morph weights and framebuffer bytes (including shadows); it
+performs no authoring calls or writes. It is a manual verification fixture.

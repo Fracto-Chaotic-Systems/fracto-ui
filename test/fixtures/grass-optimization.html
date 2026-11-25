@@ -1,0 +1,189 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Grass optimization comparison</title>
+    <style>
+      body {
+        margin: 0;
+        font: 14px system-ui;
+        background: #eee;
+      }
+      header {
+        padding: 8px;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+      main {
+        display: flex;
+      }
+      section {
+        width: 50%;
+      }
+      h2 {
+        margin: 8px;
+        font-size: 16px;
+      }
+      .view {
+        height: 72vh;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <strong>Grass optimization comparison</strong
+      ><button id="step" disabled>Advance animation 1s</button
+      ><output id="status">Loading</output>
+    </header>
+    <main>
+      <section>
+        <h2>Original grass · 45.8 MB</h2>
+        <div class="view" id="original"></div>
+      </section>
+      <section>
+        <h2>Lossless grass · 24.4 MB</h2>
+        <div class="view" id="optimized"></div>
+      </section>
+    </main>
+    <script type="module">
+      import * as THREE from "three";
+      import { load_component_runtime } from "/src/utils/render/ComponentRuntimePackage.js";
+      import { component_sections } from "/src/pages/games/ComponentSectionContent.js";
+      import { create_component_content } from "/src/pages/games/ComponentStageContent.js";
+      import { update_component_lighting } from "/src/pages/games/ComponentStageLighting.js";
+      import {
+        configure_component_shadows,
+        fit_component_shadows,
+      } from "/src/pages/games/ComponentStageShadows.js";
+      import { play_grass_view } from "/src/pages/games/GamesPlayGrassView.js";
+      const status = document.querySelector("#status"),
+        button = document.querySelector("#step");
+      const base = new URLSearchParams(location.hash.slice(1)).get("base");
+      const releases = [
+        "d8e227c70918a9be7a1db2ba1f7f759de1ae7d8a9e9cd0d9c79bbf7df326716c",
+        "bd9af53adc6de4a1be2b1bf8a789ef99fa5bd6399dcedf35b0db1d5a655caf69",
+      ];
+      const stages = [];
+      let seconds = 0;
+      try {
+        for (const [index, id] of ["original", "optimized"].entries()) {
+          const package_ = await load_component_runtime(
+            `${base}/grass-strip/${releases[index]}/manifest.json`,
+          );
+          const doc = package_.document,
+            refs = [doc.floor.asset, ...doc.objects.map((o) => o.asset)];
+          const descriptors = await package_.resolve_materials(refs);
+          const selected = component_sections(doc, descriptors).filter(
+            (s) =>
+              s.min - s.reach <= 9.45 + 0.485 &&
+              s.max + s.reach >= 9.45 - 0.485,
+          );
+          const subset = {
+            ...doc,
+            objects: selected.flatMap((s) => s.objects),
+            scatters: [],
+          };
+          const host = document.querySelector(`#${id}`),
+            scene = new THREE.Scene();
+          const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+          renderer.setPixelRatio(1);
+          renderer.setSize(host.clientWidth, host.clientHeight);
+          renderer.outputColorSpace = THREE.SRGBColorSpace;
+          renderer.toneMapping = THREE.ACESFilmicToneMapping;
+          host.append(renderer.domElement);
+          const light = new THREE.DirectionalLight(0xfff4e5, 3);
+          configure_component_shadows(renderer, light);
+          update_component_lighting(light, doc);
+          scene.add(
+            new THREE.HemisphereLight(0xffffff, 0x657565, 2),
+            light,
+            light.target,
+          );
+          const view = play_grass_view(
+            doc.floor,
+            host.clientWidth,
+            host.clientHeight,
+          );
+          const camera = new THREE.OrthographicCamera(
+            -view.width / 2,
+            view.width / 2,
+            view.height / 2,
+            -view.height / 2,
+            0.001,
+            100,
+          );
+          camera.up.set(0, 0, -1);
+          camera.position.set(0, 10, 9.45);
+          camera.lookAt(0, 0, 9.45);
+          camera.updateMatrixWorld();
+          let content;
+          const render = () => {
+            if (!content) return;
+            fit_component_shadows(light, content.root, doc, camera);
+            renderer.render(scene, camera);
+          };
+          content = create_component_content({
+            scene,
+            render,
+            resolve: package_.resolve_materials,
+            on_status: (s) => {
+              if (!["content_ready", "loading_content"].includes(s))
+                throw Error(s);
+            },
+          });
+          await content.update(subset);
+          render();
+          stages.push({ content, render, renderer });
+        }
+        const verify = () => {
+          const pixels = stages.map((stage) => {
+            stage.render();
+            const gl = stage.renderer.getContext(), bytes = new Uint8Array(gl.drawingBufferWidth * gl.drawingBufferHeight * 4);
+            gl.readPixels(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight, gl.RGBA, gl.UNSIGNED_BYTE, bytes);
+            return bytes;
+          });
+          let different = 0;
+          for (let i = 0; i < pixels[0].length; i++) if (pixels[0][i] !== pixels[1][i]) different++;
+          const weights = stages.map(({ content }) => {
+            const values = [];
+            content.root.traverse((node) => {
+              if (node.morphTargetInfluences)
+                values.push(...node.morphTargetInfluences);
+            });
+            return values;
+          });
+          if (JSON.stringify(weights[0]) !== JSON.stringify(weights[1]))
+            throw Error("Animation pose differs");
+          if (different) throw Error(`${different} framebuffer bytes differ`);
+          status.textContent = `Matched ${weights[0].length} morph weights at ${seconds}s; 0 pixel differences (including shadows)`;
+        };
+        verify();
+        button.disabled = false;
+        button.onclick = () => {
+          seconds++;
+          for (const stage of stages) {
+            stage.content.animate(1);
+            stage.render();
+          }
+          verify();
+        };
+        window.addEventListener(
+          "pagehide",
+          () => {
+            for (const stage of stages) {
+              stage.content.dispose();
+              stage.renderer.dispose();
+              stage.renderer.forceContextLoss();
+            }
+          },
+          { once: true },
+        );
+      } catch (error) {
+        status.textContent = `ERROR: ${error.message}`;
+        throw error;
+      }
+    </script>
+  </body>
+</html>

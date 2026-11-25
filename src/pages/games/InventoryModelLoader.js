@@ -1,6 +1,7 @@
 import { inventory_spec_gloss } from "./InventorySpecGloss.js";
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
 import { FBXLoader } from "three/addons/loaders/FBXLoader.js";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { MTLLoader } from "three/addons/loaders/MTLLoader.js";
@@ -86,6 +87,7 @@ export async function load_inventory_model(asset, on_resources, on_error) {
   });
   if (["glb", "gltf"].includes(asset.format)) {
     const result = await new GLTFLoader(manager)
+      .setMeshoptDecoder(MeshoptDecoder)
       .register(inventory_spec_gloss)
       .loadAsync(url);
     result.scene.animations = result.animations;

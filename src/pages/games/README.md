@@ -127,8 +127,9 @@ Authoring saves never change an existing release. Publish the accepted scene,
 deploy that directory with the asset service, then update the UI release binding.
 Public/lab origins use the existing `/api/asset/component-runtime` route; direct
 UI ports use a thin `/api/component-runtime` proxy. Neither path queries an
-authoring registry. Files are immutable and browser-cacheable; the first load
-still downloads the referenced geometry/textures (about 62 MB for this release).
+authoring registry. Files are immutable and browser-cacheable; the optimized
+release totals about 41 MB, with visible sections and their nearby resources
+loaded first.
 Sidebar order is Overview, separator, worlds, music, play, models group (materials, components, areas), separator, wordnet, Settings, Status.
 The models group uses the same labeled sidebar separator as Study’s bailiwicks group.
 Overview, Settings, and Status intentionally remain blank.
@@ -1057,6 +1058,23 @@ its mixer and frame callback when selection changes. A separate framing parent
 keeps preview centering/scale from overwriting authored animation transforms.
 Initial framing uses precise posed vertices rather than unioning all morph targets.
 InventoryAnimation.js owns mixer lifetime; InventoryScene.js owns the visible loop.
+
+Play background residency is managed by `ComponentSectionContent.js`: one-metre
+Z sections are grouped by material and selected using calibrated object bounds,
+complete insect patrol envelopes and offscreen shadow reach. Dirt loads separately;
+nearby groups attach as each material becomes ready. A shared four-worker queue
+downloads each model prototype once. One extra metre around the visible region is
+prefetched, and the camera waits before entering an unfinished region. Loaded
+sections remain resident for the return trip; new section animation clocks catch
+up to component time. Disposal releases shared prototypes once. Editor stages
+retain their full-scene loading behavior. This changes playback residency only,
+not the published component or the separate path definition.
+
+The Play release binding selects losslessly compressed grass GLBs. The shared
+inventory loader enables Three's bundled Meshopt decoder (no CDN or decoder
+download); uncompressed catalog assets remain supported. Compression retains all
+original geometry, morph targets, keyframes, material settings and texture bytes.
+The original published package is kept for comparison and rollback.
 
 Component stages also automatically loop the first authored clip of each placed
 or scattered material, including every grass-strip patch. ComponentStageAnimation.js
