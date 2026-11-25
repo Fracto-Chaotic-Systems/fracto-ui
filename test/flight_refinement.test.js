@@ -225,14 +225,22 @@ test("maximum-depth duplicates, including mirrored pixels, are valid terminal re
 
 test("cache pressure preserves pinned parents and stops refinement within the memory budget", async () => {
   const { cache, engine, loads } = fixture({ cache_options: { max_tiles: 1 } });
+  // Close enough to share one sample at level four as well as level three.
+  const pair = points([
+    [-1.9, 1.9],
+    [-1.89999, 1.9],
+  ]);
   await cache.load("000");
-  engine.sample(close_points);
+  engine.sample(pair);
+  await engine.settled();
+  // The resident root sits outside the budget; its child fills the one slot.
+  assert.deepEqual([...engine.sample(pair).levels], [4, 4]);
   await engine.settled();
   assert.equal(engine.get_stats().last_error.code, "FLIGHT_TILE_CACHE_BUDGET");
   assert.ok(cache.peek("000"));
-  assert.equal(cache.get_stats().tiles, 1);
-  assert.deepEqual(loads, ["000"]);
-  assert.deepEqual([...engine.sample(close_points).levels], [3, 3]);
+  assert.equal(cache.get_stats().tiles, 2);
+  assert.equal(loads.length, 2);
+  assert.deepEqual([...engine.sample(pair).levels], [4, 4]);
 });
 
 test("new views cancel obsolete child work and late responses cannot alter frames or cache", async () => {

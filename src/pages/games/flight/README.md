@@ -363,11 +363,13 @@ Client API:
   cached arrays as read-only. Bounds and envelope metadata are immutable.
 - `retain(codes)` aborts outstanding tile requests no longer needed by the
   latest view. A batched availability request remains useful if any of its
-  codes are retained. Cached tiles remain until LRU eviction.
+  codes are retained. Cached tiles remain until LRU eviction, except level-3
+  roots, which load on demand and then stay resident as the coarse fallback.
 - `clear()` empties data/metadata and cancels pending work; `destroy()` also
   permanently rejects new requests. `get_stats()` exposes current occupancy.
 
-Defaults bound the owned decoded cache to 64 tiles/64 MiB, metadata to 1024
+Defaults bound the evictable decoded cache to 96 tiles/96 MiB plus up to 32
+resident level-3 roots (128 tiles/128 MiB in total), metadata to 1024
 entries, outstanding/queued requests to 256, and active transports to four.
 Options can lower these budgets. Caller-retained arrays and transient JSON
 transport allocations are outside the decoded-cache byte count. Identical tile

@@ -70,34 +70,65 @@ test("both byte and tile-count budgets evict least recently used decoded tiles",
     { max_bytes: 2 * FLIGHT_TILE_BYTES },
   ]) {
     const store = cache(limits);
-    await store.load("000");
-    await store.load("001");
-    store.peek("000");
-    await store.load("002");
-    assert.equal(store.peek("001"), null);
-    assert.ok(store.peek("000"));
-    assert.ok(store.peek("002"));
+    await store.load("0000");
+    await store.load("0001");
+    store.peek("0000");
+    await store.load("0002");
+    assert.equal(store.peek("0001"), null);
+    assert.ok(store.peek("0000"));
+    assert.ok(store.peek("0002"));
     assert.equal(store.get_stats().tiles, 2);
   }
 });
 
 test("pinning protects active frame tiles without exceeding budgets, and unpinning restores eviction", async () => {
   const store = cache({ max_tiles: 2 });
-  await store.load("000");
-  await store.load("001");
-  store.pin(["000"]);
-  await store.load("002");
-  assert.equal(store.peek("001"), null);
-  assert.ok(store.peek("000"));
-  store.pin(["000", "002"]);
-  await assert.rejects(store.load("003"), { code: "FLIGHT_TILE_CACHE_BUDGET" });
+  await store.load("0000");
+  await store.load("0001");
+  store.pin(["0000"]);
+  await store.load("0002");
+  assert.equal(store.peek("0001"), null);
+  assert.ok(store.peek("0000"));
+  store.pin(["0000", "0002"]);
+  await assert.rejects(store.load("0003"), {
+    code: "FLIGHT_TILE_CACHE_BUDGET",
+  });
   assert.equal(store.get_stats().tiles, 2);
   assert.equal(store.get_stats().pinned, 2);
   store.pin([]);
-  await store.load("003");
+  await store.load("0003");
   assert.equal(store.get_stats().tiles, 2);
   store.clear();
   assert.equal(store.get_stats().pinned, 0);
+});
+
+test("level-three roots load on demand, stay resident outside the budget and are released by clear", async () => {
+  const loads = [];
+  const store = cache({
+    max_tiles: 1,
+    load_tile: async (code) => (loads.push(code), payload(code)),
+  });
+  assert.equal(store.get_stats().tiles, 0);
+  await store.load("000");
+  await store.load("002");
+  for (const code of ["0000", "0001", "0002"]) await store.load(code);
+  assert.ok(store.peek("000"));
+  assert.ok(store.peek("002"));
+  assert.equal(store.peek("0000"), null);
+  assert.deepEqual(loads, ["000", "002", "0000", "0001", "0002"]);
+  store.pin(["0002"]);
+  await assert.rejects(store.load("0003"), {
+    code: "FLIGHT_TILE_CACHE_BUDGET",
+  });
+  await store.load("003");
+  assert.deepEqual(
+    { tiles: store.get_stats().tiles, resident: store.get_stats().resident },
+    { tiles: 4, resident: 3 },
+  );
+  assert.equal(store.get_stats().bytes, 4 * FLIGHT_TILE_BYTES);
+  store.clear();
+  assert.equal(store.get_stats().resident, 0);
+  assert.equal(store.peek("000"), null);
 });
 
 test("bounded availability batches deduplicate, skip missing tiles and expire negative entries", async () => {
