@@ -1070,6 +1070,15 @@ up to component time. Disposal releases shared prototypes once. Editor stages
 retain their full-scene loading behavior. This changes playback residency only,
 not the published component or the separate path definition.
 
+`ComponentStageReveal.js` gently reveals each arriving floor/material group over
+1.2 seconds using an eased presentation clock. Temporary local shader materials
+apply matching coverage ramps in visible and shadow passes, preserving foliage
+alpha cutouts, depth writes, texture alpha and existing shader adapters. Materials
+are restored exactly at completion and released on cancellation. The viewer runs
+these fades while later downloads are pending, independently of the component's
+authored animation multiplier; paused/hidden pages do not consume the fade. No
+authoring data, published assets or material-loading order is changed.
+
 The Play release binding selects losslessly compressed grass GLBs. The shared
 inventory loader enables Three's bundled Meshopt decoder (no CDN or decoder
 download); uncompressed catalog assets remain supported. Compression retains all

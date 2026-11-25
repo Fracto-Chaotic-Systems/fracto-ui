@@ -25,6 +25,7 @@ export function create_component_content({
   resolve = resolve_component_references,
   load = load_inventory_model,
   own_prototypes = true,
+  on_ready = () => {},
 }) {
   let root = new THREE.Group(),
     generation = 0,
@@ -240,6 +241,7 @@ export function create_component_content({
         playback_speed = document.animation_speed ?? 1;
         animation.start(playback_speed);
         floor_resources = floor;
+        on_ready(root);
         scene.add(root);
         render();
         on_status("content_ready");

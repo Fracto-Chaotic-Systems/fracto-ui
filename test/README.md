@@ -494,6 +494,11 @@ all clip, material and calibration metadata must match.
 materials, shared prototype lifetime, synchronized animation for late sections,
 patrol/shadow selection bounds, and cancellation during a model load.
 
+`component_stage_reveal.test.js` covers synchronized material/shadow reveal ramps,
+retained alpha masks and specular/gloss shader adapters, exact material restoration,
+and temporary-resource cleanup. `games_play_grass.test.js` also checks that arrival
+fades animate before initial content readiness and restart at zero after idle gaps.
+
 `component_variant_selection.test.js` covers single-selection toggling, switching
 variants, restoration of the base, stale-base errors and exclusion from authored
 history. `component_stage_animation.test.js` checks independent clip rates even

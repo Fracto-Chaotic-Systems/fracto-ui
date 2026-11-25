@@ -71,17 +71,22 @@ export function create_play_grass_scene(
       shadow_bounds,
     );
     renderer.render(scene, camera);
-    if (ready && frame === null) frame = requestAnimationFrame(tick);
+    if ((ready || content.revealing) && frame === null)
+      frame = requestAnimationFrame(tick);
+    else if (!ready && !content.revealing) last_time = null;
   };
   const tick = (time) => {
     frame = null;
     if (disposed || failed || document.hidden) return;
     if (last_time !== null) {
       const delta = (time - last_time) / 1000;
-      content.animate(Math.min(delta, 0.1));
-      const candidate = motion.sample(motion.elapsed_seconds + delta);
-      if (content.focus(candidate, view_radius()))
-        apply_top_down_path_pose(camera, motion.advance(delta));
+      content.reveal(Math.min(delta, 0.1));
+      if (ready) {
+        content.animate(Math.min(delta, 0.1));
+        const candidate = motion.sample(motion.elapsed_seconds + delta);
+        if (content.focus(candidate, view_radius()))
+          apply_top_down_path_pose(camera, motion.advance(delta));
+      }
     }
     last_time = time;
     render();

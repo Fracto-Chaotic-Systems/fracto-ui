@@ -27,3 +27,11 @@ grass at identical camera, lighting and manually stepped animation times. `URL`
 is the URL-encoded `/component-runtime` prefix of the file-only server. The fixture
 checks matching morph weights and framebuffer bytes (including shadows); it
 performs no authoring calls or writes. It is a manual verification fixture.
+
+## Component arrival fade
+
+`component-reveal.html#base=URL` uses the real published grass and reveal shaders.
+`URL` is the URL-encoded file server's `/component-runtime` prefix. It verifies
+hidden plants cast no shadows, intermediate coverage is visible, and completed
+fades restore the exact framebuffer. Controls freeze the reveal or replay its
+1.2-second transition. No component or material records are modified.

@@ -4,6 +4,7 @@ import { generate_component_scatter } from "@fracto/sdk/FractoComponentScatter.j
 import { create_component_content } from "./ComponentStageContent.js";
 import { load_inventory_model } from "./InventoryModelLoader.js";
 import { dispose_component_resources } from "./ComponentStageGeometry.js";
+import { create_component_reveal } from "./ComponentStageReveal.js";
 
 // Playback residency only. Authored placements, scatter seeds and motion stay intact.
 export function component_sections(document, descriptors, length = 1) {
@@ -70,6 +71,7 @@ export function create_component_section_content({
 }) {
   const root = new THREE.Group(),
     cache = new Map(),
+    reveals = new Map(),
     queued = [];
   scene.add(root);
   let disposed = false,
@@ -142,6 +144,7 @@ export function create_component_section_content({
         ),
       load: shared_load,
       own_prototypes: false,
+      on_ready: (group) => reveals.set(content, create_component_reveal(group)),
     });
     contents.push(content);
     return content;
@@ -182,6 +185,15 @@ export function create_component_section_content({
     get revision() {
       return revision;
     },
+    get revealing() {
+      return reveals.size > 0;
+    },
+    reveal(delta) {
+      for (const [content, reveal] of reveals) {
+        reveal.update(delta);
+        if (!reveal.active) reveals.delete(content);
+      }
+    },
     animate(delta) {
       elapsed += delta;
       for (const content of contents) content.animate(delta);
@@ -221,6 +233,8 @@ export function create_component_section_content({
       generation++;
       for (const task of queued.splice(0))
         task.reject(new Error("runtime_stream_disposed"));
+      for (const reveal of reveals.values()) reveal.dispose();
+      reveals.clear();
       for (const content of contents) content.dispose();
       scene.remove(root);
       for (const promise of cache.values())

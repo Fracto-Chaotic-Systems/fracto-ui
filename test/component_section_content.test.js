@@ -90,6 +90,9 @@ test("first section renders without distant rocks; lookahead shares models, pres
     },
   });
   await content.update(document, pose(8), 0.5);
+  assert.equal(content.revealing, true);
+  content.reveal(1.2);
+  assert.equal(content.revealing, false);
   assert.deepEqual(loads, ["grass"]);
   assert.equal(statuses.at(-1), "content_ready");
   const items = () => {

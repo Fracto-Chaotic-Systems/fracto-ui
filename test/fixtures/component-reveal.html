@@ -1,0 +1,216 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Component arrival fade</title>
+    <style>
+      body {
+        margin: 0;
+        font: 14px system-ui;
+        background: #eee;
+      }
+      header {
+        padding: 8px;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+      #view {
+        height: 78vh;
+      }
+      button {
+        padding: 6px;
+      }
+      output {
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <strong>Component arrival fade</strong
+      ><button id="hidden" disabled>Hidden</button
+      ><button id="half" disabled>Half faded</button
+      ><button id="full" disabled>Fully visible</button
+      ><button id="play" disabled>Play arrival</button
+      ><output id="status">Loading</output>
+    </header>
+    <div id="view"></div>
+    <script type="module">
+      import * as THREE from "three";
+      import { load_component_runtime } from "/src/utils/render/ComponentRuntimePackage.js";
+      import { PLAY_GRASS_RELEASE } from "/src/pages/games/GamesPlayGrassRelease.js";
+      import { create_component_section_content } from "/src/pages/games/ComponentSectionContent.js";
+      import { create_component_reveal } from "/src/pages/games/ComponentStageReveal.js";
+      import {
+        configure_component_shadows,
+        fit_component_shadows,
+      } from "/src/pages/games/ComponentStageShadows.js";
+      import { update_component_lighting } from "/src/pages/games/ComponentStageLighting.js";
+      import { play_grass_view } from "/src/pages/games/GamesPlayGrassView.js";
+      const status = document.querySelector("#status"),
+        host = document.querySelector("#view");
+      try {
+        const base = new URLSearchParams(location.hash.slice(1)).get("base");
+        const package_ = await load_component_runtime(
+          `${base}/grass-strip/${PLAY_GRASS_RELEASE.release}/manifest.json`,
+        );
+        const doc = package_.document,
+          scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x554e36);
+        const renderer = new THREE.WebGLRenderer({
+          antialias: true,
+          preserveDrawingBuffer: true,
+        });
+        renderer.setPixelRatio(1);
+        renderer.setSize(host.clientWidth, host.clientHeight);
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        host.append(renderer.domElement);
+        const light = new THREE.DirectionalLight(0xfff4e5, 3);
+        configure_component_shadows(renderer, light);
+        update_component_lighting(light, doc);
+        scene.add(
+          new THREE.HemisphereLight(0xffffff, 0x657565, 2),
+          light,
+          light.target,
+        );
+        const view = play_grass_view(
+          doc.floor,
+          host.clientWidth,
+          host.clientHeight,
+        );
+        const camera = new THREE.OrthographicCamera(
+          -view.width / 2,
+          view.width / 2,
+          view.height / 2,
+          -view.height / 2,
+          0.001,
+          100,
+        );
+        camera.up.set(0, 0, -1);
+        camera.position.set(0, 10, 9.45);
+        camera.lookAt(0, 0, 9.45);
+        camera.updateMatrixWorld();
+        let content,
+          reveal,
+          frame = null;
+        const render = () => {
+          if (!content) return;
+          fit_component_shadows(light, content.root, doc, camera);
+          renderer.render(scene, camera);
+        };
+        content = create_component_section_content({
+          scene,
+          render,
+          resolve: package_.resolve_materials,
+          on_status: (s) => {
+            if (!["content_ready", "loading_content"].includes(s))
+              throw Error(s);
+          },
+        });
+        await content.update(doc, { position: [0, 0, 9.45] }, 0.485);
+        content.reveal(1.2);
+        render();
+        const pixels = () => {
+          const gl = renderer.getContext(),
+            bytes = new Uint8Array(
+              gl.drawingBufferWidth * gl.drawingBufferHeight * 4,
+            );
+          gl.readPixels(
+            0,
+            0,
+            gl.drawingBufferWidth,
+            gl.drawingBufferHeight,
+            gl.RGBA,
+            gl.UNSIGNED_BYTE,
+            bytes,
+          );
+          return bytes;
+        };
+        const difference = (a, b) => {
+          let n = 0;
+          for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) n++;
+          return n;
+        };
+        const full = pixels(),
+          meshes = [];
+        content.root.traverse((node) => {
+          if (node.isMesh && node.userData.component_item_id !== "floor")
+            meshes.push({ node, visible: node.visible });
+        });
+        meshes.forEach(({ node }) => (node.visible = false));
+        render();
+        const ground = pixels();
+        meshes.forEach(({ node, visible }) => (node.visible = visible));
+        const plants = {
+          traverse(fn) {
+            for (const { node } of meshes) fn(node);
+          },
+        };
+        const reset = () => {
+          if (frame !== null) cancelAnimationFrame(frame);
+          frame = null;
+          reveal?.dispose();
+          reveal = create_component_reveal(plants);
+        };
+        reset();
+        render();
+        if (difference(pixels(), ground) !== 0)
+          throw Error("Hidden plants still render or cast shadows");
+        reveal.update(0.6);
+        render();
+        const half = difference(pixels(), ground);
+        if (!half) throw Error("Missing intermediate fade");
+        reveal.update(0.6);
+        render();
+        if (difference(pixels(), full) !== 0)
+          throw Error("Completed fade changed the authored rendering");
+        const checked =
+          "Verified: no hidden shadows; intermediate coverage; exact final pixels";
+        const show = (seconds) => {
+          reset();
+          reveal.update(seconds);
+          render();
+          status.textContent = `${checked} · fade ${Math.round((seconds / 1.2) * 100)}%`;
+        };
+        document.querySelector("#hidden").onclick = () => show(0);
+        document.querySelector("#half").onclick = () => show(0.6);
+        document.querySelector("#full").onclick = () => show(1.2);
+        document.querySelector("#play").onclick = () => {
+          reset();
+          let last;
+          const tick = (time) => {
+            if (last !== undefined) reveal.update((time - last) / 1000);
+            last = time;
+            render();
+            if (reveal.active) frame = requestAnimationFrame(tick);
+            else {
+              frame = null;
+              status.textContent = checked + " · arrival complete";
+            }
+          };
+          frame = requestAnimationFrame(tick);
+        };
+        document
+          .querySelectorAll("button")
+          .forEach((button) => (button.disabled = false));
+        show(0.6);
+        window.addEventListener(
+          "pagehide",
+          () => {
+            if (frame !== null) cancelAnimationFrame(frame);
+            reveal.dispose();
+            content.dispose();
+            renderer.dispose();
+            renderer.forceContextLoss();
+          },
+          { once: true },
+        );
+      } catch (error) {
+        status.textContent = "ERROR: " + error.message;
+        throw error;
+      }
+    </script>
+  </body>
+</html>

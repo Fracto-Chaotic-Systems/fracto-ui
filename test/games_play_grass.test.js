@@ -4,6 +4,7 @@ import { play_grass_view } from "../src/pages/games/GamesPlayGrassView.js";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { runInNewContext } from "node:vm";
+import { setImmediate } from "node:timers";
 import { transformSync } from "esbuild";
 import * as THREE from "three";
 import { create_path_motion_controller } from "@fracto/sdk/FractoPathMotion.js";
@@ -14,6 +15,127 @@ const path_motion = JSON.parse(
     "utf8",
   ),
 );
+
+test("arrival fades animate before all content is ready and restart from zero after an idle gap", async () => {
+  const source = readFileSync(
+    new URL("../src/pages/games/GamesPlayGrassScene.js", import.meta.url),
+    "utf8",
+  ).replace(/^import[^;]+;\r?\n/gm, "");
+  const module = { exports: {} },
+    frames = new Map(),
+    calls = [];
+  let options,
+    complete,
+    remaining = 0;
+  const content = {
+    root: new THREE.Group(),
+    revision: 0,
+    revealing: false,
+    reveal(delta) {
+      calls.push(["reveal", delta]);
+      remaining -= delta;
+      this.revealing = remaining > 1e-8;
+    },
+    animate() {
+      calls.push("animate");
+    },
+    focus() {
+      return true;
+    },
+    update() {
+      options.on_status("loading_content");
+      return new Promise((resolve) => {
+        complete = resolve;
+      });
+    },
+    dispose() {},
+  };
+  class Renderer {
+    constructor() {
+      this.domElement = {
+        style: {},
+        addEventListener() {},
+        removeEventListener() {},
+        remove() {},
+      };
+    }
+    setPixelRatio() {}
+    setSize() {}
+    render() {}
+    dispose() {}
+    forceContextLoss() {}
+  }
+  let next_frame = 0;
+  runInNewContext(transformSync(source, { format: "cjs" }).code, {
+    module,
+    exports: module.exports,
+    THREE: { ...THREE, WebGLRenderer: Renderer },
+    window: { devicePixelRatio: 1 },
+    document: {
+      hidden: false,
+      addEventListener() {},
+      removeEventListener() {},
+    },
+    requestAnimationFrame(fn) {
+      frames.set(++next_frame, fn);
+      return next_frame;
+    },
+    cancelAnimationFrame(id) {
+      frames.delete(id);
+    },
+    create_component_section_content(value) {
+      options = value;
+      return content;
+    },
+    create_path_motion_controller,
+    apply_top_down_path_pose,
+    play_grass_view,
+    configure_component_shadows() {},
+    fit_component_shadows() {},
+    update_component_lighting() {},
+  });
+  const runtime = module.exports.create_play_grass_scene(
+    { prepend() {} },
+    {
+      path_motion,
+      resolve_materials() {},
+      on_error() {
+        assert.fail("unexpected renderer error");
+      },
+    },
+  );
+  const pending = runtime.update({ floor: { size: [1, 20] } });
+  const arrive = () => {
+    remaining = 0.2;
+    content.revealing = true;
+    options.render();
+  };
+  const frame = (time) => {
+    const [id, fn] = frames.entries().next().value;
+    frames.delete(id);
+    fn(time);
+  };
+  arrive();
+  assert.equal(frames.size, 1);
+  frame(100);
+  frame(200);
+  frame(300);
+  assert.equal(frames.size, 0);
+  assert.ok(!calls.includes("animate"));
+  const before = calls.length;
+  arrive();
+  frame(10000);
+  assert.equal(calls.length, before); // A stalled download must not consume the new fade.
+  frame(10100);
+  assert.equal(content.revealing, true);
+  options.on_status("content_ready");
+  complete();
+  await pending;
+  frame(10200);
+  assert.ok(calls.includes("animate"));
+  runtime.dispose();
+  assert.equal(frames.size, 0);
+});
 
 test("background unmount aborts loading and prevents late renderer creation; loaded scene is disposed", async () => {
   const source = readFileSync(
