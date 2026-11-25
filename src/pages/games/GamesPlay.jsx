@@ -130,6 +130,36 @@ const SettingsToggle = styled(SettingsIcon)`
     background: #00000010;
     color: #222222;
   }
+
+  /* Closed: the gear sits over the scene, so it is white, drawn as an outline
+     that fills in on hover or focus. Font Awesome Free has no outlined gear, so
+     the solid gear's path is stroked instead of filled. Open: the close icon
+     sits over the light drawer and keeps the dark colors above. */
+  &[aria-expanded="false"] {
+    color: #ffffff;
+
+    svg {
+      overflow: visible;
+    }
+
+    path {
+      fill: transparent;
+      stroke: currentColor;
+      stroke-width: 40;
+      stroke-linejoin: round;
+      transition: fill 120ms ease;
+    }
+
+    &:hover,
+    &:focus-visible {
+      background: #ffffff26;
+      color: #ffffff;
+
+      path {
+        fill: currentColor;
+      }
+    }
+  }
 `;
 
 const SettingsContent = styled.div`

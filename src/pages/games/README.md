@@ -485,10 +485,11 @@ triggers change speed; bank/pitch produce turn and climb/descent readings.
 See [controllers/README.md](controllers/README.md).
 
 - GamesPlay.jsx renders the **game play** title above a flex content area, with a
-  gear icon in that area's upper-right corner and the tooltip **settings**.
+  white outlined gear icon (filled on hover or focus) in that area's upper-right
+  corner and the tooltip **settings**.
   Clicking it toggles a persistent Material UI drawer that slides in from the right
   with a **Settings** heading. The same button stays above the drawer and changes
-  to an **×** with a **Close settings** tooltip while open. The drawer is positioned
+  to a dark **×** (readable over the light drawer) with a **Close settings** tooltip while open. The drawer is positioned
   within the content area
   below the title bar. It has no backdrop or focus trap, so the rest of the page
   stays undimmed and interactive.
