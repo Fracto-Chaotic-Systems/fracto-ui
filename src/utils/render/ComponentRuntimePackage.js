@@ -57,6 +57,7 @@ export async function load_component_runtime(url, signal, request = fetch) {
   }
   return {
     document: manifest.component,
+    source_revision: manifest.source_revision,
     release,
     resolve_materials: async (references) => {
       const result = {};

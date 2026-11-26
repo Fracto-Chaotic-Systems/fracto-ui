@@ -1,6 +1,6 @@
 export const PRELUDE_WELCOME_SECONDS = 0.47;
 export const PRELUDE_TO_SECONDS = 2.87;
-export const PRELUDE_TV_SECONDS = 4.17;
+export const PRELUDE_TV_SECONDS = 4;
 export const PRELUDE_DURATION_SECONDS = 12.17;
 const ease = (time, from, to) => {
   const t = Math.max(0, Math.min(1, (time - from) / (to - from)));
@@ -15,7 +15,7 @@ export function sample_play_prelude(seconds) {
     welcome_spacing_em:
       0.04 + 0.56 * ease(seconds, PRELUDE_WELCOME_SECONDS, 3.9),
     to_opacity:
-      ease(seconds, PRELUDE_TO_SECONDS, 3.22) * (1 - ease(seconds, 3.65, 4.05)),
+      ease(seconds, PRELUDE_TO_SECONDS, 3.22) * (1 - ease(seconds, 3.65, 4)),
     chaos_opacity:
       seconds >= PRELUDE_TV_SECONDS
         ? 1 - ease(seconds, 6.17, PRELUDE_DURATION_SECONDS)

@@ -158,7 +158,8 @@ test("development launch, Reset to prelude, explicit completion, repeated reset 
   assert.equal(find("tv").props.visible, false);
   find(Prelude).props.on_prepare();
   tree = render();
-  assert.equal(find(Grass).props.reveal_limit, -1);
+  assert.equal(find(Grass).props.reveal_limit, 4);
+  assert.equal(find(Grass).props.audio_ref, find("audio").props.ref);
   assert.equal(find(Grass).props.key, "grass-1");
   assert.ok(
     find(Prelude).props.audio_ref,
@@ -171,8 +172,8 @@ test("development launch, Reset to prelude, explicit completion, repeated reset 
   assert.equal(find("tv").props.visible, true);
   assert.equal(
     find(Grass).props.reveal_limit,
-    0,
-    "Only moving ladybugs join TV and CHAOS",
+    4,
+    "The audio clock gates material cues independently of the text phase",
   );
   assert.equal(
     find("tv").props.key,
@@ -189,8 +190,8 @@ test("development launch, Reset to prelude, explicit completion, repeated reset 
   assert.equal(find(Grass).props.key, "grass-1");
   assert.equal(
     find(Grass).props.reveal_limit,
-    3,
-    "Landscape starts after CHAOS disappears",
+    4,
+    "The same audio clock continues through confirmation",
   );
   assert.equal(find(Grass).props.introduction, true);
   assert.ok(!tree.find((n) => n.props["aria-haspopup"] === "dialog"));

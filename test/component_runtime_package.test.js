@@ -89,6 +89,7 @@ test("published loader resolves every material and resource locally without any 
   const descriptors = await loaded.resolve_materials([asset, asset]);
   const descriptor = Object.values(descriptors)[0];
   assert.equal(loaded.document.name, "Published grass");
+  assert.equal(loaded.source_revision, 17);
   assert.match(
     descriptor.runtime.file_urls["model.glb"],
     /\/files\/[a-f0-9]{64}\.glb$/,

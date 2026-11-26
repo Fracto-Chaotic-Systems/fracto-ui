@@ -197,7 +197,20 @@ test("background unmount aborts loading and prevents late renderer creation; loa
       styled: { div: () => "div" },
       AppText: { get: (v) => v },
       PLAY_GRASS_TEXT: {},
-      PLAY_GRASS_RELEASE: { key: "grass-strip", release: "a".repeat(64) },
+      PLAY_GRASS_VARIANT: { role_groups: { walking_insects: "bugs" } },
+      visible_play_traversal_starts: () => [0.3, 0.6],
+      random_play_traversal_start: ({ candidates }) => candidates[0],
+      PLAY_GRASS_RELEASE: {
+        key: "grass-strip",
+        release: "a".repeat(64),
+        variant: "ladybug-zoomies",
+      },
+      play_grass_variant_document: (document, revision, key) => {
+        assert.equal(revision, 17);
+        assert.equal(key, "ladybug-zoomies");
+        calls.push("zoomies");
+        return document;
+      },
       component_runtime_manifest_url: () =>
         "http://runtime.invalid/grass-strip/manifest.json",
       load_path_motion: async () => path_motion,
@@ -208,6 +221,7 @@ test("background unmount aborts loading and prevents late renderer creation; loa
       },
       create_play_grass_scene: (host, options) => {
         assert.equal(options.path_motion, path_motion);
+        assert.equal(options.start_fraction, 0.3);
         calls.push("create");
         return {
           release_introduction() {},
@@ -223,7 +237,7 @@ test("background unmount aborts loading and prevents late renderer creation; loa
     effects[2]();
     if (cancel_first) cleanup();
     const document = { id: "base-strip" };
-    complete({ document });
+    complete({ document, source_revision: 17 });
     await promise;
     await new Promise((resolve) => setImmediate(resolve));
     if (cancel_first) {
@@ -231,6 +245,7 @@ test("background unmount aborts loading and prevents late renderer creation; loa
       assert.equal(calls.includes("create"), false);
     } else {
       assert.ok(calls.includes(document));
+      assert.ok(calls.includes("zoomies"));
       assert.deepEqual(calls.find(Array.isArray), [1200, 700]);
       cleanup();
       assert.equal(calls.at(-1), "dispose");

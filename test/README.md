@@ -1,18 +1,30 @@
 # UI tests
 
-`games_play_intro_title.test.js` verifies the sudden FRACTO cue at audio 29.66s,
-buffering/hidden-tab behavior and cancellation before the cue. The play flow test
-keeps this title confined to the confirmation scene and removes it on entry to play.
+`games_play_grass_variant.test.js` checks the pinned Ladybug zoomies binding,
+all 20 insect speed/clip-clock changes, source-revision rejection, base immutability
+and grass animation isolation, including the selected heading-varied algorithm.
+Package-loader tests retain source revision for
+variant compatibility checks without adding authoring requests.
+
+`games_play_intro_title.test.js` verifies the sudden FRACTO cue at audio 29.5s,
+buffering/hidden-tab behavior and cancellation before the cue.
+It also checks the audio-driven five-second fade from 37.21s to 42.21s,
+including buffering and observing the clock after the title has expired.
+The play flow test keeps this title confined to the confirmation scene and removes
+it on entry to play.
 
 `games_play_traversal_start.test.js` checks randomized, separated entry points,
 reload persistence, optional storage and forward movement away from the turns.
+It also checks that eligible starts contain a ladybug's full wandering area
+through the first eight seconds of camera travel at desktop and portrait sizes.
 The renderer test checks that its initial camera uses the selected route offset.
 
 `component_ordered_reveal.test.js` checks the ladybug/stone/dirt/grass order even
 when downloads finish backwards, empty categories, shadow fades, later sections
-and cancellation. It also verifies the gated insect-only TV cue, the four-second
-bugs-and-stones hold, and four-second dirt/grass fades. Prelude clock tests check
-the exact 0.47/2.87/4.17-second audio cues, buffering, and late-frame catchup.
+and cancellation. It also verifies full material visibility at 4.0/10.25/17.5/23.5/26.5s,
+separate sparse/dense grass fades, buffering and delayed-download independence.
+Prelude clock tests check the exact 0.47/2.87/4.0-second text/audio cues and
+late-frame catchup.
 The grass renderer test checks that the camera and animation
 advance before initial content is ready, even while section residency is pending.
 

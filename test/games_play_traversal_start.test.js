@@ -6,7 +6,10 @@ import {
   select_play_traversal_start,
   random_play_traversal_start,
   play_traversal_start_seconds,
+  visible_play_traversal_starts,
 } from "../src/pages/games/GamesPlayTraversalStart.js";
+import { component_motion_bounds } from "@fracto/sdk/FractoComponentMotion.js";
+import { play_grass_view } from "../src/pages/games/GamesPlayGrassView.js";
 const path = JSON.parse(
   readFileSync(
     new URL("../public/motions/slow-strip-patrol.json", import.meta.url),
@@ -67,4 +70,71 @@ test("invalid offsets cannot initialize the path", () => {
   const motion = create_path_motion_controller(path);
   for (const value of [-1, 2, NaN])
     assert.throws(() => play_traversal_start_seconds(motion, value));
+});
+
+test("random entries keep a moving ladybug in the actual crop, across viewport shapes and reloads", () => {
+  const document = {
+    floor: { size: [1, 20] },
+    objects: Array.from({ length: 20 }, (_, i) => ({
+      id: `bug-${i}`,
+      group_id: "bugs",
+      position: [i % 2 ? 0.1 : -0.1, 0, i - 9.5],
+      rotation: [0, i * 0.5, 0],
+      motion: {
+        algorithm: "facing-wander-v1",
+        speed_mps: 0.048,
+        distance_m: 0.08,
+      },
+    })),
+  };
+  for (const [width, height] of [
+    [1200, 700],
+    [1920, 1080],
+    [390, 844],
+    [800, 800],
+  ]) {
+    const candidates = visible_play_traversal_starts(
+      document,
+      path,
+      width,
+      height,
+      "bugs",
+    );
+    assert.ok(candidates.length > 1);
+    const view = play_grass_view(document.floor, width, height);
+    let previous = null;
+    for (const draw of [0, 0.2, 0.5, 0.8, 1]) {
+      const next = select_play_traversal_start(
+        previous,
+        () => draw,
+        candidates,
+      );
+      assert.ok(candidates.includes(next));
+      if (previous !== null)
+        assert.ok(Math.abs(next - previous) >= 0.1 - 1e-12);
+      previous = next;
+      const motion = create_path_motion_controller(path);
+      const start = play_traversal_start_seconds(motion, next);
+      assert.ok(
+        document.objects.some((object) => {
+          const { min, max } = component_motion_bounds(object);
+          return [0, 4, 8].every((seconds) => {
+            const pose = motion.sample(start + seconds);
+            return [min[0], max[0]].every((x) =>
+              [min[2], max[2]].every(
+                (z) =>
+                  Math.abs(x - pose.position[0]) + 0.019 < view.width / 2 &&
+                  Math.abs(z - pose.position[2]) + 0.019 < view.height / 2,
+              ),
+            );
+          });
+        }),
+        `${width}x${height} must contain a complete bug route`,
+      );
+    }
+  }
+  assert.deepEqual(
+    visible_play_traversal_starts(document, path, 1200, 700, "grass"),
+    [],
+  );
 });

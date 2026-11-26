@@ -4,19 +4,28 @@ import { create_component_reveal } from "./ComponentStageReveal.js";
 export function create_ordered_component_reveal({
   durations = [],
   holds = [],
-  limit = 3,
+  limit = 4,
+  cue_seconds = null,
 } = {}) {
   const entries = new Set();
   const categories = new Set();
   let stage = 0,
     hold_elapsed = 0,
     sealed = false,
-    disposed = false;
-  const complete = () => sealed && stage > 3;
+    disposed = false,
+    clock_complete = false,
+    last_rank = 3;
+  const complete = () =>
+    cue_seconds
+      ? sealed &&
+        clock_complete &&
+        ![...entries].some((entry) => entry.blocking)
+      : sealed && stage > last_rank;
   return {
     expect(rank, blocking) {
+      last_rank = Math.max(last_rank, rank);
       if (blocking) categories.add(rank);
-      const entry = { rank, blocking, reveal: null, root: null };
+      const entry = { rank, blocking, reveal: null, root: null, elapsed: 0 };
       entries.add(entry);
       return (root) => {
         if (disposed) return;
@@ -43,8 +52,29 @@ export function create_ordered_component_reveal({
     get active() {
       return !complete() || [...entries].some((entry) => entry.reveal?.active);
     },
-    update(delta) {
+    update(delta, seconds) {
       if (disposed) return;
+      if (cue_seconds) {
+        if (!Number.isFinite(seconds)) return;
+        for (const entry of entries) {
+          const cue = cue_seconds[entry.rank];
+          if (!entry.reveal || entry.rank > limit || seconds < cue) continue;
+          entry.root.visible = true;
+          // Initial assets sample the music clock; late streamed sections retain
+          // a gentle arrival fade without delaying any other material's cue.
+          const elapsed = entry.blocking
+            ? Math.max(0, seconds - cue)
+            : entry.elapsed + delta;
+          entry.reveal.update(Math.max(0, elapsed - entry.elapsed));
+          entry.elapsed = elapsed;
+          if (!entry.reveal.active) entries.delete(entry);
+        }
+        const last = cue_seconds.length - 1;
+        clock_complete =
+          seconds >= cue_seconds[last] + (durations[last] ?? 1.2) &&
+          limit >= last;
+        return;
+      }
       const pending = [...entries].some((e) => e.blocking && e.rank === stage);
       // Never spend the same frame delta twice across consecutive categories.
       for (const entry of entries) {
@@ -54,7 +84,7 @@ export function create_ordered_component_reveal({
         if (!entry.reveal.active) entries.delete(entry);
       }
       if (sealed) {
-        while (stage <= 3) {
+        while (stage <= last_rank) {
           if (stage > limit) break;
           const required = [...entries].filter(
             (e) => e.blocking && e.rank === stage,

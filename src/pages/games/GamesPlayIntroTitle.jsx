@@ -26,7 +26,7 @@ const Title = styled(WelcomeStyles.Title)`
   transform: translate(-50%, -100%) scale(0);
 `;
 
-function VisibleTitle({ width_px }) {
+function VisibleTitle({ width_px, opacity }) {
   const label = useRef(null);
   useLayoutEffect(() => {
     const node = label.current;
@@ -37,7 +37,7 @@ function VisibleTitle({ width_px }) {
     }
   }, [width_px]);
   return (
-    <Anchor>
+    <Anchor style={{ opacity }}>
       <Title ref={label} role="heading" aria-level={2}>
         {AppText.get(KEY_WELCOME_TITLE)}
       </Title>
@@ -46,10 +46,12 @@ function VisibleTitle({ width_px }) {
 }
 
 export default function GamesPlayIntroTitle({ audio_ref, width_px }) {
-  const [visible, set_visible] = useState(false);
+  const [opacity, set_opacity] = useState(0);
   useEffect(
-    () => watch_intro_title_cue(audio_ref.current, () => set_visible(true)),
+    () => watch_intro_title_cue(audio_ref.current, set_opacity),
     [audio_ref],
   );
-  return visible ? <VisibleTitle width_px={width_px} /> : null;
+  return opacity > 0 ? (
+    <VisibleTitle width_px={width_px} opacity={opacity} />
+  ) : null;
 }

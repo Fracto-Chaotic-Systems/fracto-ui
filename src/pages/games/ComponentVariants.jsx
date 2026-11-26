@@ -9,6 +9,7 @@ const text = (key) => AppText.get(COMPONENT_STAGE_TEXT[key]);
 const properties = {
   "motion.speed_mps": "variant_movement",
   "walk_clip.playback_rate": "variant_walk",
+  "motion.algorithm": "variant_route",
 };
 
 export default function ComponentVariants({
@@ -78,9 +79,15 @@ export default function ComponentVariants({
                       ? text(properties[override.target.property])
                       : override.target.property}
                     {": "}
-                    {override.operation === "multiply"
-                      ? `${override.value}×`
-                      : `${text(`variant_${override.operation}`)} ${override.value ?? ""}`}
+                    {override.target.property === "motion.algorithm"
+                      ? text(
+                          override.value === "facing-wander-v1"
+                            ? "variant_wander"
+                            : "variant_patrol",
+                        )
+                      : override.operation === "multiply"
+                        ? `${override.value}×`
+                        : `${text(`variant_${override.operation}`)} ${override.value ?? ""}`}
                   </li>
                 ))}
               </ul>

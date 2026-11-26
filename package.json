@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "test:crt": "node --test test/crt_initialization.test.js test/crt_mount.test.js test/crt_screen.test.js test/crt_playlist.test.js",
-    "test:flight-scene": "node --test test/flight_scene.test.js test/games_play_fullscreen.test.js test/games_play_controls_layout.test.js test/games_play_grass.test.js test/games_play_traversal_start.test.js test/component_ordered_reveal.test.js test/component_section_content.test.js test/component_stage_reveal.test.js",
+    "test:flight-scene": "node --test test/flight_scene.test.js test/games_play_fullscreen.test.js test/games_play_controls_layout.test.js test/games_play_grass.test.js test/games_play_grass_variant.test.js test/games_play_traversal_start.test.js test/component_ordered_reveal.test.js test/component_section_content.test.js test/component_stage_reveal.test.js",
     "test:flight-frames": "node --test test/flight_frame_colors.test.js test/flight_frame_worker.test.js",
     "benchmark:flight-frames": "node scripts/benchmark_flight_frame.js",
     "test:flight-refinement": "node --test test/flight_refinement.test.js",

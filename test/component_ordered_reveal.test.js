@@ -5,60 +5,110 @@ import { create_ordered_component_reveal } from "../src/pages/games/ComponentOrd
 import {
   grass_introduction_rank,
   GRASS_INTRODUCTION,
+  GRASS_FULL_VISIBILITY_SECONDS,
 } from "../src/pages/games/GamesPlayGrassIntroduction.js";
 
 const mesh = () =>
   new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial());
 
-test("TV cue releases only insects; CHAOS completion permits stones, then a sustained white-ground hold before slow dirt and grass", () => {
+test("five material groups fade ahead of their music cues, with clock-driven fades and buffering", () => {
   const sequence = create_ordered_component_reveal(GRASS_INTRODUCTION);
-  const roots = Array.from({ length: 4 }, mesh);
+  const roots = Array.from({ length: 5 }, mesh);
   const arrivals = roots.map((_, rank) => sequence.expect(rank, true));
   sequence.seal();
   assert.equal(sequence.prepared, false);
-  for (const rank of [3, 2, 1, 0]) arrivals[rank](roots[rank]);
+  for (const rank of [4, 3, 2, 1, 0]) arrivals[rank](roots[rank]);
   assert.equal(sequence.prepared, true);
-  sequence.update(20);
+  sequence.release(4);
+  sequence.update(20, 3.999);
   assert.ok(
     roots.every((root) => !root.visible),
     "Preloading must leave the opening completely white",
   );
-  sequence.release(0);
-  sequence.update(0);
+  sequence.update(0, 4);
   assert.equal(roots[0].visible, true);
   assert.equal(
     roots[0].customDepthMaterial,
     undefined,
     "Insects appear at the TV cue",
   );
-  sequence.update(8);
-  assert.ok(
-    roots.slice(1).every((root) => !root.visible),
-    "No landscape while CHAOS is visible",
-  );
-  sequence.release(3);
-  sequence.update(1.5);
-  assert.equal(roots[1].visible, true);
-  sequence.update(3.9);
-  assert.equal(roots[2].visible, false);
-  assert.equal(roots[3].visible, false);
-  sequence.update(0.11);
-  sequence.update(0.1);
-  assert.equal(roots[2].visible, true);
-  sequence.update(2);
-  assert.ok(roots[2].customDepthMaterial, "Dirt fades slowly for four seconds");
-  assert.equal(roots[3].visible, false);
-  sequence.update(2);
-  sequence.update(0.1);
-  assert.equal(roots[3].visible, true);
-  sequence.update(2);
-  assert.ok(
-    roots[3].customDepthMaterial,
-    "Grass also fades slowly for four seconds",
-  );
-  sequence.update(2);
+  for (let rank = 1; rank < 5; rank++) {
+    const cue = GRASS_INTRODUCTION.cue_seconds[rank];
+    sequence.update(100, cue - 0.001);
+    assert.equal(roots[rank].visible, false);
+    sequence.update(0, cue);
+    assert.equal(roots[rank].visible, true);
+    const shader = {
+      uniforms: {},
+      fragmentShader: "#include <alphatest_fragment>",
+    };
+    roots[rank].material.onBeforeCompile(shader);
+    sequence.update(100, cue);
+    assert.equal(
+      shader.uniforms.componentReveal.value,
+      0,
+      "Buffering pauses the fade",
+    );
+    sequence.update(0, cue + GRASS_INTRODUCTION.durations[rank] / 2);
+    assert.ok(Math.abs(shader.uniforms.componentReveal.value - 0.5) < 1e-10);
+    assert.ok(
+      roots[rank].customDepthMaterial,
+      "Shadows fade with the material",
+    );
+  }
+  sequence.update(0, 26.5);
+  assert.ok(roots.every((root) => !root.customDepthMaterial));
   assert.equal(sequence.complete, true);
   sequence.dispose();
+});
+
+test("a delayed early download cannot shift later audio cues, and late frames catch up", () => {
+  const sequence = create_ordered_component_reveal(GRASS_INTRODUCTION);
+  const roots = Array.from({ length: 5 }, mesh);
+  const arrivals = roots.map((_, rank) => sequence.expect(rank, true));
+  sequence.seal();
+  sequence.release(4);
+  for (const rank of [4, 3, 2, 0]) arrivals[rank](roots[rank]);
+  sequence.update(0, 22);
+  assert.equal(roots[2].visible, true);
+  assert.equal(roots[2].customDepthMaterial, undefined);
+  assert.equal(roots[3].visible, true);
+  assert.equal(roots[4].visible, false);
+  arrivals[1](roots[1]);
+  sequence.update(0, 29.5);
+  assert.ok(roots.every((root) => root.visible && !root.customDepthMaterial));
+  assert.equal(sequence.complete, true);
+  sequence.dispose();
+});
+
+test("materials reach full coverage exactly at the requested beats, preserving sudden insects", () => {
+  assert.deepEqual(GRASS_FULL_VISIBILITY_SECONDS, [4, 10.25, 17.5, 23.5, 26.5]);
+  assert.deepEqual(GRASS_INTRODUCTION.cue_seconds, [4, 8.75, 13.5, 20.5, 23.5]);
+  for (let rank = 0; rank < 5; rank++) {
+    const sequence = create_ordered_component_reveal(GRASS_INTRODUCTION);
+    const root = mesh(),
+      original = root.material;
+    sequence.expect(rank, true)(root);
+    sequence.seal();
+    sequence.release(4);
+    const end = GRASS_FULL_VISIBILITY_SECONDS[rank];
+    sequence.update(0, end - 0.001);
+    if (rank === 0) assert.equal(root.visible, false);
+    else {
+      assert.equal(root.visible, true);
+      assert.notEqual(root.material, original);
+      assert.ok(root.customDepthMaterial);
+    }
+    sequence.update(0, end);
+    assert.equal(root.visible, true);
+    assert.equal(
+      root.material,
+      original,
+      "Full original material coverage at the cue",
+    );
+    assert.equal(root.customDepthMaterial, undefined);
+    sequence.dispose();
+  }
 });
 
 test("cached later materials stay hidden until each earlier category finishes, including missing downloads", () => {
@@ -109,13 +159,13 @@ test("empty categories are skipped and cancellation restores temporary materials
   assert.equal(grass.material, original);
 });
 
-test("published strip roles are ladybugs, unique rocks, dirt, then both grasses", () => {
+test("published strip roles distinguish small sparse tufts from large dense tufts", () => {
   assert.equal(grass_introduction_rank({ floor: {}, objects: [] }), 2);
   for (const [id, rank] of [
     ["ladybug-with-animated-walk-cycle-only", 0],
     ["rocks-piece-084", 1],
     ["animated-grass", 3],
-    ["yard-grass", 3],
+    ["yard-grass", 4],
   ])
     assert.equal(
       grass_introduction_rank({ objects: [{ asset: { id } }] }),

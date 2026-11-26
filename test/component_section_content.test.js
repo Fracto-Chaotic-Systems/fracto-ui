@@ -208,6 +208,21 @@ test("motion envelopes and offscreen shadow casters participate in section selec
   assert.ok(section.reach > 0);
 });
 
+test("a heading-varied insect's sideways travel is included in streamed section bounds", () => {
+  const document = create_component_document(randomUUID(), "Wander");
+  document.objects = [
+    object("insect", 0, {
+      rotation: [0, Math.PI / 2, 0],
+      motion: { algorithm: "facing-wander-v1", distance_m: 3, speed_mps: 0.01 },
+    }),
+  ];
+  const [section] = component_sections(document, {
+    [component_reference_key(ref("insect"))]: descriptor("insect"),
+  });
+  assert.ok(section.min < -0.75);
+  assert.ok(section.max > 0.75);
+});
+
 test("floor renders during model loading and a freed worker starts the next model without a batch barrier", async () => {
   const document = create_component_document(randomUUID(), "Queue");
   document.floor = { size: [1, 20], texture_repeat: [1, 20], asset: null };

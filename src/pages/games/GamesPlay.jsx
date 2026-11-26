@@ -275,9 +275,8 @@ export default function GamesPlay({ crt_content } = {}) {
           <GamesPlayGrass
             key={`grass-${flow.run}`}
             introduction={flow.run > 0}
-            reveal_limit={
-              flow.phase === "prelude" ? (flow.tv_visible ? 0 : -1) : 3
-            }
+            reveal_limit={4}
+            audio_ref={audio_ref}
             width_px={content_bounds.width}
             height_px={content_bounds.height}
           />

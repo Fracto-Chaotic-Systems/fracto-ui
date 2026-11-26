@@ -33,8 +33,8 @@ test("white opening, spreading centered welcome, smaller to, simultaneous TV/CHA
       overlap.to_opacity > 0,
   );
   assert.equal(sample_play_prelude(4.05).to_opacity, 0);
-  assert.equal(sample_play_prelude(4.169).tv_visible, false);
-  const arrival = sample_play_prelude(4.17);
+  assert.equal(sample_play_prelude(3.999).tv_visible, false);
+  const arrival = sample_play_prelude(4);
   assert.equal(arrival.tv_visible, true);
   assert.equal(arrival.chaos_opacity, 1);
   assert.equal(arrival.welcome_opacity + arrival.to_opacity, 0);

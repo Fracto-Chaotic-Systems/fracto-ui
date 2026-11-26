@@ -1,5 +1,6 @@
 // Start from the Reset click itself, retaining the browser's audio permission.
 export function create_prelude_soundtrack(audio, on_error, page = document) {
+  audio.volume = 0.25;
   let active = false,
     generation = 0,
     run_id;

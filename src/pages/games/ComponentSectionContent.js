@@ -6,6 +6,7 @@ import { load_inventory_model } from "./InventoryModelLoader.js";
 import { dispose_component_resources } from "./ComponentStageGeometry.js";
 import { create_component_reveal } from "./ComponentStageReveal.js";
 import { create_ordered_component_reveal } from "./ComponentOrderedReveal.js";
+import { component_motion_bounds } from "@fracto/sdk/FractoComponentMotion.js";
 
 // Playback residency only. Authored placements, scatter seeds and motion stay intact.
 export function component_sections(document, descriptors, length = 1) {
@@ -32,9 +33,7 @@ export function component_sections(document, descriptors, length = 1) {
       (Math.hypot(...facts.dimensions_m) +
         Math.hypot(...facts.ground_anchor_m)) *
       Math.max(...object.scale);
-    const end =
-      object.position[2] +
-      Math.cos(object.rotation[1]) * (object.motion?.distance_m ?? 0);
+    const motion_bounds = component_motion_bounds(object);
     // Independent material groups reveal grass/rocks as each prototype arrives.
     const key = `${Math.floor(object.position[2] / length)}:${component_reference_key(object.asset)}`;
     if (!sections.has(key))
@@ -47,16 +46,8 @@ export function component_sections(document, descriptors, length = 1) {
       });
     const section = sections.get(key);
     section.objects.push(object);
-    section.min = Math.min(
-      section.min,
-      object.position[2] - radius,
-      end - radius,
-    );
-    section.max = Math.max(
-      section.max,
-      object.position[2] + radius,
-      end + radius,
-    );
+    section.min = Math.min(section.min, motion_bounds.min[2] - radius);
+    section.max = Math.max(section.max, motion_bounds.max[2] + radius);
     // Include offscreen shadow casters at the component light's fixed 4:3 elevation.
     section.reach = Math.max(section.reach, (radius * 4) / 3 + 0.05);
   }
@@ -216,8 +207,8 @@ export function create_component_section_content({
     release_introduction(rank) {
       introduction?.release(rank);
     },
-    reveal(delta) {
-      introduction?.update(delta);
+    reveal(delta, seconds) {
+      introduction?.update(delta, seconds);
       for (const [content, reveal] of reveals) {
         reveal.update(delta);
         if (!reveal.active) reveals.delete(content);

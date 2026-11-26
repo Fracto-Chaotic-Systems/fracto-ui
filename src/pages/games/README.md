@@ -70,10 +70,12 @@ Click a variant to preview it; clicking it again restores the base. Only one
 variant or none can be selected, and the selected button is highlighted with
 `aria-pressed=true`. Previews derive from the authored base every time and never
 enter save/undo history. The grass strip's Ladybug zoomies preview scales insect
-patrol speed and walk clips by 8×; grass wind and the component clock stay inherited.
+movement speed and walk clips by 8× and uses bounded varied-heading routes;
+grass wind and the component clock stay inherited.
 Clip mixers are separated by source and rate so shared models cannot contaminate
 one another's playback. The SDK currently resolves multiply/replace overrides for
-`motion.speed_mps` and `walk_clip.playback_rate`; unsupported targets or a base
+`motion.speed_mps` and `walk_clip.playback_rate`, and replacement of
+`motion.algorithm` with a supported route; unsupported targets or a base
 revision mismatch show an error and the base. New base revisions need explicit
 variant rebasing. Clip rates are renderer options, not new persisted scene fields.
 
@@ -98,7 +100,7 @@ Settings → control → Reset game closes the drawer, starts a new run and ente
 `GamesPlayPrelude.jsx`. Its white-screen sequence is sampled by
 `GamesPlayPreludeTimeline.js`, using the audio element's `currentTime` as its
 sole clock: WELCOME begins fading at 0.47s (fully visible at 1.27s), "to" begins
-at 2.87s while WELCOME fades through 3.9s, and "to" clears by 4.05s. At 4.17s,
+at 2.87s while WELCOME fades through 3.9s, and "to" clears by 4.0s. At 4.0s,
 the corner TV and lower CHAOS word appear with the already-moving ladybugs.
 CHAOS holds until 6.17s then slowly fades through 12.17s,
 when the confirmation scene begins. The GAME PLAY title stays mounted above the
@@ -115,16 +117,19 @@ WELCOME uses a 20px type size, "to" is 14px, and CHAOS scales from 48px to 160px
 with the viewport to create a much stronger final-word emphasis.
 
 While waiting for confirmation, `GamesPlayIntroTitleCue.js` observes the same
-music clock and releases FRACTO abruptly at 29.66s. `GamesPlayIntroTitle.jsx`
+music clock and releases FRACTO abruptly at 29.5s. `GamesPlayIntroTitle.jsx`
 inherits `WelcomeStyles.Title` directly from the splash screen (monospace,
 normal weight, spaced letters, outlined white text, shadow, 0.65 vertical scale).
 It measures the natural lettering before paint and scales it to 50% of the game
 area width, keeping the text horizontally symmetric and its bottom 1rem above
 the area's vertical center. Resize adjusts that width without replaying the cue.
-The title remains until confirmation; confirming earlier cancels the cue.
+The title holds until audio 37.21s, then fades linearly over five audio seconds
+and disappears at 42.21s. Buffering pauses the fade, and late observation samples
+the current opacity without replaying it. Confirming earlier cancels the cue.
 
 `GamesPlayPreludeAudio.js` manages the user-provided TwelveNoteFugue MP3 in
-`public/audio/`. The audio element preloads on page load; Reset calls `play()`
+`public/audio/`, with default playback volume set to 25%. The audio element
+preloads on page load; Reset calls `play()`
 synchronously in the click handler to retain browser audio permission, restarting
 at zero. It continues through the landscape reveal and stops on confirmation or
 page unmount. Hidden tabs pause playback and resume at the same position. Rejected
@@ -136,30 +141,36 @@ flight state, instruments and map lifetime for one run. Reset unmounts that
 session and its effects; confirmation mounts a fresh initial flight state
 and neutral controls. The background preloads at audio time 0.8s, once WELCOME is
 visible, with every material hidden over white and traversal already running.
-At the shared 4.17s TV/CHAOS cue, only the ladybugs are released, immediately rather
+At the shared 4.0s TV/CHAOS cue, only the ladybugs are released, immediately rather
 than faded. The prelude's white overlay becomes transparent at that cue. Graphics
 readiness never delays the audio cues; a late material appears when ready.
-After CHAOS disappears, stones fade over 1.5s, then bugs and stones remain alone
-over white for four more seconds. Dirt fades over four seconds, followed by both
-grass types over four seconds. Reset runs pass an
+The music cues mark full visibility: stones fade from 8.75s to 10.25s;
+dirt from 13.5s to 17.5s; small sparse grass tufts from 20.5s to 23.5s;
+large dense tufts from 23.5s to 26.5s. Ladybugs still appear suddenly at 4.0s.
+Each fade samples the music clock, independently of download
+order or the text phase. Reset runs pass an
 introduction flag that stays fixed when the message is activated, so revealing
 game controls never reloads or restarts the background.
 `GamesPlayGrassIntroduction.js` assigns the published material roles to the order
-ladybugs → stones → dirt → grass (both sparse and dense). The optional
-`ComponentOrderedReveal.js` coordinator holds later groups hidden until the
-initial view's preceding category is loaded, has finished its configured fade,
-and has completed any hold. The prelude explicitly releases the insect and
-landscape categories at their respective cues.
+ladybugs → stones → dirt → small sparse grass → large dense grass. The optional
+`ComponentOrderedReveal.js` coordinator supports explicit audio cues for these
+five groups; other callers retain sequential arrival fades. Slow downloads never
+delay a later cue, and late initial assets catch up to their current audio fade.
 Downloads remain parallel. Missing categories are skipped; later streamed sections
 use their category's fade after it has been introduced. Visibility and shadow
 coverage change together, preserving grass cutouts and the final appearance.
 Camera traversal and material animation start during loading and continue through
-all four reveals, including waits for slower downloads. Once introduced, the
+all five reveals, including waits for slower downloads. Once introduced, the
 normal section lookahead guard resumes for future travel. Hidden tabs still pause
 the clocks. Ordinary development page loads retain their existing arrival behavior.
-Each new prelude chooses a different forward-leg entry point with
-`GamesPlayTraversalStart.js`: randomly within 10–90% of the route, at least 10%
-of its length away from the previous start (about 1.89m on this strip). The
+Each background launch chooses a ladybug-visible forward-leg entry point with
+`GamesPlayTraversalStart.js`. After the published document and variant load, it
+checks the actual viewport against the insects' full motion envelopes, with a
+2cm silhouette margin and eight seconds of camera travel reserved. It randomly
+selects among qualifying positions within 10–90% of the route, at least 10%
+of its length away from the previous start when available (about 1.89m on this strip).
+If no position can fit an insect envelope in an unusually narrow crop, ordinary
+random selection remains available. The
 preceding choice is kept in tab session storage so refreshing and resetting also
 changes the visible stretch. Storage is optional; in-memory fallback still varies
 successive resets. The chosen offset is retained across resize, retries, reveal
@@ -191,7 +202,7 @@ the opening text. `GamesPlayTv.jsx` now keeps the initialized CRT for the whole
 play page; reset hides it while the text starts and its media continues loading
 independently. Fresh `GamesCrt` setup uses `CrtInitialization.js` to cross a painted
 frame and start in a separate task, cancelling discarded StrictMode mounts before
-any graphics are allocated. At audio time 4.17s the TV becomes visible in the same
+any graphics are allocated. At audio time 4.0s the TV becomes visible in the same
 corner and continues its live playlist, swivel and mechanical pose through the
 handoff into play, without a remount. The existing CRT implementation is reused.
 
@@ -211,6 +222,22 @@ below FlightScene's existing -1 layer and never captures foreground interaction.
 The parent passes its measured dimensions; the renderer resizes without reloading
 assets, pauses while the document is hidden and disposes on unmount. Load/context
 failure offers a localized retry. The previous brushed-metal background is removed.
+
+The play binding selects **Ladybug zoomies**, authored variant revision 7 against
+base scene 17. `GamesPlayGrassVariant.js` pins its three walking-insect deltas
+and resolves them with the shared SDK: a bounded varied-heading route,
+8× movement speed and matching 8× walk rate.
+For the section player, the semantic walk rate becomes an insect-specific animation
+clock (native 1× instead of the base 0.125×). The inherited component clock still
+governs motion time. Each insect faces its current segment and chooses different
+headings at corners instead of retracing a single line. Its ID seeds a repeatable
+circuit within an ellipse covering the original patrol span, with lateral radius
+one quarter of that span; section residency includes the complete sideways envelope.
+Grass clocks, insect size/placement/patrol distance,
+stones, dirt, route and source documents are preserved. The immutable optimized
+base package and cached models are reused; no variant/API lookup occurs during
+gameplay. Publication source revision is checked before applying the delta, so
+rebasing onto a new base is deliberate. The component editor's base is unchanged.
 
 Path motion is authored separately in `public/motions/slow-strip-patrol.json`,
 and operated by the framework-neutral SDK `FractoPathMotion.js`. The Play layer

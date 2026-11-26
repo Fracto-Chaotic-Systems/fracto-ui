@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { runInNewContext } from "node:vm";
 import test from "node:test";
+import { setImmediate } from "node:timers";
 import { transformSync } from "esbuild";
 
 function nodes(node) {
@@ -76,6 +77,11 @@ test("variants panel lists the current component, clears stale results, handles 
     name: "Ladybug zoomies",
     overrides: [
       {
+        target: { property: "motion.algorithm", role: "walking_insects" },
+        operation: "replace",
+        value: "facing-wander-v1",
+      },
+      {
         target: { property: "motion.speed_mps", role: "walking_insects" },
         operation: "multiply",
         value: 8,
@@ -86,6 +92,7 @@ test("variants panel lists the current component, clears stale results, handles 
   await flush();
   assert.match(content(render("grass")), /Ladybug zoomies/);
   assert.match(content(render("grass")), /8×/);
+  assert.match(content(render("grass")), /variant_wander/);
   let button = nodes(render("grass")).find((n) => n.type === "button");
   assert.equal(button.props["aria-pressed"], false);
   button.props.onClick();

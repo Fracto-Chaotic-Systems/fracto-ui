@@ -23,6 +23,7 @@ export function create_play_grass_scene(
     introduction = false,
     start_fraction = 0,
     on_prepared,
+    read_intro_seconds,
   },
 ) {
   if (typeof resolve_materials !== "function")
@@ -94,7 +95,7 @@ export function create_play_grass_scene(
     if (disposed || failed || document.hidden) return;
     if (last_time !== null) {
       const delta = (time - last_time) / 1000;
-      content.reveal(Math.min(delta, 0.1));
+      content.reveal(Math.min(delta, 0.1), read_intro_seconds?.());
       if (ready || introducing()) {
         content.animate(Math.min(delta, 0.1));
         const candidate = motion.sample(motion.elapsed_seconds + delta);
@@ -153,7 +154,7 @@ export function create_play_grass_scene(
     resize,
     release_introduction(rank) {
       content.release_introduction(rank);
-      content.reveal(0);
+      content.reveal(0, read_intro_seconds?.());
       render();
     },
     seek_motion(seconds) {

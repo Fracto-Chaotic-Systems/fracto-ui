@@ -4,6 +4,8 @@
 canonical SHA-256 (including on HTTP lab origins without Web Crypto), and resolves
 material pins and registered file URLs entirely from that manifest. Missing or
 corrupt packages fail closed; no authoring/database fallback is attempted.
+The result also carries the manifest's `source_revision`, allowing a consumer
+to reject a pinned variant whose authored base revision does not match.
 
 `TopDownPathCamera.js` loads and SDK-validates independently authored motion
 descriptions and applies a supplied path pose to a downward-looking camera.
