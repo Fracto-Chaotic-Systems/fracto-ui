@@ -1,0 +1,17 @@
+/* Pinyon Script is already calligraphic and slanted; use its native outlines. */
+@keyframes confirmation-arrival {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@font-face {
+  font-family: "Fracto Pinyon Script";
+  src: url("/fonts/pinyon-script/PinyonScript-Regular.ttf") format("truetype");
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+}

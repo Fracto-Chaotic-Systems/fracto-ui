@@ -9,6 +9,7 @@ import { transformSync } from "esbuild";
 import * as THREE from "three";
 import { create_path_motion_controller } from "@fracto/sdk/FractoPathMotion.js";
 import { apply_top_down_path_pose } from "../src/utils/render/TopDownPathCamera.js";
+import { play_traversal_start_seconds } from "../src/pages/games/GamesPlayTraversalStart.js";
 const path_motion = JSON.parse(
   readFileSync(
     new URL("../public/motions/slow-strip-patrol.json", import.meta.url),
@@ -16,126 +17,154 @@ const path_motion = JSON.parse(
   ),
 );
 
-test("arrival fades animate before all content is ready and restart from zero after an idle gap", async () => {
-  const source = readFileSync(
-    new URL("../src/pages/games/GamesPlayGrassScene.js", import.meta.url),
-    "utf8",
-  ).replace(/^import[^;]+;\r?\n/gm, "");
-  const module = { exports: {} },
-    frames = new Map(),
-    calls = [];
-  let options,
-    complete,
-    remaining = 0;
-  const content = {
-    root: new THREE.Group(),
-    revision: 0,
-    revealing: false,
-    reveal(delta) {
-      calls.push(["reveal", delta]);
-      remaining -= delta;
-      this.revealing = remaining > 1e-8;
-    },
-    animate() {
-      calls.push("animate");
-    },
-    focus() {
-      return true;
-    },
-    update() {
-      options.on_status("loading_content");
-      return new Promise((resolve) => {
-        complete = resolve;
-      });
-    },
-    dispose() {},
-  };
-  class Renderer {
-    constructor() {
-      this.domElement = {
-        style: {},
+for (const introduction of [false, true])
+  test(`arrival fades ${introduction ? "with moving introduction" : "during loading and after idle gaps"}`, async () => {
+    const source = readFileSync(
+      new URL("../src/pages/games/GamesPlayGrassScene.js", import.meta.url),
+      "utf8",
+    ).replace(/^import[^;]+;\r?\n/gm, "");
+    const module = { exports: {} },
+      frames = new Map(),
+      calls = [],
+      camera_positions = [];
+    let options,
+      complete,
+      remaining = 0;
+    const content = {
+      root: new THREE.Group(),
+      revision: 0,
+      revealing: false,
+      introduction_complete: !introduction,
+      reveal(delta) {
+        calls.push(["reveal", delta]);
+        remaining -= delta;
+        this.revealing = remaining > 1e-8;
+      },
+      animate() {
+        calls.push("animate");
+      },
+      focus() {
+        return false; // Initial material loads cannot block motion during the introduction.
+      },
+      update() {
+        options.on_status("loading_content");
+        return new Promise((resolve) => {
+          complete = resolve;
+        });
+      },
+      release_introduction() {},
+      dispose() {},
+    };
+    class Renderer {
+      constructor() {
+        this.domElement = {
+          style: {},
+          addEventListener() {},
+          removeEventListener() {},
+          remove() {},
+        };
+      }
+      setPixelRatio() {}
+      setSize() {}
+      render(scene, camera) {
+        camera_positions.push(camera.position.z);
+      }
+      dispose() {}
+      forceContextLoss() {}
+    }
+    let next_frame = 0;
+    runInNewContext(transformSync(source, { format: "cjs" }).code, {
+      module,
+      exports: module.exports,
+      THREE: { ...THREE, WebGLRenderer: Renderer },
+      window: { devicePixelRatio: 1 },
+      document: {
+        hidden: false,
         addEventListener() {},
         removeEventListener() {},
-        remove() {},
-      };
-    }
-    setPixelRatio() {}
-    setSize() {}
-    render() {}
-    dispose() {}
-    forceContextLoss() {}
-  }
-  let next_frame = 0;
-  runInNewContext(transformSync(source, { format: "cjs" }).code, {
-    module,
-    exports: module.exports,
-    THREE: { ...THREE, WebGLRenderer: Renderer },
-    window: { devicePixelRatio: 1 },
-    document: {
-      hidden: false,
-      addEventListener() {},
-      removeEventListener() {},
-    },
-    requestAnimationFrame(fn) {
-      frames.set(++next_frame, fn);
-      return next_frame;
-    },
-    cancelAnimationFrame(id) {
-      frames.delete(id);
-    },
-    create_component_section_content(value) {
-      options = value;
-      return content;
-    },
-    create_path_motion_controller,
-    apply_top_down_path_pose,
-    play_grass_view,
-    configure_component_shadows() {},
-    fit_component_shadows() {},
-    update_component_lighting() {},
-  });
-  const runtime = module.exports.create_play_grass_scene(
-    { prepend() {} },
-    {
-      path_motion,
-      resolve_materials() {},
-      on_error() {
-        assert.fail("unexpected renderer error");
       },
-    },
-  );
-  const pending = runtime.update({ floor: { size: [1, 20] } });
-  const arrive = () => {
-    remaining = 0.2;
-    content.revealing = true;
-    options.render();
-  };
-  const frame = (time) => {
-    const [id, fn] = frames.entries().next().value;
-    frames.delete(id);
-    fn(time);
-  };
-  arrive();
-  assert.equal(frames.size, 1);
-  frame(100);
-  frame(200);
-  frame(300);
-  assert.equal(frames.size, 0);
-  assert.ok(!calls.includes("animate"));
-  const before = calls.length;
-  arrive();
-  frame(10000);
-  assert.equal(calls.length, before); // A stalled download must not consume the new fade.
-  frame(10100);
-  assert.equal(content.revealing, true);
-  options.on_status("content_ready");
-  complete();
-  await pending;
-  frame(10200);
-  assert.ok(calls.includes("animate"));
-  runtime.dispose();
-  assert.equal(frames.size, 0);
-});
+      requestAnimationFrame(fn) {
+        frames.set(++next_frame, fn);
+        return next_frame;
+      },
+      cancelAnimationFrame(id) {
+        frames.delete(id);
+      },
+      create_component_section_content(value) {
+        options = value;
+        return content;
+      },
+      create_path_motion_controller,
+      play_traversal_start_seconds,
+      grass_introduction_rank() {},
+      GRASS_INTRODUCTION: {},
+      apply_top_down_path_pose,
+      play_grass_view,
+      configure_component_shadows() {},
+      fit_component_shadows() {},
+      update_component_lighting() {},
+    });
+    const runtime = module.exports.create_play_grass_scene(
+      { prepend() {} },
+      {
+        path_motion,
+        introduction,
+        start_fraction: introduction ? 0.5 : 0,
+        resolve_materials() {},
+        on_error() {
+          assert.fail("unexpected renderer error");
+        },
+      },
+    );
+    const pending = runtime.update({ floor: { size: [1, 20] } });
+    const arrive = () => {
+      remaining = 0.2;
+      content.revealing = true;
+      options.render();
+    };
+    const frame = (time) => {
+      const [id, fn] = frames.entries().next().value;
+      frames.delete(id);
+      fn(time);
+    };
+    arrive();
+    assert.equal(frames.size, 1);
+    frame(100);
+    frame(200);
+    frame(300);
+    if (introduction) {
+      assert.ok(
+        Math.abs(camera_positions[0]) < 1e-8,
+        "Initial resident sections and camera use the chosen middle-of-strip start",
+      );
+      assert.equal(frames.size, 1);
+      assert.ok(calls.includes("animate"));
+      assert.ok(
+        camera_positions.some((z) => Math.abs(z - camera_positions[0]) > 1e-10),
+        "Camera moves before content_ready even when focus reports pending sections",
+      );
+      runtime.dispose();
+      complete();
+      await pending;
+      assert.equal(frames.size, 0);
+      return;
+    }
+    assert.equal(frames.size, 0);
+    assert.ok(!calls.includes("animate"));
+    const before = calls.length;
+    arrive();
+    frame(10000);
+    assert.equal(calls.length, before); // A stalled download must not consume the new fade.
+    frame(10100);
+    assert.equal(content.revealing, true);
+    options.on_status("content_ready");
+    complete();
+    await pending;
+    frame(10200);
+    assert.ok(calls.includes("animate"));
+    runtime.dispose();
+    assert.equal(frames.size, 0);
+  });
 
 test("background unmount aborts loading and prevents late renderer creation; loaded scene is disposed", async () => {
   const source = readFileSync(
@@ -181,6 +210,7 @@ test("background unmount aborts loading and prevents late renderer creation; loa
         assert.equal(options.path_motion, path_motion);
         calls.push("create");
         return {
+          release_introduction() {},
           resize: (w, h) => calls.push([w, h]),
           update: (doc) => calls.push(doc),
           dispose: () => calls.push("dispose"),
@@ -188,8 +218,9 @@ test("background unmount aborts loading and prevents late renderer creation; loa
       },
     });
     module.exports.default({ width_px: 1200, height_px: 700 });
-    const cleanup = effects[0]();
-    effects[1]();
+    effects[0]();
+    const cleanup = effects[1]();
+    effects[2]();
     if (cancel_first) cleanup();
     const document = { id: "base-strip" };
     complete({ document });

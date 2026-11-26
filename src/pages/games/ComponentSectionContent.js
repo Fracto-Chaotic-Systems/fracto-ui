@@ -5,6 +5,7 @@ import { create_component_content } from "./ComponentStageContent.js";
 import { load_inventory_model } from "./InventoryModelLoader.js";
 import { dispose_component_resources } from "./ComponentStageGeometry.js";
 import { create_component_reveal } from "./ComponentStageReveal.js";
+import { create_ordered_component_reveal } from "./ComponentOrderedReveal.js";
 
 // Playback residency only. Authored placements, scatter seeds and motion stay intact.
 export function component_sections(document, descriptors, length = 1) {
@@ -68,7 +69,13 @@ export function create_component_section_content({
   on_status,
   resolve,
   load = load_inventory_model,
+  introduction_rank = null,
+  introduction_settings = {},
+  on_prepared = () => {},
 }) {
+  const introduction = introduction_rank
+    ? create_ordered_component_reveal(introduction_settings)
+    : null;
   const root = new THREE.Group(),
     cache = new Map(),
     reveals = new Map(),
@@ -79,6 +86,13 @@ export function create_component_section_content({
     generation = 0,
     revision = 0,
     active = 0;
+  let prepared = false;
+  const report_prepared = () => {
+    if (!disposed && !prepared && introduction?.prepared) {
+      prepared = true;
+      on_prepared();
+    }
+  };
   let sections = [],
     contents = [],
     elapsed = 0,
@@ -122,7 +136,11 @@ export function create_component_section_content({
       return model;
     });
   };
-  const child = () => {
+  const child = (value, blocking = false) => {
+    const reveal_ready = introduction?.expect(
+      introduction_rank(value),
+      blocking,
+    );
     const content = create_component_content({
       scene: root,
       render,
@@ -144,7 +162,10 @@ export function create_component_section_content({
         ),
       load: shared_load,
       own_prototypes: false,
-      on_ready: (group) => reveals.set(content, create_component_reveal(group)),
+      on_ready: (group) => {
+        if (reveal_ready) reveal_ready(group);
+        else reveals.set(content, create_component_reveal(group));
+      },
     });
     contents.push(content);
     return content;
@@ -155,14 +176,15 @@ export function create_component_section_content({
     objects,
     scatters: [],
   });
-  const ensure = (section) => {
+  const ensure = (section, blocking = false) => {
     if (section.promise) return section.promise;
     const token = generation,
-      content = child();
+      content = child(subset(section.objects), blocking);
     section.promise = content.update(subset(section.objects)).then(() => {
       if (disposed || failed || token !== generation) return;
       content.animate(elapsed);
       section.ready = true;
+      report_prepared();
       revision++;
       render();
     });
@@ -186,9 +208,16 @@ export function create_component_section_content({
       return revision;
     },
     get revealing() {
-      return reveals.size > 0;
+      return introduction?.active || reveals.size > 0;
+    },
+    get introduction_complete() {
+      return introduction?.complete ?? true;
+    },
+    release_introduction(rank) {
+      introduction?.release(rank);
     },
     reveal(delta) {
+      introduction?.update(delta);
       for (const [content, reveal] of reveals) {
         reveal.update(delta);
         if (!reveal.active) reveals.delete(content);
@@ -218,19 +247,30 @@ export function create_component_section_content({
       ]);
       if (disposed || token !== generation) return;
       sections = component_sections(document, descriptors);
-      const floor = child();
-      // Dirt can render while the first model prototypes download and decode.
+      const floor = child(subset([], document.floor), true);
+      // Floor loading is parallel; the optional introduction controls visibility.
       const floor_ready = floor.update(subset([], document.floor)).then(() => {
         revision++;
         render();
       });
-      await Promise.all([floor_ready, ...required(pose, radius).map(ensure)]);
+      const initial = required(pose, radius)
+        .sort((a, b) =>
+          introduction_rank
+            ? introduction_rank(subset(a.objects)) -
+              introduction_rank(subset(b.objects))
+            : 0,
+        )
+        .map((section) => ensure(section, true));
+      introduction?.seal();
+      report_prepared();
+      await Promise.all([floor_ready, ...initial]);
       if (!disposed && !failed && token === generation)
         on_status("content_ready");
     },
     dispose() {
       disposed = true;
       generation++;
+      introduction?.dispose();
       for (const task of queued.splice(0))
         task.reject(new Error("runtime_stream_disposed"));
       for (const reveal of reveals.values()) reveal.dispose();

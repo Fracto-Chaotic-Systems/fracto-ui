@@ -10,6 +10,7 @@ import {
   create_component_section_content,
   component_sections,
 } from "../src/pages/games/ComponentSectionContent.js";
+import { grass_introduction_rank } from "../src/pages/games/GamesPlayGrassIntroduction.js";
 
 const ref = (id) => ({ id, revision: "a".repeat(64) });
 const facts = {
@@ -38,6 +39,71 @@ const descriptor = (id) => ({
 });
 const drain = () => new Promise((resolve) => setImmediate(resolve));
 const pose = (z) => ({ position: [0, 0, z] });
+
+test("streamed introduction holds dirt and cached models until ladybugs, stones, dirt and grass take their turns", async () => {
+  const document = create_component_document(randomUUID(), "Introduction");
+  document.floor = { size: [1, 20], texture_repeat: [1, 20], asset: null };
+  document.objects = [
+    object("yard-grass", 0),
+    object("rocks-piece-001", 0),
+    object("ladybug", 0),
+  ];
+  const descriptors = Object.fromEntries(
+    document.objects.map((o) => [
+      component_reference_key(o.asset),
+      descriptor(o.asset.id),
+    ]),
+  );
+  const pending = new Map();
+  const content = create_component_section_content({
+    scene: new THREE.Scene(),
+    render() {},
+    on_status() {},
+    introduction_rank: grass_introduction_rank,
+    resolve: async () => descriptors,
+    load: (asset) =>
+      new Promise((resolve) =>
+        pending.set(asset.id, () =>
+          resolve(
+            new THREE.Mesh(
+              new THREE.BoxGeometry(),
+              new THREE.MeshBasicMaterial(),
+            ),
+          ),
+        ),
+      ),
+  });
+  const initial = content.update(document, pose(0), 0.5);
+  const visible = () => {
+    const ids = [];
+    content.root.traverseVisible((node) => {
+      if (node.userData.component_item_id)
+        ids.push(node.userData.component_item_id);
+    });
+    return ids.sort();
+  };
+  await drain();
+  assert.equal(pending.size, 3, "All three model downloads run in parallel");
+  pending.get("yard-grass")();
+  pending.get("rocks-piece-001")();
+  await drain();
+  content.reveal(5);
+  assert.deepEqual(visible(), []);
+  pending.get("ladybug")();
+  await initial;
+  for (const [index, expected] of [
+    document.objects[2].id,
+    document.objects[1].id,
+    "floor",
+    document.objects[0].id,
+  ].entries()) {
+    content.reveal(1.2);
+    assert.equal(visible().length, index + 1);
+    assert.ok(visible().includes(expected));
+  }
+  assert.equal(content.introduction_complete, true);
+  content.dispose();
+});
 
 test("first section renders without distant rocks; lookahead shares models, preserves clocks and disposes once", async () => {
   const document = create_component_document(randomUUID(), "Stream");

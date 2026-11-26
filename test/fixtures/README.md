@@ -1,5 +1,14 @@
 # Contract fixtures
 
+`game-play-flow.html` mounts the real Play page in StrictMode with normal game
+text and settings initialization. Use settings → control → Reset game to enter
+  the audio-synchronized WELCOME/to/CHAOS sequence (0.47s/2.87s/4.17s in the
+  TwelveNoteFugue soundtrack); wait for its completion or click anywhere
+  in the game area to skip to the background and TV. Only activating the final
+  white message starts a new interactive session. The GAME PLAY title remains
+  visible above the game area throughout. It
+uses the development service endpoints for runtime assets and flight rendering.
+
 `path-motion.html` loads the published grass package and separate motion file into
 the production Play renderer. Seek buttons preview stops, either half-turn and
 reverse travel in seconds, without changing model records or speeding up the

@@ -24,6 +24,7 @@ import {
   KEY_GAMES_PLAY_CONTROLLER_COLOR_LABEL,
   CONTROLLER_COLOR_TEXT,
   FLIGHT_SCENE_TEXT,
+  PLAY_FLOW_TEXT,
 } from "../../text/GamesText.jsx";
 import {
   CONTROLLER_COLORS,
@@ -110,7 +111,7 @@ const LensField = styled(ToggleItem)`
   }
 `;
 
-export default function GamesPlaySettings({ fullscreen_target_ref }) {
+export default function GamesPlaySettings({ fullscreen_target_ref, on_reset }) {
   const canvas_shape = useCanvasShape();
   const fisheye_strength = useFisheyeStrength();
   const haze_percent = useAtmosphere();
@@ -307,6 +308,11 @@ export default function GamesPlaySettings({ fullscreen_target_ref }) {
           </select>
         </ToggleItem>
         <FlightControlSettingsPanel />
+        <ToggleItem as="div">
+          <button type="button" onClick={on_reset} disabled={!on_reset}>
+            {AppText.get(PLAY_FLOW_TEXT.reset)}
+          </button>
+        </ToggleItem>
       </SettingsSection>
     </>
   );

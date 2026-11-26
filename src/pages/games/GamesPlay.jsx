@@ -1,4 +1,11 @@
-import { useEffect, useId, useRef, useState } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  useReducer,
+  useCallback,
+} from "react";
 import styled from "styled-components";
 import Drawer from "@mui/material/Drawer";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
@@ -14,28 +21,15 @@ import CoolSplitter, {
 import { SPLITTER_WIDTH_PX } from "../../constants.jsx";
 import { KEY_GAMES_PLAY_SETTINGS_POSITION } from "../../settings/GamesSettings.jsx";
 import GamesPlaySettings from "./GamesPlaySettings.jsx";
-import GamesPlayControls from "./GamesPlayControls.jsx";
-import GamesCrt from "./GamesCrt.jsx";
+import GamesPlayInteractive from "./GamesPlayInteractive.jsx";
+import GamesPlayPrelude from "./GamesPlayPrelude.jsx";
+import GamesPlayConfirmation from "./GamesPlayConfirmation.jsx";
+import GamesPlayIntroTitle from "./GamesPlayIntroTitle.jsx";
+import GamesPlayTv from "./GamesPlayTv.jsx";
+import { INITIAL_PLAY_FLOW, play_flow_reducer } from "./GamesPlayFlow.js";
+import { create_prelude_soundtrack } from "./GamesPlayPreludeAudio.js";
 import GamesPlayGrass from "./GamesPlayGrass.jsx";
 import screen_media from "virtual:crt-screen-media";
-import { create_controller_input } from "./controllers/ControllerInput.js";
-import {
-  create_flight_controls,
-  bind_flight_controls,
-} from "./controllers/FlightControls.js";
-import {
-  read_flight_control_settings,
-  subscribe_flight_control_settings,
-} from "./controllers/useFlightControlSettings.js";
-import {
-  create_flight_state,
-  INITIAL_FLIGHT_STATE,
-} from "./flight/FlightState.js";
-import { start_flight_simulation } from "./flight/FlightSimulation.js";
-import FlightScene from "./flight/FlightScene.jsx";
-import { useCanvasShape } from "./useCanvasDisplay.js";
-import { useFisheyeStrength } from "./useFisheye.js";
-import { useAtmosphere } from "./useAtmosphere.js";
 import {
   MAX_SETTINGS_POSITION,
   MIN_SETTINGS_POSITION,
@@ -52,7 +46,10 @@ const PlayPanel = styled.div`
   display: flex;
   flex-direction: column;
   height: 100%;
+  max-height: 100%;
+  min-width: 0;
   min-height: 0;
+  overflow: hidden;
 
   > ${styles.SectionTitle} {
     flex-shrink: 0;
@@ -67,7 +64,7 @@ const PlayContent = styled.div`
   flex: 1;
   min-height: 0;
   overflow: hidden;
-  background-color: #554e36;
+  background-color: ${({ $waiting }) => ($waiting ? "#ffffff" : "#554e36")};
 
   &:fullscreen {
     width: 100vw;
@@ -76,25 +73,6 @@ const PlayContent = styled.div`
     max-height: none;
     margin: 0;
     flex: none;
-  }
-`;
-
-const CornerTv = styled.div`
-  position: absolute;
-  top: 0;
-  left: -50px;
-  z-index: 0;
-  width: clamp(425px, 67.5%, 725px);
-  max-width: calc(125% - 3.75rem);
-  aspect-ratio: 1.25;
-  pointer-events: none;
-
-  > div {
-    height: 100%;
-  }
-
-  button {
-    pointer-events: auto;
   }
 `;
 
@@ -179,30 +157,32 @@ const SettingsHeading = styled.h2`
 `;
 
 export default function GamesPlay({ crt_content } = {}) {
-  const canvas_shape = useCanvasShape();
-  const fisheye_strength = useFisheyeStrength();
-  const haze_percent = useAtmosphere();
-  // Input, mapped commands, and telemetry have separate per-page lifetimes.
-  const [game_input] = useState(create_controller_input);
-  const [flight_controls] = useState(create_flight_controls);
-  useEffect(
-    () =>
-      bind_flight_controls(game_input, flight_controls, {
-        read_settings: read_flight_control_settings,
-        subscribe_settings: subscribe_flight_control_settings,
-      }),
-    [game_input, flight_controls],
-  );
-  const [flight_state] = useState(() =>
-    create_flight_state(INITIAL_FLIGHT_STATE),
-  );
-  useEffect(
-    () => start_flight_simulation(flight_state, flight_controls),
-    [flight_state, flight_controls],
+  const [flow, dispatch_flow] = useReducer(
+    play_flow_reducer,
+    INITIAL_PLAY_FLOW,
   );
   const [settings_open, set_settings_open] = useState(false);
   const content_ref = useRef(null);
   const gear_ref = useRef(null);
+  const audio_ref = useRef(null);
+  const soundtrack = useRef(null);
+  const [audio_error, set_audio_error] = useState(false);
+  useEffect(() => {
+    const player = create_prelude_soundtrack(audio_ref.current, () =>
+      set_audio_error(true),
+    );
+    soundtrack.current = player;
+    return () => {
+      player.dispose();
+      soundtrack.current = null;
+    };
+  }, []);
+  const reset_game = () => {
+    set_settings_open(false);
+    set_audio_error(false);
+    soundtrack.current?.start(flow.run + 1);
+    dispatch_flow({ type: "reset" });
+  };
   const [content_bounds, set_content_bounds] = useState({
     width: 0,
     height: 0,
@@ -238,55 +218,128 @@ export default function GamesPlay({ crt_content } = {}) {
     set_settings_open(false);
     gear_ref.current?.focus();
   };
+  const complete_prelude = useCallback(() => {
+    dispatch_flow({ type: "prelude_complete", run: flow.run });
+  }, [flow.run]);
+  useEffect(() => {
+    if (flow.phase === "interactive" && flow.run > 0) gear_ref.current?.focus();
+  }, [flow.phase, flow.run]);
+  const skip_prelude = () =>
+    dispatch_flow({ type: "skip_prelude", run: flow.run });
+  const confirm_play = () => {
+    soundtrack.current?.stop(flow.run);
+    dispatch_flow({ type: "confirm", run: flow.run });
+  };
+  const reveal_prelude_tv = useCallback(() => {
+    dispatch_flow({ type: "prelude_tv_reveal", run: flow.run });
+  }, [flow.run]);
+  const prepare_background = useCallback(() => {
+    dispatch_flow({ type: "prelude_background_prepare", run: flow.run });
+  }, [flow.run]);
 
   return (
     <PlayPanel>
+      <audio
+        ref={audio_ref}
+        src="/audio/twelve-note-fugue.mp3"
+        preload="auto"
+        aria-hidden="true"
+        data-prelude-soundtrack="true"
+      />
       <styles.SectionTitle>
         {AppText.get(KEY_GAMES_PLAY_TITLE)}
       </styles.SectionTitle>
-      <PlayContent ref={content_ref}>
-        <GamesPlayGrass
-          width_px={content_bounds.width}
-          height_px={content_bounds.height}
+      <PlayContent
+        ref={content_ref}
+        $waiting={flow.phase !== "interactive"}
+        onClickCapture={(event) => {
+          if (flow.phase !== "prelude") return;
+          event.preventDefault();
+          event.stopPropagation();
+          if (audio_error) reset_game();
+          else skip_prelude();
+        }}
+        onKeyDownCapture={(event) => {
+          if (
+            flow.phase !== "prelude" ||
+            !["Enter", " ", "Escape"].includes(event.key)
+          )
+            return;
+          event.preventDefault();
+          event.stopPropagation();
+          if (audio_error) reset_game();
+          else skip_prelude();
+        }}
+      >
+        {(flow.phase !== "prelude" || flow.background_prepared) && (
+          <GamesPlayGrass
+            key={`grass-${flow.run}`}
+            introduction={flow.run > 0}
+            reveal_limit={
+              flow.phase === "prelude" ? (flow.tv_visible ? 0 : -1) : 3
+            }
+            width_px={content_bounds.width}
+            height_px={content_bounds.height}
+          />
+        )}
+        {flow.phase === "prelude" && (
+          <GamesPlayPrelude
+            key={`prelude-${flow.run}`}
+            on_complete={complete_prelude}
+            on_tv_reveal={reveal_prelude_tv}
+            on_prepare={prepare_background}
+            audio_ref={audio_ref}
+            audio_error={audio_error}
+          />
+        )}
+        {flow.phase === "confirmation" && (
+          <GamesPlayConfirmation
+            key={`confirmation-${flow.run}`}
+            on_confirm={confirm_play}
+          />
+        )}
+        {flow.phase === "confirmation" && (
+          <GamesPlayIntroTitle
+            key={`intro-title-${flow.run}`}
+            audio_ref={audio_ref}
+            width_px={content_bounds.width}
+          />
+        )}
+        {flow.phase === "interactive" && (
+          <GamesPlayInteractive
+            key={`interactive-${flow.run}`}
+            width_px={content_bounds.width}
+            height_px={content_bounds.height}
+          />
+        )}
+        <GamesPlayTv
+          key="tv"
+          crt_content={crt_content ?? DEFAULT_CRT_CONTENT}
+          visible={flow.tv_visible}
+          prelude={flow.phase !== "interactive"}
         />
-        <FlightScene
-          display_mode={canvas_shape === "porthole" ? "porthole" : "640x480"}
-          fisheye_strength={fisheye_strength}
-          haze_percent={haze_percent}
-          flight_state={flight_state}
-          width_px={content_bounds.width}
-          height_px={content_bounds.height}
-        />
-        <GamesPlayControls
-          input={game_input}
-          flight_controls={flight_controls}
-          flight_state={flight_state}
-          width_px={content_bounds.width}
-          height_px={content_bounds.height}
-        />
-        <CornerTv>
-          <GamesCrt screen_content={crt_content ?? DEFAULT_CRT_CONTENT} />
-        </CornerTv>
-        <SettingsToggle
-          ref={gear_ref}
-          type="button"
-          title={AppText.get(
-            settings_open
-              ? KEY_GAMES_PLAY_SETTINGS_CLOSE
-              : KEY_GAMES_PLAY_SETTINGS,
-          )}
-          aria-label={AppText.get(
-            settings_open
-              ? KEY_GAMES_PLAY_SETTINGS_CLOSE
-              : KEY_GAMES_PLAY_SETTINGS,
-          )}
-          aria-expanded={settings_open}
-          aria-controls={settings_open ? drawer_id : undefined}
-          aria-haspopup="dialog"
-          onClick={() => set_settings_open((open) => !open)}
-        >
-          <FontAwesomeIcon icon={settings_open ? faXmark : faGear} />
-        </SettingsToggle>
+        {flow.phase === "interactive" && (
+          <SettingsToggle
+            ref={gear_ref}
+            type="button"
+            title={AppText.get(
+              settings_open
+                ? KEY_GAMES_PLAY_SETTINGS_CLOSE
+                : KEY_GAMES_PLAY_SETTINGS,
+            )}
+            aria-label={AppText.get(
+              settings_open
+                ? KEY_GAMES_PLAY_SETTINGS_CLOSE
+                : KEY_GAMES_PLAY_SETTINGS,
+            )}
+            aria-expanded={settings_open}
+            aria-controls={settings_open ? drawer_id : undefined}
+            aria-haspopup="dialog"
+            onClick={() => set_settings_open((open) => !open)}
+          >
+            <FontAwesomeIcon icon={settings_open ? faXmark : faGear} />
+          </SettingsToggle>
+        )}
         <ClickAwayListener
           onClickAway={(event) => {
             if (settings_open && !gear_ref.current?.contains(event.target)) {
@@ -346,7 +399,10 @@ export default function GamesPlay({ crt_content } = {}) {
               <SettingsHeading id={heading_id}>
                 {AppText.get(KEY_GAMES_PLAY_SETTINGS_TITLE)}
               </SettingsHeading>
-              <GamesPlaySettings fullscreen_target_ref={content_ref} />
+              <GamesPlaySettings
+                fullscreen_target_ref={content_ref}
+                on_reset={reset_game}
+              />
             </SettingsContent>
           </Drawer>
         </ClickAwayListener>

@@ -5,7 +5,10 @@ export const COMPONENT_REVEAL_SECONDS = 1.2;
 // Coverage fading retains foliage depth writes and authored alpha cutouts. The
 // same coverage ramp in the shadow pass avoids solid shadows from hidden plants.
 // All temporary materials are local to this arriving group, never its prototype.
-export function create_component_reveal(root) {
+export function create_component_reveal(
+  root,
+  duration = COMPONENT_REVEAL_SECONDS,
+) {
   const uniform = { value: 0 },
     originals = [],
     temporary = new Set(),
@@ -70,7 +73,7 @@ if (componentReveal <= componentRevealNoise) discard;`,
     update(delta) {
       if (!active) return;
       elapsed += delta;
-      const t = Math.min(elapsed / COMPONENT_REVEAL_SECONDS, 1);
+      const t = duration === 0 ? 1 : Math.min(elapsed / duration, 1);
       uniform.value = t * t * (3 - 2 * t);
       if (t === 1) finish();
     },

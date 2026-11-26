@@ -501,6 +501,20 @@ export const KEY_GAMES_PLAY_SETTINGS = `${GAMES_FOLDER}/play_settings`;
 export const KEY_GAMES_PLAY_SETTINGS_TITLE = `${GAMES_FOLDER}/play_settings_title`;
 export const KEY_GAMES_PLAY_SETTINGS_CLOSE = `${GAMES_FOLDER}/play_settings_close`;
 export const KEY_GAMES_PLAY_SETTINGS_RESIZE = `${GAMES_FOLDER}/play_settings_resize`;
+export const PLAY_FLOW_TEXT = Object.fromEntries(
+  [
+    "reset",
+    "prelude",
+    "skip",
+    "welcome",
+    "to",
+    "chaos",
+    "confirm",
+    "confirm_at_will",
+    "confirm_your_will",
+    "audio_retry",
+  ].map((code) => [code, `${GAMES_FOLDER}/play_flow_${code}`]),
+);
 export const KEY_GAMES_PLAY_DISPLAY = `${GAMES_FOLDER}/play_display`;
 export const DASHBOARD_BACKGROUND_TEXT = Object.fromEntries(
   ["label", "woodgrain", "metal", "wicker", "pearl"].map((code) => [
@@ -1555,6 +1569,16 @@ export const APP_GAMES_TEXT = {
   [KEY_GAMES_PLAY_SETTINGS_TITLE]: "Settings",
   [KEY_GAMES_PLAY_SETTINGS_CLOSE]: "Close settings",
   [KEY_GAMES_PLAY_SETTINGS_RESIZE]: "Resize settings panel",
+  [PLAY_FLOW_TEXT.reset]: "Reset game",
+  [PLAY_FLOW_TEXT.prelude]: "Prelude",
+  [PLAY_FLOW_TEXT.skip]: "Skip prelude",
+  [PLAY_FLOW_TEXT.welcome]: "WELCOME",
+  [PLAY_FLOW_TEXT.to]: "to",
+  [PLAY_FLOW_TEXT.chaos]: "CHAOS",
+  [PLAY_FLOW_TEXT.confirm]: "Confirm and begin game",
+  [PLAY_FLOW_TEXT.confirm_at_will]: "confirm at will",
+  [PLAY_FLOW_TEXT.confirm_your_will]: "confirm your will",
+  [PLAY_FLOW_TEXT.audio_retry]: "Audio could not start. Click to retry.",
   [KEY_GAMES_PLAY_DISPLAY]: "display",
   [NIGHT_FLIGHT_TEXT.label]: "night flight lighting",
   [NIGHT_FLIGHT_TEXT.night]: "lights",

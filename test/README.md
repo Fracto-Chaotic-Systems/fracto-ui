@@ -1,5 +1,41 @@
 # UI tests
 
+`games_play_intro_title.test.js` verifies the sudden FRACTO cue at audio 29.66s,
+buffering/hidden-tab behavior and cancellation before the cue. The play flow test
+keeps this title confined to the confirmation scene and removes it on entry to play.
+
+`games_play_traversal_start.test.js` checks randomized, separated entry points,
+reload persistence, optional storage and forward movement away from the turns.
+The renderer test checks that its initial camera uses the selected route offset.
+
+`component_ordered_reveal.test.js` checks the ladybug/stone/dirt/grass order even
+when downloads finish backwards, empty categories, shadow fades, later sections
+and cancellation. It also verifies the gated insect-only TV cue, the four-second
+bugs-and-stones hold, and four-second dirt/grass fades. Prelude clock tests check
+the exact 0.47/2.87/4.17-second audio cues, buffering, and late-frame catchup.
+The grass renderer test checks that the camera and animation
+advance before initial content is ready, even while section residency is pending.
+
+`crt_initialization.test.js` verifies that cold graphics setup yields to browser
+paint and that abandoned/StrictMode mounts cancel before WebGL allocation. The
+play flow test checks stable TV identity across repeated resets.
+
+`games_play_confirmation.test.js` covers irregular phrase holds, short bursts,
+hidden-tab pausing and timer cleanup.
+`games_play_flow.test.js` checks development startup, Reset → Prelude → confirmation → play,
+repeated reset, abandoned prelude completions, fresh interactive state and session
+effect cleanup. `games_play_fullscreen.test.js` covers the Reset game action in
+the control section and verifies that it does not modify saved preferences.
+`games_play_prelude.test.js` covers the timed typography, simultaneous TV/CHAOS
+reveal, slow final fade, hidden-tab handling and cancellation.
+`games_play_prelude_audio.test.js` covers synchronous playback from Reset, pause
+and resume, retry, stale callbacks and soundtrack disposal. The
+flow test also checks click capture and continuity of the shared CRT instance.
+It verifies that background/TV clicks and stage keys cannot bypass the final
+message, that skipping the typography still requires confirmation, and that a
+stale confirmation callback cannot advance a later run.
+The title remains mounted in every phase, with the same game-area container.
+
 `component_runtime_package.test.js` verifies pinned manifest identity, static
 resource URLs, no authoring requests/fallback, and canonical lab routing. The
 Play lifecycle test loads the runtime package rather than an editor database row.

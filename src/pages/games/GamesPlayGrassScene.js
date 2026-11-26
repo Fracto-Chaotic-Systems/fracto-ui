@@ -8,22 +8,35 @@ import {
 import { play_grass_view } from "./GamesPlayGrassView.js";
 import { create_path_motion_controller } from "@fracto/sdk/FractoPathMotion.js";
 import { apply_top_down_path_pose } from "../../utils/render/TopDownPathCamera.js";
+import { play_traversal_start_seconds } from "./GamesPlayTraversalStart.js";
+import {
+  grass_introduction_rank,
+  GRASS_INTRODUCTION,
+} from "./GamesPlayGrassIntroduction.js";
 
 export function create_play_grass_scene(
   host,
-  { on_error, path_motion, resolve_materials },
+  {
+    on_error,
+    path_motion,
+    resolve_materials,
+    introduction = false,
+    start_fraction = 0,
+    on_prepared,
+  },
 ) {
   if (typeof resolve_materials !== "function")
     throw new Error("runtime_package_required");
   const motion = create_path_motion_controller(path_motion);
-  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  if (start_fraction > 0)
+    motion.reset(play_traversal_start_seconds(motion, start_fraction));
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.domElement.style.display = "block";
   host.prepend(renderer.domElement);
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x554e36);
   const light = new THREE.DirectionalLight(0xfff4e5, 3);
   configure_component_shadows(renderer, light);
   scene.add(
@@ -71,20 +84,21 @@ export function create_play_grass_scene(
       shadow_bounds,
     );
     renderer.render(scene, camera);
-    if ((ready || content.revealing) && frame === null)
+    if ((ready || introducing() || content.revealing) && frame === null)
       frame = requestAnimationFrame(tick);
-    else if (!ready && !content.revealing) last_time = null;
+    else if (!ready && !introducing() && !content.revealing) last_time = null;
   };
+  const introducing = () => introduction && !content.introduction_complete;
   const tick = (time) => {
     frame = null;
     if (disposed || failed || document.hidden) return;
     if (last_time !== null) {
       const delta = (time - last_time) / 1000;
       content.reveal(Math.min(delta, 0.1));
-      if (ready) {
+      if (ready || introducing()) {
         content.animate(Math.min(delta, 0.1));
         const candidate = motion.sample(motion.elapsed_seconds + delta);
-        if (content.focus(candidate, view_radius()))
+        if (content.focus(candidate, view_radius()) || introducing())
           apply_top_down_path_pose(camera, motion.advance(delta));
       }
     }
@@ -96,10 +110,14 @@ export function create_play_grass_scene(
     scene,
     render,
     resolve: resolve_materials,
+    introduction_rank: introduction ? grass_introduction_rank : null,
+    introduction_settings: GRASS_INTRODUCTION,
+    on_prepared,
     on_status: (status) => {
       if (status === "loading_content") {
         ready = false;
         stop();
+        if (introduction) render();
       } else if (status === "content_ready") {
         ready = true;
         render();
@@ -133,6 +151,11 @@ export function create_play_grass_scene(
   renderer.domElement.addEventListener("webglcontextlost", context_lost);
   return {
     resize,
+    release_introduction(rank) {
+      content.release_introduction(rank);
+      content.reveal(0);
+      render();
+    },
     seek_motion(seconds) {
       const pose = motion.reset(seconds);
       content.focus(pose, view_radius());

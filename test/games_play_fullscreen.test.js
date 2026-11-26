@@ -37,6 +37,7 @@ function mount({
   let cursor = 0;
   let requests = 0;
   let exits = 0;
+  let resets = 0;
   const document = {
     fullscreenEnabled: supported,
     fullscreenElement: null,
@@ -63,6 +64,7 @@ function mount({
     FlightControlSettingsPanel: () => null,
     DashboardBackgroundSetting: () => null,
     FLIGHT_SETTINGS_TEXT: { instruments: "instruments" },
+    PLAY_FLOW_TEXT: { reset: "Reset game" },
     FLIGHT_SCENE_TEXT: {
       mode: "canvas mode",
       cinema: "cinema",
@@ -132,7 +134,7 @@ function mount({
   });
   const render = () => {
     cursor = 0;
-    return component({ fullscreen_target_ref });
+    return component({ fullscreen_target_ref, on_reset: () => resets++ });
   };
   render();
   const cleanup = effects[0]();
@@ -146,8 +148,22 @@ function mount({
     toggle,
     cleanup,
     counts: () => ({ requests, exits }),
+    resets: () => resets,
   };
 }
+
+test("Reset game is inside control and invokes the session callback without changing preferences", () => {
+  const view = mount();
+  const control = view.render().children.at(-1);
+  const button = control.children.at(-1).children[0];
+  assert.equal(control.children[0].children[0], "control");
+  assert.equal(button.children[0], "Reset game");
+  assert.equal(button.props.disabled, false);
+  const saved = view.saved.length;
+  button.props.onClick();
+  assert.equal(view.resets(), 1);
+  assert.equal(view.saved.length, saved);
+});
 
 test("toggle fullscreens only the game area and exits back to normal layout", async () => {
   const view = mount();

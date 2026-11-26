@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Game reset and prelude</title>
+    <style>
+      body {
+        margin: 0;
+        font: 14px system-ui;
+      }
+      #root {
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      import React from "react";
+      import { createRoot } from "react-dom/client";
+      import GamesPlay from "/src/pages/games/GamesPlay.jsx";
+      import AppSettings from "/src/AppSettings.jsx";
+      import AppText from "/src/AppText.jsx";
+      import { APP_GAMES_SETTINGS } from "/src/settings/GamesSettings.jsx";
+      import { APP_GAMES_TEXT } from "/src/text/GamesText.jsx";
+      import { APP_WELCOME_TEXT } from "/src/text/WelcomeText.jsx";
+      AppSettings.initialize(APP_GAMES_SETTINGS);
+      AppText.initialize({ ...APP_GAMES_TEXT, ...APP_WELCOME_TEXT });
+      const root = createRoot(document.querySelector("#root"));
+      root.render(
+        React.createElement(
+          React.StrictMode,
+          null,
+          React.createElement(GamesPlay),
+        ),
+      );
+      window.addEventListener("pagehide", () => root.unmount(), { once: true });
+    </script>
+  </body>
+</html>

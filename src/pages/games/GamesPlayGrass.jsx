@@ -9,6 +9,7 @@ import {
 import { PLAY_GRASS_RELEASE } from "./GamesPlayGrassRelease.js";
 import { create_play_grass_scene } from "./GamesPlayGrassScene.js";
 import { load_path_motion } from "../../utils/render/TopDownPathCamera.js";
+import { random_play_traversal_start } from "./GamesPlayTraversalStart.js";
 
 const Background = styled.div`
   position: absolute;
@@ -35,14 +36,30 @@ const Notice = styled.div`
   }
 `;
 
-export default function GamesPlayGrass({ width_px, height_px }) {
+export default function GamesPlayGrass({
+  width_px,
+  height_px,
+  introduction = false,
+  reveal_limit = 3,
+  on_prepared,
+}) {
   const host = useRef(null),
     runtime = useRef(null),
-    size = useRef({ width: width_px, height: height_px });
+    size = useRef({ width: width_px, height: height_px }),
+    presentation = useRef({ reveal_limit, on_prepared }),
+    traversal_start = useRef(null);
+  useEffect(() => {
+    presentation.current = { reveal_limit, on_prepared };
+    runtime.current?.release_introduction(reveal_limit);
+  }, [reveal_limit, on_prepared]);
   const [failed, set_failed] = useState(false),
     [attempt, set_attempt] = useState(0);
   useEffect(() => {
     const controller = new AbortController();
+    if (traversal_start.current === null)
+      traversal_start.current = introduction
+        ? random_play_traversal_start()
+        : 0;
     let scene;
     Promise.all([
       load_component_runtime(
@@ -60,6 +77,9 @@ export default function GamesPlayGrass({ width_px, height_px }) {
       .then(([{ document, resolve_materials }, path_motion]) => {
         if (controller.signal.aborted) return;
         scene = create_play_grass_scene(host.current, {
+          introduction,
+          start_fraction: traversal_start.current,
+          on_prepared: () => presentation.current.on_prepared?.(),
           path_motion,
           resolve_materials,
           on_error: () => {
@@ -67,6 +87,7 @@ export default function GamesPlayGrass({ width_px, height_px }) {
           },
         });
         runtime.current = scene;
+        scene.release_introduction(presentation.current.reveal_limit);
         scene.resize(size.current.width, size.current.height);
         return scene.update(document);
       })
@@ -78,7 +99,7 @@ export default function GamesPlayGrass({ width_px, height_px }) {
       scene?.dispose();
       runtime.current = null;
     };
-  }, [attempt]);
+  }, [attempt, introduction]);
   useEffect(() => {
     size.current = { width: width_px, height: height_px };
     runtime.current?.resize(width_px, height_px);

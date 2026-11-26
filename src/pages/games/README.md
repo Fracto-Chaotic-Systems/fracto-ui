@@ -92,6 +92,109 @@ available as existing capabilities; [conversation](COMPONENT_CONVERSATION.md),
 workflow rather than the current stage UI.
 
 The parent ../Games.jsx owns sidebar selection and the persisted splitter.
+`GamesPlayFlow.js` owns the nonpersistent development launch/reset phases. A new
+page opens directly in `interactive`, preserving the current development startup.
+Settings → control → Reset game closes the drawer, starts a new run and enters
+`GamesPlayPrelude.jsx`. Its white-screen sequence is sampled by
+`GamesPlayPreludeTimeline.js`, using the audio element's `currentTime` as its
+sole clock: WELCOME begins fading at 0.47s (fully visible at 1.27s), "to" begins
+at 2.87s while WELCOME fades through 3.9s, and "to" clears by 4.05s. At 4.17s,
+the corner TV and lower CHAOS word appear with the already-moving ladybugs.
+CHAOS holds until 6.17s then slowly fades through 12.17s,
+when the confirmation scene begins. The GAME PLAY title stays mounted above the
+same bounded game area throughout prelude, confirmation and interactive play;
+the page header and sidebar remain outside it. The confirmation message anchors
+to the bottom of this game area, not the browser viewport. Only the settings
+gear hides during the prelude and confirmation. Click anywhere in the game area (including the TV), or
+press Enter/Space/Escape, to skip immediately. Click capture prevents that same
+click from toggling the TV or activating an underlying game control. Presentation
+time follows buffering/pausing audio, and a delayed frame catches up to the music.
+Completion and TV reveal are scoped to the current run; late callbacks cannot
+advance a newer prelude after reset.
+WELCOME uses a 20px type size, "to" is 14px, and CHAOS scales from 48px to 160px
+with the viewport to create a much stronger final-word emphasis.
+
+While waiting for confirmation, `GamesPlayIntroTitleCue.js` observes the same
+music clock and releases FRACTO abruptly at 29.66s. `GamesPlayIntroTitle.jsx`
+inherits `WelcomeStyles.Title` directly from the splash screen (monospace,
+normal weight, spaced letters, outlined white text, shadow, 0.65 vertical scale).
+It measures the natural lettering before paint and scales it to 50% of the game
+area width, keeping the text horizontally symmetric and its bottom 1rem above
+the area's vertical center. Resize adjusts that width without replaying the cue.
+The title remains until confirmation; confirming earlier cancels the cue.
+
+`GamesPlayPreludeAudio.js` manages the user-provided TwelveNoteFugue MP3 in
+`public/audio/`. The audio element preloads on page load; Reset calls `play()`
+synchronously in the click handler to retain browser audio permission, restarting
+at zero. It continues through the landscape reveal and stops on confirmation or
+page unmount. Hidden tabs pause playback and resume at the same position. Rejected
+playback or decoding errors offer a retry that starts a new welcome run. Cancelled
+play promises and stale confirmation callbacks cannot affect a newer soundtrack.
+
+`GamesPlayInteractive.jsx` owns the controller input, mapped commands, simulation,
+flight state, instruments and map lifetime for one run. Reset unmounts that
+session and its effects; confirmation mounts a fresh initial flight state
+and neutral controls. The background preloads at audio time 0.8s, once WELCOME is
+visible, with every material hidden over white and traversal already running.
+At the shared 4.17s TV/CHAOS cue, only the ladybugs are released, immediately rather
+than faded. The prelude's white overlay becomes transparent at that cue. Graphics
+readiness never delays the audio cues; a late material appears when ready.
+After CHAOS disappears, stones fade over 1.5s, then bugs and stones remain alone
+over white for four more seconds. Dirt fades over four seconds, followed by both
+grass types over four seconds. Reset runs pass an
+introduction flag that stays fixed when the message is activated, so revealing
+game controls never reloads or restarts the background.
+`GamesPlayGrassIntroduction.js` assigns the published material roles to the order
+ladybugs → stones → dirt → grass (both sparse and dense). The optional
+`ComponentOrderedReveal.js` coordinator holds later groups hidden until the
+initial view's preceding category is loaded, has finished its configured fade,
+and has completed any hold. The prelude explicitly releases the insect and
+landscape categories at their respective cues.
+Downloads remain parallel. Missing categories are skipped; later streamed sections
+use their category's fade after it has been introduced. Visibility and shadow
+coverage change together, preserving grass cutouts and the final appearance.
+Camera traversal and material animation start during loading and continue through
+all four reveals, including waits for slower downloads. Once introduced, the
+normal section lookahead guard resumes for future travel. Hidden tabs still pause
+the clocks. Ordinary development page loads retain their existing arrival behavior.
+Each new prelude chooses a different forward-leg entry point with
+`GamesPlayTraversalStart.js`: randomly within 10–90% of the route, at least 10%
+of its length away from the previous start (about 1.89m on this strip). The
+preceding choice is kept in tab session storage so refreshing and resetting also
+changes the visible stretch. Storage is optional; in-memory fallback still varies
+successive resets. The chosen offset is retained across resize, retries, reveal
+cues and confirmation. It initializes the existing path controller before section
+selection, so insects and stones are loaded for that view and already travel
+downward at the cue. Authored objects, scatter seeds, route endpoints, speed and
+turns are unchanged.
+Only the active TV and bottom prompt overlay this scene. `GamesPlayConfirmation`
+shows white calligraphic text in self-hosted Pinyon Script, at 42px with 0.14em
+letter spacing and a tight shadow. It fades in once over 2.5 seconds when the
+confirmation scene begins; phrase changes do not restart that entrance.
+`GamesPlayConfirmation.css` registers its
+naturally slanted outlines; the font and license live in `public/fonts/pinyon-script/`.
+`GamesPlayConfirmationTiming.js`
+alternates "confirm at will" and "confirm your will" with random 2.5–8.5 second
+holds and occasional brief bursts. Timers pause in hidden tabs and are disposed
+on exit. Only activating the final message button enters play (click, or native
+Enter/Space activation while focused). Background clicks, TV interaction and
+stage-level keys cannot show controllers, dashboard, map or settings. Skipping
+the earlier timed prelude goes to this same confirmation scene, so a reset always
+requires the final message before interactive play. Development startup still
+launches directly into play. Display/control preferences and the fullscreen
+container remain in place; resetting a run never restores preference defaults.
+Background, prelude and interactive session use distinct run-scoped React keys
+so transitions unmount old sessions without leaving orphaned controls or renderers.
+The TV has a stable key across resets. Recreating its renderer, procedural casing
+and armature textures, model and shaders in the reset commit previously delayed
+the opening text. `GamesPlayTv.jsx` now keeps the initialized CRT for the whole
+play page; reset hides it while the text starts and its media continues loading
+independently. Fresh `GamesCrt` setup uses `CrtInitialization.js` to cross a painted
+frame and start in a separate task, cancelling discarded StrictMode mounts before
+any graphics are allocated. At audio time 4.17s the TV becomes visible in the same
+corner and continues its live playlist, swivel and mechanical pose through the
+handoff into play, without a remount. The existing CRT implementation is reused.
+
 It gives the play pane full height so GamesPlay's flex content area can fill the
 space below the title without clipping the gear or drawer to a zero-height box.
 `GamesPlayGrass` fills that content area behind the flight scene, TV, scroll map,
@@ -1062,22 +1165,27 @@ InventoryAnimation.js owns mixer lifetime; InventoryScene.js owns the visible lo
 Play background residency is managed by `ComponentSectionContent.js`: one-metre
 Z sections are grouped by material and selected using calibrated object bounds,
 complete insect patrol envelopes and offscreen shadow reach. Dirt loads separately;
-nearby groups attach as each material becomes ready. A shared four-worker queue
+nearby groups attach as each material becomes ready, with optional ordered
+visibility during the reset introduction. A shared four-worker queue
 downloads each model prototype once. One extra metre around the visible region is
-prefetched, and the camera waits before entering an unfinished region. Loaded
+prefetched, and after the introduction the camera waits before entering an
+unfinished region. During the introduction it advances while materials form. Loaded
 sections remain resident for the return trip; new section animation clocks catch
 up to component time. Disposal releases shared prototypes once. Editor stages
 retain their full-scene loading behavior. This changes playback residency only,
 not the published component or the separate path definition.
 
 `ComponentStageReveal.js` gently reveals each arriving floor/material group over
-1.2 seconds using an eased presentation clock. Temporary local shader materials
+1.2 seconds by default using an eased presentation clock; the reset introduction
+supplies its own slower landscape durations. Temporary local shader materials
 apply matching coverage ramps in visible and shadow passes, preserving foliage
 alpha cutouts, depth writes, texture alpha and existing shader adapters. Materials
 are restored exactly at completion and released on cancellation. The viewer runs
 these fades while later downloads are pending, independently of the component's
 authored animation multiplier; paused/hidden pages do not consume the fade. No
-authoring data, published assets or material-loading order is changed.
+authoring data or published assets are changed. The reset introduction prioritizes
+ladybug prototypes and uses `ComponentOrderedReveal.js` to sequence visibility;
+ordinary development launches still reveal groups as they arrive.
 
 The Play release binding selects losslessly compressed grass GLBs. The shared
 inventory loader enables Three's bundled Meshopt decoder (no CDN or decoder
