@@ -32,7 +32,7 @@ test("variants panel lists the current component, clears stale results, handles 
       AbortController,
       AppText: { get: (key) => key },
       COMPONENT_STAGE_TEXT: new Proxy({}, { get: (_, key) => key }),
-      InventoryControls: "aside",
+      StageVariants: "section",
       InventoryCaption: "p",
       VariantButton: "button",
       useState(initial) {

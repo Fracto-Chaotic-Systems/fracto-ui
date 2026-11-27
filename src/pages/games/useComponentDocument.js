@@ -94,6 +94,41 @@ export default function useComponentDocument() {
         dispatch({ type: "open", ...result });
       });
     },
+    /**
+     * Saves only the name, at once, on top of the saved document (expected
+     * revision checked); unsaved edits stay in the draft. A never-saved
+     * component has no saved document, so its name is a draft edit.
+     */
+    rename(name) {
+      return run(async () => {
+        const present = state.history.present;
+        if (!state.revision) {
+          dispatch({ type: "edit", document: { ...present, name } });
+          return;
+        }
+        const saved = validate_component_response(
+          await component_request(`/${encodeURIComponent(present.id)}`),
+        );
+        if (saved.revision !== state.revision) throw new Error("conflict");
+        const document = validate_component_document({
+          ...saved.document,
+          name,
+        });
+        const result = validate_component_response(
+          await component_request(`/${document.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              document,
+              expected_revision: state.revision,
+            }),
+          }),
+        );
+        if (result.document.name !== name) throw new Error("request_error");
+        dispatch({ type: "renamed", ...result });
+        set_message("saved");
+      });
+    },
     save() {
       return run(async () => {
         const document = validate_component_document(state.history.present);

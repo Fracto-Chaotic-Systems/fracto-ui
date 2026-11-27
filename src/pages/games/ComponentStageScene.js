@@ -16,7 +16,7 @@ import {
 // Stage guides are editor furniture, separate from future authored floor/objects.
 export function create_component_stage(
   host,
-  { label, on_error, on_status, on_select, on_walk },
+  { label, on_error, on_status, on_select, on_walk, on_info },
 ) {
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -61,7 +61,11 @@ export function create_component_stage(
     suspended = false,
     walk = null,
     orbit_view = null;
-  const looping = () => Boolean(content?.animated || walk?.active);
+  // Preview-only view settings shared with the materials preview: play/pause
+  // animation and a display scale. Neither changes the document.
+  let preview = { scale: 1, animation: true };
+  const animating = () => Boolean(content?.animated && preview.animation);
+  const looping = () => Boolean(animating() || walk?.active);
   const stop_animation = () => {
     if (frame !== null) cancelAnimationFrame(frame);
     frame = null;
@@ -92,7 +96,7 @@ export function create_component_stage(
       if (last_frame !== null) {
         const dt = Math.min((time - last_frame) / 1000, 0.1);
         walk.update(Math.min(dt, 0.05));
-        if (content.animated) content.animate(dt);
+        if (animating()) content.animate(dt);
       }
       last_frame = time;
       render();
@@ -101,6 +105,9 @@ export function create_component_stage(
   const render = () => {
     if (disposed || suspended) return;
     camera.updateMatrixWorld();
+    // The content root can be replaced by updates, so apply the scale here.
+    if (content && content.root.scale.x !== preview.scale)
+      content.root.scale.setScalar(preview.scale);
     if (content) {
       const view = [
         content.root.uuid,
@@ -128,6 +135,18 @@ export function create_component_stage(
     start_animation();
   };
   content = create_component_content({ scene, render, on_status });
+  /** Reports whether the content animates and its unscaled height (metres). */
+  const report = () => {
+    if (disposed || !content) return;
+    const bounds = new THREE.Box3().setFromObject(content.root);
+    const scale = content.root.scale.x || 1;
+    on_info?.({
+      animated: Boolean(content.animated),
+      height: bounds.isEmpty()
+        ? 0
+        : bounds.getSize(new THREE.Vector3()).y / scale,
+    });
+  };
   walk = create_walk_controller({
     camera,
     canvas,
@@ -275,6 +294,14 @@ export function create_component_stage(
       await content.update(document, options);
       if (disposed || token !== lighting_generation) return;
       render();
+      report();
+    },
+    set_preview(next) {
+      preview = { ...preview, ...next };
+      shadow_view = null;
+      stop_animation();
+      render();
+      report();
     },
     select(id) {
       selected = id;

@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { preview_component_variant } from "@fracto/sdk/FractoComponentVariant.js";
 import AppText from "../../AppText.jsx";
-import { COMPONENT_STAGE_TEXT } from "../../text/GamesText.jsx";
+import { COMPONENT_STAGE_TEXT, INVENTORY_TEXT } from "../../text/GamesText.jsx";
 import {
   InventoryToolbar,
   InventoryCaption,
   InventoryStatus,
+  InventoryControls,
 } from "./InventoryStyles.jsx";
 import {
   StageHost,
@@ -18,7 +19,12 @@ import { create_component_stage } from "./ComponentStageScene.js";
 import { construction_text } from "./ComponentToolFields.jsx";
 import ComponentConstructionDocument from "./ComponentConstructionDocument.jsx";
 import ComponentVariants from "./ComponentVariants.jsx";
+import ComponentNameEdit from "./ComponentNameEdit.jsx";
 import ComponentStageLightingControls from "./ComponentStageLightingControls.jsx";
+import {
+  PreviewAnimationToggle,
+  PreviewScaleControls,
+} from "./InventoryPreviewControls.jsx";
 
 const text = (key) => AppText.get(COMPONENT_STAGE_TEXT[key]);
 
@@ -37,6 +43,12 @@ export default function ComponentStage({
   const [document_view, set_document_view] = useState(false);
   const [selection, set_selection] = useState(null);
   const [walk, set_walk] = useState({ active: false, locked: false });
+  // View-only preview settings, like the materials page (not saved).
+  const [preview_options, set_preview_options] = useState({
+    scale: 1,
+    animation: true,
+  });
+  const [info, set_info] = useState(null);
   const selected =
     selection?.component_id === draft.id ? selection.variant : null;
   const preview = useMemo(() => {
@@ -57,6 +69,7 @@ export default function ComponentStage({
         on_error: () => set_failed(true),
         on_status: set_content_status,
         on_walk: set_walk,
+        on_info: set_info,
       });
     } catch {
       queueMicrotask(() => {
@@ -79,6 +92,9 @@ export default function ComponentStage({
     scene.current?.set_visible(!document_view);
   }, [document_view, attempt]);
 
+  useEffect(() => {
+    scene.current?.set_preview(preview_options);
+  }, [preview_options, attempt]);
   return (
     <StageHost
       onKeyDown={(event) => {
@@ -123,8 +139,7 @@ export default function ComponentStage({
           <button disabled={editor.busy} onClick={on_reload}>
             {text("reload")}
           </button>
-        )}{" "}
-        {folder_control}
+        )}
         <span role="status">
           {text(editor.busy ? "working" : editor.dirty ? "unsaved" : "saved")}
         </span>
@@ -160,12 +175,6 @@ export default function ComponentStage({
             {text("walk")}
           </button>
         )}
-        <ComponentStageLightingControls
-          document={draft}
-          on_change={editor.edit}
-          disabled={editor.busy}
-          hidden={document_view}
-        />
       </StageViewButtons>
       <ComponentConstructionDocument
         document={draft}
@@ -205,19 +214,50 @@ export default function ComponentStage({
             </InventoryStatus>
           )}
         </StageViewport>
-        <ComponentVariants
-          key={draft.id}
-          component_id={draft.id}
-          selected_key={preview.error ? null : selected?.key}
-          on_select={(variant) =>
-            set_selection((current) =>
-              current?.component_id === draft.id &&
-              current.variant.key === variant.key
-                ? null
-                : { component_id: draft.id, variant },
-            )
-          }
-        />
+        {/* A generic right panel like the materials page: name, folder,
+            lighting, then the variants. */}
+        <InventoryControls aria-label={AppText.get(INVENTORY_TEXT.asset)}>
+          <ComponentNameEdit
+            key={draft.name}
+            name={draft.name}
+            disabled={editor.busy}
+            on_rename={editor.rename}
+          />
+          {folder_control}
+          {info?.animated && (
+            <PreviewAnimationToggle
+              checked={preview_options.animation}
+              on_change={(animation) =>
+                set_preview_options((current) => ({ ...current, animation }))
+              }
+            />
+          )}
+          <PreviewScaleControls
+            scale={preview_options.scale}
+            height={info?.height ?? null}
+            on_change={(scale) =>
+              set_preview_options((current) => ({ ...current, scale }))
+            }
+          />
+          <ComponentStageLightingControls
+            document={draft}
+            on_change={editor.edit}
+            disabled={editor.busy}
+          />
+          <ComponentVariants
+            key={draft.id}
+            component_id={draft.id}
+            selected_key={preview.error ? null : selected?.key}
+            on_select={(variant) =>
+              set_selection((current) =>
+                current?.component_id === draft.id &&
+                current.variant.key === variant.key
+                  ? null
+                  : { component_id: draft.id, variant },
+              )
+            }
+          />
+        </InventoryControls>
       </StageWorkspace>
       {preview.error && <p role="alert">{text("variant_preview_error")}</p>}
       <InventoryCaption>

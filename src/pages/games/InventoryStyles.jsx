@@ -181,6 +181,17 @@ export const TreeActionForm = styled.form`
   }
 `;
 
+/**
+ * The "in: <folder>" line (or its editor) under the name row in a right panel:
+ * half the panel gap above it, slightly indented.
+ */
+export const InventoryFolderLine = styled.div`
+  margin-top: -0.5rem;
+  padding-left: 0.75rem;
+  > form {
+    margin: 0;
+  }
+`;
 export const InventoryNameRow = styled.div`
   margin: 0;
   display: flex;

@@ -33,7 +33,10 @@ test("lighting uses the materials viewer azimuth and native intensity", () => {
   assert.ok(Math.abs(light.position.x - Math.sqrt(8)) < 1e-10);
 });
 
-test("lighting controls author component defaults and reject invalid or busy edits", () => {
+test("lighting controls author component defaults and reject invalid or busy edits", async () => {
+  const { load_preview_controls } =
+    await import("./inventory_preview_controls_fixture.js");
+  const shared = load_preview_controls();
   const source = readFileSync(
     new URL(
       "../src/pages/games/ComponentStageLightingControls.jsx",
@@ -50,13 +53,10 @@ test("lighting controls author component defaults and reject invalid or busy edi
       exports: module.exports,
       require: createRequire(import.meta.url),
       AppText: { get: (v) => v },
-      INVENTORY_TEXT: {
-        lighting: "Light direction",
-        strength: "Light intensity",
-      },
       COMPONENT_STAGE_TEXT: { stage_lighting: "Stage lighting" },
       component_lighting,
-      StageLightingBar: "bar",
+      StageLightingGroup: "group",
+      PreviewLightingControls: shared.PreviewLightingControls,
     },
   );
   const document = create_component_document(randomUUID(), "Stage"),
@@ -68,22 +68,28 @@ test("lighting controls author component defaults and reject invalid or busy edi
       disabled,
       hidden: true,
     });
-  const inputs = (tree) =>
-    tree.props.children.map((label) => label.props.children[1]);
+  const expand = (node) => {
+    if (Array.isArray(node)) return Array.from(node).flatMap(expand);
+    if (!node || typeof node !== "object") return [];
+    if (typeof node.type === "function") return expand(node.type(node.props));
+    return [node, ...expand(node.props?.children)];
+  };
+  const inputs = (tree) => expand(tree).filter((node) => node.type === "input");
   const tree = render(),
     [direction, intensity] = inputs(tree);
   assert.equal(tree.props.hidden, true);
+  assert.equal(tree.props["aria-label"], "Stage lighting");
   assert.equal(direction.props.value, 45);
   assert.equal(intensity.props.value, 3);
-  direction.props.onChange({ target: { valueAsNumber: 120 } });
+  direction.props.onChange({ target: { value: "120" } });
   assert.equal(edits[0].lighting.direction_degrees, 120);
   assert.equal(edits[0].lighting.intensity, 3);
   assert.equal(edits[0].id, document.id);
   assert.equal(document.lighting.direction_degrees, 45);
-  intensity.props.onChange({ target: { valueAsNumber: 1.25 } });
+  intensity.props.onChange({ target: { value: "1.25" } });
   assert.equal(edits[1].lighting.intensity, 1.25);
-  for (const value of [NaN, Infinity, -1, 7])
-    intensity.props.onChange({ target: { valueAsNumber: value } });
-  inputs(render(true))[0].props.onChange({ target: { valueAsNumber: 180 } });
+  for (const value of ["NaN", "Infinity", "-1", "7"])
+    intensity.props.onChange({ target: { value } });
+  inputs(render(true))[0].props.onChange({ target: { value: "180" } });
   assert.equal(edits.length, 2);
 });

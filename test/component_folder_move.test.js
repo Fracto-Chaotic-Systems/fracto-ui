@@ -52,6 +52,19 @@ const nodes = (element) => {
     ),
   ];
 };
+// The folder line renders inside its spacing/indent wrapper.
+const row_of = (tree) => {
+  assert.equal(tree.type, "folder-line");
+  return tree.props.children;
+};
+const text_of = (node) =>
+  typeof node === "string"
+    ? node
+    : Array.isArray(node)
+      ? Array.from(node).map(text_of).join("")
+      : node?.props
+        ? text_of([node.props.children].flat())
+        : "";
 const find = (tree, type, predicate = () => true) =>
   nodes(tree).find((node) => node.type === type && predicate(node));
 
@@ -64,6 +77,9 @@ function move_fixture(fail = false) {
     INVENTORY_CATALOG_TEXT: new Proxy({}, { get: (_, key) => key }),
     COMPONENT_STAGE_TEXT: new Proxy({}, { get: (_, key) => key }),
     CatalogMoveForm: "form",
+    InventoryNameRow: "row",
+    InventoryFolderLine: "folder-line",
+    CoolEditLink: "pencil",
     CoolIconLink: "icon",
     check_icon: "check-svg",
     cancel_icon: "cancel-svg",
@@ -92,10 +108,20 @@ function move_fixture(fail = false) {
 
 test("Move to folder lists the component folders and sends the chosen folder", async () => {
   const f = move_fixture();
-  const button = f.render();
-  assert.equal(button.type, "button");
-  assert.equal(button.props.children, "move_folder");
-  button.props.onClick();
+  const line = row_of(f.render());
+  assert.equal(line.type, "row");
+  const [label, pencil] = Array.from(line.props.children);
+  assert.equal(text_of(label), "in_folder folder_root");
+  assert.equal(
+    Array.from([label.props.children].flat()).find(
+      (child) => child?.type === "strong",
+    ).props.children,
+    "folder_root",
+    "the folder name is bold",
+  );
+  assert.equal(pencil.type, "pencil");
+  assert.equal(pencil.props.title, "move_folder");
+  pencil.props.on_click();
   const tree = f.render();
   const options = nodes(find(tree, "select")).filter(
     (node) => node.type === "option",
@@ -108,6 +134,7 @@ test("Move to folder lists the component folders and sends the chosen folder", a
     Array.from(find(tree, "form").props.children, (child) => child.type),
     ["label", "icon", "icon"],
   );
+  assert.equal(Array.from(find(tree, "label").props.children)[0], "in_folder");
   assert.equal(
     find(tree, "icon", (node) => node.props.icon === "check-svg").props.color,
     "#17803d",
@@ -125,12 +152,14 @@ test("Move to folder lists the component folders and sends the chosen folder", a
     folder_path: "Plants/Herbs",
   });
   assert.deepEqual(f.moved, ["Plants/Herbs"]);
-  assert.equal(f.render().type, "button");
+  assert.equal(row_of(f.render()).type, "row");
 });
 
 test("Move to folder: unchanged choice, Cancel and Escape send nothing; failures keep the form", async () => {
   const f = move_fixture();
-  f.render({ folder_path: "Plants" }).props.onClick();
+  Array.from(
+    row_of(f.render({ folder_path: "Plants" })).props.children,
+  )[1].props.on_click();
   assert.equal(
     find(f.render({ folder_path: "Plants" }), "select").props.value,
     "Plants",
@@ -139,14 +168,14 @@ test("Move to folder: unchanged choice, Cancel and Escape send nothing; failures
     preventDefault() {},
   });
   assert.equal(f.requests.length, 0);
-  f.render().props.onClick();
+  Array.from(row_of(f.render()).props.children)[1].props.on_click();
   find(
     f.render(),
     "icon",
     (node) => node.props.icon === "cancel-svg",
   ).props.on_click();
-  assert.equal(f.render().type, "button");
-  f.render().props.onClick();
+  assert.equal(row_of(f.render()).type, "row");
+  Array.from(row_of(f.render()).props.children)[1].props.on_click();
   let prevented = false;
   find(f.render(), "form").props.onKeyDown({
     key: "Escape",
@@ -155,11 +184,11 @@ test("Move to folder: unchanged choice, Cancel and Escape send nothing; failures
     },
   });
   assert.equal(prevented, true);
-  assert.equal(f.render().type, "button");
+  assert.equal(row_of(f.render()).type, "row");
   assert.equal(f.requests.length, 0);
 
   const failing = move_fixture(true);
-  failing.render().props.onClick();
+  Array.from(row_of(failing.render()).props.children)[1].props.on_click();
   find(failing.render(), "select").props.onChange({
     target: { value: "Plants" },
   });

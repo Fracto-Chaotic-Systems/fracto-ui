@@ -1,8 +1,10 @@
 import AppText from "../../AppText.jsx";
-import { INVENTORY_TEXT, COMPONENT_STAGE_TEXT } from "../../text/GamesText.jsx";
+import { COMPONENT_STAGE_TEXT } from "../../text/GamesText.jsx";
 import { component_lighting } from "@fracto/sdk/FractoComponentDocument.js";
-import { StageLightingBar } from "./ComponentStageStyles.jsx";
+import { StageLightingGroup } from "./ComponentStageStyles.jsx";
+import { PreviewLightingControls } from "./InventoryPreviewControls.jsx";
 
+/** The shared light controls, stored in the component document's lighting. */
 export default function ComponentStageLightingControls({
   document,
   on_change,
@@ -10,47 +12,27 @@ export default function ComponentStageLightingControls({
   hidden,
 }) {
   const lighting = component_lighting(document);
-  const range = (field, label, min, max, step, suffix) => (
-    <label>
-      <span>
-        {AppText.get(INVENTORY_TEXT[label])}{" "}
-        <output>
-          {lighting[field]}
-          {suffix}
-        </output>
-      </span>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={lighting[field]}
-        disabled={disabled}
-        aria-label={AppText.get(INVENTORY_TEXT[label])}
-        onChange={(event) => {
-          const value = event.target.valueAsNumber;
-          if (
-            !disabled &&
-            Number.isFinite(value) &&
-            value >= min &&
-            value <= max
-          )
-            on_change({
-              ...document,
-              lighting: { ...lighting, [field]: value },
-            });
-        }}
-      />
-    </label>
-  );
   return (
-    <StageLightingBar
+    <StageLightingGroup
       role="group"
       aria-label={AppText.get(COMPONENT_STAGE_TEXT.stage_lighting)}
       hidden={hidden}
     >
-      {range("direction_degrees", "lighting", 0, 360, 5, "°")}
-      {range("intensity", "strength", 0.25, 6, 0.25, "")}
-    </StageLightingBar>
+      <PreviewLightingControls
+        direction={lighting.direction_degrees}
+        intensity={lighting.intensity}
+        disabled={disabled}
+        on_change={(field, value) =>
+          on_change({
+            ...document,
+            lighting: {
+              ...lighting,
+              [field === "direction" ? "direction_degrees" : "intensity"]:
+                value,
+            },
+          })
+        }
+      />
+    </StageLightingGroup>
   );
 }

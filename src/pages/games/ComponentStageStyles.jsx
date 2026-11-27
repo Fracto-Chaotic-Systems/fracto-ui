@@ -20,7 +20,9 @@ export const StageWorkspace = styled.div`
   grid-template-rows: minmax(360px, 1fr);
   gap: 1rem;
   overflow: auto;
-  input {
+  /* Text and range inputs fill their row; checkboxes keep their own size so
+     their labels (e.g. Play animation) stay beside them. */
+  input:not([type="checkbox"]):not([type="radio"]) {
     width: 100%;
     min-width: 0;
     box-sizing: border-box;
@@ -35,28 +37,20 @@ export const StageViewport = styled(InventoryViewport)`
   min-width: 0;
   min-height: 360px;
 `;
-export const StageLightingBar = styled.div`
+/** Lighting sliders in the stage's right panel (styled like the materials controls). */
+export const StageLightingGroup = styled.div`
   display: flex;
-  flex: 0 0 auto;
+  flex-direction: column;
   gap: 1rem;
-  margin-left: 0.5rem;
   &[hidden] {
     display: none;
   }
-  label {
-    flex: 0 0 20rem;
-    width: 20rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-  }
-  output {
-    font-variant-numeric: tabular-nums;
-  }
-  input {
-    width: 100%;
-    margin: 0;
-  }
+`;
+/** The variants list inside the stage's right panel. */
+export const StageVariants = styled.section`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 `;
 export const VariantButton = styled.button`
   width: 100%;

@@ -65,6 +65,11 @@ export default function GamesComposites() {
             if (ok) reload_saved();
             return ok;
           },
+          async rename(name) {
+            const ok = await editor.rename(name);
+            if (ok) reload_saved();
+            return ok;
+          },
         }}
         folder_control={
           editor.revision > 0 && (

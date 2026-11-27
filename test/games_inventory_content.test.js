@@ -59,6 +59,10 @@ function fixture(assets = []) {
       InventoryImport: "import",
       InventoryAssetTree: "tree",
       InventorySelectionName: "selection-name",
+      PreviewRange: "range",
+      PreviewAnimationToggle: "animation-toggle",
+      PreviewScaleControls: "scale-controls",
+      PreviewLightingControls: "lighting-controls",
       useInventoryAssets: () => ({
         assets,
         selected: assets[0]?.id ?? null,
@@ -121,11 +125,14 @@ test("a page can own folder selection; the details panel follows it", () => {
   });
   assert.equal(f.find(tree, "tree").props.selected_folder, "Plants");
   const name = f.find(tree, "selection-name");
-  assert.deepEqual({ ...name.props.target }, {
-    kind: "folder",
-    path: "Plants",
-    label: "Plants",
-  });
+  assert.deepEqual(
+    { ...name.props.target },
+    {
+      kind: "folder",
+      path: "Plants",
+      label: "Plants",
+    },
+  );
   f.find(tree, "tree").props.on_folder_select("Other");
   assert.deepEqual(chosen, ["Other"]);
 });

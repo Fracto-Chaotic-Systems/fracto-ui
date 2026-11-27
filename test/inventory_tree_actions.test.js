@@ -119,6 +119,7 @@ function fixture(target, response_error = null) {
     trash_icon: "trash-svg",
     TreeActionForm: "form",
     CatalogMoveForm: "form",
+    InventoryFolderLine: "folder-line",
     folder_contains: (parent, path) =>
       path === parent || path.startsWith(parent + "/"),
     ATTRIBUTION_FIELDS: ["creator_name", "source_url"],
@@ -198,6 +199,15 @@ const nodes_of = (element) => {
     ),
   ];
 };
+// Visible text of a node, including nested elements such as <strong>.
+const text_of = (node) =>
+  typeof node === "string" || typeof node === "number"
+    ? String(node)
+    : Array.isArray(node)
+      ? Array.from(node).map(text_of).join("")
+      : node?.props
+        ? text_of([node.props.children].flat())
+        : "";
 const folder_edit = (tree) =>
   nodes_of(tree).find(
     (node) => node.type === "pencil" && node.props.title === "move_folder",
@@ -493,7 +503,7 @@ test("rename replaces the header name in place with green accept and red cancel 
   assert.equal(f.find(tree, "input").props["aria-label"], "new_name");
   assert.equal(f.find(tree, "pencil", "rename"), undefined);
   assert.equal(f.find(tree, "trash"), undefined);
-  assert.equal(f.find(tree, "strong"), undefined);
+  assert.equal(f.find(tree, "strong", "plants"), undefined);
   f.find(tree, "input").props.onChange({ target: { value: "Discarded name" } });
   f.find(f.render(), "cancel").props.on_click();
   assert.equal(f.find(f.render(), "strong").props.children, "plants");
@@ -686,15 +696,24 @@ test("model details show Move to folder under the name and save only the folder"
   const initial = f.render();
   const parts = nodes_of(initial);
   const folder_line = parts.find(
-    (node) =>
-      node.type === "span" &&
-      Array.from([node.props.children].flat()).join("") === "in_folder plants",
+    (node) => node.type === "span" && text_of(node) === "in_folder plants",
   );
   assert.ok(folder_line, "shows in: <folder> under the name");
+  const bold = Array.from([folder_line.props.children].flat()).find(
+    (child) => child?.type === "strong",
+  );
+  assert.equal(bold.props.children, "plants", "the folder name is bold");
+  assert.ok(
+    parts.some(
+      (node) =>
+        node.type === "folder-line" && nodes_of(node).includes(folder_line),
+    ),
+    "the folder line is wrapped for its spacing and indent",
+  );
   const line_text = (tree) =>
     nodes_of(tree)
       .filter((node) => node.type === "span")
-      .map((node) => Array.from([node.props.children].flat()).join(""));
+      .map((node) => text_of(node));
   assert.ok(
     line_text(
       fixture({ kind: "model", id: "grass", label: "Grass" }).render(),
@@ -811,7 +830,7 @@ test("a selected folder shows in: <parent> with a pencil and moves under a new p
   const lines = (tree) =>
     nodes_of(tree)
       .filter((node) => node.type === "span")
-      .map((node) => Array.from([node.props.children].flat()).join(""));
+      .map((node) => text_of(node));
   assert.ok(lines(f.render()).includes("in_folder plants"));
   assert.equal(
     lines(f.render()).some((line) => line.startsWith("folder_path")),

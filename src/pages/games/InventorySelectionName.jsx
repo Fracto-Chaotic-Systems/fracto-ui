@@ -10,6 +10,7 @@ import AppText from "../../AppText.jsx";
 import CoolEditLink from "../../utils/ui/CoolEditLink.jsx";
 import { INVENTORY_CATALOG_TEXT } from "../../text/GamesText.jsx";
 import {
+  InventoryFolderLine,
   InventoryNameRow,
   TreeActions,
   TreeActionForm,
@@ -139,77 +140,81 @@ export default function InventorySelectionName({
           />
         </InventoryNameRow>
       )}
-      {move.moving ? (
-        <CatalogMoveForm
-          onSubmit={move.save}
-          onKeyDown={(event) => {
-            if (event.key === "Escape" && !move.busy) {
-              event.preventDefault();
-              move.cancel();
-            }
-          }}
-        >
-          <label>
-            {text("in_folder")}
-            <select
-              value={move.folder}
+      <InventoryFolderLine>
+        {move.moving ? (
+          <CatalogMoveForm
+            onSubmit={move.save}
+            onKeyDown={(event) => {
+              if (event.key === "Escape" && !move.busy) {
+                event.preventDefault();
+                move.cancel();
+              }
+            }}
+          >
+            <label>
+              {text("in_folder")}
+              <select
+                value={move.folder}
+                disabled={disabled || move.busy}
+                onChange={(event) => move.set_folder(event.target.value)}
+              >
+                <option value="">{text("folder_root")}</option>
+                {[...new Set([...folders, move.current].filter(Boolean))]
+                  // A folder cannot move into itself or one of its subfolders.
+                  .filter(
+                    (path) =>
+                      target.kind !== "folder" ||
+                      !folder_contains(target.path, path),
+                  )
+                  .sort()
+                  .map((path) => (
+                    <option key={path} value={path}>
+                      {path}
+                    </option>
+                  ))}
+              </select>
+            </label>
+            <CoolIconLink
+              title={text("move_folder")}
+              icon={check_icon}
+              color="#17803d"
+              type="submit"
               disabled={disabled || move.busy}
-              onChange={(event) => move.set_folder(event.target.value)}
-            >
-              <option value="">{text("folder_root")}</option>
-              {[...new Set([...folders, move.current].filter(Boolean))]
-                // A folder cannot move into itself or one of its subfolders.
-                .filter(
-                  (path) =>
-                    target.kind !== "folder" ||
-                    !folder_contains(target.path, path),
-                )
-                .sort()
-                .map((path) => (
-                  <option key={path} value={path}>
-                    {path}
-                  </option>
-                ))}
-            </select>
-          </label>
-          <CoolIconLink
-            title={text("move_folder")}
-            icon={check_icon}
-            color="#17803d"
-            type="submit"
-            disabled={disabled || move.busy}
-          />
-          <CoolIconLink
-            title={text("cancel")}
-            icon={cancel_icon}
-            color="#c62828"
-            on_click={move.cancel}
-            disabled={move.busy}
-          />
-        </CatalogMoveForm>
-      ) : (
-        <InventoryNameRow>
-          <span>
-            {text("in_folder")}{" "}
-            {(target.kind === "folder"
-              ? parent_folder(target.path)
-              : target.folder_path) || text("folder_root")}
-          </span>
-          <CoolEditLink
-            title={text("move_folder")}
-            disabled={
-              disabled ||
-              creating ||
-              move.busy ||
-              rename.busy ||
-              rename.editing ||
-              deletion.busy ||
-              deletion.confirming
-            }
-            on_click={move.begin}
-          />
-        </InventoryNameRow>
-      )}
+            />
+            <CoolIconLink
+              title={text("cancel")}
+              icon={cancel_icon}
+              color="#c62828"
+              on_click={move.cancel}
+              disabled={move.busy}
+            />
+          </CatalogMoveForm>
+        ) : (
+          <InventoryNameRow>
+            <span>
+              {text("in_folder")}{" "}
+              <strong>
+                {(target.kind === "folder"
+                  ? parent_folder(target.path)
+                  : target.folder_path) || text("folder_root")}
+              </strong>
+            </span>
+            <CoolEditLink
+              title={text("move_folder")}
+              disabled={
+                disabled ||
+                creating ||
+                move.busy ||
+                rename.busy ||
+                rename.editing ||
+                deletion.busy ||
+                deletion.confirming
+              }
+              on_click={move.begin}
+            />
+          </InventoryNameRow>
+        )}
+      </InventoryFolderLine>
       {target.kind === "folder" && (
         <InventoryNewFolder
           creation={creation}

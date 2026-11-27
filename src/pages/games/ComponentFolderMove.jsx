@@ -1,5 +1,6 @@
 import { useState } from "react";
 import CoolIconLink from "../../utils/ui/CoolIconLink.jsx";
+import CoolEditLink from "../../utils/ui/CoolEditLink.jsx";
 import { check_icon, cancel_icon } from "../../utils/ui/CoolIcons.jsx";
 import AppText from "../../AppText.jsx";
 import {
@@ -7,13 +8,14 @@ import {
   COMPONENT_STAGE_TEXT,
 } from "../../text/GamesText.jsx";
 import { CatalogMoveForm } from "./InventoryCatalogStyles.jsx";
+import { InventoryFolderLine, InventoryNameRow } from "./InventoryStyles.jsx";
 import useInventoryFolders from "./useInventoryFolders.js";
 import { component_request } from "./ComponentDocumentApi.js";
 
 const text = (key) => AppText.get(INVENTORY_CATALOG_TEXT[key]);
 const NO_ASSETS = [];
 
-/** Move a saved component document to a folder of the component category. */
+/** "in: <folder>" for a saved component, with the pencil to move it (saved at once). */
 export default function ComponentFolderMove({
   id,
   folder_path = "",
@@ -51,20 +53,27 @@ export default function ComponentFolderMove({
   };
   if (!moving)
     return (
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={() => {
-          set_target(folder_path);
-          set_failed(false);
-          set_moving(true);
-        }}
-      >
-        {text("move_folder")}
-      </button>
+      <InventoryFolderLine>
+        <InventoryNameRow>
+          <span>
+            {text("in_folder")}{" "}
+            <strong>{folder_path || text("folder_root")}</strong>
+          </span>
+          <CoolEditLink
+            title={text("move_folder")}
+            disabled={disabled}
+            on_click={() => {
+              if (disabled) return;
+              set_target(folder_path);
+              set_failed(false);
+              set_moving(true);
+            }}
+          />
+        </InventoryNameRow>
+      </InventoryFolderLine>
     );
   return (
-    <>
+    <InventoryFolderLine>
       <CatalogMoveForm
         onSubmit={save}
         onKeyDown={(event) => {
@@ -75,7 +84,7 @@ export default function ComponentFolderMove({
         }}
       >
         <label>
-          {text("folder_path")}
+          {text("in_folder")}
           <select
             value={target}
             disabled={disabled || busy}
@@ -113,6 +122,6 @@ export default function ComponentFolderMove({
       {(failed || organization.error) && (
         <p role="alert">{AppText.get(COMPONENT_STAGE_TEXT.request_error)}</p>
       )}
-    </>
+    </InventoryFolderLine>
   );
 }

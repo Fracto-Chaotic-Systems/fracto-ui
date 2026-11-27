@@ -74,6 +74,25 @@ export function component_document_reducer(state, action) {
       return { ...state, history: undo_component_history(state.history) };
     case "redo":
       return { ...state, history: redo_component_history(state.history) };
+    case "renamed": {
+      // An immediate name save: every snapshot and the saved copy take the new
+      // name, so other unsaved edits stay unsaved and undo never reverts it.
+      if (state.history.present.id !== action.document.id) return state;
+      const rename = (document) => ({
+        ...document,
+        name: action.document.name,
+      });
+      return {
+        ...state,
+        revision: action.revision,
+        saved_json: JSON.stringify(action.document),
+        history: {
+          past: state.history.past.map(rename),
+          present: rename(state.history.present),
+          future: state.history.future.map(rename),
+        },
+      };
+    }
     case "saved":
       return state.history.present.id !== action.document.id
         ? state

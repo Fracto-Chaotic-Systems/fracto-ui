@@ -28,9 +28,9 @@ diagonal normalization, jump and floor following, flying clearance, pitch clampi
 spawn placement and the floor-only probe.
 
 ComponentStageLightingControls places the materials-style light direction and
-intensity sliders on the Stage / Construction document button row above the
-workspace. Each control is 20rem wide; the row scrolls horizontally when the
-available width cannot fit both controls and buttons. They edit `document.lighting`
+intensity sliders in the stage's right-hand panel, below the name and folder and
+above the variants (they were on the Stage / Construction document button row).
+They edit `document.lighting`
 through the existing editor history and Save component flow; variants inherit
 the base lighting. New documents store 45° / 3 defaults and legacy documents
 resolve those values until edited. Direction spans 0–360° (step 5°), intensity
@@ -320,6 +320,17 @@ and triangle statistics update with the slider. Reset and asset selection restor
 Instance GPU buffers are released with the preview's normal disposal lifecycle.
 
 `GamesInventory.jsx` owns preview controls and loading/retry status.
+`InventoryPreviewControls.jsx` holds the right-panel preview controls shared by
+every asset page (materials and components today; MIDI and areas are expected to
+follow): `PreviewRange` (labelled slider; only finite in-range values are
+reported), `PreviewAnimationToggle` ("Play animation"), `PreviewScaleControls`
+(scale 0.1–2× with the scaled height in metres) and `PreviewLightingControls`
+(light direction 0–360°/5°, intensity 0.25–6/0.25), with the shared bounds in
+`PREVIEW_RANGES`. Changing them changes both pages. Materials keep all of these
+as preview-only view state; components store lighting in the document
+(`ComponentStageLightingControls` wraps the shared control) and keep scale and
+animation as view-only stage settings (`set_preview` on the stage scene, which
+reports `{animated, height}` through `on_info`).
 Its optional toolbar lets the components page supply its construction action.
 Its optional `content` fills the area right of the tree (the preview and details
 columns, `InventoryContent`); a page may also own folder selection
@@ -341,9 +352,20 @@ tree and highlights it, with the usual discard check for unsaved work. Saving
 refreshes the tree, so new and renamed components appear. Folder create/rename/delete use the
 same component-category folder tree as published components; the data service
 moves contained documents on rename and refuses to delete a folder holding one.
-In the stage, a saved component's toolbar has Move to folder
-(`ComponentFolderMove.jsx`): a folder select with the green check and red X, or
-Escape, using PUT `/api/component-documents/:id/folder`. Moving never changes the
+In the stage, the right-hand panel (an `InventoryControls` panel like the
+materials page) holds, in order: the component name with its pencil
+(`ComponentNameEdit.jsx`), "in: <folder>" with its pencil for saved components
+(`ComponentFolderMove.jsx`), Play animation (only when the content animates),
+scale and height, the light direction and intensity sliders
+(`ComponentStageLightingControls.jsx`, formerly in the view buttons bar) and the
+variants list (`ComponentVariants.jsx`, now a section inside the panel). The name
+and folder save at once with the green check (red X or Escape cancels). A name
+save (`useComponentDocument` `rename`) loads the saved document, changes only its
+name (1–120 characters, no control characters) and PUTs it with the expected
+revision; the `renamed` state update applies the name to the saved copy and every
+undo snapshot, so other unsaved edits stay unsaved and Undo never reverts the
+name. A never-saved component's name is a draft edit. Folder moves use PUT
+`/api/component-documents/:id/folder`. Moving never changes the
 document or its revision. Unsaved new components appear at the root after their
 first save. Save persists the complete document with expected-revision checks.
 The stage has no Back button; new/open/reload require inline discard (shown in

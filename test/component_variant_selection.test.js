@@ -99,6 +99,7 @@ test("stage toggles a single variant, restores the base and keeps preview out of
         update_document: (document, options) =>
           updates.push({ document, options }),
         set_visible() {},
+        set_preview() {},
         dispose() {},
       }),
       preview_component_variant,
@@ -108,6 +109,8 @@ test("stage toggles a single variant, restores the base and keeps preview out of
       MainStyles: { SectionTitle: "h2" },
       InventoryLayout: "div",
       StageHost: "div",
+      InventoryControls: "aside",
+      INVENTORY_TEXT: new Proxy({}, { get: (_, key) => key }),
       InventoryToolbar: "header",
       InventoryCaption: "p",
       InventoryStatus: "status",
@@ -117,6 +120,9 @@ test("stage toggles a single variant, restores the base and keeps preview out of
       construction_text: (v) => v,
       ComponentConstructionDocument: "document",
       ComponentVariants: "variants",
+      ComponentNameEdit: "name-edit",
+      PreviewAnimationToggle: "animation-toggle",
+      PreviewScaleControls: "scale-controls",
       ComponentStageLightingControls: "lighting-controls",
     },
   );

@@ -1,4 +1,10 @@
 import InventorySelectionName from "./InventorySelectionName.jsx";
+import {
+  PreviewRange,
+  PreviewAnimationToggle,
+  PreviewScaleControls,
+  PreviewLightingControls,
+} from "./InventoryPreviewControls.jsx";
 import MaterialMetadataPanel from "./MaterialMetadataPanel.jsx";
 import { useEffect, useRef, useState } from "react";
 import AppText from "../../AppText.jsx";
@@ -113,22 +119,15 @@ export default function GamesInventory({
   const set_option = (key, value) =>
     set_options((current) => ({ ...current, [key]: value }));
   const range = (key, min, max, step, suffix) => (
-    <label>
-      {text(key)}{" "}
-      <output>
-        {options[key]}
-        {suffix}
-      </output>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={options[key]}
-        aria-label={text(key)}
-        onChange={(event) => set_option(key, Number(event.target.value))}
-      />
-    </label>
+    <PreviewRange
+      label={text(key)}
+      value={options[key]}
+      min={min}
+      max={max}
+      step={step}
+      suffix={suffix}
+      on_change={(value) => set_option(key, value)}
+    />
   );
   return (
     <InventoryLayout>
@@ -280,18 +279,16 @@ export default function GamesInventory({
                       </InventoryCaption>
                     )}
                     {status === "ready" && model_info?.animations > 0 && (
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={options.animation}
-                          onChange={(event) =>
-                            set_option("animation", event.target.checked)
-                          }
-                        />
-                        {text("animation")}
-                      </label>
+                      <PreviewAnimationToggle
+                        checked={options.animation}
+                        on_change={(value) => set_option("animation", value)}
+                      />
                     )}
-                    {range("scale", 0.1, 2, 0.05, "×")}
+                    <PreviewScaleControls
+                      scale={options.scale}
+                      height={model_info?.height ?? null}
+                      on_change={(value) => set_option("scale", value)}
+                    />
                     {asset.id === "grasses-2" && (
                       <>
                         {range("density", 0, 8, 0.25, "×")}
@@ -300,17 +297,16 @@ export default function GamesInventory({
                         </InventoryCaption>
                       </>
                     )}
-                    <div>
-                      {text("height")}:{" "}
-                      <output>
-                        {model_info
-                          ? (model_info.height * options.scale).toFixed(2)
-                          : "—"}{" "}
-                        m
-                      </output>
-                    </div>
-                    {range("lighting", 0, 360, 5, "°")}
-                    {range("strength", 0.25, 6, 0.25, "")}
+                    <PreviewLightingControls
+                      direction={options.lighting}
+                      intensity={options.strength}
+                      on_change={(field, value) =>
+                        set_option(
+                          field === "direction" ? "lighting" : "strength",
+                          value,
+                        )
+                      }
+                    />
                     {["normal", "roughness", "wireframe", "reference"].map(
                       (key) => (
                         <label key={key}>

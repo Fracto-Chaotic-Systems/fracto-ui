@@ -137,23 +137,37 @@ export const CatalogMessage = styled.p`
   border-radius: 4px;
 `;
 
+/**
+ * "in: [folder select] ✓ ✗" on one line. The select takes the remaining width
+ * and shrinks, cutting long paths with an ellipsis instead of wrapping below
+ * the label. `&&` outranks the right panel's general label/select rules.
+ */
 export const CatalogMoveForm = styled.form`
   display: flex;
   align-items: center;
   gap: 0.4rem;
   margin: 0.75rem 0;
-  label {
+  min-width: 0;
+  && > * {
+    flex: 0 0 auto;
+  }
+  && label {
     display: flex;
+    flex: 1 1 auto;
+    flex-wrap: nowrap;
     align-items: center;
     gap: 0.4rem;
-    flex: 0 1 auto;
     min-width: 0;
+    white-space: nowrap;
   }
-  select {
-    flex: 0 1 auto;
+  && select {
+    flex: 1 1 0;
     width: auto;
     max-width: 100%;
     min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     font: inherit;
   }
 `;

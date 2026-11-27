@@ -385,6 +385,7 @@ export const INVENTORY_CATALOG_TEXT = Object.fromEntries(
 export const INVENTORY_TEXT = Object.fromEntries(
   [
     "material_repair",
+    "animation",
     "model_error",
     "density",
     "density_help",

@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import AppText from "../../AppText.jsx";
 import { COMPONENT_STAGE_TEXT } from "../../text/GamesText.jsx";
-import { InventoryControls, InventoryCaption } from "./InventoryStyles.jsx";
+import { InventoryCaption } from "./InventoryStyles.jsx";
 import { component_request } from "./ComponentDocumentApi.js";
-import { VariantButton } from "./ComponentStageStyles.jsx";
+import { VariantButton, StageVariants } from "./ComponentStageStyles.jsx";
 
 const text = (key) => AppText.get(COMPONENT_STAGE_TEXT[key]);
 const properties = {
@@ -42,7 +42,7 @@ export default function ComponentVariants({
   const current =
     state.id === component_id ? state : { loading: true, variants: [] };
   return (
-    <InventoryControls aria-label={text("variants")}>
+    <StageVariants aria-label={text("variants")}>
       <strong>{text("variants")}</strong>
       {current.loading && <span role="status">{text("variants_loading")}</span>}
       {current.failed && (
@@ -95,6 +95,6 @@ export default function ComponentVariants({
           ))}
         </ul>
       )}
-    </InventoryControls>
+    </StageVariants>
   );
 }
