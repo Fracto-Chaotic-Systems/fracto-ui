@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { InventoryViewport } from "./InventoryStyles.jsx";
+import { InventoryCaption, InventoryViewport } from "./InventoryStyles.jsx";
 
 export const StageHost = styled.div`
   flex: 1;
@@ -86,6 +86,74 @@ export const StagePane = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+`;
+/** A caption line between the stage and the tabs; the pane's gap spaces it. */
+export const StageCaption = styled(InventoryCaption)`
+  margin: 0;
+`;
+/** The "materials" tab's usage table. */
+export const MaterialUsageTable = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  th,
+  td {
+    padding: 0.35rem 0.5rem;
+    border-bottom: 1px solid #dde3e5;
+    text-align: right;
+    vertical-align: top;
+    font-variant-numeric: tabular-nums;
+  }
+  th:first-child {
+    text-align: left;
+  }
+  thead th {
+    color: #52636a;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  tbody th {
+    font-weight: 600;
+  }
+  small {
+    display: block;
+    color: #52636a;
+    font-weight: normal;
+  }
+  tfoot th,
+  tfoot td {
+    border-bottom: 0;
+    color: #52636a;
+  }
+  tfoot td {
+    text-align: left;
+  }
+  .material-group button {
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+  }
+  .material-member th {
+    padding-left: 1.5rem;
+    font-weight: normal;
+  }
+`;
+/** The "history" tab's list, spaced like a material's history. */
+export const StageHistoryList = styled.ol`
+  margin: 0;
+  padding-left: 1.3rem;
+  font-size: 0.875rem;
+  li {
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
+  }
+  li p {
+    margin: 0.25rem 0;
+  }
 `;
 /** Padding inside a details tab card. */
 export const StageTab = styled.div`

@@ -227,6 +227,7 @@ export default function GamesInventory({
                           <MaterialMetadataPanel
                             key={asset.id}
                             asset_id={asset.id}
+                            read_only
                             disabled={catalog_editing}
                             on_editing_change={set_material_editing}
                             on_saved={() =>

@@ -61,7 +61,24 @@ links and images as plain text; no heading, help text or Read/Edit buttons) as
 the first ("construction") tab below the stage. Like the materials page, the
 components middle column shows the stage on top (`StagePane`) and a scrollable
 details region with `CoolTabs` below it; the former Stage / Construction
-document switch is gone and the stage stays visible. The page no longer edits
+document switch is gone and the stage stays visible. The second tab, "materials"
+(`ComponentMaterialsTab.jsx`, numbers from `ComponentMaterialUsage.js`),
+lists every material the current draft uses: placed objects (and how many
+move), scattered instances (rules, scatter area minus exclusions, per m² of
+scatter), the total, the scale range, per m² of floor and the floor's size and
+texture tiling; the footer gives the instances used out of the SDK's 1,000.
+Scatter and floor columns appear only when the component has scatter rules or a
+floor. Names come from the materials catalog (IDs if it is unavailable). Five
+or more materials from one catalog folder (or with the same ID prefix, such as
+`rocks-piece-001`…`084`) collapse into one expandable row with summed values. The third tab, "history"
+(`ComponentHistoryTab.jsx`), lists the component's dated change entries newest
+first, like a material's history (date · action, then the description), from
+GET `/api/component-documents/:id/history`. It reloads when opened and after
+each save; an unsaved component has no history yet. Each save also sends
+`notes`: labels for the edits since the last save, kept beside the undo history
+by `ComponentEditNotes.js` (construction batches such as "placed 30 ×
+yard-grass", applied proposals, lighting changes), so undone edits drop out and
+repeats collapse to "(×n)". The server puts them at the start of the entry. The page no longer edits
 the text; it is still saved, reloaded and undone with the document when other
 flows change it, and description-only changes do not rebuild geometry.
 Structured blueprint/server ingestion remains future work.
@@ -279,8 +296,8 @@ The construction stage includes `MaterialSearchPanel.jsx`: bounded catalog searc
 over names/tags/categories/descriptions, placement filters, paginated results,
 stable IDs/revisions and explicit missing placement facts. It does not place
 objects or alter the component document. Expanding a result shows `MaterialFacts`;
-its construction metadata can be edited there or beneath a material's catalog
-preview via `MaterialMetadataPanel.jsx`. Search/paging is blocked while metadata
+its construction metadata can be edited there via `MaterialMetadataPanel.jsx`
+(the materials page's metadata tab shows it read-only). Search/paging is blocked while metadata
 edits are open. Successful metadata saves invalidate the old search snapshot.
 
 `MaterialMetadataEditor.jsx` owns the form and `MaterialMetadataForm.js` handles
@@ -427,8 +444,8 @@ folder and an empty note unchanged, and refuses non-attribution keys. One value
 edits at a time, and not while a metadata edit or a recovered-draft editor (which
 still opens for an unsaved browser draft) is open. The version is read-only; the
 name/ID and folder are shown (and changed) in the right panel instead, source files (preserved files), history (modification history) and,
-on the materials page, metadata (`MaterialMetadataPanel.jsx`, passed in as the
-`metadata` slot). Every tab stays mounted and unselected ones are hidden, so open
+on the materials page, metadata (`MaterialMetadataPanel.jsx` with `read_only`,
+so no edit or reload buttons; passed in as the `metadata` slot). Every tab stays mounted and unselected ones are hidden, so open
 catalog or metadata edits keep their drafts across tab switches. `GamesInventory`
 owns the selected tab so it survives the panel's remount after saves; a
 remembered metadata tab falls back to history where there is no metadata. `InventoryCatalogEditor.jsx` owns the editable form and
@@ -1366,3 +1383,11 @@ opaque material with both fully transparent and visibly opaque sampled pixels
 receives alpha testing/double-sided rendering. Opaque bark textures and intentional
 translucency retain their settings. Preview map snapshots retain the correction
 across material toggles; original textures, models and catalogs are unchanged.
+
+Auto-pilot uses the shared `DashboardSwitch.jsx` artwork and nameplate, mirrored
+to the right of the turn coordinator. The turn dial and caption shift left by
+the same amount the heading dial shifts right. Layouts without the spare
+half-cell put auto-pilot at the controller upper-right, opposite lights.
+`GamesPlayInteractive.jsx` owns the on/off state, initially off for each game.
+This control does not yet alter flight; automatic behavior will be specified
+separately. Its nameplate follows night lighting independently of activation.

@@ -4,7 +4,6 @@ import AppText from "../../AppText.jsx";
 import { COMPONENT_STAGE_TEXT, INVENTORY_TEXT } from "../../text/GamesText.jsx";
 import {
   InventoryToolbar,
-  InventoryCaption,
   InventoryStatus,
   InventoryControls,
   InventoryDetails,
@@ -16,11 +15,14 @@ import {
   StageViewport,
   StagePane,
   StageTab,
+  StageCaption,
   StagePreviewNotice,
 } from "./ComponentStageStyles.jsx";
 import { create_component_stage } from "./ComponentStageScene.js";
 import { construction_text } from "./ComponentToolFields.jsx";
 import ComponentConstructionDocument from "./ComponentConstructionDocument.jsx";
+import ComponentMaterialsTab from "./ComponentMaterialsTab.jsx";
+import ComponentHistoryTab from "./ComponentHistoryTab.jsx";
 import ComponentVariants from "./ComponentVariants.jsx";
 import ComponentNameEdit from "./ComponentNameEdit.jsx";
 import ComponentStageLightingControls from "./ComponentStageLightingControls.jsx";
@@ -187,18 +189,40 @@ export default function ComponentStage({
               </InventoryStatus>
             )}
           </StageViewport>
+          {/* Navigation help and preview errors sit between the stage and the tabs. */}
+          {preview.error && (
+            <StageCaption role="alert">
+              {text("variant_preview_error")}
+            </StageCaption>
+          )}
+          <StageCaption>
+            {text(walk.active ? "walk_navigation" : "navigation")}
+          </StageCaption>
           <InventoryDetails
             tabIndex={0}
             role="region"
             aria-label={text("component_details")}
           >
             <CoolTabs
-              labels={[text("tab_construction")]}
+              labels={[
+                text("tab_construction"),
+                text("tab_materials"),
+                text("tab_history"),
+              ]}
               tab_index={details_tab}
               on_tab_select={set_details_tab}
               selected_content={
                 <StageTab>
-                  <ComponentConstructionDocument document={draft} />
+                  {details_tab === 2 ? (
+                    <ComponentHistoryTab
+                      id={draft.id}
+                      revision={editor.revision}
+                    />
+                  ) : details_tab === 1 ? (
+                    <ComponentMaterialsTab document={draft} />
+                  ) : (
+                    <ComponentConstructionDocument document={draft} />
+                  )}
                 </StageTab>
               }
             />
@@ -231,7 +255,9 @@ export default function ComponentStage({
           />
           <ComponentStageLightingControls
             document={draft}
-            on_change={editor.edit}
+            on_change={(document) =>
+              editor.edit(document, text("note_lighting"))
+            }
             disabled={editor.busy}
           />
           <ComponentVariants
@@ -249,10 +275,6 @@ export default function ComponentStage({
           />
         </InventoryControls>
       </StageWorkspace>
-      {preview.error && <p role="alert">{text("variant_preview_error")}</p>}
-      <InventoryCaption>
-        {text(walk.active ? "walk_navigation" : "navigation")}
-      </InventoryCaption>
     </StageHost>
   );
 }

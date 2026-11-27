@@ -7,6 +7,7 @@ import {
   component_document_reducer,
   component_is_dirty,
 } from "./ComponentDocumentState.js";
+import { notes_since_save } from "./ComponentEditNotes.js";
 import {
   component_request,
   validate_component_response,
@@ -65,8 +66,9 @@ export default function useComponentDocument() {
       });
       set_message(null);
     },
-    edit(document) {
-      dispatch({ type: "edit", document });
+    /** `label` names the edit for the history entry of the next save. */
+    edit(document, label) {
+      dispatch({ type: "edit", document, label });
       set_message(null);
     },
     construct(commands, materials, expected_id) {
@@ -132,6 +134,7 @@ export default function useComponentDocument() {
     save() {
       return run(async () => {
         const document = validate_component_document(state.history.present);
+        const notes = notes_since_save(state);
         const result = validate_component_response(
           await component_request(`/${document.id}`, {
             method: "PUT",
@@ -139,6 +142,8 @@ export default function useComponentDocument() {
             body: JSON.stringify({
               document,
               expected_revision: state.revision,
+              // Labels of the edits since the last save, for the history entry.
+              ...(notes.length ? { notes } : {}),
             }),
           }),
         );

@@ -24,9 +24,14 @@ async function request(id, options = {}) {
     throw new Error(response.status === 409 ? "conflict" : "error");
   return (await response.json()).material;
 }
+/**
+ * A material's construction metadata. `read_only` (the materials page's
+ * metadata tab) shows the facts without the edit and reload buttons.
+ */
 export default function MaterialMetadataPanel({
   asset_id,
   disabled = false,
+  read_only = false,
   on_editing_change,
   on_saved,
 }) {
@@ -103,15 +108,17 @@ export default function MaterialMetadataPanel({
       {material && !form && (
         <>
           <MaterialFacts material={material} />
-          <button
-            disabled={busy || disabled || message === "loading"}
-            onClick={() => {
-              set_form(material_form(material));
-              set_message("");
-            }}
-          >
-            {text("edit")}
-          </button>
+          {!read_only && (
+            <button
+              disabled={busy || disabled || message === "loading"}
+              onClick={() => {
+                set_form(material_form(material));
+                set_message("");
+              }}
+            >
+              {text("edit")}
+            </button>
+          )}
         </>
       )}
       {form && (
@@ -137,14 +144,16 @@ export default function MaterialMetadataPanel({
           {text(message)}
         </p>
       )}
-      <CatalogActions>
-        <button
-          disabled={busy || disabled || message === "loading"}
-          onClick={reload}
-        >
-          {text(form ? "discard_reload" : "reload")}
-        </button>
-      </CatalogActions>
+      {!read_only && (
+        <CatalogActions>
+          <button
+            disabled={busy || disabled || message === "loading"}
+            onClick={reload}
+          >
+            {text(form ? "discard_reload" : "reload")}
+          </button>
+        </CatalogActions>
+      )}
     </CatalogPanel>
   );
 }

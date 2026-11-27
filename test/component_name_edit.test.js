@@ -147,8 +147,11 @@ test("the stage's right panel holds the name, folder, lighting and variants", ()
     StageViewport: "viewport",
     StagePane: "pane",
     StageTab: "tab",
+    StageCaption: "p",
     InventoryDetails: "details",
     CoolTabs: "tabs",
+    ComponentMaterialsTab: "materials-tab",
+    ComponentHistoryTab: "history-tab",
     StagePreviewNotice: "notice",
     construction_text: (value) => value,
     ComponentConstructionDocument: "document",
@@ -192,15 +195,20 @@ test("the stage's right panel holds the name, folder, lighting and variants", ()
   assert.equal(name.props.name, "Grass strip");
   assert.equal(name.props.on_rename, editor.rename, "names save at once");
   assert.equal(lighting.props.document, draft);
-  // The stage sits above a tabbed details region whose first tab is
-  // "construction", holding the construction document.
+  // The stage sits above the navigation help line, then a tabbed details
+  // region whose first tab is "construction", holding the construction document.
   const pane = kids(workspace).find((node) => node?.type === "pane");
-  const [viewport, details] = kids(pane).filter(Boolean);
+  const [viewport, caption, details] = kids(pane).filter(Boolean);
   assert.equal(viewport.type, "viewport");
+  assert.equal(caption.props.children, "navigation");
   assert.equal(details.type, "details");
   assert.equal(details.props.role, "region");
   const tabs = kids(details).find((node) => node?.type === "tabs");
-  assert.deepEqual(Array.from(tabs.props.labels), ["tab_construction"]);
+  assert.deepEqual(Array.from(tabs.props.labels), [
+    "tab_construction",
+    "tab_materials",
+    "tab_history",
+  ]);
   assert.equal(tabs.props.tab_index, 0);
   const construction = all(tabs.props.selected_content).find(
     (node) => node.type === "document",
@@ -272,7 +280,9 @@ test("editor.rename saves only the name on the saved document with its revision"
   reducer_state = state_module.component_document_reducer(reducer_state, {
     type: "edit",
     document: draft,
+    label: "adjusted the lighting",
   });
+  const notes_module = await import("../src/pages/games/ComponentEditNotes.js");
   const hook = load("useComponentDocument.js", {
     useReducer: (reducer) => [
       reducer_state,
@@ -288,6 +298,7 @@ test("editor.rename saves only the name on the saved document with its revision"
     validate_component_document: sdk.validate_component_document,
     component_document_reducer: state_module.component_document_reducer,
     component_is_dirty: state_module.component_is_dirty,
+    notes_since_save: notes_module.notes_since_save,
     validate_component_response: (result) => ({
       document: sdk.validate_component_document(result.document),
       revision: result.revision,
@@ -324,6 +335,21 @@ test("editor.rename saves only the name on the saved document with its revision"
     requests.some((request) => request.options.method === "PUT"),
     false,
   );
+  // A full save carries the labels of the unsaved edits; the next one none.
+  server_revision = 4;
+  requests.length = 0;
+  h.reset();
+  assert.equal(await hook().save(), true);
+  assert.deepEqual(JSON.parse(requests[0].options.body).notes, [
+    "adjusted the lighting",
+  ]);
+  requests.length = 0;
+  h.reset();
+  assert.equal(await hook().save(), true);
+  assert.equal(
+    Object.hasOwn(JSON.parse(requests[0].options.body), "notes"),
+    false,
+  );
 });
 
 test("a failed name save keeps the editor open with the draft", async () => {
@@ -335,4 +361,75 @@ test("a failed name save keeps the editor open with the draft", async () => {
   const form = kids(render())[0];
   assert.equal(form.props.as, "form");
   assert.equal(kids(form)[0].props.value, "Meadow");
+});
+
+test("the materials tab shows the component's material usage", () => {
+  const h = hooks();
+  const stage = load("ComponentStage.jsx", {
+    useState: h.useState,
+    useRef: (initial) => ({ current: initial }),
+    useMemo: (compute) => compute(),
+    useEffect: () => {},
+    create_component_stage: () => ({}),
+    preview_component_variant: () => ({}),
+    AppText: { get: (key) => key },
+    COMPONENT_STAGE_TEXT: new Proxy({}, { get: (_, key) => key }),
+    INVENTORY_TEXT: new Proxy({}, { get: (_, key) => key }),
+    StageHost: "host",
+    InventoryToolbar: "toolbar",
+    InventoryCaption: "caption",
+    InventoryStatus: "status",
+    InventoryControls: "panel",
+    InventoryDetails: "details",
+    StagePane: "pane",
+    StageTab: "tab",
+    StageCaption: "p",
+    CoolTabs: "tabs",
+    StageWorkspace: "workspace",
+    StageViewport: "viewport",
+    StagePreviewNotice: "notice",
+    construction_text: (value) => value,
+    ComponentConstructionDocument: "document",
+    ComponentMaterialsTab: "materials-tab",
+    ComponentHistoryTab: "history-tab",
+    ComponentVariants: "variants",
+    ComponentStageLightingControls: "lighting",
+    ComponentNameEdit: "name-edit",
+    PreviewAnimationToggle: "animation-toggle",
+    PreviewScaleControls: "scale-controls",
+  });
+  const draft = { id: "doc-1", name: "Grass strip", objects: [] };
+  const editor = {
+    history: { present: draft, past: [], future: [] },
+    revision: 2,
+    busy: false,
+    dirty: false,
+    edit() {},
+    rename: async () => true,
+  };
+  const all = (node) =>
+    !node || typeof node !== "object" ? [] : [node, ...kids(node).flatMap(all)];
+  h.reset();
+  let tabs = all(stage({ editor })).find((node) => node.type === "tabs");
+  tabs.props.on_tab_select(1);
+  h.reset();
+  tabs = all(stage({ editor })).find((node) => node.type === "tabs");
+  assert.equal(tabs.props.tab_index, 1);
+  const content = all(tabs.props.selected_content);
+  const materials = content.find((node) => node.type === "materials-tab");
+  assert.equal(materials.props.document, draft);
+  assert.equal(
+    content.some((node) => node.type === "document"),
+    false,
+  );
+  tabs.props.on_tab_select(2);
+  h.reset();
+  tabs = all(stage({ editor })).find((node) => node.type === "tabs");
+  const history = all(tabs.props.selected_content).find(
+    (node) => node.type === "history-tab",
+  );
+  assert.deepEqual(
+    { id: history.props.id, revision: history.props.revision },
+    { id: "doc-1", revision: 2 },
+  );
 });
