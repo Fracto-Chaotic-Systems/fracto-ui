@@ -135,8 +135,49 @@ export default function useInventoryCatalog(asset_id, on_saved) {
       set_busy(false);
     }
   };
+  /** Revision-checked save of one attribution field; nothing else changes. */
+  const save_field = async (key, value) => {
+    if (busy || !catalog || !ATTRIBUTION_FIELDS.includes(key)) return false;
+    set_busy(true);
+    set_message("saving");
+    try {
+      const attribution = Object.fromEntries(
+        ATTRIBUTION_FIELDS.map((name) => [
+          name,
+          catalog.record.attribution[name] || "",
+        ]),
+      );
+      attribution[key] = value;
+      const next = await request(asset_id, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          revision: catalog.revision,
+          attribution,
+          note: "",
+          folder_path: catalog.record.folder_path || "",
+        }),
+      });
+      set_catalog(next);
+      set_message("saved_direct");
+      await on_saved?.(next.record);
+      return true;
+    } catch (error) {
+      set_message(
+        ["file_conflict", "invalid_url", "invalid_record"].includes(
+          error.message,
+        )
+          ? error.message
+          : "save_error",
+      );
+      return false;
+    } finally {
+      set_busy(false);
+    }
+  };
   return {
     record: catalog?.record,
+    save_field,
     busy,
     load_error,
     editing,

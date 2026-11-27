@@ -1,11 +1,58 @@
 import styled from "styled-components";
 
+export const CatalogTab = styled.div`
+  padding: 0.75rem;
+  &[hidden] {
+    display: none;
+  }
+`;
+/** `$bare` drops the outlined box, e.g. for the tabbed catalog information. */
+/** An attribution value with a pencil revealed on hover or keyboard focus. */
+export const CatalogValue = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  max-width: 100%;
+  .catalog-value {
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: text;
+    overflow-wrap: anywhere;
+  }
+  .catalog-value:disabled {
+    cursor: default;
+  }
+  .catalog-edit-action {
+    visibility: hidden;
+  }
+  &:hover .catalog-edit-action,
+  &:focus-within .catalog-edit-action {
+    visibility: visible;
+  }
+`;
+/** Inline attribution editor: input (or textarea), green check, red X. */
+export const CatalogFieldForm = styled.form`
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  input,
+  textarea {
+    flex: 1;
+    min-width: 0;
+    box-sizing: border-box;
+    font: inherit;
+  }
+`;
 export const CatalogPanel = styled.section`
-  margin-top: 1.25rem;
-  padding: 1.1rem;
-  border: 1px solid #ccd4d6;
+  margin-top: ${({ $bare }) => ($bare ? "0.75rem" : "1.25rem")};
+  padding: ${({ $bare }) => ($bare ? "0" : "1.1rem")};
+  border: ${({ $bare }) => ($bare ? "0" : "1px solid #ccd4d6")};
   border-radius: 6px;
-  background: #f9fbfb;
+  background: ${({ $bare }) => ($bare ? "transparent" : "#f9fbfb")};
   font-size: 0.875rem;
   overflow-wrap: anywhere;
   h2 {

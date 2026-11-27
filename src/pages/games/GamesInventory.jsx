@@ -86,6 +86,8 @@ export default function GamesInventory({
   const [catalog_editing, set_catalog_editing] = useState(false);
   const [material_editing, set_material_editing] = useState(false);
   const [catalog_refresh, set_catalog_refresh] = useState(0);
+  // Kept here so the catalog tab survives panel remounts after saves.
+  const [catalog_tab, set_catalog_tab] = useState(0);
   // Folder selection may be owned by the page (components) or kept here (materials).
   const [own_folder, set_own_folder] = useState(null);
   const folder_controlled = folder_selection !== undefined;
@@ -96,7 +98,12 @@ export default function GamesInventory({
   const target = selected_folder
     ? { kind: "folder", path: selected_folder, label: selected_folder }
     : asset
-      ? { kind: "model", id: asset.id, label: asset.name }
+      ? {
+          kind: "model",
+          id: asset.id,
+          label: asset.name,
+          folder_path: asset.folder_path || "",
+        }
       : null;
   const [options, set_options] = useState({ ...DEFAULT_INVENTORY_PREVIEW });
   const [status, set_status] = useState("loading");
@@ -210,23 +217,26 @@ export default function GamesInventory({
                     </InventoryCaption>
                     <InventoryCatalogPanel
                       key={`${asset.id}:${asset.name}:${asset.folder_path}:${catalog_refresh}`}
-                      editing_disabled={material_editing}
                       asset_id={asset.id}
-                      folders={folders}
+                      editing_disabled={material_editing}
                       on_editing_change={set_catalog_editing}
                       on_saved={() => inventory.reload(asset.id)}
+                      tab={catalog_tab}
+                      on_tab={set_catalog_tab}
+                      metadata={
+                        category === "material" && (
+                          <MaterialMetadataPanel
+                            key={asset.id}
+                            asset_id={asset.id}
+                            disabled={catalog_editing}
+                            on_editing_change={set_material_editing}
+                            on_saved={() =>
+                              set_catalog_refresh((value) => value + 1)
+                            }
+                          />
+                        )
+                      }
                     />
-                    {category === "material" && (
-                      <MaterialMetadataPanel
-                        key={asset.id}
-                        asset_id={asset.id}
-                        disabled={catalog_editing}
-                        on_editing_change={set_material_editing}
-                        on_saved={() =>
-                          set_catalog_refresh((value) => value + 1)
-                        }
-                      />
-                    )}
                   </InventoryDetails>
                 </InventoryPreviewPane>
               </>

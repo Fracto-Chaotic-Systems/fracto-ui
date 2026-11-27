@@ -21,6 +21,12 @@ const folder_api = readFileSync(
   new URL("../src/pages/games/InventoryFolderApi.js", import.meta.url),
   "utf8",
 ).replace(/^export /gm, "");
+const move_hook = readFileSync(
+  new URL("../src/pages/games/useInventoryMove.js", import.meta.url),
+  "utf8",
+)
+  .replace(/^import[^;]+;\r?\n/gm, "")
+  .replace("export default function", "function");
 const new_folder_hook = readFileSync(
   new URL("../src/pages/games/useInventoryNewFolder.js", import.meta.url),
   "utf8",
@@ -46,6 +52,7 @@ const compiled = transformSync(
     folder_api,
     delete_hook,
     rename_hook,
+    move_hook,
     new_folder_hook,
     new_folder_component,
     rename_source,
@@ -62,6 +69,7 @@ const revision = "a".repeat(64);
 
 // Expand inlined function components so their output can be inspected.
 const expand = (element) => {
+  if (Array.isArray(element)) return Array.from(element, expand);
   if (!element || typeof element !== "object") return element;
   if (typeof element.type === "function")
     return expand(element.type(element.props));
@@ -110,6 +118,10 @@ function fixture(target, response_error = null) {
     cancel_icon: "cancel-svg",
     trash_icon: "trash-svg",
     TreeActionForm: "form",
+    CatalogMoveForm: "form",
+    folder_contains: (parent, path) =>
+      path === parent || path.startsWith(parent + "/"),
+    ATTRIBUTION_FIELDS: ["creator_name", "source_url"],
     AbortSignal,
     fetch: async (url, options = {}) => {
       requests.push({ url, options });
@@ -122,7 +134,14 @@ function fixture(target, response_error = null) {
               : url.includes("/folders")
                 ? { folder_path: JSON.parse(options.body).folder_path }
                 : { id: "grass" }
-            : { revision, record: { name: "Grass" } },
+            : {
+                revision,
+                record: {
+                  name: "Grass",
+                  folder_path: "plants",
+                  attribution: { creator_name: "Ada", source_url: "" },
+                },
+              },
       };
     },
   });
@@ -166,6 +185,23 @@ function fixture(target, response_error = null) {
   return { render, find, requests, created, changed: () => changed };
 }
 
+const nodes_of = (element) => {
+  if (!element || typeof element !== "object") return [];
+  if (typeof element.type === "function")
+    return nodes_of(element.type(element.props));
+  const children = element.props?.children;
+  return [
+    element,
+    ...(Array.isArray(children) ? Array.from(children) : [children]).flatMap(
+      (child) =>
+        Array.isArray(child) ? child.flatMap(nodes_of) : nodes_of(child),
+    ),
+  ];
+};
+const folder_edit = (tree) =>
+  nodes_of(tree).find(
+    (node) => node.type === "pencil" && node.props.title === "move_folder",
+  );
 const posts = (f) => f.requests.filter((request) => request.options.method);
 
 test("folder details offer New folder, which opens an inline name editor with check and X", async () => {
@@ -435,7 +471,7 @@ test("rename and delete cannot overlap in the details panel", async () => {
   const f = fixture({ kind: "folder", path: "plants", label: "plants" });
   await f.find(f.render(), "pencil").props.on_click();
   assert.equal(f.find(f.render(), "trash"), undefined);
-  assert.equal(f.find(f.render(), "pencil"), undefined);
+  assert.equal(f.find(f.render(), "pencil", "rename"), undefined);
   assert.equal(f.find(f.render(), "button", "confirm_delete"), undefined);
   assert.equal(f.requests.length, 0);
 });
@@ -455,7 +491,7 @@ test("rename replaces the header name in place with green accept and red cancel 
   assert.equal(f.find(tree, "cancel").props.color, "#c62828");
   assert.equal(f.find(tree, "input").props.value, "plants");
   assert.equal(f.find(tree, "input").props["aria-label"], "new_name");
-  assert.equal(f.find(tree, "pencil"), undefined);
+  assert.equal(f.find(tree, "pencil", "rename"), undefined);
   assert.equal(f.find(tree, "trash"), undefined);
   assert.equal(f.find(tree, "strong"), undefined);
   f.find(tree, "input").props.onChange({ target: { value: "Discarded name" } });
@@ -638,4 +674,189 @@ test("choosing a component document leaf opens it instead of selecting a folder"
     items: [{ isLeaf: false }],
   });
   assert.deepEqual(folders, ["Plants"]);
+});
+
+test("model details show Move to folder under the name and save only the folder", async () => {
+  const f = fixture({
+    kind: "model",
+    id: "grass",
+    label: "Grass",
+    folder_path: "plants",
+  });
+  const initial = f.render();
+  const parts = nodes_of(initial);
+  const folder_line = parts.find(
+    (node) =>
+      node.type === "span" &&
+      Array.from([node.props.children].flat()).join("") === "in_folder plants",
+  );
+  assert.ok(folder_line, "shows in: <folder> under the name");
+  const line_text = (tree) =>
+    nodes_of(tree)
+      .filter((node) => node.type === "span")
+      .map((node) => Array.from([node.props.children].flat()).join(""));
+  assert.ok(
+    line_text(
+      fixture({ kind: "model", id: "grass", label: "Grass" }).render(),
+    ).includes("in_folder folder_root"),
+    "the category root reads in: Category root",
+  );
+  const name_row = parts.findIndex(
+    (node) =>
+      node.type === "div" && node.props.children?.[0]?.type === "strong",
+  );
+  const move_index = parts.findIndex(
+    (node) => node.type === "pencil" && node.props.title === "move_folder",
+  );
+  assert.ok(
+    name_row >= 0 && move_index > name_row,
+    "Move to folder sits under the name",
+  );
+  const move_button = folder_edit(initial);
+  await move_button.props.on_click();
+  const tree = f.render();
+  assert.equal(f.find(tree, "select").props.value, "plants");
+  assert.deepEqual(
+    nodes_of(f.find(tree, "select"))
+      .filter((node) => node.type === "option")
+      .map((node) => node.props.value),
+    ["", "plants", "plants/herbs"],
+  );
+  assert.deepEqual(
+    Array.from(f.find(tree, "form").props.children, (child) => child.type),
+    ["label", "icon", "icon"],
+  );
+  assert.equal(f.find(tree, "accept").props.color, "#17803d");
+  assert.equal(f.find(tree, "cancel").props.color, "#c62828");
+  assert.equal(f.find(tree, "pencil").props.disabled, true);
+  assert.equal(f.find(tree, "trash").props.disabled, true);
+  f.find(tree, "select").props.onChange({ target: { value: "plants/herbs" } });
+  await f.find(f.render(), "form").props.onSubmit({ preventDefault() {} });
+  const patch = f.requests.find(
+    (request) => request.options.method === "PATCH",
+  );
+  assert.match(patch.url, /api\/environment-catalog\/grass$/);
+  assert.deepEqual(JSON.parse(patch.options.body), {
+    revision,
+    attribution: { creator_name: "Ada", source_url: "" },
+    note: "",
+    folder_path: "plants/herbs",
+  });
+  assert.equal(f.changed(), 1);
+  assert.equal(f.find(f.render(), "form"), undefined);
+  assert.ok(folder_edit(f.render()));
+});
+
+test("Move to folder: unchanged choice, X and Escape send nothing; conflicts keep the form", async () => {
+  const f = fixture({ kind: "model", id: "grass", label: "Grass" });
+  await folder_edit(f.render()).props.on_click();
+  await f.find(f.render(), "form").props.onSubmit({ preventDefault() {} });
+  assert.equal(f.find(f.render(), "form"), undefined);
+  await folder_edit(f.render()).props.on_click();
+  f.find(f.render(), "cancel").props.on_click();
+  assert.equal(f.find(f.render(), "form"), undefined);
+  await folder_edit(f.render()).props.on_click();
+  let prevented = false;
+  f.find(f.render(), "form").props.onKeyDown({
+    key: "Escape",
+    preventDefault() {
+      prevented = true;
+    },
+  });
+  assert.equal(prevented, true);
+  assert.equal(f.find(f.render(), "form"), undefined);
+  assert.equal(
+    f.requests.filter((request) => request.options.method).length,
+    0,
+  );
+
+  const conflict = fixture(
+    { kind: "model", id: "grass", label: "Grass" },
+    "file_conflict",
+  );
+  await folder_edit(conflict.render()).props.on_click();
+  conflict
+    .find(conflict.render(), "select")
+    .props.onChange({ target: { value: "plants/herbs" } });
+  await conflict
+    .find(conflict.render(), "form")
+    .props.onSubmit({ preventDefault() {} });
+  assert.ok(conflict.find(conflict.render(), "form"));
+  assert.equal(
+    conflict.find(conflict.render(), "p", "file_conflict").props.role,
+    "alert",
+  );
+  assert.equal(conflict.changed(), 0);
+});
+
+test("Move waits for open drafts and other actions", async () => {
+  const f = fixture({ kind: "model", id: "grass", label: "Grass" });
+  assert.equal(folder_edit(f.render({ disabled: true })).props.disabled, true);
+  await folder_edit(f.render({ disabled: true })).props.on_click();
+  assert.equal(f.find(f.render(), "form"), undefined);
+  await f.find(f.render(), "trash").props.on_click();
+  assert.equal(folder_edit(f.render()).props.disabled, true);
+  assert.equal(
+    f.requests.filter((request) => request.options.method).length,
+    0,
+  );
+});
+
+test("a selected folder shows in: <parent> with a pencil and moves under a new parent", async () => {
+  const f = fixture({
+    kind: "folder",
+    path: "plants/herbs",
+    label: "plants/herbs",
+  });
+  const lines = (tree) =>
+    nodes_of(tree)
+      .filter((node) => node.type === "span")
+      .map((node) => Array.from([node.props.children].flat()).join(""));
+  assert.ok(lines(f.render()).includes("in_folder plants"));
+  assert.equal(
+    lines(f.render()).some((line) => line.startsWith("folder_path")),
+    false,
+    "Folder path: is replaced by in:",
+  );
+  await folder_edit(f.render()).props.on_click();
+  assert.equal(f.requests.length, 0, "folders need no record fetch");
+  const tree = f.render();
+  assert.equal(f.find(tree, "select").props.value, "plants");
+  // The folder itself (and anything under it) is not offered as a destination.
+  assert.deepEqual(
+    nodes_of(f.find(tree, "select"))
+      .filter((node) => node.type === "option")
+      .map((node) => node.props.value),
+    ["", "plants"],
+  );
+  // Unchanged parent sends nothing.
+  await f.find(f.render(), "form").props.onSubmit({ preventDefault() {} });
+  assert.equal(f.requests.length, 0);
+  await folder_edit(f.render()).props.on_click();
+  f.find(f.render(), "select").props.onChange({ target: { value: "" } });
+  await f.find(f.render(), "form").props.onSubmit({ preventDefault() {} });
+  assert.match(f.requests[0].url, /api\/environment-catalog\/manage$/);
+  assert.deepEqual(JSON.parse(f.requests[0].options.body), {
+    action: "move-folder",
+    category: "material",
+    folder_path: "plants/herbs",
+    parent: "",
+  });
+  assert.equal(f.changed(), 1);
+  assert.equal(f.find(f.render(), "form"), undefined);
+  const root = fixture({ kind: "folder", path: "plants", label: "plants" });
+  assert.ok(lines(root.render()).includes("in_folder folder_root"));
+});
+
+test("a folder move conflict keeps the editor and reports the error", async () => {
+  const f = fixture(
+    { kind: "folder", path: "plants/herbs", label: "plants/herbs" },
+    "folder_conflict",
+  );
+  await folder_edit(f.render()).props.on_click();
+  f.find(f.render(), "select").props.onChange({ target: { value: "" } });
+  await f.find(f.render(), "form").props.onSubmit({ preventDefault() {} });
+  assert.ok(f.find(f.render(), "form"));
+  assert.equal(f.find(f.render(), "p", "folder_conflict").props.role, "alert");
+  assert.equal(f.changed(), 0);
 });

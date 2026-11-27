@@ -17,6 +17,9 @@ import {
 import useInventoryRename from "./useInventoryRename.js";
 import useInventoryNewFolder from "./useInventoryNewFolder.js";
 import InventoryNewFolder from "./InventoryNewFolder.jsx";
+import useInventoryMove, { parent_folder } from "./useInventoryMove.js";
+import { folder_contains } from "@fracto/sdk/FractoModelManagement.js";
+import { CatalogMoveForm } from "./InventoryCatalogStyles.jsx";
 
 const text = (key) => AppText.get(INVENTORY_CATALOG_TEXT[key]);
 export default function InventorySelectionName({
@@ -35,17 +38,24 @@ export default function InventorySelectionName({
     disabled,
   });
   const creating = creation.editing || creation.busy;
-  const rename = useInventoryRename({
+  const move = useInventoryMove({
     target,
     category,
     on_changed,
     disabled: disabled || creating,
   });
+  const moving = move.moving || move.busy;
+  const rename = useInventoryRename({
+    target,
+    category,
+    on_changed,
+    disabled: disabled || creating || moving,
+  });
   const deletion = useInventoryDelete({
     target,
     category,
     on_changed,
-    disabled: disabled || creating || rename.busy || rename.editing,
+    disabled: disabled || creating || moving || rename.busy || rename.editing,
   });
   const name_input = useRef(null);
   useEffect(() => {
@@ -101,6 +111,7 @@ export default function InventorySelectionName({
             disabled={
               disabled ||
               creating ||
+              moving ||
               rename.busy ||
               rename.editing ||
               deletion.busy ||
@@ -119,6 +130,7 @@ export default function InventorySelectionName({
             disabled={
               disabled ||
               creating ||
+              moving ||
               rename.busy ||
               rename.editing ||
               deletion.busy ||
@@ -127,10 +139,76 @@ export default function InventorySelectionName({
           />
         </InventoryNameRow>
       )}
-      {target.kind === "folder" && (
-        <span>
-          {text("folder_path")}: {target.path}
-        </span>
+      {move.moving ? (
+        <CatalogMoveForm
+          onSubmit={move.save}
+          onKeyDown={(event) => {
+            if (event.key === "Escape" && !move.busy) {
+              event.preventDefault();
+              move.cancel();
+            }
+          }}
+        >
+          <label>
+            {text("in_folder")}
+            <select
+              value={move.folder}
+              disabled={disabled || move.busy}
+              onChange={(event) => move.set_folder(event.target.value)}
+            >
+              <option value="">{text("folder_root")}</option>
+              {[...new Set([...folders, move.current].filter(Boolean))]
+                // A folder cannot move into itself or one of its subfolders.
+                .filter(
+                  (path) =>
+                    target.kind !== "folder" ||
+                    !folder_contains(target.path, path),
+                )
+                .sort()
+                .map((path) => (
+                  <option key={path} value={path}>
+                    {path}
+                  </option>
+                ))}
+            </select>
+          </label>
+          <CoolIconLink
+            title={text("move_folder")}
+            icon={check_icon}
+            color="#17803d"
+            type="submit"
+            disabled={disabled || move.busy}
+          />
+          <CoolIconLink
+            title={text("cancel")}
+            icon={cancel_icon}
+            color="#c62828"
+            on_click={move.cancel}
+            disabled={move.busy}
+          />
+        </CatalogMoveForm>
+      ) : (
+        <InventoryNameRow>
+          <span>
+            {text("in_folder")}{" "}
+            {(target.kind === "folder"
+              ? parent_folder(target.path)
+              : target.folder_path) || text("folder_root")}
+          </span>
+          <CoolEditLink
+            title={text("move_folder")}
+            disabled={
+              disabled ||
+              creating ||
+              move.busy ||
+              rename.busy ||
+              rename.editing ||
+              deletion.busy ||
+              deletion.confirming
+            }
+            on_click={move.begin}
+          />
+        </InventoryNameRow>
       )}
       {target.kind === "folder" && (
         <InventoryNewFolder
@@ -170,6 +248,7 @@ export default function InventorySelectionName({
       )}
       {deletion.error && <p role="alert">{text(deletion.error)}</p>}
       {rename.error && <p role="alert">{text(rename.error)}</p>}
+      {move.error && <p role="alert">{text(move.error)}</p>}
     </>
   );
 }

@@ -87,6 +87,7 @@ export default function MaterialMetadataPanel({
   };
   return (
     <CatalogPanel
+      $bare
       aria-label={text("metadata")}
       onKeyDown={(event) => {
         event.stopPropagation();
@@ -99,7 +100,6 @@ export default function MaterialMetadataPanel({
         }
       }}
     >
-      <h3>{text("metadata")}</h3>
       {material && !form && (
         <>
           <MaterialFacts material={material} />

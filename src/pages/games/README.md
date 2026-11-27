@@ -381,9 +381,26 @@ Preview controls do not write to the source catalog. Scale and texture roles are
 provisional; original files and unresolved attribution stay in the main asset
 catalog. Preview resources are served directly from the registered asset library.
 
-`InventoryCatalogPanel.jsx` displays the selected asset's creator, source,
-license, attribution text/conditions, preserved files and modification history
-below the preview. `InventoryCatalogEditor.jsx` owns the editable form and
+`InventoryCatalogPanel.jsx` displays the selected asset's catalog information
+below the preview as `CoolTabs` tabs only (no heading or outlined box; the
+`CatalogPanel` style's `$bare` variant, also used by the metadata panel, whose
+duplicate "metadata" heading was removed): details (version,
+folder, creator, source, license, attribution text/conditions; no title or
+Edit/reload buttons). Only attribution values are editable, in place: click a
+value (or its pencil, revealed on hover/focus; URL values stay links, so use the
+pencil) to get an input (textarea for credit/conditions/notes) with the green
+check and red X; Enter/check saves, Escape/X cancels, unchanged text saves
+nothing. `InventoryCatalogField.jsx` owns that row; `useInventoryCatalog.js`
+`save_field` sends one revision-checked PATCH with the other attribution values,
+folder and an empty note unchanged, and refuses non-attribution keys. One value
+edits at a time, and not while a metadata edit or a recovered-draft editor (which
+still opens for an unsaved browser draft) is open. The version is read-only; the
+name/ID and folder are shown (and changed) in the right panel instead, source files (preserved files), history (modification history) and,
+on the materials page, metadata (`MaterialMetadataPanel.jsx`, passed in as the
+`metadata` slot). Every tab stays mounted and unselected ones are hidden, so open
+catalog or metadata edits keep their drafts across tab switches. `GamesInventory`
+owns the selected tab so it survives the panel's remount after saves; a
+remembered metadata tab falls back to history where there is no metadata. `InventoryCatalogEditor.jsx` owns the editable form and
 `InventoryCatalogStyles.jsx` owns its presentation. `InventoryCatalog.js`
 validates imports and edits, preserves unknown fields, and appends attribution
 changes and optional modification notes
@@ -1143,8 +1160,9 @@ asset IDs for preview selection. Folders sort before assets, with stable name/ID
 ordering. The tree supports keyboard navigation and collapse/expand, and has a
 bounded scrolling host. Selecting a folder does not replace the preview.
 
-To organize an asset, select it, choose Edit catalog details below the preview,
-and save Folder path (for example Vegetation/Grasses). A blank path means the
+To organize an asset, select it and use Move to folder in the details panel
+(see below); earlier versions saved Folder path from Edit catalog details (for
+example Vegetation/Grasses). A blank path means the
 category root. The tree refreshes after a successful save while retaining the
 selected asset. Folders are persistent category-scoped logical groups; model
 binaries and library directories are not moved. Folder changes are revision
@@ -1156,10 +1174,20 @@ New folder above each tree creates a root-level folder of the category. It
 uses the same inline row as the details panel (below), and the same single-name
 rules, so it no longer accepts slash-separated paths. Subfolders are created
 from a selected folder's details panel. Definitions live in the data service, accessed through the asset
-service and thin UI proxy. Select a model and choose Move to folder below its
-preview, choose an existing folder (or Category root), then confirm. This form
-uses the same revision-checked catalog save as attribution editing, preserving
-attribution and recording movement history. Cancel leaves the asset unchanged.
+service and thin UI proxy. Select a model or a folder: the right-hand details
+panel shows "in: <folder>" (or "in: Category root") under its name, with a
+pencil; for a folder this is its parent and replaces the old "Folder path:" line.
+Moving a folder sends move-folder with the new parent (its subfolders, models and
+component documents move with it; the folder itself and its subfolders are not
+offered as destinations), then selects the folder at its new path. The pencil
+turns that line into a folder select with the green check and red X; choose an
+existing folder (or Category root), then confirm. `useInventoryMove.js` reads the current record and revision
+and sends the same revision-checked catalog save as attribution editing, with the
+attribution unchanged and only `folder_path` changed, so history records the move.
+An unchanged choice, Cancel or Escape leaves the asset unchanged. Move, rename,
+delete and New folder are mutually exclusive, and all wait while catalog or
+material metadata edits are open. The catalog panel below the preview no longer
+has a Move to folder button.
 
 Model inventory pages fill the Games pane. The preview stays above an independently
 scrollable, keyboard-focusable details region containing catalog metadata, folder
@@ -1209,8 +1237,8 @@ inline row for both the tree and the details panel; useInventoryNewFolder.js
 owns the draft (the tree passes an empty parent); InventoryFolderApi.js holds
 the folder-creation request and name validation.
 
-The Move to folder editor uses the same green check and red X icons to the
-right of its selector. Check submits the revision-checked save; X or Escape
+The Move to folder editor (details panel) uses the same green check and red X
+icons to the right of its selector. Check submits the revision-checked save; X or Escape
 cancels. Both actions are disabled while a save is running.
 
 Model/resource load failures now show a model/texture error with Retry. Renderer
