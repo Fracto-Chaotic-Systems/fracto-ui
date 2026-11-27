@@ -1,18 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { preview_component_variant } from "@fracto/sdk/FractoComponentVariant.js";
 import AppText from "../../AppText.jsx";
+import { COMPONENT_STAGE_TEXT } from "../../text/GamesText.jsx";
 import {
-  COMPONENT_STAGE_TEXT,
-  KEY_GAMES_COMPOSITES_TITLE,
-} from "../../text/GamesText.jsx";
-import { MainStyles } from "../../styles/MainStyles.jsx";
-import {
-  InventoryLayout,
   InventoryToolbar,
   InventoryCaption,
   InventoryStatus,
 } from "./InventoryStyles.jsx";
 import {
+  StageHost,
   StageWorkspace,
   StageViewport,
   StageViewButtons,
@@ -30,7 +26,7 @@ export default function ComponentStage({
   editor,
   notice,
   on_reload,
-  on_close,
+  folder_control = null,
 }) {
   const draft = editor.history.present;
   const host = useRef(null);
@@ -84,7 +80,7 @@ export default function ComponentStage({
   }, [document_view, attempt]);
 
   return (
-    <InventoryLayout
+    <StageHost
       onKeyDown={(event) => {
         if (!(event.ctrlKey || event.metaKey) || editor.busy) return;
         if (event.key.toLowerCase() === "s") {
@@ -104,13 +100,7 @@ export default function ComponentStage({
         }
       }}
     >
-      <MainStyles.SectionTitle>
-        {AppText.get(KEY_GAMES_COMPOSITES_TITLE)}
-      </MainStyles.SectionTitle>
       <InventoryToolbar>
-        <button disabled={editor.busy} onClick={on_close}>
-          {text("back")}
-        </button>{" "}
         <button
           disabled={editor.busy || !editor.dirty}
           onClick={() => void editor.save()}
@@ -133,7 +123,8 @@ export default function ComponentStage({
           <button disabled={editor.busy} onClick={on_reload}>
             {text("reload")}
           </button>
-        )}
+        )}{" "}
+        {folder_control}
         <span role="status">
           {text(editor.busy ? "working" : editor.dirty ? "unsaved" : "saved")}
         </span>
@@ -232,6 +223,6 @@ export default function ComponentStage({
       <InventoryCaption>
         {text(walk.active ? "walk_navigation" : "navigation")}
       </InventoryCaption>
-    </InventoryLayout>
+    </StageHost>
   );
 }

@@ -1,6 +1,17 @@
 import styled from "styled-components";
 import { InventoryViewport } from "./InventoryStyles.jsx";
 
+export const StageHost = styled.div`
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  p {
+    line-height: 1.5;
+  }
+`;
+
 export const StageWorkspace = styled.div`
   flex: 1;
   min-height: 0;
@@ -71,21 +82,6 @@ export const StagePreviewNotice = styled.div`
   background: #fffffff0;
   font-size: 0.875rem;
   pointer-events: none;
-`;
-
-export const SavedComponentList = styled.div`
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
-  max-height: 150px;
-  overflow: auto;
-  font-size: 0.875rem;
-  button {
-    padding: 0.35rem 0.5rem;
-    cursor: pointer;
-  }
 `;
 
 export const StageViewButtons = styled.nav`

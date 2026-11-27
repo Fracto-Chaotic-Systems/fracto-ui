@@ -40,6 +40,18 @@ export const InventoryWorkspace = styled.div`
     }
   }
 `;
+/** Fills the preview and details columns, e.g. the components page's construction stage. */
+export const InventoryContent = styled.div`
+  grid-column: 2 / -1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  @media (max-width: 650px) {
+    grid-column: auto;
+  }
+`;
 export const InventoryAssetList = styled.nav`
   align-self: stretch;
   min-height: 0;

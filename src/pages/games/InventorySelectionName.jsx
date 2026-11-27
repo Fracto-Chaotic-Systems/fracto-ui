@@ -15,20 +15,37 @@ import {
   TreeActionForm,
 } from "./InventoryStyles.jsx";
 import useInventoryRename from "./useInventoryRename.js";
+import useInventoryNewFolder from "./useInventoryNewFolder.js";
+import InventoryNewFolder from "./InventoryNewFolder.jsx";
 
 const text = (key) => AppText.get(INVENTORY_CATALOG_TEXT[key]);
 export default function InventorySelectionName({
   target,
   category,
   on_changed,
+  on_folder_created,
+  folders = [],
   disabled = false,
 }) {
-  const rename = useInventoryRename({ target, category, on_changed, disabled });
+  const creation = useInventoryNewFolder({
+    parent: target.kind === "folder" ? target.path : "",
+    category,
+    folders,
+    on_created: on_folder_created,
+    disabled,
+  });
+  const creating = creation.editing || creation.busy;
+  const rename = useInventoryRename({
+    target,
+    category,
+    on_changed,
+    disabled: disabled || creating,
+  });
   const deletion = useInventoryDelete({
     target,
     category,
     on_changed,
-    disabled: disabled || rename.busy || rename.editing,
+    disabled: disabled || creating || rename.busy || rename.editing,
   });
   const name_input = useRef(null);
   useEffect(() => {
@@ -83,6 +100,7 @@ export default function InventorySelectionName({
             title={text("rename")}
             disabled={
               disabled ||
+              creating ||
               rename.busy ||
               rename.editing ||
               deletion.busy ||
@@ -100,6 +118,7 @@ export default function InventorySelectionName({
             on_click={deletion.begin}
             disabled={
               disabled ||
+              creating ||
               rename.busy ||
               rename.editing ||
               deletion.busy ||
@@ -112,6 +131,18 @@ export default function InventorySelectionName({
         <span>
           {text("folder_path")}: {target.path}
         </span>
+      )}
+      {target.kind === "folder" && (
+        <InventoryNewFolder
+          creation={creation}
+          disabled={disabled}
+          button_disabled={
+            rename.busy ||
+            rename.editing ||
+            deletion.busy ||
+            deletion.confirming
+          }
+        />
       )}
       {deletion.confirming && (
         <TreeActionForm onSubmit={deletion.confirm}>

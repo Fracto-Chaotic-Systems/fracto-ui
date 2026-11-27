@@ -4,6 +4,8 @@ import AppText from "../../AppText.jsx";
 import { INVENTORY_TEXT } from "../../text/GamesText.jsx";
 import { build_inventory_asset_tree } from "./InventoryAssetTree.js";
 import useInventoryFolders from "./useInventoryFolders.js";
+import useInventoryNewFolder from "./useInventoryNewFolder.js";
+import InventoryNewFolder from "./InventoryNewFolder.jsx";
 import { INVENTORY_CATALOG_TEXT } from "../../text/GamesText.jsx";
 import { InventoryTreeHost } from "./InventoryStyles.jsx";
 
@@ -15,14 +17,22 @@ export default function InventoryAssetTree({
   on_folders,
   selected_folder,
   on_folder_select,
+  documents = [],
+  on_document_open,
+  selected_document = null,
 }) {
   const organization = useInventoryFolders(category, assets, on_folders);
-  const [creating, set_creating] = useState(false),
-    [path, set_path] = useState("");
+  // The tree creates root-level folders; subfolders are created from a folder's details panel.
+  const creation = useInventoryNewFolder({
+    parent: "",
+    category,
+    folders: organization.folders,
+    on_created: organization.retry,
+  });
   const text = (key) => AppText.get(INVENTORY_CATALOG_TEXT[key]);
   const tree = useMemo(
-    () => build_inventory_asset_tree(assets, organization.folders),
-    [assets, organization.folders],
+    () => build_inventory_asset_tree(assets, organization.folders, documents),
+    [assets, organization.folders, documents],
   );
   const folder =
     selected_folder && tree.folder_keys.includes(`folder:${selected_folder}`)
@@ -31,44 +41,7 @@ export default function InventoryAssetTree({
   const [collapsed, set_collapsed] = useState([]);
   return (
     <>
-      <button
-        type="button"
-        disabled={organization.busy}
-        onClick={() => set_creating(true)}
-      >
-        {text("new_folder")}
-      </button>
-      {creating && (
-        <form
-          onSubmit={async (event) => {
-            event.preventDefault();
-            if (await organization.create(path)) {
-              set_creating(false);
-              set_path("");
-            }
-          }}
-        >
-          <label>
-            {text("folder_path")}
-            <input
-              required
-              maxLength={512}
-              value={path}
-              onChange={(event) => set_path(event.target.value)}
-              disabled={organization.busy}
-            />
-          </label>
-          <small>{text("folder_help")}</small>
-          <button disabled={organization.busy}>{text("new_folder")}</button>
-          <button
-            type="button"
-            disabled={organization.busy}
-            onClick={() => set_creating(false)}
-          >
-            {text("cancel")}
-          </button>
-        </form>
-      )}
+      <InventoryNewFolder creation={creation} />
       {organization.error && (
         <p role="alert">
           {text("folder_error")}{" "}
@@ -85,9 +58,11 @@ export default function InventoryAssetTree({
           selected_keys={
             folder
               ? [`folder:${folder}`]
-              : selected
-                ? [`asset:${selected}`]
-                : []
+              : selected_document
+                ? [`document:${selected_document}`]
+                : selected
+                  ? [`asset:${selected}`]
+                  : []
           }
           expanded_keys={tree.folder_keys.filter(
             (key) => !collapsed.includes(key),
@@ -98,6 +73,12 @@ export default function InventoryAssetTree({
             )
           }
           on_select={(keys, { items }) => {
+            const document = items.find((item) => item.metadata?.document_id);
+            // Authored components open in the construction stage.
+            if (document) {
+              on_folder_select(null);
+              return on_document_open?.(document.metadata.document_id);
+            }
             on_folder_select(
               keys[0]?.startsWith("folder:") ? keys[0].slice(7) : null,
             );

@@ -321,14 +321,33 @@ Instance GPU buffers are released with the preview's normal disposal lifecycle.
 
 `GamesInventory.jsx` owns preview controls and loading/retry status.
 Its optional toolbar lets the components page supply its construction action.
-`GamesComposites.jsx` switches between the catalog and `ComponentStage.jsx`.
+Its optional `content` fills the area right of the tree (the preview and details
+columns, `InventoryContent`); a page may also own folder selection
+(`selected_folder`/`on_folder_select`). `GamesComposites.jsx` keeps the tree
+on the left and shows `ComponentStage.jsx` as that content while a component is
+selected, the same layout as the materials page. Selecting a folder (or a
+published asset) shows the usual details instead; the loaded draft stays in the
+editor, and re-selecting the same component returns to it without reloading. A
+new unsaved component is not in the tree yet, so Resume returns to it.
 `useComponentDocument.js` owns document save/load and request status;
 `ComponentDocumentState.js` owns reducer/history/dirty semantics using the shared
 SDK contract. `ComponentDocumentApi.js` is the bounded data-service client.
-`SavedComponents.jsx` lists paginated authored documents separately from published
-catalog assets. Save persists the complete document with expected-revision checks.
-Back/resume retains the current editor; new/open/reload require inline discard
-when dirty. Browser close/refresh warns while dirty. Unsaved edits remain local
+Saved (authored) component documents are listed in the page's left tree, beside
+any published catalog components: `useComponentDocuments.js` reads every page of
+`/api/component-documents` (at most 1,000) and `GamesInventory` passes them to
+`InventoryAssetTree` as `document:<id>` leaves placed by each document's
+`folder_path` (root by default). Choosing one loads it into the stage beside the
+tree and highlights it, with the usual discard check for unsaved work. Saving
+refreshes the tree, so new and renamed components appear. Folder create/rename/delete use the
+same component-category folder tree as published components; the data service
+moves contained documents on rename and refuses to delete a folder holding one.
+In the stage, a saved component's toolbar has Move to folder
+(`ComponentFolderMove.jsx`): a folder select with the green check and red X, or
+Escape, using PUT `/api/component-documents/:id/folder`. Moving never changes the
+document or its revision. Unsaved new components appear at the root after their
+first save. Save persists the complete document with expected-revision checks.
+The stage has no Back button; new/open/reload require inline discard (shown in
+the page toolbar) when dirty. Browser close/refresh warns while dirty. Unsaved edits remain local
 to the mounted components page. Saved documents survive navigation/restarts.
 The stage supports name editing, save, load, undo/redo (100 snapshots), orbit/pan/
 zoom, reset view, and graphics retry. Save preserves history; load resets it.
@@ -1133,8 +1152,10 @@ checked and recorded in modification history. Folder names are bounded to eight
 levels, 64 characters each, 512 characters overall; absolute/traversal-style,
 empty-segment and control-character paths are rejected.
 
-New folder above each tree accepts a slash-separated path, including nested and
-empty folders. Definitions live in the data service, accessed through the asset
+New folder above each tree creates a root-level folder of the category. It
+uses the same inline row as the details panel (below), and the same single-name
+rules, so it no longer accepts slash-separated paths. Subfolders are created
+from a selected folder's details panel. Definitions live in the data service, accessed through the asset
 service and thin UI proxy. Select a model and choose Move to folder below its
 preview, choose an existing folder (or Category root), then confirm. This form
 uses the same revision-checked catalog save as attribution editing, preserving
@@ -1172,6 +1193,21 @@ cancels. Failed saves keep the draft; Cancel sends no mutation.
 
 The trash icon is revealed on name-row hover (or keyboard focus within the row).
 It remains absent throughout inline name editing.
+
+A selected folder's details panel has a New folder button below its path. It
+opens the same inline row as rename: an input followed by the green check
+(create) and red X (cancel); Enter creates and Escape cancels. It creates one
+child of the selected folder, so the name cannot contain / or nested paths.
+Names must also be portable folder names: at most 64 characters, not . or ..,
+no trailing period, no Windows reserved names (CON, PRN, AUX, NUL, COM1-9,
+LPT1-9, with or without an extension) and none of < > : " / \ | ? * or control
+characters. Invalid or already-existing names show an alert, keep the draft and
+send no request. The selected folder stays selected and the tree refreshes.
+Rename, delete and New folder are mutually exclusive, and New folder is disabled
+while catalog edits are open. InventoryNewFolder.jsx renders the button and
+inline row for both the tree and the details panel; useInventoryNewFolder.js
+owns the draft (the tree passes an empty parent); InventoryFolderApi.js holds
+the folder-creation request and name validation.
 
 The Move to folder editor uses the same green check and red X icons to the
 right of its selector. Check submits the revision-checked save; X or Escape

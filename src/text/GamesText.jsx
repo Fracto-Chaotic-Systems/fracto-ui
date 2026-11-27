@@ -233,7 +233,6 @@ export const COMPONENT_STAGE_TEXT = Object.fromEntries(
     "resume",
     "untitled",
     "view",
-    "back",
     "properties",
     "title",
     "name",
@@ -267,11 +266,8 @@ export const COMPONENT_STAGE_TEXT = Object.fromEntries(
     "saved",
     "unsaved",
     "working",
-    "saved_components",
     "loading",
-    "no_saved",
     "no_published",
-    "more",
     "request_error",
     "conflict",
     "invalid_component_document",
@@ -341,6 +337,10 @@ export const INVENTORY_CATALOG_TEXT = Object.fromEntries(
     "folder_conflict",
     "folder_not_found",
     "new_folder",
+    "new_folder_name",
+    "accept_new_folder",
+    "folder_name_invalid",
+    "folder_exists",
     "move_folder",
     "folder_error",
     "folder_path",
@@ -1059,7 +1059,6 @@ export const APP_GAMES_TEXT = {
   [COMPONENT_STAGE_TEXT.resume]: "resume draft",
   [COMPONENT_STAGE_TEXT.untitled]: "Untitled component",
   [COMPONENT_STAGE_TEXT.view]: "Component construction stage",
-  [COMPONENT_STAGE_TEXT.back]: "back to components",
   [COMPONENT_STAGE_TEXT.properties]: "Component properties",
   [COMPONENT_STAGE_TEXT.title]: "Construction stage",
   [COMPONENT_STAGE_TEXT.name]: "Component name",
@@ -1099,12 +1098,9 @@ export const APP_GAMES_TEXT = {
   [COMPONENT_STAGE_TEXT.saved]: "Saved",
   [COMPONENT_STAGE_TEXT.unsaved]: "Unsaved changes",
   [COMPONENT_STAGE_TEXT.working]: "Working…",
-  [COMPONENT_STAGE_TEXT.saved_components]: "Saved components",
   [COMPONENT_STAGE_TEXT.loading]: "Loading components…",
-  [COMPONENT_STAGE_TEXT.no_saved]: "No saved components yet.",
   [COMPONENT_STAGE_TEXT.no_published]:
-    "No published components yet. Use new component to begin, or open a saved component above.",
-  [COMPONENT_STAGE_TEXT.more]: "load more",
+    "No published components yet. Choose a component in the list to open it, or use new component to begin.",
   [COMPONENT_STAGE_TEXT.request_error]:
     "Unable to load or save components. Your draft is retained. Retry the operation.",
   [COMPONENT_STAGE_TEXT.conflict]:
@@ -1244,6 +1240,12 @@ export const APP_GAMES_TEXT = {
   [INVENTORY_CATALOG_TEXT.folder_not_found]:
     "This folder no longer exists. Refresh the list.",
   [INVENTORY_CATALOG_TEXT.new_folder]: "New folder",
+  [INVENTORY_CATALOG_TEXT.new_folder_name]: "New folder name",
+  [INVENTORY_CATALOG_TEXT.accept_new_folder]: "Create folder",
+  [INVENTORY_CATALOG_TEXT.folder_name_invalid]:
+    'Enter one folder name of up to 64 characters. It cannot be . or .., end with a period, be a reserved name such as CON or NUL, or contain < > : " / \\ | ? * or control characters.',
+  [INVENTORY_CATALOG_TEXT.folder_exists]:
+    "A folder with this name already exists here.",
   [INVENTORY_CATALOG_TEXT.move_folder]: "Move to folder",
   [INVENTORY_CATALOG_TEXT.folder_error]:
     "Folders could not be loaded or saved. Check the folder path and server, then retry.",

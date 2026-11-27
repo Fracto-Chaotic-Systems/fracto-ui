@@ -107,6 +107,7 @@ test("stage toggles a single variant, restores the base and keeps preview out of
       KEY_GAMES_COMPOSITES_TITLE: "components",
       MainStyles: { SectionTitle: "h2" },
       InventoryLayout: "div",
+      StageHost: "div",
       InventoryToolbar: "header",
       InventoryCaption: "p",
       InventoryStatus: "status",
