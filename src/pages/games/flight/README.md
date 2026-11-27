@@ -707,13 +707,15 @@ engagement and plan changes do not recreate input, flight state, or the renderer
 Plan time pauses with the existing blur/hidden-tab suspension. Disconnected input
 stops manual look changes but does not stop an engaged pilot.
 
-`FlightPlan.js` defines the default clockwise orbit around (-0.75, 0), radius
-1.5 world units, altitude 1 (2500 calibrated feet), with a configurable 120-second
-period. Engagement captures the circle from the current polar angle; radius and
-height approach their targets exponentially with a two-second time constant,
-without teleporting. Craft heading follows the path tangent, and attitude,
-airspeed, climb and turn instruments are derived from the actual sampled motion;
-craft attitude is then damped by the gradual correction model below.
+`FlightPlan.js` defines the default horizontal figure-eight centered at (-0.75, 0).
+Each lobe reaches 1.5 world units left/right, matching the original circle's
+horizontal extent: real coordinates -2.25 to 0.75. The imaginary extent is ±0.75.
+The route uses x = 1.5 sin(t), y = 0.75 sin(2t), crossing the center twice per
+180-second circuit (two-thirds of the original speed), at altitude 1 (2500 calibrated feet). Engagement chooses the
+nearest phase, then fades the entry-position/height difference with a two-second
+time constant, avoiding teleportation. Craft attitude follows the sampled path
+through the gradual correction model below; airspeed and climb reflect motion.
+The original circular route remains available with type `orbit`.
 `AutoPilotView.js` aims the default camera at the set center (-0.75, 0, 0),
 compensating for craft pitch and bank. Engaging starts with that centered view.
 The look joystick adds retained yaw/pitch offsets relative to the moving target;
@@ -721,12 +723,12 @@ a right-stick tap recenters on the set. Plan replacement preserves user offsets.
 Disengagement preserves the current view for manual flight.
 
 `pilot.set_plan(plan)` can replace a plan while engaged or disengaged. A plan is
-an immutable orbit definition (type, center_re, center_im, radius,
+an immutable `orbit` or `figure_eight` definition (type, center_re, center_im, radius,
 altitude_world, period_seconds, optional clockwise) or a synchronous sampler:
 `({ elapsed_seconds, entry_state }) => ({ position_re, position_im, altitude_world })`.
 The sampler can encode a predefined sequence or read changing external targets;
 it is called once per simulation step. A replacement starts its clock at zero
-and captures the current pose as `entry_state`. Orbit replacements transition
+and captures the current pose as `entry_state`. Built-in route replacements transition
 smoothly; custom samplers own their continuity. Samplers must return finite world
 coordinates and a positive bounded altitude. Invalid definitions are rejected
 before replacing the plan; a throwing/invalid sampler disengages the pilot and

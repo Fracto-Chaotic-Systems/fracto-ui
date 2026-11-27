@@ -7,7 +7,10 @@ import { create_flight_projection } from "../src/pages/games/flight/FlightProjec
 import assert from "node:assert/strict";
 import test from "node:test";
 import { create_auto_pilot } from "../src/pages/games/flight/AutoPilot.js";
-import { DEFAULT_FLIGHT_PLAN } from "../src/pages/games/flight/FlightPlan.js";
+import {
+  DEFAULT_FLIGHT_PLAN,
+  compile_flight_plan,
+} from "../src/pages/games/flight/FlightPlan.js";
 import {
   create_flight_state,
   INITIAL_FLIGHT_STATE,
@@ -28,9 +31,13 @@ const orbit_state = {
   position_im: 1.5,
 };
 
-test("default orbit completes a circle at the specified center, radius and height at different frame rates", () => {
+test("explicit orbit completes a circle at the specified center, radius and height at different frame rates", () => {
   for (const hz of [30, 60, 120]) {
-    const pilot = create_auto_pilot();
+    const pilot = create_auto_pilot({
+      ...DEFAULT_FLIGHT_PLAN,
+      type: "orbit",
+      period_seconds: 120,
+    });
     pilot.set_enabled(true);
     let state = orbit_state;
     for (let i = 0; i < 120 * hz; i++) {
@@ -49,7 +56,11 @@ test("default orbit completes a circle at the specified center, radius and heigh
 });
 
 test("capture converges from an arbitrary pose without teleporting, and manual channels cannot change the route", () => {
-  const pilot = create_auto_pilot();
+  const pilot = create_auto_pilot({
+    ...DEFAULT_FLIGHT_PLAN,
+    type: "orbit",
+    period_seconds: 120,
+  });
   pilot.set_enabled(true);
   let state = { ...INITIAL_FLIGHT_STATE, altitude_world: 2 };
   const first = pilot.step(
@@ -75,7 +86,11 @@ test("capture converges from an arbitrary pose without teleporting, and manual c
   );
   assert.ok(first.altitude_world < 2 && first.altitude_world > 1.9);
 
-  const other = create_auto_pilot();
+  const other = create_auto_pilot({
+    ...DEFAULT_FLIGHT_PLAN,
+    type: "orbit",
+    period_seconds: 120,
+  });
   other.set_enabled(true);
   const neutral = other.step(state, { connected: false }, 0.1);
   close((first.camera_heading_deg - neutral.camera_heading_deg + 360) % 360, 9);
@@ -423,7 +438,11 @@ test("uneven frame timing cannot spike the turn coordinator during a steady orbi
     [1 / 120, 1 / 30, 1 / 60],
     [0.001, 0.099],
   ]) {
-    const pilot = create_auto_pilot();
+    const pilot = create_auto_pilot({
+      ...DEFAULT_FLIGHT_PLAN,
+      type: "orbit",
+      period_seconds: 120,
+    });
     pilot.set_enabled(true);
     let state = orbit_state,
       elapsed = 0,
@@ -451,4 +470,74 @@ test("uneven frame timing cannot spike the turn coordinator during a steady orbi
     close(state.turn_rate_deg_s, 3, 1e-6);
     assert.ok(max - min < 0.001, "settled turn needle stays steady");
   }
+});
+
+test("default figure eight crosses the center twice and has the original circle's left/right reach", () => {
+  assert.equal(DEFAULT_FLIGHT_PLAN.type, "figure_eight");
+  const sample = compile_flight_plan(DEFAULT_FLIGHT_PLAN);
+  const entry_state = {
+    ...INITIAL_FLIGHT_STATE,
+    position_re: -0.75,
+    position_im: 0,
+  };
+  for (const [elapsed_seconds, re, im] of [
+    [0, -0.75, 0],
+    [45, 0.75, 0],
+    [90, -0.75, 0],
+    [135, -2.25, 0],
+    [180, -0.75, 0],
+  ]) {
+    const pose = sample({ elapsed_seconds, entry_state });
+    close(pose.position_re, re);
+    close(pose.position_im, im);
+    close(pose.altitude_world, 1);
+  }
+  let min = Infinity,
+    max = -Infinity;
+  for (let i = 0; i <= 1800; i++) {
+    const pose = sample({ elapsed_seconds: i / 10, entry_state });
+    min = Math.min(min, pose.position_re);
+    max = Math.max(max, pose.position_re);
+    assert.ok(Math.abs(pose.position_im) <= 0.75 + 1e-10);
+  }
+  close(min, -2.25);
+  close(max, 0.75);
+  const pilot = create_auto_pilot();
+  pilot.set_enabled(true);
+  let state = entry_state;
+  for (let i = 0; i < 1800; i++) {
+    state = pilot.step(state, {}, 0.1);
+    assert.ok(
+      Object.values(state).every(
+        (value) => typeof value !== "number" || Number.isFinite(value),
+      ),
+    );
+  }
+  close(state.position_re, -0.75);
+  close(state.position_im, 0);
+});
+
+test("figure eight capture and replacement preserve the entry pose and converge to the route", () => {
+  const sample = compile_flight_plan(DEFAULT_FLIGHT_PLAN);
+  const entry_state = { ...INITIAL_FLIGHT_STATE, altitude_world: 2 };
+  const start = sample({ elapsed_seconds: 0, entry_state });
+  close(start.position_re, entry_state.position_re);
+  close(start.position_im, entry_state.position_im);
+  close(start.altitude_world, 2);
+  const first = sample({ elapsed_seconds: 0.1, entry_state });
+  assert.ok(
+    Math.hypot(
+      first.position_re - entry_state.position_re,
+      first.position_im - entry_state.position_im,
+    ) < 0.1,
+  );
+  const settled = sample({ elapsed_seconds: 60, entry_state });
+  const x = (settled.position_re + 0.75) / 1.5,
+    y = settled.position_im / 1.5;
+  close(y * y, x * x * (1 - x * x));
+  close(settled.altitude_world, 1);
+  const replacement = { ...entry_state, position_re: 0.3, position_im: 0.1 };
+  const fresh = sample({ elapsed_seconds: 0, entry_state: replacement });
+  close(fresh.position_re, replacement.position_re);
+  close(fresh.position_im, replacement.position_im);
 });
