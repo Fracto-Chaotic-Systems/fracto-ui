@@ -79,6 +79,9 @@ fitting the gap between the controller halves, aligned 1rem above the game area'
 edge (the screen bottom in fullscreen). Uppercase green monospace text glows over
 subtle scan lines. The blank panel remains visible when idle or help is disabled;
 text appears while an action is held and the existing help setting is enabled.
+While auto-pilot is on, this panel instead reads **autopilot engaged**, regardless
+of help visibility or held actions. Switching off restores the live action display.
+The engagement message scales to fit the existing panel width.
 The panel uses 38% of the controller width, a tight 20px minimum height, no vertical
 padding, and smaller text on a single horizontal line. It occupies the lower gap
 without shrinking or separating the controller halves. Its size and type scale
@@ -146,3 +149,10 @@ Old controller text keys remain available for compatibility.
 Run `npm run test:game-controller` for mapper/session and controller regressions.
 `/scripts/flight_controls_smoke.html` exercises production preferences and help
 against held synthetic inputs; restore defaults after changing fixture mappings.
+
+Auto-pilot is enforced in `bind_flight_controls` before commands reach the
+simulation: all buttons and the left stick are ignored while engaged, and the
+right stick is reserved for look with the existing response/inversion settings.
+Right-stick tap still recenters the view. Live remaps cannot bypass this filter;
+disengagement restores the current saved mappings. The simulation also ignores
+non-camera neutralization while the pilot owns movement.

@@ -156,7 +156,11 @@ const SettingsHeading = styled.h2`
   padding-right: 2rem;
 `;
 
-export default function GamesPlay({ crt_content } = {}) {
+export default function GamesPlay({
+  crt_content,
+  flight_plan,
+  auto_pilot_tuning,
+} = {}) {
   const [flow, dispatch_flow] = useReducer(
     play_flow_reducer,
     INITIAL_PLAY_FLOW,
@@ -306,6 +310,8 @@ export default function GamesPlay({ crt_content } = {}) {
         )}
         {flow.phase === "interactive" && (
           <GamesPlayInteractive
+            flight_plan={flight_plan}
+            auto_pilot_tuning={auto_pilot_tuning}
             key={`interactive-${flow.run}`}
             width_px={content_bounds.width}
             height_px={content_bounds.height}

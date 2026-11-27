@@ -1388,6 +1388,8 @@ Auto-pilot uses the shared `DashboardSwitch.jsx` artwork and nameplate, mirrored
 to the right of the turn coordinator. The turn dial and caption shift left by
 the same amount the heading dial shifts right. Layouts without the spare
 half-cell put auto-pilot at the controller upper-right, opposite lights.
-`GamesPlayInteractive.jsx` owns the on/off state, initially off for each game.
-This control does not yet alter flight; automatic behavior will be specified
-separately. Its nameplate follows night lighting independently of activation.
+`GamesPlayInteractive.jsx` owns the on/off state, initially engaged for each game
+session and after a page refresh. Switching it off applies to the current session.
+Engagement follows a replaceable flight plan and blocks manual movement/buttons
+while retaining the right look joystick. Its nameplate follows night lighting
+independently of activation.

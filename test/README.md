@@ -561,3 +561,9 @@ It reads the saved grass strip and the actual sparse-grass clip through service
 endpoints, checks all 140 objects retain explicit native 1× clocks, and compares
 all local rig/morph poses against native-time playback while the component clock
 remains 0.125×. It checks the saved scene and revision are unchanged by the test.
+
+`auto_pilot.test.js` checks the default orbit over full circuits at 30/60/120 Hz,
+smooth capture, live definition/sampler replacement, malformed plans, physical
+look-stick isolation despite remapping, recentering, engagement/disengagement,
+input disconnection, hidden-tab suspension and simulation cleanup. Run with
+`npm run test:autopilot`.

@@ -56,7 +56,11 @@ const read_device = () => {
     : "on_screen";
 };
 
-export default function GameController({ input, flight_controls }) {
+export default function GameController({
+  input,
+  flight_controls,
+  auto_pilot = false,
+}) {
   const color = useSyncExternalStore(subscribe_color, read_color, read_color);
   const host_ref = useRef(null);
   const [device, set_device] = useState(read_device);
@@ -92,7 +96,7 @@ export default function GameController({ input, flight_controls }) {
       aria-label={AppText.get(KEY_GAMES_PLAY_CONTROLLER_ON_SCREEN_TITLE)}
     >
       <div ref={host_ref} />
-      <ControllerActions controls={flight_controls} />
+      <ControllerActions controls={flight_controls} auto_pilot={auto_pilot} />
       {error === device && (
         <p role="status">{AppText.get(KEY_GAMES_PLAY_CONTROLLER_ERROR)}</p>
       )}

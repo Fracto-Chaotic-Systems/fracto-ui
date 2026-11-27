@@ -10,6 +10,7 @@ import {
 } from "flight-indicators";
 import AppText from "../../../AppText.jsx";
 import NightFlightSwitch from "../NightFlightSwitch.jsx";
+import AutoPilotSwitch from "../AutoPilotSwitch.jsx";
 import { dashboard_nameplate } from "../DashboardNameplate.js";
 import {
   FLIGHT_INSTRUMENT_TEXT,
@@ -149,6 +150,9 @@ export default function FlightInstrumentGroup({
   flight_state,
   night = false,
   show_night_switch = false,
+  show_auto_pilot_switch = false,
+  auto_pilot = false,
+  on_auto_pilot_change,
   settings = DEFAULT_INSTRUMENT_SETTINGS,
 }) {
   const state = useSyncExternalStore(
@@ -159,6 +163,7 @@ export default function FlightInstrumentGroup({
   const codes = instrument_codes(settings, side);
   const columns = Math.min(compact ? 3 : 2, codes.length);
   const heading_index = codes.indexOf("heading");
+  const turn_index = codes.indexOf("turn");
   if (!codes.length) return null;
   return (
     <InstrumentGroup
@@ -177,6 +182,19 @@ export default function FlightInstrumentGroup({
           }
         />
       )}
+      {show_auto_pilot_switch && turn_index >= 0 && (
+        <AutoPilotSwitch
+          enabled={auto_pilot}
+          on_change={on_auto_pilot_change}
+          night={night}
+          width_px={Math.min(54, (size_px + 8) / 2 - 6)}
+          top_px={
+            Math.floor(turn_index / columns) * (size_px + 24) +
+            size_px / 2 -
+            (Math.min(54, (size_px + 8) / 2 - 6) * 2) / 3
+          }
+        />
+      )}
       {codes.map((code) => {
         const Component = INSTRUMENTS[code];
         return (
@@ -187,7 +205,9 @@ export default function FlightInstrumentGroup({
             $offset={
               code === "heading" && show_night_switch
                 ? (Math.min(54, (size_px + 8) / 2 - 6) + 2) / 2
-                : 0
+                : code === "turn" && show_auto_pilot_switch
+                  ? -(Math.min(54, (size_px + 8) / 2 - 6) + 2) / 2
+                  : 0
             }
           >
             <Component

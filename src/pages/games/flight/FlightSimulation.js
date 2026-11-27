@@ -8,6 +8,7 @@ export function start_flight_simulation(
   flight_state,
   controls,
   environment = { window, document },
+  auto_pilot = null,
 ) {
   const { window: target_window, document: target_document } = environment;
   let active = true;
@@ -17,7 +18,9 @@ export function start_flight_simulation(
   const unsubscribe_neutralize = controls.subscribe_neutralize?.((channels) => {
     if (active)
       flight_state.update(
-        neutralize_flight_channels(flight_state.get_snapshot(), channels),
+        auto_pilot?.get_snapshot()
+          ? auto_pilot.recenter_look(flight_state.get_snapshot(), channels)
+          : neutralize_flight_channels(flight_state.get_snapshot(), channels),
       );
   });
   const schedule = () => {
@@ -32,7 +35,7 @@ export function start_flight_simulation(
       if (last_time !== null) {
         const dt = Math.min(0.1, Math.max(0, (time - last_time) / 1000));
         flight_state.update(
-          step_flight_state(
+          (auto_pilot?.get_snapshot() ? auto_pilot.step : step_flight_state)(
             flight_state.get_snapshot(),
             controls.get_snapshot(),
             dt,

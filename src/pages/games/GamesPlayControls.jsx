@@ -1,6 +1,9 @@
 import styled, { css, keyframes } from "styled-components";
 import AppText from "../../AppText.jsx";
-import { FLIGHT_SETTINGS_TEXT } from "../../text/GamesText.jsx";
+import {
+  AUTO_PILOT_TEXT,
+  FLIGHT_SETTINGS_TEXT,
+} from "../../text/GamesText.jsx";
 import GameController from "./controllers/GameController.jsx";
 import FlightInstrumentGroup from "./flight/FlightInstrumentGroup.jsx";
 import FlightInstrumentStatus from "./flight/FlightInstrumentStatus.jsx";
@@ -10,6 +13,8 @@ import { useDashboardBackground } from "./useDashboardBackground.js";
 import { dashboard_background } from "./DashboardBackground.js";
 import { useNightFlight } from "./useNightFlight.js";
 import NightFlightSwitch from "./NightFlightSwitch.jsx";
+import AutoPilotSwitch from "./AutoPilotSwitch.jsx";
+import AutoPilotIndicator from "./AutoPilotIndicator.jsx";
 import GamesPlayMap from "./GamesPlayMap.jsx";
 
 const pearl_drift = keyframes`
@@ -119,6 +124,8 @@ const ControllerSlot = styled.div`
 
 export default function GamesPlayControls({
   input,
+  auto_pilot,
+  on_auto_pilot_change,
   flight_controls,
   flight_state,
   width_px,
@@ -130,7 +137,8 @@ export default function GamesPlayControls({
   const layout = game_controls_layout(width_px, height_px, settings);
   const groups = layout.groups.filter((group) => group.count);
   const group_height = (group) =>
-    group.rows * (layout.instrument_size + 16) + Math.max(0, group.rows - 1) * 8;
+    group.rows * (layout.instrument_size + 16) +
+    Math.max(0, group.rows - 1) * 8;
   const dock_height = layout.compact
     ? layout.controller_height +
       groups.reduce((sum, group) => sum + group_height(group) + 8, 0)
@@ -143,6 +151,25 @@ export default function GamesPlayControls({
       $width={layout.dock_width}
       $shoulder_radius={layout.instrument_size / 2 + 28}
     >
+      <AutoPilotIndicator
+        enabled={auto_pilot}
+        label={AppText.get(
+          auto_pilot ? AUTO_PILOT_TEXT.active : AUTO_PILOT_TEXT.inactive,
+        )}
+        left_px={
+          layout.compact
+            ? layout.dock_width / 2
+            : layout.group_widths[0] + layout.controller_width / 2
+        }
+        top_px={
+          layout.compact
+            ? dock_height -
+              layout.controller_height +
+              layout.controller_height * 0.18
+            : layout.instrument_size / 2 + 28
+        }
+        size_px={Math.min(22, layout.controller_width * 0.08)}
+      />
       <GamesPlayMap
         flight_state={flight_state}
         width_px={width_px}
@@ -181,6 +208,9 @@ export default function GamesPlayControls({
               compact={layout.compact}
               night={night}
               show_night_switch={layout.heading_switch_side === side}
+              show_auto_pilot_switch={layout.turn_switch_side === side}
+              auto_pilot={auto_pilot}
+              on_auto_pilot_change={on_auto_pilot_change}
             />
           </InstrumentSlot>
         ))}
@@ -189,7 +219,19 @@ export default function GamesPlayControls({
           $width={layout.controller_width}
           $height={layout.controller_height}
         >
-          <GameController input={input} flight_controls={flight_controls} />
+          <GameController
+            input={input}
+            flight_controls={flight_controls}
+            auto_pilot={auto_pilot}
+          />
+          {!layout.turn_switch_side && (
+            <AutoPilotSwitch
+              enabled={auto_pilot}
+              on_change={on_auto_pilot_change}
+              night={night}
+              width_px={Math.min(54, layout.controller_width * 0.17)}
+            />
+          )}
           {!layout.heading_switch_side && (
             <NightFlightSwitch
               enabled={night}

@@ -33,12 +33,37 @@ export function create_flight_controls() {
 export function bind_flight_controls(
   input,
   controls,
-  { read_settings, subscribe_settings },
+  { read_settings, subscribe_settings, auto_pilot = null },
 ) {
   let settings = normalize_flight_control_settings(read_settings());
-  const refresh = () => controls.update(input.get_snapshot(), settings);
+  const refresh = () => {
+    const state = input.get_snapshot();
+    if (!auto_pilot?.get_snapshot()) {
+      controls.update(state, settings);
+      return;
+    }
+    // Only the physical look stick survives; button remaps and the movement stick
+    // cannot inject camera or aircraft commands while the pilot owns the craft.
+    controls.update(
+      { ...state, axes: [0, 0, state.axes[2], state.axes[3]], buttons: [] },
+      {
+        ...settings,
+        axes: {
+          left_x: "none",
+          left_y: "none",
+          right_x: "look_x",
+          right_y: "look_y",
+        },
+      },
+    );
+  };
+  const unsubscribe_pilot = auto_pilot?.subscribe(refresh);
   const unsubscribe_input = input.subscribe(refresh);
   const unsubscribe_stick_reset = input.subscribe_stick_reset?.((stick) => {
+    if (auto_pilot?.get_snapshot()) {
+      if (stick === 1) controls.neutralize(["look_x", "look_y"]);
+      return;
+    }
     const axes = stick === 0 ? ["left_x", "left_y"] : ["right_x", "right_y"];
     controls.neutralize([
       ...new Set(
@@ -58,6 +83,7 @@ export function bind_flight_controls(
     if (!active) return;
     active = false;
     unsubscribe_input();
+    unsubscribe_pilot?.();
     unsubscribe_stick_reset?.();
     unsubscribe_settings();
     controls.reset();

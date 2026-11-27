@@ -1,3 +1,4 @@
+import { create_auto_pilot } from "../src/pages/games/flight/AutoPilot.js";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
@@ -311,6 +312,8 @@ test("interactive sessions own fresh input, flight state and effect cleanups", (
       ...h,
       create_controller_input,
       create_flight_controls,
+      create_auto_pilot,
+      useSyncExternalStore: (_subscribe, read) => read(),
       create_flight_state,
       INITIAL_FLIGHT_STATE,
       useCanvasShape: () => "cinema",
@@ -334,11 +337,14 @@ test("interactive sessions own fresh input, flight state and effect cleanups", (
       GamesPlayControls: "controls",
       GamesCrt: "crt",
     });
-    module.exports.default({ width_px: 1000, height_px: 700 });
+    const tree = module.exports.default({ width_px: 1000, height_px: 700 });
+    const dashboard = nodes(tree).find((node) => node.type === "controls");
+    assert.equal(dashboard.props.auto_pilot, true, "fresh gameplay starts engaged");
+    dashboard.props.on_auto_pilot_change(false);
     const stops = h.effects.map((effect) => effect());
     return {
       stop() {
-        stops.forEach((stop) => stop());
+        stops.forEach((stop) => stop?.());
       },
       cleanups,
     };

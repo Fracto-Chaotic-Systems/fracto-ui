@@ -86,6 +86,15 @@ export function game_controls_layout(
               instrument_codes(settings, group.side).at(-1) === "heading",
           )?.side ?? null)
         : null,
+    turn_switch_side:
+      !compact && !limited
+        ? (groups.find(
+            (group) =>
+              group.columns === 2 &&
+              group.count % 2 === 1 &&
+              instrument_codes(settings, group.side).at(-1) === "turn",
+          )?.side ?? null)
+        : null,
     compact,
     dock_width,
     group_widths,

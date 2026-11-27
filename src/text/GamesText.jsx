@@ -481,7 +481,13 @@ export const FLIGHT_SCENE_TEXT = {
   error: `${GAMES_FOLDER}/flight_scene_error`,
   retry: `${GAMES_FOLDER}/flight_scene_retry`,
 };
-export const AUTO_PILOT_TEXT = { label: `${GAMES_FOLDER}/auto_pilot` };
+export const AUTO_PILOT_TEXT = {
+  label: `${GAMES_FOLDER}/auto_pilot`,
+  caption: `${GAMES_FOLDER}/auto_pilot_caption`,
+  engaged: `${GAMES_FOLDER}/auto_pilot_engaged`,
+  active: `${GAMES_FOLDER}/auto_pilot_active`,
+  inactive: `${GAMES_FOLDER}/auto_pilot_inactive`,
+};
 export const NIGHT_FLIGHT_TEXT = {
   label: `${GAMES_FOLDER}/night_flight_lighting`,
   night: `${GAMES_FOLDER}/night_flight_switch_caption`,
@@ -1632,6 +1638,10 @@ export const APP_GAMES_TEXT = {
   [PLAY_FLOW_TEXT.audio_retry]: "Audio could not start. Click to retry.",
   [KEY_GAMES_PLAY_DISPLAY]: "display",
   [AUTO_PILOT_TEXT.label]: "auto-pilot",
+  [AUTO_PILOT_TEXT.caption]: "auto",
+  [AUTO_PILOT_TEXT.engaged]: "autopilot engaged",
+  [AUTO_PILOT_TEXT.active]: "auto-pilot active",
+  [AUTO_PILOT_TEXT.inactive]: "auto-pilot inactive",
   [NIGHT_FLIGHT_TEXT.label]: "night flight lighting",
   [NIGHT_FLIGHT_TEXT.night]: "lights",
   [DASHBOARD_BACKGROUND_TEXT.label]: "dashboard background",

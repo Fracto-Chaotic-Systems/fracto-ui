@@ -679,3 +679,92 @@ Validation completed against the development stack's real numerical tile service
   fullscreen entry/exit and physical touchscreen/hand-held operation remain
   unverified; automated entry/exit/rejection, cleanup and changed-size geometry
   checks pass.
+
+Auto-pilot uses the shared `DashboardSwitch.jsx` artwork and nameplate, mirrored
+to the right of the turn coordinator. The turn dial and caption shift left by
+the same amount the heading dial shifts right. Layouts without the spare
+half-cell put auto-pilot at the controller upper-right, opposite lights.
+`GamesPlayInteractive.jsx` owns the on/off state, initially engaged for each game
+session and after a page refresh. Switching it off applies to the current session.
+Engagement follows a replaceable flight plan and blocks manual movement/buttons
+while retaining the right look joystick. Its nameplate follows night lighting
+independently of activation.
+
+The auto-pilot nameplate reads **AUTO** and uses the same horizontal padding
+as **LIGHTS** through the shared dashboard switch plate.
+
+`AutoPilotIndicator.jsx` renders a circular green dashboard lamp with a thin
+metallic rim, centered between the controller sticks at dashboard shoulder
+height. The existing session auto-pilot state controls its bright green glow
+or dim green lens. Compact layouts retain it above the controller center;
+its size scales down with the controller and it never intercepts input.
+
+## Auto-pilot and flight plans
+
+`AutoPilot.js` owns a per-session pilot store, including engagement, plan sampler,
+entry pose and plan time. `FlightSimulation.js` uses it in the existing RAF loop;
+engagement and plan changes do not recreate input, flight state, or the renderer.
+Plan time pauses with the existing blur/hidden-tab suspension. Disconnected input
+stops manual look changes but does not stop an engaged pilot.
+
+`FlightPlan.js` defines the default clockwise orbit around (-0.75, 0), radius
+1.5 world units, altitude 1 (2500 calibrated feet), with a configurable 120-second
+period. Engagement captures the circle from the current polar angle; radius and
+height approach their targets exponentially with a two-second time constant,
+without teleporting. Craft heading follows the path tangent, and attitude,
+airspeed, climb and turn instruments are derived from the actual sampled motion;
+craft attitude is then damped by the gradual correction model below.
+`AutoPilotView.js` aims the default camera at the set center (-0.75, 0, 0),
+compensating for craft pitch and bank. Engaging starts with that centered view.
+The look joystick adds retained yaw/pitch offsets relative to the moving target;
+a right-stick tap recenters on the set. Plan replacement preserves user offsets.
+Disengagement preserves the current view for manual flight.
+
+`pilot.set_plan(plan)` can replace a plan while engaged or disengaged. A plan is
+an immutable orbit definition (type, center_re, center_im, radius,
+altitude_world, period_seconds, optional clockwise) or a synchronous sampler:
+`({ elapsed_seconds, entry_state }) => ({ position_re, position_im, altitude_world })`.
+The sampler can encode a predefined sequence or read changing external targets;
+it is called once per simulation step. A replacement starts its clock at zero
+and captures the current pose as `entry_state`. Orbit replacements transition
+smoothly; custom samplers own their continuity. Samplers must return finite world
+coordinates and a positive bounded altitude. Invalid definitions are rejected
+before replacing the plan; a throwing/invalid sampler disengages the pilot and
+preserves the last valid state. `GamesPlay` and `GamesPlayInteractive` accept an
+optional `flight_plan` prop so a caller can replace a definition or sampler at
+runtime without restarting the game. Omission at startup selects the default.
+
+The same store drives the AUTO switch, green lamp and engagement message.
+`bind_flight_controls` immediately reapplies restrictions on engagement: only
+right-stick axes survive, assigned to look regardless of custom movement/button
+remaps. Sensitivity, inversion and precision settings still apply. Only a
+right-stick tap can recenter the view; left-stick taps cannot alter pilot motion.
+Disengagement restores manual mappings at the current pose and velocity.
+
+### Gradual attitude corrections
+
+`AutoPilotAttitude.js` damps pitch, bank and heading separately from the sampled
+route. Desired attitude is reconsidered every 0.5 seconds, then eased with a
+three-second response time. Small errors within 0.1 degrees cause no adjustment.
+Default maximum rates are 1 degree/second pitch, 2 degrees/second bank and
+6 degrees/second heading, with a 20-degree target bank limit. Reversals must pass
+through intermediate angles. Existing attitudes outside the bank limit ease
+back at the same rate rather than snapping. Camera targeting continues to
+compensate for the smoothed craft pose and user look remains immediate.
+
+For incremental evaluation, call `pilot.set_tuning({ roll_rate_deg_s: 1.5 })`
+or update the `auto_pilot_tuning` prop on `GamesPlay`/`GamesPlayInteractive`.
+Partial changes preserve other settings and do not restart the plan, clear look
+offsets or reset the correction clock. `pilot.get_tuning()` returns the current
+immutable values. Tune one value and observe several seconds before another
+change. Defaults and key names live in `DEFAULT_AUTO_PILOT_TUNING`; invalid
+changes are rejected atomically. These parameters control attitude response;
+the orbit geometry, altitude and circuit period stay defined by the flight plan.
+
+Auto-pilot turn-rate derivatives use the time between successive chord midpoints
+(the mean of their frame durations), preventing RAF jitter from multiplying the
+turn reading. The turn coordinator then uses a 1.5-second exponential response
+and a 1 degree/second-per-second slew limit, targeting the flight model's ±12
+degrees/second turn range. These can be adjusted live with
+`turn_response_seconds` and `turn_acceleration_deg_s2`. Bank targets use the
+corrected path derivative; the displayed turn reading is damped independently.

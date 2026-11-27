@@ -2,6 +2,7 @@ import { useSyncExternalStore } from "react";
 import styled from "styled-components";
 import AppText from "../../../AppText.jsx";
 import {
+  AUTO_PILOT_TEXT,
   FLIGHT_CONTROL_ACTION_TEXT,
   KEY_GAMES_PLAY_CONTROLLER_ACTIONS_LABEL,
 } from "../../../text/GamesText.jsx";
@@ -52,7 +53,10 @@ const ActionBox = styled.li`
     0 0 3px #29ff62,
     0 0 7px #29ff6273;
   font-family: "Courier New", monospace;
-  font-size: clamp(7px, 3.2cqw, 11px);
+  font-size: ${({ $engaged }) =>
+    $engaged
+      ? "clamp(4px, calc(3.52cqw - 1.95px), 11px)"
+      : "clamp(7px, 3.2cqw, 11px)"};
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -79,13 +83,17 @@ function ActiveControllerActions({ controls }) {
   );
 }
 
-export default function ControllerActions({ controls }) {
+export default function ControllerActions({ controls, auto_pilot = false }) {
   return (
     <ActionBoxes
       aria-label={AppText.get(KEY_GAMES_PLAY_CONTROLLER_ACTIONS_LABEL)}
       aria-live="polite"
     >
-      <ActiveControllerActions controls={controls} />
+      {auto_pilot ? (
+        <ActionBox $engaged>{AppText.get(AUTO_PILOT_TEXT.engaged)}</ActionBox>
+      ) : (
+        <ActiveControllerActions controls={controls} />
+      )}
     </ActionBoxes>
   );
 }
