@@ -145,7 +145,10 @@ test("the stage's right panel holds the name, folder, lighting and variants", ()
     InventoryControls: "panel",
     StageWorkspace: "workspace",
     StageViewport: "viewport",
-    StageViewButtons: "nav",
+    StagePane: "pane",
+    StageTab: "tab",
+    InventoryDetails: "details",
+    CoolTabs: "tabs",
     StagePreviewNotice: "notice",
     construction_text: (value) => value,
     ComponentConstructionDocument: "document",
@@ -189,8 +192,28 @@ test("the stage's right panel holds the name, folder, lighting and variants", ()
   assert.equal(name.props.name, "Grass strip");
   assert.equal(name.props.on_rename, editor.rename, "names save at once");
   assert.equal(lighting.props.document, draft);
-  // Lighting and the folder control left the toolbar and view buttons.
-  for (const type of ["toolbar", "nav"]) {
+  // The stage sits above a tabbed details region whose first tab is
+  // "construction", holding the construction document.
+  const pane = kids(workspace).find((node) => node?.type === "pane");
+  const [viewport, details] = kids(pane).filter(Boolean);
+  assert.equal(viewport.type, "viewport");
+  assert.equal(details.type, "details");
+  assert.equal(details.props.role, "region");
+  const tabs = kids(details).find((node) => node?.type === "tabs");
+  assert.deepEqual(Array.from(tabs.props.labels), ["tab_construction"]);
+  assert.equal(tabs.props.tab_index, 0);
+  const construction = all(tabs.props.selected_content).find(
+    (node) => node.type === "document",
+  );
+  assert.equal(construction.props.document, draft);
+  assert.equal(construction.props.hidden, undefined, "always shown in its tab");
+  // The old Stage / Construction document switch is gone.
+  assert.equal(
+    all(tree).some((node) => node.type === "nav"),
+    false,
+  );
+  // Lighting and the folder control left the toolbar.
+  for (const type of ["toolbar"]) {
     const bar = all(tree).find((node) => node.type === type);
     assert.equal(
       all(bar).some((node) => ["lighting", "folder-move"].includes(node.type)),

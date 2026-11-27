@@ -7,12 +7,15 @@ import {
   InventoryCaption,
   InventoryStatus,
   InventoryControls,
+  InventoryDetails,
 } from "./InventoryStyles.jsx";
+import CoolTabs from "../../utils/ui/CoolTabs.jsx";
 import {
   StageHost,
   StageWorkspace,
   StageViewport,
-  StageViewButtons,
+  StagePane,
+  StageTab,
   StagePreviewNotice,
 } from "./ComponentStageStyles.jsx";
 import { create_component_stage } from "./ComponentStageScene.js";
@@ -40,7 +43,7 @@ export default function ComponentStage({
   const [failed, set_failed] = useState(false);
   const [attempt, set_attempt] = useState(0);
   const [content_status, set_content_status] = useState("content_ready");
-  const [document_view, set_document_view] = useState(false);
+  const [details_tab, set_details_tab] = useState(0);
   const [selection, set_selection] = useState(null);
   const [walk, set_walk] = useState({ active: false, locked: false });
   // View-only preview settings, like the materials page (not saved).
@@ -88,9 +91,6 @@ export default function ComponentStage({
       clip_rates: preview.clip_rates,
     });
   }, [preview, attempt]);
-  useEffect(() => {
-    scene.current?.set_visible(!document_view);
-  }, [document_view, attempt]);
 
   useEffect(() => {
     scene.current?.set_preview(preview_options);
@@ -150,70 +150,60 @@ export default function ComponentStage({
         )}
         {notice}
       </InventoryToolbar>
-      <StageViewButtons aria-label={text("editor_views")}>
-        <button
-          type="button"
-          aria-pressed={!document_view}
-          onClick={() => set_document_view(false)}
-        >
-          {text("stage_view")}
-        </button>
-        <button
-          type="button"
-          aria-pressed={document_view}
-          onClick={() => set_document_view(true)}
-        >
-          {text("construction_document")}
-        </button>
-        {!document_view && (
-          <button
-            type="button"
-            aria-pressed={walk.active}
-            disabled={failed}
-            onClick={() => scene.current?.set_walking(!walk.active)}
-          >
-            {text("walk")}
-          </button>
-        )}
-      </StageViewButtons>
-      <ComponentConstructionDocument
-        document={draft}
-        on_change={editor.edit}
-        disabled={editor.busy}
-        hidden={!document_view}
-      />
-      <StageWorkspace $hidden={document_view}>
-        <StageViewport ref={host}>
-          {walk.active && !failed && (
-            <StagePreviewNotice role="status">
-              {walk.flying && <strong>{text("walk_flying")} · </strong>}
-              {text(walk.locked ? "walk_controls" : "walk_click")}
-            </StagePreviewNotice>
-          )}
-          {!failed && content_status !== "content_ready" && (
-            <InventoryStatus role="status">
-              {construction_text(content_status)}{" "}
-              {content_status !== "loading_content" && (
-                <button onClick={() => set_attempt((value) => value + 1)}>
+      {/* The Walk (first-person) button is hidden for now; it returns with
+          the "areas" section. Walk mode itself (scene set_walking, notices,
+          text) is kept intact. */}
+      <StageWorkspace>
+        {/* Like the materials page: the stage above, model details in tabs below. */}
+        <StagePane>
+          <StageViewport ref={host}>
+            {walk.active && !failed && (
+              <StagePreviewNotice role="status">
+                {walk.flying && <strong>{text("walk_flying")} · </strong>}
+                {text(walk.locked ? "walk_controls" : "walk_click")}
+              </StagePreviewNotice>
+            )}
+            {!failed && content_status !== "content_ready" && (
+              <InventoryStatus role="status">
+                {construction_text(content_status)}{" "}
+                {content_status !== "loading_content" && (
+                  <button onClick={() => set_attempt((value) => value + 1)}>
+                    {text("retry")}
+                  </button>
+                )}
+              </InventoryStatus>
+            )}
+            {failed && (
+              <InventoryStatus role="alert">
+                {text("error")}{" "}
+                <button
+                  onClick={() => {
+                    set_failed(false);
+                    set_attempt((value) => value + 1);
+                  }}
+                >
                   {text("retry")}
                 </button>
-              )}
-            </InventoryStatus>
-          )}
-          {failed && (
-            <InventoryStatus role="alert">
-              {text("error")}{" "}
-              <button
-                onClick={() => {
-                  set_failed(false);
-                  set_attempt((value) => value + 1);
-                }}
-              >
-                {text("retry")}
-              </button>
-            </InventoryStatus>
-          )}
-        </StageViewport>
+              </InventoryStatus>
+            )}
+          </StageViewport>
+          <InventoryDetails
+            tabIndex={0}
+            role="region"
+            aria-label={text("component_details")}
+          >
+            <CoolTabs
+              labels={[text("tab_construction")]}
+              tab_index={details_tab}
+              on_tab_select={set_details_tab}
+              selected_content={
+                <StageTab>
+                  <ComponentConstructionDocument document={draft} />
+                </StageTab>
+              }
+            />
+          </InventoryDetails>
+        </StagePane>
         {/* A generic right panel like the materials page: name, folder,
             lighting, then the variants. */}
         <InventoryControls aria-label={AppText.get(INVENTORY_TEXT.asset)}>

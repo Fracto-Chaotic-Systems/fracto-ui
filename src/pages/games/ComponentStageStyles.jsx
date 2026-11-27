@@ -78,78 +78,35 @@ export const StagePreviewNotice = styled.div`
   pointer-events: none;
 `;
 
-export const StageViewButtons = styled.nav`
+/** The middle column: the stage above, model details (tabs) below. */
+export const StagePane = styled.div`
+  position: relative;
+  min-width: 0;
+  min-height: 0;
   display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  overflow-x: auto;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
-  button {
-    flex: 0 0 auto;
-    white-space: nowrap;
-    padding: 0.5rem 0.75rem;
-    cursor: pointer;
-  }
-  button[aria-pressed="true"] {
-    background: #e8eef0;
-    border-color: #427e8a;
-    font-weight: 600;
-  }
+  flex-direction: column;
+  gap: 0.75rem;
 `;
+/** Padding inside a details tab card. */
+export const StageTab = styled.div`
+  padding: 0.75rem;
+`;
+/** The read-only construction document inside the "construction" tab. */
 export const ConstructionDocumentStyles = styled.section`
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 0;
-  gap: 0.5rem;
   &[hidden] {
     display: none;
-  }
-  header {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-  h3 {
-    margin: 0;
-    margin-right: auto;
   }
   p {
     margin: 0.25rem 0;
   }
-  button {
-    padding: 0.4rem 0.7rem;
-    cursor: pointer;
-  }
-  button[aria-pressed="true"] {
-    font-weight: 600;
-    border-color: #427e8a;
-  }
-  textarea {
-    flex: 1;
-    min-height: 300px;
-    width: 100%;
-    box-sizing: border-box;
-    padding: 1rem;
-    resize: vertical;
-    font:
-      0.95rem/1.5 ui-monospace,
-      Consolas,
-      monospace;
-    border: 1px solid #bdc9cc;
-    border-radius: 6px;
-  }
-  small {
-    align-self: flex-end;
-  }
 `;
+/** The document text; it sits directly in the tab card (no extra outline). */
 export const ConstructionDocumentBody = styled.div`
   flex: 1;
   min-height: 0;
   overflow: auto;
-  padding: 1rem;
-  border: 1px solid #bdc9cc;
-  border-radius: 6px;
 `;

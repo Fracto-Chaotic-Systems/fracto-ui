@@ -2,6 +2,10 @@
 
 ## First-person walk on the construction stage
 
+The **Walk** button is hidden on the components page for now (2026-11-27); it is
+meant to return with the "areas" section. Walk mode below is unchanged and is
+reached through the scene's `set_walking`.
+
 The stage's **Walk** button switches the orbit camera to a first-person explorer
 for studying an environment at human scale. Click the stage to capture the mouse
 (pointer lock); Esc releases it, and choosing Walk again restores the exact orbit
@@ -52,10 +56,15 @@ Per-clone depth materials and the light's shadow map are disposed with the stage
 Component creation now follows collaborative authoring with maintained,
 role-based construction descriptions. See the data service's
 `components/blueprints/README.md` for the workflow and complete grass-strip
-description. Construction document in the editor provides formatted Read and
-Markdown Edit views of the saved description. Save component, reload, dirty-state
-warnings and undo/redo include the text; description-only edits do not rebuild
-geometry. Structured blueprint/server ingestion remains future work.
+description. The construction document is shown read-only (formatted Markdown,
+links and images as plain text; no heading, help text or Read/Edit buttons) as
+the first ("construction") tab below the stage. Like the materials page, the
+components middle column shows the stage on top (`StagePane`) and a scrollable
+details region with `CoolTabs` below it; the former Stage / Construction
+document switch is gone and the stage stays visible. The page no longer edits
+the text; it is still saved, reloaded and undone with the document when other
+flows change it, and description-only changes do not rebuild geometry.
+Structured blueprint/server ingestion remains future work.
 
 Representative construction evaluation covers geometry, counts, path clearance,
 refinement, history and real MySQL roundtrips. Live plain-floor, wooded-path and
