@@ -17,6 +17,7 @@ export const PREVIEW_RANGES = {
   scale: { min: 0.1, max: 2, step: 0.05, suffix: "×" },
   direction: { min: 0, max: 360, step: 5, suffix: "°" },
   intensity: { min: 0.25, max: 6, step: 0.25, suffix: "" },
+  ambient: { min: 0, max: 4, step: 0.1, suffix: "" },
 };
 
 /** A labelled slider with its value; only finite in-range values are reported. */

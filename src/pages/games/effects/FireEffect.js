@@ -110,7 +110,12 @@ const SPARK_VERTEX = /* glsl */ `
     float units = length((modelMatrix * vec4(1.0, 0.0, 0.0, 0.0)).xyz);
     vec4 view = viewMatrix * vec4(base + p * units, 1.0);
     gl_Position = projectionMatrix * view;
-    gl_PointSize = max(1.0, uPixel * uHeight * 0.022 * (1.0 - life * 0.6) / max(-view.z, 1e-6));
+    // Height is in the fire's units; scale it to world units like the position.
+    gl_PointSize = clamp(
+      uPixel * uHeight * units * 0.022 * (1.0 - life * 0.6) / max(-view.z, 1e-6),
+      1.0,
+      48.0
+    );
   }
 `;
 
@@ -199,6 +204,7 @@ export function create_fire_effect(effect, { cardinality } = {}) {
       fragmentShader: FLAME_FRAGMENT,
     });
     material.userData.layer_intensity = intensity;
+    material.userData.base_seed = seed;
     materials.push(material);
     const mesh = new THREE.Mesh(sheet, material);
     mesh.scale.set(sheet_width, height * layer_height, 1);
@@ -236,14 +242,24 @@ export function create_fire_effect(effect, { cardinality } = {}) {
   if (effect.light) {
     light = new THREE.PointLight(0xffffff, 0, height * 8, 2);
     light.position.y = height * 0.35;
+    // Shadows only show where the renderer enables shadow maps (the components
+    // stage); undefined (older records) means on.
+    light.castShadow = effect.shadows !== false;
+    light.shadow.mapSize.set(512, 512);
     group.add(light);
   }
   for (const child of group.children) {
     child.frustumCulled = false;
+    if (child.isLight) continue; // the light's castShadow is the effect's `shadows`
+    // Flames, glow and sparks neither cast nor receive shadows.
     child.castShadow = false;
     child.receiveShadow = false;
   }
-  group.traverse((node) => (node.userData.inventory_effect = true));
+  group.traverse((node) => {
+    node.userData.inventory_effect = true;
+    // Never picked by stage clicks, walk probes or selection rays.
+    if (node.isMesh || node.isPoints) node.raycast = () => {};
+  });
 
   // Flame colors are orbital pattern colors; null restores the saved cardinality.
   const set_cardinality = (value) => {
@@ -254,34 +270,112 @@ export function create_fire_effect(effect, { cardinality } = {}) {
   };
   set_cardinality(cardinality);
 
-  let time = Math.abs(effect.anchor[0] * 3.1 + effect.anchor[2] * 1.7) % 10;
+  let time = 0;
+  // Each fire's own identity, from where it is placed (world position at its
+  // first update), so fires that share a material never move in step: start
+  // phase, drift rate, mirrored drift, a slowly wandering tempo and its own
+  // flame noise. Deterministic: the same placement behaves the same each load.
+  const fraction = (value) => value - Math.floor(value);
+  let identity = null;
+  const assign_identity = () => {
+    group.updateWorldMatrix(true, false);
+    const p = group.getWorldPosition(new THREE.Vector3());
+    const seed = fraction(
+      Math.sin(p.x * 12.9898 + p.y * 78.233 + p.z * 37.719) * 43758.5453,
+    );
+    identity = {
+      seed,
+      rate: 0.85 + 0.3 * fraction(seed * 7.31),
+      mirror_x: fraction(seed * 13.7) < 0.5 ? -1 : 1,
+      mirror_z: fraction(seed * 5.93) < 0.5 ? -1 : 1,
+      tempo_a: 0.21 + 0.2 * fraction(seed * 3.37),
+      tempo_b: 0.57 + 0.3 * fraction(seed * 9.71),
+      phase: seed * 6.2832,
+    };
+    time = seed * 40;
+    for (const material of materials)
+      if (material.uniforms.uSeed)
+        material.uniforms.uSeed.value =
+          material.userData.base_seed + seed * 37;
+  };
+  // Tempo wanders between about 0.7× and 1.3× on this fire's own schedule.
+  const tempo = (t) =>
+    1 +
+    0.2 * Math.sin(t * identity.tempo_a + identity.phase) +
+    0.1 * Math.sin(t * identity.tempo_b + identity.phase * 1.7);
   const flicker = (t) =>
     0.78 +
     0.12 * Math.sin(t * 9.1) * Math.sin(t * 2.3 + 1.7) +
     0.1 * Math.sin(t * 17.3 + Math.sin(t * 5.1));
-  const world_up = new THREE.Vector3(0, 1, 0),
-    rotation = new THREE.Quaternion();
-  // The light sits above the flame base along world up, in the fire's own units.
-  const place_light = () => {
+  // Optional authored light position (see the SDK's light_offset): x/z on the
+  // model's own axes, y raised along world up.
+  const lift = effect.light_offset ? effect.light_offset[1] : height * 0.35;
+  const horizontal = new THREE.Vector3(
+    effect.light_offset?.[0] ?? 0,
+    0,
+    effect.light_offset?.[2] ?? 0,
+  );
+  const rotation = new THREE.Quaternion(),
+    world_scale = new THREE.Vector3();
+  let world_height = height;
+  // The light sits above the flame base along world up, in the fire's own units,
+  // and drifts a little with the flame so the shadows it casts dance.
+  const sway = new THREE.Vector3();
+  const place_light = (t = 0) => {
     if (!light) return;
     group.updateWorldMatrix(true, false);
+    // Light range and brightness are in world units: a fire on a model scaled
+    // from centimetres to metres must not light 100x as far.
+    world_height = height * group.getWorldScale(world_scale).y;
+    light.distance = world_height * 8;
+    // Near/far only take effect once the projection is rebuilt; without it the
+    // shadow camera keeps its defaults and clips out the torch itself.
+    const near = Math.max(world_height * 0.02, 1e-4);
+    if (
+      light.shadow.camera.near !== near ||
+      light.shadow.camera.far !== light.distance
+    ) {
+      light.shadow.camera.near = near;
+      light.shadow.camera.far = light.distance;
+      light.shadow.camera.updateProjectionMatrix();
+    }
+    // Close, grazing light on uneven stone needs a firm bias, or each block
+    // shadows its neighbours in square patches.
+    light.shadow.bias = -0.003;
+    light.shadow.normalBias = world_height * 0.02;
     group.getWorldQuaternion(rotation).invert();
+    // World-axis drift in flame heights: side to side, toward/away, up/down,
+    // at this fire's own rate and handedness.
+    const rate = identity?.rate ?? 1,
+      u = t * rate;
+    sway.set(
+      (identity?.mirror_x ?? 1) *
+        0.06 *
+        (Math.sin(u * 3.1) * 0.6 + Math.sin(u * 7.7 + 1.3) * 0.4),
+      lift / height + 0.04 * Math.sin(u * 5.3 + 0.7) * Math.sin(u * 2.1),
+      (identity?.mirror_z ?? 1) *
+        0.04 *
+        (Math.sin(u * 4.3 + 2.1) * 0.7 + Math.sin(u * 9.1) * 0.3),
+    );
     light.position
-      .copy(world_up)
+      .copy(sway)
       .applyQuaternion(rotation)
-      .multiplyScalar(height * 0.35);
+      .multiplyScalar(height)
+      .add(horizontal);
   };
   const step = (delta = 0, camera, viewport_height) => {
-    time += delta * effect.speed;
-    place_light();
+    if (!identity && group.parent) assign_identity();
+    time += delta * effect.speed * (identity ? tempo(time) : 1);
+    place_light(time);
     shared.uTime.value = time;
     if (sparks && camera?.isPerspectiveCamera && viewport_height)
       sparks.material.uniforms.uPixel.value =
         viewport_height /
         (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2));
     if (light) {
-      // Scale with size squared so the lit area tracks the flame in any units.
-      light.intensity = 6 * height * height * effect.intensity * flicker(time);
+      // Scale with the world-space size squared so the lit area tracks the flame.
+      light.intensity =
+        6 * world_height * world_height * effect.intensity * flicker(time);
     }
   };
   step(0);
@@ -290,6 +384,10 @@ export function create_fire_effect(effect, { cardinality } = {}) {
     light,
     get time() {
       return time;
+    },
+    /** This fire's motion identity (null until it is placed and updated). */
+    get identity() {
+      return identity;
     },
     update: step,
     set_cardinality,

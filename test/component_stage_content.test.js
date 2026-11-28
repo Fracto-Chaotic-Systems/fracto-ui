@@ -276,3 +276,71 @@ test("authored patrols move the outer placement, face forwards, inherit speed an
   content.dispose();
   assert.equal(content.animated, false);
 });
+test("material fire rides on each placed model and objects can override its color", async () => {
+  const { FIRE_PALETTES } = await import("@fracto/sdk/FractoMaterialEffects.js");
+  const torch = { id: "fire-torch", revision: "c".repeat(64) };
+  const effect = {
+    type: "fire",
+    anchor: [0, 85, -14.5],
+    size: 42,
+    width: null,
+    cardinality: 1,
+    intensity: 1,
+    speed: 1,
+    light: true,
+    sparks: true,
+  };
+  const torch_descriptor = {
+    material: { ...torch, construction: { ...facts, up_axis: "y" } },
+    runtime: {
+      id: "fire-torch",
+      model: "torch.obj",
+      format: "obj",
+      resources: ["torch.obj"],
+      effects: [effect],
+    },
+  };
+  const source = new THREE.Mesh(
+    new THREE.BoxGeometry(),
+    new THREE.MeshStandardMaterial(),
+  );
+  const content = create_component_content({
+    scene: new THREE.Scene(),
+    render() {},
+    on_status() {},
+    resolve: async () => ({
+      [component_reference_key(torch)]: torch_descriptor,
+    }),
+    load: async () => source,
+  });
+  const document = create_component_document(randomUUID(), "Torches");
+  for (const flame_cardinality of [undefined, 9])
+    document.objects.push({
+      id: randomUUID(),
+      asset: torch,
+      position: [0, 0, 0],
+      rotation: [0, 0, 0],
+      scale: [1, 1, 1],
+      group_id: null,
+      ...(flame_cardinality ? { flame_cardinality } : {}),
+    });
+  await content.update(document);
+  assert.equal(content.animated, true);
+  const fires = [];
+  content.root.traverse((node) => node.name === "fire" && fires.push(node));
+  assert.equal(fires.length, 2);
+  const body = (fire) =>
+    `#${fire.children.find((child) => child.isMesh).material.uniforms.uBody.value.getHexString()}`;
+  const expected = (value) => `#${new THREE.Color(value).getHexString()}`;
+  assert.equal(body(fires[0]), expected(FIRE_PALETTES[1].body));
+  assert.equal(body(fires[1]), expected(FIRE_PALETTES[9].body));
+  // Fire sits in the model's source units, under the unit-scaled model.
+  assert.deepEqual(fires[0].position.toArray(), [0, 85, -14.5]);
+  const camera = new THREE.PerspectiveCamera();
+  content.animate(0.5, camera, 600);
+  const light = fires[0].children.find((child) => child.isPointLight);
+  assert.ok(light.intensity > 0);
+  assert.equal(new THREE.Raycaster().intersectObject(fires[0], true).length, 0);
+  content.dispose();
+  assert.equal(fires[0].parent, null);
+});

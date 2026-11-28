@@ -1161,14 +1161,16 @@ A material's `asset.json` may list `effects`, positioned in the model's source u
 v1 has one type, `fire`:
 
 ```json
-"effects": [{ "type": "fire", "anchor": [0.3, 85, -14.5], "size": 42,
-  "cardinality": 1, "intensity": 1, "speed": 1, "light": true, "sparks": true }]
+"effects": [{ "type": "fire", "anchor": [0.3, 85, -14.5], "size": 100, "width": 60,
+  "cardinality": 1, "intensity": 0.7, "speed": 1, "light": true, "sparks": true,
+  "shadows": true, "light_offset": [0, 30, -35] }]
 ```
 
 Flame colors are the orbital pattern colors: `cardinality` is one of 1, 3, 5, 7, 9, 11,
 13 or 15, and the flame takes the hue `FractoColors.pattern_hue` gives that pattern
 (core, body and tip stops from that hue). Optional `width` overrides the flame width
-(default 0.8 x `size`). The SDK (`FractoMaterialEffects.js`) validates the list; the
+(default 0.8 x `size`); `shadows` (default true) lets the fire's light cast shadows,
+and `light_offset` places the light (x/z model axes, y world up; default 0.35 x `size` up). The SDK (`FractoMaterialEffects.js`) validates the list; the
 asset server passes it with the listing and the construction runtime, and an invalid
 list shows no effects. Fire always rises along world up, so a model mounted at an
 angle keeps a vertical flame. `effects/` renders them (see its README). The materials preview

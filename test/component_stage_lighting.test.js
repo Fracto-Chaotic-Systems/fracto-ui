@@ -9,6 +9,7 @@ import * as THREE from "three";
 import {
   component_lighting,
   create_component_document,
+  DEFAULT_COMPONENT_AMBIENT,
 } from "@fracto/sdk/FractoComponentDocument.js";
 import { update_component_lighting } from "../src/pages/games/ComponentStageLighting.js";
 
@@ -31,6 +32,15 @@ test("lighting uses the materials viewer azimuth and native intensity", () => {
   update_component_lighting(light, {});
   assert.equal(light.intensity, 3);
   assert.ok(Math.abs(light.position.x - Math.sqrt(8)) < 1e-10);
+  const sky = new THREE.HemisphereLight();
+  update_component_lighting(
+    light,
+    { lighting: { direction_degrees: 45, intensity: 0.4, ambient: 0.3 } },
+    sky,
+  );
+  assert.equal(sky.intensity, 0.3);
+  update_component_lighting(light, {}, sky);
+  assert.equal(sky.intensity, 2);
 });
 
 test("lighting controls author component defaults and reject invalid or busy edits", async () => {
@@ -53,10 +63,16 @@ test("lighting controls author component defaults and reject invalid or busy edi
       exports: module.exports,
       require: createRequire(import.meta.url),
       AppText: { get: (v) => v },
-      COMPONENT_STAGE_TEXT: { stage_lighting: "Stage lighting" },
+      COMPONENT_STAGE_TEXT: {
+        stage_lighting: "Stage lighting",
+        stage_ambient: "Ambient light",
+      },
       component_lighting,
+      DEFAULT_COMPONENT_AMBIENT,
       StageLightingGroup: "group",
       PreviewLightingControls: shared.PreviewLightingControls,
+      PreviewRange: shared.PreviewRange,
+      PREVIEW_RANGES: shared.PREVIEW_RANGES,
     },
   );
   const document = create_component_document(randomUUID(), "Stage"),
@@ -90,6 +106,11 @@ test("lighting controls author component defaults and reject invalid or busy edi
   assert.equal(edits[1].lighting.intensity, 1.25);
   for (const value of ["NaN", "Infinity", "-1", "7"])
     intensity.props.onChange({ target: { value } });
+  const ambient = inputs(tree)[2];
+  assert.equal(ambient.props.value, 2);
+  ambient.props.onChange({ target: { value: "0.3" } });
+  assert.equal(edits[2].lighting.ambient, 0.3);
+  assert.equal(edits[2].lighting.direction_degrees, 45);
   inputs(render(true))[0].props.onChange({ target: { value: "180" } });
-  assert.equal(edits.length, 2);
+  assert.equal(edits.length, 3);
 });

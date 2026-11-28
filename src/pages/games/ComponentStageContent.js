@@ -13,6 +13,7 @@ import {
   inventory_file_url,
 } from "./InventoryModelLoader.js";
 import { repair_fbx_cutouts } from "./InventoryMaterialPreview.js";
+import { create_material_effects } from "./effects/MaterialEffects.js";
 import {
   oriented_component_instance,
   dispose_component_resources,
@@ -35,6 +36,7 @@ export function create_component_content({
     floor_resources = null,
     animation = create_component_animation(),
     motions = [],
+    effects = [],
     elapsed = 0,
     playback_speed = 1;
   const cache = new Map();
@@ -43,6 +45,8 @@ export function create_component_content({
   let active_refs = new Set();
   const clear = () => {
     animation.dispose();
+    effects.forEach((item) => item.dispose());
+    effects = [];
     motions = [];
     elapsed = 0;
     dispose_component_resources(root, false);
@@ -103,11 +107,15 @@ export function create_component_content({
       return (
         !disposed &&
         root.visible &&
-        (animation.active || (playback_speed > 0 && motions.length > 0))
+        (animation.active ||
+          effects.length > 0 ||
+          (playback_speed > 0 && motions.length > 0))
       );
     },
-    animate(delta) {
+    /** Advances clips and motions; fire effects also need the camera and canvas height. */
+    animate(delta, camera, viewport_height) {
       animation.update(delta);
+      for (const item of effects) item.update(delta, camera, viewport_height);
       elapsed += delta * playback_speed;
       for (const { node, object } of motions) {
         const pose = sample_component_motion(object, elapsed);
@@ -134,6 +142,21 @@ export function create_component_content({
       const next = new THREE.Group();
       const next_animation = create_component_animation();
       const next_motions = [];
+      const next_effects = [];
+      // A material's fire (asset.json effects) rides on each placed model, in the
+      // model's own units; an object's flame_cardinality overrides its color.
+      const attach_effects = (descriptor, model, cardinality) => {
+        const created = create_material_effects(descriptor.runtime.effects, {
+          cardinality,
+        });
+        if (!created.count) return;
+        model.add(created.object);
+        next_effects.push(created);
+      };
+      const discard_effects = () => {
+        next_effects.forEach((item) => item.dispose());
+        next_effects.length = 0;
+      };
       let floor = null;
       try {
         validate_component_document(document);
@@ -196,13 +219,15 @@ export function create_component_content({
             descriptor.material.construction,
             item,
             item.id,
-            (model) =>
+            (model) => {
               next_animation.add(
                 source,
                 model,
                 clip_rates[item.id] ?? 1,
                 item.animation_speed,
-              ),
+              );
+              attach_effects(descriptor, model, item.flame_cardinality);
+            },
           );
           next.add(placed);
           if (item.motion) next_motions.push({ node: placed, object: item });
@@ -220,12 +245,16 @@ export function create_component_content({
                 descriptor.material.construction,
                 transform,
                 rule.id,
-                (model) => next_animation.add(source, model),
+                (model) => {
+                  next_animation.add(source, model);
+                  attach_effects(descriptor, model);
+                },
               ),
             );
         }
         if (disposed || token !== generation) {
           next_animation.dispose();
+          discard_effects();
           dispose_component_resources(next, false);
           if (floor) {
             floor.geometry.dispose();
@@ -238,6 +267,7 @@ export function create_component_content({
         root = next;
         animation = next_animation;
         motions = next_motions;
+        effects = next_effects;
         playback_speed = document.animation_speed ?? 1;
         animation.start(playback_speed);
         floor_resources = floor;
@@ -247,6 +277,7 @@ export function create_component_content({
         on_status("content_ready");
       } catch (error) {
         next_animation.dispose();
+        discard_effects();
         dispose_component_resources(next, false);
         if (floor) {
           floor.geometry.dispose();

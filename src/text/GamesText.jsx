@@ -218,6 +218,7 @@ export const COMPONENT_STAGE_TEXT = Object.fromEntries(
     "variants",
     "variant_preview_error",
     "stage_lighting",
+    "stage_ambient",
     "variants_loading",
     "variants_empty",
     "variants_error",
@@ -1075,6 +1076,7 @@ export const APP_GAMES_TEXT = {
   [MATERIAL_TEXT.more]: "more materials",
   [COMPONENT_STAGE_TEXT.variants]: "Variants",
   [COMPONENT_STAGE_TEXT.stage_lighting]: "Stage lighting",
+  [COMPONENT_STAGE_TEXT.stage_ambient]: "Ambient light",
   [COMPONENT_STAGE_TEXT.variant_preview_error]:
     "Unable to preview this variant against the current component. Showing the base component.",
   [COMPONENT_STAGE_TEXT.variants_loading]: "Loading variants…",

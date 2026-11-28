@@ -38,13 +38,10 @@ export function create_component_stage(
   const origin = new THREE.AxesHelper(2);
   scene.add(grid, origin);
   const sunlight = new THREE.DirectionalLight(0xfff4e5, 3);
+  const skylight = new THREE.HemisphereLight(0xffffff, 0x657565, 2);
   configure_component_shadows(renderer, sunlight);
-  update_component_lighting(sunlight, {});
-  scene.add(
-    new THREE.HemisphereLight(0xffffff, 0x657565, 2),
-    sunlight,
-    sunlight.target,
-  );
+  update_component_lighting(sunlight, {}, skylight);
+  scene.add(skylight, sunlight, sunlight.target);
   const selection_box = new THREE.Box3(),
     highlight = new THREE.Box3Helper(selection_box, 0xe29a23);
   highlight.visible = false;
@@ -96,7 +93,7 @@ export function create_component_stage(
       if (last_frame !== null) {
         const dt = Math.min((time - last_frame) / 1000, 0.1);
         walk.update(Math.min(dt, 0.05));
-        if (animating()) content.animate(dt);
+        if (animating()) content.animate(dt, camera, canvas.height);
       }
       last_frame = time;
       render();
@@ -290,7 +287,7 @@ export function create_component_stage(
       const token = ++lighting_generation;
       lighting_document = document;
       shadow_view = null;
-      update_component_lighting(sunlight, document);
+      update_component_lighting(sunlight, document, skylight);
       await content.update(document, options);
       if (disposed || token !== lighting_generation) return;
       render();
