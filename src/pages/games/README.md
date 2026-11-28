@@ -1170,7 +1170,8 @@ Flame colors are the orbital pattern colors: `cardinality` is one of 1, 3, 5, 7,
 (core, body and tip stops from that hue). Optional `width` overrides the flame width
 (default 0.8 x `size`). The SDK (`FractoMaterialEffects.js`) validates the list; the
 asset server passes it with the listing and the construction runtime, and an invalid
-list shows no effects. `effects/` renders them (see its README). The materials preview
+list shows no effects. Fire always rises along world up, so a model mounted at an
+angle keeps a vertical flame. `effects/` renders them (see its README). The materials preview
 attaches them to the model, runs its animation loop for them, and offers a
 preview-only Flame color choice (with a swatch) over the same cardinalities.
 

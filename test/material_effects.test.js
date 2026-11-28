@@ -90,3 +90,29 @@ test("material effects attach every valid effect and ignore invalid lists", () =
     0,
   );
 });
+
+test("a fire on a tilted mount keeps its anchor but lights from straight above it", () => {
+  for (const degrees of [-30, 0, 30]) {
+    const mount = new THREE.Group();
+    mount.rotation.z = THREE.MathUtils.degToRad(degrees);
+    mount.scale.setScalar(0.5);
+    const effect = create_fire_effect(fire({ anchor: [0, 90, 0] }));
+    mount.add(effect.object);
+    effect.update(0.016);
+    mount.updateMatrixWorld(true);
+    const base = effect.object.getWorldPosition(new THREE.Vector3());
+    // The anchor follows the tilt (90 * 0.5 along the rotated axis).
+    const expected_base = new THREE.Vector3(0, 45, 0).applyAxisAngle(
+      new THREE.Vector3(0, 0, 1),
+      THREE.MathUtils.degToRad(degrees),
+    );
+    assert.ok(base.distanceTo(expected_base) < 1e-9, `${degrees} base`);
+    // The light rises vertically: 0.35 * size * mount scale straight up.
+    const offset = effect.light
+      .getWorldPosition(new THREE.Vector3())
+      .sub(base);
+    assert.ok(Math.abs(offset.x) < 1e-9 && Math.abs(offset.z) < 1e-9, `${degrees}`);
+    assert.ok(Math.abs(offset.y - 30 * 0.35 * 0.5) < 1e-9, `${degrees} height`);
+    effect.dispose();
+  }
+});

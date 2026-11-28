@@ -1,9 +1,11 @@
 import * as THREE from "three";
 import { resolve_fire_colors } from "@fracto/sdk/FractoMaterialEffects.js";
 
-// Animated fire: layered noise flames that turn to face the camera around their
-// own up axis (in the vertex shader, so any render loop works), a soft glow,
-// GPU-driven sparks and a flickering point light. Units are the parent's units.
+// Animated fire: layered noise flames that turn to face the camera (in the vertex
+// shader, so any render loop works), a soft glow, GPU-driven sparks and a
+// flickering point light. The anchor follows the parent (units, position, tilt),
+// but flames, sparks and light always rise along world up, so a torch mounted at
+// an angle still burns vertically.
 
 const NOISE = /* glsl */ `
   float fire_hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
@@ -20,17 +22,17 @@ const NOISE = /* glsl */ `
   }
 `;
 
-// Cylindrical billboard around the object's up axis; position.xy is the sheet,
-// uDepth pushes a layer toward/away from the camera for parallax.
+// Cylindrical billboard around world up; position.xy is the sheet, uLift raises
+// it along world up (sheet units) and uDepth pushes a layer toward/away from the
+// camera for parallax. Scale comes from the model matrix, rotation does not.
 const BILLBOARD_VERTEX = /* glsl */ `
-  uniform float uDepth;
+  uniform float uDepth, uLift;
   varying vec2 vUv;
   void main() {
     vUv = uv;
     vec3 base = (modelMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
-    vec3 up_axis = (modelMatrix * vec4(0.0, 1.0, 0.0, 0.0)).xyz;
-    float height_scale = length(up_axis);
-    vec3 up = up_axis / max(height_scale, 1e-9);
+    float height_scale = length((modelMatrix * vec4(0.0, 1.0, 0.0, 0.0)).xyz);
+    vec3 up = vec3(0.0, 1.0, 0.0);
     float width_scale = length((modelMatrix * vec4(1.0, 0.0, 0.0, 0.0)).xyz);
     vec3 to_camera = cameraPosition - base;
     vec3 flat_view = to_camera - up * dot(to_camera, up);
@@ -38,7 +40,7 @@ const BILLBOARD_VERTEX = /* glsl */ `
     vec3 facing = normalize(flat_view);
     vec3 right = normalize(cross(up, facing));
     vec3 world = base + right * position.x * width_scale
-      + up * position.y * height_scale + facing * uDepth * width_scale;
+      + up * (position.y + uLift) * height_scale + facing * uDepth * width_scale;
     gl_Position = projectionMatrix * viewMatrix * vec4(world, 1.0);
   }
 `;
@@ -103,7 +105,10 @@ const SPARK_VERTEX = /* glsl */ `
       sin(angle) * radius);
     vLife = life;
     vSeed = aSeed;
-    vec4 view = modelViewMatrix * vec4(p, 1.0);
+    // Rise along world up from the anchor, whatever the parent's rotation.
+    vec3 base = (modelMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+    float units = length((modelMatrix * vec4(1.0, 0.0, 0.0, 0.0)).xyz);
+    vec4 view = viewMatrix * vec4(base + p * units, 1.0);
     gl_Position = projectionMatrix * view;
     gl_PointSize = max(1.0, uPixel * uHeight * 0.022 * (1.0 - life * 0.6) / max(-view.z, 1e-6));
   }
@@ -170,14 +175,13 @@ export function create_fire_effect(effect, { cardinality } = {}) {
     geometries = [sheet];
   const glow_material = new THREE.ShaderMaterial({
     ...premultiplied,
-    uniforms: { ...shared, uDepth: { value: -0.2 } },
+    uniforms: { ...shared, uDepth: { value: -0.2 }, uLift: { value: -0.35 / 1.5 } },
     vertexShader: BILLBOARD_VERTEX,
     fragmentShader: GLOW_FRAGMENT,
   });
   materials.push(glow_material);
   const glow = new THREE.Mesh(sheet, glow_material);
   glow.scale.set(width * 2.4, height * 1.5, 1);
-  glow.position.y = -height * 0.35;
   glow.renderOrder = 10;
   group.add(glow);
   for (const [shape, layer_height, depth, seed, intensity] of LAYERS) {
@@ -187,6 +191,7 @@ export function create_fire_effect(effect, { cardinality } = {}) {
         ...shared,
         uIntensity: { value: effect.intensity * intensity },
         uSeed: { value: seed },
+        uLift: { value: 0 },
         uShape: { value: shape },
         uDepth: { value: depth },
       },
@@ -254,8 +259,21 @@ export function create_fire_effect(effect, { cardinality } = {}) {
     0.78 +
     0.12 * Math.sin(t * 9.1) * Math.sin(t * 2.3 + 1.7) +
     0.1 * Math.sin(t * 17.3 + Math.sin(t * 5.1));
+  const world_up = new THREE.Vector3(0, 1, 0),
+    rotation = new THREE.Quaternion();
+  // The light sits above the flame base along world up, in the fire's own units.
+  const place_light = () => {
+    if (!light) return;
+    group.updateWorldMatrix(true, false);
+    group.getWorldQuaternion(rotation).invert();
+    light.position
+      .copy(world_up)
+      .applyQuaternion(rotation)
+      .multiplyScalar(height * 0.35);
+  };
   const step = (delta = 0, camera, viewport_height) => {
     time += delta * effect.speed;
+    place_light();
     shared.uTime.value = time;
     if (sparks && camera?.isPerspectiveCamera && viewport_height)
       sparks.material.uniforms.uPixel.value =

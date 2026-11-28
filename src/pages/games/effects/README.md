@@ -11,10 +11,13 @@ the render loop. Every node is tagged `userData.inventory_effect` so material pa
   previews another supported cardinality's flame color (`null` restores the saved one);
   `dispose()`.
 - `FireEffect.js` — one fire: three noise-driven flame sheets that turn toward the camera
-  around the fire's up axis in the vertex shader, a soft glow, GPU sparks and a flickering
+  around world up in the vertex shader, a soft glow, GPU sparks and a flickering
   point light scaled to the flame size. Colors are three stops (core, body, tip) built from
   the orbital pattern hue of the fire's `cardinality` (see the SDK's `fire_palette`). Blending is premultiplied "over" with extra emission, so flames read on
   both light and dark backgrounds. No shadows are cast.
+  The anchor follows the model (position, scale and tilt), but flames, glow, sparks and the
+  light always rise along world up, so a torch mounted at an angle (e.g. ±30° on a wall)
+  still burns vertically.
 
 Tests: `test/material_effects.test.js` (structure, colors, timing) and
 `test/sdk_material_effects.test.js` (format). Shaders are checked by rendering.
