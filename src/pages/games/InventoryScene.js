@@ -2,6 +2,7 @@ import { create_inventory_animation } from "./InventoryAnimation.js";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { load_inventory_model } from "./InventoryModelLoader.js";
+import { create_material_effects } from "./effects/MaterialEffects.js";
 import { create_grass_density } from "./InventoryGrassDensity.js";
 import { repair_fbx_cutouts } from "./InventoryMaterialPreview.js";
 import {
@@ -19,6 +20,9 @@ export const DEFAULT_INVENTORY_PREVIEW = {
   reference: false,
   density: 1,
   animation: true,
+  // "saved" uses each fire's cardinality from asset.json; a supported
+  // cardinality previews that orbital pattern's flame color instead.
+  flame_cardinality: "saved",
 };
 
 function dispose_tree(root) {
@@ -104,6 +108,7 @@ export function create_inventory_scene(
     context_failed = false,
     model = null,
     animation = null,
+    effects = null,
     frame = null,
     last_frame = null,
     extent = 1,
@@ -125,7 +130,7 @@ export function create_inventory_scene(
     if (
       disposed ||
       context_failed ||
-      !animation?.count ||
+      !(animation?.count || effects?.count) ||
       !options.animation ||
       document.hidden ||
       frame !== null
@@ -134,8 +139,11 @@ export function create_inventory_scene(
     const tick = (time) => {
       frame = null;
       if (disposed || !options.animation || document.hidden) return;
-      if (last_frame !== null)
-        animation.update(Math.min((time - last_frame) / 1000, 0.1));
+      if (last_frame !== null) {
+        const delta = Math.min((time - last_frame) / 1000, 0.1);
+        if (animation?.count) animation.update(delta);
+        effects?.update(delta, camera, canvas.height);
+      }
       last_frame = time;
       render();
       frame = requestAnimationFrame(tick);
@@ -179,6 +187,9 @@ export function create_inventory_scene(
     light.intensity = options.strength;
     reference.visible = options.reference;
     ruler.visible = options.reference;
+    effects?.set_cardinality(
+      options.flame_cardinality === "saved" ? null : options.flame_cardinality,
+    );
     if (model) {
       if (density) {
         const result = density.set(options.density);
@@ -193,7 +204,7 @@ export function create_inventory_scene(
       }
       model.scale.setScalar(options.scale);
       model.traverse((node) => {
-        if (!node.isMesh) return;
+        if (!node.isMesh || node.userData.inventory_effect) return;
         for (const material of [node.material].flat()) {
           const maps = material.userData.inventory_maps;
           material.map = options.wireframe ? null : maps.base;
@@ -302,6 +313,12 @@ export function create_inventory_scene(
         textures: textures.size,
       };
       if (asset.id === "grasses-2") density = create_grass_density(model);
+      // Effects sit in the model's source units, after bounds and counts.
+      effects = create_material_effects(asset.effects);
+      if (effects.count) {
+        centered.add(effects.object);
+        model_info = { ...model_info, effects: effects.count };
+      }
       scene.add(model);
       if (!density) on_info?.(model_info);
       update(options);
@@ -318,6 +335,7 @@ export function create_inventory_scene(
       disposed = true;
       stop_animation();
       animation?.dispose();
+      effects?.dispose();
       document.removeEventListener("visibilitychange", visibility_changed);
       observer.disconnect();
       canvas.removeEventListener("webglcontextlost", context_lost);

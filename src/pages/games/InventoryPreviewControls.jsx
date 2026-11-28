@@ -1,5 +1,9 @@
 import AppText from "../../AppText.jsx";
 import { INVENTORY_TEXT } from "../../text/GamesText.jsx";
+import {
+  FIRE_CARDINALITIES,
+  FIRE_PALETTES,
+} from "@fracto/sdk/FractoMaterialEffects.js";
 
 /**
  * Right-panel preview controls shared by every asset page (materials and
@@ -66,6 +70,47 @@ export function PreviewAnimationToggle({
         onChange={(event) => on_change(event.target.checked)}
       />
       {text("animation")}
+    </label>
+  );
+}
+
+/**
+ * Flame color for previews with fire effects: "saved", or one of the supported
+ * cardinalities, whose orbital pattern color the flame takes.
+ */
+export function PreviewFlameColor({ value, on_change, disabled = false }) {
+  return (
+    <label>
+      {text("flame_color")}{" "}
+      <span
+        aria-hidden="true"
+        style={{
+          display: "inline-block",
+          width: "0.9em",
+          height: "0.9em",
+          verticalAlign: "middle",
+          borderRadius: "50%",
+          background:
+            value === "saved" ? "transparent" : FIRE_PALETTES[value]?.body,
+        }}
+      />{" "}
+      <select
+        value={String(value)}
+        disabled={disabled}
+        onChange={(event) => {
+          const raw = event.target.value;
+          if (raw === "saved") return on_change("saved");
+          const next = Number(raw);
+          if (FIRE_CARDINALITIES.includes(next)) on_change(next);
+        }}
+      >
+        <option value="saved">{text("flame_saved")}</option>
+        {FIRE_CARDINALITIES.map((cardinality) => (
+          <option key={cardinality} value={String(cardinality)}>
+            {text("flame_pattern").replace("{cardinality}", cardinality)}
+          </option>
+        ))}
+      </select>
     </label>
   );
 }

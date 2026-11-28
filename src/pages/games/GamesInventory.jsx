@@ -4,6 +4,7 @@ import {
   PreviewAnimationToggle,
   PreviewScaleControls,
   PreviewLightingControls,
+  PreviewFlameColor,
 } from "./InventoryPreviewControls.jsx";
 import MaterialMetadataPanel from "./MaterialMetadataPanel.jsx";
 import { useEffect, useRef, useState } from "react";
@@ -279,11 +280,23 @@ export default function GamesInventory({
                         {text("material_repair")}
                       </InventoryCaption>
                     )}
-                    {status === "ready" && model_info?.animations > 0 && (
+                    {status === "ready" &&
+                      (model_info?.animations > 0 || model_info?.effects > 0) && (
                       <PreviewAnimationToggle
                         checked={options.animation}
                         on_change={(value) => set_option("animation", value)}
                       />
+                    )}
+                    {status === "ready" && model_info?.effects > 0 && (
+                      <>
+                        <PreviewFlameColor
+                          value={options.flame_cardinality}
+                          on_change={(value) =>
+                            set_option("flame_cardinality", value)
+                          }
+                        />
+                        <InventoryCaption>{text("flame_help")}</InventoryCaption>
+                      </>
                     )}
                     <PreviewScaleControls
                       scale={options.scale}

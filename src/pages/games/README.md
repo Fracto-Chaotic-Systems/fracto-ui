@@ -1155,6 +1155,25 @@ explicit GrandB piano (Legacy) override remains available. See music/README.md.
 
 Interface step 6 automated checks pass (79 MIDI tests and 190-file compatibility corpus). The expanded real-browser verification remains pending tool access; see MIDI_VERIFICATION.md.
 
+### Material effects (fire)
+
+A material's `asset.json` may list `effects`, positioned in the model's source units.
+v1 has one type, `fire`:
+
+```json
+"effects": [{ "type": "fire", "anchor": [0.3, 85, -14.5], "size": 42,
+  "cardinality": 1, "intensity": 1, "speed": 1, "light": true, "sparks": true }]
+```
+
+Flame colors are the orbital pattern colors: `cardinality` is one of 1, 3, 5, 7, 9, 11,
+13 or 15, and the flame takes the hue `FractoColors.pattern_hue` gives that pattern
+(core, body and tip stops from that hue). Optional `width` overrides the flame width
+(default 0.8 x `size`). The SDK (`FractoMaterialEffects.js`) validates the list; the
+asset server passes it with the listing and the construction runtime, and an invalid
+list shows no effects. `effects/` renders them (see its README). The materials preview
+attaches them to the model, runs its animation loop for them, and offers a
+preview-only Flame color choice (with a swatch) over the same cardinalities.
+
 ### Folder import and preview resources
 
 Blender `.blend` files are accepted alongside the direct preview formats. On

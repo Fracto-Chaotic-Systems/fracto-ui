@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { FIRE_PALETTES } from "@fracto/sdk/FractoMaterialEffects.js";
 import { load_preview_controls } from "./inventory_preview_controls_fixture.js";
 // Expands function components so the rendered controls can be inspected.
 const expand = (node) => {
@@ -91,4 +92,28 @@ test("scale shows the scaled height; animation is a labelled toggle", () => {
   assert.equal(Array.from(toggle.props.children)[1], "animation");
   inputs(toggle, "checkbox")[0].props.onChange({ target: { checked: false } });
   assert.deepEqual(toggled, [false]);
+});
+
+test("flame color offers the saved color and the odd pattern cardinalities 1-15", () => {
+  const controls = load_preview_controls();
+  const changes = [];
+  const tree = controls.PreviewFlameColor({
+    value: 5,
+    on_change: (value) => changes.push(value),
+  });
+  const select = expand(tree).find((node) => node.type === "select");
+  assert.equal(select.props.value, "5");
+  const options = expand(select.props.children).filter(
+    (node) => node.type === "option",
+  );
+  assert.deepEqual(
+    options.map((option) => option.props.value),
+    ["saved", "1", "3", "5", "7", "9", "11", "13", "15"],
+  );
+  assert.equal(options[2].props.children, "flame_pattern");
+  const swatch = expand(tree).find((node) => node.type === "span");
+  assert.equal(swatch.props.style.background, FIRE_PALETTES[5].body);
+  for (const value of ["3", "2", "17", "orange", "saved"])
+    select.props.onChange({ target: { value } });
+  assert.deepEqual(changes, [3, "saved"]);
 });

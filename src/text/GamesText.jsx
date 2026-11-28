@@ -433,6 +433,10 @@ export const INVENTORY_TEXT = Object.fromEntries(
     "view",
     "units",
     "units_grid",
+    "flame_color",
+    "flame_saved",
+    "flame_help",
+    "flame_pattern",
   ].map((key) => [key, `${GAMES_FOLDER}/inventory_${key}`]),
 );
 export const PARCHMENT_PLATE_TEXT = Object.fromEntries(
@@ -1165,6 +1169,11 @@ export const APP_GAMES_TEXT = {
   [COMPONENT_STAGE_TEXT.error]: "Unable to display the construction stage.",
   [COMPONENT_STAGE_TEXT.retry]: "retry",
   [INVENTORY_TEXT.animation]: "Play animation",
+  [INVENTORY_TEXT.flame_color]: "Flame color",
+  [INVENTORY_TEXT.flame_saved]: "As saved",
+  [INVENTORY_TEXT.flame_help]:
+    "Preview only. Flame colors are the orbital pattern colors for cardinalities 1, 3, 5 … 15. The saved cardinality is set in the asset's effects (asset.json).",
+  [INVENTORY_TEXT.flame_pattern]: "Pattern {cardinality}",
   [INVENTORY_TEXT.model_error]:
     "The model or one of its required textures could not load. Check the imported files and retry.",
   [INVENTORY_TEXT.material_repair]:
